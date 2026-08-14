@@ -128,6 +128,22 @@
       "parent": "1249",
       "type": "Rule",
       "description": "Materialized at .github/kglibrary.instructions.md. Every project under KGlibrary/<project>/info.md MUST use YAML frontmatter keys: name, description, repo, branch, commit_id, so the website and agents can uniformly consume reference project info."
+    },
+    {
+      "id": "1321",
+      "name": "update README",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "Update README.md to reflect the current state of the project: the canonical intent architecture graph, global agent rules, materialized skills, the ARGO harness, the KGlibrary reference library, the GitHub Pages home site, and automated tests.",
+      "testcases": [
+        {
+          "name": "AT-1321-01-README反映项目当前状态",
+          "description": "GIVEN 仓库当前包含意图架构图谱、Agent 全局规则、物化 Skill、ARGO 工具链、KGlibrary 参考库、GitHub Pages 站点与自动化测试；WHEN 读者打开 README.md；THEN README 反映当前项目状态，包含意图图谱路径、全局规则、skill 目录、ARGO 目录、KGlibrary、站点入口与测试运行方式。",
+          "type": "Acceptance Test",
+          "Input": "打开 README.md",
+          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 包含 design/KG/SystemArchitecture.json、.github/copilot-instructions.md、.github/skills/、.argo/、KGlibrary/、index.html、tests/ 与 node --test 运行方式。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -205,7 +221,8 @@
         "1317",
         "1318",
         "1319",
-        "1320"
+        "1320",
+        "1321"
       ],
       "included_relationships": [
         "1162",
