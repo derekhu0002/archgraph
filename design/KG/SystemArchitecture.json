@@ -143,6 +143,17 @@
           "Input": "打开 README.md",
           "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 包含 design/KG/SystemArchitecture.json、.github/copilot-instructions.md、.github/skills/、.argo/、KGlibrary/、index.html、tests/ 与 node --test 运行方式。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "dc84086",
+          "description": "README.md; tests/readme.test.js"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
       ]
     }
   ],
