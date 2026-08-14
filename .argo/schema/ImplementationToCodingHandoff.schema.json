@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./.argo/schema/ImplementationToCodingHandoff.schema.json",
+  "title": "Implementation To Coding Handoff Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "stage",
+    "generatedAt",
+    "sourceIntentGraphPath",
+    "implementationContracts",
+    "explicitEntrypoints",
+    "criticalNonExplicitTests",
+    "expectedFailureRecordsPath",
+    "codingTargets",
+    "taskExecutionPlan",
+    "frozenFiles"
+  ],
+  "properties": {
+    "stage": {
+      "type": "string",
+      "const": "implementation-to-coding"
+    },
+    "generatedAt": {
+      "type": "string"
+    },
+    "sourceIntentGraphPath": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "implementationContracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "explicitEntrypoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/explicitEntrypoint"
+      }
+    },
+    "criticalNonExplicitTests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonExplicitTest"
+      }
+    },
+    "supportingNonExplicitTests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonExplicitTest"
+      }
+    },
+    "expectedFailureRecordsPath": {
+      "type": "string"
+    },
+    "codingTargets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/codingTarget"
+      }
+    },
+    "taskExecutionPlan": {
+      "$ref": "#/$defs/taskExecutionPlan"
+    },
+    "frozenFiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "openGaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "explicitEntrypoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "testcaseName",
+        "entryPath",
+        "controlPoint",
+        "observationPoint",
+        "initialExecutionStatus",
+        "initialExecutionCommand"
+      ],
+      "properties": {
+        "testcaseName": {
+          "type": "string"
+        },
+        "entryPath": {
+          "type": "string"
+        },
+        "controlPoint": {
+          "type": "string"
+        },
+        "observationPoint": {
+          "type": "string"
+        },
+        "initialExecutionStatus": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        },
+        "initialExecutionCommand": {
+          "type": "string"
+        },
+        "failureReason": {
+          "type": "string"
+        }
+      }
+    },
+    "nonExplicitTest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "controlPoint",
+        "observationPoint"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "controlPoint": {
+          "type": "string"
+        },
+        "observationPoint": {
+          "type": "string"
+        },
+        "expectedStatus": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        }
+      }
+    },
+    "codingTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "failureSignal",
+        "nextAction"
+      ],
+      "properties": {
+        "testcaseName": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "failureSignal": {
+          "type": "string"
+        },
+        "nextAction": {
+          "type": "string"
+        }
+      }
+    },
+    "taskExecutionPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionStrategy",
+        "tasks"
+      ],
+      "properties": {
+        "executionStrategy": {
+          "type": "string"
+        },
+        "tasks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/codingTask"
+          }
+        }
+      }
+    },
+    "codingTask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taskId",
+        "title",
+        "objective",
+        "steps",
+        "completionSignal"
+      ],
+      "properties": {
+        "taskId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "objective": {
+          "type": "string"
+        },
+        "dependsOn": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relatedTestcases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "targetPaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "completionSignal": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

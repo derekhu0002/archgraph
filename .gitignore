@@ -1,0 +1,4 @@
+.argo/.env
+node_modules/
+.argo/temp
+data/
