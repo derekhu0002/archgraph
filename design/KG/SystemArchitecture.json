@@ -175,6 +175,17 @@
           "Input": "打开 README.md",
           "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js：断言 README 引用 docs/diagrams/global-architecture.svg，且该 SVG 与源文件 docs/diagrams/global-architecture.excalidraw 均存在，并包含 人类、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA 等标签。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "2040682",
+          "description": "README.md; design/KG/SystemArchitecture.json; .github/skills/diagram-draw/SKILL.md; .github/skills/diagram-draw/renderExcalidrawSvg.js; docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
       ]
     },
     {
