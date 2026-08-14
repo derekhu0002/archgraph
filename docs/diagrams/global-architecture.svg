@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+  viewBox="40 -10 1320 740"
+  width="100%"
+  style="background:#ffffff; max-width: 1100px;">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#3b5bdb" />
+    </marker>
+  </defs>
+  <rect x="60" y="50" width="1280" height="130" rx="0" fill="none" stroke="#adb5bd" stroke-width="1" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round" opacity="1" />
+  <rect x="60" y="200" width="1280" height="140" rx="0" fill="none" stroke="#adb5bd" stroke-width="1" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round" opacity="1" />
+  <rect x="60" y="370" width="1280" height="140" rx="0" fill="none" stroke="#adb5bd" stroke-width="1" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round" opacity="1" />
+  <rect x="60" y="550" width="1280" height="160" rx="0" fill="none" stroke="#adb5bd" stroke-width="1" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round" opacity="1" />
+  <text x="80" y="73" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="15" fill="#495057" style="white-space: pre;"><tspan x="80">Actor / Role Layer</tspan></text>
+  <text x="80" y="223" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="15" fill="#495057" style="white-space: pre;"><tspan x="80">Business / Process Layer</tspan></text>
+  <text x="80" y="393" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="15" fill="#495057" style="white-space: pre;"><tspan x="80">Application Layer</tspan></text>
+  <text x="80" y="573" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="15" fill="#495057" style="white-space: pre;"><tspan x="80">Technology Layer</tspan></text>
+  <text x="700" y="30" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="20" fill="#1e1e1e" style="white-space: pre;"><tspan x="700">Graph-driven Agentic Engineering — Layered Viewpoint</tspan></text>
+  <polyline points="700,150 700,235" fill="none" stroke="#3b5bdb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+  <polyline points="780,115 1035,395" fill="none" stroke="#3b5bdb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+  <polyline points="700,315 365,395" fill="none" stroke="#3b5bdb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+  <polyline points="365,470 610,590" fill="none" stroke="#3b5bdb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+  <polyline points="1035,470 820,590" fill="none" stroke="#3b5bdb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+  <polyline points="850,632 900,632" fill="none" stroke="#3b5bdb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+  <rect x="620" y="80" width="160" height="70" rx="10.5" fill="#e7f0ff" stroke="#2f6fed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" />
+  <rect x="610" y="235" width="180" height="80" rx="12" fill="#e6f4ea" stroke="#2f9e44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" />
+  <rect x="250" y="395" width="230" height="75" rx="11.25" fill="#fff1e0" stroke="#e8590c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" />
+  <rect x="920" y="395" width="230" height="75" rx="11.25" fill="#fff1e0" stroke="#e8590c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" />
+  <rect x="560" y="590" width="290" height="85" rx="12.75" fill="#f3edff" stroke="#6741d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" />
+  <rect x="900" y="590" width="270" height="85" rx="12.75" fill="#f8f9fa" stroke="#495057" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" />
+  <text x="700" y="117.25" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="18" fill="#1e1e1e" style="white-space: pre;"><tspan x="700">人类</tspan><tspan x="700" dy="22.5">Human</tspan></text>
+  <text x="700" y="277" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="16" fill="#1e1e1e" style="white-space: pre;"><tspan x="700">AGENT</tspan><tspan x="700" dy="20">agentic engineering</tspan></text>
+  <text x="365" y="434.5" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="16" fill="#1e1e1e" style="white-space: pre;"><tspan x="365">ARGO MCP</tspan><tspan x="365" dy="20">intent-graph tools</tspan></text>
+  <text x="1035" y="425" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="15" fill="#1e1e1e" style="white-space: pre;"><tspan x="1035">EA</tspan><tspan x="1035" dy="18.75">Enterprise Architect</tspan><tspan x="1035" dy="18.75">(.feap model)</tspan></text>
+  <text x="705" y="625.5" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="14" fill="#1e1e1e" style="white-space: pre;"><tspan x="705">graph</tspan><tspan x="705" dy="17.5">intent architecture</tspan><tspan x="705" dy="17.5">SystemArchitecture.json + Neo4j</tspan></text>
+  <text x="1035" y="625.5" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="14" fill="#1e1e1e" style="white-space: pre;"><tspan x="1035">ArchiMate 3.2</tspan><tspan x="1035" dy="17.5">schema + rules</tspan><tspan x="1035" dy="17.5">(.argo/schema)</tspan></text>
+  <text x="710" y="181" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="13" fill="#5b6472" style="white-space: pre;"><tspan x="710">instructs / work packages</tspan></text>
+  <text x="800" y="305" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="13" fill="#5b6472" style="white-space: pre;"><tspan x="800">authors .feap model</tspan></text>
+  <text x="390" y="361" text-anchor="start" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="13" fill="#5b6472" style="white-space: pre;"><tspan x="390">calls MCP tools</tspan></text>
+  <text x="487" y="551" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="13" fill="#5b6472" style="white-space: pre;"><tspan x="487">reads / writes</tspan></text>
+  <text x="930" y="551" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="13" fill="#5b6472" style="white-space: pre;"><tspan x="930">exports SystemArchitecture.json</tspan></text>
+  <text x="900" y="579" text-anchor="middle" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="13" fill="#5b6472" style="white-space: pre;"><tspan x="900">complies with</tspan></text>
+</svg>

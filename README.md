@@ -11,6 +11,16 @@ traced back to that element.
 
 The canonical graph lives at [`design/KG/SystemArchitecture.json`](design/KG/SystemArchitecture.json).
 
+## Architecture
+
+The global architecture (Layered Viewpoint) shows how the human, the coding agent, ARGO MCP, the
+intent architecture graph, ArchiMate 3.2, and Enterprise Architect relate in graph-driven agentic
+engineering:
+
+![Global architecture — Layered Viewpoint](docs/diagrams/global-architecture.svg)
+
+Editable source: [`docs/diagrams/global-architecture.excalidraw`](docs/diagrams/global-architecture.excalidraw)
+
 ## Core principles
 
 1. **Arm before acting** — before any development, pull the Work Package's associated Skills and

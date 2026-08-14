@@ -1,299 +1,308 @@
 {
-    "name": "System",
-    "description": "Exported from EA package System\r\n\r\nImported from: D:\\Projects\\Argo\\design\\KG\\SystemArchitecture.json\r\nSchema: .argo/schema/SystemArchitecture.schema.json",
-    "elements": [
+  "name": "System",
+  "description": "Exported from EA package System\r\n\r\nImported from: D:\\Projects\\Argo\\design\\KG\\SystemArchitecture.json\r\nSchema: .argo/schema/SystemArchitecture.schema.json",
+  "elements": [
+    {
+      "id": "1240",
+      "name": "Application Cooperation Viewpoint",
+      "alias": "1211",
+      "type": "Grouping",
+      "subdiagram_views": [
         {
-            "id": "1240",
-            "name": "Application Cooperation Viewpoint",
-            "alias": "1211",
-            "type": "Grouping",
-            "subdiagram_views": [
-                {
-                    "view_id": "169",
-                    "view_name": "Application Cooperation"
-                }
-            ]
-        },
-        {
-            "id": "1249",
-            "name": "Implementation and Migration Viewpoint",
-            "alias": "1211",
-            "type": "Grouping",
-            "subdiagram_views": [
-                {
-                    "view_id": "176",
-                    "view_name": "AgentCapabilities"
-                },
-                {
-                    "view_id": "174",
-                    "view_name": "Implementation and Migration"
-                }
-            ]
-        },
-        {
-            "id": "1310",
-            "name": "create-github-repository-page",
-            "parent": "1249",
-            "type": "Skill",
-            "description": "create a website based on your github repo:https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site\r\nTODO:完成后刷新本描述"
-        },
-        {
-            "id": "1311",
-            "name": "create our home web site",
-            "parent": "1249",
-            "type": "Work Package",
-            "description": "create a home website for this project.",
-            "attributes": [
-                {
-                    "name": "commit",
-                    "value": "4252ca8",
-                    "description": "index.html; .nojekyll; .github/skills/create-github-repository-page/SKILL.md"
-                },
-                {
-                    "name": "status",
-                    "value": "COMPLETED"
-                }
-            ],
-            "testcases": [
-                {
-                    "name": "can view the content through the website.",
-                    "description": "can view the content through the website.",
-                    "type": "Acceptance Test",
-                    "Input": "N/A",
-                    "acceptanceCriteria": "can view the content through the website."
-                }
-            ]
-        },
-        {
-            "id": "1317",
-            "name": "优化WEB布局和风格",
-            "parent": "1249",
-            "type": "Work Package",
-            "description": "对于本站的网站，做如下优化：\r\n1. 采用科技简洁的布局风格，参考https://www.deepseek.com/；\r\n2. 要有一个区域用来接啥当前项目中已经积累的参考库KGlibrary中的其他项目信息；",
-            "attributes": [
-                {
-                    "name": "commit",
-                    "value": "2458f97",
-                    "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
-                },
-                {
-                    "name": "commit",
-                    "value": "aa932c3",
-                    "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; design/KG/SystemArchitecture.json"
-                },
-                {
-                    "name": "status",
-                    "value": "COMPLETED"
-                }
-            ],
-            "testcases": [
-                {
-                    "name": "AT-1317-01-科技简洁布局风格",
-                    "description": "GIVEN 网站已发布；WHEN 访客在浏览器打开网站首页；THEN 页面以科技简洁布局呈现：顶部导航栏、首屏 Hero（项目名+标语+行动按钮）、正文分节卡片化、浅色科技主题。",
-                    "type": "Acceptance Test",
-                    "Input": "浏览器打开网站首页",
-                    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"layout-style\"）：断言 index.html 含导航栏、Hero 区、h1 项目名、≥4 个 section、data-theme=\"light\" 浅色主题标记。通过。"
-                },
-                {
-                    "name": "AT-1317-02-KGlibrary参考库区域",
-                    "description": "GIVEN KGlibrary 目录下存在参考项目（当前为 XKG-TEST）；WHEN 访客在浏览器打开网站首页；THEN 页面存在 Reference Library (KGlibrary) 区域，列出每个参考项目的名称、简介与仓库链接。",
-                    "type": "Acceptance Test",
-                    "Input": "浏览器打开网站首页",
-                    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言存在 id=\"kglibrary\" 区域，且每个项目的 name 与 repo 链接均出现在页面中。通过。"
-                }
-            ]
-        },
-        {
-            "id": "1318",
-            "name": "project website",
-            "parent": "1240",
-            "type": "Application Component",
-            "attributes": [
-                {
-                    "name": "website",
-                    "value": "https://derekhu0002.github.io/open_knowledge_graph_engineering/"
-                }
-            ]
-        },
-        {
-            "id": "1319",
-            "name": "optimize-web-layout-style",
-            "parent": "1249",
-            "type": "Skill",
-            "description": "Materialized at .github/skills/optimize-web-layout-style/SKILL.md. Guides applying a tech-simple, clean layout and visual style to the project website (referencing https://www.deepseek.com/) and rendering a Reference Library (KGlibrary) area that lists projects from KGlibrary."
-        },
-        {
-            "id": "1320",
-            "name": "kglibrary-info-format",
-            "parent": "1249",
-            "type": "Rule",
-            "description": "Materialized at .github/kglibrary.instructions.md. Every project under KGlibrary/<project>/info.md MUST use YAML frontmatter keys: name, description, repo, branch, commit_id, so the website and agents can uniformly consume reference project info."
-        },
-        {
-            "id": "1321",
-            "name": "update README",
-            "parent": "1249",
-            "type": "Work Package",
-            "description": "Update README.md to reflect the current state of the project: the canonical intent architecture graph, global agent rules, materialized skills, the ARGO harness, the KGlibrary reference library, the GitHub Pages home site, and automated tests.",
-            "attributes": [
-                {
-                    "name": "commit",
-                    "value": "54ad8dc",
-                    "description": "README.md; tests/readme.test.js"
-                },
-                {
-                    "name": "commit",
-                    "value": "dc84086",
-                    "description": "README.md; tests/readme.test.js"
-                },
-                {
-                    "name": "status",
-                    "value": "COMPLETED"
-                }
-            ],
-            "testcases": [
-                {
-                    "name": "AT-1321-01-README反映项目当前状态",
-                    "description": "GIVEN 仓库当前包含意图架构图谱、Agent 全局规则、物化 Skill、ARGO 工具链、KGlibrary 参考库、GitHub Pages 站点与自动化测试；WHEN 读者打开 README.md；THEN README 反映当前项目状态，包含意图图谱路径、全局规则、skill 目录、ARGO 目录、KGlibrary、站点入口与测试运行方式，且 How to use 章节说明 ArchiMate 3.2 合规及将框架复制到其他项目所需的 .argo/、.github/、.opencode/、.cursor/ 与 .feap。",
-                    "type": "Acceptance Test",
-                    "Input": "打开 README.md",
-                    "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 包含 design/KG/SystemArchitecture.json、.github/copilot-instructions.md、.github/skills/、.argo/、KGlibrary/、index.html、tests/ 与 node --test 运行方式；并断言 How to use 章节包含 ArchiMate 3.2、.argo/、.github/|.opencode/|.cursor/ 与 .feap。通过。"
-                }
-            ]
-        },
-        {
-            "id": "1330",
-            "name": "画一个全局架构图",
-            "parent": "1249",
-            "type": "Work Package",
-            "description": "使用Layered Viewpoint,画一个架构图插入README中，重点表达granph-driven agentic engineering中AGENT、ARGO MCP、graph、ARCHIMATE3.2、EA、人类间的关系\r\n\r\nLayered Viewpoint \r\nThe layered viewpoint pictures several layers and aspects of an Enterprise Architecture in one \r\ndiagram. There are two categories of layers, namely dedicated layers and service layers. The \r\nlayers are the result of the use of the “grouping” relationship for a natural partitioning of the entire \r\nset of objects and relationships that belong to a model. The technology, application, process, and \r\nactor/role layers belong to the first category. The structural principle behind a fully layered \r\nviewpoint is that each dedicated layer exposes, by means of the “realization” relationship, a layer \r\nof services, which are further on “serving” the next dedicated layer. Thus, we can easily separate \r\nthe internal structure and organization of a dedicated layer from its externally observable behavior \r\nexpressed as the service layer that the dedicated layer realizes. The order, number, or nature of \r\nthese layers are not fixed, but in general a (more or less) complete and natural layering of an \r\nArchiMate model should contain the succession of layers depicted in the example given in Table \r\n27. However, this example is by no means intended to be prescriptive. The main goal of the layered \r\nviewpoint is to provide an overview in one diagram. Furthermore, this viewpoint can be used as \r\nsupport for impact of change analysis and performance analysis or for extending the service \r\nportfolio. "
-        },
-        {
-            "id": "1331",
-            "name": "DIAGRAM DRAW SKILL",
-            "parent": "1249",
-            "type": "Skill",
-            "description": "https://github.com/coleam00/excalidraw-diagram-skill"
+          "view_id": "169",
+          "view_name": "Application Cooperation"
         }
-    ],
-    "relationships": [
+      ]
+    },
+    {
+      "id": "1249",
+      "name": "Implementation and Migration Viewpoint",
+      "alias": "1211",
+      "type": "Grouping",
+      "subdiagram_views": [
         {
-            "id": "1161",
-            "statement": "Implementation and Migration Viewpoint --(Association)--> Application Cooperation Viewpoint",
-            "name": "Association",
-            "type": "Association",
-            "source_id": "1249",
-            "target_id": "1240",
-            "source_name": "Implementation and Migration Viewpoint",
-            "target_name": "Application Cooperation Viewpoint"
+          "view_id": "176",
+          "view_name": "AgentCapabilities"
         },
         {
-            "id": "1162",
-            "statement": "create our home web site --(Association)--> create-github-repository-page",
-            "name": "Association",
-            "type": "Association",
-            "source_id": "1311",
-            "target_id": "1310",
-            "source_name": "create our home web site",
-            "target_name": "create-github-repository-page"
-        },
-        {
-            "id": "1166",
-            "statement": "优化WEB布局和风格 --(Association)--> project website",
-            "name": "Association",
-            "type": "Association",
-            "source_id": "1317",
-            "target_id": "1318",
-            "source_name": "优化WEB布局和风格",
-            "target_name": "project website"
-        },
-        {
-            "id": "1167",
-            "statement": "优化WEB布局和风格 --(Association)--> optimize-web-layout-style",
-            "name": "Association",
-            "type": "Association",
-            "source_id": "1317",
-            "target_id": "1319",
-            "source_name": "优化WEB布局和风格",
-            "target_name": "optimize-web-layout-style"
-        },
-        {
-            "id": "1168",
-            "statement": "优化WEB布局和风格 --(Association)--> kglibrary-info-format",
-            "name": "Association",
-            "type": "Association",
-            "source_id": "1317",
-            "target_id": "1320",
-            "source_name": "优化WEB布局和风格",
-            "target_name": "kglibrary-info-format"
-        },
-        {
-            "id": "1172",
-            "statement": "画一个全局架构图 --(Association)--> DIAGRAM DRAW SKILL",
-            "name": "使用这个SKILL来作图",
-            "type": "Association",
-            "source_id": "1330",
-            "target_id": "1331",
-            "source_name": "画一个全局架构图",
-            "target_name": "DIAGRAM DRAW SKILL"
+          "view_id": "174",
+          "view_name": "Implementation and Migration"
         }
-    ],
-    "views": [
+      ]
+    },
+    {
+      "id": "1310",
+      "name": "create-github-repository-page",
+      "parent": "1249",
+      "type": "Skill",
+      "description": "create a website based on your github repo:https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site\r\nTODO:完成后刷新本描述"
+    },
+    {
+      "id": "1311",
+      "name": "create our home web site",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "create a home website for this project.",
+      "attributes": [
         {
-            "view_id": "176",
-            "view_name": "AgentCapabilities",
-            "parent_element_id": "1249",
-            "parent_element_name": "Implementation and Migration Viewpoint",
-            "included_elements": [
-                "1310",
-                "1319"
-            ],
-            "included_relationships": []
+          "name": "commit",
+          "value": "4252ca8",
+          "description": "index.html; .nojekyll; .github/skills/create-github-repository-page/SKILL.md"
         },
         {
-            "view_id": "174",
-            "view_name": "Implementation and Migration",
-            "parent_element_id": "1249",
-            "parent_element_name": "Implementation and Migration Viewpoint",
-            "included_elements": [
-                "1330",
-                "1310",
-                "1311",
-                "1317",
-                "1318",
-                "1319",
-                "1320",
-                "1321",
-                "1331"
-            ],
-            "included_relationships": [
-                "1162",
-                "1166",
-                "1167",
-                "1168",
-                "1172"
-            ]
-        },
-        {
-            "view_id": "169",
-            "view_name": "Application Cooperation",
-            "parent_element_id": "1240",
-            "parent_element_name": "Application Cooperation Viewpoint",
-            "included_elements": [
-                "1318"
-            ],
-            "included_relationships": []
-        },
-        {
-            "view_id": "170",
-            "view_name": "SystemArchitecture",
-            "included_elements": [
-                "1249",
-                "1240"
-            ],
-            "included_relationships": [
-                "1161"
-            ]
+          "name": "status",
+          "value": "COMPLETED"
         }
-    ]
+      ],
+      "testcases": [
+        {
+          "name": "can view the content through the website.",
+          "description": "can view the content through the website.",
+          "type": "Acceptance Test",
+          "Input": "N/A",
+          "acceptanceCriteria": "can view the content through the website."
+        }
+      ]
+    },
+    {
+      "id": "1317",
+      "name": "优化WEB布局和风格",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "对于本站的网站，做如下优化：\r\n1. 采用科技简洁的布局风格，参考https://www.deepseek.com/；\r\n2. 要有一个区域用来接啥当前项目中已经积累的参考库KGlibrary中的其他项目信息；",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "2458f97",
+          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "aa932c3",
+          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-1317-01-科技简洁布局风格",
+          "description": "GIVEN 网站已发布；WHEN 访客在浏览器打开网站首页；THEN 页面以科技简洁布局呈现：顶部导航栏、首屏 Hero（项目名+标语+行动按钮）、正文分节卡片化、浅色科技主题。",
+          "type": "Acceptance Test",
+          "Input": "浏览器打开网站首页",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"layout-style\"）：断言 index.html 含导航栏、Hero 区、h1 项目名、≥4 个 section、data-theme=\"light\" 浅色主题标记。通过。"
+        },
+        {
+          "name": "AT-1317-02-KGlibrary参考库区域",
+          "description": "GIVEN KGlibrary 目录下存在参考项目（当前为 XKG-TEST）；WHEN 访客在浏览器打开网站首页；THEN 页面存在 Reference Library (KGlibrary) 区域，列出每个参考项目的名称、简介与仓库链接。",
+          "type": "Acceptance Test",
+          "Input": "浏览器打开网站首页",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言存在 id=\"kglibrary\" 区域，且每个项目的 name 与 repo 链接均出现在页面中。通过。"
+        }
+      ]
+    },
+    {
+      "id": "1318",
+      "name": "project website",
+      "parent": "1240",
+      "type": "Application Component",
+      "attributes": [
+        {
+          "name": "website",
+          "value": "https://derekhu0002.github.io/open_knowledge_graph_engineering/"
+        }
+      ]
+    },
+    {
+      "id": "1319",
+      "name": "optimize-web-layout-style",
+      "parent": "1249",
+      "type": "Skill",
+      "description": "Materialized at .github/skills/optimize-web-layout-style/SKILL.md. Guides applying a tech-simple, clean layout and visual style to the project website (referencing https://www.deepseek.com/) and rendering a Reference Library (KGlibrary) area that lists projects from KGlibrary."
+    },
+    {
+      "id": "1320",
+      "name": "kglibrary-info-format",
+      "parent": "1249",
+      "type": "Rule",
+      "description": "Materialized at .github/kglibrary.instructions.md. Every project under KGlibrary/<project>/info.md MUST use YAML frontmatter keys: name, description, repo, branch, commit_id, so the website and agents can uniformly consume reference project info."
+    },
+    {
+      "id": "1321",
+      "name": "update README",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "Update README.md to reflect the current state of the project: the canonical intent architecture graph, global agent rules, materialized skills, the ARGO harness, the KGlibrary reference library, the GitHub Pages home site, and automated tests.",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "54ad8dc",
+          "description": "README.md; tests/readme.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "dc84086",
+          "description": "README.md; tests/readme.test.js"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-1321-01-README反映项目当前状态",
+          "description": "GIVEN 仓库当前包含意图架构图谱、Agent 全局规则、物化 Skill、ARGO 工具链、KGlibrary 参考库、GitHub Pages 站点与自动化测试；WHEN 读者打开 README.md；THEN README 反映当前项目状态，包含意图图谱路径、全局规则、skill 目录、ARGO 目录、KGlibrary、站点入口与测试运行方式，且 How to use 章节说明 ArchiMate 3.2 合规及将框架复制到其他项目所需的 .argo/、.github/、.opencode/、.cursor/ 与 .feap。",
+          "type": "Acceptance Test",
+          "Input": "打开 README.md",
+          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 包含 design/KG/SystemArchitecture.json、.github/copilot-instructions.md、.github/skills/、.argo/、KGlibrary/、index.html、tests/ 与 node --test 运行方式；并断言 How to use 章节包含 ArchiMate 3.2、.argo/、.github/|.opencode/|.cursor/ 与 .feap。通过。"
+        }
+      ]
+    },
+    {
+      "id": "1330",
+      "name": "画一个全局架构图",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "使用Layered Viewpoint,画一个架构图插入README中，重点表达granph-driven agentic engineering中AGENT、ARGO MCP、graph、ARCHIMATE3.2、EA、人类间的关系\r\n\r\nLayered Viewpoint \r\nThe layered viewpoint pictures several layers and aspects of an Enterprise Architecture in one \r\ndiagram. There are two categories of layers, namely dedicated layers and service layers. The \r\nlayers are the result of the use of the “grouping” relationship for a natural partitioning of the entire \r\nset of objects and relationships that belong to a model. The technology, application, process, and \r\nactor/role layers belong to the first category. The structural principle behind a fully layered \r\nviewpoint is that each dedicated layer exposes, by means of the “realization” relationship, a layer \r\nof services, which are further on “serving” the next dedicated layer. Thus, we can easily separate \r\nthe internal structure and organization of a dedicated layer from its externally observable behavior \r\nexpressed as the service layer that the dedicated layer realizes. The order, number, or nature of \r\nthese layers are not fixed, but in general a (more or less) complete and natural layering of an \r\nArchiMate model should contain the succession of layers depicted in the example given in Table \r\n27. However, this example is by no means intended to be prescriptive. The main goal of the layered \r\nviewpoint is to provide an overview in one diagram. Furthermore, this viewpoint can be used as \r\nsupport for impact of change analysis and performance analysis or for extending the service \r\nportfolio. ",
+      "testcases": [
+        {
+          "name": "AT-1330-01-全局架构图插入README",
+          "description": "GIVEN 项目 README 需要呈现 graph-driven agentic engineering 的全局架构；WHEN 读者打开 README 的 Architecture 章节；THEN README 内嵌一张 Layered Viewpoint 架构图，图中表达 人类(Human)、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA(Enterprise Architect) 之间的关系。",
+          "type": "Acceptance Test",
+          "Input": "打开 README.md",
+          "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js：断言 README 引用 docs/diagrams/global-architecture.svg，且该 SVG 与源文件 docs/diagrams/global-architecture.excalidraw 均存在，并包含 人类、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA 等标签。通过。"
+        }
+      ]
+    },
+    {
+      "id": "1331",
+      "name": "DIAGRAM DRAW SKILL",
+      "parent": "1249",
+      "type": "Skill",
+      "description": "https://github.com/coleam00/excalidraw-diagram-skill"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "1161",
+      "statement": "Implementation and Migration Viewpoint --(Association)--> Application Cooperation Viewpoint",
+      "name": "Association",
+      "type": "Association",
+      "source_id": "1249",
+      "target_id": "1240",
+      "source_name": "Implementation and Migration Viewpoint",
+      "target_name": "Application Cooperation Viewpoint"
+    },
+    {
+      "id": "1162",
+      "statement": "create our home web site --(Association)--> create-github-repository-page",
+      "name": "Association",
+      "type": "Association",
+      "source_id": "1311",
+      "target_id": "1310",
+      "source_name": "create our home web site",
+      "target_name": "create-github-repository-page"
+    },
+    {
+      "id": "1166",
+      "statement": "优化WEB布局和风格 --(Association)--> project website",
+      "name": "Association",
+      "type": "Association",
+      "source_id": "1317",
+      "target_id": "1318",
+      "source_name": "优化WEB布局和风格",
+      "target_name": "project website"
+    },
+    {
+      "id": "1167",
+      "statement": "优化WEB布局和风格 --(Association)--> optimize-web-layout-style",
+      "name": "Association",
+      "type": "Association",
+      "source_id": "1317",
+      "target_id": "1319",
+      "source_name": "优化WEB布局和风格",
+      "target_name": "optimize-web-layout-style"
+    },
+    {
+      "id": "1168",
+      "statement": "优化WEB布局和风格 --(Association)--> kglibrary-info-format",
+      "name": "Association",
+      "type": "Association",
+      "source_id": "1317",
+      "target_id": "1320",
+      "source_name": "优化WEB布局和风格",
+      "target_name": "kglibrary-info-format"
+    },
+    {
+      "id": "1172",
+      "statement": "画一个全局架构图 --(Association)--> DIAGRAM DRAW SKILL",
+      "name": "使用这个SKILL来作图",
+      "type": "Association",
+      "source_id": "1330",
+      "target_id": "1331",
+      "source_name": "画一个全局架构图",
+      "target_name": "DIAGRAM DRAW SKILL"
+    }
+  ],
+  "views": [
+    {
+      "view_id": "176",
+      "view_name": "AgentCapabilities",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "included_elements": [
+        "1310",
+        "1319"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "174",
+      "view_name": "Implementation and Migration",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "included_elements": [
+        "1330",
+        "1310",
+        "1311",
+        "1317",
+        "1318",
+        "1319",
+        "1320",
+        "1321",
+        "1331"
+      ],
+      "included_relationships": [
+        "1162",
+        "1166",
+        "1167",
+        "1168",
+        "1172"
+      ]
+    },
+    {
+      "view_id": "169",
+      "view_name": "Application Cooperation",
+      "parent_element_id": "1240",
+      "parent_element_name": "Application Cooperation Viewpoint",
+      "included_elements": [
+        "1318"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "170",
+      "view_name": "SystemArchitecture",
+      "included_elements": [
+        "1249",
+        "1240"
+      ],
+      "included_relationships": [
+        "1161"
+      ]
+    }
+  ]
 }
