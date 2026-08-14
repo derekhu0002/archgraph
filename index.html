@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>open_knowledge_graph_engineering</title>
+  <meta name="description" content="A Knowledge graph driven method for Agentic Engineering." />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #181b22;
+      --border: #2a2f3a;
+      --text: #e6e8ee;
+      --muted: #9aa3b2;
+      --accent: #4da3ff;
+      --accent-2: #7ce0c3;
+      --code-bg: #11151c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .hero {
+      padding: 96px 24px 64px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      background: radial-gradient(1200px 400px at 50% -10%, #1b2230 0%, var(--bg) 60%);
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      margin: 0 0 12px;
+      letter-spacing: -0.02em;
+    }
+    .hero h1 code { color: var(--accent-2); }
+    .tagline {
+      color: var(--muted);
+      font-size: 1.2rem;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .badges { margin-top: 24px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    main { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+    section { margin-bottom: 40px; }
+    h2 {
+      font-size: 1.5rem;
+      margin: 0 0 16px;
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+    .card h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    code {
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <h1><code>open_knowledge_graph_engineering</code></h1>
+    <p class="tagline">A Knowledge graph driven method for Agentic Engineering.</p>
+    <div class="badges">
+      <span class="badge">Intent Architecture Graph</span>
+      <span class="badge">Work Package Driven</span>
+      <span class="badge">Acceptance-Test First</span>
+      <span class="badge">Commit Traceability</span>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2>What is this?</h2>
+      <p>
+        This project turns an <strong>intent architecture graph</strong> into the single source of truth for
+        agentic engineering. Every piece of work starts from an element in the graph — a Work Package, a Skill,
+        a Rule, or a Viewpoint — and every code change is traced back to it.
+      </p>
+    </section>
+
+    <section>
+      <h2>Core principles</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>1 · Arm before acting</h3>
+          <p>Before any development, pull the Work Package&rsquo;s associated Skills and Rules and materialize them as <code>SKILL.md</code> and <code>*.instructions.md</code>.</p>
+        </div>
+        <div class="card">
+          <h3>2 · Find the element first</h3>
+          <p>Every repository change maps to an architecture element. If none exists, create one inside a sensible View and Viewpoint.</p>
+        </div>
+        <div class="card">
+          <h3>3 · Acceptance tests first</h3>
+          <p>Check the affected acceptance cases before changing anything. Tests verify elements from the outside, never their internals.</p>
+        </div>
+        <div class="card">
+          <h3>4 · Commit traceability</h3>
+          <p>After each change, commit and register the commit id plus file paths back into the graph element.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Repository map</h2>
+      <pre>design/KG/SystemArchitecture.json   # canonical intent architecture graph
+.github/copilot-instructions.md    # global agent rules
+.github/skills/&lt;name&gt;/SKILL.md      # skills materialized from the graph
+KGlibrary/                         # knowledge graph library (reference projects)</pre>
+    </section>
+
+    <section>
+      <h2>Links</h2>
+      <p>
+        <a href="https://github.com/derekhu0002/open_knowledge_graph_engineering">GitHub repository</a>
+        &nbsp;·&nbsp;
+        <a href="https://docs.github.com/en/pages">GitHub Pages documentation</a>
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    Generated as a GitHub Pages home site for the <code>open_knowledge_graph_engineering</code> project.
+  </footer>
+</body>
+</html>
