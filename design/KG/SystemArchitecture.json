@@ -88,9 +88,14 @@
       ],
       "attributes": [
         {
+          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "2458f97",
-          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
+          "value": "2458f97"
+        },
+        {
+          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "aa932c3"
         },
         {
           "name": "status",
