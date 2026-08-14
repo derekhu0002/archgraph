@@ -85,6 +85,17 @@
           "Input": "浏览器打开网站首页",
           "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言存在 id=\"kglibrary\" 区域，且每个项目的 name 与 repo 链接均出现在页面中。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "2458f97",
+          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
       ]
     },
     {
