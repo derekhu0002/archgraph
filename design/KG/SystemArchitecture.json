@@ -170,10 +170,10 @@
       "testcases": [
         {
           "name": "AT-1330-01-全局架构图插入README",
-          "description": "GIVEN 项目 README 需要呈现 graph-driven agentic engineering 的全局架构；WHEN 读者打开 README 的 Architecture 章节；THEN README 内嵌一张 Layered Viewpoint 架构图，图中表达 人类(Human)、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA(Enterprise Architect) 之间的关系。",
+          "description": "GIVEN 项目 README 需要呈现 graph-driven agentic engineering 的全局架构；WHEN 读者打开 README 的 Architecture 章节；THEN README 内嵌一张 Layered Viewpoint 架构图，图中表达 人类(Human)、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA(Enterprise Architect)、Neo4j 之间的关系。",
           "type": "Acceptance Test",
           "Input": "打开 README.md",
-          "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js：断言 README 引用 docs/diagrams/global-architecture.svg，且该 SVG 与源文件 docs/diagrams/global-architecture.excalidraw 均存在，并包含 人类、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA 等标签。通过。"
+          "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js：断言 README 引用 docs/diagrams/global-architecture.svg，且该 SVG 与源文件 docs/diagrams/global-architecture.excalidraw 均存在，并包含 人类、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA、Neo4j 等标签。通过。"
         }
       ],
       "attributes": [

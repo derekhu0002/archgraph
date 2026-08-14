@@ -19,7 +19,7 @@ test('architecture-diagram: Layered Viewpoint diagram embedded in README', () =>
   assert.ok(existsSync(EXCALIDRAW_PATH), 'the Excalidraw source should exist');
 
   const svg = readFileSync(SVG_PATH, 'utf8');
-  for (const label of ['人类', 'AGENT', 'ARGO MCP', 'graph', 'ArchiMate 3.2', 'EA']) {
+  for (const label of ['人类', 'AGENT', 'ARGO MCP', 'graph', 'ArchiMate 3.2', 'EA', 'Neo4j']) {
     assert.ok(svg.includes(label), `diagram should mention "${label}"`);
   }
 });
