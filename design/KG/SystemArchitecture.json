@@ -183,6 +183,11 @@
           "description": "README.md; design/KG/SystemArchitecture.json; .github/skills/diagram-draw/SKILL.md; .github/skills/diagram-draw/renderExcalidrawSvg.js; docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js"
         },
         {
+          "name": "commit",
+          "value": "2e5c6b9",
+          "description": "docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
