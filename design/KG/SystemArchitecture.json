@@ -214,6 +214,17 @@
           "Input": "浏览器打开网站首页",
           "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"architecture\" 区域并引用 docs/diagrams/global-architecture.svg，含 id=\"howto\" 区域并提及 ArchiMate 3.2、.argo/ 与 .github/|.opencode/|.cursor/。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "4027dd0",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
       ]
     }
   ],
