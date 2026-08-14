@@ -138,16 +138,21 @@
       "testcases": [
         {
           "name": "AT-1321-01-README反映项目当前状态",
-          "description": "GIVEN 仓库当前包含意图架构图谱、Agent 全局规则、物化 Skill、ARGO 工具链、KGlibrary 参考库、GitHub Pages 站点与自动化测试；WHEN 读者打开 README.md；THEN README 反映当前项目状态，包含意图图谱路径、全局规则、skill 目录、ARGO 目录、KGlibrary、站点入口与测试运行方式。",
+          "description": "GIVEN 仓库当前包含意图架构图谱、Agent 全局规则、物化 Skill、ARGO 工具链、KGlibrary 参考库、GitHub Pages 站点与自动化测试；WHEN 读者打开 README.md；THEN README 反映当前项目状态，包含意图图谱路径、全局规则、skill 目录、ARGO 目录、KGlibrary、站点入口与测试运行方式，且 How to use 章节说明 ArchiMate 3.2 合规及将框架复制到其他项目所需的 .argo/、.github/、.opencode/、.cursor/ 与 .feap。",
           "type": "Acceptance Test",
           "Input": "打开 README.md",
-          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 包含 design/KG/SystemArchitecture.json、.github/copilot-instructions.md、.github/skills/、.argo/、KGlibrary/、index.html、tests/ 与 node --test 运行方式。通过。"
+          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 包含 design/KG/SystemArchitecture.json、.github/copilot-instructions.md、.github/skills/、.argo/、KGlibrary/、index.html、tests/ 与 node --test 运行方式；并断言 How to use 章节包含 ArchiMate 3.2、.argo/、.github/|.opencode/|.cursor/ 与 .feap。通过。"
         }
       ],
       "attributes": [
         {
           "name": "commit",
           "value": "dc84086",
+          "description": "README.md; tests/readme.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "54ad8dc",
           "description": "README.md; tests/readme.test.js"
         },
         {
