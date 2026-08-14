@@ -30,10 +30,10 @@ function parseInfoFrontmatter(md) {
   return meta;
 }
 
-test('layout-style: tech-simple dark layout with nav, hero and sections', () => {
+test('layout-style: tech-simple light layout with nav, hero and sections', () => {
   // GIVEN the project website is published
   // WHEN a visitor opens the homepage in a browser
-  // THEN the page renders a tech-simple layout: nav bar, hero, title and sectioned content in a dark theme
+  // THEN the page renders a tech-simple layout: nav bar, hero, title and sectioned content in a light theme
   assert.match(HTML, /<nav\b/, 'page should have a top navigation bar');
   assert.match(HTML, /class="hero"/, 'page should have a hero section');
   assert.match(
@@ -43,7 +43,7 @@ test('layout-style: tech-simple dark layout with nav, hero and sections', () => 
   );
   const sections = HTML.match(/<section\b/g) || [];
   assert.ok(sections.length >= 4, 'page should have at least 4 content sections');
-  assert.match(HTML, /data-theme="dark"/, 'page should declare a dark tech theme');
+  assert.match(HTML, /data-theme="light"/, 'page should declare a light tech theme');
 });
 
 test('kglibrary-area: lists every KGlibrary reference project', () => {

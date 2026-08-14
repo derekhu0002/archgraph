@@ -72,18 +72,18 @@
       "description": "对于本站的网站，做如下优化：\r\n1. 采用科技简洁的布局风格，参考https://www.deepseek.com/；\r\n2. 要有一个区域用来接啥当前项目中已经积累的参考库KGlibrary中的其他项目信息；",
       "testcases": [
         {
-          "name": "AT-1317-01-科技简洁布局风格",
-          "description": "GIVEN 网站已发布；WHEN 访客在浏览器打开网站首页；THEN 页面以科技简洁布局呈现：顶部导航栏、首屏 Hero（项目名+标语+行动按钮）、正文分节卡片化、深色科技主题。",
-          "type": "Acceptance Test",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"layout-style\"）：断言 index.html 含导航栏、Hero 区、h1 项目名、≥4 个 section、data-theme=\"light\" 浅色主题标记。通过。",
+          "description": "GIVEN 网站已发布；WHEN 访客在浏览器打开网站首页；THEN 页面以科技简洁布局呈现：顶部导航栏、首屏 Hero（项目名+标语+行动按钮）、正文分节卡片化、浅色科技主题。",
           "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"layout-style\"）：断言 index.html 含导航栏、Hero 区、h1 项目名、≥4 个 section、data-theme=\"dark\" 深色主题标记。通过。"
+          "name": "AT-1317-01-科技简洁布局风格",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1317-02-KGlibrary参考库区域",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言存在 id=\"kglibrary\" 区域，且每个项目的 name 与 repo 链接均出现在页面中。通过。",
           "description": "GIVEN KGlibrary 目录下存在参考项目（当前为 XKG-TEST）；WHEN 访客在浏览器打开网站首页；THEN 页面存在 Reference Library (KGlibrary) 区域，列出每个参考项目的名称、简介与仓库链接。",
-          "type": "Acceptance Test",
           "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言存在 id=\"kglibrary\" 区域，且每个项目的 name 与 repo 链接均出现在页面中。通过。"
+          "name": "AT-1317-02-KGlibrary参考库区域",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [

@@ -9,16 +9,16 @@ disable-model-invocation: true
 
 `optimize-web-layout-style` 负责把本项目主页（`index.html`）优化为「科技简洁」的布局与风格，并在页面中呈现 KGlibrary 参考库里的其他项目信息。
 
-- 视觉参考：https://www.deepseek.com/ —— 深色科技主题、留白充足、克制的边框、单一主强调色（蓝）、卡片化内容分区。
+- 视觉参考：https://www.deepseek.com/ —— 浅色科技主题、留白充足、克制的边框、单一主强调色（蓝）、卡片化内容分区。
 - 页面是纯静态 GitHub Pages 站点：保持 `index.html` 单文件、可离线打开、不依赖服务端语言。
 - KGlibrary 参考库：`KGlibrary/<project>/info.md` 使用 YAML frontmatter 描述项目（见 `.github/kglibrary.instructions.md`）。
 
 ## Rules
 
 - **MUST** 保持纯静态、单文件 `index.html`，不引入构建步骤或运行时依赖（CDN 字体/图标除外，且需可降级）。
-- **MUST** 采用科技简洁风格：深色背景 + 单一蓝色主强调色，顶部固定导航栏，Hero 首屏，正文卡片化分区。
+- **MUST** 采用科技简洁风格：浅色背景 + 单一蓝色主强调色，顶部固定导航栏，Hero 首屏，正文卡片化分区。
 - **MUST** 在页面中提供 `id="kglibrary"` 的 Reference Library 区域，列出 KGlibrary 中每个参考项目的 `name`、`description` 与 `repo` 链接。
-- **MUST** 给 `<html>`（或 `<body>`）标注 `data-theme="dark"`，作为深色科技主题的可验证标记。
+- **MUST** 给 `<html>`（或 `<body>`）标注 `data-theme="light"`，作为浅色科技主题的可验证标记。
 - **MUST** 页面内容与 `KGlibrary/*/info.md` 保持同步；修改 KGlibrary 后需同步刷新该区域。
 - **MUST NOT** 在站点中暴露密钥、token 等敏感信息（Pages 站点公开可访问）。
 
