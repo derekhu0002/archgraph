@@ -21,3 +21,21 @@ test('readme: documents the current repository state', () => {
   assert.match(README, /tests\//, 'README should reference the tests directory');
   assert.match(README, /node --test/, 'README should show how to run tests');
 });
+
+function sectionAfter(md, heading) {
+  const re = new RegExp('## ' + heading + '[\\s\\S]*?(?=\\n## |$)');
+  const match = md.match(re);
+  return match ? match[0] : '';
+}
+
+test('readme: how-to-use section explains framework adoption', () => {
+  // GIVEN the README documents how to adopt the framework
+  // WHEN a reader opens the How to use section
+  // THEN it states ArchiMate 3.2 compliance and the pieces to copy into another project
+  const section = sectionAfter(README, 'How to use');
+  assert.ok(section, 'README should have a How to use section');
+  assert.match(section, /ArchiMate 3\.2/, 'should state ArchiMate 3.2 compliance');
+  assert.match(section, /\.argo\//, 'should mention copying .argo/');
+  assert.match(section, /\.github\/|\.opencode\/|\.cursor\//, 'should mention copying one agent config directory');
+  assert.match(section, /\.feap/, 'should mention the .feap EA model');
+});

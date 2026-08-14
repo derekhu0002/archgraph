@@ -37,6 +37,31 @@ These rules are encoded in [`.github/copilot-instructions.md`](.github/copilot-i
 | `index.html` | GitHub Pages home site |
 | `tests/` | Executable acceptance tests (Node.js built-in test runner) |
 
+## How to use
+
+`open_knowledge_graph_engineering` is an agentic engineering framework driven by a knowledge graph —
+the intent architecture graph — whose schema complies with **ArchiMate 3.2**.
+
+To adopt it as the building framework for another project, copy the following into the target project:
+
+1. **`.argo/`** — the ARGO harness: the MCP server, the ArchiMate 3.2 schema, validators, the
+   semantic (Graph RAG) lifecycle, and Neo4j sync.
+2. **One agent-host configuration directory**, depending on which agent you use:
+   - `.github/` — GitHub Copilot / VS Code
+   - `.opencode/` — opencode
+   - `.cursor/` — Cursor
+
+   Each directory carries the global rules, the materialized skills, and the `argo` MCP wiring.
+3. **The `.feap` Enterprise Architect model** — the ArchiMate 3.2 model used to author the
+   knowledge graph (the `feap` tool).
+
+Then point your agent at the harness (`node .argo/scripts/argo-mcp-server.js`) and bootstrap the
+environment:
+
+```powershell
+node .argo/scripts/ensureArgoHarnessEnvironment.js
+```
+
 ## ARGO MCP harness
 
 Read and write the intent architecture through the **ARGO MCP server** — configured in
