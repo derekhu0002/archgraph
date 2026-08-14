@@ -81,3 +81,23 @@ test('kglibrary-area: lists every KGlibrary reference project', () => {
     }
   }
 });
+
+test('readme-sync: home page mirrors README (architecture + how to use)', () => {
+  // GIVEN the README documents the global architecture and how to adopt the framework
+  // WHEN a visitor opens the homepage in a browser
+  // THEN the page mirrors those sections: an Architecture section with the diagram, and a How to use section
+  assert.match(HTML, /id="architecture"/, 'page should have an Architecture section');
+  assert.match(
+    HTML,
+    /docs\/diagrams\/global-architecture\.svg/,
+    'Architecture section should embed the global architecture diagram'
+  );
+  assert.match(HTML, /id="howto"/, 'page should have a How to use section');
+  assert.match(HTML, /ArchiMate 3\.2/, 'How to use should mention ArchiMate 3.2');
+  assert.match(HTML, /\.argo\//, 'How to use should mention .argo/');
+  assert.match(
+    HTML,
+    /\.github\/|\.opencode\/|\.cursor\//,
+    'How to use should mention the agent config directories'
+  );
+});

@@ -199,6 +199,22 @@
       "parent": "1249",
       "type": "Skill",
       "description": "https://github.com/coleam00/excalidraw-diagram-skill"
+    },
+    {
+      "id": "1332",
+      "name": "根据README更新INDEX主页",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "根据 README 的当前内容同步更新网站主页 index.html：增加 Architecture（全局架构图）、How to use（框架复用）章节，并刷新 Repository map。",
+      "testcases": [
+        {
+          "name": "AT-1332-01-主页与README同步",
+          "description": "GIVEN README 已包含 Architecture（全局架构图）与 How to use（框架复用）章节；WHEN 访客在浏览器打开网站首页；THEN 首页同步展示这些章节：包含 Architecture 架构图（docs/diagrams/global-architecture.svg）与 How to use 内容（ArchiMate 3.2 与 .argo/、.github/、.opencode/、.cursor/）。",
+          "type": "Acceptance Test",
+          "Input": "浏览器打开网站首页",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"architecture\" 区域并引用 docs/diagrams/global-architecture.svg，含 id=\"howto\" 区域并提及 ArchiMate 3.2、.argo/ 与 .github/|.opencode/|.cursor/。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -261,6 +277,16 @@
       "target_id": "1331",
       "source_name": "画一个全局架构图",
       "target_name": "DIAGRAM DRAW SKILL"
+    },
+    {
+      "id": "1173",
+      "statement": "根据README更新INDEX主页 --(Association)--> project website",
+      "name": "Association",
+      "type": "Association",
+      "source_id": "1332",
+      "target_id": "1318",
+      "source_name": "根据README更新INDEX主页",
+      "target_name": "project website"
     }
   ],
   "views": [
@@ -289,14 +315,16 @@
         "1319",
         "1320",
         "1321",
-        "1331"
+        "1331",
+        "1332"
       ],
       "included_relationships": [
         "1162",
         "1166",
         "1167",
         "1168",
-        "1172"
+        "1172",
+        "1173"
       ]
     },
     {
