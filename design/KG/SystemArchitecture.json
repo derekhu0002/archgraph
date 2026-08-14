@@ -1,130 +1,168 @@
 {
-  "name": "System",
-  "description": "Exported from EA package System\r\n\r\nImported from: D:\\Projects\\Argo\\design\\KG\\SystemArchitecture.json\r\nSchema: .argo/schema/SystemArchitecture.schema.json",
-  "elements": [
-    {
-      "id": "1240",
-      "name": "Application Cooperation Viewpoint",
-      "alias": "1211",
-      "type": "Grouping",
-      "subdiagram_views": [
+    "name": "System",
+    "description": "Exported from EA package System\r\n\r\nImported from: D:\\Projects\\Argo\\design\\KG\\SystemArchitecture.json\r\nSchema: .argo/schema/SystemArchitecture.schema.json",
+    "elements": [
         {
-          "view_id": "169",
-          "view_name": "Application Cooperation"
-        }
-      ]
-    },
-    {
-      "id": "1249",
-      "name": "Implementation and Migration Viewpoint",
-      "alias": "1211",
-      "type": "Grouping",
-      "subdiagram_views": [
-        {
-          "view_id": "176",
-          "view_name": "AgentCapabilities"
+            "id": "1240",
+            "name": "Application Cooperation Viewpoint",
+            "alias": "1211",
+            "type": "Grouping",
+            "subdiagram_views": [
+                {
+                    "view_id": "169",
+                    "view_name": "Application Cooperation"
+                }
+            ]
         },
         {
-          "view_id": "174",
-          "view_name": "Implementation and Migration"
-        }
-      ]
-    },
-    {
-      "id": "1310",
-      "name": "create-github-repository-page",
-      "parent": "1249",
-      "type": "Skill",
-      "description": "create a website based on your github repo:https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site"
-    },
-    {
-      "id": "1311",
-      "name": "create our home web site",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "create a home website for this project.",
-      "testcases": [
+            "id": "1249",
+            "name": "Implementation and Migration Viewpoint",
+            "alias": "1211",
+            "type": "Grouping",
+            "subdiagram_views": [
+                {
+                    "view_id": "176",
+                    "view_name": "AgentCapabilities"
+                },
+                {
+                    "view_id": "174",
+                    "view_name": "Implementation and Migration"
+                }
+            ]
+        },
         {
-          "name": "can view the content through the website.",
-          "description": "can view the content through the website.",
-          "type": "Acceptance Test",
-          "Input": "N/A",
-          "acceptanceCriteria": "can view the content through the website."
-        }
-      ],
-      "attributes": [
+            "id": "1310",
+            "name": "create-github-repository-page",
+            "parent": "1249",
+            "type": "Skill",
+            "description": "create a website based on your github repo:https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site\r\nTODO:完成后刷新本描述"
+        },
         {
-          "name": "commit",
-          "value": "4252ca8",
-          "description": "index.html; .nojekyll; .github/skills/create-github-repository-page/SKILL.md"
+            "id": "1311",
+            "name": "create our home web site",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "create a home website for this project.",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "4252ca8",
+                    "description": "index.html; .nojekyll; .github/skills/create-github-repository-page/SKILL.md"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "can view the content through the website.",
+                    "description": "can view the content through the website.",
+                    "type": "Acceptance Test",
+                    "Input": "N/A",
+                    "acceptanceCriteria": "can view the content through the website."
+                }
+            ]
+        },
+        {
+            "id": "1317",
+            "name": "优化WEB布局和风格",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "对于本站的网站，做如下优化：\r\n1. 采用科技简洁的布局风格，参考https://www.deepseek.com/；\r\n2. 要有一个区域用来接啥当前项目中已经积累的参考库KGlibrary中的其他项目信息；"
+        },
+        {
+            "id": "1318",
+            "name": "project website",
+            "parent": "1240",
+            "type": "Application Component",
+            "attributes": [
+                {
+                    "name": "website",
+                    "value": "https://derekhu0002.github.io/open_knowledge_graph_engineering/"
+                }
+            ]
         }
-      ]
-    }
-  ],
-  "relationships": [
-    {
-      "id": "1161",
-      "statement": "Implementation and Migration Viewpoint --(Association)--> Application Cooperation Viewpoint",
-      "name": "Association",
-      "type": "Association",
-      "source_id": "1249",
-      "target_id": "1240",
-      "source_name": "Implementation and Migration Viewpoint",
-      "target_name": "Application Cooperation Viewpoint"
-    },
-    {
-      "id": "1162",
-      "statement": "create our home web site --(Association)--> create-github-repository-page",
-      "name": "Association",
-      "type": "Association",
-      "source_id": "1311",
-      "target_id": "1310",
-      "source_name": "create our home web site",
-      "target_name": "create-github-repository-page"
-    }
-  ],
-  "views": [
-    {
-      "view_id": "176",
-      "view_name": "AgentCapabilities",
-      "parent_element_id": "1249",
-      "parent_element_name": "Implementation and Migration Viewpoint",
-      "included_elements": [
-        "1310"
-      ],
-      "included_relationships": []
-    },
-    {
-      "view_id": "174",
-      "view_name": "Implementation and Migration",
-      "parent_element_id": "1249",
-      "parent_element_name": "Implementation and Migration Viewpoint",
-      "included_elements": [
-        "1310",
-        "1311"
-      ],
-      "included_relationships": [
-        "1162"
-      ]
-    },
-    {
-      "view_id": "169",
-      "view_name": "Application Cooperation",
-      "parent_element_id": "1240",
-      "parent_element_name": "Application Cooperation Viewpoint",
-      "included_elements": [],
-      "included_relationships": []
-    },
-    {
-      "view_id": "170",
-      "view_name": "SystemArchitecture",
-      "included_elements": [
-        "1249",
-        "1240"
-      ],
-      "included_relationships": [
-        "1161"
-      ]
-    }
-  ]
+    ],
+    "relationships": [
+        {
+            "id": "1161",
+            "statement": "Implementation and Migration Viewpoint --(Association)--> Application Cooperation Viewpoint",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1249",
+            "target_id": "1240",
+            "source_name": "Implementation and Migration Viewpoint",
+            "target_name": "Application Cooperation Viewpoint"
+        },
+        {
+            "id": "1162",
+            "statement": "create our home web site --(Association)--> create-github-repository-page",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1311",
+            "target_id": "1310",
+            "source_name": "create our home web site",
+            "target_name": "create-github-repository-page"
+        },
+        {
+            "id": "1166",
+            "statement": "优化WEB布局和风格 --(Association)--> project website",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1317",
+            "target_id": "1318",
+            "source_name": "优化WEB布局和风格",
+            "target_name": "project website"
+        }
+    ],
+    "views": [
+        {
+            "view_id": "176",
+            "view_name": "AgentCapabilities",
+            "parent_element_id": "1249",
+            "parent_element_name": "Implementation and Migration Viewpoint",
+            "included_elements": [
+                "1310"
+            ],
+            "included_relationships": []
+        },
+        {
+            "view_id": "174",
+            "view_name": "Implementation and Migration",
+            "parent_element_id": "1249",
+            "parent_element_name": "Implementation and Migration Viewpoint",
+            "included_elements": [
+                "1310",
+                "1311",
+                "1317",
+                "1318"
+            ],
+            "included_relationships": [
+                "1162",
+                "1166"
+            ]
+        },
+        {
+            "view_id": "169",
+            "view_name": "Application Cooperation",
+            "parent_element_id": "1240",
+            "parent_element_name": "Application Cooperation Viewpoint",
+            "included_elements": [
+                "1318"
+            ],
+            "included_relationships": []
+        },
+        {
+            "view_id": "170",
+            "view_name": "SystemArchitecture",
+            "included_elements": [
+                "1249",
+                "1240"
+            ],
+            "included_relationships": [
+                "1161"
+            ]
+        }
+    ]
 }
