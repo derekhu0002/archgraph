@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,153 +7,231 @@
   <meta name="description" content="A Knowledge graph driven method for Agentic Engineering." />
   <style>
     :root {
-      --bg: #0f1115;
-      --panel: #181b22;
+      --bg: #0d1117;
+      --bg-soft: #161b22;
       --border: #2a2f3a;
-      --text: #e6e8ee;
-      --muted: #9aa3b2;
-      --accent: #4da3ff;
-      --accent-2: #7ce0c3;
-      --code-bg: #11151c;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #4d6bfe;
+      --accent-soft: rgba(77, 107, 254, 0.12);
+      --code-bg: #10151c;
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
     }
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
-    .hero {
-      padding: 96px 24px 64px;
-      text-align: center;
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 24px;
+      background: rgba(13, 17, 23, 0.82);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      background: radial-gradient(1200px 400px at 50% -10%, #1b2230 0%, var(--bg) 60%);
     }
-    .hero h1 {
-      font-size: clamp(2rem, 5vw, 3.4rem);
-      margin: 0 0 12px;
-      letter-spacing: -0.02em;
-    }
-    .hero h1 code { color: var(--accent-2); }
-    .tagline {
-      color: var(--muted);
-      font-size: 1.2rem;
-      max-width: 640px;
-      margin: 0 auto;
-    }
-    .badges { margin-top: 24px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-    .badge {
-      display: inline-block;
+    .site-nav .brand { font-weight: 600; font-size: 0.95rem; color: var(--text); }
+    .site-nav .brand code { color: var(--accent); background: transparent; padding: 0; }
+    .site-nav .links { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+    .site-nav .links a { color: var(--muted); font-size: 0.9rem; }
+    .site-nav .links a:hover { color: var(--text); text-decoration: none; }
+    .site-nav .gh-btn {
       padding: 6px 14px;
       border: 1px solid var(--border);
-      border-radius: 999px;
-      color: var(--muted);
-      font-size: 0.85rem;
+      border-radius: 8px;
+      color: var(--text) !important;
+      background: var(--bg-soft);
     }
-    main { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
-    section { margin-bottom: 40px; }
-    h2 {
-      font-size: 1.5rem;
-      margin: 0 0 16px;
-      letter-spacing: -0.01em;
+    .site-nav .gh-btn:hover { border-color: var(--accent); }
+
+    .hero {
+      padding: 104px 24px 88px;
+      text-align: center;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
+      background:
+        radial-gradient(900px 420px at 50% -12%, rgba(77, 107, 254, 0.22) 0%, rgba(77, 107, 254, 0) 62%),
+        var(--bg);
     }
+    .hero h1 {
+      font-size: clamp(2.1rem, 5vw, 3.5rem);
+      margin: 0 0 16px;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .hero h1 code { color: var(--accent); background: transparent; padding: 0; }
+    .tagline { color: var(--muted); font-size: 1.15rem; max-width: 620px; margin: 0 auto; }
+    .hero-actions { margin-top: 32px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--bg-soft);
+    }
+    .btn:hover { text-decoration: none; border-color: var(--accent); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { filter: brightness(1.08); }
+
+    main { max-width: 1040px; margin: 0 auto; padding: 48px 24px 96px; }
+    section { margin-bottom: 56px; }
+    h2 {
+      font-size: 1.55rem;
+      margin: 0 0 18px;
+      letter-spacing: -0.02em;
+    }
+    h2 .num { color: var(--accent); font-family: ui-monospace, monospace; font-size: 0.95rem; margin-right: 8px; }
+    .lead { color: var(--muted); max-width: 720px; margin: 0 0 24px; }
+
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 16px;
     }
     .card {
-      background: var(--panel);
+      background: var(--bg-soft);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 18px 20px;
+      border-radius: 12px;
+      padding: 20px 22px;
     }
-    .card h3 { margin: 0 0 8px; font-size: 1.05rem; }
-    .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    .card h3 { margin: 0 0 10px; font-size: 1.02rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
     code {
       background: var(--code-bg);
       padding: 1px 6px;
-      border-radius: 4px;
+      border-radius: 5px;
       font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
       font-size: 0.9em;
     }
     pre {
       background: var(--code-bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
+      border-radius: 10px;
+      padding: 18px;
       overflow-x: auto;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
+
+    .project-card {
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin-bottom: 14px;
+    }
+    .project-card h3 { margin: 0 0 8px; font-size: 1.1rem; }
+    .project-card h3 a { color: var(--text); }
+    .project-card h3 a:hover { color: var(--accent); text-decoration: none; }
+    .project-card .desc { color: var(--muted); margin: 0 0 14px; font-size: 0.95rem; }
+    .project-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      font-size: 0.78rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 10px;
+    }
+
     footer {
       text-align: center;
       color: var(--muted);
       font-size: 0.85rem;
-      padding: 24px;
+      padding: 28px 24px;
       border-top: 1px solid var(--border);
     }
   </style>
 </head>
 <body>
+  <nav class="site-nav">
+    <span class="brand"><code>open_knowledge_graph_engineering</code></span>
+    <div class="links">
+      <a href="#about">About</a>
+      <a href="#principles">Principles</a>
+      <a href="#repository">Repository</a>
+      <a href="#kglibrary">Reference Library</a>
+      <a class="gh-btn" href="https://github.com/derekhu0002/open_knowledge_graph_engineering">GitHub</a>
+    </div>
+  </nav>
+
   <header class="hero">
     <h1><code>open_knowledge_graph_engineering</code></h1>
     <p class="tagline">A Knowledge graph driven method for Agentic Engineering.</p>
-    <div class="badges">
-      <span class="badge">Intent Architecture Graph</span>
-      <span class="badge">Work Package Driven</span>
-      <span class="badge">Acceptance-Test First</span>
-      <span class="badge">Commit Traceability</span>
+    <div class="hero-actions">
+      <a class="btn primary" href="https://github.com/derekhu0002/open_knowledge_graph_engineering">View on GitHub</a>
+      <a class="btn" href="#kglibrary">Explore Reference Library</a>
     </div>
   </header>
 
   <main>
-    <section>
-      <h2>What is this?</h2>
-      <p>
+    <section id="about">
+      <h2><span class="num">01</span>What is this?</h2>
+      <p class="lead">
         This project turns an <strong>intent architecture graph</strong> into the single source of truth for
         agentic engineering. Every piece of work starts from an element in the graph — a Work Package, a Skill,
         a Rule, or a Viewpoint — and every code change is traced back to it.
       </p>
     </section>
 
-    <section>
-      <h2>Core principles</h2>
+    <section id="principles">
+      <h2><span class="num">02</span>Core principles</h2>
       <div class="grid">
         <div class="card">
-          <h3>1 · Arm before acting</h3>
+          <h3>Arm before acting</h3>
           <p>Before any development, pull the Work Package&rsquo;s associated Skills and Rules and materialize them as <code>SKILL.md</code> and <code>*.instructions.md</code>.</p>
         </div>
         <div class="card">
-          <h3>2 · Find the element first</h3>
+          <h3>Find the element first</h3>
           <p>Every repository change maps to an architecture element. If none exists, create one inside a sensible View and Viewpoint.</p>
         </div>
         <div class="card">
-          <h3>3 · Acceptance tests first</h3>
+          <h3>Acceptance tests first</h3>
           <p>Check the affected acceptance cases before changing anything. Tests verify elements from the outside, never their internals.</p>
         </div>
         <div class="card">
-          <h3>4 · Commit traceability</h3>
+          <h3>Commit traceability</h3>
           <p>After each change, commit and register the commit id plus file paths back into the graph element.</p>
         </div>
       </div>
     </section>
 
-    <section>
-      <h2>Repository map</h2>
+    <section id="repository">
+      <h2><span class="num">03</span>Repository map</h2>
       <pre>design/KG/SystemArchitecture.json   # canonical intent architecture graph
 .github/copilot-instructions.md    # global agent rules
 .github/skills/&lt;name&gt;/SKILL.md      # skills materialized from the graph
 KGlibrary/                         # knowledge graph library (reference projects)</pre>
     </section>
 
-    <section>
-      <h2>Links</h2>
-      <p>
+    <section id="kglibrary">
+      <h2><span class="num">04</span>Reference Library · KGlibrary</h2>
+      <p class="lead">Projects accumulated in the KGlibrary reference library, surfacing knowledge-graph-driven engineering examples.</p>
+      <div class="project-card">
+        <h3><a href="https://github.com/derekhu0002/XKG-TEST">XKG-TEST</a></h3>
+        <p class="desc">a test repo which created a online mindmapping draft panel</p>
+        <div class="project-meta">
+          <span class="chip">repo · github.com/derekhu0002/XKG-TEST</span>
+          <span class="chip">branch · main</span>
+          <span class="chip">commit · 1372c4e</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="links">
+      <h2><span class="num">05</span>Links</h2>
+      <p class="lead">
         <a href="https://github.com/derekhu0002/open_knowledge_graph_engineering">GitHub repository</a>
         &nbsp;·&nbsp;
         <a href="https://docs.github.com/en/pages">GitHub Pages documentation</a>
