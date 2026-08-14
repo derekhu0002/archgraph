@@ -1,42 +1,83 @@
 {
-"name": "System",
-"description": "Exported from EA package System",
-"elements": [
-{
-"id": "1211",
-"name": "AcceptanceDeliveryViewpoint"
-,"type": "Grouping"
-,"subdiagram_views": [
-{
-"view_id": "163",
-"view_name": "AcceptanceDeliveryViewpoint"
-}
-]
-}
-],
-"relationships": [{"id":"3001","name":"Baseline viewpoint association","type":"Association","source_id":"1207","target_id":"1208","source_name":"StakeholderIntentViewpoint","target_name":"OutcomeCapabilityViewpoint","description":"Baseline navigation from stakeholder intent to outcome and capability scope.","statement":"StakeholderIntentViewpoint --(Association)--> OutcomeCapabilityViewpoint"},{"id":"3002","name":"Baseline viewpoint association","type":"Association","source_id":"1208","target_id":"1209","source_name":"OutcomeCapabilityViewpoint","target_name":"BusinessBehaviorViewpoint","description":"Baseline navigation from outcome and capability scope to observable business behavior.","statement":"OutcomeCapabilityViewpoint --(Association)--> BusinessBehaviorViewpoint"},{"id":"3003","name":"Baseline viewpoint association","type":"Association","source_id":"1209","target_id":"1210","source_name":"BusinessBehaviorViewpoint","target_name":"CapabilityRealizationViewpoint","description":"Baseline navigation from business behavior to capability realization responsibilities.","statement":"BusinessBehaviorViewpoint --(Association)--> CapabilityRealizationViewpoint"},{"id":"3004","name":"Baseline viewpoint association","type":"Association","source_id":"1210","target_id":"1211","source_name":"CapabilityRealizationViewpoint","target_name":"AcceptanceDeliveryViewpoint","description":"Baseline navigation from realization responsibilities to acceptance and delivery sequencing.","statement":"CapabilityRealizationViewpoint --(Association)--> AcceptanceDeliveryViewpoint"}],
-"views": [
-{
-"view_id": "163",
-"view_name": "AcceptanceDeliveryViewpoint"
-,"parent_element_id": "1211"
-,"parent_element_name": "AcceptanceDeliveryViewpoint"
-,"included_elements": [
-
-]
-,"included_relationships": [
-
-]
-},
-{
-"view_id": "202",
-"view_name": "SystemArchitecture"
-,"included_elements": [
-"1211"
-]
-,"included_relationships": [
-
-]
-}
-]
+    "name": "System",
+    "description": "Exported from EA package System\r\n\r\nImported from: D:\\Projects\\Argo\\design\\KG\\SystemArchitecture.json\r\nSchema: .argo/schema/SystemArchitecture.schema.json",
+    "elements": [
+        {
+            "id": "1240",
+            "name": "Application Cooperation Viewpoint",
+            "alias": "1211",
+            "type": "Grouping",
+            "subdiagram_views": [
+                {
+                    "view_id": "169",
+                    "view_name": "Application Cooperation"
+                }
+            ]
+        },
+        {
+            "id": "1249",
+            "name": "Implementation and Migration Viewpoint",
+            "alias": "1211",
+            "type": "Grouping",
+            "subdiagram_views": [
+                {
+                    "view_id": "176",
+                    "view_name": "AgentCapabilities"
+                },
+                {
+                    "view_id": "174",
+                    "view_name": "Implementation and Migration"
+                }
+            ]
+        }
+    ],
+    "relationships": [
+        {
+            "id": "1161",
+            "statement": "Implementation and Migration Viewpoint --(Association)--> Application Cooperation Viewpoint",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1249",
+            "target_id": "1240",
+            "source_name": "Implementation and Migration Viewpoint",
+            "target_name": "Application Cooperation Viewpoint"
+        }
+    ],
+    "views": [
+        {
+            "view_id": "176",
+            "view_name": "AgentCapabilities",
+            "parent_element_id": "1249",
+            "parent_element_name": "Implementation and Migration Viewpoint",
+            "included_elements": [],
+            "included_relationships": []
+        },
+        {
+            "view_id": "174",
+            "view_name": "Implementation and Migration",
+            "parent_element_id": "1249",
+            "parent_element_name": "Implementation and Migration Viewpoint",
+            "included_elements": [],
+            "included_relationships": []
+        },
+        {
+            "view_id": "169",
+            "view_name": "Application Cooperation",
+            "parent_element_id": "1240",
+            "parent_element_name": "Application Cooperation Viewpoint",
+            "included_elements": [],
+            "included_relationships": []
+        },
+        {
+            "view_id": "170",
+            "view_name": "SystemArchitecture",
+            "included_elements": [
+                "1249",
+                "1240"
+            ],
+            "included_relationships": [
+                "1161"
+            ]
+        }
+    ]
 }

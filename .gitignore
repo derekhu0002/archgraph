@@ -2,3 +2,4 @@
 node_modules/
 .argo/temp
 data/
+package-lock.json
