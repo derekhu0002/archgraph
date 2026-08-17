@@ -550,6 +550,11 @@
         {
           "name": "version",
           "value": "v0.1"
+        },
+        {
+          "name": "commit",
+          "value": "cdbb063",
+          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "Agent 建模语言（AML）标准：连接上游消费者与下游厂商的建模语言契约。AML 扩展 ArchiMate 3.2（新增 Skill/Rule 元素与 testcases/attributes 结构约定），现行规范文档为 docs/agent-programming-language.md（v0.1）。消费者用一份 AML 描述 harness 即可多处运行，厂商按 AML 实现接入。",
