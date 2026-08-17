@@ -7,8 +7,13 @@ const { resolve } = require('node:dns').promises;
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
-const CUSTOM_DOMAIN = 'archgraph.derekworkspacev5.com';
-const PAGES_HOST = 'derekhu0002.github.io';
+const CUSTOM_DOMAIN = 'archgraph.org';
+const GITHUB_PAGES_IPS = new Set([
+  '185.199.108.153',
+  '185.199.109.153',
+  '185.199.110.153',
+  '185.199.111.153',
+]);
 
 test('custom-domain: CNAME file declares the custom domain', () => {
   // GIVEN the repository publishes a GitHub Pages site
@@ -22,21 +27,25 @@ test('custom-domain: CNAME file declares the custom domain', () => {
   );
 });
 
-test('custom-domain: DNS CNAME points to the GitHub Pages host', async (t) => {
-  // GIVEN the DNS provider (Cloudflare) has been configured for the custom domain
+test('custom-domain: DNS resolves to GitHub Pages', async (t) => {
+  // GIVEN the DNS provider has configured A records for the apex custom domain
   // WHEN a visitor resolves the custom domain
-  // THEN it is a CNAME alias pointing to the GitHub Pages host
-  let records;
+  // THEN it resolves to the GitHub Pages IP addresses
+  let addresses;
   try {
-    records = await resolve(CUSTOM_DOMAIN, 'CNAME');
+    addresses = await resolve(CUSTOM_DOMAIN, 'A');
   } catch (err) {
     t.skip(
-      `DNS CNAME for ${CUSTOM_DOMAIN} is not configured yet (${err.code || err.message}); add it in Cloudflare`
+      `DNS for ${CUSTOM_DOMAIN} is not configured yet (${err.code || err.message}); add the GitHub Pages A records in your DNS provider`
     );
     return;
   }
   assert.ok(
-    Array.isArray(records) && records.some((r) => r.toLowerCase() === PAGES_HOST),
-    `expected ${CUSTOM_DOMAIN} to CNAME to ${PAGES_HOST}, got ${JSON.stringify(records)}`
+    Array.isArray(addresses) && addresses.length > 0,
+    `expected ${CUSTOM_DOMAIN} to resolve to at least one A record`
+  );
+  assert.ok(
+    addresses.every((ip) => GITHUB_PAGES_IPS.has(ip)),
+    `expected ${CUSTOM_DOMAIN} to resolve to GitHub Pages IPs ${[...GITHUB_PAGES_IPS].join(', ')}, got ${JSON.stringify(addresses)}`
   );
 });
