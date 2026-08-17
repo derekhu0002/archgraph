@@ -425,6 +425,22 @@
           "value": "COMPLETED"
         }
       ]
+    },
+    {
+      "id": "1352",
+      "name": "发布洞察报告到微信公众号",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "使用 .argo/skills/@ai-chen2050/wechat-public-cli 技能，将已归档的《知识图谱驱动的 Agent 构建》洞察报告发布到微信公众号。",
+      "testcases": [
+        {
+          "name": "AT-1352-01-公众号文章就绪",
+          "description": "GIVEN 洞察报告已归档；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号文章 Markdown，且正文包含报告内容。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/industry-insight-graph-driven-agent.wechat.md",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-article-ready\"）：断言 docs/industry-insight-graph-driven-agent.wechat.md 存在，frontmatter 含 title/author/digest，正文含 GraphRAG。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -687,6 +703,16 @@
       "target_id": "1318",
       "source_name": "归档洞察报告并发布网站子页",
       "target_name": "project website"
+    },
+    {
+      "id": "1193",
+      "statement": "发布洞察报告到微信公众号 --(Association)--> 归档洞察报告并发布网站子页",
+      "name": "基于已归档报告发布",
+      "type": "Association",
+      "source_id": "1352",
+      "target_id": "1351",
+      "source_name": "发布洞察报告到微信公众号",
+      "target_name": "归档洞察报告并发布网站子页"
     }
   ],
   "views": [
@@ -719,7 +745,8 @@
         "1332",
         "1333",
         "1335",
-        "1351"
+        "1351",
+        "1352"
       ],
       "included_relationships": [
         "1162",
@@ -728,7 +755,8 @@
         "1168",
         "1172",
         "1173",
-        "1192"
+        "1192",
+        "1193"
       ]
     },
     {

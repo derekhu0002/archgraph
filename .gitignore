@@ -3,3 +3,4 @@ node_modules/
 .argo/temp
 data/
 package-lock.json
+wechat-public.config.json
