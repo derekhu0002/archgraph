@@ -175,7 +175,7 @@ test('how-section: home page explains how ArchGraph will realize the AML standar
   assert.match(HTML, /downstream/i, 'should mention the downstream vendors');
   assert.match(
     HTML,
-    /docs\/agent-programming-language\.md/,
+    /docs\/agent-programming-language\.html/,
     'How section should link to the AML language spec'
   );
 });

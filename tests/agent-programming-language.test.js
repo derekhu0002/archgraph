@@ -58,3 +58,20 @@ test('apl-spec: syntax maps relationship types to grammar semantics', () => {
     assert.ok(doc.includes(keyword), `document should map "${keyword}"`);
   }
 });
+
+test('aml-spec-html: formal HTML page renders the specification', () => {
+  // GIVEN the AML specification is published as a formal HTML page
+  // WHEN a reader opens docs/agent-programming-language.html
+  // THEN the page declares version/status, an abstract, a table of contents and the core sections
+  const htmlPath = path.join(ROOT, 'docs', 'agent-programming-language.html');
+  assert.ok(existsSync(htmlPath), 'docs/agent-programming-language.html should exist');
+  const html = readFileSync(htmlPath, 'utf8');
+  assert.match(html, /v0\.1/, 'page should declare the version');
+  assert.match(html, /AML/, 'page should be titled AML');
+  assert.match(html, /摘要|Abstract/, 'page should have an abstract');
+  assert.match(html, /目录|Contents/, 'page should have a table of contents');
+  assert.match(html, /定位与扩展范围/, 'page should contain section 1');
+  assert.match(html, /扩展元素/, 'page should contain section 2');
+  assert.match(html, /扩展结构/, 'page should contain section 3');
+  assert.match(html, /合规与扩展流程/, 'page should contain section 7');
+});

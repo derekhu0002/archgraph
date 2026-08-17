@@ -171,8 +171,8 @@
         },
         {
           "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"how-section\"）：断言存在 id=\"how\" 小节且位于 What is it for（id=\"what-for\"）之后，并断言页面包含 AML、conformance、reference implementation、upstream、downstream 等关键表述，且链接到语言规范 docs/agent-programming-language.md。通过。",
-          "description": "GIVEN 项目主页在 What is it for 小节之后提供 How we're going to do it 小节；WHEN 访客打开主页；THEN 该小节说明将意图图谱发展为 AML 建模语言标准的五步路线（语言规范、一致性测试套件、参考实现、上游消费者体验、下游厂商生态），并链接到语言规范文档。",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"how-section\"）：断言存在 id=\"how\" 小节且位于 What is it for（id=\"what-for\"）之后，并断言页面包含 AML、conformance、reference implementation、upstream、downstream 等关键表述，且链接到正式 HTML 版语言规范 docs/agent-programming-language.html。通过。",
+          "description": "GIVEN 项目主页在 What is it for 小节之后提供 How we're going to do it 小节；WHEN 访客打开主页；THEN 该小节说明将意图图谱发展为 AML 建模语言标准的五步路线（语言规范、一致性测试套件、参考实现、上游消费者体验、下游厂商生态），并链接到正式 HTML 版语言规范页面。",
           "name": "AT-1318-03-主页说明如何实现AML标准",
           "type": "Acceptance Test"
         }
@@ -296,7 +296,7 @@
       ]
     },
     {
-      "description": "将基于知识图谱（ArchiMate 3.2 schema）的 Agent 编程“词汇与语法”整理成技术规范文档 docs/agent-programming-language.md，定义元素→编程概念的词汇表与关系→语法语义。",
+      "description": "将基于知识图谱（ArchiMate 3.2 schema）的 Agent 编程“词汇与语法”整理成技术规范文档 docs/agent-programming-language.md（v0.1），定义元素→编程概念的词汇表与关系→语法语义，并以正式 HTML 页面 docs/agent-programming-language.html 呈现。",
       "id": "1333",
       "name": "编写Agent编程语言规范",
       "parent": "1249",
@@ -306,6 +306,13 @@
           "acceptanceCriteria": "执行 node --test tests/agent-programming-language.test.js：断言 docs/agent-programming-language.md 存在并包含“词汇表/词汇”“语法”“testcases/验收”“持久化/运行时”等关键章节，以及 Work Package、Business Actor、Business Process、Course of Action、Constraint、Principle、Triggering、Flow 等映射。通过。",
           "description": "GIVEN 仓库已建立基于知识图谱的记忆系统（schema 见 .argo/schema/SystemArchitecture.schema.json）；WHEN 读者打开 docs/agent-programming-language.md；THEN 文档以技术规范形式定义 Agent 编程词汇表（元素类型→编程语义）与语法（关系类型→语法语义），并包含验收断言（testcases GIVEN-WHEN-THEN）与持久化元素/运行时实例边界。",
           "name": "AT-1333-01-编程语言规范文档",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "打开 docs/agent-programming-language.html",
+          "acceptanceCriteria": "执行 node --test tests/agent-programming-language.test.js（用例 \"aml-spec-html\"）：断言 docs/agent-programming-language.html 存在并包含 v0.1、AML、摘要、目录，以及定位与扩展范围、扩展元素、扩展结构、合规与扩展流程等章节。通过。",
+          "description": "GIVEN 技术规范文档 docs/agent-programming-language.md 已存在；WHEN 读者打开正式 HTML 页面 docs/agent-programming-language.html；THEN 页面以正式规范风格呈现：声明版本/状态、摘要、目录，并包含定位与扩展范围、扩展元素、扩展结构、合规与扩展流程等章节。",
+          "name": "AT-1333-02-规范HTML正式版",
           "type": "Acceptance Test"
         }
       ],
