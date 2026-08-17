@@ -1,0 +1,324 @@
+{
+"name": "Process Cooperation Viewpoint",
+"description": "表达多个 Agent 角色之间为完成同一任务而进行的协作流程（ArchiMate 流程协作视角）。",
+"elements": [
+{
+"id": "1336",
+"name": "gpt-researcher-research-program"
+,"type": "Course of Action"
+,"description": "GPT-Researcher 多 Agent 研究主流程：从研究查询到发布报告的整体计划（Plan-and-Solve + RAG，参考 STORM 论文）。"
+},
+{
+"id": "1337",
+"name": "Plan Research"
+,"type": "Business Process"
+,"description": "规划研究：将研究查询分解为一组子问题，形成研究大纲。"
+},
+{
+"id": "1338",
+"name": "Conduct Sub-research"
+,"type": "Business Process"
+,"description": "执行子研究：并行抓取每个子问题相关的网络/本地文档信息，总结并追踪来源。"
+},
+{
+"id": "1339",
+"name": "Write Report"
+,"type": "Business Process"
+,"description": "撰写报告：过滤并聚合各子研究摘要，撰写研究报告草稿。"
+},
+{
+"id": "1340",
+"name": "Review Report"
+,"type": "Business Process"
+,"description": "评审报告：审阅草稿，检查事实准确性、客观性与引用完整性，给出修改意见。"
+},
+{
+"id": "1341",
+"name": "Publish Report"
+,"type": "Business Process"
+,"description": "发布报告：生成最终报告，输出 Markdown/PDF/Docx 等格式。"
+},
+{
+"id": "1342",
+"name": "Planner"
+,"type": "Business Role"
+,"description": "规划者：生成研究问题与研究大纲。"
+},
+{
+"id": "1343",
+"name": "Researcher"
+,"type": "Business Role"
+,"description": "研究员：并行收集各子问题的信息并溯源。"
+},
+{
+"id": "1344",
+"name": "Editor"
+,"type": "Business Role"
+,"description": "编辑：聚合摘要并撰写报告。"
+},
+{
+"id": "1345",
+"name": "Reviewer"
+,"type": "Business Role"
+,"description": "审稿人：评审草稿并提出修改意见。"
+},
+{
+"id": "1346",
+"name": "Publisher"
+,"type": "Business Role"
+,"description": "发布者：输出最终研究报告。"
+},
+{
+"id": "1347",
+"name": "Research Report"
+,"type": "Deliverable"
+,"description": "研究报告：包含引用来源的最终报告（Markdown/PDF/Docx）。"
+},
+{
+"id": "1348",
+"name": "Produce objective research report"
+,"type": "Goal"
+,"description": "产出客观、事实性、带引用的研究报告。"
+},
+{
+"id": "1349",
+"name": "Cite every fact with source"
+,"type": "Constraint"
+,"description": "局部约束：报告中每个事实必须附引用来源（作用于 Conduct Sub-research）。"
+},
+{
+"id": "1350",
+"name": "Reduce bias and hallucination"
+,"type": "Principle"
+,"description": "全局约束：通过多源抓取与交叉验证减少偏见与幻觉。"
+}
+],
+"relationships": [
+{
+"id":"1174"
+,"statement":"Plan Research --(Realization)--> gpt-researcher-research-program"
+,"name":"Realization"
+,"type":"Realization"
+,"source_id":"1337"
+,"target_id":"1336"
+,"source_name":"Plan Research"
+,"target_name":"gpt-researcher-research-program"
+},
+{
+"id":"1175"
+,"statement":"Conduct Sub-research --(Realization)--> gpt-researcher-research-program"
+,"name":"Realization"
+,"type":"Realization"
+,"source_id":"1338"
+,"target_id":"1336"
+,"source_name":"Conduct Sub-research"
+,"target_name":"gpt-researcher-research-program"
+},
+{
+"id":"1176"
+,"statement":"Write Report --(Realization)--> gpt-researcher-research-program"
+,"name":"Realization"
+,"type":"Realization"
+,"source_id":"1339"
+,"target_id":"1336"
+,"source_name":"Write Report"
+,"target_name":"gpt-researcher-research-program"
+},
+{
+"id":"1177"
+,"statement":"Review Report --(Realization)--> gpt-researcher-research-program"
+,"name":"Realization"
+,"type":"Realization"
+,"source_id":"1340"
+,"target_id":"1336"
+,"source_name":"Review Report"
+,"target_name":"gpt-researcher-research-program"
+},
+{
+"id":"1178"
+,"statement":"Publish Report --(Realization)--> gpt-researcher-research-program"
+,"name":"Realization"
+,"type":"Realization"
+,"source_id":"1341"
+,"target_id":"1336"
+,"source_name":"Publish Report"
+,"target_name":"gpt-researcher-research-program"
+},
+{
+"id":"1179"
+,"statement":"Plan Research --(Triggering)--> Conduct Sub-research"
+,"name":"Triggering"
+,"type":"Triggering"
+,"source_id":"1337"
+,"target_id":"1338"
+,"source_name":"Plan Research"
+,"target_name":"Conduct Sub-research"
+},
+{
+"id":"1180"
+,"statement":"Conduct Sub-research --(Triggering)--> Write Report"
+,"name":"Triggering"
+,"type":"Triggering"
+,"source_id":"1338"
+,"target_id":"1339"
+,"source_name":"Conduct Sub-research"
+,"target_name":"Write Report"
+},
+{
+"id":"1181"
+,"statement":"Write Report --(Triggering)--> Review Report"
+,"name":"Triggering"
+,"type":"Triggering"
+,"source_id":"1339"
+,"target_id":"1340"
+,"source_name":"Write Report"
+,"target_name":"Review Report"
+},
+{
+"id":"1182"
+,"statement":"Review Report --(Triggering)--> Publish Report"
+,"name":"Triggering"
+,"type":"Triggering"
+,"source_id":"1340"
+,"target_id":"1341"
+,"source_name":"Review Report"
+,"target_name":"Publish Report"
+},
+{
+"id":"1183"
+,"statement":"Planner --(Assignment)--> Plan Research"
+,"name":"Assignment"
+,"type":"Assignment"
+,"source_id":"1342"
+,"target_id":"1337"
+,"source_name":"Planner"
+,"target_name":"Plan Research"
+},
+{
+"id":"1184"
+,"statement":"Researcher --(Assignment)--> Conduct Sub-research"
+,"name":"Assignment"
+,"type":"Assignment"
+,"source_id":"1343"
+,"target_id":"1338"
+,"source_name":"Researcher"
+,"target_name":"Conduct Sub-research"
+},
+{
+"id":"1185"
+,"statement":"Editor --(Assignment)--> Write Report"
+,"name":"Assignment"
+,"type":"Assignment"
+,"source_id":"1344"
+,"target_id":"1339"
+,"source_name":"Editor"
+,"target_name":"Write Report"
+},
+{
+"id":"1186"
+,"statement":"Reviewer --(Assignment)--> Review Report"
+,"name":"Assignment"
+,"type":"Assignment"
+,"source_id":"1345"
+,"target_id":"1340"
+,"source_name":"Reviewer"
+,"target_name":"Review Report"
+},
+{
+"id":"1187"
+,"statement":"Publisher --(Assignment)--> Publish Report"
+,"name":"Assignment"
+,"type":"Assignment"
+,"source_id":"1346"
+,"target_id":"1341"
+,"source_name":"Publisher"
+,"target_name":"Publish Report"
+},
+{
+"id":"1188"
+,"statement":"Publish Report --(Association)--> Research Report"
+,"name":"Association"
+,"type":"Association"
+,"source_id":"1341"
+,"target_id":"1347"
+,"source_name":"Publish Report"
+,"target_name":"Research Report"
+},
+{
+"id":"1189"
+,"statement":"Research Report --(Realization)--> Produce objective research report"
+,"name":"Realization"
+,"type":"Realization"
+,"source_id":"1347"
+,"target_id":"1348"
+,"source_name":"Research Report"
+,"target_name":"Produce objective research report"
+},
+{
+"id":"1190"
+,"statement":"Cite every fact with source --(Association)--> Conduct Sub-research"
+,"name":"Association"
+,"type":"Association"
+,"source_id":"1349"
+,"target_id":"1338"
+,"source_name":"Cite every fact with source"
+,"target_name":"Conduct Sub-research"
+},
+{
+"id":"1191"
+,"statement":"Reduce bias and hallucination --(Influence)--> Produce objective research report"
+,"name":"Influence"
+,"type":"Influence"
+,"source_id":"1350"
+,"target_id":"1348"
+,"source_name":"Reduce bias and hallucination"
+,"target_name":"Produce objective research report"
+}
+],
+"views": [
+{
+"view_id": "177",
+"view_name": "GPT-Researcher Multi-Agent Research"
+,"parent_element_id": "1334"
+,"parent_element_name": "Process Cooperation Viewpoint"
+,"description": "用 AML 对 GPT-Researcher 多 Agent 研究工作流的建模视图：Planner 规划 → Researcher 并行子研究 → Editor 撰写 → Reviewer 评审 → Publisher 发布。"
+,"included_elements": [
+"1336",
+"1337",
+"1338",
+"1339",
+"1340",
+"1341",
+"1342",
+"1343",
+"1344",
+"1345",
+"1346",
+"1347",
+"1348",
+"1349",
+"1350"
+]
+,"included_relationships": [
+"1174",
+"1175",
+"1176",
+"1177",
+"1178",
+"1179",
+"1180",
+"1181",
+"1182",
+"1183",
+"1184",
+"1185",
+"1186",
+"1187",
+"1188",
+"1189",
+"1190",
+"1191"
+]
+}
+]
+}
