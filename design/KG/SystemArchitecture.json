@@ -232,6 +232,22 @@
           "value": "COMPLETED"
         }
       ]
+    },
+    {
+      "description": "将基于知识图谱（ArchiMate 3.2 schema）的 Agent 编程“词汇与语法”整理成技术规范文档 docs/agent-programming-language.md，定义元素→编程概念的词汇表与关系→语法语义。",
+      "id": "1333",
+      "name": "编写Agent编程语言规范",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "打开 docs/agent-programming-language.md",
+          "acceptanceCriteria": "执行 node --test tests/agent-programming-language.test.js：断言 docs/agent-programming-language.md 存在并包含“词汇表/词汇”“语法”“testcases/验收”“持久化/运行时”等关键章节，以及 Work Package、Business Actor、Business Process、Course of Action、Constraint、Principle、Triggering、Flow 等映射。通过。",
+          "description": "GIVEN 仓库已建立基于知识图谱的记忆系统（schema 见 .argo/schema/SystemArchitecture.schema.json）；WHEN 读者打开 docs/agent-programming-language.md；THEN 文档以技术规范形式定义 Agent 编程词汇表（元素类型→编程语义）与语法（关系类型→语法语义），并包含验收断言（testcases GIVEN-WHEN-THEN）与持久化元素/运行时实例边界。",
+          "name": "AT-1333-01-编程语言规范文档",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -333,7 +349,8 @@
         "1320",
         "1321",
         "1331",
-        "1332"
+        "1332",
+        "1333"
       ],
       "included_relationships": [
         "1162",
