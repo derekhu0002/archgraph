@@ -540,6 +540,142 @@
           "value": "COMPLETED"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "spec",
+          "value": "docs/agent-programming-language.md"
+        },
+        {
+          "name": "version",
+          "value": "v0.1"
+        }
+      ],
+      "description": "Agent 建模语言（AML）标准：连接上游消费者与下游厂商的建模语言契约。AML 扩展 ArchiMate 3.2（新增 Skill/Rule 元素与 testcases/attributes 结构约定），现行规范文档为 docs/agent-programming-language.md（v0.1）。消费者用一份 AML 描述 harness 即可多处运行，厂商按 AML 实现接入。",
+      "id": "1354",
+      "name": "AML 规范",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "查看 design/KG/SystemArchitecture.json 与 docs/agent-programming-language.md",
+          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言 docs/agent-programming-language.md 声明 v0.1 与 ArchiMate 3.2 扩展，且图谱包含 AML 规范（Contract，parent=1249）及其下五个 Work Package（各带验收用例）。通过。",
+          "description": "GIVEN 仓库已有 AML 规范文档（docs/agent-programming-language.md，v0.1）并将 AML 标准化为一等架构元素；WHEN 读者查看意图图谱；THEN 图谱包含 AML 规范（Contract）元素，其下挂载五条标准化工作主线 Work Package（语言规范、一致性测试套件、参考实现、上游消费者体验、下游厂商生态），每个 Work Package 均带 GIVEN-WHEN-THEN 验收用例。",
+          "name": "AT-1354-01-AML规范已建模",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Contract"
+    },
+    {
+      "attributes": [
+        {
+          "name": "status",
+          "value": "PLANNED"
+        }
+      ],
+      "description": "将 docs/agent-programming-language.md 的 v0.1 草案演进为带版本号的正式 AML 规范：固化元模型（元素类型与 Profile 约定）、语法（关系用法与结构扩展）、语义（GIVEN-WHEN-THEN 断言与持久化/运行时边界）与交换格式（.argo/schema/SystemArchitecture.schema.json），并声明与 ArchiMate 3.2 的扩展关系。",
+      "id": "1355",
+      "name": "制定AML语言规范",
+      "parent": "1354",
+      "testcases": [
+        {
+          "Input": "打开 docs/agent-programming-language.md",
+          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言规范文档声明 v0.1 与 ArchiMate 3.2 扩展，且“制定AML语言规范”Work Package 挂载于 AML 规范下并带验收用例。通过。",
+          "description": "GIVEN AML v0.1 草案已存在；WHEN 完成语言规范正式化；THEN 存在带版本号的 AML 规范文档，定义词汇、语法、语义与交换格式，并声明与 ArchiMate 3.2 的扩展关系。",
+          "name": "AT-1355-01-AML语言规范正式化",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "status",
+          "value": "PLANNED"
+        }
+      ],
+      "description": "提供 conformance suite，让厂商自证“遵守 AML”：schema 校验器、示例图谱与可执行用例，覆盖元素、关系、视图与 testcases 的结构与语义约束。",
+      "id": "1356",
+      "name": "建立AML一致性测试套件",
+      "parent": "1354",
+      "testcases": [
+        {
+          "Input": "运行一致性测试套件",
+          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“建立AML一致性测试套件”Work Package 挂载于 AML 规范下并带验收用例。通过。",
+          "description": "GIVEN AML 规范已定义；WHEN 厂商实现 AML 接入；THEN 可通过一致性测试套件验证其实现对 AML 的遵守。",
+          "name": "AT-1356-01-AML一致性测试套件",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "status",
+          "value": "PLANNED"
+        }
+      ],
+      "description": "以 ARGO harness 作为 AML 参考实现：MCP server 读写图谱、schema 校验、语义（Graph RAG）生命周期与 Neo4j 同步，作为厂商实现与消费者接入的样板。",
+      "id": "1357",
+      "name": "提供AML参考实现",
+      "parent": "1354",
+      "testcases": [
+        {
+          "Input": "运行 node .argo/scripts/argo-mcp-server.js",
+          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“提供AML参考实现”Work Package 挂载于 AML 规范下并带验收用例。通过。",
+          "description": "GIVEN AML 规范已定义；WHEN 消费者或厂商需要参考实现；THEN ARGO harness 提供可运行的 MCP server、schema 校验器与 Graph RAG 生命周期实现。",
+          "name": "AT-1357-01-AML参考实现",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "status",
+          "value": "PLANNED"
+        }
+      ],
+      "description": "让消费者用一份 AML 描述其 harness，即可生成 .github/、.opencode/、.cursor/ 等多宿主配置，实现一次建模、多处运行。",
+      "id": "1358",
+      "name": "简化上游消费者建模体验",
+      "parent": "1354",
+      "testcases": [
+        {
+          "Input": "用 AML 描述 harness 并生成多宿主配置",
+          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“简化上游消费者建模体验”Work Package 挂载于 AML 规范下并带验收用例。通过。",
+          "description": "GIVEN 消费者已用 AML 描述其 harness；WHEN 需要切换或同时使用多个 agent 宿主；THEN 从同一份 AML 生成各宿主配置，无需重写意图与规则。",
+          "name": "AT-1358-01-上游消费者一次建模多处运行",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "status",
+          "value": "PLANNED"
+        }
+      ],
+      "description": "面向 agent 宿主、MCP server、图数据库与编辑器厂商，提供 AML schema、SDK、校验器与接入指南，降低接入成本并推动 AML 成为事实标准。",
+      "id": "1359",
+      "name": "构建下游厂商生态",
+      "parent": "1354",
+      "testcases": [
+        {
+          "Input": "厂商按接入指南实现 AML 支持",
+          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“构建下游厂商生态”Work Package 挂载于 AML 规范下并带验收用例。通过。",
+          "description": "GIVEN AML 规范与参考实现已发布；WHEN 下游厂商接入 AML；THEN 厂商可获得 schema、SDK 与校验器，并验证其实现合规。",
+          "name": "AT-1359-01-下游厂商生态接入",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -934,6 +1070,21 @@
         "1189",
         "1190",
         "1191"
+      ]
+    },
+    {
+      "description": "AML 规范及其标准化工作主线：语言规范、一致性测试套件、参考实现、上游消费者体验、下游厂商生态。",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "view_id": "178",
+      "view_name": "AML Standardization",
+      "included_elements": [
+        "1354",
+        "1355",
+        "1356",
+        "1357",
+        "1358",
+        "1359"
       ]
     }
   ]
