@@ -153,6 +153,20 @@
       border-radius: 12px;
     }
     .what-for-fig svg { display: block; width: 100%; height: auto; }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      margin-right: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 600;
+      vertical-align: 2px;
+    }
 
     footer {
       text-align: center;
@@ -169,6 +183,7 @@
     <div class="links">
       <a href="#about">About</a>
       <a href="#what-for">What it&rsquo;s for</a>
+      <a href="#how">Roadmap</a>
       <a href="#architecture">Architecture</a>
       <a href="#principles">Principles</a>
       <a href="#repository">Repository</a>
@@ -315,8 +330,65 @@
       </div>
     </section>
 
+    <section id="how">
+      <h2><span class="num">03</span>How we&rsquo;re going to do it</h2>
+      <p class="lead">
+        We&rsquo;re turning the intent architecture graph into <strong>AML</strong> &mdash; a modeling language
+        standard for agentic engineering harnesses &mdash; as the contract between consumers above and vendors
+        below. The plan, in five steps:
+      </p>
+
+      <figure class="what-for-fig">
+        <svg viewBox="0 0 980 220" role="img" aria-label="AML as the contract between consumers and vendors" style="font-family: inherit;">
+          <defs>
+            <marker id="how-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4d6bfe"/>
+            </marker>
+          </defs>
+
+          <rect x="20" y="70" width="300" height="90" rx="12" fill="#f5f7fa" stroke="#e6e8ee"/>
+          <text x="170" y="108" text-anchor="middle" font-size="15" font-weight="600" fill="#0f172a">Upstream consumers</text>
+          <text x="170" y="130" text-anchor="middle" font-size="11.5" fill="#5b6472">model your harness in AML once</text>
+
+          <rect x="380" y="70" width="220" height="90" rx="12" fill="rgba(77,107,254,0.08)" stroke="#4d6bfe" stroke-width="1.5"/>
+          <text x="490" y="106" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">AML</text>
+          <text x="490" y="128" text-anchor="middle" font-size="11" fill="#5b6472">the standard contract</text>
+
+          <rect x="660" y="70" width="300" height="90" rx="12" fill="#f5f7fa" stroke="#e6e8ee"/>
+          <text x="810" y="108" text-anchor="middle" font-size="15" font-weight="600" fill="#0f172a">Downstream vendors</text>
+          <text x="810" y="130" text-anchor="middle" font-size="11.5" fill="#5b6472">agent hosts &middot; MCP &middot; Neo4j &middot; EA</text>
+
+          <line x1="320" y1="115" x2="376" y2="115" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#how-arrow)"/>
+          <line x1="660" y1="115" x2="604" y2="115" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#how-arrow)"/>
+        </svg>
+      </figure>
+
+      <div class="grid">
+        <div class="card">
+          <h3><span class="step-num">1</span>Formalize the AML spec</h3>
+          <p>Turn the v0.1 draft into a versioned standard: vocabulary, syntax, semantics, and interchange format.</p>
+        </div>
+        <div class="card">
+          <h3><span class="step-num">2</span>Build a conformance suite</h3>
+          <p>Let vendors self-certify that their implementation complies with AML.</p>
+        </div>
+        <div class="card">
+          <h3><span class="step-num">3</span>Ship the reference implementation</h3>
+          <p>The ARGO harness &mdash; MCP server, validators, Graph RAG &mdash; as the model others follow.</p>
+        </div>
+        <div class="card">
+          <h3><span class="step-num">4</span>Smooth the upstream experience</h3>
+          <p>One AML model generates <code>.github/</code>, <code>.opencode/</code>, <code>.cursor/</code>: write once, run anywhere.</p>
+        </div>
+        <div class="card">
+          <h3><span class="step-num">5</span>Grow the downstream ecosystem</h3>
+          <p>Hand vendors the schema, SDK, and validator to make AML easy to adopt.</p>
+        </div>
+      </div>
+    </section>
+
     <section id="architecture">
-      <h2><span class="num">03</span>Architecture</h2>
+      <h2><span class="num">04</span>Architecture</h2>
       <p class="lead">
         The global architecture (Layered Viewpoint) shows how the human, the coding agent, ARGO MCP, the intent
         architecture graph, ArchiMate 3.2, Enterprise Architect, and Neo4j relate in graph-driven agentic
@@ -334,7 +406,7 @@
     </section>
 
     <section id="principles">
-      <h2><span class="num">04</span>Core principles</h2>
+      <h2><span class="num">05</span>Core principles</h2>
       <div class="grid">
         <div class="card">
           <h3>Arm before acting</h3>
@@ -356,7 +428,7 @@
     </section>
 
     <section id="repository">
-      <h2><span class="num">05</span>Repository map</h2>
+      <h2><span class="num">06</span>Repository map</h2>
       <pre>design/KG/SystemArchitecture.json    # canonical intent architecture graph (ArchiMate 3.2)
 .github/copilot-instructions.md     # global agent rules
 .github/kglibrary.instructions.md   # global rule for KGlibrary info format
@@ -369,7 +441,7 @@ tests/                              # executable acceptance tests</pre>
     </section>
 
     <section id="howto">
-      <h2><span class="num">06</span>How to use</h2>
+      <h2><span class="num">07</span>How to use</h2>
       <p class="lead">
         This is an agentic engineering framework driven by a knowledge graph whose schema complies with
         <strong>ArchiMate 3.2</strong>. To adopt it as the building framework for another project, copy the
@@ -393,7 +465,7 @@ tests/                              # executable acceptance tests</pre>
     </section>
 
     <section id="kglibrary">
-      <h2><span class="num">07</span>Reference Library · KGlibrary</h2>
+      <h2><span class="num">08</span>Reference Library · KGlibrary</h2>
       <p class="lead">Projects accumulated in the KGlibrary reference library, surfacing knowledge-graph-driven engineering examples.</p>
       <div class="project-card">
         <h3><a href="https://github.com/derekhu0002/XKG-TEST">XKG-TEST</a></h3>
@@ -407,7 +479,7 @@ tests/                              # executable acceptance tests</pre>
     </section>
 
     <section id="insights">
-      <h2><span class="num">08</span>Insights</h2>
+      <h2><span class="num">09</span>Insights</h2>
       <p class="lead">
         Industry insight: how knowledge graphs drive agent engineering &mdash; GraphRAG, agent memory and
         portable skills, surveyed with the GPT-Researcher multi-agent method.
@@ -423,7 +495,7 @@ tests/                              # executable acceptance tests</pre>
     </section>
 
     <section id="links">
-      <h2><span class="num">09</span>Links</h2>
+      <h2><span class="num">10</span>Links</h2>
       <p class="lead">
         <a href="https://github.com/derekhu0002/archgraph">GitHub repository</a>
         &nbsp;·&nbsp;

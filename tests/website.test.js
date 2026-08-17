@@ -156,3 +156,21 @@ test('what-for-section: home page explains the problems ArchGraph solves', () =>
   assert.match(HTML, /acceptance-test/i, 'should mention acceptance-test-driven delivery');
   assert.match(HTML, /traceab/i, 'should mention traceability');
 });
+
+test('how-section: home page explains how ArchGraph will realize the AML standard', () => {
+  // GIVEN the project homepage presents the roadmap after "What is it for"
+  // WHEN a visitor opens the homepage
+  // THEN a "How we're going to do it" section follows "What is it for" and lists the five AML workstreams
+  assert.match(HTML, /id="how"/, 'page should have a How we do it section');
+  const whatForIdx = HTML.indexOf('id="what-for"');
+  const howIdx = HTML.indexOf('id="how"');
+  assert.ok(
+    whatForIdx !== -1 && howIdx !== -1 && howIdx > whatForIdx,
+    'How section should appear after What is it for'
+  );
+  assert.match(HTML, /AML/, 'should mention AML');
+  assert.match(HTML, /conformance/i, 'should mention the conformance suite');
+  assert.match(HTML, /reference implementation/i, 'should mention the reference implementation');
+  assert.match(HTML, /upstream/i, 'should mention the upstream consumers');
+  assert.match(HTML, /downstream/i, 'should mention the downstream vendors');
+});

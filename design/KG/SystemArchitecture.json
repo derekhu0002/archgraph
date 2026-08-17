@@ -143,7 +143,7 @@
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         }
       ],
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、What is it for 小节（图形化说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯）、全局架构图、核心原则、仓库结构图、如何复用本框架（.argo/、agent-host 配置、.feap 模型），并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
+      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、What is it for 小节（图形化说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯）、How we're going to do it 小节（说明将意图图谱发展为 AML 建模语言标准的五步路线：语言规范、一致性测试套件、参考实现、上游消费者体验、下游厂商生态）、全局架构图、核心原则、仓库结构图、如何复用本框架（.argo/、agent-host 配置、.feap 模型），并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
       "testcases": [
         {
           "name": "AT-1318-01-自定义域名访问",
@@ -158,6 +158,13 @@
           "type": "Acceptance Test",
           "Input": "浏览器打开网站首页",
           "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"what-for-section\"）：断言存在 id=\"what-for\" 小节且位于 What is this（id=\"about\"）之后，并断言页面包含 cross-platform orchestration、long-term memory、minimal context、single source of truth、acceptance-test、traceability 等关键表述。通过。"
+        },
+        {
+          "name": "AT-1318-03-主页说明如何实现AML标准",
+          "description": "GIVEN 项目主页在 What is it for 小节之后提供 How we're going to do it 小节；WHEN 访客打开主页；THEN 该小节说明将意图图谱发展为 AML 建模语言标准的五步路线（语言规范、一致性测试套件、参考实现、上游消费者体验、下游厂商生态）。",
+          "type": "Acceptance Test",
+          "Input": "浏览器打开网站首页",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"how-section\"）：断言存在 id=\"how\" 小节且位于 What is it for（id=\"what-for\"）之后，并断言页面包含 AML、conformance、reference implementation、upstream、downstream 等关键表述。通过。"
         }
       ]
     },
