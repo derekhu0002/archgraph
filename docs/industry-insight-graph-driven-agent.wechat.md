@@ -1,8 +1,8 @@
 ---
 title: "知识图谱驱动的 Agent 构建——业界洞察报告"
-author: "derekhu0002"
+author: "derek"
 digest: "用 GPT-Researcher 多 Agent 方法调研知识图谱驱动 Agent 的业界现状：GraphRAG、Agent 记忆与可移植技能。"
-banner: ""
+banner: "https://www.microsoft.com/en-us/research/wp-content/uploads/2024/02/GraphRag-BlogHeroFeature-1400x788-1-1280x720.png"
 open_comment: 1
 source_url: "https://derekhu0002.github.io/open_knowledge_graph_engineering/docs/industry-insight-graph-driven-agent.html"
 ---
