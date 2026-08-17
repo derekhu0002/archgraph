@@ -440,6 +440,17 @@
           "Input": "打开 docs/industry-insight-graph-driven-agent.wechat.md",
           "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-article-ready\"）：断言 docs/industry-insight-graph-driven-agent.wechat.md 存在，frontmatter 含 title/author/digest，正文含 GraphRAG。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "e9abada",
+          "description": "docs/industry-insight-graph-driven-agent.wechat.md; tests/wechat-article.test.js; .gitignore; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "status",
+          "value": "IN-PROGRESS"
+        }
       ]
     }
   ],
