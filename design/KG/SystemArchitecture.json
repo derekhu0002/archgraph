@@ -315,8 +315,8 @@
         },
         {
           "Input": "打开 docs/agent-programming-language.html",
-          "acceptanceCriteria": "执行 node --test tests/agent-programming-language.test.js（用例 \"aml-spec-html\"）：断言 docs/agent-programming-language.html 存在并包含 v0.1、AML、摘要、目录，以及定位与扩展范围、扩展元素、扩展结构、合规与扩展流程等章节。通过。",
-          "description": "GIVEN 技术规范文档 docs/agent-programming-language.md 已存在；WHEN 读者打开正式 HTML 页面 docs/agent-programming-language.html；THEN 页面以正式规范风格呈现：声明版本/状态、摘要、目录，并包含定位与扩展范围、扩展元素、扩展结构、合规与扩展流程等章节。",
+          "acceptanceCriteria": "执行 node --test tests/agent-programming-language.test.js（用例 \"aml-spec-html\"）：断言 docs/agent-programming-language.html 存在并包含 v0.1、AML、Abstract、Contents，以及 Scope and Extensions、Extended Elements、Extended Structures、Compliance and Extension Process 等章节。通过。",
+          "description": "GIVEN 技术规范文档 docs/agent-programming-language.md 已存在；WHEN 读者打开英文正式 HTML 页面 docs/agent-programming-language.html；THEN 页面以正式规范风格（英文）呈现：声明版本/状态、摘要、目录，并包含 Scope and Extensions、Extended Elements、Extended Structures、Compliance and Extension Process 等章节。",
           "name": "AT-1333-02-规范HTML正式版",
           "type": "Acceptance Test"
         }

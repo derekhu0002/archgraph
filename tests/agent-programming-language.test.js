@@ -68,10 +68,10 @@ test('aml-spec-html: formal HTML page renders the specification', () => {
   const html = readFileSync(htmlPath, 'utf8');
   assert.match(html, /v0\.1/, 'page should declare the version');
   assert.match(html, /AML/, 'page should be titled AML');
-  assert.match(html, /摘要|Abstract/, 'page should have an abstract');
-  assert.match(html, /目录|Contents/, 'page should have a table of contents');
-  assert.match(html, /定位与扩展范围/, 'page should contain section 1');
-  assert.match(html, /扩展元素/, 'page should contain section 2');
-  assert.match(html, /扩展结构/, 'page should contain section 3');
-  assert.match(html, /合规与扩展流程/, 'page should contain section 7');
+  assert.match(html, /Abstract/, 'page should have an abstract');
+  assert.match(html, /Contents/, 'page should have a table of contents');
+  assert.match(html, /Scope and Extensions/, 'page should contain section 1');
+  assert.match(html, /Extended Elements/, 'page should contain section 2');
+  assert.match(html, /Extended Structures/, 'page should contain section 3');
+  assert.match(html, /Compliance and Extension Process/, 'page should contain section 7');
 });

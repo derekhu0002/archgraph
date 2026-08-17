@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agent 建模语言（AML）规范 v0.1</title>
-  <meta name="description" content="AML — Agent 建模语言规范：基于知识图谱的 Agent 行为建模语言，ArchiMate 3.2 的扩展。" />
+  <title>Agent Modeling Language (AML) Specification v0.1</title>
+  <meta name="description" content="AML — the Agent Modeling Language: a knowledge-graph based modeling language for agent behavior, an extension of ArchiMate 3.2." />
   <style>
     :root {
       --bg: #ffffff;
@@ -175,74 +175,76 @@
 <body>
   <nav class="site-nav">
     <span class="brand"><code>ArchGraph</code></span>
-    <a class="back" href="../index.html">&larr; 返回首页</a>
+    <a class="back" href="../index.html">&larr; Home</a>
   </nav>
 
   <main>
     <header class="doc-head">
       <p class="doc-kicker">ArchGraph · Technical Specification</p>
-      <h1><span class="lang">Agent 建模语言</span>（AML）<span class="ver-badge">v0.1</span></h1>
+      <h1><span class="lang">Agent Modeling Language</span> (AML) <span class="ver-badge">v0.1</span></h1>
       <p class="doc-meta">
-        <span class="item"><b>状态</b> Working Draft（草案）</span>
-        <span class="item"><b>版本</b> v0.1</span>
-        <span class="item"><b>发布日期</b> 2026-08-17</span>
-        <span class="item"><b>编辑者</b> ArchGraph</span>
-        <span class="item"><b>元模型</b> ArchiMate 3.2（AML 为其扩展）</span>
-        <span class="item"><b>图 Schema</b> <code>.argo/schema/SystemArchitecture.schema.json</code></span>
+        <span class="item"><b>Status</b> Working Draft</span>
+        <span class="item"><b>Version</b> v0.1</span>
+        <span class="item"><b>Published</b> 2026-08-17</span>
+        <span class="item"><b>Editor</b> ArchGraph</span>
+        <span class="item"><b>Metamodel</b> ArchiMate 3.2 (AML extends it)</span>
+        <span class="item"><b>Graph schema</b> <code>.argo/schema/SystemArchitecture.schema.json</code></span>
       </p>
     </header>
 
     <section class="status-note">
-      <b>本规范状态（Status of This Document）：</b>本文档为 AML v0.1 草案，处于持续演进中；正式版本发布前，
-      其内容可能发生变化。读者可在 <code>ArchGraph</code> 仓库中跟踪本文档的最新版本。
+      <b>Status of This Document:</b> This is the v0.1 Working Draft of AML and is under continuous evolution;
+      its contents may change before a formal release. Readers can track the latest version in the
+      <code>ArchGraph</code> repository.
     </section>
 
     <section class="abstract">
-      <h2>摘要（Abstract）</h2>
+      <h2>Abstract</h2>
       <p>
-        本规范定义 <b>Agent 建模语言（AML）</b>——一种基于知识图谱的 Agent 行为建模语言。AML 是
-        <b>ArchiMate 3.2</b> 的扩展：扩展其词汇（新增元素类型）与语法（新增结构约定），并约定如何用标准
-        ArchiMate 元素为 Agent 建模。AML 面向智能体工程 harness 的建模与标准化，作为上游消费者与下游厂商
-        之间的契约。
+        This specification defines the <b>Agent Modeling Language (AML)</b> — a knowledge-graph based modeling
+        language for agent behavior. AML is an extension of <b>ArchiMate 3.2</b>: it extends its vocabulary
+        (new element types) and syntax (new structural conventions), and defines how standard ArchiMate
+        elements are used to model agents. AML targets the modeling and standardization of agentic engineering
+        harnesses, serving as the contract between upstream consumers and downstream vendors.
       </p>
     </section>
 
     <nav class="toc">
-      <h2>目录（Contents）</h2>
+      <h2>Contents</h2>
       <ol>
-        <li><a class="sec" href="#s1">定位与扩展范围</a></li>
-        <li><a class="sec" href="#s2">扩展元素</a></li>
-        <li><a class="sec" href="#s3">扩展结构</a></li>
-        <li><a class="sec" href="#s4">标准元素的 AML 约定（Profile）</a></li>
-        <li><a class="sec" href="#s5">持久化元素 vs 运行时实例</a></li>
-        <li><a class="sec" href="#s6">完整程序示例</a></li>
-        <li><a class="sec" href="#s7">合规与扩展流程</a></li>
-        <li><a class="sec" href="#refs">参考文献</a></li>
+        <li><a class="sec" href="#s1">Scope and Extensions</a></li>
+        <li><a class="sec" href="#s2">Extended Elements</a></li>
+        <li><a class="sec" href="#s3">Extended Structures</a></li>
+        <li><a class="sec" href="#s4">AML Profile for Standard Elements</a></li>
+        <li><a class="sec" href="#s5">Persistent Elements vs. Runtime Instances</a></li>
+        <li><a class="sec" href="#s6">Complete Program Example</a></li>
+        <li><a class="sec" href="#s7">Compliance and Extension Process</a></li>
+        <li><a class="sec" href="#refs">References</a></li>
       </ol>
     </nav>
 
     <section class="doc-section" id="s1">
-      <h2 class="sec"><span class="secno">1</span>定位与扩展范围</h2>
-      <p>AML 不改动 ArchiMate 3.2 已有的元素与关系定义，只在以下层面扩展：</p>
+      <h2 class="sec"><span class="secno">1</span>Scope and Extensions</h2>
+      <p>AML does not modify the existing element and relationship definitions of ArchiMate 3.2; it only extends at the following layers:</p>
       <table>
         <thead>
-          <tr><th>扩展层面</th><th>内容</th><th>是否标准 ArchiMate 3.2</th></tr>
+          <tr><th>Extension layer</th><th>Content</th><th>Standard ArchiMate 3.2?</th></tr>
         </thead>
         <tbody>
-          <tr><td>新增元素类型</td><td><code>Skill</code>、<code>Rule</code></td><td>否，AML 扩展（<code>layer: Other</code>、<code>aspect: Agent</code>）</td></tr>
-          <tr><td>新增结构约定</td><td><code>testcases</code>、<code>attributes</code>、<code>subdiagram_views</code>、<code>parent</code></td><td>否，AML 扩展</td></tr>
-          <tr><td>标准元素的 AML 约定（Profile）</td><td>对 <code>Work Package</code>、<code>Business Actor</code> 等赋予 Agent 语义</td><td>元素本身标准，语义约定为 AML 新增</td></tr>
+          <tr><td>New element types</td><td><code>Skill</code>, <code>Rule</code></td><td>No, AML extension (<code>layer: Other</code>, <code>aspect: Agent</code>)</td></tr>
+          <tr><td>New structural conventions</td><td><code>testcases</code>, <code>attributes</code>, <code>subdiagram_views</code>, <code>parent</code></td><td>No, AML extension</td></tr>
+          <tr><td>AML profile for standard elements</td><td>Assigns agent semantics to <code>Work Package</code>, <code>Business Actor</code>, etc.</td><td>The elements are standard; the semantic conventions are AML additions</td></tr>
         </tbody>
       </table>
-      <blockquote>本文只描述<strong>扩展部分</strong>。ArchiMate 3.2 已有元素与关系的定义，请参阅 <code>.argo/schema/archimate3.2.pdf</code>。</blockquote>
+      <blockquote>This document describes only the <strong>extension parts</strong>. For definitions of existing ArchiMate 3.2 elements and relationships, see <code>.argo/schema/archimate3.2.pdf</code>.</blockquote>
 
-      <h3>1.1 解释循环</h3>
+      <h3>1.1 Interpretation Loop</h3>
       <ul>
-        <li><b>程序文本</b>：<code>design/KG/SystemArchitecture.json</code> 中的元素、关系与视图。</li>
-        <li><b>解释器</b>：Agent 通过 ARGO MCP 读取图谱（<code>getIntentElementContext</code> / 语义查询），完成"自武装"后执行任务。</li>
+        <li><b>Program text</b>: the elements, relationships and views in <code>design/KG/SystemArchitecture.json</code>.</li>
+        <li><b>Interpreter</b>: the agent reads the graph through ARGO MCP (<code>getIntentElementContext</code> / semantic query) and "arms itself" before executing the task.</li>
       </ul>
       <figure class="spec-fig">
-        <svg viewBox="0 0 980 200" role="img" aria-label="AML 解释循环" style="font-family: inherit;">
+        <svg viewBox="0 0 980 200" role="img" aria-label="AML interpretation loop" style="font-family: inherit;">
           <defs>
             <marker id="aml-loop-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#4d6bfe"/>
@@ -250,156 +252,156 @@
           </defs>
 
           <path d="M 797 90 L 797 40 L 95 40 L 95 86" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aml-loop-arrow)"/>
-          <text x="446" y="34" text-anchor="middle" font-size="11" fill="#5b6472">回写后开启新任务</text>
+          <text x="446" y="34" text-anchor="middle" font-size="11" fill="#5b6472">write back, then next task</text>
 
           <path d="M 602 150 L 602 182 L 455 182 L 455 154" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#aml-loop-arrow)"/>
-          <text x="528" y="178" text-anchor="middle" font-size="11" fill="#5b6472">否</text>
+          <text x="528" y="178" text-anchor="middle" font-size="11" fill="#5b6472">no</text>
 
           <rect x="10" y="90" width="170" height="60" rx="10" fill="#f5f7fa" stroke="#e6e8ee"/>
           <text x="95" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Work Package</text>
-          <text x="95" y="136" text-anchor="middle" font-size="10.5" fill="#5b6472">任务 + 验收用例</text>
+          <text x="95" y="136" text-anchor="middle" font-size="10.5" fill="#5b6472">task + testcases</text>
 
           <line x1="180" y1="120" x2="201" y2="120" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#aml-loop-arrow)"/>
           <rect x="205" y="90" width="180" height="60" rx="10" fill="#f5f7fa" stroke="#e6e8ee"/>
-          <text x="295" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">读图 · 自武装</text>
-          <text x="295" y="136" text-anchor="middle" font-size="10.5" fill="#5b6472">ARGO MCP 语义检索</text>
+          <text x="295" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Read graph · arm itself</text>
+          <text x="295" y="136" text-anchor="middle" font-size="10.5" fill="#5b6472">ARGO MCP semantic retrieval</text>
 
           <line x1="385" y1="120" x2="406" y2="120" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#aml-loop-arrow)"/>
           <rect x="410" y="90" width="90" height="60" rx="10" fill="#f5f7fa" stroke="#e6e8ee"/>
-          <text x="455" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">执行</text>
+          <text x="455" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Execute</text>
 
           <line x1="500" y1="120" x2="521" y2="120" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#aml-loop-arrow)"/>
           <rect x="525" y="90" width="155" height="60" rx="10" fill="#f5f7fa" stroke="#e6e8ee"/>
-          <text x="602" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">testcases 全绿?</text>
-          <text x="602" y="136" text-anchor="middle" font-size="10.5" fill="#5b6472">是 → 提交</text>
+          <text x="602" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">testcases all green?</text>
+          <text x="602" y="136" text-anchor="middle" font-size="10.5" fill="#5b6472">yes → commit</text>
 
           <line x1="680" y1="120" x2="701" y2="120" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#aml-loop-arrow)"/>
           <rect x="705" y="90" width="185" height="60" rx="10" fill="rgba(77,107,254,0.08)" stroke="#4d6bfe" stroke-opacity="0.35"/>
-          <text x="797" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">commit + 回写图谱</text>
-          <text x="797" y="136" text-anchor="middle" font-size="10.5" fill="#4d6bfe">commit id + 文件路径</text>
+          <text x="797" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">commit + write back</text>
+          <text x="797" y="136" text-anchor="middle" font-size="10.5" fill="#4d6bfe">commit id + file paths</text>
         </svg>
-        <figcaption>图 1 · AML 解释循环</figcaption>
+        <figcaption>Figure 1 · AML interpretation loop</figcaption>
       </figure>
     </section>
 
     <section class="doc-section" id="s2">
-      <h2 class="sec"><span class="secno">2</span>扩展元素</h2>
+      <h2 class="sec"><span class="secno">2</span>Extended Elements</h2>
 
-      <h3>2.1 <code>Skill</code>（技能模块）</h3>
+      <h3>2.1 <code>Skill</code> (skill module)</h3>
       <ul>
-        <li><b>语义</b>：Agent 可加载的技能模块。</li>
-        <li><b>物化</b>：<code>.github/skills/&lt;name&gt;/SKILL.md</code>（一个 <code>Skill</code> 元素对应一份 SKILL.md）。</li>
-        <li><b>用法</b>：<code>Work Package --Association--&gt; Skill</code> 表示该任务需要该技能；Agent 领取任务后读取对应 SKILL.md 完成"自武装"。</li>
-        <li><b>示例</b>：元素 <code>1319 optimize-web-layout-style</code> → <code>.github/skills/optimize-web-layout-style/SKILL.md</code>。</li>
+        <li><b>Semantics</b>: a skill module the agent can load.</li>
+        <li><b>Materialization</b>: <code>.github/skills/&lt;name&gt;/SKILL.md</code> (one <code>Skill</code> element maps to one SKILL.md).</li>
+        <li><b>Usage</b>: <code>Work Package --Association--&gt; Skill</code> means the task requires the skill; after taking the task, the agent reads the corresponding SKILL.md to "arm itself".</li>
+        <li><b>Example</b>: element <code>1319 optimize-web-layout-style</code> → <code>.github/skills/optimize-web-layout-style/SKILL.md</code>.</li>
       </ul>
 
-      <h3>2.2 <code>Rule</code>（规则模块）</h3>
+      <h3>2.2 <code>Rule</code> (rule module)</h3>
       <ul>
-        <li><b>语义</b>：可复用的规则模块。</li>
-        <li><b>物化</b>：<code>.github/&lt;name&gt;.instructions.md</code>（一个 <code>Rule</code> 元素对应一份 instructions 文件）。</li>
-        <li><b>用法</b>：<code>Work Package --Association--&gt; Rule</code> 表示该任务需遵守该规则；全局规则物化到 <code>.github/copilot-instructions.md</code>。</li>
-        <li><b>示例</b>：元素 <code>1320 kglibrary-info-format</code> → <code>.github/kglibrary.instructions.md</code>。</li>
+        <li><b>Semantics</b>: a reusable rule module.</li>
+        <li><b>Materialization</b>: <code>.github/&lt;name&gt;.instructions.md</code> (one <code>Rule</code> element maps to one instructions file).</li>
+        <li><b>Usage</b>: <code>Work Package --Association--&gt; Rule</code> means the task must follow the rule; global rules materialize to <code>.github/copilot-instructions.md</code>.</li>
+        <li><b>Example</b>: element <code>1320 kglibrary-info-format</code> → <code>.github/kglibrary.instructions.md</code>.</li>
       </ul>
 
-      <h3>2.3 <code>Skill</code> / <code>Rule</code> 与标准元素的区分</h3>
+      <h3>2.3 Distinguishing <code>Skill</code> / <code>Rule</code> from standard elements</h3>
       <table>
         <thead>
-          <tr><th>概念</th><th>标准/扩展</th><th>物化目标</th></tr>
+          <tr><th>Concept</th><th>Standard/Extension</th><th>Materialization target</th></tr>
         </thead>
         <tbody>
-          <tr><td><code>Capability</code>（标准）</td><td>抽象能力，不直接物化</td><td>—</td></tr>
-          <tr><td><code>Skill</code>（扩展）</td><td>可加载技能模块</td><td><code>.github/skills/&lt;name&gt;/SKILL.md</code></td></tr>
-          <tr><td><code>Principle</code>（标准）</td><td>全局约束</td><td>全局 <code>*.instructions.md</code></td></tr>
-          <tr><td><code>Rule</code>（扩展）</td><td>可复用规则模块</td><td><code>.github/&lt;name&gt;.instructions.md</code></td></tr>
-          <tr><td><code>Constraint</code>（标准）</td><td>局部约束</td><td>—（挂在关联的 Task/Process 上）</td></tr>
+          <tr><td><code>Capability</code> (standard)</td><td>Abstract capability, not directly materialized</td><td>—</td></tr>
+          <tr><td><code>Skill</code> (extension)</td><td>Loadable skill module</td><td><code>.github/skills/&lt;name&gt;/SKILL.md</code></td></tr>
+          <tr><td><code>Principle</code> (standard)</td><td>Global constraint</td><td>global <code>*.instructions.md</code></td></tr>
+          <tr><td><code>Rule</code> (extension)</td><td>Reusable rule module</td><td><code>.github/&lt;name&gt;.instructions.md</code></td></tr>
+          <tr><td><code>Constraint</code> (standard)</td><td>Local constraint</td><td>— (attached to the associated Task/Process)</td></tr>
         </tbody>
       </table>
-      <p>约束的三级区分：</p>
+      <p>The three levels of constraints:</p>
       <ul>
-        <li><code>Principle</code>（全局）：对所有任务始终适用，例如"修改前必须先找到架构元素"。</li>
-        <li><code>Rule</code>（规则模块）：可复用的规则，物化为 <code>.github/*.instructions.md</code>。</li>
-        <li><code>Constraint</code>（局部）：只约束它 <code>Association</code> 到的某个 Task / Process。</li>
+        <li><code>Principle</code> (global): always applies to all tasks, e.g. "find the architecture element before modifying anything".</li>
+        <li><code>Rule</code> (rule module): a reusable rule, materialized as <code>.github/*.instructions.md</code>.</li>
+        <li><code>Constraint</code> (local): constrains only the Task / Process it <code>Association</code>s to.</li>
       </ul>
     </section>
 
     <section class="doc-section" id="s3">
-      <h2 class="sec"><span class="secno">3</span>扩展结构</h2>
+      <h2 class="sec"><span class="secno">3</span>Extended Structures</h2>
 
-      <h3>3.1 <code>testcases</code>（验收断言）</h3>
-      <p><code>testcases</code> 是 AML 的<strong>断言机制</strong>，挂载在元素上，标准 ArchiMate 没有对应概念。每个用例必须：</p>
+      <h3>3.1 <code>testcases</code> (acceptance assertions)</h3>
+      <p><code>testcases</code> is AML's <strong>assertion mechanism</strong>, mounted on elements; standard ArchiMate has no counterpart. Each case must:</p>
       <ol>
-        <li><b>GIVEN-WHEN-THEN 格式</b>：<code>description</code> 用 GIVEN-WHEN-THEN 描述规格。</li>
-        <li><b>可执行</b>：<code>acceptanceCriteria</code> 必须是工作区相对的可执行入口（如 <code>node --test tests/xxx.test.js</code>）。</li>
-        <li><b>外部验证</b>：从元素外部可观察行为验证，不验证内部实现。</li>
+        <li><b>GIVEN-WHEN-THEN format</b>: <code>description</code> describes the specification in GIVEN-WHEN-THEN form.</li>
+        <li><b>Executable</b>: <code>acceptanceCriteria</code> must be a workspace-relative executable entrypoint (e.g. <code>node --test tests/xxx.test.js</code>).</li>
+        <li><b>External verification</b>: verifies observable behavior from outside the element, not the internal implementation.</li>
       </ol>
-      <p>示例：</p>
+      <p>Example:</p>
       <pre><code>{
-  "name": "AT-1333-01-编程语言规范文档",
-  "description": "GIVEN 仓库已建立基于知识图谱的记忆系统；WHEN 读者打开 docs/agent-programming-language.md；THEN 文档定义词汇表、语法、验收断言与持久化/运行时边界。",
+  "name": "AT-1333-01-language-spec-document",
+  "description": "GIVEN the repository keeps a knowledge-graph based memory system; WHEN a reader opens docs/agent-programming-language.md; THEN the document defines the vocabulary, syntax, acceptance assertions and the persistent/runtime boundary.",
   "type": "Acceptance Test",
-  "Input": "打开 docs/agent-programming-language.md",
-  "acceptanceCriteria": "执行 node --test tests/agent-programming-language.test.js：断言文档存在并包含词汇表、语法、testcases、持久化/运行时等关键章节。通过。"
+  "Input": "Open docs/agent-programming-language.md",
+  "acceptanceCriteria": "Run node --test tests/agent-programming-language.test.js: assert the document exists and contains the vocabulary, syntax, testcases, persistence/runtime sections. Pass."
 }</code></pre>
 
-      <h3>3.2 <code>attributes</code>（属性容器）</h3>
-      <p>通用属性容器，用于给元素附加 Agent 工程元数据。AML 约定的属性名：</p>
+      <h3>3.2 <code>attributes</code> (property container)</h3>
+      <p>A general property container for attaching agent engineering metadata to elements. AML-defined property names:</p>
       <table>
-        <thead><tr><th>属性名</th><th>用途</th></tr></thead>
+        <thead><tr><th>Property</th><th>Purpose</th></tr></thead>
         <tbody>
-          <tr><td><code>commit</code></td><td>登记一次提交：<code>value</code>=commit id，<code>description</code>=相关文件路径（可多条）</td></tr>
-          <tr><td><code>status</code></td><td>任务状态（如 <code>COMPLETED</code>）</td></tr>
-          <tr><td><code>verification_focus</code> / <code>external_scope</code> / <code>acceptance_outcomes</code> / <code>design_risks</code></td><td>架构意图元数据（schema 建议）</td></tr>
+          <tr><td><code>commit</code></td><td>Registers one commit: <code>value</code>=commit id, <code>description</code>=related file paths (multiple allowed)</td></tr>
+          <tr><td><code>status</code></td><td>Task status (e.g. <code>COMPLETED</code>)</td></tr>
+          <tr><td><code>verification_focus</code> / <code>external_scope</code> / <code>acceptance_outcomes</code> / <code>design_risks</code></td><td>Architecture intent metadata (suggested by the schema)</td></tr>
         </tbody>
       </table>
 
-      <h3>3.3 <code>subdiagram_views</code> / <code>parent</code>（结构挂载）</h3>
+      <h3>3.3 <code>subdiagram_views</code> / <code>parent</code> (structural attachment)</h3>
       <ul>
-        <li><code>parent</code>：元素在视图树中的父元素（如 Work Package 挂在 Viewpoint <code>Grouping</code> 下）。</li>
-        <li><code>subdiagram_views</code>：元素与子图 View 的关联。</li>
+        <li><code>parent</code>: the element's parent in the view tree (e.g. a Work Package hangs under a Viewpoint <code>Grouping</code>).</li>
+        <li><code>subdiagram_views</code>: the element's association with sub-diagram views.</li>
       </ul>
     </section>
 
     <section class="doc-section" id="s4">
-      <h2 class="sec"><span class="secno">4</span>标准元素的 AML 约定（Profile）</h2>
-      <p>对标准 ArchiMate 元素，AML 只约定 Agent 语义，元素定义见 ArchiMate 3.2。</p>
+      <h2 class="sec"><span class="secno">4</span>AML Profile for Standard Elements</h2>
+      <p>AML only assigns agent semantics to standard ArchiMate elements; element definitions follow ArchiMate 3.2.</p>
       <table>
-        <thead><tr><th>标准元素</th><th>AML 约定语义</th></tr></thead>
+        <thead><tr><th>Standard element</th><th>AML semantic convention</th></tr></thead>
         <tbody>
-          <tr><td><code>Work Package</code></td><td>Task（任务）：Agent 领取的最小工作单元</td></tr>
-          <tr><td><code>Course of Action</code></td><td>Program / main（主流程）</td></tr>
-          <tr><td><code>Business Process</code></td><td>Procedure（可复用行为定义）</td></tr>
-          <tr><td><code>Business Actor</code></td><td>持久化 Agent 本体</td></tr>
-          <tr><td><code>Business Role</code></td><td>Role Type（角色类型）</td></tr>
-          <tr><td><code>Business Collaboration</code></td><td>Multi-agent Context（协作上下文）</td></tr>
-          <tr><td><code>Capability</code></td><td>抽象能力</td></tr>
-          <tr><td><code>Business Event</code></td><td>Event（事件/触发条件）</td></tr>
-          <tr><td><code>Implementation Event</code></td><td>Milestone（里程碑/检查点）</td></tr>
-          <tr><td><code>And Junction</code> / <code>Or Junction</code></td><td>控制流分支与汇聚</td></tr>
-          <tr><td><code>Business Service</code> / <code>Business Interface</code></td><td>Service / Interface（服务/接口契约）</td></tr>
-          <tr><td><code>Business Object</code> / <code>Data Object</code></td><td>Object / Data（状态对象/数据）</td></tr>
-          <tr><td><code>Artifact</code></td><td>File（仓库文件）</td></tr>
-          <tr><td><code>Deliverable</code></td><td>Output（产物/返回值）</td></tr>
-          <tr><td><code>Goal</code> / <code>Outcome</code></td><td>Goal / Assertion（目标/期望结果）</td></tr>
+          <tr><td><code>Work Package</code></td><td>Task: the smallest unit of work an agent takes</td></tr>
+          <tr><td><code>Course of Action</code></td><td>Program / main</td></tr>
+          <tr><td><code>Business Process</code></td><td>Procedure (reusable behavior definition)</td></tr>
+          <tr><td><code>Business Actor</code></td><td>Persistent agent identity</td></tr>
+          <tr><td><code>Business Role</code></td><td>Role Type</td></tr>
+          <tr><td><code>Business Collaboration</code></td><td>Multi-agent Context</td></tr>
+          <tr><td><code>Capability</code></td><td>Abstract capability</td></tr>
+          <tr><td><code>Business Event</code></td><td>Event (event/trigger)</td></tr>
+          <tr><td><code>Implementation Event</code></td><td>Milestone (checkpoint)</td></tr>
+          <tr><td><code>And Junction</code> / <code>Or Junction</code></td><td>Control-flow branch and join</td></tr>
+          <tr><td><code>Business Service</code> / <code>Business Interface</code></td><td>Service / Interface (service contract)</td></tr>
+          <tr><td><code>Business Object</code> / <code>Data Object</code></td><td>Object / Data (state object/data)</td></tr>
+          <tr><td><code>Artifact</code></td><td>File (repository file)</td></tr>
+          <tr><td><code>Deliverable</code></td><td>Output</td></tr>
+          <tr><td><code>Goal</code> / <code>Outcome</code></td><td>Goal / Assertion</td></tr>
           <tr><td><code>Driver</code> / <code>Requirement</code> / <code>Assessment</code></td><td>Motivation / Precondition / Check</td></tr>
           <tr><td><code>Principle</code> / <code>Constraint</code></td><td>Global / Local Constraint</td></tr>
-          <tr><td><code>Plateau</code> / <code>Gap</code></td><td>Stage / TODO（阶段状态/缺口）</td></tr>
-          <tr><td><code>Grouping</code></td><td>Namespace（命名空间）</td></tr>
+          <tr><td><code>Plateau</code> / <code>Gap</code></td><td>Stage / TODO</td></tr>
+          <tr><td><code>Grouping</code></td><td>Namespace</td></tr>
         </tbody>
       </table>
 
-      <h3>4.1 关系（关键字）的 AML 用法</h3>
-      <p>关系类型均为标准 ArchiMate 关系，AML 只约定用法：</p>
+      <h3>4.1 Relationship usage in AML</h3>
+      <p>Relationship types are all standard ArchiMate relationships; AML only defines their usage:</p>
       <table>
-        <thead><tr><th>关系类型</th><th>AML 用法</th></tr></thead>
+        <thead><tr><th>Relationship type</th><th>AML usage</th></tr></thead>
         <tbody>
-          <tr><td><code>Association</code></td><td>use（引用 Skill/Rule/Resource）</td></tr>
-          <tr><td><code>Assignment</code></td><td>assign（Task → Role/Actor）</td></tr>
-          <tr><td><code>Realization</code></td><td>implements（Process→Service、Skill→Capability、Deliverable→Goal）</td></tr>
-          <tr><td><code>Serving</code></td><td>serves（Service → Actor）</td></tr>
-          <tr><td><code>Access</code></td><td>read/write（Process → Data Object）</td></tr>
-          <tr><td><code>Triggering</code></td><td>then（顺序/触发）</td></tr>
-          <tr><td><code>Flow</code></td><td>pipe（数据流转）</td></tr>
-          <tr><td><code>Composition</code></td><td>contains（主流程→Task）</td></tr>
+          <tr><td><code>Association</code></td><td>use (reference Skill/Rule/Resource)</td></tr>
+          <tr><td><code>Assignment</code></td><td>assign (Task → Role/Actor)</td></tr>
+          <tr><td><code>Realization</code></td><td>implements (Process→Service, Skill→Capability, Deliverable→Goal)</td></tr>
+          <tr><td><code>Serving</code></td><td>serves (Service → Actor)</td></tr>
+          <tr><td><code>Access</code></td><td>read/write (Process → Data Object)</td></tr>
+          <tr><td><code>Triggering</code></td><td>then (sequence/trigger)</td></tr>
+          <tr><td><code>Flow</code></td><td>pipe (data flow)</td></tr>
+          <tr><td><code>Composition</code></td><td>contains (main flow → Task)</td></tr>
           <tr><td><code>Aggregation</code></td><td>aggregates</td></tr>
           <tr><td><code>Influence</code></td><td>influences</td></tr>
           <tr><td><code>Specialization</code></td><td>extends</td></tr>
@@ -408,34 +410,34 @@
     </section>
 
     <section class="doc-section" id="s5">
-      <h2 class="sec"><span class="secno">5</span>持久化元素 vs 运行时实例</h2>
-      <p>ArchiMate 是<strong>设计时语言</strong>，建模"类型/定义"，不建模运行时实例。AML 遵循同一边界：</p>
+      <h2 class="sec"><span class="secno">5</span>Persistent Elements vs. Runtime Instances</h2>
+      <p>ArchiMate is a <strong>design-time language</strong>: it models types/definitions, not runtime instances. AML follows the same boundary:</p>
       <table>
-        <thead><tr><th>类别</th><th>是否进图谱</th><th>例子</th></tr></thead>
+        <thead><tr><th>Category</th><th>In the graph?</th><th>Examples</th></tr></thead>
         <tbody>
           <tr>
-            <td><b>持久化元素</b>（程序文本）</td>
-            <td>是，长期存在</td>
-            <td><code>Skill</code>、<code>Rule</code>、<code>Business Actor</code>、<code>Business Role</code>、<code>Capability</code>、<code>Work Package</code>、<code>Business Process</code>、<code>Course of Action</code>、<code>Goal</code>、<code>Constraint</code>、<code>Principle</code></td>
+            <td><b>Persistent elements</b> (program text)</td>
+            <td>Yes, long-lived</td>
+            <td><code>Skill</code>, <code>Rule</code>, <code>Business Actor</code>, <code>Business Role</code>, <code>Capability</code>, <code>Work Package</code>, <code>Business Process</code>, <code>Course of Action</code>, <code>Goal</code>, <code>Constraint</code>, <code>Principle</code></td>
           </tr>
           <tr>
-            <td><b>运行时实例</b>（程序运行）</td>
-            <td>否，只回写结果</td>
-            <td>一次 session、一次执行、一份 commit</td>
+            <td><b>Runtime instances</b> (program execution)</td>
+            <td>No, only results are written back</td>
+            <td>one session, one execution, one commit</td>
           </tr>
         </tbody>
       </table>
       <ul>
-        <li><code>Business Actor</code> 是<strong>持久化的人</strong>：有身份、长期记忆（记忆即知识图谱本身），可反复参与多次执行。</li>
-        <li>一次 "agent session" 是运行时实例：由 <code>Work Package --Assignment--&gt; Business Actor</code> 的一次执行表达；结果通过 <code>attributes.commit</code> 回写，不新建元素。</li>
+        <li><code>Business Actor</code> is a <strong>persistent person</strong>: it has identity and long-term memory (the memory is the knowledge graph itself), and can take part in many executions.</li>
+        <li>An "agent session" is a runtime instance: it is expressed by one execution of <code>Work Package --Assignment--&gt; Business Actor</code>; results are written back through <code>attributes.commit</code>, without creating new elements.</li>
       </ul>
     </section>
 
     <section class="doc-section" id="s6">
-      <h2 class="sec"><span class="secno">6</span>完整程序示例</h2>
-      <p>以"根据 README 更新 INDEX 主页"（Work Package <code>1332</code>）为例：</p>
+      <h2 class="sec"><span class="secno">6</span>Complete Program Example</h2>
+      <p>Example: "update the INDEX homepage according to the README" (Work Package <code>1332</code>):</p>
       <pre><code>sync-homepage-program (Course of Action · Program)
-└── Composition ── 根据README更新INDEX主页 (Work Package · Task)
+└── Composition ── update-INDEX-homepage-from-README (Work Package · Task)
     ├── Assignment ── web-developer (Business Role)
     ├── Association ── optimize-web-layout-style (Skill)
     ├── Association ── kglibrary-info-format (Rule)
@@ -445,32 +447,32 @@
     ├── Composition ── update-howto-section (Business Process · P2)
     │   └── Access ── index.html (Artifact)
     └── Flow ── updated index.html (Deliverable)
-        └── Realization ── 主页与README同步 (Goal)
+        └── Realization ── homepage-synced-with-README (Goal)
 
-仅允许修改 index.html 与 tests/website.test.js (Constraint) ── Association ── 根据README更新INDEX主页
-改前必有架构元素 (Principle) ── Influence ── 根据README更新INDEX主页</code></pre>
+only index.html and tests/website.test.js may be modified (Constraint) ── Association ── update-INDEX-homepage-from-README
+find the architecture element before modifying (Principle) ── Influence ── update-INDEX-homepage-from-README</code></pre>
     </section>
 
     <section class="doc-section" id="s7">
-      <h2 class="sec"><span class="secno">7</span>合规与扩展流程</h2>
+      <h2 class="sec"><span class="secno">7</span>Compliance and Extension Process</h2>
       <ul>
-        <li><code>Skill</code> / <code>Rule</code> 是 <code>archimateElementType</code> 枚举中仅有的两个非标准元素，已登记于 <code>.argo/scripts/archimate32-rules.js</code>（<code>layer: "Other"</code>、<code>aspect: "Agent"</code>）。</li>
-        <li>本规范不修改 <code>SystemArchitecture.schema.json</code>。</li>
-        <li>未来需要新原语时，依次评估：① 能否映射到标准 ArchiMate 元素（加约定）；② 能否用 <code>attributes</code> 表达；③ 仍不能才扩展 <code>archimateElementType</code> 枚举。</li>
+        <li><code>Skill</code> / <code>Rule</code> are the only two non-standard elements in the <code>archimateElementType</code> enum, registered in <code>.argo/scripts/archimate32-rules.js</code> (<code>layer: "Other"</code>, <code>aspect: "Agent"</code>).</li>
+        <li>This specification does not modify <code>SystemArchitecture.schema.json</code>.</li>
+        <li>When a new primitive is needed, evaluate in order: ① whether it maps to a standard ArchiMate element (add a convention); ② whether it can be expressed with <code>attributes</code>; ③ only then extend the <code>archimateElementType</code> enum.</li>
       </ul>
     </section>
 
     <section class="doc-section" id="refs">
-      <h2 class="sec"><span class="secno">8</span>参考文献</h2>
+      <h2 class="sec"><span class="secno">8</span>References</h2>
       <ol class="refs">
-        <li>The Open Group, <i>ArchiMate 3.2 Specification</i>（本仓库内随附 <code>.argo/schema/archimate3.2.pdf</code>）。</li>
-        <li>ArchGraph 仓库，<i>SystemArchitecture JSON Schema</i>，<code>.argo/schema/SystemArchitecture.schema.json</code>。</li>
+        <li>The Open Group, <i>ArchiMate 3.2 Specification</i> (bundled in this repository as <code>.argo/schema/archimate3.2.pdf</code>).</li>
+        <li>ArchGraph repository, <i>SystemArchitecture JSON Schema</i>, <code>.argo/schema/SystemArchitecture.schema.json</code>.</li>
       </ol>
     </section>
   </main>
 
   <footer>
-    AML 规范 v0.1 · <code>ArchGraph</code>
+    AML Specification v0.1 · <code>ArchGraph</code>
   </footer>
 </body>
 </html>
