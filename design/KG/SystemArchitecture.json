@@ -193,6 +193,11 @@
           "description": "README.md; tests/readme.test.js"
         },
         {
+          "name": "commit",
+          "value": "ca32794",
+          "description": "README.md; tests/project-name.test.js"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
@@ -524,6 +529,11 @@
           "name": "commit",
           "value": "3b6fc91",
           "description": "README.md; index.html; package.json; tests/website.test.js; tests/project-name.test.js; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; docs/industry-insight-graph-driven-agent.wechat.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "ca32794",
+          "description": "tests/project-name.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "status",
