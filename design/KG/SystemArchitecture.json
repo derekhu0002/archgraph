@@ -289,7 +289,18 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Work Package"
+      "type": "Work Package",
+      "attributes": [
+        {
+          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js",
+          "name": "commit",
+          "value": "4d55487"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ]
     },
     {
       "description": "GPT-Researcher 多 Agent 研究主流程：从研究查询到发布报告的整体计划（Plan-and-Solve + RAG，参考 STORM 论文）。",
