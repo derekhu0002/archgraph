@@ -52,77 +52,36 @@ flowchart LR
 | `Business Process` | **Procedure（可复用行为定义）** | 步骤序列，可被多个 Task 复用 |
 | `Business Function` | **Module（功能模块）** | 行为能力的聚合分组 |
 | `Business Interaction` | **Interaction（协作交互）** | 多 Actor 之间的交互行为 |
-| `Value Stream` | **Pipeline（端到端流水线）** | 从触发到价值的端到端流程 |
 
 ### 2.2 执行者层（谁来执行）
 
 | 元素类型 | 建模语义 | 说明 |
 |---|---|---|
-| `Business Actor` | **持久化 Agent 本体（人）** | 持久实体：有身份、长期记忆、可反复参与多次执行 |
+| `Business Actor` | **持久化 Agent 本体** | 持久实体：有身份、长期记忆、可反复参与多次执行 |
 | `Business Role` | **Role Type（角色类型）** | 可复用角色定义，Actor 通过 `Assignment` 扮演 |
 | `Business Collaboration` | **Multi-agent Context（协作上下文）** | 多个 Actor 协作的容器 |
-| `Capability` | **Capability（抽象能力）** | Agent 具备的能力，由 `Skill` 实现 |
 | `Skill` | **Skill Module（技能模块）** | 物化到 `.github/skills/<name>/SKILL.md` 的可加载技能 |
-| `Stakeholder` | **Stakeholder（利益相关者）** | 结果的干系人 |
 
 ### 2.3 事件/控制层（何时、按什么顺序）
 
 | 元素类型 | 建模语义 | 说明 |
 |---|---|---|
-| `Business Event` | **Event（事件/触发条件）** | 程序入口的触发 |
-| `Implementation Event` | **Milestone / Checkpoint（里程碑）** | 检查点、阶段闸门 |
 | `And Junction` | **并行/汇聚（AND fork/join）** | 并发执行 |
 | `Or Junction` | **分支/汇聚（OR branch/merge）** | 条件选择 |
 
 ### 2.4 服务/接口层（对外契约）
 
-| 元素类型 | 建模语义 | 说明 |
-|---|---|---|
-| `Business Service` | **Service / API（服务契约）** | 对外可调用的行为 |
-| `Business Interface` | **Interface（接口）** | 边界与接入点 |
-| `Application Service` | **App Service** | 应用层服务 |
-| `Contract` | **Contract（契约）** | 协作双方的协议 |
-
-### 2.5 结构/数据层（操作什么、产出什么）
-
-| 元素类型 | 建模语义 | 说明 |
-|---|---|---|
-| `Business Object` | **Object / State（状态对象）** | 被读写的对象 |
-| `Data Object` | **Data（数据）** | 数据 |
-| `Artifact` | **File / Artifact（制品）** | 仓库里的实际文件 |
-| `Deliverable` | **Output / Return Value（产物）** | 任务的输出 |
-| `Resource` | **Dependency（依赖资源）** | 执行所需的资源 |
-| `Representation` | **Representation（表示）** | 数据的呈现形式 |
-| `Meaning` / `Value` | **Semantics / Value** | 语义与价值 |
-
 ### 2.6 意图/约束层（为什么做、不能做什么）
 
 | 元素类型 | 建模语义 | 说明 |
 |---|---|---|
-| `Goal` | **Goal（目标）** | 要达成的目标 |
-| `Outcome` | **Assertion（期望结果）** | 可被 `testcase` 验证的结果 |
-| `Driver` | **Motivation（动机）** | 为什么要做 |
-| `Requirement` | **Precondition（前置需求）** | 必须满足的条件 |
-| `Principle` | **Global Constraint（全局约束）** | 始终适用，物化到全局 `*.instructions.md` |
-| `Constraint` | **Local Constraint（局部约束）** | 只作用于关联的 Task / Process |
 | `Rule` | **Rule Module（规则模块）** | 物化到 `.github/<name>.instructions.md` 的可复用规则 |
-| `Assessment` | **Evaluation / Check（评审）** | 检查/评审动作 |
 
 约束的三级区分：
 
 - `Principle`（全局）：对所有任务始终适用，例如"修改前必须先找到架构元素"。
 - `Rule`（规则模块）：可复用的规则，物化为 `.github/*.instructions.md`。
 - `Constraint`（局部）：只约束它 `Association` 到的某个 Task / Process。
-
-### 2.7 组织/环境层
-
-| 元素类型 | 建模语义 | 说明 |
-|---|---|---|
-| `Grouping` | **Namespace（命名空间/模块）** | 组织单元，如 Viewpoint |
-| `Plateau` | **Stage / State（阶段状态）** | 状态快照 |
-| `Gap` | **TODO / Diff（缺口）** | 现状与目标的差异 |
-| `Product` | **Product（最终产品）** | 交付的最终产品 |
-| `Node` / `Device` / `System Software` | **Runtime / Environment（运行时环境）** | 执行环境 |
 
 ## 3. 语法：关系 → 语法语义
 
