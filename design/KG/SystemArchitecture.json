@@ -136,6 +136,11 @@
           "name": "commit",
           "value": "aa4ef69",
           "description": "tests/custom-domain.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "7e230f3",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、What is it for 小节（图形化说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯）、全局架构图、核心原则、仓库结构图、如何复用本框架（.argo/、agent-host 配置、.feap 模型），并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
