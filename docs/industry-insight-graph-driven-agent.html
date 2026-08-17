@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>知识图谱驱动的 Agent 构建 · 业界洞察</title>
+  <meta name="description" content="Knowledge graph driven Agent engineering — industry insight report." />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f5f7fa;
+      --border: #e6e8ee;
+      --text: #0f172a;
+      --muted: #5b6472;
+      --accent: #4d6bfe;
+      --accent-soft: rgba(77, 107, 254, 0.08);
+      --code-bg: #f2f4f8;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 24px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav .brand { font-weight: 600; font-size: 0.95rem; color: var(--text); }
+    .site-nav .brand code { color: var(--accent); background: transparent; padding: 0; }
+    .site-nav .back {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text) !important;
+      background: var(--bg-soft);
+      font-size: 0.9rem;
+    }
+    .site-nav .back:hover { border-color: var(--accent); text-decoration: none; }
+
+    main { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+    .article-head { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+    .article-head h1 {
+      font-size: clamp(1.7rem, 4vw, 2.5rem);
+      margin: 0 0 12px;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .article-head .subtitle { color: var(--muted); margin: 0; font-size: 0.95rem; }
+    .method-note {
+      background: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin: 0 0 32px;
+    }
+    h2 {
+      font-size: 1.45rem;
+      margin: 48px 0 16px;
+      letter-spacing: -0.02em;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 1.12rem; margin: 28px 0 10px; }
+    p { margin: 0 0 14px; }
+    ul, ol { margin: 0 0 16px; padding-left: 22px; }
+    li { margin-bottom: 6px; }
+    code {
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-size: 0.9em;
+    }
+    table { width: 100%; border-collapse: collapse; margin: 0 0 20px; font-size: 0.92rem; }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+    th { background: var(--bg-soft); }
+    blockquote {
+      margin: 0 0 18px;
+      padding: 12px 18px;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 0 8px 8px 0;
+      color: var(--muted);
+    }
+    .ref { font-size: 0.9rem; color: var(--muted); }
+    .ref li { margin-bottom: 8px; }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 28px 24px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <nav class="site-nav">
+    <span class="brand"><code>open_knowledge_graph_engineering</code></span>
+    <a class="back" href="../index.html">&larr; 返回首页</a>
+  </nav>
+
+  <main>
+    <header class="article-head">
+      <h1>知识图谱驱动的 Agent 构建</h1>
+      <p class="subtitle">业界洞察报告 · Knowledge-graph-driven Agent Engineering</p>
+    </header>
+
+    <div class="method-note">
+      <strong>研究方法</strong>：遵循 view 177「GPT-Researcher Multi-Agent Research」的多 Agent 流程 ——
+      Planner 规划 → Researcher 并行子研究 → Editor 撰写 → Reviewer 评审 → Publisher 发布。
+      围绕「知识图谱驱动的 Agent」主课题，经 4 个并行子研究聚合而成，所有关键论断附引用来源。
+    </div>
+
+    <h2>一、核心结论（TL;DR）</h2>
+    <ol>
+      <li><strong>图谱正从 RAG 的"可选项"变成 Agent 的"默认基础设施"</strong>——业界正重演 Google 2012 年"things, not strings"的路径，GraphRAG 被视为超越纯向量 RAG 的下一代默认检索架构 [1]。</li>
+      <li><strong>Agent 记忆正在图化</strong>：Neo4j 等厂商提出"上下文图（Context Graph）"与 Agent 记忆服务（NAMS），把短期对话、长期知识、推理轨迹统一建模为图，并进一步<strong>把记忆蒸馏成可移植的 SKILL</strong> [4]。</li>
+      <li><strong>实证数据一致指向"图 &gt; 纯向量"</strong>：Data.world 平均 3 倍准确率提升 [1]、LinkedIn 客服中位解决时间降 28.6% [1]、英国 NICD 独立研究称 Agent 真实度提升 80% [3]。</li>
+      <li><strong>本项目（open_knowledge_graph_engineering）正在践行的方向与业界前沿高度同构</strong>——详见第七节。</li>
+    </ol>
+
+    <h2>二、为什么 Agent 需要知识图谱（动机与价值）</h2>
+    <p>Neo4j 的《GraphRAG Manifesto》把当前阶段称为 RAG 的 <strong>"Blue Links 时代"</strong>：纯自回归 LLM + 向量 RAG 存在天花板——向量只回答"相似性"，却无法表达"事物之间的关系"，且难以解释决策依据 [1]。</p>
+    <p>向量与图谱是两种本质不同的知识表示：</p>
+    <table>
+      <thead>
+        <tr><th>维度</th><th>向量表示</th><th>图谱表示</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>性质</td><td>统计式（数组）</td><td>声明式/符号式（世界模型）</td></tr>
+        <tr><td>擅长</td><td>相似度匹配</td><td>关系、结构、多跳推理</td></tr>
+        <tr><td>可解释性</td><td>弱</td><td>强（人机皆可读）</td></tr>
+        <tr><td>可治理性</td><td>弱</td><td>强（权限、溯源、审计）</td></tr>
+      </tbody>
+    </table>
+    <p>基线 RAG 的两个公认短板被 Microsoft 明确点出：<strong>① 无法"连点成线"</strong>（跨片段综合推理）；<strong>② 无法对大数据集做全局语义概括</strong> [2]。GraphRAG 通过 LLM 生成的知识图谱补足这两点，且 tokens 消耗减少 26%–97% [1][2]。</p>
+    <p>对 <strong>Agent</strong> 而言，图谱带来三大类收益 [1]：</p>
+    <ul>
+      <li><strong>运行时</strong>：更高准确率、更完整、更有用的答案；</li>
+      <li><strong>开发期</strong>：数据可见、易调试、易迭代；</li>
+      <li><strong>治理</strong>：可解释、可溯源、可做细粒度权限控制（合规/金融/医疗刚需）。</li>
+    </ul>
+
+    <h2>三、核心技术方法</h2>
+    <h3>3.1 GraphRAG 流程（Microsoft GraphRAG）</h3>
+    <p>Microsoft GraphRAG 采用<strong>结构化、层次化</strong>的 RAG 流程 [2]：</p>
+    <ul>
+      <li><strong>索引（Index）</strong>：语料切分为 TextUnits → 抽取实体/关系/关键声明 → <strong>Leiden 层次聚类</strong>构建社区 → 自底向上生成社区摘要；</li>
+      <li><strong>查询（Query）</strong>：三种主模式——<strong>Global Search</strong>（基于社区摘要做全局问题）、<strong>Local Search</strong>（围绕特定实体向邻居扇出）、<strong>DRIFT Search</strong>（局部扇出 + 社区信息增强），另有 Basic Search（纯向量兜底）。</li>
+    </ul>
+
+    <h3>3.2 图的两种形态 [1]</h3>
+    <ul>
+      <li><strong>域图（Domain Graph）</strong>：对"世界模型"的表达，实体与实体间语义关系；</li>
+      <li><strong>词法图（Lexical Graph）</strong>：文档结构图（chunk、章节、表格、来源、作者），二者可叠加成双层图。</li>
+    </ul>
+
+    <h3>3.3 轻量化检索：LightRAG 的双层架构与五种查询模式</h3>
+    <p>LightRAG（HKUDS，EMNLP2025，arXiv 2410.05779）是 Microsoft GraphRAG 的高效替代，采用 <strong>KG + 向量双层架构</strong>，提供 <code>local / global / hybrid / naive / mix</code> 五种查询模式，并支持增量更新与选择性删除 [5]。</p>
+
+    <h3>3.4 图谱作为 Agent 记忆（最新前沿）</h3>
+    <p>Neo4j Agent Memory Service（NAMS）把 Agent 记忆分为三类并建模为<strong>上下文图</strong> [4]：</p>
+    <ul>
+      <li><strong>短期记忆</strong>：对话消息（信息）；</li>
+      <li><strong>长期记忆</strong>：经领域本体抽取的实体关系知识图谱（知识）；</li>
+      <li><strong>推理记忆</strong>：推理与决策轨迹、工具调用、结果与反馈（通向"行动"）。</li>
+    </ul>
+    <blockquote>"Memory records what happened. An ontology turns what happened into knowledge. Distillation turns that knowledge into something an agent can run." [4]</blockquote>
+
+    <h2>四、主流框架与开源项目对比</h2>
+    <table>
+      <thead>
+        <tr><th>项目</th><th>定位</th><th>关键特征</th><th>来源</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Microsoft GraphRAG</strong></td><td>结构化层次化 RAG</td><td>Leiden 社区聚类 + 社区摘要；Global/Local/DRIFT 查询</td><td>[2]</td></tr>
+        <tr><td><strong>Neo4j</strong></td><td>图数据库 + GraphRAG 生态</td><td>GraphRAG Manifesto、LLM Knowledge Graph Builder、NAMS、MCP for Aura</td><td>[1][4]</td></tr>
+        <tr><td><strong>LlamaIndex</strong></td><td>RAG 框架</td><td>Property Graph Index，将文本转为属性图</td><td>[1]</td></tr>
+        <tr><td><strong>LangChain / LangGraph</strong></td><td>Agent 编排</td><td>Neo4j Cypher 集成；LangGraph 以"图"表达 Agent 工作流</td><td>[1]</td></tr>
+        <tr><td><strong>LightRAG (HKUDS)</strong></td><td>轻量图 RAG</td><td>双层架构、5 查询模式、增量更新、多后端存储</td><td>[5]</td></tr>
+        <tr><td><strong>GPT-Researcher</strong></td><td>深度研究 Agent</td><td>Planner + 执行 Agent + Publisher；Deep Research 树状探索；MCP 集成</td><td>[6]</td></tr>
+      </tbody>
+    </table>
+
+    <h2>五、实证数据（效果验证）</h2>
+    <table>
+      <thead>
+        <tr><th>研究/机构</th><th>结果</th><th>来源</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Data.world（43 个业务问题）</td><td>GraphRAG 平均提升准确率 3 倍（54.2%）</td><td>[1]</td></tr>
+        <tr><td>Microsoft Research（arXiv 2404.16130）</td><td>tokens 消耗减少 26%–97%</td><td>[1][2]</td></tr>
+        <tr><td>LinkedIn（客服场景）</td><td>中位单问题解决时间降 28.6%</td><td>[1]</td></tr>
+        <tr><td>Writer（RAG Benchmark，RobustQA）</td><td>GraphRAG 86% vs 竞品 33%–76%</td><td>[1]</td></tr>
+        <tr><td><strong>英国 NICD 独立研究（510 个复杂问题）</strong></td><td><strong>Agent 真实度 +80%</strong>；回答数 2 倍；幻觉更少；token 更省</td><td>[3]</td></tr>
+      </tbody>
+    </table>
+    <p>NICD 细节：GraphRAG 真实度评分 63 vs 纯向量 35；精确率 .38 vs .18、召回率 .35 vs .15；拒答率从 71.1% 降到 34.7%（回答率 28.9% → 65.3%）。关键洞察：<strong>无需重手工本体，仅用"标题 + 章节 + 链接"的轻量图结构即可显著提升 Agent 可靠性</strong> [3]。</p>
+
+    <h2>六、应用场景与趋势</h2>
+    <p><strong>典型场景</strong> [1][3]：企业知识库与客服、金融/投资（SEC 文件、欺诈检测）、医疗、法律、供应链韧性、制造业、政府公共部门。</p>
+    <p><strong>六大趋势</strong>：</p>
+    <ol>
+      <li><strong>图谱 + 向量融合成为默认</strong>：GraphRAG 被定义为"包含向量的 RAG"，而非替代 [1]。</li>
+      <li><strong>Agent 记忆图化</strong>：上下文图（Context Graph）成为 Agent 基础设施 [4]。</li>
+      <li><strong>技能蒸馏与可移植</strong>：AIP（Agent Instruction Protocol，arXiv 2606.04781）提出把技能表示为<strong>带类型的图</strong>，SkillsBench 上结构化技能比自由文本 pass rate +14.1pp、快 13% [4]。</li>
+      <li><strong>MCP 成为图谱接入 Agent 的标准通道</strong>：Neo4j MCP for Aura、GPT-Researcher 的 MCP retriever [4][6]。</li>
+      <li><strong>治理成为 Agent 落地的最大门槛</strong>：可解释、可审计、权限控制是合规行业刚需 [1][3]。</li>
+      <li><strong>降本</strong>：轻量图结构（无需重本体）、LightRAG 式无社区报告的检索，显著降低 LLM 调用成本 [3][5]。</li>
+    </ol>
+
+    <h2>七、对本项目的启示（开放知识图谱工程）</h2>
+    <p>对照业界前沿，本仓库正在实践的方法论与趋势<strong>高度吻合</strong>，且形成互补闭环：</p>
+    <table>
+      <thead>
+        <tr><th>本项目实践</th><th>对应业界趋势</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>design/KG/SystemArchitecture.json</code>（ArchiMate 3.2 意图图谱）</td><td>GraphRAG 的"域图/世界模型"</td></tr>
+        <tr><td>验收用例 GIVEN-WHEN-THEN + <code>node --test</code> 可执行化</td><td>GraphRAG 的"可解释、可审计、可验证"</td></tr>
+        <tr><td><code>.github/skills/*/SKILL.md</code> + ARGO MCP</td><td>AIP 技能图 + NAMS 技能蒸馏 + MCP 接入</td></tr>
+        <tr><td>多 Agent 研究流程建模（view 177）</td><td>GPT-Researcher / STORM 的 Planner-Executor 范式</td></tr>
+        <tr><td>KGlibrary 参考库</td><td>轻量图结构即可增益 Agent 可靠性（NICD 结论）</td></tr>
+      </tbody>
+    </table>
+    <p><strong>可借鉴的下一步</strong>：</p>
+    <ol>
+      <li>为意图图谱引入<strong>社区/层次索引</strong>（Leiden 聚类 + 社区摘要），支撑"全局性"查询；</li>
+      <li>将 <strong>Agent 推理轨迹（reasoning memory）</strong> 写回图谱，为后续"技能蒸馏"做准备；</li>
+      <li>用 GraphRAG 的 Local/Global 双模式对标本项目的验收用例设计（外部验证 vs 内部实现）。</li>
+    </ol>
+
+    <h2>八、参考文献</h2>
+    <ol class="ref">
+      <li>Philip Rathle, <em>The GraphRAG manifesto: Adding knowledge to GenAI</em>, Neo4j Blog, 2024-07-11. https://neo4j.com/blog/genai/graphrag-manifesto/</li>
+      <li>Microsoft GraphRAG 官方文档. https://microsoft.github.io/graphrag/ （论文 arXiv:2404.16130）</li>
+      <li>Jim Webber, <em>Independent study: GraphRAG makes AI agents 80% more truthful</em>, Neo4j Blog, 2026-07-22. https://neo4j.com/blog/agentic-ai/study-graphrag-ai-agents-80-percent-more-truthful/ （NICD 报告，基准 MoNaCo，arXiv:2508.11133）</li>
+      <li>William Lyon, <em>From Agent Memory to Portable Skills</em>, Neo4j Blog, 2026-08-06. https://neo4j.com/blog/genai/from-agent-memory-to-portable-skills/ （AIP，arXiv:2606.04781）</li>
+      <li>HKUDS/LightRAG. https://github.com/HKUDS/LightRAG （EMNLP2025，arXiv:2410.05779）</li>
+      <li>assafelovic/gpt-researcher. https://github.com/assafelovic/gpt-researcher （Plan-and-Solve arXiv:2305.04091；STORM arXiv:2402.14207）</li>
+    </ol>
+  </main>
+
+  <footer>
+    Generated as a subpage of the <code>open_knowledge_graph_engineering</code> GitHub Pages site.
+  </footer>
+</body>
+</html>

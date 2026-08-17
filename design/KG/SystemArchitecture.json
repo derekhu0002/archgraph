@@ -391,6 +391,29 @@
       "id": "1350",
       "name": "Reduce bias and hallucination",
       "type": "Principle"
+    },
+    {
+      "id": "1351",
+      "name": "归档洞察报告并发布网站子页",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "将《知识图谱驱动的 Agent 构建》业界洞察报告归档到 docs/industry-insight-graph-driven-agent.md，并在项目网站发布为独立子页 docs/industry-insight-graph-driven-agent.html（首页新增 Insights 入口）。洞察方法采用 view 177「GPT-Researcher Multi-Agent Research」的多 Agent 研究流程。",
+      "testcases": [
+        {
+          "name": "AT-1351-01-洞察报告归档docs",
+          "description": "GIVEN 业界洞察报告已完成；WHEN 读者访问 docs/ 目录；THEN 报告以 Markdown 归档于 docs/industry-insight-graph-driven-agent.md，包含研究背景、核心技术、主流框架、实证数据与引用来源。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/industry-insight-graph-driven-agent.md",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"insight-report-archived\"）：断言 docs/industry-insight-graph-driven-agent.md 存在，并包含 GraphRAG、知识图谱、80% more truthful 与参考文献章节。通过。"
+        },
+        {
+          "name": "AT-1351-02-洞察报告网站子页",
+          "description": "GIVEN 洞察报告已归档；WHEN 访客从网站首页导航点击 Insights 链接；THEN 打开独立子页 docs/industry-insight-graph-driven-agent.html，呈现报告全文，且首页导航包含指向该子页的链接。",
+          "type": "Acceptance Test",
+          "Input": "浏览器打开网站首页并点击 Insights",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"insight-subpage\"）：断言 index.html 含指向 docs/industry-insight-graph-driven-agent.html 的链接，且该 HTML 文件存在并包含报告标题与关键内容。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -643,6 +666,16 @@
       "target_id": "1348",
       "target_name": "Produce objective research report",
       "type": "Influence"
+    },
+    {
+      "id": "1192",
+      "statement": "归档洞察报告并发布网站子页 --(Association)--> project website",
+      "name": "发布为网站子页",
+      "type": "Association",
+      "source_id": "1351",
+      "target_id": "1318",
+      "source_name": "归档洞察报告并发布网站子页",
+      "target_name": "project website"
     }
   ],
   "views": [
@@ -674,7 +707,8 @@
         "1331",
         "1332",
         "1333",
-        "1335"
+        "1335",
+        "1351"
       ],
       "included_relationships": [
         "1162",
@@ -682,7 +716,8 @@
         "1167",
         "1168",
         "1172",
-        "1173"
+        "1173",
+        "1192"
       ]
     },
     {

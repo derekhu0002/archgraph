@@ -101,3 +101,39 @@ test('readme-sync: home page mirrors README (architecture + how to use)', () => 
     'How to use should mention the agent config directories'
   );
 });
+
+test('insight-report-archived: industry insight report archived under docs/', () => {
+  // GIVEN the industry insight report on knowledge-graph-driven agents has been produced
+  // WHEN a reader opens the docs/ directory
+  // THEN the report is archived as Markdown with key sections and cited sources
+  const report = readFileSync(
+    path.join(ROOT, 'docs', 'industry-insight-graph-driven-agent.md'),
+    'utf8'
+  );
+  assert.match(report, /GraphRAG/, 'report should discuss GraphRAG');
+  assert.match(report, /知识图谱/, 'report should discuss knowledge graphs');
+  assert.match(report, /80% more truthful/, 'report should cite the NICD study');
+  assert.match(report, /参考文献/, 'report should have a references section');
+});
+
+test('insight-subpage: home page links to the insight report subpage', () => {
+  // GIVEN the industry insight report has been archived
+  // WHEN a visitor opens the homepage and clicks the Insights link
+  // THEN a standalone subpage renders the full report
+  assert.match(
+    HTML,
+    /docs\/industry-insight-graph-driven-agent\.html/,
+    'home page should link to the insight subpage'
+  );
+  const subpage = readFileSync(
+    path.join(ROOT, 'docs', 'industry-insight-graph-driven-agent.html'),
+    'utf8'
+  );
+  assert.match(
+    subpage,
+    /知识图谱驱动的 Agent 构建/,
+    'subpage should show the report title'
+  );
+  assert.match(subpage, /GraphRAG/, 'subpage should discuss GraphRAG');
+  assert.match(subpage, /80% more truthful/, 'subpage should cite the NICD study');
+});
