@@ -453,8 +453,14 @@
           "value": "4516b04"
         },
         {
+          "description": "WeChat draft media_id",
+          "name": "media_id",
+          "value": "BRZAMZ3b-CaOBH8qdG2KTSVtDhlz7tQPi5y2JvVDpTKytc8780o6c3wQDUk3UtU0"
+        },
+        {
+          "description": "草稿已创建；freepublish 被 48001 api unauthorized 拒绝（账号无 API 发布权限）",
           "name": "status",
-          "value": "IN-PROGRESS"
+          "value": "BLOCKED"
         }
       ]
     }
