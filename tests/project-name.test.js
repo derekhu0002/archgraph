@@ -30,21 +30,15 @@ test('project-name: public-facing files use ArchGraph and drop the old name', ()
   }
 });
 
-test('project-name: repo and pages links use the archgraph slug', () => {
+test('project-name: home site links use the archgraph slug', () => {
   // GIVEN the GitHub repository has been renamed to archgraph
-  // WHEN a visitor opens the home site and the README
-  // THEN GitHub and Pages links reference the archgraph slug
+  // WHEN a visitor opens the home site
+  // THEN GitHub links reference the archgraph slug
   const html = readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  const readme = readFileSync(path.join(ROOT, 'README.md'), 'utf8');
 
   assert.match(
     html,
     /github\.com\/derekhu0002\/archgraph/,
     'home site GitHub links should point to derekhu0002/archgraph'
-  );
-  assert.match(
-    readme,
-    /derekhu0002\.github\.io\/archgraph/,
-    'README Pages link should point to the archgraph pages site'
   );
 });

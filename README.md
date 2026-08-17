@@ -41,7 +41,7 @@ These rules are encoded in [`.github/copilot-instructions.md`](.github/copilot-i
 | `design/KG/SystemArchitecture.json` | Canonical intent architecture graph (single source of truth) |
 | `.github/copilot-instructions.md` | Global agent rules |
 | `.github/kglibrary.instructions.md` | Global rule for `KGlibrary/*/info.md` frontmatter format |
-| `.github/skills/<name>/SKILL.md` | Skills materialized from the graph (`argo-init`, `create-github-repository-page`, `optimize-web-layout-style`) |
+| `.github/skills/<name>/SKILL.md` | Skills materialized from the graph (`argo-init`, `create-github-repository-page`, `diagram-draw`, `optimize-web-layout-style`) |
 | `.argo/` | ARGO harness: MCP server, schema, validators, semantic (Graph RAG) lifecycle and Neo4j sync |
 | `KGlibrary/` | Reference project knowledge library |
 | `index.html` | GitHub Pages home site |
@@ -94,17 +94,12 @@ Each project under `KGlibrary/<project>/` provides an `info.md` with YAML frontm
 consume reference project information. See
 [`.github/kglibrary.instructions.md`](.github/kglibrary.instructions.md).
 
-## Home site
-
-The project home site is a static GitHub Pages site served from `index.html` and published at
-<https://derekhu0002.github.io/archgraph/>.
-
 ## Tests
 
 Run the acceptance suite with:
 
 ```powershell
-node --test
+node --test "tests/*.test.js"
 ```
 
 ## Requirements
