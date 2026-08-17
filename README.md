@@ -1,10 +1,10 @@
-# open_knowledge_graph_engineering
+# ArchGraph
 
-A Knowledge graph driven method for Agentic Engineering.
+An architecture-graph driven framework for Agentic Engineering.
 
 ## What is this?
 
-`open_knowledge_graph_engineering` treats an **intent architecture graph** as the single source of
+`ArchGraph` treats an **intent architecture graph** as the single source of
 truth for agentic engineering. Every piece of work starts from an element in the graph — a Work
 Package, a Skill, a Rule, a Viewpoint, or an Application Component — and every repository change is
 traced back to that element.
@@ -49,7 +49,7 @@ These rules are encoded in [`.github/copilot-instructions.md`](.github/copilot-i
 
 ## How to use
 
-`open_knowledge_graph_engineering` is an agentic engineering framework driven by a knowledge graph —
+`ArchGraph` is an agentic engineering framework driven by a knowledge graph —
 the intent architecture graph — whose schema complies with **ArchiMate 3.2**.
 
 To adopt it as the building framework for another project, copy the following into the target project:
@@ -97,7 +97,7 @@ consume reference project information. See
 ## Home site
 
 The project home site is a static GitHub Pages site served from `index.html` and published at
-<https://derekhu0002.github.io/open_knowledge_graph_engineering/>.
+<https://derekhu0002.github.io/archgraph/>.
 
 ## Tests
 

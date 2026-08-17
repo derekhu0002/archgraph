@@ -38,7 +38,7 @@ test('layout-style: tech-simple light layout with nav, hero and sections', () =>
   assert.match(HTML, /class="hero"/, 'page should have a hero section');
   assert.match(
     HTML,
-    /<h1[\s\S]*?open_knowledge_graph_engineering/,
+    /<h1[\s\S]*?ArchGraph/,
     'hero should show the project name'
   );
   const sections = HTML.match(/<section\b/g) || [];

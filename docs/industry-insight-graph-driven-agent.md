@@ -11,7 +11,7 @@
 1. **图谱正从 RAG 的"可选项"变成 Agent 的"默认基础设施"**——业界正重演 Google 2012 年"things, not strings"的路径，GraphRAG 被视为超越纯向量 RAG 的下一代默认检索架构 [1]。
 2. **Agent 记忆正在图化**：Neo4j 等厂商提出"上下文图（Context Graph）"与 Agent 记忆服务（NAMS），把短期对话、长期知识、推理轨迹统一建模为图，并进一步**把记忆蒸馏成可移植的 SKILL** [4]。
 3. **实证数据一致指向"图 > 纯向量"**：Data.world 平均 3 倍准确率提升 [1]、LinkedIn 客服中位解决时间降 28.6% [1]、英国 NICD 独立研究称 Agent 真实度提升 80% [3]。
-4. **本项目（open_knowledge_graph_engineering）正在践行的方向与业界前沿高度同构**——详见第七节。
+4. **本项目（ArchGraph）正在践行的方向与业界前沿高度同构**——详见第七节。
 
 ---
 

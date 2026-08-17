@@ -111,7 +111,7 @@
       "attributes": [
         {
           "name": "website",
-          "value": "https://derekhu0002.github.io/open_knowledge_graph_engineering/"
+          "value": "https://derekhu0002.github.io/archgraph/"
         },
         {
           "name": "commit",
@@ -119,7 +119,7 @@
           "description": "design/KG/SystemArchitecture.json"
         }
       ],
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（知识图谱驱动的 Agentic Engineering 方法）、全局架构图、核心原则、仓库结构图、如何复用本框架（.argo/、agent-host 配置、.feap 模型），并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。"
+      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、全局架构图、核心原则、仓库结构图、如何复用本框架（.argo/、agent-host 配置、.feap 模型），并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。"
     },
     {
       "id": "1319",
@@ -463,6 +463,22 @@
           "value": "BLOCKED"
         }
       ]
+    },
+    {
+      "id": "1353",
+      "name": "rename project to ArchGraph",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "将项目对外品牌名从 open_knowledge_graph_engineering 更名为 ArchGraph（完整名 ArchGraph Framework；tagline：An architecture-graph driven framework for Agentic Engineering），同步更新 README.md、index.html、docs/industry-insight-graph-driven-agent.* 文档、tests 用例，并更新意图图谱中 project website 元素的 website 属性。",
+      "testcases": [
+        {
+          "name": "AT-1353-01-项目品牌名统一为ArchGraph",
+          "description": "GIVEN 项目品牌名确定为 ArchGraph；WHEN 读者访问 README、网站首页与 docs 洞察报告文档；THEN 对外文案统一使用新名字 ArchGraph（完整名 ArchGraph Framework），不再出现旧名 open_knowledge_graph_engineering，且 GitHub 仓库与 Pages 链接指向 archgraph。",
+          "type": "Acceptance Test",
+          "Input": "读取 README.md、index.html、docs/industry-insight-graph-driven-agent.md/.html/.wechat.md",
+          "acceptanceCriteria": "执行 node --test tests/project-name.test.js：断言 README.md、index.html、docs/industry-insight-graph-driven-agent.md|.html|.wechat.md 均包含 ArchGraph 且不含 open_knowledge_graph_engineering，并断言 index.html 的 GitHub/Pages 链接指向 archgraph。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -735,6 +751,16 @@
       "target_id": "1351",
       "source_name": "发布洞察报告到微信公众号",
       "target_name": "归档洞察报告并发布网站子页"
+    },
+    {
+      "id": "1194",
+      "name": "Association",
+      "type": "Association",
+      "source_id": "1353",
+      "target_id": "1318",
+      "source_name": "rename project to ArchGraph",
+      "target_name": "project website",
+      "statement": "rename project to ArchGraph --(Association)--> project website"
     }
   ],
   "views": [
@@ -768,7 +794,8 @@
         "1333",
         "1335",
         "1351",
-        "1352"
+        "1352",
+        "1353"
       ],
       "included_relationships": [
         "1162",
@@ -778,7 +805,8 @@
         "1172",
         "1173",
         "1192",
-        "1193"
+        "1193",
+        "1194"
       ]
     },
     {
