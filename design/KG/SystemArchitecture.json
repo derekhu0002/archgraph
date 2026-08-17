@@ -478,6 +478,17 @@
           "Input": "读取 README.md、index.html、docs/industry-insight-graph-driven-agent.md/.html/.wechat.md",
           "acceptanceCriteria": "执行 node --test tests/project-name.test.js：断言 README.md、index.html、docs/industry-insight-graph-driven-agent.md|.html|.wechat.md 均包含 ArchGraph 且不含 open_knowledge_graph_engineering，并断言 index.html 的 GitHub/Pages 链接指向 archgraph。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "3b6fc91",
+          "description": "README.md; index.html; package.json; tests/website.test.js; tests/project-name.test.js; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; docs/industry-insight-graph-driven-agent.wechat.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
       ]
     }
   ],
