@@ -1,32 +1,32 @@
 # Agent 建模语言（AML）
 
-> 基于知识图谱（ArchiMate 3.2）的 Agent 行为建模词汇与语法。
+> 基于知识图谱的 Agent 行为建模语言。AML 是 ArchiMate 3.2 的**扩展**：扩展其词汇（新增元素）与语法（新增结构约定），并约定如何用标准元素给 Agent 建模。
 >
-> - 元模型：ArchiMate 3.2
+> - 元模型：ArchiMate 3.2（AML 为其扩展）
 > - 图 Schema：`.argo/schema/SystemArchitecture.schema.json`
 > - 状态：v0.1（草案）
 
-## 1. 概述
+## 1. 定位与扩展范围
 
-### 1.1 目的
+AML 不改动 ArchiMate 3.2 已有的元素与关系定义，只在以下层面扩展：
 
-本规范定义一套**基于知识图谱的 Agent 建模语言（Agent Modeling Language, AML）**，用于描述"一个 Agent 如何完成一个任务"。它把 ArchiMate 3.2 的元素与关系用作建模原语：
+| 扩展层面 | 内容 | 是否标准 ArchiMate 3.2 |
+|---|---|---|
+| 新增元素类型 | `Skill`、`Rule` | 否，AML 扩展（`layer: Other`、`aspect: Agent`） |
+| 新增结构约定 | `testcases`、`attributes`、`subdiagram_views`、`parent` | 否，AML 扩展 |
+| 标准元素的 AML 约定（Profile） | 对 `Work Package`、`Business Actor` 等赋予 Agent 语义 | 元素本身标准，语义约定为 AML 新增 |
 
-- **元素 = 词汇（类型系统）**：用受控的 `archimateElementType` 枚举表达程序中的各类概念（任务、角色、行为、约束、产物等）。
-- **关系 = 语法（关键字）**：用受控的 `archimateRelationshipType` 枚举表达这些概念之间的结构、控制流与数据流。
-- **testcases = 断言**：挂载在元素上的 GIVEN-WHEN-THEN 可执行验收用例，定义"完成"的判据。
+> 本文只描述**扩展部分**。ArchiMate 3.2 已有元素与关系的定义，请参阅 `.argo/schema/archimate3.2.pdf`。
 
-### 1.2 程序文本与解释循环
+### 1.1 解释循环
 
 - **程序文本**：`design/KG/SystemArchitecture.json` 中的元素、关系与视图。
 - **解释器**：Agent 通过 ARGO MCP 读取图谱（`getIntentElementContext` / 语义查询），完成"自武装"后执行任务。
-- **解释循环**：
 
 ```mermaid
 flowchart LR
   A[Work Package<br/>任务 + 验收用例] -->|Association| B[Skill → SKILL.md]
   A -->|Association| C[Rule → instructions.md]
-  A -->|Triggering/Flow| D[Business Process<br/>步骤序列]
   E[ARGO MCP 语义检索] --> F[Agent 自武装<br/>读图 → 装配上下文]
   F --> G[执行]
   G --> H{testcases 全绿?}
@@ -35,47 +35,31 @@ flowchart LR
   I --> A
 ```
 
-### 1.3 设计原则
+## 2. 扩展元素
 
-1. **不改 Schema**：AML 只使用 `SystemArchitecture.schema.json` 中已存在的 `archimateElementType` 与 `archimateRelationshipType` 枚举，通过约定赋予建模语义，不新增字段。
-2. **声明式优先**：图谱声明"要什么、用什么做、不许做什么、怎样算完成"，由 Agent 解释执行；命令式细节下沉到 `SKILL.md` 与 `*.instructions.md`。
-3. **验收外化**：每个验收用例从元素**外部**验证（外部可观察行为），不验证内部实现。
+### 2.1 `Skill`（技能模块）
 
-## 2. 词汇表：元素 → 建模概念
+- **语义**：Agent 可加载的技能模块。
+- **物化**：`.github/skills/<name>/SKILL.md`（一个 `Skill` 元素对应一份 SKILL.md）。
+- **用法**：`Work Package --Association--> Skill` 表示该任务需要该技能；Agent 领取任务后读取对应 SKILL.md 完成"自武装"。
+- **示例**：元素 `1319 optimize-web-layout-style` → `.github/skills/optimize-web-layout-style/SKILL.md`。
 
-### 2.1 行为层（做什么、怎么做）
+### 2.2 `Rule`（规则模块）
 
-| 元素类型 | 建模语义 | 说明 |
+- **语义**：可复用的规则模块。
+- **物化**：`.github/<name>.instructions.md`（一个 `Rule` 元素对应一份 instructions 文件）。
+- **用法**：`Work Package --Association--> Rule` 表示该任务需遵守该规则；全局规则物化到 `.github/copilot-instructions.md`。
+- **示例**：元素 `1320 kglibrary-info-format` → `.github/kglibrary.instructions.md`。
+
+### 2.3 `Skill` / `Rule` 与标准元素的区分
+
+| 概念 | 标准/扩展 | 物化目标 |
 |---|---|---|
-| `Work Package` | **Task（任务）** | Agent 领取的最小可执行工作单元；挂 `testcases` 作为验收 |
-| `Course of Action` | **Program / main（主流程）** | 达成目标的步骤计划，程序入口 |
-| `Business Process` | **Procedure（可复用行为定义）** | 步骤序列，可被多个 Task 复用 |
-| `Business Function` | **Module（功能模块）** | 行为能力的聚合分组 |
-| `Business Interaction` | **Interaction（协作交互）** | 多 Actor 之间的交互行为 |
-
-### 2.2 执行者层（谁来执行）
-
-| 元素类型 | 建模语义 | 说明 |
-|---|---|---|
-| `Business Actor` | **持久化 Agent 本体** | 持久实体：有身份、长期记忆、可反复参与多次执行 |
-| `Business Role` | **Role Type（角色类型）** | 可复用角色定义，Actor 通过 `Assignment` 扮演 |
-| `Business Collaboration` | **Multi-agent Context（协作上下文）** | 多个 Actor 协作的容器 |
-| `Skill` | **Skill Module（技能模块）** | 物化到 `.github/skills/<name>/SKILL.md` 的可加载技能 |
-
-### 2.3 事件/控制层（何时、按什么顺序）
-
-| 元素类型 | 建模语义 | 说明 |
-|---|---|---|
-| `And Junction` | **并行/汇聚（AND fork/join）** | 并发执行 |
-| `Or Junction` | **分支/汇聚（OR branch/merge）** | 条件选择 |
-
-### 2.4 服务/接口层（对外契约）
-
-### 2.6 意图/约束层（为什么做、不能做什么）
-
-| 元素类型 | 建模语义 | 说明 |
-|---|---|---|
-| `Rule` | **Rule Module（规则模块）** | 物化到 `.github/<name>.instructions.md` 的可复用规则 |
+| `Capability`（标准） | 抽象能力，不直接物化 | — |
+| `Skill`（扩展） | 可加载技能模块 | `.github/skills/<name>/SKILL.md` |
+| `Principle`（标准） | 全局约束 | 全局 `*.instructions.md` |
+| `Rule`（扩展） | 可复用规则模块 | `.github/<name>.instructions.md` |
+| `Constraint`（标准） | 局部约束 | —（挂在关联的 Task/Process 上） |
 
 约束的三级区分：
 
@@ -83,30 +67,14 @@ flowchart LR
 - `Rule`（规则模块）：可复用的规则，物化为 `.github/*.instructions.md`。
 - `Constraint`（局部）：只约束它 `Association` 到的某个 Task / Process。
 
-## 3. 语法：关系 → 语法语义
+## 3. 扩展结构
 
-关系类型是 AML 的关键字：
+### 3.1 `testcases`（验收断言）
 
-| 关系类型 | 语法语义 | 典型用法 |
-|---|---|---|
-| `Association` | **use（引用/依赖）** | `Task → Skill`、`Task → Rule`、`Task → Resource` |
-| `Assignment` | **assign（指派）** | `Task → Role`、`Task → Actor` |
-| `Realization` | **implements（实现）** | `Process → Service`、`Skill → Capability`、`Deliverable → Goal` |
-| `Serving` | **serves（服务）** | `Service → Actor` |
-| `Access` | **read/write（读写）** | `Process → Data Object` |
-| `Triggering` | **then / triggers（顺序/触发）** | `Event → Task`、`Task → Task` |
-| `Flow` | **pipe（数据流转）** | `Task → Deliverable`、`Task → Artifact` |
-| `Composition` | **contains（强组合）** | `Course of Action → Task`、`Task → Sub-task` |
-| `Aggregation` | **aggregates（松聚合）** | `Task → 关联资源集` |
-| `Influence` | **influences（影响）** | `Driver → Goal`、`Assessment → Decision` |
-| `Specialization` | **extends（特化/继承）** | `Role → 更具体的 Role` |
+`testcases` 是 AML 的**断言机制**，挂载在元素上，标准 ArchiMate 没有对应概念。每个用例必须：
 
-## 4. 验收断言：testcases
-
-`testcases` 是 AML 的**单元测试/断言**，挂载在元素上，必须满足：
-
-1. **GIVEN-WHEN-THEN 格式**：`description` 用 GIVEN-WHEN-THEN 描述规格，便于人读。
-2. **可执行**：`acceptanceCriteria` 必须是具体的、工作区相对的可执行入口（如 `node --test tests/xxx.test.js`），而非描述性文字。
+1. **GIVEN-WHEN-THEN 格式**：`description` 用 GIVEN-WHEN-THEN 描述规格。
+2. **可执行**：`acceptanceCriteria` 必须是工作区相对的可执行入口（如 `node --test tests/xxx.test.js`）。
 3. **外部验证**：从元素外部可观察行为验证，不验证内部实现。
 
 示例：
@@ -121,17 +89,76 @@ flowchart LR
 }
 ```
 
+### 3.2 `attributes`（属性容器）
+
+通用属性容器，用于给元素附加 Agent 工程元数据。AML 约定的属性名：
+
+| 属性名 | 用途 |
+|---|---|
+| `commit` | 登记一次提交：`value`=commit id，`description`=相关文件路径（可多条） |
+| `status` | 任务状态（如 `COMPLETED`） |
+| `verification_focus` / `external_scope` / `acceptance_outcomes` / `design_risks` | 架构意图元数据（schema 建议） |
+
+### 3.3 `subdiagram_views` / `parent`（结构挂载）
+
+- `parent`：元素在视图树中的父元素（如 Work Package 挂在 Viewpoint `Grouping` 下）。
+- `subdiagram_views`：元素与子图 View 的关联。
+
+## 4. 标准元素的 AML 约定（Profile）
+
+对标准 ArchiMate 元素，AML 只约定 Agent 语义，元素定义见 ArchiMate 3.2。
+
+| 标准元素 | AML 约定语义 |
+|---|---|
+| `Work Package` | Task（任务）：Agent 领取的最小工作单元 |
+| `Course of Action` | Program / main（主流程） |
+| `Business Process` | Procedure（可复用行为定义） |
+| `Business Actor` | 持久化 Agent 本体 |
+| `Business Role` | Role Type（角色类型） |
+| `Business Collaboration` | Multi-agent Context（协作上下文） |
+| `Capability` | 抽象能力 |
+| `Business Event` | Event（事件/触发条件） |
+| `Implementation Event` | Milestone（里程碑/检查点） |
+| `And Junction` / `Or Junction` | 控制流分支与汇聚 |
+| `Business Service` / `Business Interface` | Service / Interface（服务/接口契约） |
+| `Business Object` / `Data Object` | Object / Data（状态对象/数据） |
+| `Artifact` | File（仓库文件） |
+| `Deliverable` | Output（产物/返回值） |
+| `Goal` / `Outcome` | Goal / Assertion（目标/期望结果） |
+| `Driver` / `Requirement` / `Assessment` | Motivation / Precondition / Check |
+| `Principle` / `Constraint` | Global / Local Constraint |
+| `Plateau` / `Gap` | Stage / TODO（阶段状态/缺口） |
+| `Grouping` | Namespace（命名空间） |
+
+### 4.1 关系（关键字）的 AML 用法
+
+关系类型均为标准 ArchiMate 关系，AML 只约定用法：
+
+| 关系类型 | AML 用法 |
+|---|---|
+| `Association` | use（引用 Skill/Rule/Resource） |
+| `Assignment` | assign（Task → Role/Actor） |
+| `Realization` | implements（Process→Service、Skill→Capability、Deliverable→Goal） |
+| `Serving` | serves（Service → Actor） |
+| `Access` | read/write（Process → Data Object） |
+| `Triggering` | then（顺序/触发） |
+| `Flow` | pipe（数据流转） |
+| `Composition` | contains（主流程→Task） |
+| `Aggregation` | aggregates |
+| `Influence` | influences |
+| `Specialization` | extends |
+
 ## 5. 持久化元素 vs 运行时实例
 
-ArchiMate 是**设计时语言**，建模"类型/定义"，不建模运行时实例。AML 严格区分：
+ArchiMate 是**设计时语言**，建模"类型/定义"，不建模运行时实例。AML 遵循同一边界：
 
 | 类别 | 是否进图谱 | 例子 |
 |---|---|---|
-| **持久化元素**（程序文本） | 是，长期存在 | `Business Actor`、`Business Role`、`Capability`、`Skill`、`Rule`、`Work Package`、`Business Process`、`Course of Action`、`Goal`、`Constraint`、`Principle` |
+| **持久化元素**（程序文本） | 是，长期存在 | `Skill`、`Rule`、`Business Actor`、`Business Role`、`Capability`、`Work Package`、`Business Process`、`Course of Action`、`Goal`、`Constraint`、`Principle` |
 | **运行时实例**（程序运行） | 否，只回写结果 | 一次 session、一次执行、一份 commit |
 
 - `Business Actor` 是**持久化的人**：有身份、长期记忆（记忆即知识图谱本身），可反复参与多次执行。
-- 一次"agent session"是运行时实例：由 `Work Package` 通过 `Assignment` 指派给某个持久 `Business Actor` 执行；执行结果通过 `attributes` 中的 `commit` 回写，不新建元素。
+- 一次"agent session"是运行时实例：由 `Work Package --Assignment--> Business Actor` 的一次执行表达；结果通过 `attributes.commit` 回写，不新建元素。
 
 ## 6. 完整程序示例
 
@@ -154,6 +181,8 @@ flowchart TD
   PR["Principle<br/>改前必有架构元素"] --"Influence"--> WP
 ```
 
-## 7. 与 Schema 的一致性
+## 7. 合规与扩展流程
 
-本规范不修改 `SystemArchitecture.schema.json`。所有元素类型均来自 `archimateElementType` 枚举，所有关系类型均来自 `archimateRelationshipType` 枚举。新增能力通过**约定**而非 schema 扩展实现；若未来需要新的原语，应先评估是否可映射到现有枚举，再考虑扩展 schema。
+- `Skill` / `Rule` 是 `archimateElementType` 枚举中仅有的两个非标准元素，已登记于 `.argo/scripts/archimate32-rules.js`（`layer: "Other"`、`aspect: "Agent"`）。
+- 本规范不修改 `SystemArchitecture.schema.json`。
+- 未来需要新原语时，依次评估：① 能否映射到标准 ArchiMate 元素（加约定）；② 能否用 `attributes` 表达；③ 仍不能才扩展 `archimateElementType` 枚举。
