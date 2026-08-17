@@ -443,9 +443,14 @@
       ],
       "attributes": [
         {
+          "description": "docs/industry-insight-graph-driven-agent.wechat.md; tests/wechat-article.test.js; .gitignore; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "e9abada",
-          "description": "docs/industry-insight-graph-driven-agent.wechat.md; tests/wechat-article.test.js; .gitignore; design/KG/SystemArchitecture.json"
+          "value": "e9abada"
+        },
+        {
+          "description": "docs/industry-insight-graph-driven-agent.wechat.md",
+          "name": "commit",
+          "value": "4516b04"
         },
         {
           "name": "status",
