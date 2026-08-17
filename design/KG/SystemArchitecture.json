@@ -247,7 +247,18 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Work Package"
+      "type": "Work Package",
+      "attributes": [
+        {
+          "description": "docs/agent-programming-language.md; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "44e1cf0"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ]
     }
   ],
   "relationships": [
