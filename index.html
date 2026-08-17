@@ -145,6 +145,15 @@
       padding: 3px 10px;
     }
 
+    .what-for-fig {
+      margin: 0 0 28px;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .what-for-fig svg { display: block; width: 100%; height: auto; }
+
     footer {
       text-align: center;
       color: var(--muted);
@@ -159,6 +168,7 @@
     <span class="brand"><code>ArchGraph</code></span>
     <div class="links">
       <a href="#about">About</a>
+      <a href="#what-for">What it&rsquo;s for</a>
       <a href="#architecture">Architecture</a>
       <a href="#principles">Principles</a>
       <a href="#repository">Repository</a>
@@ -188,8 +198,125 @@
       </p>
     </section>
 
+    <section id="what-for">
+      <h2><span class="num">02</span>What is it for?</h2>
+      <p class="lead">
+        <code>ArchGraph</code> exists to remove the recurring pain of agentic engineering. On the left are the
+        problems that usually stall multi-agent projects; on the right is what the intent architecture graph turns
+        them into.
+      </p>
+
+      <figure class="what-for-fig">
+        <svg viewBox="0 0 980 570" role="img" aria-label="Problems ArchGraph solves" style="font-family: inherit;">
+          <defs>
+            <marker id="wf-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4d6bfe"/>
+            </marker>
+            <marker id="wf-arrow-muted" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+            </marker>
+          </defs>
+
+          <rect x="380" y="52" width="220" height="490" rx="14" fill="rgba(77,107,254,0.06)" stroke="#4d6bfe" stroke-width="1.5"/>
+          <text x="490" y="104" text-anchor="middle" font-size="21" font-weight="700" fill="#0f172a">ArchGraph</text>
+          <text x="490" y="126" text-anchor="middle" font-size="12" fill="#5b6472">intent architecture graph</text>
+          <text x="490" y="144" text-anchor="middle" font-size="11" fill="#5b6472">ArchiMate 3.2</text>
+
+          <text x="140" y="30" text-anchor="middle" font-size="12.5" font-weight="600" fill="#5b6472">PROBLEMS AGENTS HIT</text>
+          <text x="842" y="30" text-anchor="middle" font-size="12.5" font-weight="600" fill="#4d6bfe">SOLVED BY ARCHGRAPH</text>
+
+          <!-- row 1 -->
+          <rect x="10" y="62" width="260" height="66" rx="10" fill="#f5f7fa" stroke="#e6e8ee"/>
+          <text x="24" y="88" font-size="13.5" font-weight="600" fill="#0f172a">Siloed agents</text>
+          <text x="24" y="108" font-size="10.5" fill="#5b6472">each host, its own rules</text>
+          <line x1="270" y1="95" x2="376" y2="95" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#wf-arrow-muted)"/>
+          <line x1="604" y1="95" x2="711" y2="95" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#wf-arrow)"/>
+          <rect x="715" y="62" width="255" height="66" rx="10" fill="rgba(77,107,254,0.08)" stroke="#4d6bfe" stroke-opacity="0.35"/>
+          <text x="729" y="88" font-size="13.5" font-weight="600" fill="#1e40af">Cross-platform orchestration</text>
+          <text x="729" y="108" font-size="10.5" fill="#4d6bfe">one graph drives Copilot, opencode, Cursor</text>
+
+          <!-- row 2 -->
+          <rect x="10" y="144" width="260" height="66" rx="10" fill="#f5f7fa" stroke="#e6e8ee"/>
+          <text x="24" y="170" font-size="13.5" font-weight="600" fill="#0f172a">Memory lost</text>
+          <text x="24" y="190" font-size="10.5" fill="#5b6472">between sessions &amp; handoffs</text>
+          <line x1="270" y1="177" x2="376" y2="177" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#wf-arrow-muted)"/>
+          <line x1="604" y1="177" x2="711" y2="177" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#wf-arrow)"/>
+          <rect x="715" y="144" width="255" height="66" rx="10" fill="rgba(77,107,254,0.08)" stroke="#4d6bfe" stroke-opacity="0.35"/>
+          <text x="729" y="170" font-size="13.5" font-weight="600" fill="#1e40af">Long-term memory</text>
+          <text x="729" y="190" font-size="10.5" fill="#4d6bfe">GraphRAG lifecycle + Neo4j sync</text>
+
+          <!-- row 3 -->
+          <rect x="10" y="226" width="260" height="66" rx="10" fill="#f5f7fa" stroke="#e6e8ee"/>
+          <text x="24" y="252" font-size="13.5" font-weight="600" fill="#0f172a">Context overflow</text>
+          <text x="24" y="272" font-size="10.5" fill="#5b6472">every skill loaded every time</text>
+          <line x1="270" y1="259" x2="376" y2="259" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#wf-arrow-muted)"/>
+          <line x1="604" y1="259" x2="711" y2="259" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#wf-arrow)"/>
+          <rect x="715" y="226" width="255" height="66" rx="10" fill="rgba(77,107,254,0.08)" stroke="#4d6bfe" stroke-opacity="0.35"/>
+          <text x="729" y="252" font-size="13.5" font-weight="600" fill="#1e40af">Minimal context assembly</text>
+          <text x="729" y="272" font-size="10.5" fill="#4d6bfe">arm only with what&rsquo;s needed</text>
+
+          <!-- row 4 -->
+          <rect x="10" y="308" width="260" height="66" rx="10" fill="#f5f7fa" stroke="#e6e8ee"/>
+          <text x="24" y="334" font-size="13.5" font-weight="600" fill="#0f172a">Design drifts</text>
+          <text x="24" y="354" font-size="10.5" fill="#5b6472">away from the code</text>
+          <line x1="270" y1="341" x2="376" y2="341" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#wf-arrow-muted)"/>
+          <line x1="604" y1="341" x2="711" y2="341" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#wf-arrow)"/>
+          <rect x="715" y="308" width="255" height="66" rx="10" fill="rgba(77,107,254,0.08)" stroke="#4d6bfe" stroke-opacity="0.35"/>
+          <text x="729" y="334" font-size="13.5" font-weight="600" fill="#1e40af">Single source of truth</text>
+          <text x="729" y="354" font-size="10.5" fill="#4d6bfe">every change maps to a graph element</text>
+
+          <!-- row 5 -->
+          <rect x="10" y="390" width="260" height="66" rx="10" fill="#f5f7fa" stroke="#e6e8ee"/>
+          <text x="24" y="416" font-size="13.5" font-weight="600" fill="#0f172a">Unverifiable output</text>
+          <text x="24" y="436" font-size="10.5" fill="#5b6472">agents can&rsquo;t prove the work</text>
+          <line x1="270" y1="423" x2="376" y2="423" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#wf-arrow-muted)"/>
+          <line x1="604" y1="423" x2="711" y2="423" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#wf-arrow)"/>
+          <rect x="715" y="390" width="255" height="66" rx="10" fill="rgba(77,107,254,0.08)" stroke="#4d6bfe" stroke-opacity="0.35"/>
+          <text x="729" y="416" font-size="13.5" font-weight="600" fill="#1e40af">Acceptance-test-driven delivery</text>
+          <text x="729" y="436" font-size="10.5" fill="#4d6bfe">GIVEN-WHEN-THEN, node --test</text>
+
+          <!-- row 6 -->
+          <rect x="10" y="472" width="260" height="66" rx="10" fill="#f5f7fa" stroke="#e6e8ee"/>
+          <text x="24" y="498" font-size="13.5" font-weight="600" fill="#0f172a">No audit trail</text>
+          <text x="24" y="518" font-size="10.5" fill="#5b6472">who changed what, and why</text>
+          <line x1="270" y1="505" x2="376" y2="505" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#wf-arrow-muted)"/>
+          <line x1="604" y1="505" x2="711" y2="505" stroke="#4d6bfe" stroke-width="1.5" marker-end="url(#wf-arrow)"/>
+          <rect x="715" y="472" width="255" height="66" rx="10" fill="rgba(77,107,254,0.08)" stroke="#4d6bfe" stroke-opacity="0.35"/>
+          <text x="729" y="498" font-size="13.5" font-weight="600" fill="#1e40af">Traceability</text>
+          <text x="729" y="518" font-size="10.5" fill="#4d6bfe">commit id + file paths registered back</text>
+        </svg>
+      </figure>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Cross-platform orchestration</h3>
+          <p>One intent graph drives GitHub Copilot, opencode, and Cursor with the same rules, skills, and harness.</p>
+        </div>
+        <div class="card">
+          <h3>Long-term memory</h3>
+          <p>The graph is durable, queryable memory &mdash; a GraphRAG lifecycle plus Neo4j sync keeps knowledge across sessions.</p>
+        </div>
+        <div class="card">
+          <h3>Minimal context assembly</h3>
+          <p>Arm before acting: materialize only the Skills and Rules the current Work Package needs.</p>
+        </div>
+        <div class="card">
+          <h3>Single source of truth</h3>
+          <p>Every change maps to a graph element, so design, docs, and code never drift apart.</p>
+        </div>
+        <div class="card">
+          <h3>Acceptance-test-driven delivery</h3>
+          <p>GIVEN-WHEN-THEN cases verify each element from the outside, executable with <code>node --test</code>.</p>
+        </div>
+        <div class="card">
+          <h3>Traceability</h3>
+          <p>Every commit&rsquo;s id and file paths are registered back into the graph element.</p>
+        </div>
+      </div>
+    </section>
+
     <section id="architecture">
-      <h2><span class="num">02</span>Architecture</h2>
+      <h2><span class="num">03</span>Architecture</h2>
       <p class="lead">
         The global architecture (Layered Viewpoint) shows how the human, the coding agent, ARGO MCP, the intent
         architecture graph, ArchiMate 3.2, Enterprise Architect, and Neo4j relate in graph-driven agentic
@@ -207,7 +334,7 @@
     </section>
 
     <section id="principles">
-      <h2><span class="num">03</span>Core principles</h2>
+      <h2><span class="num">04</span>Core principles</h2>
       <div class="grid">
         <div class="card">
           <h3>Arm before acting</h3>
@@ -229,7 +356,7 @@
     </section>
 
     <section id="repository">
-      <h2><span class="num">04</span>Repository map</h2>
+      <h2><span class="num">05</span>Repository map</h2>
       <pre>design/KG/SystemArchitecture.json    # canonical intent architecture graph (ArchiMate 3.2)
 .github/copilot-instructions.md     # global agent rules
 .github/kglibrary.instructions.md   # global rule for KGlibrary info format
@@ -242,7 +369,7 @@ tests/                              # executable acceptance tests</pre>
     </section>
 
     <section id="howto">
-      <h2><span class="num">05</span>How to use</h2>
+      <h2><span class="num">06</span>How to use</h2>
       <p class="lead">
         This is an agentic engineering framework driven by a knowledge graph whose schema complies with
         <strong>ArchiMate 3.2</strong>. To adopt it as the building framework for another project, copy the
@@ -266,7 +393,7 @@ tests/                              # executable acceptance tests</pre>
     </section>
 
     <section id="kglibrary">
-      <h2><span class="num">06</span>Reference Library · KGlibrary</h2>
+      <h2><span class="num">07</span>Reference Library · KGlibrary</h2>
       <p class="lead">Projects accumulated in the KGlibrary reference library, surfacing knowledge-graph-driven engineering examples.</p>
       <div class="project-card">
         <h3><a href="https://github.com/derekhu0002/XKG-TEST">XKG-TEST</a></h3>
@@ -280,7 +407,7 @@ tests/                              # executable acceptance tests</pre>
     </section>
 
     <section id="insights">
-      <h2><span class="num">07</span>Insights</h2>
+      <h2><span class="num">08</span>Insights</h2>
       <p class="lead">
         Industry insight: how knowledge graphs drive agent engineering &mdash; GraphRAG, agent memory and
         portable skills, surveyed with the GPT-Researcher multi-agent method.
@@ -296,7 +423,7 @@ tests/                              # executable acceptance tests</pre>
     </section>
 
     <section id="links">
-      <h2><span class="num">08</span>Links</h2>
+      <h2><span class="num">09</span>Links</h2>
       <p class="lead">
         <a href="https://github.com/derekhu0002/archgraph">GitHub repository</a>
         &nbsp;·&nbsp;

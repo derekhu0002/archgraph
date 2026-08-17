@@ -138,7 +138,7 @@
           "description": "tests/custom-domain.test.js"
         }
       ],
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、全局架构图、核心原则、仓库结构图、如何复用本框架（.argo/、agent-host 配置、.feap 模型），并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
+      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、What is it for 小节（图形化说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯）、全局架构图、核心原则、仓库结构图、如何复用本框架（.argo/、agent-host 配置、.feap 模型），并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
       "testcases": [
         {
           "name": "AT-1318-01-自定义域名访问",
@@ -146,6 +146,13 @@
           "type": "Acceptance Test",
           "Input": "浏览器访问 https://archgraph.org/",
           "acceptanceCriteria": "执行 node --test tests/custom-domain.test.js：断言 CNAME 文件内容恰为 archgraph.org；并对 archgraph.org 做 DNS A 解析，断言其解析到 GitHub Pages 的 4 个 IP（DNS 记录未配置时该用例跳过）。通过。"
+        },
+        {
+          "name": "AT-1318-02-主页说明解决的问题",
+          "description": "GIVEN 项目主页（index.html）在 What is this 小节之后提供 What is it for 小节；WHEN 访客打开主页；THEN 页面以图形化方式说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯。",
+          "type": "Acceptance Test",
+          "Input": "浏览器打开网站首页",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"what-for-section\"）：断言存在 id=\"what-for\" 小节且位于 What is this（id=\"about\"）之后，并断言页面包含 cross-platform orchestration、long-term memory、minimal context、single source of truth、acceptance-test、traceability 等关键表述。通过。"
         }
       ]
     },

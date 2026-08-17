@@ -137,3 +137,22 @@ test('insight-subpage: home page links to the insight report subpage', () => {
   assert.match(subpage, /GraphRAG/, 'subpage should discuss GraphRAG');
   assert.match(subpage, /80% more truthful/, 'subpage should cite the NICD study');
 });
+
+test('what-for-section: home page explains the problems ArchGraph solves', () => {
+  // GIVEN the project homepage presents its purpose and architecture
+  // WHEN a visitor opens the homepage
+  // THEN a "What is it for" section follows "What is this" and graphically lists the solved problems
+  assert.match(HTML, /id="what-for"/, 'page should have a What is it for section');
+  const aboutIdx = HTML.indexOf('id="about"');
+  const whatForIdx = HTML.indexOf('id="what-for"');
+  assert.ok(
+    aboutIdx !== -1 && whatForIdx !== -1 && whatForIdx > aboutIdx,
+    'What is it for should appear after What is this'
+  );
+  assert.match(HTML, /cross-platform orchestration/i, 'should mention cross-platform orchestration');
+  assert.match(HTML, /long-term memory/i, 'should mention long-term memory');
+  assert.match(HTML, /minimal context/i, 'should mention minimal context assembly');
+  assert.match(HTML, /single source of truth/i, 'should mention single source of truth');
+  assert.match(HTML, /acceptance-test/i, 'should mention acceptance-test-driven delivery');
+  assert.match(HTML, /traceab/i, 'should mention traceability');
+});
