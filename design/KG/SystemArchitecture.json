@@ -413,6 +413,17 @@
           "Input": "浏览器打开网站首页并点击 Insights",
           "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"insight-subpage\"）：断言 index.html 含指向 docs/industry-insight-graph-driven-agent.html 的链接，且该 HTML 文件存在并包含报告标题与关键内容。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "08545d6",
+          "description": "index.html; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
       ]
     }
   ],
