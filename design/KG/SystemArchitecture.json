@@ -269,6 +269,117 @@
           "value": "COMPLETED"
         }
       ]
+    },
+    {
+      "id": "1334",
+      "name": "Process Cooperation Viewpoint",
+      "type": "Grouping",
+      "description": "表达多个 Agent 角色之间为完成同一任务而进行的协作流程（ArchiMate 流程协作视角）。"
+    },
+    {
+      "description": "用 AML 对主流开源深度研究项目 GPT-Researcher（github.com/assafelovic/gpt-researcher）的多 Agent 研究工作流建模：Planner 规划 → Researcher 并行子研究 → Editor 撰写 → Reviewer 评审 → Publisher 发布，产出带引用来源的研究报告。建模结果见 Process Cooperation Viewpoint（view 177）。",
+      "id": "1335",
+      "name": "用AML建模GPT-Researcher多Agent研究流程",
+      "testcases": [
+        {
+          "Input": "查看 design/KG/SystemArchitecture.json 的 view 177",
+          "acceptanceCriteria": "执行 node --test tests/gpt-researcher-model.test.js：断言图谱包含上述元素与关系。通过。",
+          "description": "GIVEN 知识图谱具备 AML 建模能力；WHEN 读者查看 Process Cooperation Viewpoint（view 177）中的 GPT-Researcher 建模；THEN 图谱包含主流程 Course of Action、5 个 Business Process（Plan/Conduct/Write/Review/Publish）及其 Triggering 链、5 个 Business Role（Planner/Researcher/Editor/Reviewer/Publisher）及其 Assignment、Deliverable→Goal 的 Realization，以及 Constraint 与 Principle 约束。",
+          "name": "AT-1335-01-AML建模GPTResearcher多Agent流程",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
+    },
+    {
+      "description": "GPT-Researcher 多 Agent 研究主流程：从研究查询到发布报告的整体计划（Plan-and-Solve + RAG，参考 STORM 论文）。",
+      "id": "1336",
+      "name": "gpt-researcher-research-program",
+      "type": "Course of Action"
+    },
+    {
+      "description": "规划研究：将研究查询分解为一组子问题，形成研究大纲。",
+      "id": "1337",
+      "name": "Plan Research",
+      "type": "Business Process"
+    },
+    {
+      "description": "执行子研究：并行抓取每个子问题相关的网络/本地文档信息，总结并追踪来源。",
+      "id": "1338",
+      "name": "Conduct Sub-research",
+      "type": "Business Process"
+    },
+    {
+      "description": "撰写报告：过滤并聚合各子研究摘要，撰写研究报告草稿。",
+      "id": "1339",
+      "name": "Write Report",
+      "type": "Business Process"
+    },
+    {
+      "description": "评审报告：审阅草稿，检查事实准确性、客观性与引用完整性，给出修改意见。",
+      "id": "1340",
+      "name": "Review Report",
+      "type": "Business Process"
+    },
+    {
+      "description": "发布报告：生成最终报告，输出 Markdown/PDF/Docx 等格式。",
+      "id": "1341",
+      "name": "Publish Report",
+      "type": "Business Process"
+    },
+    {
+      "description": "规划者：生成研究问题与研究大纲。",
+      "id": "1342",
+      "name": "Planner",
+      "type": "Business Role"
+    },
+    {
+      "description": "研究员：并行收集各子问题的信息并溯源。",
+      "id": "1343",
+      "name": "Researcher",
+      "type": "Business Role"
+    },
+    {
+      "description": "编辑：聚合摘要并撰写报告。",
+      "id": "1344",
+      "name": "Editor",
+      "type": "Business Role"
+    },
+    {
+      "description": "审稿人：评审草稿并提出修改意见。",
+      "id": "1345",
+      "name": "Reviewer",
+      "type": "Business Role"
+    },
+    {
+      "description": "发布者：输出最终研究报告。",
+      "id": "1346",
+      "name": "Publisher",
+      "type": "Business Role"
+    },
+    {
+      "description": "研究报告：包含引用来源的最终报告（Markdown/PDF/Docx）。",
+      "id": "1347",
+      "name": "Research Report",
+      "type": "Deliverable"
+    },
+    {
+      "description": "产出客观、事实性、带引用的研究报告。",
+      "id": "1348",
+      "name": "Produce objective research report",
+      "type": "Goal"
+    },
+    {
+      "description": "局部约束：报告中每个事实必须附引用来源（作用于 Conduct Sub-research）。",
+      "id": "1349",
+      "name": "Cite every fact with source",
+      "type": "Constraint"
+    },
+    {
+      "description": "全局约束：通过多源抓取与交叉验证减少偏见与幻觉。",
+      "id": "1350",
+      "name": "Reduce bias and hallucination",
+      "type": "Principle"
     }
   ],
   "relationships": [
@@ -341,6 +452,186 @@
       "target_id": "1318",
       "source_name": "根据README更新INDEX主页",
       "target_name": "project website"
+    },
+    {
+      "id": "1174",
+      "name": "Realization",
+      "source_id": "1337",
+      "source_name": "Plan Research",
+      "statement": "Plan Research --(Realization)--> gpt-researcher-research-program",
+      "target_id": "1336",
+      "target_name": "gpt-researcher-research-program",
+      "type": "Realization"
+    },
+    {
+      "id": "1175",
+      "name": "Realization",
+      "source_id": "1338",
+      "source_name": "Conduct Sub-research",
+      "statement": "Conduct Sub-research --(Realization)--> gpt-researcher-research-program",
+      "target_id": "1336",
+      "target_name": "gpt-researcher-research-program",
+      "type": "Realization"
+    },
+    {
+      "id": "1176",
+      "name": "Realization",
+      "source_id": "1339",
+      "source_name": "Write Report",
+      "statement": "Write Report --(Realization)--> gpt-researcher-research-program",
+      "target_id": "1336",
+      "target_name": "gpt-researcher-research-program",
+      "type": "Realization"
+    },
+    {
+      "id": "1177",
+      "name": "Realization",
+      "source_id": "1340",
+      "source_name": "Review Report",
+      "statement": "Review Report --(Realization)--> gpt-researcher-research-program",
+      "target_id": "1336",
+      "target_name": "gpt-researcher-research-program",
+      "type": "Realization"
+    },
+    {
+      "id": "1178",
+      "name": "Realization",
+      "source_id": "1341",
+      "source_name": "Publish Report",
+      "statement": "Publish Report --(Realization)--> gpt-researcher-research-program",
+      "target_id": "1336",
+      "target_name": "gpt-researcher-research-program",
+      "type": "Realization"
+    },
+    {
+      "id": "1179",
+      "name": "Triggering",
+      "source_id": "1337",
+      "source_name": "Plan Research",
+      "statement": "Plan Research --(Triggering)--> Conduct Sub-research",
+      "target_id": "1338",
+      "target_name": "Conduct Sub-research",
+      "type": "Triggering"
+    },
+    {
+      "id": "1180",
+      "name": "Triggering",
+      "source_id": "1338",
+      "source_name": "Conduct Sub-research",
+      "statement": "Conduct Sub-research --(Triggering)--> Write Report",
+      "target_id": "1339",
+      "target_name": "Write Report",
+      "type": "Triggering"
+    },
+    {
+      "id": "1181",
+      "name": "Triggering",
+      "source_id": "1339",
+      "source_name": "Write Report",
+      "statement": "Write Report --(Triggering)--> Review Report",
+      "target_id": "1340",
+      "target_name": "Review Report",
+      "type": "Triggering"
+    },
+    {
+      "id": "1182",
+      "name": "Triggering",
+      "source_id": "1340",
+      "source_name": "Review Report",
+      "statement": "Review Report --(Triggering)--> Publish Report",
+      "target_id": "1341",
+      "target_name": "Publish Report",
+      "type": "Triggering"
+    },
+    {
+      "id": "1183",
+      "name": "Assignment",
+      "source_id": "1342",
+      "source_name": "Planner",
+      "statement": "Planner --(Assignment)--> Plan Research",
+      "target_id": "1337",
+      "target_name": "Plan Research",
+      "type": "Assignment"
+    },
+    {
+      "id": "1184",
+      "name": "Assignment",
+      "source_id": "1343",
+      "source_name": "Researcher",
+      "statement": "Researcher --(Assignment)--> Conduct Sub-research",
+      "target_id": "1338",
+      "target_name": "Conduct Sub-research",
+      "type": "Assignment"
+    },
+    {
+      "id": "1185",
+      "name": "Assignment",
+      "source_id": "1344",
+      "source_name": "Editor",
+      "statement": "Editor --(Assignment)--> Write Report",
+      "target_id": "1339",
+      "target_name": "Write Report",
+      "type": "Assignment"
+    },
+    {
+      "id": "1186",
+      "name": "Assignment",
+      "source_id": "1345",
+      "source_name": "Reviewer",
+      "statement": "Reviewer --(Assignment)--> Review Report",
+      "target_id": "1340",
+      "target_name": "Review Report",
+      "type": "Assignment"
+    },
+    {
+      "id": "1187",
+      "name": "Assignment",
+      "source_id": "1346",
+      "source_name": "Publisher",
+      "statement": "Publisher --(Assignment)--> Publish Report",
+      "target_id": "1341",
+      "target_name": "Publish Report",
+      "type": "Assignment"
+    },
+    {
+      "id": "1188",
+      "name": "Association",
+      "source_id": "1341",
+      "source_name": "Publish Report",
+      "statement": "Publish Report --(Association)--> Research Report",
+      "target_id": "1347",
+      "target_name": "Research Report",
+      "type": "Association"
+    },
+    {
+      "id": "1189",
+      "name": "Realization",
+      "source_id": "1347",
+      "source_name": "Research Report",
+      "statement": "Research Report --(Realization)--> Produce objective research report",
+      "target_id": "1348",
+      "target_name": "Produce objective research report",
+      "type": "Realization"
+    },
+    {
+      "id": "1190",
+      "name": "Association",
+      "source_id": "1349",
+      "source_name": "Cite every fact with source",
+      "statement": "Cite every fact with source --(Association)--> Conduct Sub-research",
+      "target_id": "1338",
+      "target_name": "Conduct Sub-research",
+      "type": "Association"
+    },
+    {
+      "id": "1191",
+      "name": "Influence",
+      "source_id": "1350",
+      "source_name": "Reduce bias and hallucination",
+      "statement": "Reduce bias and hallucination --(Influence)--> Produce objective research report",
+      "target_id": "1348",
+      "target_name": "Produce objective research report",
+      "type": "Influence"
     }
   ],
   "views": [
@@ -371,7 +662,8 @@
         "1321",
         "1331",
         "1332",
-        "1333"
+        "1333",
+        "1335"
       ],
       "included_relationships": [
         "1162",
@@ -397,10 +689,55 @@
       "view_name": "SystemArchitecture",
       "included_elements": [
         "1249",
-        "1240"
+        "1240",
+        "1334"
       ],
       "included_relationships": [
         "1161"
+      ]
+    },
+    {
+      "view_id": "177",
+      "view_name": "GPT-Researcher Multi-Agent Research",
+      "parent_element_id": "1334",
+      "parent_element_name": "Process Cooperation Viewpoint",
+      "description": "用 AML 对 GPT-Researcher 多 Agent 研究工作流的建模视图：Planner 规划 → Researcher 并行子研究 → Editor 撰写 → Reviewer 评审 → Publisher 发布。",
+      "included_elements": [
+        "1336",
+        "1337",
+        "1338",
+        "1339",
+        "1340",
+        "1341",
+        "1342",
+        "1343",
+        "1344",
+        "1345",
+        "1346",
+        "1347",
+        "1348",
+        "1349",
+        "1350"
+      ],
+      "included_relationships": [
+        "1174",
+        "1175",
+        "1176",
+        "1177",
+        "1178",
+        "1179",
+        "1180",
+        "1181",
+        "1182",
+        "1183",
+        "1184",
+        "1185",
+        "1186",
+        "1187",
+        "1188",
+        "1189",
+        "1190",
+        "1191"
       ]
     }
   ]
