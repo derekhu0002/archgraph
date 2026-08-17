@@ -119,7 +119,16 @@
           "description": "design/KG/SystemArchitecture.json"
         }
       ],
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、全局架构图、核心原则、仓库结构图、如何复用本框架（.argo/、agent-host 配置、.feap 模型），并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。"
+      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、全局架构图、核心原则、仓库结构图、如何复用本框架（.argo/、agent-host 配置、.feap 模型），并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。",
+      "testcases": [
+        {
+          "name": "AT-1318-01-自定义域名访问",
+          "description": "GIVEN 已在 DNS 提供商（Cloudflare）为 archgraph.derekworkspacev5.com 配置指向 derekhu0002.github.io 的 CNAME 记录，且仓库发布源根目录含 CNAME 文件；WHEN 访客通过 https://archgraph.derekworkspacev5.com/ 访问网站；THEN 返回与 https://derekhu0002.github.io/archgraph/ 相同的 ArchGraph 项目主页内容。",
+          "type": "Acceptance Test",
+          "Input": "浏览器访问 https://archgraph.derekworkspacev5.com/",
+          "acceptanceCriteria": "执行 node --test tests/custom-domain.test.js：断言 CNAME 文件内容恰为 archgraph.derekworkspacev5.com；并对 archgraph.derekworkspacev5.com 做 DNS CNAME 解析，断言其指向 derekhu0002.github.io（DNS 记录未配置时该用例跳过）。通过。"
+        }
+      ]
     },
     {
       "id": "1319",
