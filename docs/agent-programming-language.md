@@ -1,17 +1,16 @@
-# Agent 编程语言规范（APL）
+# Agent 建模语言（AML）
 
-> 基于知识图谱（ArchiMate 3.2）的 Agent 行为编程词汇与语法。
+> 基于知识图谱（ArchiMate 3.2）的 Agent 行为建模词汇与语法。
 >
 > - 元模型：ArchiMate 3.2
 > - 图 Schema：`.argo/schema/SystemArchitecture.schema.json`
-> - 规范图：`design/KG/SystemArchitecture.json`
 > - 状态：v0.1（草案）
 
 ## 1. 概述
 
 ### 1.1 目的
 
-本规范定义一套**基于知识图谱的 Agent 编程语言（Agent Programming Language, APL）**，用于描述"一个 Agent 如何完成一个任务"。它把 ArchiMate 3.2 的元素与关系用作编程原语：
+本规范定义一套**基于知识图谱的 Agent 建模语言（Agent Modeling Language, AML）**，用于描述"一个 Agent 如何完成一个任务"。它把 ArchiMate 3.2 的元素与关系用作建模原语：
 
 - **元素 = 词汇（类型系统）**：用受控的 `archimateElementType` 枚举表达程序中的各类概念（任务、角色、行为、约束、产物等）。
 - **关系 = 语法（关键字）**：用受控的 `archimateRelationshipType` 枚举表达这些概念之间的结构、控制流与数据流。
@@ -38,15 +37,15 @@ flowchart LR
 
 ### 1.3 设计原则
 
-1. **不改 Schema**：APL 只使用 `SystemArchitecture.schema.json` 中已存在的 `archimateElementType` 与 `archimateRelationshipType` 枚举，通过约定赋予编程语义，不新增字段。
+1. **不改 Schema**：AML 只使用 `SystemArchitecture.schema.json` 中已存在的 `archimateElementType` 与 `archimateRelationshipType` 枚举，通过约定赋予建模语义，不新增字段。
 2. **声明式优先**：图谱声明"要什么、用什么做、不许做什么、怎样算完成"，由 Agent 解释执行；命令式细节下沉到 `SKILL.md` 与 `*.instructions.md`。
 3. **验收外化**：每个验收用例从元素**外部**验证（外部可观察行为），不验证内部实现。
 
-## 2. 词汇表：元素 → 编程概念
+## 2. 词汇表：元素 → 建模概念
 
 ### 2.1 行为层（做什么、怎么做）
 
-| 元素类型 | 编程语义 | 说明 |
+| 元素类型 | 建模语义 | 说明 |
 |---|---|---|
 | `Work Package` | **Task（任务）** | Agent 领取的最小可执行工作单元；挂 `testcases` 作为验收 |
 | `Course of Action` | **Program / main（主流程）** | 达成目标的步骤计划，程序入口 |
@@ -57,7 +56,7 @@ flowchart LR
 
 ### 2.2 执行者层（谁来执行）
 
-| 元素类型 | 编程语义 | 说明 |
+| 元素类型 | 建模语义 | 说明 |
 |---|---|---|
 | `Business Actor` | **持久化 Agent 本体（人）** | 持久实体：有身份、长期记忆、可反复参与多次执行 |
 | `Business Role` | **Role Type（角色类型）** | 可复用角色定义，Actor 通过 `Assignment` 扮演 |
@@ -68,7 +67,7 @@ flowchart LR
 
 ### 2.3 事件/控制层（何时、按什么顺序）
 
-| 元素类型 | 编程语义 | 说明 |
+| 元素类型 | 建模语义 | 说明 |
 |---|---|---|
 | `Business Event` | **Event（事件/触发条件）** | 程序入口的触发 |
 | `Implementation Event` | **Milestone / Checkpoint（里程碑）** | 检查点、阶段闸门 |
@@ -77,7 +76,7 @@ flowchart LR
 
 ### 2.4 服务/接口层（对外契约）
 
-| 元素类型 | 编程语义 | 说明 |
+| 元素类型 | 建模语义 | 说明 |
 |---|---|---|
 | `Business Service` | **Service / API（服务契约）** | 对外可调用的行为 |
 | `Business Interface` | **Interface（接口）** | 边界与接入点 |
@@ -86,7 +85,7 @@ flowchart LR
 
 ### 2.5 结构/数据层（操作什么、产出什么）
 
-| 元素类型 | 编程语义 | 说明 |
+| 元素类型 | 建模语义 | 说明 |
 |---|---|---|
 | `Business Object` | **Object / State（状态对象）** | 被读写的对象 |
 | `Data Object` | **Data（数据）** | 数据 |
@@ -98,7 +97,7 @@ flowchart LR
 
 ### 2.6 意图/约束层（为什么做、不能做什么）
 
-| 元素类型 | 编程语义 | 说明 |
+| 元素类型 | 建模语义 | 说明 |
 |---|---|---|
 | `Goal` | **Goal（目标）** | 要达成的目标 |
 | `Outcome` | **Assertion（期望结果）** | 可被 `testcase` 验证的结果 |
@@ -117,7 +116,7 @@ flowchart LR
 
 ### 2.7 组织/环境层
 
-| 元素类型 | 编程语义 | 说明 |
+| 元素类型 | 建模语义 | 说明 |
 |---|---|---|
 | `Grouping` | **Namespace（命名空间/模块）** | 组织单元，如 Viewpoint |
 | `Plateau` | **Stage / State（阶段状态）** | 状态快照 |
@@ -127,7 +126,7 @@ flowchart LR
 
 ## 3. 语法：关系 → 语法语义
 
-关系类型是 APL 的关键字：
+关系类型是 AML 的关键字：
 
 | 关系类型 | 语法语义 | 典型用法 |
 |---|---|---|
@@ -145,7 +144,7 @@ flowchart LR
 
 ## 4. 验收断言：testcases
 
-`testcases` 是 APL 的**单元测试/断言**，挂载在元素上，必须满足：
+`testcases` 是 AML 的**单元测试/断言**，挂载在元素上，必须满足：
 
 1. **GIVEN-WHEN-THEN 格式**：`description` 用 GIVEN-WHEN-THEN 描述规格，便于人读。
 2. **可执行**：`acceptanceCriteria` 必须是具体的、工作区相对的可执行入口（如 `node --test tests/xxx.test.js`），而非描述性文字。
@@ -165,7 +164,7 @@ flowchart LR
 
 ## 5. 持久化元素 vs 运行时实例
 
-ArchiMate 是**设计时语言**，建模"类型/定义"，不建模运行时实例。APL 严格区分：
+ArchiMate 是**设计时语言**，建模"类型/定义"，不建模运行时实例。AML 严格区分：
 
 | 类别 | 是否进图谱 | 例子 |
 |---|---|---|
