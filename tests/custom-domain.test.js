@@ -3,7 +3,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
-const { resolve } = require('node:dns').promises;
+const { lookup } = require('node:dns').promises;
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -31,17 +31,18 @@ test('custom-domain: DNS resolves to GitHub Pages', async (t) => {
   // GIVEN the DNS provider has configured A records for the apex custom domain
   // WHEN a visitor resolves the custom domain
   // THEN it resolves to the GitHub Pages IP addresses
-  let addresses;
+  let results;
   try {
-    addresses = await resolve(CUSTOM_DOMAIN, 'A');
+    results = await lookup(CUSTOM_DOMAIN, { all: true });
   } catch (err) {
     t.skip(
       `DNS for ${CUSTOM_DOMAIN} is not configured yet (${err.code || err.message}); add the GitHub Pages A records in your DNS provider`
     );
     return;
   }
+  const addresses = results.map((entry) => entry.address);
   assert.ok(
-    Array.isArray(addresses) && addresses.length > 0,
+    addresses.length > 0,
     `expected ${CUSTOM_DOMAIN} to resolve to at least one A record`
   );
   assert.ok(
