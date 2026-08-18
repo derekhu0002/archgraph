@@ -1111,7 +1111,12 @@
         {
           "name": "status",
           "value": "BLOCKED",
-          "description": "wechat:draft 创建失败：40164 invalid ip 120.229.12.28 not in whitelist（需在公众号后台将当前公网 IP 加入白名单）"
+          "description": "草稿已创建（media_id 已记录）；freepublish 与 sendall 均被 48001 api unauthorized 拒绝（账号无 API 发布/群发权限），需在公众号后台手动发布"
+        },
+        {
+          "name": "media_id",
+          "value": "BRZAMZ3b-CaOBH8qdG2KTet7kAaHQ8GK03n8aoe7vKH_Bjq2L3aDrpbM36sNE3iY",
+          "description": "WeChat draft media_id"
         },
         {
           "name": "deliveryStatus",
