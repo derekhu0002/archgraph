@@ -5,9 +5,11 @@ const { promisify } = require('util');
 
 const execFileAsync = promisify(execFile);
 
-const repoRoot = process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..');
+const {
+  getWorkspaceRoot,
+} = require('./argo-paths.js');
+
+const repoRoot = getWorkspaceRoot();
 const PYTHON_EXECUTABLE = resolvePythonExecutable(repoRoot);
 const DEFAULT_ARCHITECTURE_GRAPH_PATH = 'design/KG/SystemArchitecture.json';
 const FAILURE_RECORDS_PATH = 'design/KG/test-failure-records.json';

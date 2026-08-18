@@ -1,10 +1,12 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const neo4j = require('neo4j-driver');
 const {
   resolveExternalProductionConfig,
 } = require('./graph-rag/externalProductionConfig.js');
+const {
+  getWorkspaceRoot,
+} = require('./argo-paths.js');
 
 const DEFAULT_GRAPH_PATH = 'design/KG/SystemArchitecture.json';
 const SYNC_STATE_RELATIVE_PATH = '.argo/temp/neo4j-system-architecture-sync-state.json';
@@ -24,10 +26,16 @@ const DISALLOWED_RUNTIME_OVERRIDE_FIELDS = Object.freeze([
   'embeddingCredential',
 ]);
 
+let neo4jDriverModule;
+function requireNeo4jDriver() {
+  if (!neo4jDriverModule) {
+    neo4jDriverModule = require('neo4j-driver');
+  }
+  return neo4jDriverModule;
+}
+
 function getRepoRoot() {
-  return process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..');
+  return getWorkspaceRoot();
 }
 
 function resolveArchitecturePath(architecturePath = DEFAULT_GRAPH_PATH) {
@@ -117,6 +125,7 @@ function rejectRuntimeConfigurationOverrides(overrides) {
 
 function createDriver(config = {}) {
   const resolved = getNeo4jConfig(config);
+  const neo4j = requireNeo4jDriver();
   return neo4j.driver(
     resolved.uri,
     neo4j.auth.basic(resolved.username, resolved.password),
@@ -742,7 +751,7 @@ function arraysEqual(left, right) {
 }
 
 function toNumber(value) {
-  if (neo4j.isInt(value)) {
+  if (requireNeo4jDriver().isInt(value)) {
     return value.toNumber();
   }
   return Number(value);

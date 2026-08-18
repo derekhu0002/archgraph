@@ -6,22 +6,27 @@ const { promisify } = require('node:util');
 
 const execFileAsync = promisify(execFile);
 
+const {
+  getArgoRoot,
+  getWorkspaceRoot,
+} = require('./argo-paths.js');
+
 const HANDOFF_STAGES = ['intent-to-implementation', 'implementation-to-coding'];
 const DEFAULT_TRACE_PROPOSAL_PATH = 'design/KG/ImplementationToIntentTraceProposal.json';
 const DEFAULT_ARCHITECTURE_GRAPH_PATH = 'design/KG/SystemArchitecture.json';
 
 const SCRIPT_CANDIDATES = {
   validateSystemArchitecture: [
-    '.argo/scripts/validateSystemArchitecture.js',
+    'scripts/validateSystemArchitecture.js',
   ],
   validateStageHandoff: [
-    '.argo/scripts/validateStageHandoff.js',
+    'scripts/validateStageHandoff.js',
   ],
   validateTraceProposal: [
-    '.argo/scripts/validateTraceProposal.js',
+    'scripts/validateTraceProposal.js',
   ],
   runArchitectureTests: [
-    '.argo/scripts/runArchitectureTests.js',
+    'scripts/runArchitectureTests.js',
   ],
 };
 
@@ -81,14 +86,20 @@ const TOOLS = [
 ];
 
 function resolveWorkspaceRoot() {
-  return process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..');
+  return getWorkspaceRoot();
 }
 
 function resolveScriptPath(workspaceRoot, candidates) {
+  const argoRoot = getArgoRoot();
   for (const relativePath of candidates) {
-    const absolutePath = path.join(workspaceRoot, relativePath);
+    const absolutePath = path.join(argoRoot, relativePath);
+    if (fs.existsSync(absolutePath)) {
+      return { absolutePath, relativePath };
+    }
+  }
+
+  for (const relativePath of candidates) {
+    const absolutePath = path.join(workspaceRoot, '.argo', relativePath);
     if (fs.existsSync(absolutePath)) {
       return { absolutePath, relativePath };
     }

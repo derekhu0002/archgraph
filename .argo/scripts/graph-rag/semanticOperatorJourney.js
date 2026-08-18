@@ -2,6 +2,10 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 
+const {
+  getWorkspaceRoot,
+} = require('../argo-paths.js');
+
 const LIVE_PROVIDER_GATE = 'ARGO_LIVE_PROVIDER_E2E';
 const MUTATION_VECTOR_GATE = 'ARGO_W31_LIVE_MUTATION_VECTOR_E2E';
 const SEMANTIC_CHANNELS = Object.freeze(['Element', 'ArchitectureRelationship', 'View']);
@@ -360,7 +364,7 @@ function canonicalInitVersions(request) {
   const repositoryRoot = path.resolve(
     request.repositoryRoot
     || (request.workspace && request.workspace.workspaceRoot)
-    || process.cwd(),
+    || getWorkspaceRoot(),
   );
   const graph = JSON.parse(fs.readFileSync(
     path.join(repositoryRoot, 'design', 'KG', 'SystemArchitecture.json'),

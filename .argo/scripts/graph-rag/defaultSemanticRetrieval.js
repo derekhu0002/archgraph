@@ -10,6 +10,10 @@ const {
 const {
   createProductionGraphRagRuntime,
 } = require('./productionGraphRagRuntime.js');
+const {
+  getWorkspaceRoot,
+  resolveArgoPath,
+} = require('../argo-paths.js');
 
 const APPROVED_SOURCE_KEYS = Object.freeze([
   'ARGO_EMBEDDING_BASE_URL',
@@ -199,9 +203,7 @@ async function createTestComposition(composition) {
 
 async function createProductionComposition(dependencies) {
   const repositoryRoot = dependencies.repositoryRoot
-    || process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..', '..');
+    || getWorkspaceRoot();
   let configurationEvidence;
   return Object.freeze({
     async resolveConfiguration() {
@@ -303,10 +305,8 @@ async function attemptAutomaticAlignment({ composition, request, alignment }) {
 
 function runScriptOwnedSemanticAlignment(operation) {
   const childProcess = require('node:child_process');
-  const repositoryRoot = process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..', '..');
-  const scriptPath = path.join(repositoryRoot, '.argo', 'scripts', 'ensureArgoHarnessEnvironment.js');
+  const repositoryRoot = getWorkspaceRoot();
+  const scriptPath = resolveArgoPath('scripts', 'ensureArgoHarnessEnvironment.js');
   const result = childProcess.spawnSync(process.execPath, [scriptPath], {
     cwd: repositoryRoot,
     encoding: 'utf8',

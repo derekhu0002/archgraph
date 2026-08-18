@@ -3,6 +3,9 @@ const path = require('node:path');
 const {
   createSystemMetadataCommandAdapter,
 } = require('./systemMetadataCommandAdapter.js');
+const {
+  getArgoEnvPath,
+} = require('../argo-paths.js');
 
 const CONFIG_KEYS = Object.freeze([
   'ARGO_EMBEDDING_BASE_URL',
@@ -81,7 +84,7 @@ async function resolveTrusted({
 }) {
   if (!issuedAdapters.has(source)) throw safeError('SOURCE_ADAPTER_UNTRUSTED');
   const filesystem = adapters.filesystem || fs;
-  const canonicalFilePath = path.join(repositoryRoot, '.argo', '.env');
+  const canonicalFilePath = getArgoEnvPath();
   const configuredFilePath = source.filePath();
   const fileExists = filesystem.existsSync(configuredFilePath);
   if (fileExists || path.resolve(configuredFilePath) !== path.resolve(canonicalFilePath)) {
@@ -336,8 +339,9 @@ function preflightFile({ canonicalFilePath, configuredFilePath, filesystem, adap
   let tracked;
   let aclEvidence;
   if (adapters.systemMetadata) {
-    ignored = adapters.systemMetadata.isSecretFileIgnored();
-    tracked = adapters.systemMetadata.isSecretFileTracked();
+    const insideRepository = adapters.systemMetadata.isSecretFileInsideGitRepository().status === 0;
+    ignored = insideRepository ? adapters.systemMetadata.isSecretFileIgnored() : true;
+    tracked = insideRepository ? adapters.systemMetadata.isSecretFileTracked() : false;
     const identityResult = adapters.systemMetadata.readCurrentIdentity();
     const aclResult = adapters.systemMetadata.readSecretFileAcl();
     aclEvidence = {
@@ -387,7 +391,7 @@ function parseAcl(output) {
 
 function productionSourceBehavior(repositoryRoot) {
   return Object.freeze({
-    expectedFilePath: path.join(repositoryRoot, '.argo', '.env'),
+    expectedFilePath: getArgoEnvPath(),
     readProcessKey: key => process.env[key],
     readFileEntries: filePath => parseEnv(fs.readFileSync(filePath, 'utf8')),
   });

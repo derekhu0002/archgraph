@@ -17,6 +17,10 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 
+const {
+  getWorkspaceRoot,
+} = require('../argo-paths.js');
+
 const execFileAsync = promisify(execFile);
 
 const PYTHON_EXECUTABLE = resolvePythonExecutable();
@@ -157,9 +161,7 @@ async function runCommand(command, args, cwd, extraEnv = undefined) {
 }
 
 function resolvePythonExecutable() {
-    const workspaceRoot = process.env.ARGO_REPO_ROOT
-        || process.env.WORKSPACE_FOLDER
-        || path.resolve(__dirname, '..', '..', '..');
+    const workspaceRoot = getWorkspaceRoot();
 
     const candidates = process.platform === 'win32'
         ? [

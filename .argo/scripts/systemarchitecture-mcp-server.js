@@ -3,6 +3,11 @@ const path = require('node:path');
 const readline = require('node:readline');
 const crypto = require('node:crypto');
 
+const {
+  getArgoRoot,
+  getWorkspaceRoot,
+} = require('./argo-paths.js');
+
 const DEFAULT_GRAPH_PATH = 'design/KG/SystemArchitecture.json';
 const LEGAL_QUERY_PURPOSES = new Set([
   'intent-decision',
@@ -425,9 +430,7 @@ function mutationInputSchema() {
 }
 
 function resolveWorkspaceRoot() {
-  return process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..');
+  return getWorkspaceRoot();
 }
 
 function initializeWorkspace(request) {
@@ -459,6 +462,11 @@ function normalizeRelativePath(value) {
 }
 
 function resolveSchemaPath(workspaceRoot) {
+  const bundledSchemaPath = path.join(getArgoRoot(), 'schema', 'SystemArchitecture.schema.json');
+  if (fs.existsSync(bundledSchemaPath)) {
+    return { absolutePath: bundledSchemaPath, relativePath: SCHEMA_PATH_CANDIDATES[0] };
+  }
+
   for (const candidate of SCHEMA_PATH_CANDIDATES) {
     const absolutePath = path.join(workspaceRoot, candidate);
     if (fs.existsSync(absolutePath)) {

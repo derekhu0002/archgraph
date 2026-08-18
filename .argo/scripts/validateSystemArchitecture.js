@@ -1,12 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 
-const repoRoot = process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..');
+const {
+  getArgoRoot,
+  getWorkspaceRoot,
+} = require('./argo-paths.js');
+
+const repoRoot = getWorkspaceRoot();
 const graphRelativePath = path.join('design', 'KG', 'SystemArchitecture.json');
 const graphPath = path.join(repoRoot, graphRelativePath);
 const schemaPathCandidates = [
+    path.join(getArgoRoot(), 'schema', 'SystemArchitecture.schema.json'),
     path.join(repoRoot, '.argo', 'schema', 'SystemArchitecture.schema.json'),
 ];
 

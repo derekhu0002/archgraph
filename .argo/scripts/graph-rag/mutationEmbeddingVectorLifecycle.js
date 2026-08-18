@@ -3,6 +3,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { AsyncLocalStorage } = require('node:async_hooks');
 
+const {
+  getWorkspaceRoot,
+} = require('../argo-paths.js');
+
 const { createLiveEmbeddingIndexGate } = require('./liveEmbeddingIndexGate.js');
 const { createApprovedNeo4jBoundary } = require('./liveEmbeddingNeo4jBoundary.js');
 const {
@@ -32,9 +36,7 @@ const PRODUCTION_READINESS_PATH = '.argo/temp/system-architecture-semantic-readi
 function createProductionSemanticReadinessStore(options = {}) {
   const repositoryRoot = path.resolve(
     options.repositoryRoot
-    || process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.join(__dirname, '..', '..', '..'),
+    || getWorkspaceRoot(),
   );
   const recordPath = path.join(repositoryRoot, ...PRODUCTION_READINESS_PATH.split('/'));
 
@@ -123,9 +125,7 @@ function hasPersistentLifecyclePorts(dependencies) {
 function createProductionPersistentLifecycleDependencies(options = {}) {
   const repositoryRoot = path.resolve(
     options.repositoryRoot
-    || process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.join(__dirname, '..', '..', '..'),
+    || getWorkspaceRoot(),
   );
   const readinessStore = createProductionSemanticReadinessStore({ repositoryRoot });
   let resources;
@@ -713,7 +713,7 @@ function safePersistentError(category, action) {
 }
 
 function createMutationEmbeddingVectorLifecycle(dependencies = {}) {
-  const repositoryRoot = path.resolve(dependencies.repositoryRoot || path.join(__dirname, '..', '..', '..'));
+  const repositoryRoot = path.resolve(dependencies.repositoryRoot || getWorkspaceRoot());
   const neo4j = dependencies.neo4j || require('neo4j-driver');
   const fetchImpl = dependencies.fetch || global.fetch;
 

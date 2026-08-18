@@ -2,6 +2,10 @@ const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 
+const {
+  getWorkspaceRoot,
+} = require('./argo-paths.js');
+
 const DEFAULT_ARCHITECTURE_PATH = 'design/KG/SystemArchitecture.json';
 const DEFAULT_OUTPUT_DIR = '.argo/temp/architecture_analysis';
 
@@ -100,7 +104,7 @@ function parseArgs(args) {
 }
 
 function resolveWorkspaceRoot(input) {
-  return path.resolve(input || process.env.ARGO_REPO_ROOT || process.env.WORKSPACE_FOLDER || path.resolve(__dirname, '..', '..'));
+  return path.resolve(input || getWorkspaceRoot());
 }
 
 function resolveWorkspacePath(workspaceRoot, relativePath) {

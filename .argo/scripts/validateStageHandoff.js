@@ -1,9 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const repoRoot = process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..');
+const {
+  getArgoRoot,
+  getWorkspaceRoot,
+} = require('./argo-paths.js');
+
+const repoRoot = getWorkspaceRoot();
 const SYSTEM_ARCHITECTURE_PATH = 'design/KG/SystemArchitecture.json';
 const SUPPORTED_ACCEPTANCE_ENTRY_EXTENSIONS = new Set(['.js', '.cjs', '.mjs', '.py', '.java']);
 const DISALLOWED_ACCEPTANCE_CRITERIA_PATTERNS = [
@@ -52,7 +55,7 @@ function main() {
 
 function validateStage(stage, config, errors) {
     const handoffAbsolutePath = path.join(repoRoot, config.filePath);
-    const schemaAbsolutePath = path.join(repoRoot, config.schemaPath);
+    const schemaAbsolutePath = resolveSchemaAbsolutePath(config.schemaPath);
 
     if (!fs.existsSync(schemaAbsolutePath)) {
         errors.push(`${stage}: schema file is missing at ${config.schemaPath}`);
@@ -73,6 +76,14 @@ function validateStage(stage, config, errors) {
     }
 
     config.validate(document, errors, config.filePath);
+}
+
+function resolveSchemaAbsolutePath(schemaPath) {
+    const bundledCandidate = path.join(getArgoRoot(), 'schema', path.basename(schemaPath));
+    if (fs.existsSync(bundledCandidate)) {
+        return bundledCandidate;
+    }
+    return path.join(repoRoot, schemaPath);
 }
 
 function validateIntentToImplementation(document, errors, filePath) {

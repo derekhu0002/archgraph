@@ -1,9 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const repoRoot = process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..');
+const {
+  getArgoRoot,
+  getWorkspaceRoot,
+} = require('./argo-paths.js');
+
+const repoRoot = getWorkspaceRoot();
 const DEFAULT_PROPOSAL_PATH = 'design/KG/ImplementationToIntentTraceProposal.json';
 const TRACE_PROPOSAL_SCHEMA_PATH = '.argo/schema/ImplementationToIntentTraceProposal.schema.json';
 
@@ -22,9 +25,17 @@ function main() {
     console.log(`Trace proposal validation passed for: ${proposalPath}`);
 }
 
+function resolveSchemaAbsolutePath(schemaPath) {
+    const bundledCandidate = path.join(getArgoRoot(), 'schema', path.basename(schemaPath));
+    if (fs.existsSync(bundledCandidate)) {
+        return bundledCandidate;
+    }
+    return path.join(repoRoot, schemaPath);
+}
+
 function validateTraceProposal(proposalPath) {
     const errors = [];
-    const schemaAbsolutePath = path.join(repoRoot, TRACE_PROPOSAL_SCHEMA_PATH);
+    const schemaAbsolutePath = resolveSchemaAbsolutePath(TRACE_PROPOSAL_SCHEMA_PATH);
     if (!fs.existsSync(schemaAbsolutePath)) {
         errors.push(`schema file is missing at ${TRACE_PROPOSAL_SCHEMA_PATH}`);
         return errors;

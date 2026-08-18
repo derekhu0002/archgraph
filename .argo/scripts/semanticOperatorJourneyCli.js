@@ -2,6 +2,9 @@ const path = require('node:path');
 const {
   semanticOperatorErrorPayload,
 } = require('./graph-rag/semanticOperatorError.js');
+const {
+  getWorkspaceRoot,
+} = require('./argo-paths.js');
 
 async function runSemanticOperatorCommand({ command, options = {}, journey }) {
   if (!journey) {
@@ -24,9 +27,7 @@ async function runCliProcess({
   const command = argv[0];
   const parsedOptions = parseOptions(argv.slice(1));
   const repositoryRoot = dependencies.repositoryRoot
-    || process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..');
+    || getWorkspaceRoot();
   const options = {
     ...parsedOptions,
     approvedConfigurationRequest: {

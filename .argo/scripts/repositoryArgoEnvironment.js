@@ -1,22 +1,49 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+const {
+  getArgoEnvPath,
+} = require('./argo-paths.js');
+
 function loadRepositoryArgoEnvironment(workspaceRoot) {
-  const envPath = path.join(workspaceRoot, '.argo', '.env');
+  const argoEnvPath = getArgoEnvPath();
+  const workspaceEnvPath = path.join(workspaceRoot, '.argo', '.env');
   const result = {
     status: 'missing',
-    path: normalizeRelativePath(path.relative(workspaceRoot, envPath)),
+    path: normalizeRelativePath(path.relative(workspaceRoot, argoEnvPath)),
     loadedBeforeProjection: true,
     assignedCount: 0,
     preservedProcessCount: 0,
+    sourcePaths: [],
   };
 
-  if (!fs.existsSync(envPath)) {
+  const candidatePaths = [argoEnvPath];
+  if (workspaceEnvPath !== argoEnvPath) {
+    candidatePaths.push(workspaceEnvPath);
+  }
+
+  const merged = new Map();
+  const loadedPaths = [];
+  for (const envPath of candidatePaths) {
+    if (!fs.existsSync(envPath)) {
+      continue;
+    }
+    for (const [key, value] of parseRepositoryEnvFile(fs.readFileSync(envPath, 'utf8'))) {
+      merged.set(key, value);
+    }
+    loadedPaths.push(envPath);
+  }
+
+  if (loadedPaths.length === 0) {
     return result;
   }
 
-  const entries = parseRepositoryEnvFile(fs.readFileSync(envPath, 'utf8'));
-  for (const [key, value] of entries) {
+  result.status = 'loaded';
+  result.sourcePaths = loadedPaths.map(
+    envPath => normalizeRelativePath(path.relative(workspaceRoot, envPath)),
+  );
+
+  for (const [key, value] of merged) {
     if (process.env[key] === undefined) {
       process.env[key] = value;
       result.assignedCount += 1;
@@ -25,7 +52,6 @@ function loadRepositoryArgoEnvironment(workspaceRoot) {
     }
   }
 
-  result.status = 'loaded';
   return result;
 }
 

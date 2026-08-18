@@ -14,6 +14,9 @@ const {
 const {
   loadRepositoryArgoEnvironment,
 } = require('./repositoryArgoEnvironment.js');
+const {
+  getWorkspaceRoot,
+} = require('./argo-paths.js');
 const canonicalSemanticInitStorage = new AsyncLocalStorage();
 
 const HANDOFF_FILES_TO_RESET = [
@@ -361,9 +364,7 @@ function mutationInputSchema() {
 }
 
 function resolveWorkspaceRoot() {
-  return process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..');
+  return getWorkspaceRoot();
 }
 
 async function callTool(name, args = {}, progressToken = null, dependencies = undefined) {

@@ -19,6 +19,10 @@ const {
 const {
   loadRepositoryArgoEnvironment,
 } = require('./repositoryArgoEnvironment.js');
+const {
+  getWorkspaceRoot,
+  resolveArgoPath,
+} = require('./argo-paths.js');
 
 const REQUIRED_TOOL_NAMES = [
   'getSystemArchitecture',
@@ -92,9 +96,7 @@ function parseArgs(argv) {
 }
 
 function resolveWorkspaceRoot() {
-  return process.env.ARGO_REPO_ROOT
-    || process.env.WORKSPACE_FOLDER
-    || path.resolve(__dirname, '..', '..');
+  return getWorkspaceRoot();
 }
 
 async function ensureCanonicalSemanticLifecycle({ checkOnly, workspaceRoot, neo4j }) {
@@ -130,7 +132,7 @@ async function ensureCanonicalSemanticLifecycle({ checkOnly, workspaceRoot, neo4
 }
 
 function verifyArgoMcpServer({ workspaceRoot }) {
-  const serverPath = path.join(workspaceRoot, '.argo', 'scripts', 'argo-mcp-server.js');
+  const serverPath = resolveArgoPath('scripts', 'argo-mcp-server.js');
   const requests = [
     { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'argo-init-skill', version: '1' } } },
     { jsonrpc: '2.0', method: 'notifications/initialized', params: {} },

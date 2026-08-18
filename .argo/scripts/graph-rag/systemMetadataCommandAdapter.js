@@ -1,9 +1,14 @@
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
 
+const {
+  getArgoEnvPath,
+} = require('../argo-paths.js');
+
 const CAPABILITY_NAMES = Object.freeze([
   'isSecretFileIgnored',
   'isSecretFileTracked',
+  'isSecretFileInsideGitRepository',
   'readCurrentIdentity',
   'readSecretFileAcl',
 ]);
@@ -121,7 +126,8 @@ function createAdapter({
   mutateInvocation,
   forbiddenValues,
 }) {
-  const canonicalPath = path.join(repositoryRoot, '.argo', '.env');
+  const canonicalPath = getArgoEnvPath();
+  const gitDirectory = path.dirname(canonicalPath);
   const sanitizedEnvironment = Object.freeze(Object.fromEntries(
     ['PATH', 'PATHEXT', 'SystemRoot', 'WINDIR']
       .filter(key => typeof process.env[key] === 'string')
@@ -138,7 +144,7 @@ function createAdapter({
     if (receivedArguments.length !== 0) throw prohibited();
     const expected = buildInvocation(
       capabilityName,
-      repositoryRoot,
+      gitDirectory,
       canonicalPath,
       sanitizedEnvironment,
     );
@@ -183,10 +189,11 @@ function createAdapter({
   };
 }
 
-function buildInvocation(capabilityName, repositoryRoot, canonicalPath, environment) {
+function buildInvocation(capabilityName, gitDirectory, canonicalPath, environment) {
   const templates = {
-    isSecretFileIgnored: ['git', ['check-ignore', '--quiet', '--', '.argo/.env']],
-    isSecretFileTracked: ['git', ['ls-files', '--error-unmatch', '--', '.argo/.env']],
+    isSecretFileInsideGitRepository: ['git', ['rev-parse', '--is-inside-work-tree']],
+    isSecretFileIgnored: ['git', ['check-ignore', '--quiet', '--', '.env']],
+    isSecretFileTracked: ['git', ['ls-files', '--error-unmatch', '--', '.env']],
     readCurrentIdentity: ['whoami', []],
     readSecretFileAcl: ['icacls', [canonicalPath]],
   };
@@ -196,7 +203,7 @@ function buildInvocation(capabilityName, repositoryRoot, canonicalPath, environm
     executable: template[0],
     args: [...template[1]],
     options: {
-      cwd: repositoryRoot,
+      cwd: gitDirectory,
       encoding: 'utf8',
       env: { ...environment },
       shell: false,

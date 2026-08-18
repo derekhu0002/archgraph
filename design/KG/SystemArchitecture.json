@@ -670,6 +670,13 @@
           "description": "GIVEN AML 规范已定义；WHEN 消费者或厂商需要参考实现；THEN ARGO harness 提供可运行的 MCP server、schema 校验器与 Graph RAG 生命周期实现。",
           "name": "AT-1357-01-AML参考实现",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "运行 tests/argo-global-install.test.js",
+          "acceptanceCriteria": "tests/argo-global-install.test.js",
+          "description": "GIVEN .argo 工具链被复制到仓库外的全局目录（如用户目录）；WHEN 以 ARGO_REPO_ROOT 指向当前仓库并启动全局安装的 .argo/scripts/argo-mcp-server.js；THEN MCP server 能完成 initialize 与 tools/list，且 validateSystemArchitecture 与 getSystemArchitecture 工具调用均通过（脚本与 schema 从安装目录解析，workspace 从 ARGO_REPO_ROOT 解析）。",
+          "name": "AT-1357-02-ARGO全局安装可运行",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package"
