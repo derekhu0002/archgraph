@@ -235,7 +235,7 @@
       "name": "update README",
       "parent": "1249",
       "type": "Work Package",
-      "description": "Update README.md to reflect the current state of the project: the canonical intent architecture graph, global agent rules, materialized skills (repo-level with user-level mirrors), the ARGO harness, the KGlibrary reference library, the GitHub Pages home site, automated tests, the npm install/deploy method (npm install -g archgraph-argo + argo-deploy) with the Neo4j + vector engine requirement for semantic queries, and a user-facing How to use workflow (locate the element, arm Skills/Rules, work test-first, trace commits).",
+      "description": "Update README.md to a concise, external-facing form: What is this? (unified-language positioning matching the homepage), Architecture, Install (npm install -g archgraph-argo + argo-deploy, with the Neo4j + vector engine note for semantic queries), and How to use (user-facing coding-agent workflow). Internal-detail sections (Core principles, Repository map, ARGO MCP harness, KGlibrary reference library, Tests, Requirements) are removed.",
       "attributes": [
         {
           "name": "commit",
@@ -284,11 +284,11 @@
       ],
       "testcases": [
         {
-          "name": "AT-1321-01-README反映项目当前状态",
-          "description": "GIVEN 仓库当前包含意图架构图谱、Agent 全局规则、物化 Skill（含仓库级 argo-init 与用户级副本）、ARGO 工具链、KGlibrary 参考库、GitHub Pages 站点与自动化测试；WHEN 读者打开 README.md；THEN README 反映当前项目状态，包含意图图谱路径、全局规则位置、skill 目录、ARGO 目录、KGlibrary、站点入口与测试运行方式，且 How to use 章节以用户视角说明编码代理工作流（定位架构元素、武装 Skills/Rules、测试先行、提交可追溯），并说明意图图谱以 ArchiMate 3.2 建模为单一事实来源。",
+          "name": "AT-1321-01-README精简对外形态",
+          "description": "GIVEN README 已精简为对外简洁形态；WHEN 读者打开 README.md；THEN What is this? 章节以主页一致的口径说明统一语言目标（unified language / one model / single view），How to use 章节以用户视角说明编码代理工作流，Install 章节文档化 npm 部署方式，且已移除内部细节章节（Core principles、Repository map、ARGO MCP harness、KGlibrary reference library、Tests、Requirements）。",
           "type": "Acceptance Test",
           "Input": "打开 README.md",
-          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 包含 design/KG/SystemArchitecture.json、argo-copilot-instructions.instructions.md、.github/skills/、.argo/、KGlibrary/、index.html、tests/ 与 node --test 运行方式；并断言 How to use 章节包含 ArchiMate 3.2、coding agent、Skills and Rules 与 single source of truth。通过。"
+          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 What is this? 章节包含 unified language、one model 与 single view；断言 How to use 章节包含 ArchiMate 3.2、coding agent、Skills and Rules 与 single source of truth；断言 Install 章节包含 npm install -g archgraph-argo、argo-deploy、MCP server、Neo4j 与 vector engine。通过。"
         },
         {
           "name": "AT-1321-02-README文档化npm安装部署",

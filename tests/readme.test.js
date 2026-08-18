@@ -8,18 +8,15 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..');
 const README = readFileSync(path.join(ROOT, 'README.md'), 'utf8');
 
-test('readme: documents the current repository state', () => {
-  // GIVEN the repository is in its current state
+test('readme: what-is-this states the unified-language goal', () => {
+  // GIVEN the project positions itself as a unified language for harness and product design
   // WHEN a reader opens README.md
-  // THEN it reflects the current project: intent graph, global rules, skills, ARGO harness, KGlibrary, home site and tests
-  assert.match(README, /design\/KG\/SystemArchitecture\.json/, 'README should reference the canonical intent graph');
-  assert.match(README, /argo-copilot-instructions\.instructions\.md/, 'README should reference the global agent rules');
-  assert.match(README, /\.github\/skills\//, 'README should reference the materialized skills directory');
-  assert.match(README, /\.argo\//, 'README should reference the ARGO harness');
-  assert.match(README, /KGlibrary\//, 'README should reference the reference library');
-  assert.match(README, /index\.html/, 'README should reference the home site entry');
-  assert.match(README, /tests\//, 'README should reference the tests directory');
-  assert.match(README, /node --test/, 'README should show how to run tests');
+  // THEN What is this? states the unified-language, one-model, single-view positioning (matching the homepage)
+  const section = sectionAfter(README, 'What is this');
+  assert.ok(section, 'README should have a What is this? section');
+  assert.match(section, /unified language/, 'should state the unified-language goal');
+  assert.match(section, /one model/, 'should state the one-model design');
+  assert.match(section, /single view/, 'should state the single view');
 });
 
 function sectionAfter(md, heading) {

@@ -4,12 +4,8 @@ An architecture-graph driven framework for Agentic Engineering.
 
 ## What is this?
 
-`ArchGraph` treats an **intent architecture graph** as the single source of
-truth for agentic engineering. Every piece of work starts from an element in the graph — a Work
-Package, a Skill, a Rule, a Viewpoint, or an Application Component — and every repository change is
-traced back to that element.
-
-The canonical graph lives at [`design/KG/SystemArchitecture.json`](design/KG/SystemArchitecture.json).
+ArchGraph builds a **unified language** that puts harness design and target product design into
+**one model** — so you get a single view to work and observe, and real control over your agents.
 
 ## Architecture
 
@@ -20,35 +16,6 @@ engineering:
 ![Global architecture — Layered Viewpoint](docs/diagrams/global-architecture.svg)
 
 Editable source: [`docs/diagrams/global-architecture.excalidraw`](docs/diagrams/global-architecture.excalidraw)
-
-## Core principles
-
-1. **Arm before acting** — before any development, pull the Work Package's associated Skills and
-   Rules and materialize them under `~/.copilot/skills/<name>/SKILL.md` (user-level) or
-   `.github/skills/<name>/SKILL.md` (project) and `*.instructions.md`.
-2. **Find the element first** — every repository change maps to an architecture element. If none
-   exists, create one inside a sensible View and Viewpoint.
-3. **Acceptance tests first** — check the affected acceptance cases before changing anything.
-   Tests verify elements from the outside (GIVEN-WHEN-THEN), never their internals.
-4. **Commit traceability** — after each change, commit and register the commit id plus file paths
-   back into the graph element.
-
-These rules are encoded as user-level instructions `argo-copilot-instructions.instructions.md`
-in the VS Code Copilot prompts folder (`%APPDATA%\Code\User\prompts`).
-
-## Repository map
-
-| Path | Purpose |
-| --- | --- |
-| `design/KG/SystemArchitecture.json` | Canonical intent architecture graph (single source of truth) |
-| `%APPDATA%\Code\User\prompts\argo-copilot-instructions.instructions.md` | Global agent rules (user-level) |
-| `~/.copilot/skills/argo-init/SKILL.md` | ARGO harness init skill (user-level) |
-| `.github/kglibrary.instructions.md` | Global rule for `KGlibrary/*/info.md` frontmatter format |
-| `.github/skills/<name>/SKILL.md` | Skills materialized from the graph (`argo-init`, `create-github-repository-page`, `diagram-draw`, `optimize-web-layout-style`) |
-| `.argo/` | ARGO harness: MCP server, schema, validators, semantic (Graph RAG) lifecycle and Neo4j sync |
-| `KGlibrary/` | Reference project knowledge library |
-| `index.html` | GitHub Pages home site |
-| `tests/` | Executable acceptance tests (Node.js built-in test runner) |
 
 ## Install
 
@@ -71,41 +38,6 @@ After installing, open your project and start a coding agent. It will:
 3. work test-first (GIVEN-WHEN-THEN), and trace every commit back to the graph.
 
 The intent architecture graph — modelled in **ArchiMate 3.2** — is the single source of truth.
-
-## ARGO MCP harness
-
-Read and write the intent architecture through the **ARGO MCP server** — configured in
-[`.github/mcp.json`](.github/mcp.json) and served by `node .argo/scripts/argo-mcp-server.js`.
-Never edit `design/KG/SystemArchitecture.json` directly.
-
-Bootstrap or health-check the harness with:
-
-```powershell
-node .argo/scripts/ensureArgoHarnessEnvironment.js
-```
-
-The harness validates the graph against `.argo/schema/SystemArchitecture.schema.json`, supports a
-semantic (Graph RAG) query lifecycle, and can sync the graph into Neo4j (`neo4j-driver`).
-
-## KGlibrary reference library
-
-Each project under `KGlibrary/<project>/` provides an `info.md` with YAML frontmatter keys
-(`name`, `description`, `repo`, `branch`, `commit_id`) so the home site and agents can uniformly
-consume reference project information. See
-[`.github/kglibrary.instructions.md`](.github/kglibrary.instructions.md).
-
-## Tests
-
-Run the acceptance suite with:
-
-```powershell
-node --test "tests/*.test.js"
-```
-
-## Requirements
-
-- Node.js (built-in `node:test` runner)
-- Neo4j and a vector engine (embedding provider) — required only for semantic (Graph RAG) queries
 
 ## License
 
