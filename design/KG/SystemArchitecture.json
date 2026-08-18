@@ -754,6 +754,22 @@
           "value": "COMPLETED"
         }
       ]
+    },
+    {
+      "id": "1361",
+      "name": "ARGO npm 部署插件",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "发布一个 npm 包（archgraph-argo-deploy），打包 ARGO 工具链（argo/scripts、schema、skills、rules、.env.example）与全局 skills/rules，提供 argo-deploy CLI 一键部署到全局（用户级）或工作区（仓库级）位置。",
+      "testcases": [
+        {
+          "name": "AT-1361-01-npm部署插件可运行",
+          "description": "GIVEN archgraph-argo-deploy 包已打包 ARGO 工具链与 skills/rules；WHEN 运行 argo-deploy --workspace <临时目录>；THEN 目标目录生成 .argo/scripts/argo-mcp-server.js 与 .argo/.env.example，生成 .github/skills/argo-init/SKILL.md 等 skills，生成 .github/kglibrary.instructions.md 与意图架构全局规则，且不包含 .env 与 temp/。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -1170,7 +1186,8 @@
         "1354",
         "1355",
         "1357",
-        "1358"
+        "1358",
+        "1361"
       ],
       "included_relationships": []
     },

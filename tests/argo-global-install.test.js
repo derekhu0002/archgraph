@@ -8,7 +8,6 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
 const WORKSPACE_ROOT = path.resolve(__dirname, '..');
-const SERVER_RELATIVE_PATH = path.join('.argo', 'scripts', 'argo-mcp-server.js');
 
 function buildMcpInput() {
   const requests = [
@@ -44,12 +43,12 @@ function copyArgoInstallation(targetRoot) {
   const targetArgo = path.join(targetRoot, '.argo');
   fs.mkdirSync(path.join(targetArgo, 'scripts'), { recursive: true });
   fs.cpSync(
-    path.join(WORKSPACE_ROOT, '.argo', 'scripts'),
+    path.join(WORKSPACE_ROOT, 'argo', 'scripts'),
     path.join(targetArgo, 'scripts'),
     { recursive: true },
   );
   fs.cpSync(
-    path.join(WORKSPACE_ROOT, '.argo', 'schema'),
+    path.join(WORKSPACE_ROOT, 'argo', 'schema'),
     path.join(targetArgo, 'schema'),
     { recursive: true },
   );

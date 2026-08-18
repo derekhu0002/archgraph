@@ -1,0 +1,22 @@
+{
+  "name": "archgraph-argo-deploy",
+  "version": "0.1.0",
+  "description": "Deploy the ArchGraph ARGO toolchain, skills, and rules to global (user-level) or workspace locations.",
+  "license": "MIT",
+  "bin": {
+    "argo-deploy": "bin/argo-deploy.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "assets"
+  ],
+  "scripts": {
+    "sync-assets": "node scripts/sync-assets.js",
+    "prepare": "node scripts/sync-assets.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
