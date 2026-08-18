@@ -4,6 +4,7 @@ const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
@@ -73,6 +74,48 @@ function parseResponses(stdout) {
     .map(line => JSON.parse(line));
 }
 
+function buildRootsMcpInput(workspaceUri) {
+  const requests = [
+    {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'argo-roots-test', version: '1' },
+      },
+    },
+    { jsonrpc: '2.0', method: 'notifications/initialized', params: {} },
+    {
+      jsonrpc: '2.0',
+      method: 'notifications/roots/list_changed',
+      params: { roots: [{ uri: workspaceUri, name: 'workspace' }] },
+    },
+    {
+      jsonrpc: '2.0',
+      id: 3,
+      method: 'tools/call',
+      params: { name: 'getSystemArchitecture', arguments: {} },
+    },
+  ];
+  return `${requests.map(request => JSON.stringify(request)).join('\n')}\n`;
+}
+
+function runRootsServer(serverPath, workspaceRoot) {
+  const env = { ...process.env };
+  delete env.ARGO_REPO_ROOT;
+  delete env.WORKSPACE_FOLDER;
+  const result = spawnSync(process.execPath, [serverPath], {
+    cwd: os.homedir(),
+    encoding: 'utf8',
+    env,
+    input: buildRootsMcpInput(pathToFileURL(workspaceRoot).href),
+    maxBuffer: 20 * 1024 * 1024,
+  });
+  return result;
+}
+
 test('argo MCP works from a repository-external global installation', () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-global-install-'));
   try {
@@ -98,6 +141,41 @@ test('argo MCP works from a repository-external global installation', () => {
 
     const validationPayload = JSON.parse(validation.result.content[0].text);
     assert.equal(validationPayload.status, 'passed');
+
+    const snapshotPayload = JSON.parse(snapshot.result.content[0].text);
+    assert.equal(snapshotPayload.status, 'passed');
+    assert.equal(snapshotPayload.graphPath, 'design/KG/SystemArchitecture.json');
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('argo MCP discovers the workspace from MCP roots without any env var', () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-roots-install-'));
+  try {
+    const serverPath = copyArgoInstallation(tempRoot);
+    assert.ok(fs.existsSync(serverPath), 'copied global server entrypoint must exist');
+
+    const workspaceRoot = path.join(tempRoot, 'workspace');
+    fs.mkdirSync(path.join(workspaceRoot, 'design', 'KG'), { recursive: true });
+    fs.cpSync(
+      path.join(WORKSPACE_ROOT, 'design', 'KG', 'SystemArchitecture.json'),
+      path.join(workspaceRoot, 'design', 'KG', 'SystemArchitecture.json'),
+    );
+
+    const result = runRootsServer(serverPath, workspaceRoot);
+    assert.equal(result.status, 0, `server exited with ${result.status}: ${result.stderr}`);
+
+    const responses = parseResponses(result.stdout);
+    const initialize = responses.find(response => response.id === 1);
+    const snapshot = responses.find(response => response.id === 3);
+
+    assert.ok(initialize && initialize.result, 'initialize must respond');
+    assert.equal(
+      initialize.result.capabilities.roots.listChanged,
+      true,
+      'server must declare the roots.listChanged capability',
+    );
 
     const snapshotPayload = JSON.parse(snapshot.result.content[0].text);
     assert.equal(snapshotPayload.status, 'passed');

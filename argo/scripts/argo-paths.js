@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { fileURLToPath } = require('node:url');
 
 /**
  * Shared path resolution for the Argo toolchain.
@@ -28,10 +29,41 @@ function getArgoRoot() {
   return path.resolve(__dirname, '..');
 }
 
+let mcpWorkspaceRoots = [];
+
+function setMcpWorkspaceRoots(roots) {
+  mcpWorkspaceRoots = Array.isArray(roots) ? roots : [];
+}
+
+function rootToPath(root) {
+  if (!root) {
+    return null;
+  }
+  const uri = typeof root === 'string' ? root : root.uri;
+  if (typeof uri !== 'string' || uri.trim() === '') {
+    return null;
+  }
+  if (uri.startsWith('file://')) {
+    try {
+      return fileURLToPath(uri);
+    } catch {
+      return null;
+    }
+  }
+  return uri;
+}
+
 function getWorkspaceRoot() {
   const explicit = process.env.ARGO_REPO_ROOT || process.env.WORKSPACE_FOLDER;
   if (explicit && String(explicit).trim() !== '') {
     return path.resolve(explicit);
+  }
+
+  for (const root of mcpWorkspaceRoots) {
+    const rootPath = rootToPath(root);
+    if (rootPath) {
+      return path.resolve(rootPath);
+    }
   }
 
   const embedded = path.resolve(getArgoRoot(), '..');
@@ -74,4 +106,5 @@ module.exports = {
   normalizeRelativePath,
   resolveArgoPath,
   resolveWorkspacePath,
+  setMcpWorkspaceRoots,
 };

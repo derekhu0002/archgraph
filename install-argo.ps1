@@ -135,8 +135,6 @@ if ($SkipMcp) {
         type    = 'stdio'
         command = 'node'
         args    = @($argoServer)
-        cwd     = '${workspaceFolder}'
-        env     = [ordered]@{ ARGO_REPO_ROOT = '${workspaceFolder}' }
     }
 
     $config = [ordered]@{ servers = $servers }

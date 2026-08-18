@@ -63,8 +63,8 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(mcp.servers && mcp.servers.argo);
     assert.equal(mcp.servers.argo.command, 'node');
     assert.ok(mcp.servers.argo.args[0].endsWith('argo-mcp-server.js'));
-    assert.equal(mcp.servers.argo.cwd, '${workspaceFolder}');
-    assert.equal(mcp.servers.argo.env.ARGO_REPO_ROOT, '${workspaceFolder}');
+    assert.ok(!mcp.servers.argo.cwd, 'cwd must be omitted; workspace is discovered dynamically via MCP roots');
+    assert.ok(!mcp.servers.argo.env, 'env must be omitted; workspace is discovered dynamically via MCP roots');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

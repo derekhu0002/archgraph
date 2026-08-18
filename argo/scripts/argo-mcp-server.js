@@ -16,6 +16,7 @@ const {
 } = require('./repositoryArgoEnvironment.js');
 const {
   getWorkspaceRoot,
+  setMcpWorkspaceRoots,
 } = require('./argo-paths.js');
 const canonicalSemanticInitStorage = new AsyncLocalStorage();
 
@@ -512,7 +513,7 @@ async function handleRequest(request, dependencies = undefined) {
       id,
       result: {
         protocolVersion: '2024-11-05',
-        capabilities: { tools: {} },
+        capabilities: { tools: {}, roots: { listChanged: true } },
         serverInfo: {
           name: 'argo',
           version: '1.0.0',
@@ -522,6 +523,11 @@ async function handleRequest(request, dependencies = undefined) {
   }
 
   if (method === 'notifications/initialized') {
+    return null;
+  }
+
+  if (method === 'notifications/roots/list_changed') {
+    setMcpWorkspaceRoots(params && params.roots);
     return null;
   }
 
