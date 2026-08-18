@@ -9,6 +9,8 @@ ArchGraph builds a **unified language** that puts harness design and target prod
 
 ![Core model](docs/diagrams/core-model.svg)
 
+Editable source: [`docs/diagrams/core-model.excalidraw`](docs/diagrams/core-model.excalidraw)
+
 ## Architecture
 
 The global architecture (Layered Viewpoint) shows how the human, the coding agent, ARGO MCP, the
