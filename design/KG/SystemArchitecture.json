@@ -96,10 +96,10 @@
         },
         {
           "name": "AT-1317-02-KGlibrary参考库区域",
-          "description": "GIVEN KGlibrary 目录下存在参考项目（当前为 XKG-TEST）；WHEN 访客在浏览器打开网站首页；THEN 页面存在 Reference Library (KGlibrary) 区域，列出每个参考项目的名称、简介与仓库链接。",
+          "description": "GIVEN KGlibrary 目录下存在参考项目（当前为 XKG-TEST 与 GPT-Research）；WHEN 访客打开 Reference Library 页面 docs/kglibrary.html；THEN 页面存在 KGlibrary 区域，列出每个参考项目的名称、简介与仓库链接。",
           "type": "Acceptance Test",
-          "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言存在 id=\"kglibrary\" 区域，且每个项目的 name 与 repo 链接均出现在页面中。通过。"
+          "Input": "浏览器打开网站首页并点击 Reference Library",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：断言 index.html 含指向 docs/kglibrary.html 的链接，docs/kglibrary.html 存在 id=\"kglibrary\" 区域，且每个项目的 name 与 repo 链接均出现在该页面中。通过。"
         }
       ]
     },
@@ -178,20 +178,13 @@
           "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         }
       ],
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、页面最上方的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、紧跟其后的 How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯）、What is it for 小节（图形化说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯）、全局架构图、核心原则，并渲染 KGlibrary 参考库区域（列出各参考项目的名称、简介与仓库链接）；Insights 通过导航链接到独立列表页 docs/insights.html；同时提供 GitHub 仓库入口。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
+      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力）、页面最上方的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、紧跟其后的 How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯）、核心原则，并提供 GitHub 仓库入口；Reference Library（KGlibrary 案例库）通过导航链接到独立页面 docs/kglibrary.html，Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
       "testcases": [
         {
           "Input": "浏览器访问 https://archgraph.org/",
           "acceptanceCriteria": "执行 node --test tests/custom-domain.test.js：断言 CNAME 文件内容恰为 archgraph.org；并对 archgraph.org 做 DNS A 解析，断言其解析到 GitHub Pages 的 4 个 IP（DNS 记录未配置时该用例跳过）。通过。",
           "description": "GIVEN 已在 DNS 提供商为 archgraph.org 配置指向 GitHub Pages 的 A 记录（185.199.108.153 / 185.199.109.153 / 185.199.110.153 / 185.199.111.153），且仓库发布源根目录含 CNAME 文件（内容 archgraph.org）；WHEN 访客通过 https://archgraph.org/ 访问网站；THEN 返回与 https://derekhu0002.github.io/archgraph/ 相同的 ArchGraph 项目主页内容。",
           "name": "AT-1318-01-自定义域名访问",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"what-for-section\"）：断言存在 id=\"what-for\" 小节且位于 What is this（id=\"about\"）之后，并断言页面包含 cross-platform orchestration、long-term memory、minimal context、single source of truth、acceptance-test、traceability 等关键表述。通过。",
-          "description": "GIVEN 项目主页（index.html）在 What is this 小节之后提供 What is it for 小节；WHEN 访客打开主页；THEN 页面以图形化方式说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯。",
-          "name": "AT-1318-02-主页说明解决的问题",
           "type": "Acceptance Test"
         },
         {
@@ -330,14 +323,14 @@
       "name": "根据README更新INDEX主页",
       "parent": "1249",
       "type": "Work Package",
-      "description": "根据 README 的当前内容同步更新网站主页 index.html：增加 Architecture（全局架构图）章节，将 How to use（用户工作流）前置到 Install 之后（What is this 之前），并精简主页（移除 How we're going to do it、Repository map、Insights 小节，Insights 迁至独立列表页 docs/insights.html）。",
+      "description": "根据 README 的当前内容同步更新网站主页 index.html：将 How to use（用户工作流）前置到 Install 之后（What is this 之前），并精简主页（移除 How we're going to do it、Repository map、Architecture、What is it for 小节；Architecture 仅保留在 README，KGlibrary 迁至独立页面 docs/kglibrary.html，What is it for 的额外收益内容迁至洞察文章 docs/insight-archgraph-benefits.html）。",
       "testcases": [
         {
           "name": "AT-1332-01-主页与README同步",
-          "description": "GIVEN README 已包含 Architecture（全局架构图）与 How to use（用户工作流）章节；WHEN 访客在浏览器打开网站首页；THEN 首页同步展示这些章节：包含 Architecture 架构图（docs/diagrams/global-architecture.svg）与 How to use 内容（ArchiMate 3.2、coding agent 工作流与 single source of truth），且 How to use 位于 Install 之后、What is this（id=\"about\"）之前。",
+          "description": "GIVEN README 已包含 How to use（用户工作流）章节；WHEN 访客在浏览器打开网站首页；THEN 首页同步展示 How to use 内容（ArchiMate 3.2、coding agent 工作流与 single source of truth），且 How to use 位于 Install 之后、What is this（id=\"about\"）之前。",
           "type": "Acceptance Test",
           "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"architecture\" 区域并引用 docs/diagrams/global-architecture.svg，含 id=\"howto\" 区域且位于 id=\"about\" 之前，并提及 ArchiMate 3.2、coding agent 与 single source of truth。通过。"
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"howto\" 区域且位于 id=\"about\" 之前，并提及 ArchiMate 3.2、coding agent 与 single source of truth。通过。"
         }
       ],
       "attributes": [

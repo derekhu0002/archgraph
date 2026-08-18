@@ -63,9 +63,11 @@ test('install-section: homepage shows npm install/deploy at the top', () => {
 
 test('kglibrary-area: lists every KGlibrary reference project', () => {
   // GIVEN the KGlibrary directory contains reference projects
-  // WHEN a visitor opens the homepage in a browser
-  // THEN the page has a Reference Library (KGlibrary) area listing each project name, description and repo link
-  assert.match(HTML, /id="kglibrary"/, 'page should have a KGlibrary reference area');
+  // WHEN a visitor opens the Reference Library page
+  // THEN the page has a KGlibrary area listing each project name, description and repo link
+  assert.match(HTML, /docs\/kglibrary\.html/, 'homepage should link to the Reference Library page');
+  const kglPage = readFileSync(path.join(ROOT, 'docs', 'kglibrary.html'), 'utf8');
+  assert.match(kglPage, /id="kglibrary"/, 'page should have a KGlibrary reference area');
 
   const kgDir = path.join(ROOT, 'KGlibrary');
   const projects = readdirSync(kgDir).filter((entry) =>
@@ -81,32 +83,26 @@ test('kglibrary-area: lists every KGlibrary reference project', () => {
     assert.ok(meta.repo, `project ${project} should declare a repo URL`);
 
     assert.ok(
-      HTML.includes(meta.name),
+      kglPage.includes(meta.name),
       `page should list project name "${meta.name}" from KGlibrary/${project}`
     );
     assert.ok(
-      HTML.includes(meta.repo),
+      kglPage.includes(meta.repo),
       `page should link to repo "${meta.repo}" from KGlibrary/${project}`
     );
     if (meta.description) {
       assert.ok(
-        HTML.includes(meta.description),
+        kglPage.includes(meta.description),
         `page should show description of "${meta.name}" from KGlibrary/${project}`
       );
     }
   }
 });
 
-test('readme-sync: home page mirrors README (architecture + how to use)', () => {
-  // GIVEN the README documents the global architecture and how to adopt the framework
+test('readme-sync: home page mirrors README how-to-use', () => {
+  // GIVEN the README documents how to use the framework
   // WHEN a visitor opens the homepage in a browser
-  // THEN the page mirrors those sections: an Architecture section with the diagram, and a How to use section
-  assert.match(HTML, /id="architecture"/, 'page should have an Architecture section');
-  assert.match(
-    HTML,
-    /docs\/diagrams\/global-architecture\.svg/,
-    'Architecture section should embed the global architecture diagram'
-  );
+  // THEN the page mirrors the How to use section
   assert.match(HTML, /id="howto"/, 'page should have a How to use section');
   assert.ok(
     HTML.indexOf('id="howto"') < HTML.indexOf('id="about"'),
@@ -150,23 +146,4 @@ test('insight-subpage: home page links to the insight report subpage', () => {
   assert.match(subpage, /知识图谱驱动的 Agent 构建/, 'subpage should show the report title');
   assert.match(subpage, /GraphRAG/, 'subpage should discuss GraphRAG');
   assert.match(subpage, /80% more truthful/, 'subpage should cite the NICD study');
-});
-
-test('what-for-section: home page explains the problems ArchGraph solves', () => {
-  // GIVEN the project homepage presents its purpose and architecture
-  // WHEN a visitor opens the homepage
-  // THEN a "What is it for" section follows "What is this" and graphically lists the solved problems
-  assert.match(HTML, /id="what-for"/, 'page should have a What is it for section');
-  const aboutIdx = HTML.indexOf('id="about"');
-  const whatForIdx = HTML.indexOf('id="what-for"');
-  assert.ok(
-    aboutIdx !== -1 && whatForIdx !== -1 && whatForIdx > aboutIdx,
-    'What is it for should appear after What is this'
-  );
-  assert.match(HTML, /cross-platform orchestration/i, 'should mention cross-platform orchestration');
-  assert.match(HTML, /long-term memory/i, 'should mention long-term memory');
-  assert.match(HTML, /minimal context/i, 'should mention minimal context assembly');
-  assert.match(HTML, /single source of truth/i, 'should mention single source of truth');
-  assert.match(HTML, /acceptance-test/i, 'should mention acceptance-test-driven delivery');
-  assert.match(HTML, /traceab/i, 'should mention traceability');
 });
