@@ -7,9 +7,7 @@ An architecture-graph driven framework for Agentic Engineering.
 ArchGraph builds a **unified language** that puts harness design and target product design into
 **one model** — so you get a single view to work and observe, and real control over your agents.
 
-![Core model](docs/diagrams/core-model.svg)
-
-Editable source: [`docs/diagrams/core-model.excalidraw`](docs/diagrams/core-model.excalidraw)
+![alt text](docs/diagrams/image-1.png)
 
 ## Architecture
 
