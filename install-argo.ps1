@@ -34,9 +34,9 @@ $skillDest = Join-Path $SkillsRoot 'argo-init'
 Write-Host "[3/4] argo\skills\argo-init -> $skillDest"
 Copy-Tree -Source $skillSrc -Destination $skillDest
 
-$ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'copilot-instructions.md'
-$ruleDest = Join-Path $PromptsRoot 'copilot-instructions.md'
-Write-Host "[4/4] argo\rules\copilot-instructions.md -> $ruleDest"
+$ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
+$ruleDest = Join-Path $PromptsRoot 'archgraph.instructions.md'
+Write-Host "[4/4] argo\rules\archgraph.instructions.md -> $ruleDest"
 New-Item -ItemType Directory -Force -Path $PromptsRoot | Out-Null
 Copy-Item -Force -Path $ruleSrc -Destination $ruleDest
 
