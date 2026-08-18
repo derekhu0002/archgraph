@@ -182,13 +182,13 @@
     <span class="brand"><code>ArchGraph</code></span>
     <div class="links">
       <a href="#install">Install</a>
+      <a href="#howto">How to use</a>
       <a href="#about">About</a>
       <a href="#what-for">What it&rsquo;s for</a>
       <a href="#how">Roadmap</a>
       <a href="#architecture">Architecture</a>
       <a href="#principles">Principles</a>
       <a href="#repository">Repository</a>
-      <a href="#howto">How to use</a>
       <a href="#kglibrary">Reference Library</a>
       <a href="#insights">Insights</a>
       <a class="gh-btn" href="https://github.com/derekhu0002/archgraph">GitHub</a>
@@ -218,8 +218,21 @@ argo-deploy</pre>
       </p>
     </section>
 
+    <section id="howto">
+      <h2><span class="num">01</span>How to use</h2>
+      <p class="lead">
+        After installing, open your project and start a coding agent. It will locate the architecture
+        element behind the task, arm itself with that element&rsquo;s Skills and Rules, work test-first
+        (GIVEN-WHEN-THEN), and trace every commit back to the graph.
+      </p>
+      <p class="lead">
+        The intent architecture graph &mdash; modelled in <strong>ArchiMate 3.2</strong> &mdash; is the
+        single source of truth.
+      </p>
+    </section>
+
     <section id="about">
-      <h2><span class="num">01</span>What is this?</h2>
+      <h2><span class="num">02</span>What is this?</h2>
       <p class="lead">
         This project turns an <strong>intent architecture graph</strong> — an ArchiMate 3.2 model — into the
         single source of truth for agentic engineering. Every piece of work starts from an element in the graph —
@@ -228,7 +241,7 @@ argo-deploy</pre>
     </section>
 
     <section id="what-for">
-      <h2><span class="num">02</span>What is it for?</h2>
+      <h2><span class="num">03</span>What is it for?</h2>
       <p class="lead">
         <code>ArchGraph</code> exists to remove the recurring pain of agentic engineering. On the left are the
         problems that usually stall multi-agent projects; on the right is what the intent architecture graph turns
@@ -345,7 +358,7 @@ argo-deploy</pre>
     </section>
 
     <section id="how">
-      <h2><span class="num">03</span>How we&rsquo;re going to do it</h2>
+      <h2><span class="num">04</span>How we&rsquo;re going to do it</h2>
       <p class="lead">
         We&rsquo;re turning the intent architecture graph into <strong>AML</strong> &mdash; a modeling language
         standard for agentic engineering harnesses &mdash; as the contract between consumers above and vendors
@@ -405,7 +418,7 @@ argo-deploy</pre>
     </section>
 
     <section id="architecture">
-      <h2><span class="num">04</span>Architecture</h2>
+      <h2><span class="num">05</span>Architecture</h2>
       <p class="lead">
         The global architecture (Layered Viewpoint) shows how the human, the coding agent, ARGO MCP, the intent
         architecture graph, ArchiMate 3.2, Enterprise Architect, and Neo4j relate in graph-driven agentic
@@ -423,7 +436,7 @@ argo-deploy</pre>
     </section>
 
     <section id="principles">
-      <h2><span class="num">05</span>Core principles</h2>
+      <h2><span class="num">06</span>Core principles</h2>
       <div class="grid">
         <div class="card">
           <h3>Arm before acting</h3>
@@ -445,7 +458,7 @@ argo-deploy</pre>
     </section>
 
     <section id="repository">
-      <h2><span class="num">06</span>Repository map</h2>
+      <h2><span class="num">07</span>Repository map</h2>
       <pre>design/KG/SystemArchitecture.json    # canonical intent architecture graph (ArchiMate 3.2)
 %APPDATA%\Code\User\prompts\argo-copilot-instructions.instructions.md  # global agent rules (user-level)
 ~/.copilot/skills/argo-init/SKILL.md # ARGO harness init skill (user-level)
@@ -456,30 +469,6 @@ docs/diagrams/                      # architecture diagram source (.excalidraw) 
 KGlibrary/                          # reference project knowledge library
 index.html                          # GitHub Pages home site (this page)
 tests/                              # executable acceptance tests</pre>
-    </section>
-
-    <section id="howto">
-      <h2><span class="num">07</span>How to use</h2>
-      <p class="lead">
-        This is an agentic engineering framework driven by a knowledge graph whose schema complies with
-        <strong>ArchiMate 3.2</strong>. To adopt it as the building framework for another project, copy the
-        following into that project:
-      </p>
-      <div class="grid">
-        <div class="card">
-          <h3><code>.argo/</code></h3>
-          <p>The ARGO harness: MCP server, ArchiMate 3.2 schema, validators, semantic (Graph RAG) lifecycle, and Neo4j sync.</p>
-        </div>
-        <div class="card">
-          <h3>One agent-host config</h3>
-          <p><code>.github/</code> for GitHub Copilot / VS Code, <code>.opencode/</code> for opencode, or <code>.cursor/</code> for Cursor — global rules, skills, and ARGO MCP wiring.</p>
-        </div>
-        <div class="card">
-          <h3>The <code>.feap</code> model</h3>
-          <p>The Enterprise Architect ArchiMate 3.2 model used to author the knowledge graph (the <code>feap</code> tool).</p>
-        </div>
-      </div>
-      <pre>node .argo/scripts/ensureArgoHarnessEnvironment.js</pre>
     </section>
 
     <section id="kglibrary">

@@ -28,16 +28,16 @@ function sectionAfter(md, heading) {
   return match ? match[0] : '';
 }
 
-test('readme: how-to-use section explains framework adoption', () => {
-  // GIVEN the README documents how to adopt the framework
+test('readme: how-to-use section explains the user workflow', () => {
+  // GIVEN the README documents how to use the framework
   // WHEN a reader opens the How to use section
-  // THEN it states ArchiMate 3.2 compliance and the pieces to copy into another project
+  // THEN it describes the coding-agent workflow and the graph as the single source of truth
   const section = sectionAfter(README, 'How to use');
   assert.ok(section, 'README should have a How to use section');
   assert.match(section, /ArchiMate 3\.2/, 'should state ArchiMate 3.2 compliance');
-  assert.match(section, /\.argo\//, 'should mention copying .argo/');
-  assert.match(section, /\.github\/|\.opencode\/|\.cursor\//, 'should mention copying one agent config directory');
-  assert.match(section, /\.feap/, 'should mention the .feap EA model');
+  assert.match(section, /coding agent/, 'should describe the coding-agent workflow');
+  assert.match(section, /Skills and Rules/, 'should mention arming with Skills and Rules');
+  assert.match(section, /single source of truth/, 'should state the graph is the single source of truth');
 });
 
 test('readme: install section documents npm deployment and semantic requirements', () => {

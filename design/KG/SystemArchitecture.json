@@ -168,7 +168,7 @@
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         }
       ],
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、页面最上方的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、What is it for 小节（图形化说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯）、How we're going to do it 小节（说明将意图图谱发展为 AML 建模语言标准的五步路线：语言规范、一致性测试套件、参考实现、上游消费者体验、下游厂商生态）、全局架构图、核心原则、仓库结构图、如何复用本框架（.argo/、agent-host 配置、.feap 模型），并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
+      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、页面最上方的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、紧跟其后的 How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯）、What is it for 小节（图形化说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯）、How we're going to do it 小节（说明将意图图谱发展为 AML 建模语言标准的五步路线：语言规范、一致性测试套件、参考实现、上游消费者体验、下游厂商生态）、全局架构图、核心原则、仓库结构图，并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
       "testcases": [
         {
           "Input": "浏览器访问 https://archgraph.org/",
@@ -219,7 +219,7 @@
       "name": "update README",
       "parent": "1249",
       "type": "Work Package",
-      "description": "Update README.md to reflect the current state of the project: the canonical intent architecture graph, global agent rules, materialized skills (repo-level with user-level mirrors), the ARGO harness, the KGlibrary reference library, the GitHub Pages home site, automated tests, and the npm install/deploy method (npm install -g archgraph-argo + argo-deploy) with the Neo4j + vector engine requirement for semantic queries.",
+      "description": "Update README.md to reflect the current state of the project: the canonical intent architecture graph, global agent rules, materialized skills (repo-level with user-level mirrors), the ARGO harness, the KGlibrary reference library, the GitHub Pages home site, automated tests, the npm install/deploy method (npm install -g archgraph-argo + argo-deploy) with the Neo4j + vector engine requirement for semantic queries, and a user-facing How to use workflow (locate the element, arm Skills/Rules, work test-first, trace commits).",
       "attributes": [
         {
           "name": "commit",
@@ -264,10 +264,10 @@
       "testcases": [
         {
           "name": "AT-1321-01-README反映项目当前状态",
-          "description": "GIVEN 仓库当前包含意图架构图谱、Agent 全局规则、物化 Skill（含仓库级 argo-init 与用户级副本）、ARGO 工具链、KGlibrary 参考库、GitHub Pages 站点与自动化测试；WHEN 读者打开 README.md；THEN README 反映当前项目状态，包含意图图谱路径、全局规则位置、skill 目录、ARGO 目录、KGlibrary、站点入口与测试运行方式，且 How to use 章节说明 ArchiMate 3.2 合规及将框架复制到其他项目所需的 .argo/、.github/、.opencode/、.cursor/ 与 .feap。",
+          "description": "GIVEN 仓库当前包含意图架构图谱、Agent 全局规则、物化 Skill（含仓库级 argo-init 与用户级副本）、ARGO 工具链、KGlibrary 参考库、GitHub Pages 站点与自动化测试；WHEN 读者打开 README.md；THEN README 反映当前项目状态，包含意图图谱路径、全局规则位置、skill 目录、ARGO 目录、KGlibrary、站点入口与测试运行方式，且 How to use 章节以用户视角说明编码代理工作流（定位架构元素、武装 Skills/Rules、测试先行、提交可追溯），并说明意图图谱以 ArchiMate 3.2 建模为单一事实来源。",
           "type": "Acceptance Test",
           "Input": "打开 README.md",
-          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 包含 design/KG/SystemArchitecture.json、argo-copilot-instructions.instructions.md、.github/skills/、.argo/、KGlibrary/、index.html、tests/ 与 node --test 运行方式；并断言 How to use 章节包含 ArchiMate 3.2、.argo/、.github/|.opencode/|.cursor/ 与 .feap。通过。"
+          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 包含 design/KG/SystemArchitecture.json、argo-copilot-instructions.instructions.md、.github/skills/、.argo/、KGlibrary/、index.html、tests/ 与 node --test 运行方式；并断言 How to use 章节包含 ArchiMate 3.2、coding agent、Skills and Rules 与 single source of truth。通过。"
         },
         {
           "name": "AT-1321-02-README文档化npm安装部署",
@@ -322,14 +322,14 @@
       "name": "根据README更新INDEX主页",
       "parent": "1249",
       "type": "Work Package",
-      "description": "根据 README 的当前内容同步更新网站主页 index.html：增加 Architecture（全局架构图）、How to use（框架复用）章节，并刷新 Repository map。",
+      "description": "根据 README 的当前内容同步更新网站主页 index.html：增加 Architecture（全局架构图）章节，将 How to use（用户工作流）前置到 Install 之后（What is this 之前），并刷新 Repository map。",
       "testcases": [
         {
           "name": "AT-1332-01-主页与README同步",
-          "description": "GIVEN README 已包含 Architecture（全局架构图）与 How to use（框架复用）章节；WHEN 访客在浏览器打开网站首页；THEN 首页同步展示这些章节：包含 Architecture 架构图（docs/diagrams/global-architecture.svg）与 How to use 内容（ArchiMate 3.2 与 .argo/、.github/、.opencode/、.cursor/）。",
+          "description": "GIVEN README 已包含 Architecture（全局架构图）与 How to use（用户工作流）章节；WHEN 访客在浏览器打开网站首页；THEN 首页同步展示这些章节：包含 Architecture 架构图（docs/diagrams/global-architecture.svg）与 How to use 内容（ArchiMate 3.2、coding agent 工作流与 single source of truth），且 How to use 位于 Install 之后、What is this（id=\"about\"）之前。",
           "type": "Acceptance Test",
           "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"architecture\" 区域并引用 docs/diagrams/global-architecture.svg，含 id=\"howto\" 区域并提及 ArchiMate 3.2、.argo/ 与 .github/|.opencode/|.cursor/。通过。"
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"architecture\" 区域并引用 docs/diagrams/global-architecture.svg，含 id=\"howto\" 区域且位于 id=\"about\" 之前，并提及 ArchiMate 3.2、coding agent 与 single source of truth。通过。"
         }
       ],
       "attributes": [

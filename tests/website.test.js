@@ -108,13 +108,13 @@ test('readme-sync: home page mirrors README (architecture + how to use)', () => 
     'Architecture section should embed the global architecture diagram'
   );
   assert.match(HTML, /id="howto"/, 'page should have a How to use section');
-  assert.match(HTML, /ArchiMate 3\.2/, 'How to use should mention ArchiMate 3.2');
-  assert.match(HTML, /\.argo\//, 'How to use should mention .argo/');
-  assert.match(
-    HTML,
-    /\.github\/|\.opencode\/|\.cursor\//,
-    'How to use should mention the agent config directories'
+  assert.ok(
+    HTML.indexOf('id="howto"') < HTML.indexOf('id="about"'),
+    'How to use should appear before About (right after Install)'
   );
+  assert.match(HTML, /ArchiMate 3\.2/, 'How to use should mention ArchiMate 3.2');
+  assert.match(HTML, /coding agent/, 'How to use should describe the coding-agent workflow');
+  assert.match(HTML, /single source of truth/, 'How to use should state the graph is the single source of truth');
 });
 
 test('insight-report-archived: industry insight report archived under docs/', () => {
