@@ -1,3 +1,9 @@
+---
+description: "ArchGraph / ARGO 全局工作流规则：动手前先在意图图谱定位架构元素、验收用例先行（可执行 GIVEN-WHEN-THEN）、通过全局 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径。Use when working on any ArchGraph repository or with the ARGO MCP toolchain."
+name: "ArchGraph ARGO Workflow Rules"
+applyTo: "**"
+---
+
 <Principle>
 当你领取到某个Workpackage后，进行任何开发活动前，必须先完成自我武装，从该Workpackage关联的元素中，找到完成任务需要使用的SKILL、需要遵守的全局规则。
 1. 对于需要的SKILL，请在.github/skills下创建一个或多个[SKILL名称]/SKILL.md;
