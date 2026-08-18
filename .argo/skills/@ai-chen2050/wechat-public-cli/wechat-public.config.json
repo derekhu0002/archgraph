@@ -1,4 +1,0 @@
-{
-  "wechat": { "appid": "", "secret": "" },
-  "paths": { "customCss": "./custom.css" }
-}

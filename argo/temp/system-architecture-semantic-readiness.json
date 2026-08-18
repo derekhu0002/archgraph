@@ -1,0 +1,62 @@
+{
+  "state": "Aligned",
+  "verified": true,
+  "canonicalVersion": "canonical:84d7ee7381191d0991e1a0c4677afd1ce2712a04bdef359254d30f16bf81d41d",
+  "contentVersion": "content:d4a5ddc04244bd68ef4c433dfee53bdb904f21ccd89de0e5b14eef812cfa8125",
+  "indexVersion": "index:149dfa76012dee40ddec2833ba44a2e2dda515c55498fbf61d3674975e05e4a5",
+  "completedChannels": [
+    "Element",
+    "ArchitectureRelationship",
+    "View"
+  ],
+  "missingChannels": [],
+  "mismatchedChannels": [],
+  "channels": [
+    {
+      "channel": "Element",
+      "state": "Aligned",
+      "canonicalVersion": "canonical:84d7ee7381191d0991e1a0c4677afd1ce2712a04bdef359254d30f16bf81d41d",
+      "contentVersion": "content:d4a5ddc04244bd68ef4c433dfee53bdb904f21ccd89de0e5b14eef812cfa8125",
+      "indexVersion": "index:149dfa76012dee40ddec2833ba44a2e2dda515c55498fbf61d3674975e05e4a5",
+      "complete": true,
+      "queryable": true,
+      "coherent": true,
+      "provider": "alibaba-cloud-model-studio-openai-compatible-cn-beijing",
+      "model": "qwen3.7-text-embedding",
+      "modelVersion": "qualification-2026-07-25",
+      "dimensions": 1024
+    },
+    {
+      "channel": "ArchitectureRelationship",
+      "state": "Aligned",
+      "canonicalVersion": "canonical:84d7ee7381191d0991e1a0c4677afd1ce2712a04bdef359254d30f16bf81d41d",
+      "contentVersion": "content:d4a5ddc04244bd68ef4c433dfee53bdb904f21ccd89de0e5b14eef812cfa8125",
+      "indexVersion": "index:149dfa76012dee40ddec2833ba44a2e2dda515c55498fbf61d3674975e05e4a5",
+      "complete": true,
+      "queryable": true,
+      "coherent": true,
+      "provider": "alibaba-cloud-model-studio-openai-compatible-cn-beijing",
+      "model": "qwen3.7-text-embedding",
+      "modelVersion": "qualification-2026-07-25",
+      "dimensions": 1024
+    },
+    {
+      "channel": "View",
+      "state": "Aligned",
+      "canonicalVersion": "canonical:84d7ee7381191d0991e1a0c4677afd1ce2712a04bdef359254d30f16bf81d41d",
+      "contentVersion": "content:d4a5ddc04244bd68ef4c433dfee53bdb904f21ccd89de0e5b14eef812cfa8125",
+      "indexVersion": "index:149dfa76012dee40ddec2833ba44a2e2dda515c55498fbf61d3674975e05e4a5",
+      "complete": true,
+      "queryable": true,
+      "coherent": true,
+      "provider": "alibaba-cloud-model-studio-openai-compatible-cn-beijing",
+      "model": "qwen3.7-text-embedding",
+      "modelVersion": "qualification-2026-07-25",
+      "dimensions": 1024
+    }
+  ],
+  "fullSnapshotFallback": false,
+  "identity": "system-architecture-semantic-readiness",
+  "recordId": "4b549b6d-ada2-407a-9940-8a585501452e",
+  "revision": 152
+}

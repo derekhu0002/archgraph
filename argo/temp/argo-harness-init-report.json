@@ -1,0 +1,293 @@
+{
+  "status": "ok",
+  "workspaceRoot": "D:\\Projects\\archgraph",
+  "generatedAt": "2026-08-18T00:59:04.683Z",
+  "mode": "prepare-and-check",
+  "reportPath": ".argo/temp/argo-harness-init-report.json",
+  "harnessEnvironment": {
+    "status": "loaded",
+    "path": ".argo/.env",
+    "loadedBeforeProjection": true,
+    "assignedCount": 11,
+    "preservedProcessCount": 0
+  },
+  "mcp": {
+    "status": "ok",
+    "protocolVersion": "2024-11-05",
+    "serverName": "argo",
+    "toolCount": 19,
+    "checkedTools": [
+      "getSystemArchitecture",
+      "applySystemArchitectureMutation",
+      "validateSystemArchitecture"
+    ],
+    "ping": "ok"
+  },
+  "systemArchitecture": {
+    "status": "ok",
+    "graphPath": "design/KG/SystemArchitecture.json",
+    "elementCount": 39,
+    "relationshipCount": 28,
+    "viewCount": 6,
+    "neo4jRecovery": null
+  },
+  "neo4j": {
+    "status": "ok",
+    "uri": "neo4j://127.0.0.1:7687",
+    "database": "archgraph",
+    "databaseProvision": {
+      "database": "archgraph",
+      "existed": true,
+      "created": false,
+      "currentStatus": "online",
+      "requestedStatus": "online"
+    },
+    "dirtyBefore": {
+      "graphKey": "design/KG/SystemArchitecture.json",
+      "dirty": false,
+      "lastFailureAt": "2026-08-14T14:50:18.664Z",
+      "lastRecoveredAt": "2026-08-14T14:57:17.212Z",
+      "lastSuccessAt": "2026-08-17T16:02:54.812Z",
+      "lastVerifiedCounts": {
+        "elements": 39,
+        "relationships": 28,
+        "views": 6
+      }
+    },
+    "initialSync": {
+      "graphKey": "design/KG/SystemArchitecture.json",
+      "counts": {
+        "elements": 39,
+        "relationships": 28,
+        "views": 6
+      }
+    },
+    "verification": {
+      "graphKey": "design/KG/SystemArchitecture.json",
+      "databaseProvision": {
+        "database": "archgraph",
+        "existed": true,
+        "created": false,
+        "currentStatus": "online",
+        "requestedStatus": "online"
+      },
+      "expected": {
+        "elements": 39,
+        "relationships": 28,
+        "views": 6
+      },
+      "actual": {
+        "elements": 39,
+        "relationships": 28,
+        "views": 6
+      },
+      "matches": true,
+      "expectedIds": {
+        "elements": [
+          "1240",
+          "1249",
+          "1310",
+          "1311",
+          "1317",
+          "1318",
+          "1319",
+          "1320",
+          "1321",
+          "1330",
+          "1331",
+          "1332",
+          "1333",
+          "1334",
+          "1335",
+          "1336",
+          "1337",
+          "1338",
+          "1339",
+          "1340",
+          "1341",
+          "1342",
+          "1343",
+          "1344",
+          "1345",
+          "1346",
+          "1347",
+          "1348",
+          "1349",
+          "1350",
+          "1351",
+          "1352",
+          "1353",
+          "1354",
+          "1355",
+          "1356",
+          "1357",
+          "1358",
+          "1359"
+        ],
+        "relationships": [
+          "1161",
+          "1162",
+          "1166",
+          "1167",
+          "1168",
+          "1172",
+          "1173",
+          "1174",
+          "1175",
+          "1176",
+          "1177",
+          "1178",
+          "1179",
+          "1180",
+          "1181",
+          "1182",
+          "1183",
+          "1184",
+          "1185",
+          "1186",
+          "1187",
+          "1188",
+          "1189",
+          "1190",
+          "1191",
+          "1192",
+          "1193",
+          "1194"
+        ],
+        "views": [
+          "169",
+          "170",
+          "174",
+          "176",
+          "177",
+          "178"
+        ]
+      },
+      "actualIds": {
+        "elements": [
+          "1240",
+          "1249",
+          "1310",
+          "1311",
+          "1317",
+          "1318",
+          "1319",
+          "1320",
+          "1321",
+          "1330",
+          "1331",
+          "1332",
+          "1333",
+          "1334",
+          "1335",
+          "1336",
+          "1337",
+          "1338",
+          "1339",
+          "1340",
+          "1341",
+          "1342",
+          "1343",
+          "1344",
+          "1345",
+          "1346",
+          "1347",
+          "1348",
+          "1349",
+          "1350",
+          "1351",
+          "1352",
+          "1353",
+          "1354",
+          "1355",
+          "1356",
+          "1357",
+          "1358",
+          "1359"
+        ],
+        "relationships": [
+          "1161",
+          "1162",
+          "1166",
+          "1167",
+          "1168",
+          "1172",
+          "1173",
+          "1174",
+          "1175",
+          "1176",
+          "1177",
+          "1178",
+          "1179",
+          "1180",
+          "1181",
+          "1182",
+          "1183",
+          "1184",
+          "1185",
+          "1186",
+          "1187",
+          "1188",
+          "1189",
+          "1190",
+          "1191",
+          "1192",
+          "1193",
+          "1194"
+        ],
+        "views": [
+          "169",
+          "170",
+          "174",
+          "176",
+          "177",
+          "178"
+        ]
+      }
+    }
+  },
+  "semanticLifecycle": {
+    "status": "ok",
+    "state": "Aligned",
+    "alignment": "Aligned",
+    "readiness": {
+      "state": "Aligned",
+      "verified": true,
+      "canonicalVersion": "canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e",
+      "contentVersion": "content:canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e",
+      "indexVersion": "index:canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e",
+      "completedChannels": [
+        "Element",
+        "ArchitectureRelationship",
+        "View"
+      ],
+      "missingChannels": [],
+      "mismatchedChannels": [],
+      "fullSnapshotFallback": false,
+      "channels": [
+        {
+          "channel": "Element",
+          "state": "Aligned",
+          "canonicalVersion": "canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e",
+          "contentVersion": "content:canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e",
+          "indexVersion": "index:canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e"
+        },
+        {
+          "channel": "ArchitectureRelationship",
+          "state": "Aligned",
+          "canonicalVersion": "canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e",
+          "contentVersion": "content:canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e",
+          "indexVersion": "index:canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e"
+        },
+        {
+          "channel": "View",
+          "state": "Aligned",
+          "canonicalVersion": "canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e",
+          "contentVersion": "content:canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e",
+          "indexVersion": "index:canonical:232f3e81667fa9633c3b63be716178a01343a6360ccaf16a8793a0b551f5c15e"
+        }
+      ]
+    },
+    "fullSnapshotFallback": false
+  }
+}
