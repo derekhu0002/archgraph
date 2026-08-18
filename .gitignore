@@ -4,5 +4,5 @@ node_modules/
 data/
 package-lock.json
 wechat-public.config.json
-argo\.env
 /*.tgz
+argo/.env
