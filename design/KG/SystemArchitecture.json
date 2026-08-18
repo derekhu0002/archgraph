@@ -948,7 +948,18 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Work Package"
+      "type": "Work Package",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "a2c7c44",
+          "description": "README.md; docs/diagrams/core-model.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ]
     }
   ],
   "relationships": [
