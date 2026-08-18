@@ -84,6 +84,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "098be4e",
+          "description": "docs/kglibrary.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
@@ -176,6 +181,11 @@
           "name": "commit",
           "value": "e9839a5",
           "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "098be4e",
+          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力）、页面最上方的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、紧跟其后的 How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯）、核心原则，并提供 GitHub 仓库入口；Reference Library（KGlibrary 案例库）通过导航链接到独立页面 docs/kglibrary.html，Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
@@ -352,6 +362,11 @@
           "name": "commit",
           "value": "e9839a5",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "098be4e",
+          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     },
@@ -567,6 +582,11 @@
           "name": "commit",
           "value": "e9839a5",
           "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "098be4e",
+          "description": "docs/insights.html; docs/insight-archgraph-benefits.html; design/KG/SystemArchitecture.json"
         }
       ]
     },
