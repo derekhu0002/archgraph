@@ -1086,6 +1086,22 @@
           "value": "not_delivered"
         }
       ]
+    },
+    {
+      "id": "1363",
+      "name": "发布项目官宣介绍文章到微信公众号",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "使用 .github/skills/@ai-chen2050/wechat-public-cli 技能，撰写 ArchGraph 项目官宣介绍文章并发布到微信公众号。",
+      "testcases": [
+        {
+          "name": "AT-1363-01-官宣文章就绪",
+          "description": "GIVEN 项目已具备对外官宣条件；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号官宣文章 Markdown，且正文介绍 ArchGraph（架构图驱动的 Agentic Engineering）。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/archgraph-introduction.wechat.md",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-intro-ready\"）：断言 docs/archgraph-introduction.wechat.md 存在，frontmatter 含 title/author/digest，正文含 ArchGraph 与 Agentic Engineering。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -1520,6 +1536,16 @@
       ],
       "included_relationships": [
         "1195"
+      ]
+    },
+    {
+      "view_id": "180",
+      "view_name": "Content Publication and Announcement",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "description": "对外内容发布与官宣类工作包：公众号文章撰写与发布、项目官宣介绍。",
+      "included_elements": [
+        "1363"
       ]
     }
   ]
