@@ -812,6 +812,11 @@
           "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)"
         },
         {
+          "name": "commit",
+          "value": "025ceae",
+          "description": "install-argo.ps1 (restore workspaceFolder in MCP config); tests/argo-deploy.test.js; package.json (0.4.2)"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
