@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insights · ArchGraph</title>
+  <meta name="description" content="ArchGraph — industry insights on knowledge-graph-driven agent engineering." />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f5f7fa;
+      --border: #e6e8ee;
+      --text: #0f172a;
+      --muted: #5b6472;
+      --accent: #4d6bfe;
+      --code-bg: #f2f4f8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 24px;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav .brand { font-weight: 600; font-size: 0.95rem; color: var(--text); }
+    .site-nav .brand code { color: var(--accent); background: transparent; padding: 0; }
+    .site-nav .links { display: flex; gap: 20px; align-items: center; }
+    .site-nav .links a { color: var(--muted); font-size: 0.9rem; }
+    .site-nav .links a:hover { color: var(--text); text-decoration: none; }
+    .site-nav .gh-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text) !important;
+      background: var(--bg-soft);
+    }
+
+    main { max-width: 1040px; margin: 0 auto; padding: 48px 24px 96px; }
+    h2 { font-size: 1.55rem; margin: 0 0 18px; letter-spacing: -0.02em; }
+    .lead { color: var(--muted); max-width: 720px; margin: 0 0 24px; }
+    code {
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-size: 0.9em;
+    }
+    .project-card {
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin-bottom: 14px;
+    }
+    .project-card h3 { margin: 0 0 8px; font-size: 1.1rem; }
+    .project-card h3 a { color: var(--text); }
+    .project-card h3 a:hover { color: var(--accent); text-decoration: none; }
+    .project-card .desc { color: var(--muted); margin: 0 0 14px; font-size: 0.95rem; }
+    .project-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      font-size: 0.78rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 10px;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 28px 24px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <nav class="site-nav">
+    <span class="brand"><code>ArchGraph</code></span>
+    <div class="links">
+      <a href="index.html">Home</a>
+      <a class="gh-btn" href="https://github.com/derekhu0002/archgraph">GitHub</a>
+    </div>
+  </nav>
+
+  <main>
+    <section id="insights">
+      <h2>Insights</h2>
+      <p class="lead">
+        Industry insights on knowledge-graph-driven agent engineering &mdash; GraphRAG, agent memory and
+        portable skills.
+      </p>
+      <div class="project-card">
+        <h3><a href="industry-insight-graph-driven-agent.html">知识图谱驱动的 Agent 构建 · 业界洞察</a></h3>
+        <p class="desc">GraphRAG、Agent 记忆与可移植技能的业界洞察报告，附实证数据与引用来源。</p>
+        <div class="project-meta">
+          <span class="chip">docs/industry-insight-graph-driven-agent.md</span>
+          <span class="chip">subpage · industry-insight-graph-driven-agent.html</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Generated as a GitHub Pages home site for the <code>ArchGraph</code> project.
+  </footer>
+</body>
+</html>

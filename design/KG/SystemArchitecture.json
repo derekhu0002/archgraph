@@ -173,7 +173,7 @@
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         }
       ],
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、页面最上方的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、紧跟其后的 How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯）、What is it for 小节（图形化说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯）、How we're going to do it 小节（说明将意图图谱发展为 AML 建模语言标准的五步路线：语言规范、一致性测试套件、参考实现、上游消费者体验、下游厂商生态）、全局架构图、核心原则、仓库结构图，并渲染 KGlibrary 参考库区域，列出各参考项目的名称、简介与仓库链接；同时提供 GitHub 仓库入口。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
+      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：architecture-graph driven framework for Agentic Engineering）、页面最上方的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、紧跟其后的 How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯）、What is it for 小节（图形化说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯）、全局架构图、核心原则，并渲染 KGlibrary 参考库区域（列出各参考项目的名称、简介与仓库链接）；Insights 通过导航链接到独立列表页 docs/insights.html；同时提供 GitHub 仓库入口。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
       "testcases": [
         {
           "Input": "浏览器访问 https://archgraph.org/",
@@ -187,13 +187,6 @@
           "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"what-for-section\"）：断言存在 id=\"what-for\" 小节且位于 What is this（id=\"about\"）之后，并断言页面包含 cross-platform orchestration、long-term memory、minimal context、single source of truth、acceptance-test、traceability 等关键表述。通过。",
           "description": "GIVEN 项目主页（index.html）在 What is this 小节之后提供 What is it for 小节；WHEN 访客打开主页；THEN 页面以图形化方式说明 ArchGraph 解决的问题：跨平台 Agent 编排、GraphRAG 长期记忆、最小上下文组装、单一事实来源、验收用例驱动交付、变更可追溯。",
           "name": "AT-1318-02-主页说明解决的问题",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"how-section\"）：断言存在 id=\"how\" 小节且位于 What is it for（id=\"what-for\"）之后，并断言页面包含 AML、conformance、reference implementation、upstream、downstream 等关键表述，且链接到正式 HTML 版语言规范 docs/agent-programming-language.html。通过。",
-          "description": "GIVEN 项目主页在 What is it for 小节之后提供 How we're going to do it 小节；WHEN 访客打开主页；THEN 该小节说明将意图图谱发展为 AML 建模语言标准的五步路线（语言规范、一致性测试套件、参考实现、上游消费者体验、下游厂商生态），并链接到正式 HTML 版语言规范页面。",
-          "name": "AT-1318-03-主页说明如何实现AML标准",
           "type": "Acceptance Test"
         },
         {
@@ -332,7 +325,7 @@
       "name": "根据README更新INDEX主页",
       "parent": "1249",
       "type": "Work Package",
-      "description": "根据 README 的当前内容同步更新网站主页 index.html：增加 Architecture（全局架构图）章节，将 How to use（用户工作流）前置到 Install 之后（What is this 之前），并刷新 Repository map。",
+      "description": "根据 README 的当前内容同步更新网站主页 index.html：增加 Architecture（全局架构图）章节，将 How to use（用户工作流）前置到 Install 之后（What is this 之前），并精简主页（移除 How we're going to do it、Repository map、Insights 小节，Insights 迁至独立列表页 docs/insights.html）。",
       "testcases": [
         {
           "name": "AT-1332-01-主页与README同步",
@@ -540,7 +533,7 @@
       "name": "归档洞察报告并发布网站子页",
       "parent": "1249",
       "type": "Work Package",
-      "description": "将《知识图谱驱动的 Agent 构建》业界洞察报告归档到 docs/industry-insight-graph-driven-agent.md，并在项目网站发布为独立子页 docs/industry-insight-graph-driven-agent.html（首页新增 Insights 入口）。洞察方法采用 view 177「GPT-Researcher Multi-Agent Research」的多 Agent 研究流程。",
+      "description": "将《知识图谱驱动的 Agent 构建》业界洞察报告归档到 docs/industry-insight-graph-driven-agent.md，并发布为独立子页 docs/industry-insight-graph-driven-agent.html；提供洞察文章列表页 docs/insights.html（首页导航 Insights 指向列表页）。洞察方法采用 view 177「GPT-Researcher Multi-Agent Research」的多 Agent 研究流程。",
       "testcases": [
         {
           "name": "AT-1351-01-洞察报告归档docs",
@@ -551,10 +544,10 @@
         },
         {
           "name": "AT-1351-02-洞察报告网站子页",
-          "description": "GIVEN 洞察报告已归档；WHEN 访客从网站首页导航点击 Insights 链接；THEN 打开独立子页 docs/industry-insight-graph-driven-agent.html，呈现报告全文，且首页导航包含指向该子页的链接。",
+          "description": "GIVEN 洞察报告已归档；WHEN 访客从网站首页导航点击 Insights 链接；THEN 打开独立洞察列表页 docs/insights.html，列表页链接到洞察报告子页 docs/industry-insight-graph-driven-agent.html（呈现报告全文）。",
           "type": "Acceptance Test",
           "Input": "浏览器打开网站首页并点击 Insights",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"insight-subpage\"）：断言 index.html 含指向 docs/industry-insight-graph-driven-agent.html 的链接，且该 HTML 文件存在并包含报告标题与关键内容。通过。"
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"insight-subpage\"）：断言 index.html 含指向 docs/insights.html 的链接，docs/insights.html 存在并链接到 industry-insight-graph-driven-agent.html，且该报告子页存在并包含报告标题与关键内容。通过。"
         }
       ],
       "attributes": [

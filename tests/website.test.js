@@ -134,21 +134,20 @@ test('insight-report-archived: industry insight report archived under docs/', ()
 test('insight-subpage: home page links to the insight report subpage', () => {
   // GIVEN the industry insight report has been archived
   // WHEN a visitor opens the homepage and clicks the Insights link
-  // THEN a standalone subpage renders the full report
+  // THEN a standalone insights list page opens and links to each insight article
+  assert.match(HTML, /docs\/insights\.html/, 'home page should link to the insights list page');
+  const insightsPage = readFileSync(path.join(ROOT, 'docs', 'insights.html'), 'utf8');
+  assert.match(insightsPage, /id="insights"/, 'insights page should have an Insights area');
   assert.match(
-    HTML,
-    /docs\/industry-insight-graph-driven-agent\.html/,
-    'home page should link to the insight subpage'
+    insightsPage,
+    /industry-insight-graph-driven-agent\.html/,
+    'insights page should link to the insight article'
   );
   const subpage = readFileSync(
     path.join(ROOT, 'docs', 'industry-insight-graph-driven-agent.html'),
     'utf8'
   );
-  assert.match(
-    subpage,
-    /知识图谱驱动的 Agent 构建/,
-    'subpage should show the report title'
-  );
+  assert.match(subpage, /知识图谱驱动的 Agent 构建/, 'subpage should show the report title');
   assert.match(subpage, /GraphRAG/, 'subpage should discuss GraphRAG');
   assert.match(subpage, /80% more truthful/, 'subpage should cite the NICD study');
 });
@@ -170,27 +169,4 @@ test('what-for-section: home page explains the problems ArchGraph solves', () =>
   assert.match(HTML, /single source of truth/i, 'should mention single source of truth');
   assert.match(HTML, /acceptance-test/i, 'should mention acceptance-test-driven delivery');
   assert.match(HTML, /traceab/i, 'should mention traceability');
-});
-
-test('how-section: home page explains how ArchGraph will realize the AML standard', () => {
-  // GIVEN the project homepage presents the roadmap after "What is it for"
-  // WHEN a visitor opens the homepage
-  // THEN a "How we're going to do it" section follows "What is it for" and lists the five AML workstreams
-  assert.match(HTML, /id="how"/, 'page should have a How we do it section');
-  const whatForIdx = HTML.indexOf('id="what-for"');
-  const howIdx = HTML.indexOf('id="how"');
-  assert.ok(
-    whatForIdx !== -1 && howIdx !== -1 && howIdx > whatForIdx,
-    'How section should appear after What is it for'
-  );
-  assert.match(HTML, /AML/, 'should mention AML');
-  assert.match(HTML, /conformance/i, 'should mention the conformance suite');
-  assert.match(HTML, /reference implementation/i, 'should mention the reference implementation');
-  assert.match(HTML, /upstream/i, 'should mention the upstream consumers');
-  assert.match(HTML, /downstream/i, 'should mention the downstream vendors');
-  assert.match(
-    HTML,
-    /docs\/agent-programming-language\.html/,
-    'How section should link to the AML language spec'
-  );
 });
