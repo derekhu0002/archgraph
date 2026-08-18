@@ -777,6 +777,11 @@
           "description": "argo-deploy/ (package.json; bin/argo-deploy.js; lib/deploy.js; scripts/sync-assets.js; assets/**; README.md); tests/argo-deploy.test.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
         },
         {
+          "name": "commit",
+          "value": "e5f6f3d",
+          "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
