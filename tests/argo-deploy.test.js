@@ -43,7 +43,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     // 3) argo-init skill
     assert.ok(fs.existsSync(path.join(skillsRoot, 'argo-init', 'SKILL.md')));
     // 4) global rule
-    assert.ok(fs.existsSync(path.join(promptsRoot, 'intent-architecture-global-rule.md')));
+    assert.ok(fs.existsSync(path.join(promptsRoot, 'copilot-instructions.md')));
 
     // 5) dependency manifest is deployed so `npm install` can resolve neo4j-driver.
     const manifestPath = path.join(argoRoot, 'package.json');
