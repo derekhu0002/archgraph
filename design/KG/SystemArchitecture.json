@@ -772,6 +772,11 @@
           "name": "commit",
           "value": "c8f2d74",
           "description": "restore .github/skills/argo-init/SKILL.md (repo-level compatibility)"
+        },
+        {
+          "name": "commit",
+          "value": "b39acb2",
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "以 ARGO harness 作为 AML 参考实现：MCP server 读写图谱、schema 校验、语义（Graph RAG）生命周期与 Neo4j 同步，作为厂商实现与消费者接入的样板。当前参考样例为本仓 KGlibrary（以 AML 建模的案例），暂存本仓，后续可沉淀为市场。",
@@ -941,6 +946,11 @@
           "name": "commit",
           "value": "07d2c69",
           "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)"
+        },
+        {
+          "name": "commit",
+          "value": "b39acb2",
+          "description": "argo/defaults/design/KG/SystemArchitecture.json; argo/defaults/EA-model-template.feap; install-argo.ps1; package.json; tests/argo-deploy.test.js; argo/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
         },
         {
           "name": "status",
