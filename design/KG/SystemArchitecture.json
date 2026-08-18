@@ -735,6 +735,17 @@
           "Input": "打开 KGlibrary/GPT-Research/info.md 与 index.html",
           "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言 GPT-Research 的 name、repo、description 均出现在页面中。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "description": "KGlibrary/GPT-Research/info.md; index.html; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "a1c915d"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
       ]
     }
   ],
