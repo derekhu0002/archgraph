@@ -7,6 +7,8 @@ An architecture-graph driven framework for Agentic Engineering.
 ArchGraph builds a **unified language** that puts harness design and target product design into
 **one model** — so you get a single view to work and observe, and real control over your agents.
 
+![Core model](docs/diagrams/core-model.svg)
+
 ## Architecture
 
 The global architecture (Layered Viewpoint) shows how the human, the coding agent, ARGO MCP, the

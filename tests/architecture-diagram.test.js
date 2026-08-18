@@ -9,6 +9,7 @@ const ROOT = path.resolve(__dirname, '..');
 const README = readFileSync(path.join(ROOT, 'README.md'), 'utf8');
 const SVG_PATH = path.join(ROOT, 'docs', 'diagrams', 'global-architecture.svg');
 const EXCALIDRAW_PATH = path.join(ROOT, 'docs', 'diagrams', 'global-architecture.excalidraw');
+const CORE_MODEL_PATH = path.join(ROOT, 'docs', 'diagrams', 'core-model.svg');
 
 test('architecture-diagram: Layered Viewpoint diagram embedded in README', () => {
   // GIVEN the project documents its global architecture
@@ -21,5 +22,18 @@ test('architecture-diagram: Layered Viewpoint diagram embedded in README', () =>
   const svg = readFileSync(SVG_PATH, 'utf8');
   for (const label of ['人类', 'AGENT', 'ARGO MCP', 'graph', 'ArchiMate 3.2', 'EA', 'Neo4j']) {
     assert.ok(svg.includes(label), `diagram should mention "${label}"`);
+  }
+});
+
+test('core-model-diagram: unified-language model diagram embedded under What is this?', () => {
+  // GIVEN the project positions itself as a unified language for harness and product design
+  // WHEN a reader opens the README What is this? section
+  // THEN it embeds a core-model diagram showing Harness Design, Target System Design, AgentHarness and Target Project in one model
+  assert.match(README, /docs\/diagrams\/core-model\.svg/, 'README should embed the core-model diagram');
+  assert.ok(existsSync(CORE_MODEL_PATH), 'the core-model SVG should exist');
+
+  const svg = readFileSync(CORE_MODEL_PATH, 'utf8');
+  for (const label of ['ONE MODEL', 'Harness Design', 'Target System Design', 'AgentHarness', 'Target Project']) {
+    assert.ok(svg.includes(label), `core-model diagram should mention "${label}"`);
   }
 });
