@@ -657,6 +657,11 @@
           "name": "commit",
           "value": "fa857e7",
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "ea734d2",
+          "description": ".argo/scripts/argo-paths.js; .argo/scripts/*.js; .argo/scripts/graph-rag/*; .argo/scripts/test-executors/default.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "以 ARGO harness 作为 AML 参考实现：MCP server 读写图谱、schema 校验、语义（Graph RAG）生命周期与 Neo4j 同步，作为厂商实现与消费者接入的样板。当前参考样例为本仓 KGlibrary（以 AML 建模的案例），暂存本仓，后续可沉淀为市场。",
