@@ -1153,8 +1153,13 @@
       ],
       "attributes": [
         {
+          "name": "commit",
+          "value": "e5204fc",
+          "description": "design/KG/SystemArchitecture.json; docs/kglibrary.html; KGlibrary/GPT-Researcher-Agent-Method/info.md; KGlibrary/GPT-Researcher-Agent-Method/gpt-researcher_Agent_探索方法.json; KGlibrary/McKinsey-5-Step/info.md; KGlibrary/McKinsey-5-Step/麦肯锡结构化战略分析新5步法.json"
+        },
+        {
           "name": "status",
-          "value": "IN_PROGRESS"
+          "value": "COMPLETED"
         }
       ]
     }
