@@ -227,6 +227,11 @@
           "name": "commit",
           "value": "f4819fd",
           "description": "README.md; index.html; tests/readme.test.js; .github/copilot-instructions.md (removed); .github/skills/argo-init/SKILL.md (removed); .cursor/skills/argo-init/SKILL.md; .opencode/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "c8f2d74",
+          "description": "restore .github/skills/argo-init/SKILL.md; README.md; index.html; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
@@ -672,6 +677,11 @@
           "name": "commit",
           "value": "f4819fd",
           "description": "argo-init skill moved to user-level (~/.copilot/skills/argo-init/SKILL.md); agent rules moved to user-level prompts (argo-copilot-instructions.instructions.md); removed .github/copilot-instructions.md and .github/skills/argo-init/SKILL.md"
+        },
+        {
+          "name": "commit",
+          "value": "c8f2d74",
+          "description": "restore .github/skills/argo-init/SKILL.md (repo-level compatibility)"
         }
       ],
       "description": "以 ARGO harness 作为 AML 参考实现：MCP server 读写图谱、schema 校验、语义（Graph RAG）生命周期与 Neo4j 同步，作为厂商实现与消费者接入的样板。当前参考样例为本仓 KGlibrary（以 AML 建模的案例），暂存本仓，后续可沉淀为市场。",
