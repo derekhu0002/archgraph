@@ -782,6 +782,11 @@
           "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/"
         },
         {
+          "name": "commit",
+          "value": "ee05a15",
+          "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
