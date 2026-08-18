@@ -797,6 +797,11 @@
           "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)"
         },
         {
+          "name": "commit",
+          "value": "411bf25",
+          "description": "argo/rules/archgraph.instructions.md (renamed from copilot-instructions.md); package.json (0.3.0)"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
