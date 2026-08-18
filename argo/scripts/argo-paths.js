@@ -18,10 +18,12 @@ const { fileURLToPath } = require('node:url');
  * The workspace root is resolved from, in priority order:
  *   1. ARGO_REPO_ROOT      — explicit override (set by MCP client configs).
  *   2. WORKSPACE_FOLDER    — set by some hosts.
- *   3. The embedded repo root, when the Argo installation is still inside a repo
+ *   3. The MCP `roots` advertised by the client (a global server resolves the
+ *      root that contains design/KG/SystemArchitecture.json when several roots
+ *      are present, so it never operates on an unrelated folder).
+ *   4. The embedded repo root, when the Argo installation is still inside a repo
  *      (i.e. `<argoRoot>/../design/KG/SystemArchitecture.json` exists).
- *   4. process.cwd()       — the MCP client must launch the server with its cwd
- *      set to the target workspace root.
+ *   5. process.cwd()       — last-resort fallback when no root is available.
  */
 
 function getArgoRoot() {
@@ -59,6 +61,17 @@ function getWorkspaceRoot() {
     return path.resolve(explicit);
   }
 
+  // The client may expose several roots (a multi-root workspace). Never
+  // silently operate on an unrelated folder: prefer the root that actually
+  // contains the ArchGraph marker before falling back to the first root.
+  const marker = path.join('design', 'KG', 'SystemArchitecture.json');
+  for (const root of mcpWorkspaceRoots) {
+    const rootPath = rootToPath(root);
+    if (rootPath && fs.existsSync(path.join(rootPath, marker))) {
+      return path.resolve(rootPath);
+    }
+  }
+
   for (const root of mcpWorkspaceRoots) {
     const rootPath = rootToPath(root);
     if (rootPath) {
@@ -67,7 +80,7 @@ function getWorkspaceRoot() {
   }
 
   const embedded = path.resolve(getArgoRoot(), '..');
-  if (fs.existsSync(path.join(embedded, 'design', 'KG', 'SystemArchitecture.json'))) {
+  if (fs.existsSync(path.join(embedded, marker))) {
     return embedded;
   }
 

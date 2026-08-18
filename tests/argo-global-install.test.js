@@ -75,6 +75,10 @@ function parseResponses(stdout) {
 }
 
 function buildRootsMcpInput(workspaceUri) {
+  return buildMultiRootMcpInput([{ uri: workspaceUri, name: 'workspace' }]);
+}
+
+function buildMultiRootMcpInput(roots) {
   const requests = [
     {
       jsonrpc: '2.0',
@@ -90,7 +94,7 @@ function buildRootsMcpInput(workspaceUri) {
     {
       jsonrpc: '2.0',
       method: 'notifications/roots/list_changed',
-      params: { roots: [{ uri: workspaceUri, name: 'workspace' }] },
+      params: { roots },
     },
     {
       jsonrpc: '2.0',
@@ -259,6 +263,52 @@ test('argo MCP resolves the workspace through a roots/list request/response hand
     } finally {
       child.kill();
     }
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('argo MCP selects the ArchGraph workspace among multiple roots', () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-multi-root-'));
+  try {
+    const serverPath = copyArgoInstallation(tempRoot);
+    assert.ok(fs.existsSync(serverPath), 'copied global server entrypoint must exist');
+
+    // A decoy folder (listed first) without the ArchGraph marker, and the real
+    // ArchGraph workspace (listed second). The server must not operate on the
+    // decoy folder.
+    const decoyRoot = path.join(tempRoot, 'decoy');
+    fs.mkdirSync(decoyRoot, { recursive: true });
+
+    const workspaceRoot = path.join(tempRoot, 'workspace');
+    fs.mkdirSync(path.join(workspaceRoot, 'design', 'KG'), { recursive: true });
+    fs.cpSync(
+      path.join(WORKSPACE_ROOT, 'design', 'KG', 'SystemArchitecture.json'),
+      path.join(workspaceRoot, 'design', 'KG', 'SystemArchitecture.json'),
+    );
+
+    const env = { ...process.env };
+    delete env.ARGO_REPO_ROOT;
+    delete env.WORKSPACE_FOLDER;
+
+    const input = buildMultiRootMcpInput([
+      { uri: pathToFileURL(decoyRoot).href, name: 'decoy' },
+      { uri: pathToFileURL(workspaceRoot).href, name: 'workspace' },
+    ]);
+    const result = spawnSync(process.execPath, [serverPath], {
+      cwd: os.homedir(),
+      encoding: 'utf8',
+      env,
+      input,
+      maxBuffer: 20 * 1024 * 1024,
+    });
+    assert.equal(result.status, 0, `server exited with ${result.status}: ${result.stderr}`);
+
+    const responses = parseResponses(result.stdout);
+    const snapshot = responses.find(response => response.id === 3);
+    const payload = JSON.parse(snapshot.result.content[0].text);
+    assert.equal(payload.status, 'passed');
+    assert.equal(payload.graphPath, 'design/KG/SystemArchitecture.json');
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }
