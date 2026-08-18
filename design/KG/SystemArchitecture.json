@@ -802,6 +802,11 @@
           "description": "argo/rules/archgraph.instructions.md (renamed from copilot-instructions.md); package.json (0.3.0)"
         },
         {
+          "name": "commit",
+          "value": "499d802",
+          "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
