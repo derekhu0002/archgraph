@@ -792,6 +792,11 @@
           "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore"
         },
         {
+          "name": "commit",
+          "value": "e982da1",
+          "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
