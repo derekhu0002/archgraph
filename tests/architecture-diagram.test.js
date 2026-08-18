@@ -9,7 +9,7 @@ const ROOT = path.resolve(__dirname, '..');
 const README = readFileSync(path.join(ROOT, 'README.md'), 'utf8');
 const SVG_PATH = path.join(ROOT, 'docs', 'diagrams', 'global-architecture.svg');
 const EXCALIDRAW_PATH = path.join(ROOT, 'docs', 'diagrams', 'global-architecture.excalidraw');
-const CORE_MODEL_IMAGE_PATH = path.join(ROOT, 'docs', 'diagrams', 'image-1.png');
+const CORE_MODEL_IMAGE_PATH = path.join(ROOT, 'docs', 'diagrams', 'image.png');
 
 test('architecture-diagram: Layered Viewpoint diagram embedded in README', () => {
   // GIVEN the project documents its global architecture
@@ -28,7 +28,7 @@ test('architecture-diagram: Layered Viewpoint diagram embedded in README', () =>
 test('core-model-diagram: unified-language model image embedded under What is this?', () => {
   // GIVEN the project positions itself as a unified language for harness and product design
   // WHEN a reader opens the README What is this? section
-  // THEN it embeds the core-model image (image-1.png)
-  assert.match(README, /docs\/diagrams\/image-1\.png/, 'README should embed the core-model image');
+  // THEN it embeds the core-model image (image.png)
+  assert.match(README, /docs\/diagrams\/image\.png/, 'README should embed the core-model image');
   assert.ok(existsSync(CORE_MODEL_IMAGE_PATH), 'the core-model image should exist');
 });

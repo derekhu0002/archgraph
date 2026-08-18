@@ -935,17 +935,17 @@
       ]
     },
     {
-      "description": "按核心思路（统一语言：将 harness 设计与目标产品设计放进同一模型）画一张核心模型图 image-1.png，插入 README 与主页的 What is this? 章节下，表达 Harness Design、Target System Design、AgentHarness、Target Project 之间的关系：AgentHarness 从 Harness Design 武装自己（Access），Harness Design 描述 Target System Design，Target System Design 描述 Target Project，AgentHarness 创建 Target Project。",
+      "description": "按核心思路（统一语言：将 harness 设计与目标产品设计放进同一模型）画一张核心模型图 image.png，插入 README 与主页的 What is this? 章节下，表达 Harness Design、Target System Design、AgentHarness、Target Project 之间的关系：AgentHarness 从 Harness Design 武装自己（Access），Harness Design 描述 Target System Design，Target System Design 描述 Target Project，AgentHarness 创建 Target Project。",
       "id": "1362",
       "name": "画一张核心模型图",
       "parent": "1249",
       "testcases": [
         {
           "name": "AT-1362-01-核心模型图插入README与主页",
-          "description": "GIVEN 项目定位为统一语言（harness 设计与目标产品设计放同一模型）；WHEN 读者打开 README 或主页的 What is this? 章节；THEN 下方嵌入核心模型图 docs/diagrams/image-1.png（README 与主页均引用）。",
+          "description": "GIVEN 项目定位为统一语言（harness 设计与目标产品设计放同一模型）；WHEN 读者打开 README 或主页的 What is this? 章节；THEN 下方嵌入核心模型图 docs/diagrams/image.png（README 与主页均引用）。",
           "type": "Acceptance Test",
           "Input": "打开 README.md 与 index.html",
-          "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js（用例 \"core-model-diagram\"）与 tests/website.test.js（用例 \"about-image\"）：断言 README 与 index.html 均引用 docs/diagrams/image-1.png，且该图片文件存在。通过。"
+          "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js（用例 \"core-model-diagram\"）与 tests/website.test.js（用例 \"about-image\"）：断言 README 与 index.html 均引用 docs/diagrams/image.png，且该图片文件存在。通过。"
         }
       ],
       "type": "Work Package",
