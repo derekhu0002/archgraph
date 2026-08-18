@@ -188,8 +188,8 @@
         },
         {
           "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"install-section\"）：断言 index.html 含 id=\"install\" 且位于 id=\"about\" 之前，并包含 npm install -g archgraph-argo、argo-deploy、Neo4j、vector engine 与 QWEN_KEY。通过。",
-          "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 访客打开主页；THEN 页面最上方（What is this 之前）展示 Install 部署小节：含 npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎（embedding）。",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"install-section\"）：断言 index.html 含 id=\"install\" 且位于 id=\"about\" 之前，并包含 npm install -g archgraph-argo、argo-deploy、Neo4j 与 vector engine。通过。",
+          "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 访客打开主页；THEN 页面最上方（What is this 之前）以最简方式展示 Install 部署小节：仅含 npm install -g archgraph-argo 与 argo-deploy 两条命令，并一句话说明语义查询需要 Neo4j 与向量引擎。",
           "name": "AT-1318-04-主页顶部展示安装部署",
           "type": "Acceptance Test"
         }
@@ -261,10 +261,10 @@
         },
         {
           "name": "AT-1321-02-README文档化npm安装部署",
-          "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 读者打开 README.md 的 Install 章节；THEN 文档化 npm install -g archgraph-argo 与 argo-deploy 的部署方式，并说明语义查询需要 Neo4j 与向量引擎（embedding）。",
+          "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 读者打开 README.md 的 Install 章节；THEN 以最简方式文档化 npm install -g archgraph-argo 与 argo-deploy 的部署方式，并一句话说明语义查询需要 Neo4j 与向量引擎。",
           "type": "Acceptance Test",
           "Input": "打开 README.md",
-          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 的 Install 章节包含 npm install -g archgraph-argo、argo-deploy、~/.argo、neo4j-driver、mcp.json、Neo4j、vector engine/embedding 与 QWEN_KEY。通过。"
+          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 的 Install 章节包含 npm install -g archgraph-argo、argo-deploy、MCP server、Neo4j 与 vector engine。通过。"
         }
       ]
     },

@@ -43,15 +43,12 @@ test('readme: how-to-use section explains framework adoption', () => {
 test('readme: install section documents npm deployment and semantic requirements', () => {
   // GIVEN the ARGO toolchain is published as an npm package
   // WHEN a reader opens README.md
-  // THEN it documents installing via npm, deploying with argo-deploy, and the Neo4j + vector engine requirement for semantic queries
+  // THEN it shows a minimal install: npm install + argo-deploy, plus a one-line note on Neo4j + vector engine for semantic queries
   const section = sectionAfter(README, 'Install');
   assert.ok(section, 'README should have an Install section');
   assert.match(section, /npm install -g archgraph-argo/, 'should show the npm install command');
   assert.match(section, /argo-deploy/, 'should show the argo-deploy command');
-  assert.match(section, /~\/\.argo/, 'should mention the ~/.argo deployment target');
-  assert.match(section, /neo4j-driver/, 'should mention the neo4j-driver dependency');
-  assert.match(section, /mcp\.json/, 'should mention MCP registration');
+  assert.match(section, /MCP server/, 'should mention the registered MCP server');
   assert.match(section, /Neo4j/, 'should state the Neo4j requirement for semantic queries');
-  assert.match(section, /vector engine|embedding/, 'should state the vector engine requirement');
-  assert.match(section, /QWEN_KEY/, 'should reference the embedding credential');
+  assert.match(section, /vector engine/, 'should state the vector engine requirement');
 });

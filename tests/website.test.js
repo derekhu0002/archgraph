@@ -49,7 +49,7 @@ test('layout-style: tech-simple light layout with nav, hero and sections', () =>
 test('install-section: homepage shows npm install/deploy at the top', () => {
   // GIVEN the ARGO toolchain is published as an npm package
   // WHEN a visitor opens the homepage
-  // THEN an Install section appears at the top (before About), showing the install/deploy commands and the Neo4j + vector engine requirement
+  // THEN an Install section appears at the top (before About), showing the install/deploy commands and a one-line Neo4j + vector engine note
   assert.match(HTML, /id="install"/, 'page should have an Install section');
   assert.ok(
     HTML.indexOf('id="install"') < HTML.indexOf('id="about"'),
@@ -59,7 +59,6 @@ test('install-section: homepage shows npm install/deploy at the top', () => {
   assert.match(HTML, /argo-deploy/, 'should show the deploy command');
   assert.match(HTML, /Neo4j/, 'should mention Neo4j');
   assert.match(HTML, /vector engine/, 'should mention the vector engine');
-  assert.match(HTML, /QWEN_KEY/, 'should reference the embedding credential');
 });
 
 test('kglibrary-area: lists every KGlibrary reference project', () => {

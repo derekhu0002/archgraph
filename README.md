@@ -52,36 +52,15 @@ in the VS Code Copilot prompts folder (`%APPDATA%\Code\User\prompts`).
 
 ## Install
 
-Install the npm package and deploy the ARGO toolchain to your machine:
-
 ```powershell
 npm install -g archgraph-argo
 argo-deploy
 ```
 
-`argo-deploy` runs `install-argo.ps1` and:
+Done &mdash; the ARGO toolchain, skills, and rules are deployed, and the `argo` MCP server is registered automatically.
 
-1. deploys `argo/schema` and `argo/scripts` to `~/.argo/`,
-2. deploys the `argo-init` skill to `~/.copilot/skills/argo-init/`,
-3. deploys the global rule to `%APPDATA%\Code\User\prompts\archgraph.instructions.md`,
-4. installs the `neo4j-driver` dependency into `~/.argo`,
-5. interactively collects environment values into `~/.argo/.env`,
-6. registers the `argo` MCP server in `%APPDATA%\Code\User\mcp.json`.
-
-Skip individual steps with `argo-deploy -SkipEnv`, `-SkipDeps`, or `-SkipMcp`.
-
-> **Semantic queries require Neo4j and a vector engine.** Reading, validating, and mutating the graph
-> work without them, but semantic (Graph RAG) retrieval — `getSystemArchitecture` with a semantic
-> query, or `getIntentElementContext` — needs a reachable **Neo4j** database and an **embedding
-> (vector) engine** configured in `~/.argo/.env`:
->
-> | Variable | Purpose |
-> | --- | --- |
-> | `ARGO_NEO4J_DATABASE_URL` / `_USERNAME` / `_PASSWORD` | Neo4j connection |
-> | `ARGO_EMBEDDING_PROVIDER` / `_MODEL` / `_MODEL_VERSION` / `_DIMENSIONS` / `_BASE_URL` | Embedding (vector) engine |
-> | `QWEN_KEY` | Embedding engine credential |
->
-> Without these, the semantic lifecycle stays `pending`/`disabled`; the structural tools keep working.
+> Semantic (Graph RAG) queries also need **Neo4j** and a **vector engine** configured in
+> `~/.argo/.env`; everything else works out of the box.
 
 ## How to use
 

@@ -208,25 +208,14 @@
     <section id="install">
       <h2><span class="num">00</span>Install &amp; deploy</h2>
       <p class="lead">
-        Install the npm package and deploy the ARGO toolchain to your machine with two commands:
+        Two commands, and you&rsquo;re ready:
       </p>
       <pre>npm install -g archgraph-argo
 argo-deploy</pre>
       <p class="lead" style="margin-top: 14px;">
-        <code>argo-deploy</code> deploys the MCP server, schema, <code>argo-init</code> skill and global rule,
-        installs the <code>neo4j-driver</code> dependency, generates <code>~/.argo/.env</code>, and registers the
-        <code>argo</code> MCP server in VS Code.
+        <strong>Semantic (Graph RAG) queries</strong> also need Neo4j and a vector engine &mdash;
+        everything else works out of the box.
       </p>
-      <div class="card" style="border-left: 3px solid var(--accent);">
-        <h3>Semantic queries need Neo4j + a vector engine</h3>
-        <p>
-          Reading, validating and mutating the graph work out of the box. Semantic (Graph RAG) queries &mdash;
-          <code>getSystemArchitecture</code> with a semantic query, or <code>getIntentElementContext</code> &mdash;
-          require a reachable <strong>Neo4j</strong> database and an <strong>embedding (vector) engine</strong>
-          configured in <code>~/.argo/.env</code> (<code>ARGO_NEO4J_DATABASE_URL</code> / <code>_USERNAME</code> /
-          <code>_PASSWORD</code>, <code>ARGO_EMBEDDING_*</code>, <code>QWEN_KEY</code>).
-        </p>
-      </div>
     </section>
 
     <section id="about">
