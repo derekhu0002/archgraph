@@ -52,6 +52,10 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -89,6 +93,10 @@
           "name": "commit",
           "value": "098be4e",
           "description": "docs/kglibrary.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -196,6 +204,10 @@
           "name": "commit",
           "value": "926aa9c",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力；What is this 置于页面最前）、紧随其后的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯），并提供 GitHub 仓库入口；Reference Library（KGlibrary 案例库）通过导航链接到独立页面 docs/kglibrary.html，Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
@@ -285,6 +297,10 @@
           "name": "commit",
           "value": "2acf056",
           "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -333,6 +349,10 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     },
@@ -387,6 +407,10 @@
           "name": "commit",
           "value": "926aa9c",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     },
@@ -441,6 +465,10 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     },
@@ -473,6 +501,10 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     },
@@ -607,6 +639,10 @@
           "name": "commit",
           "value": "098be4e",
           "description": "docs/insights.html; docs/insight-archgraph-benefits.html; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     },
@@ -645,6 +681,10 @@
           "description": "草稿已创建；freepublish 被 48001 api unauthorized 拒绝（账号无 API 发布权限）",
           "name": "status",
           "value": "BLOCKED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     },
@@ -677,6 +717,10 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     },
@@ -699,6 +743,10 @@
           "name": "commit",
           "value": "fa857e7",
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "description": "Agent 建模语言（AML）标准：连接上游消费者与下游厂商的建模语言契约。AML 扩展 ArchiMate 3.2（新增 Skill/Rule 元素与 testcases/attributes 结构约定），现行规范文档为 docs/agent-programming-language.md（v0.1）。消费者用一份 AML 描述 harness 即可多处运行，厂商按 AML 实现接入。",
@@ -730,6 +778,10 @@
           "name": "commit",
           "value": "fa857e7",
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "description": "将 docs/agent-programming-language.md 的 v0.1 草案演进为带版本号的正式 AML 规范：固化元模型（元素类型与 Profile 约定）、语法（关系用法与结构扩展）、语义（GIVEN-WHEN-THEN 断言与持久化/运行时边界）与交换格式（.argo/schema/SystemArchitecture.schema.json），并声明与 ArchiMate 3.2 的扩展关系。",
@@ -782,6 +834,10 @@
           "name": "commit",
           "value": "c315b5c",
           "description": "argo/scripts/argo-mcp-server.js"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "description": "以 ARGO harness 作为 AML 参考实现：MCP server 读写图谱、schema 校验、语义（Graph RAG）生命周期与 Neo4j 同步，作为厂商实现与消费者接入的样板。当前参考样例为本仓 KGlibrary（以 AML 建模的案例），暂存本仓，后续可沉淀为市场。",
@@ -818,6 +874,10 @@
         {
           "name": "status",
           "value": "PLANNED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "description": "让消费者用一份 AML 描述其 harness，即可生成 .github/、.opencode/、.cursor/ 等多宿主配置，实现一次建模、多处运行。",
@@ -859,6 +919,10 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     },
@@ -965,6 +1029,10 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -1007,6 +1075,10 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     }
