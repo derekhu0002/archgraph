@@ -27,6 +27,10 @@ applyTo: "**"
 6. 知识图谱中所有的验收用例必须采用GIVEN-WHEN-THEN的格式进行描述和实现，以便于人类阅读同时可以自动化执行。
 </Principle>
 
+<Guideline>
+当你探索上下文时，采用小步探索的方式，每次查询的深度不要过大，每次查询后，你可以根据查询结果，决定下一步的探索方向。
+</Guideline>
+
 <instruction>
 你必须通过ARGO MCP server提供的工具来进行意图架构的读写操作，禁止直接修改意图架构的源文件：
 1. getIntentElementContext: 用于获取意图架构元素的上下文信息，包括元素的属性、关联关系等。
