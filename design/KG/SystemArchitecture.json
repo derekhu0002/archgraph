@@ -966,6 +966,11 @@
           "description": "index.html (restored + image-1.png); tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
+          "name": "commit",
+          "value": "a2b0065",
+          "description": "tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
