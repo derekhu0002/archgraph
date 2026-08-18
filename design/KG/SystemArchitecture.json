@@ -760,7 +760,7 @@
       "name": "ARGO 部署脚本",
       "parent": "1249",
       "type": "Work Package",
-      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo，将 argo/skills/argo-init 部署到 ~/.copilot/skills/argo-init，将 argo/rules/archgraph.instructions.md 部署到 %APPDATA%\\Code\\User\\prompts；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补）；自动在 %APPDATA%\\Code\\User\\mcp.json 注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行）；temp 保留在仓库目录不部署。",
+      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo，将 argo/skills/argo-init 部署到 ~/.copilot/skills/argo-init，将 argo/rules/archgraph.instructions.md 部署到 %APPDATA%\\Code\\User\\prompts；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补）；自动在 %APPDATA%\\Code\\User\\mcp.json 注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行，多工作区时优先选择含 design/KG/SystemArchitecture.json 的根）；temp 保留在仓库目录不部署。",
       "testcases": [
         {
           "name": "AT-1361-01-部署脚本可运行",
@@ -832,6 +832,11 @@
           "name": "commit",
           "value": "a4dc2f7",
           "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)"
+        },
+        {
+          "name": "commit",
+          "value": "07d2c69",
+          "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)"
         },
         {
           "name": "status",
