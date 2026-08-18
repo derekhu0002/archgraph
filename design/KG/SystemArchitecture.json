@@ -1033,6 +1033,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "v0.6.0",
+          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz"
         }
       ]
     },
