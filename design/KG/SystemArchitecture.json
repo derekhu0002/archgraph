@@ -865,6 +865,13 @@
           "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）在非 --check-only 模式运行于缺少 design/KG/SystemArchitecture.json 与 .feap 模板的工作区；WHEN 执行初始化脚本；THEN 自动从部署的 defaults 拷贝 design/KG/SystemArchitecture.json，并以当前项目名拷贝 defaults/EA-model-template.feap 为 <项目名>.feap；--check-only 模式不修改工作区。",
           "name": "AT-1357-03-WorkspaceBootstrap拷贝默认文件",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "运行 tests/architecture-view-context.test.js",
+          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
+          "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
+          "name": "AT-1357-04-按视图ID解析视图完整成员",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package"

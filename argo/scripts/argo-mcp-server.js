@@ -51,6 +51,7 @@ const VALIDATOR_TOOL_NAMES = new Set([
 const SYSTEM_ARCHITECTURE_TOOL_NAMES = new Set([
   'getSystemArchitecture',
   'getIntentElementContext',
+  'getArchitectureViewContext',
   'previewSystemArchitectureMutation',
   'applySystemArchitectureMutation',
   'addArchitectureElement',

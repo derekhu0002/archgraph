@@ -214,6 +214,11 @@ const TOOLS = [
     inputSchema: intentElementContextInputSchema(),
   },
   {
+    name: 'getArchitectureViewContext',
+    description: 'read-only query that resolves one view by view_id into its complete membership: the view object, every member element (from included_elements), every member relationship (from included_relationships), the parent element, and optionally child sub-views declared by member elements. Resolves ids into full canonical objects instead of returning raw id lists.',
+    inputSchema: viewContextInputSchema(),
+  },
+  {
     name: 'generateArchitectureDiffPlantuml',
     description: 'Generate a timestamped PlantUML Markdown tree for current git diff changes in SystemArchitecture.json. The tool compares HEAD and working tree, extracts changed elements/relationships, and writes to .argo/temp/architecture_analysis/.',
     inputSchema: {
@@ -392,6 +397,20 @@ function intentElementContextInputSchema() {
       dependentDepth: { type: 'number', description: 'Default: 1. Semantic dependents that rely on the focus element.' },
       associationDepth: { type: 'number', description: 'Default: 1. Association neighbors are expanded at least one layer.' },
       associationNeighborDependencyDepth: { type: 'number', description: 'Default: 0. Optional dependency expansion from association neighbors.' },
+    },
+    additionalProperties: false,
+  };
+}
+
+function viewContextInputSchema() {
+  return {
+    type: 'object',
+    required: ['view_id'],
+    properties: {
+      architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
+      view_id: { type: 'string', description: 'The id of the view to resolve.' },
+      includeParentElement: { type: 'boolean', description: 'Default: true. Resolve the parent element referenced by the view.' },
+      includeChildViews: { type: 'boolean', description: 'Default: false. Include child views declared by member elements through subdiagram_views.' },
     },
     additionalProperties: false,
   };
@@ -622,6 +641,87 @@ function buildIntentElementContext(context, args = {}) {
     explorationHints,
     workContext: {},
     diagnostics: [],
+  };
+}
+
+function buildViewContext(context, args = {}) {
+  const viewId = typeof args.view_id === 'string' ? args.view_id.trim() : '';
+  if (!viewId) {
+    return {
+      status: 'failed',
+      error: { category: 'VIEW_ID_REQUIRED', message: 'view_id is required' },
+    };
+  }
+
+  const document = context.document;
+  const view = findView(document.views, viewId);
+  if (!view) {
+    return {
+      status: 'failed',
+      error: { category: 'VIEW_NOT_FOUND', message: `View '${viewId}' does not exist` },
+    };
+  }
+
+  const elementById = new Map((document.elements || []).map(element => [element.id, element]));
+  const relationshipById = new Map((document.relationships || []).map(relationship => [relationship.id, relationship]));
+
+  const elements = [];
+  const missingElementIds = [];
+  for (const elementId of view.included_elements || []) {
+    const element = elementById.get(elementId);
+    if (element) {
+      elements.push(clone(element));
+    } else {
+      missingElementIds.push(elementId);
+    }
+  }
+
+  const relationships = [];
+  const missingRelationshipIds = [];
+  for (const relationshipId of view.included_relationships || []) {
+    const relationship = relationshipById.get(relationshipId);
+    if (relationship) {
+      relationships.push(clone(relationship));
+    } else {
+      missingRelationshipIds.push(relationshipId);
+    }
+  }
+
+  const includeParentElement = args.includeParentElement !== false;
+  let parentElement = null;
+  if (includeParentElement && view.parent_element_id) {
+    const parent = elementById.get(view.parent_element_id);
+    parentElement = parent ? clone(parent) : null;
+  }
+
+  const includeChildViews = args.includeChildViews === true;
+  const childViews = [];
+  if (includeChildViews) {
+    const childViewIds = new Set();
+    for (const element of elements) {
+      for (const subview of element.subdiagram_views || []) {
+        if (subview && subview.view_id) {
+          childViewIds.add(subview.view_id);
+        }
+      }
+    }
+    for (const entry of document.views || []) {
+      if (childViewIds.has(entry.view_id)) {
+        childViews.push(clone(entry));
+      }
+    }
+  }
+
+  return {
+    status: 'passed',
+    graphPath: context.graphPath.relativePath,
+    view: clone(view),
+    elements,
+    relationships,
+    missingElementIds,
+    missingRelationshipIds,
+    parentElement,
+    childViews,
   };
 }
 
@@ -1818,6 +1918,11 @@ async function callTool(name, args = {}, dependencies = undefined) {
   if (name === 'getIntentElementContext') {
     const context = await loadContext(args);
     return toolResult(attachContextWarnings(buildIntentElementContext(context, args), context));
+  }
+
+  if (name === 'getArchitectureViewContext') {
+    const context = await loadContext(args);
+    return toolResult(attachContextWarnings(buildViewContext(context, args), context));
   }
 
   if (name === 'generateArchitectureDiffPlantuml') {
