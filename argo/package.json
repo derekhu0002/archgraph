@@ -1,0 +1,8 @@
+{
+  "name": "argo",
+  "private": true,
+  "description": "Runtime dependencies for the Argo toolchain (deployed alongside argo/scripts).",
+  "dependencies": {
+    "neo4j-driver": "^6.2.0"
+  }
+}

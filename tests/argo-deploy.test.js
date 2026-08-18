@@ -21,6 +21,7 @@ function runInstall(argoRoot, skillsRoot, promptsRoot) {
       '-SkillsRoot', skillsRoot,
       '-PromptsRoot', promptsRoot,
       '-SkipEnv',
+      '-SkipDeps',
     ],
     { cwd: ROOT, encoding: 'utf8' },
   );
@@ -43,6 +44,12 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(fs.existsSync(path.join(skillsRoot, 'argo-init', 'SKILL.md')));
     // 4) global rule
     assert.ok(fs.existsSync(path.join(promptsRoot, 'intent-architecture-global-rule.md')));
+
+    // 5) dependency manifest is deployed so `npm install` can resolve neo4j-driver.
+    const manifestPath = path.join(argoRoot, 'package.json');
+    assert.ok(fs.existsSync(manifestPath), 'dependency manifest must be deployed');
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    assert.ok(manifest.dependencies && manifest.dependencies['neo4j-driver']);
 
     // temp stays in the repository, and no .env is written in non-interactive mode.
     assert.ok(!fs.existsSync(path.join(argoRoot, 'temp')), 'temp must not be deployed');

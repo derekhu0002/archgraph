@@ -3,7 +3,8 @@ param(
     [string]$ArgoRoot = "$env:USERPROFILE\.argo",
     [string]$SkillsRoot = "$env:USERPROFILE\.copilot\skills",
     [string]$PromptsRoot = "$env:APPDATA\Code\User\prompts",
-    [switch]$SkipEnv
+    [switch]$SkipEnv,
+    [switch]$SkipDeps
 )
 
 $ErrorActionPreference = 'Stop'
@@ -38,6 +39,28 @@ $ruleDest = Join-Path $PromptsRoot 'intent-architecture-global-rule.md'
 Write-Host "[4/4] argo\rules\intent-architecture-global-rule.md -> $ruleDest"
 New-Item -ItemType Directory -Force -Path $PromptsRoot | Out-Null
 Copy-Item -Force -Path $ruleSrc -Destination $ruleDest
+
+$depsSrc = Join-Path $argoDir 'package.json'
+$depsDest = Join-Path $ArgoRoot 'package.json'
+Write-Host "[5/5] argo\package.json -> $depsDest"
+Copy-Item -Force -Path $depsSrc -Destination $depsDest
+
+if ($SkipDeps) {
+    Write-Host 'Skipped dependency install (-SkipDeps).'
+} elseif (Get-Command npm -ErrorAction SilentlyContinue) {
+    Write-Host "==> Installing Node dependencies in $ArgoRoot"
+    Push-Location $ArgoRoot
+    try {
+        npm install --omit=dev --no-audit --no-fund
+        if ($LASTEXITCODE -ne 0) {
+            throw "npm install failed with exit code $LASTEXITCODE"
+        }
+    } finally {
+        Pop-Location
+    }
+} else {
+    Write-Warning 'npm was not found on PATH; skipped dependency install.'
+}
 
 if ($SkipEnv) {
     Write-Host 'Skipped .env generation (-SkipEnv).'

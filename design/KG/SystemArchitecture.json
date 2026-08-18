@@ -760,11 +760,11 @@
       "name": "ARGO 部署脚本",
       "parent": "1249",
       "type": "Work Package",
-      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts 部署到 ~/.argo，将 argo/skills/argo-init 部署到 ~/.copilot/skills/argo-init，将 argo/rules/intent-architecture-global-rule.md 部署到 %APPDATA%\\Code\\User\\prompts；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补）；temp 保留在仓库目录不部署。",
+      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo，将 argo/skills/argo-init 部署到 ~/.copilot/skills/argo-init，将 argo/rules/intent-architecture-global-rule.md 部署到 %APPDATA%\\Code\\User\\prompts；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补）；temp 保留在仓库目录不部署。",
       "testcases": [
         {
           "name": "AT-1361-01-部署脚本可运行",
-          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv 与非交互方式运行到临时目录；THEN 生成 schema/SystemArchitecture.schema.json、scripts/argo-mcp-server.js、skills/argo-init/SKILL.md 与 prompts/intent-architecture-global-rule.md，且不部署 temp 与 .env。",
+          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 与非交互方式运行到临时目录；THEN 生成 schema/SystemArchitecture.schema.json、scripts/argo-mcp-server.js、skills/argo-init/SKILL.md、prompts/intent-architecture-global-rule.md 与 package.json（含 neo4j-driver 依赖），且不部署 temp 与 .env。",
           "type": "Acceptance Test",
           "Input": "运行 tests/argo-deploy.test.js",
           "acceptanceCriteria": "tests/argo-deploy.test.js"
