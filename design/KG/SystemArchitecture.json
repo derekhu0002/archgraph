@@ -720,6 +720,22 @@
         }
       ],
       "type": "Work Package"
+    },
+    {
+      "id": "1360",
+      "name": "补充KGlibrary GPT-Research参考项目信息",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "为 KGlibrary/GPT-Research 补充 info.md（YAML frontmatter 含 name/description/repo，遵循 kglibrary-info-format 规则），并同步刷新 index.html 的 #kglibrary 区域，使网站与自动化脚本可统一消费该参考项目信息。",
+      "testcases": [
+        {
+          "name": "AT-1360-01-GPTResearch信息归档并同步主页",
+          "description": "GIVEN KGlibrary/GPT-Research 目录下存在 GPT-Researcher 多 Agent 研究流程模型；WHEN 补充 info.md 并同步网站主页；THEN 存在 KGlibrary/GPT-Research/info.md（YAML frontmatter 含 name/description/repo），且 index.html 的 #kglibrary 区域列出该项目的 name、repo 与 description。",
+          "type": "Acceptance Test",
+          "Input": "打开 KGlibrary/GPT-Research/info.md 与 index.html",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言 GPT-Research 的 name、repo、description 均出现在页面中。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -1002,6 +1018,16 @@
       "source_name": "rename project to ArchGraph",
       "target_name": "project website",
       "statement": "rename project to ArchGraph --(Association)--> project website"
+    },
+    {
+      "id": "1195",
+      "statement": "补充KGlibrary GPT-Research参考项目信息 --(Association)--> kglibrary-info-format",
+      "name": "遵循该规则",
+      "type": "Association",
+      "source_id": "1360",
+      "target_id": "1320",
+      "source_name": "补充KGlibrary GPT-Research参考项目信息",
+      "target_name": "kglibrary-info-format"
     }
   ],
   "views": [
@@ -1129,6 +1155,20 @@
         "1357",
         "1358",
         "1359"
+      ]
+    },
+    {
+      "view_id": "179",
+      "view_name": "KGlibrary Reference Library",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "description": "KGlibrary 参考项目知识库的管理视图：info 格式规则（kglibrary-info-format）与收录各参考项目 info.md 的工作包。",
+      "included_elements": [
+        "1320",
+        "1360"
+      ],
+      "included_relationships": [
+        "1195"
       ]
     }
   ]
