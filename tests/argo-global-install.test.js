@@ -1,6 +1,6 @@
 'use strict';
 
-const { spawnSync } = require('node:child_process');
+const { spawn, spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -180,6 +180,85 @@ test('argo MCP discovers the workspace from MCP roots without any env var', () =
     const snapshotPayload = JSON.parse(snapshot.result.content[0].text);
     assert.equal(snapshotPayload.status, 'passed');
     assert.equal(snapshotPayload.graphPath, 'design/KG/SystemArchitecture.json');
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('argo MCP resolves the workspace through a roots/list request/response handshake', async () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-roots-handshake-'));
+  try {
+    const serverPath = copyArgoInstallation(tempRoot);
+    assert.ok(fs.existsSync(serverPath), 'copied global server entrypoint must exist');
+
+    const workspaceRoot = path.join(tempRoot, 'workspace');
+    fs.mkdirSync(path.join(workspaceRoot, 'design', 'KG'), { recursive: true });
+    fs.cpSync(
+      path.join(WORKSPACE_ROOT, 'design', 'KG', 'SystemArchitecture.json'),
+      path.join(workspaceRoot, 'design', 'KG', 'SystemArchitecture.json'),
+    );
+
+    const env = { ...process.env };
+    delete env.ARGO_REPO_ROOT;
+    delete env.WORKSPACE_FOLDER;
+
+    const child = spawn(process.execPath, [serverPath], {
+      cwd: os.homedir(),
+      env,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+
+    let buffer = '';
+    const pending = new Map();
+    let nextId = 1;
+
+    const sendLine = obj => child.stdin.write(`${JSON.stringify(obj)}\n`);
+    const request = (method, params) => new Promise((resolve) => {
+      const id = nextId++;
+      pending.set(id, resolve);
+      sendLine({ jsonrpc: '2.0', id, method, params });
+    });
+
+    child.stdout.on('data', (chunk) => {
+      buffer += chunk.toString();
+      let idx;
+      while ((idx = buffer.indexOf('\n')) >= 0) {
+        const line = buffer.slice(0, idx).trim();
+        buffer = buffer.slice(idx + 1);
+        if (!line) {
+          continue;
+        }
+        const msg = JSON.parse(line);
+        if (msg.method === 'roots/list') {
+          sendLine({
+            jsonrpc: '2.0',
+            id: msg.id,
+            result: { roots: [{ name: 'workspace', uri: pathToFileURL(workspaceRoot).href }] },
+          });
+        }
+        if (msg.id !== undefined && pending.has(msg.id)) {
+          pending.get(msg.id)(msg);
+          pending.delete(msg.id);
+        }
+      }
+    });
+
+    try {
+      const initialize = await request('initialize', {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'argo-roots-handshake-test', version: '1' },
+      });
+      sendLine({ jsonrpc: '2.0', method: 'notifications/initialized', params: {} });
+      const call = await request('tools/call', { name: 'getSystemArchitecture', arguments: {} });
+
+      assert.equal(initialize.result.capabilities.roots.listChanged, true);
+      const payload = JSON.parse(call.result.content[0].text);
+      assert.equal(payload.status, 'passed');
+      assert.equal(payload.graphPath, 'design/KG/SystemArchitecture.json');
+    } finally {
+      child.kill();
+    }
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }

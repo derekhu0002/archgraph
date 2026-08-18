@@ -16,6 +16,7 @@ const {
 } = require('./repositoryArgoEnvironment.js');
 const {
   getWorkspaceRoot,
+  hasStaticWorkspace,
   setMcpWorkspaceRoots,
 } = require('./argo-paths.js');
 const canonicalSemanticInitStorage = new AsyncLocalStorage();
@@ -504,6 +505,59 @@ function send(message) {
   process.stdout.write(`${JSON.stringify(message)}\n`);
 }
 
+let rootRequestSeq = 0;
+let rootRequestInFlight = false;
+let rootRequestTimer = null;
+let rootsSettled = false;
+const pendingRootRequests = new Map();
+const deferredToolCalls = [];
+
+function flushDeferredToolCalls() {
+  const pending = deferredToolCalls.splice(0);
+  for (const request of pending) {
+    void (async () => {
+      const response = await handleRequest(request);
+      if (response) {
+        send(response);
+      }
+    })();
+  }
+}
+
+function settleRoots() {
+  if (rootsSettled) {
+    return;
+  }
+  rootsSettled = true;
+  if (rootRequestTimer) {
+    clearTimeout(rootRequestTimer);
+    rootRequestTimer = null;
+  }
+  rootRequestInFlight = false;
+  pendingRootRequests.clear();
+  flushDeferredToolCalls();
+}
+
+function requestRoots() {
+  if (rootRequestInFlight || rootsSettled) {
+    return;
+  }
+  rootRequestInFlight = true;
+  const id = `argo-roots-${++rootRequestSeq}`;
+  rootRequestTimer = setTimeout(() => {
+    rootRequestTimer = null;
+    rootRequestInFlight = false;
+    settleRoots();
+  }, 8000);
+  pendingRootRequests.set(id, (result) => {
+    if (result && Array.isArray(result.roots)) {
+      setMcpWorkspaceRoots(result.roots);
+    }
+    settleRoots();
+  });
+  send({ jsonrpc: '2.0', id, method: 'roots/list', params: {} });
+}
+
 async function handleRequest(request, dependencies = undefined) {
   const { id, method, params } = request;
 
@@ -528,6 +582,9 @@ async function handleRequest(request, dependencies = undefined) {
 
   if (method === 'notifications/roots/list_changed') {
     setMcpWorkspaceRoots(params && params.roots);
+    if (params && Array.isArray(params.roots) && params.roots.length > 0) {
+      settleRoots();
+    }
     return null;
   }
 
@@ -612,9 +669,31 @@ async function main() {
     } catch {
       continue;
     }
+
+    // A JSON-RPC message without a `method` is a response to a server-sent request.
+    if (typeof request.method === 'undefined' && request.id !== undefined) {
+      const resolver = pendingRootRequests.get(request.id);
+      if (resolver) {
+        pendingRootRequests.delete(request.id);
+        resolver(request.result);
+      }
+      continue;
+    }
+
+    // Workspace-dependent tool calls must wait for roots so the global server
+    // targets the current workspace instead of the home directory.
+    if (request.method === 'tools/call' && !hasStaticWorkspace() && !rootsSettled) {
+      deferredToolCalls.push(request);
+      continue;
+    }
+
     const response = await handleRequest(request);
     if (response) {
       send(response);
+    }
+    if ((request.method === 'initialize' || request.method === 'notifications/initialized')
+      && !hasStaticWorkspace()) {
+      requestRoots();
     }
   }
 }

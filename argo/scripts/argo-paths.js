@@ -74,6 +74,15 @@ function getWorkspaceRoot() {
   return path.resolve(process.cwd());
 }
 
+function hasStaticWorkspace() {
+  const explicit = process.env.ARGO_REPO_ROOT || process.env.WORKSPACE_FOLDER;
+  if (explicit && String(explicit).trim() !== '') {
+    return true;
+  }
+  const embedded = path.resolve(getArgoRoot(), '..');
+  return fs.existsSync(path.join(embedded, 'design', 'KG', 'SystemArchitecture.json'));
+}
+
 function resolveArgoPath(...segments) {
   return path.resolve(getArgoRoot(), ...segments);
 }
@@ -103,6 +112,7 @@ module.exports = {
   getArgoRoot,
   getArgoEnvPath,
   getWorkspaceRoot,
+  hasStaticWorkspace,
   normalizeRelativePath,
   resolveArgoPath,
   resolveWorkspacePath,
