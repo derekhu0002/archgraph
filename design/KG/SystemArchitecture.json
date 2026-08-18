@@ -594,6 +594,11 @@
           "name": "commit",
           "value": "cdbb063",
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "fa857e7",
+          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "Agent 建模语言（AML）标准：连接上游消费者与下游厂商的建模语言契约。AML 扩展 ArchiMate 3.2（新增 Skill/Rule 元素与 testcases/attributes 结构约定），现行规范文档为 docs/agent-programming-language.md（v0.1）。消费者用一份 AML 描述 harness 即可多处运行，厂商按 AML 实现接入。",
@@ -620,6 +625,11 @@
         {
           "name": "note",
           "value": "后续重点建设"
+        },
+        {
+          "name": "commit",
+          "value": "fa857e7",
+          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "将 docs/agent-programming-language.md 的 v0.1 草案演进为带版本号的正式 AML 规范：固化元模型（元素类型与 Profile 约定）、语法（关系用法与结构扩展）、语义（GIVEN-WHEN-THEN 断言与持久化/运行时边界）与交换格式（.argo/schema/SystemArchitecture.schema.json），并声明与 ArchiMate 3.2 的扩展关系。",
@@ -642,6 +652,11 @@
         {
           "name": "status",
           "value": "PLANNED"
+        },
+        {
+          "name": "commit",
+          "value": "fa857e7",
+          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "以 ARGO harness 作为 AML 参考实现：MCP server 读写图谱、schema 校验、语义（Graph RAG）生命周期与 Neo4j 同步，作为厂商实现与消费者接入的样板。当前参考样例为本仓 KGlibrary（以 AML 建模的案例），暂存本仓，后续可沉淀为市场。",
