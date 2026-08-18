@@ -62,6 +62,18 @@ test('install-section: homepage shows npm install/deploy near the top', () => {
   assert.match(HTML, /vector engine/, 'should mention the vector engine');
 });
 
+test('about-image: homepage embeds the core-model image under What is this?', () => {
+  // GIVEN the project positions itself as a unified language for harness and product design
+  // WHEN a visitor opens the homepage
+  // THEN the What is this? section embeds the core-model image
+  assert.match(HTML, /docs\/diagrams\/image-1\.png/, 'homepage should embed the core-model image');
+  assert.ok(
+    HTML.indexOf('docs/diagrams/image-1.png') > HTML.indexOf('id="about"') &&
+    HTML.indexOf('docs/diagrams/image-1.png') < HTML.indexOf('id="install"'),
+    'image should appear inside the What is this? section'
+  );
+});
+
 test('kglibrary-area: lists every KGlibrary reference project', () => {
   // GIVEN the KGlibrary directory contains reference projects
   // WHEN a visitor opens the Reference Library page

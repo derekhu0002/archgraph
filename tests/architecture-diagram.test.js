@@ -9,8 +9,7 @@ const ROOT = path.resolve(__dirname, '..');
 const README = readFileSync(path.join(ROOT, 'README.md'), 'utf8');
 const SVG_PATH = path.join(ROOT, 'docs', 'diagrams', 'global-architecture.svg');
 const EXCALIDRAW_PATH = path.join(ROOT, 'docs', 'diagrams', 'global-architecture.excalidraw');
-const CORE_MODEL_PATH = path.join(ROOT, 'docs', 'diagrams', 'core-model.svg');
-const CORE_MODEL_EXCALIDRAW_PATH = path.join(ROOT, 'docs', 'diagrams', 'core-model.excalidraw');
+const CORE_MODEL_IMAGE_PATH = path.join(ROOT, 'docs', 'diagrams', 'image-1.png');
 
 test('architecture-diagram: Layered Viewpoint diagram embedded in README', () => {
   // GIVEN the project documents its global architecture
@@ -26,16 +25,10 @@ test('architecture-diagram: Layered Viewpoint diagram embedded in README', () =>
   }
 });
 
-test('core-model-diagram: unified-language model diagram embedded under What is this?', () => {
+test('core-model-diagram: unified-language model image embedded under What is this?', () => {
   // GIVEN the project positions itself as a unified language for harness and product design
   // WHEN a reader opens the README What is this? section
-  // THEN it embeds a core-model diagram showing Harness Design, Target System Design, AgentHarness and Target Project in one model
-  assert.match(README, /docs\/diagrams\/core-model\.svg/, 'README should embed the core-model diagram');
-  assert.ok(existsSync(CORE_MODEL_PATH), 'the core-model SVG should exist');
-  assert.ok(existsSync(CORE_MODEL_EXCALIDRAW_PATH), 'the core-model Excalidraw source should exist');
-
-  const svg = readFileSync(CORE_MODEL_PATH, 'utf8');
-  for (const label of ['ONE MODEL', 'Harness Design', 'Target System Design', 'AgentHarness', 'Target Project']) {
-    assert.ok(svg.includes(label), `core-model diagram should mention "${label}"`);
-  }
+  // THEN it embeds the core-model image (image-1.png)
+  assert.match(README, /docs\/diagrams\/image-1\.png/, 'README should embed the core-model image');
+  assert.ok(existsSync(CORE_MODEL_IMAGE_PATH), 'the core-model image should exist');
 });
