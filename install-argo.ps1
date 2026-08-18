@@ -4,7 +4,9 @@ param(
     [string]$SkillsRoot = "$env:USERPROFILE\.copilot\skills",
     [string]$PromptsRoot = "$env:APPDATA\Code\User\prompts",
     [switch]$SkipEnv,
-    [switch]$SkipDeps
+    [switch]$SkipDeps,
+    [switch]$SkipMcp,
+    [string]$McpPath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -106,6 +108,42 @@ if ($SkipEnv) {
         (New-Object System.Text.UTF8Encoding $false)
     )
     Write-Host "Wrote $envPath"
+}
+
+if ($SkipMcp) {
+    Write-Host 'Skipped MCP configuration (-SkipMcp).'
+} else {
+    Write-Host '==> Registering argo MCP server in VS Code'
+    $mcpPath = if ($McpPath) { $McpPath } else { Join-Path $env:APPDATA 'Code\User\mcp.json' }
+    $argoServer = (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js').Replace('\', '/')
+
+    $servers = [ordered]@{}
+    if (Test-Path $mcpPath) {
+        try {
+            $existing = Get-Content $mcpPath -Raw | ConvertFrom-Json
+            if ($existing.PSObject.Properties.Name -contains 'servers') {
+                foreach ($p in $existing.servers.PSObject.Properties) {
+                    $servers[$p.Name] = $p.Value
+                }
+            }
+        } catch {
+            # Ignore an unparseable existing file and start fresh.
+        }
+    }
+
+    $servers['argo'] = [ordered]@{
+        type    = 'stdio'
+        command = 'node'
+        args    = @($argoServer)
+        cwd     = '${workspaceFolder}'
+        env     = [ordered]@{ ARGO_REPO_ROOT = '${workspaceFolder}' }
+    }
+
+    $config = [ordered]@{ servers = $servers }
+    New-Item -ItemType Directory -Force -Path (Split-Path $mcpPath) | Out-Null
+    $json = $config | ConvertTo-Json -Depth 8
+    [System.IO.File]::WriteAllText($mcpPath, $json, (New-Object System.Text.UTF8Encoding $false))
+    Write-Host "argo MCP config written -> $mcpPath"
 }
 
 Write-Host ''

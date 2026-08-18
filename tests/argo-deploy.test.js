@@ -10,7 +10,7 @@ const assert = require('node:assert/strict');
 const ROOT = path.resolve(__dirname, '..');
 const SCRIPT = path.join(ROOT, 'install-argo.ps1');
 
-function runInstall(argoRoot, skillsRoot, promptsRoot) {
+function runInstall(argoRoot, skillsRoot, promptsRoot, mcpPath) {
   return spawnSync(
     'powershell.exe',
     [
@@ -20,6 +20,7 @@ function runInstall(argoRoot, skillsRoot, promptsRoot) {
       '-ArgoRoot', argoRoot,
       '-SkillsRoot', skillsRoot,
       '-PromptsRoot', promptsRoot,
+      '-McpPath', mcpPath,
       '-SkipEnv',
       '-SkipDeps',
     ],
@@ -32,8 +33,9 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
   const argoRoot = path.join(tmp, '.argo');
   const skillsRoot = path.join(tmp, '.copilot', 'skills');
   const promptsRoot = path.join(tmp, 'Code', 'User', 'prompts');
+  const mcpPath = path.join(tmp, 'mcp.json');
   try {
-    const result = runInstall(argoRoot, skillsRoot, promptsRoot);
+    const result = runInstall(argoRoot, skillsRoot, promptsRoot, mcpPath);
     assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
 
     // 1) schema
@@ -54,6 +56,14 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     // temp stays in the repository, and no .env is written in non-interactive mode.
     assert.ok(!fs.existsSync(path.join(argoRoot, 'temp')), 'temp must not be deployed');
     assert.ok(!fs.existsSync(path.join(argoRoot, '.env')), '.env must only be generated interactively');
+
+    // 6) VS Code MCP config registers the deployed argo server.
+    assert.ok(fs.existsSync(mcpPath), 'VS Code MCP config must be written');
+    const mcp = JSON.parse(fs.readFileSync(mcpPath, 'utf8'));
+    assert.ok(mcp.servers && mcp.servers.argo);
+    assert.equal(mcp.servers.argo.command, 'node');
+    assert.ok(mcp.servers.argo.args[0].endsWith('argo-mcp-server.js'));
+    assert.equal(mcp.servers.argo.env.ARGO_REPO_ROOT, '${workspaceFolder}');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
