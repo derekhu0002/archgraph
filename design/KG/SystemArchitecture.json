@@ -760,7 +760,7 @@
       "name": "ARGO 部署脚本",
       "parent": "1249",
       "type": "Work Package",
-      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo，将 argo/skills/argo-init 部署到 ~/.copilot/skills/argo-init，将 argo/rules/archgraph.instructions.md 部署到 %APPDATA%\\Code\\User\\prompts；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补）；自动在 %APPDATA%\\Code\\User\\mcp.json 注册 argo MCP server（合并已有配置）；temp 保留在仓库目录不部署。",
+      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo，将 argo/skills/argo-init 部署到 ~/.copilot/skills/argo-init，将 argo/rules/archgraph.instructions.md 部署到 %APPDATA%\\Code\\User\\prompts；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补）；自动在 %APPDATA%\\Code\\User\\mcp.json 注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行）；temp 保留在仓库目录不部署。",
       "testcases": [
         {
           "name": "AT-1361-01-部署脚本可运行",
@@ -768,6 +768,13 @@
           "type": "Acceptance Test",
           "Input": "运行 tests/argo-deploy.test.js",
           "acceptanceCriteria": "tests/argo-deploy.test.js"
+        },
+        {
+          "name": "AT-1361-02-全局server动态发现工作区",
+          "description": "GIVEN argo MCP server 已部署到 ~/.argo 且 mcp.json 不含 cwd/env；WHEN VS Code 启动 server、完成 initialize/initialized 后 server 发送 roots/list 请求，客户端返回当前工作区 roots；THEN 工作区相关的 tools/call 以该工作区为 workspaceRoot 解析 design/KG/SystemArchitecture.json 并通过验证（而非 home 目录）。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-global-install.test.js",
+          "acceptanceCriteria": "tests/argo-global-install.test.js"
         }
       ],
       "attributes": [
@@ -815,6 +822,16 @@
           "name": "commit",
           "value": "025ceae",
           "description": "install-argo.ps1 (restore workspaceFolder in MCP config); tests/argo-deploy.test.js; package.json (0.4.2)"
+        },
+        {
+          "name": "commit",
+          "value": "2af92ba",
+          "description": "argo/scripts/argo-paths.js (MCP roots workspace resolution); argo/scripts/argo-mcp-server.js (roots.listChanged capability); install-argo.ps1 (minimal MCP config); tests/argo-deploy.test.js; tests/argo-global-install.test.js; package.json (0.5.0)"
+        },
+        {
+          "name": "commit",
+          "value": "a4dc2f7",
+          "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)"
         },
         {
           "name": "status",
