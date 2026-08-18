@@ -1101,6 +1101,22 @@
           "Input": "打开 docs/archgraph-introduction.wechat.md",
           "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-intro-ready\"）：断言 docs/archgraph-introduction.wechat.md 存在，frontmatter 含 title/author/digest，正文含 ArchGraph 与 Agentic Engineering。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "03ad558",
+          "description": "docs/archgraph-introduction.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "status",
+          "value": "BLOCKED",
+          "description": "wechat:draft 创建失败：40164 invalid ip 120.229.12.28 not in whitelist（需在公众号后台将当前公网 IP 加入白名单）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        }
       ]
     }
   ],
