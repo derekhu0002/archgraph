@@ -24,7 +24,8 @@ Editable source: [`docs/diagrams/global-architecture.excalidraw`](docs/diagrams/
 ## Core principles
 
 1. **Arm before acting** — before any development, pull the Work Package's associated Skills and
-   Rules and materialize them under `.github/skills/<name>/SKILL.md` and `*.instructions.md`.
+   Rules and materialize them under `~/.copilot/skills/<name>/SKILL.md` (user-level) or
+   `.github/skills/<name>/SKILL.md` (project) and `*.instructions.md`.
 2. **Find the element first** — every repository change maps to an architecture element. If none
    exists, create one inside a sensible View and Viewpoint.
 3. **Acceptance tests first** — check the affected acceptance cases before changing anything.
@@ -32,16 +33,18 @@ Editable source: [`docs/diagrams/global-architecture.excalidraw`](docs/diagrams/
 4. **Commit traceability** — after each change, commit and register the commit id plus file paths
    back into the graph element.
 
-These rules are encoded in [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+These rules are encoded as user-level instructions `argo-copilot-instructions.instructions.md`
+in the VS Code Copilot prompts folder (`%APPDATA%\Code\User\prompts`).
 
 ## Repository map
 
 | Path | Purpose |
 | --- | --- |
 | `design/KG/SystemArchitecture.json` | Canonical intent architecture graph (single source of truth) |
-| `.github/copilot-instructions.md` | Global agent rules |
+| `%APPDATA%\Code\User\prompts\argo-copilot-instructions.instructions.md` | Global agent rules (user-level) |
+| `~/.copilot/skills/argo-init/SKILL.md` | ARGO harness init skill (user-level) |
 | `.github/kglibrary.instructions.md` | Global rule for `KGlibrary/*/info.md` frontmatter format |
-| `.github/skills/<name>/SKILL.md` | Skills materialized from the graph (`argo-init`, `create-github-repository-page`, `diagram-draw`, `optimize-web-layout-style`) |
+| `.github/skills/<name>/SKILL.md` | Project skills materialized from the graph (`create-github-repository-page`, `diagram-draw`, `optimize-web-layout-style`) |
 | `.argo/` | ARGO harness: MCP server, schema, validators, semantic (Graph RAG) lifecycle and Neo4j sync |
 | `KGlibrary/` | Reference project knowledge library |
 | `index.html` | GitHub Pages home site |

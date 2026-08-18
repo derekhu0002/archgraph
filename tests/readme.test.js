@@ -13,7 +13,7 @@ test('readme: documents the current repository state', () => {
   // WHEN a reader opens README.md
   // THEN it reflects the current project: intent graph, global rules, skills, ARGO harness, KGlibrary, home site and tests
   assert.match(README, /design\/KG\/SystemArchitecture\.json/, 'README should reference the canonical intent graph');
-  assert.match(README, /\.github\/copilot-instructions\.md/, 'README should reference the global agent rules');
+  assert.match(README, /argo-copilot-instructions\.instructions\.md/, 'README should reference the global agent rules');
   assert.match(README, /\.github\/skills\//, 'README should reference the materialized skills directory');
   assert.match(README, /\.argo\//, 'README should reference the ARGO harness');
   assert.match(README, /KGlibrary\//, 'README should reference the reference library');
