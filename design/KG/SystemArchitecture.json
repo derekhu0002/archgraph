@@ -807,6 +807,11 @@
           "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)"
         },
         {
+          "name": "commit",
+          "value": "2c54b51",
+          "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
