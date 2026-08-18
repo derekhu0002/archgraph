@@ -44,7 +44,7 @@ in the VS Code Copilot prompts folder (`%APPDATA%\Code\User\prompts`).
 | `%APPDATA%\Code\User\prompts\argo-copilot-instructions.instructions.md` | Global agent rules (user-level) |
 | `~/.copilot/skills/argo-init/SKILL.md` | ARGO harness init skill (user-level) |
 | `.github/kglibrary.instructions.md` | Global rule for `KGlibrary/*/info.md` frontmatter format |
-| `.github/skills/<name>/SKILL.md` | Project skills materialized from the graph (`create-github-repository-page`, `diagram-draw`, `optimize-web-layout-style`) |
+| `.github/skills/<name>/SKILL.md` | Skills materialized from the graph (`argo-init`, `create-github-repository-page`, `diagram-draw`, `optimize-web-layout-style`) |
 | `.argo/` | ARGO harness: MCP server, schema, validators, semantic (Graph RAG) lifecycle and Neo4j sync |
 | `KGlibrary/` | Reference project knowledge library |
 | `index.html` | GitHub Pages home site |
