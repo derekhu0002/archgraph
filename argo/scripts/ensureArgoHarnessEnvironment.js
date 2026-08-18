@@ -45,6 +45,10 @@ async function main() {
   };
 
   try {
+    report.workspaceBootstrap = await ensureWorkspaceBootstrap({
+      checkOnly: options.checkOnly,
+      workspaceRoot,
+    });
     report.mcp = verifyArgoMcpServer({ workspaceRoot });
     report.systemArchitecture = await verifyCanonicalSystemArchitecture();
     report.neo4j = await ensureNeo4jProjection({ checkOnly: options.checkOnly });
@@ -58,6 +62,9 @@ async function main() {
     report.error = formatErrorForReport(error);
   }
 
+  if (report.workspaceBootstrap && report.workspaceBootstrap.status === 'failed') {
+    report.status = 'failed';
+  }
   if (report.mcp && report.mcp.status === 'failed') {
     report.status = 'failed';
   }
@@ -97,6 +104,33 @@ function parseArgs(argv) {
 
 function resolveWorkspaceRoot() {
   return getWorkspaceRoot();
+}
+
+async function ensureWorkspaceBootstrap({ checkOnly, workspaceRoot }) {
+  if (checkOnly) {
+    return {
+      status: 'skipped',
+      reason: 'check-only',
+    };
+  }
+
+  try {
+    const workspace = await argoMcp.initializeWorkspace(workspaceRoot);
+    return {
+      status: 'ok',
+      workspaceRoot: workspace.workspaceRoot,
+      targetFeapName: workspace.targetFeapName,
+      createdFiles: workspace.createdFiles,
+      updatedFiles: workspace.updatedFiles,
+      removedFiles: workspace.removedFiles,
+      skippedSteps: workspace.skippedSteps,
+    };
+  } catch (error) {
+    return {
+      status: 'failed',
+      error: String(error && error.message ? error.message : error),
+    };
+  }
 }
 
 async function ensureCanonicalSemanticLifecycle({ checkOnly, workspaceRoot, neo4j }) {

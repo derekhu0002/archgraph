@@ -17,6 +17,7 @@ const {
 const {
   getWorkspaceRoot,
   hasStaticWorkspace,
+  resolveArgoPath,
   setMcpWorkspaceRoots,
 } = require('./argo-paths.js');
 const canonicalSemanticInitStorage = new AsyncLocalStorage();
@@ -25,9 +26,14 @@ const HANDOFF_FILES_TO_RESET = [
   ['.argo', 'temp', 'IntentToImplementationHandoff.json'],
   ['.argo', 'temp', 'ImplementationToCodingHandoff.json'],
 ];
+const WORKSPACE_GRAPH_PATH_SEGMENTS = ['design', 'KG', 'SystemArchitecture.json'];
+const BUNDLED_GRAPH_DEFAULT_SEGMENTS = ['defaults', 'design', 'KG', 'SystemArchitecture.json'];
+const REPOSITORY_GRAPH_DEFAULT_SEGMENTS = ['eatool', 'default', 'design', 'KG', 'SystemArchitecture.json'];
+const BUNDLED_EA_TEMPLATE_SEGMENTS = ['defaults', 'EA-model-template.feap'];
 const EA_TEMPLATE_PATH_CANDIDATES = [
   ['.opencode', 'customtools', 'EA-model-template.feap'],
   ['.opencode', 'EA-model-template.feap'],
+  ['eatool', 'default', 'EA-model-template.feap'],
   ['eatool', 'EA-model-template.feap'],
   ['EA-model-template.feap'],
   ['Argo.feap'],
@@ -409,6 +415,17 @@ async function initializeWorkspace(workspaceRoot) {
   const removedFiles = [];
   const skippedSteps = [];
 
+  const graphTargetPath = path.join(workspaceRoot, ...WORKSPACE_GRAPH_PATH_SEGMENTS);
+  const graphRelativePath = normalizeRelativePath(path.relative(workspaceRoot, graphTargetPath));
+  if (!fs.existsSync(graphTargetPath)) {
+    const graphSourcePath = resolveGraphDefaultSourcePath(workspaceRoot);
+    await fs.promises.mkdir(path.dirname(graphTargetPath), { recursive: true });
+    await fs.promises.copyFile(graphSourcePath, graphTargetPath);
+    createdFiles.push(graphRelativePath);
+  } else {
+    skippedSteps.push(`${graphRelativePath} already exists`);
+  }
+
   const templateSourcePath = resolveTemplateSourcePath(workspaceRoot);
   const targetFeapName = buildTargetFileName(workspaceName);
   const targetFeapPath = path.join(workspaceRoot, targetFeapName);
@@ -445,7 +462,27 @@ function resolveTemplateSourcePath(workspaceRoot) {
       return absolutePath;
     }
   }
-  throw new Error(`Unable to locate EA template. Checked: ${EA_TEMPLATE_PATH_CANDIDATES.map(candidate => candidate.join('/')).join(', ')}`);
+
+  const bundledPath = resolveArgoPath(...BUNDLED_EA_TEMPLATE_SEGMENTS);
+  if (fs.existsSync(bundledPath)) {
+    return bundledPath;
+  }
+
+  throw new Error(`Unable to locate EA template. Checked: ${EA_TEMPLATE_PATH_CANDIDATES.map(candidate => candidate.join('/')).join(', ')}, and bundled ${BUNDLED_EA_TEMPLATE_SEGMENTS.join('/')}`);
+}
+
+function resolveGraphDefaultSourcePath(workspaceRoot) {
+  const bundledPath = resolveArgoPath(...BUNDLED_GRAPH_DEFAULT_SEGMENTS);
+  if (fs.existsSync(bundledPath)) {
+    return bundledPath;
+  }
+
+  const repositoryPath = path.join(workspaceRoot, ...REPOSITORY_GRAPH_DEFAULT_SEGMENTS);
+  if (fs.existsSync(repositoryPath)) {
+    return repositoryPath;
+  }
+
+  throw new Error(`Unable to locate default SystemArchitecture template. Checked: bundled ${BUNDLED_GRAPH_DEFAULT_SEGMENTS.join('/')}, and repository ${REPOSITORY_GRAPH_DEFAULT_SEGMENTS.join('/')}`);
 }
 
 function buildTargetFileName(workspaceName) {

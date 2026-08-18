@@ -792,6 +792,13 @@
           "description": "GIVEN .argo 工具链被复制到仓库外的全局目录（如用户目录）；WHEN 以 ARGO_REPO_ROOT 指向当前仓库并启动全局安装的 .argo/scripts/argo-mcp-server.js；THEN MCP server 能完成 initialize 与 tools/list，且 validateSystemArchitecture 与 getSystemArchitecture 工具调用均通过（脚本与 schema 从安装目录解析，workspace 从 ARGO_REPO_ROOT 解析）。",
           "name": "AT-1357-02-ARGO全局安装可运行",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "运行 tests/argo-workspace-bootstrap.test.js",
+          "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js",
+          "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）在非 --check-only 模式运行于缺少 design/KG/SystemArchitecture.json 与 .feap 模板的工作区；WHEN 执行初始化脚本；THEN 自动从部署的 defaults 拷贝 design/KG/SystemArchitecture.json，并以当前项目名拷贝 defaults/EA-model-template.feap 为 <项目名>.feap；--check-only 模式不修改工作区。",
+          "name": "AT-1357-03-WorkspaceBootstrap拷贝默认文件",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package"
@@ -854,7 +861,7 @@
       "testcases": [
         {
           "name": "AT-1361-01-部署脚本可运行",
-          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 与非交互方式运行到临时目录；THEN 生成 schema/SystemArchitecture.schema.json、scripts/argo-mcp-server.js、skills/argo-init/SKILL.md、prompts/archgraph.instructions.md 与 package.json（含 neo4j-driver 依赖），并写入 mcp.json 注册 argo MCP server，且不部署 temp 与 .env。",
+          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 与非交互方式运行到临时目录；THEN 生成 schema/SystemArchitecture.schema.json、scripts/argo-mcp-server.js、defaults/design/KG/SystemArchitecture.json、defaults/EA-model-template.feap、skills/argo-init/SKILL.md、prompts/archgraph.instructions.md 与 package.json（含 neo4j-driver 依赖），并写入 mcp.json 注册 argo MCP server，且不部署 temp 与 .env。",
           "type": "Acceptance Test",
           "Input": "运行 tests/argo-deploy.test.js",
           "acceptanceCriteria": "tests/argo-deploy.test.js"
@@ -865,6 +872,13 @@
           "type": "Acceptance Test",
           "Input": "运行 tests/argo-global-install.test.js",
           "acceptanceCriteria": "tests/argo-global-install.test.js"
+        },
+        {
+          "name": "AT-1361-03-默认模板随包部署",
+          "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署到 ~/.argo；THEN 部署目录包含 defaults/design/KG/SystemArchitecture.json 与 defaults/EA-model-template.feap，且 package.json files 包含 argo/defaults。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js"
         }
       ],
       "attributes": [

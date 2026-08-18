@@ -42,6 +42,9 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(fs.existsSync(path.join(argoRoot, 'schema', 'SystemArchitecture.schema.json')));
     // 2) scripts
     assert.ok(fs.existsSync(path.join(argoRoot, 'scripts', 'argo-mcp-server.js')));
+    // 2b) defaults (workspace bootstrap templates)
+    assert.ok(fs.existsSync(path.join(argoRoot, 'defaults', 'design', 'KG', 'SystemArchitecture.json')));
+    assert.ok(fs.existsSync(path.join(argoRoot, 'defaults', 'EA-model-template.feap')));
     // 3) argo-init skill
     assert.ok(fs.existsSync(path.join(skillsRoot, 'argo-init', 'SKILL.md')));
     // 4) global rule
@@ -52,6 +55,10 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(fs.existsSync(manifestPath), 'dependency manifest must be deployed');
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
     assert.ok(manifest.dependencies && manifest.dependencies['neo4j-driver']);
+
+    // 5b) npm package manifest ships the defaults directory.
+    const npmManifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+    assert.ok(Array.isArray(npmManifest.files) && npmManifest.files.includes('argo/defaults'));
 
     // temp stays in the repository, and no .env is written in non-interactive mode.
     assert.ok(!fs.existsSync(path.join(argoRoot, 'temp')), 'temp must not be deployed');

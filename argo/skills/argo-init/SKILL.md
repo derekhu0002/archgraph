@@ -11,6 +11,7 @@ disable-model-invocation: true
 
 - `argo` MCP 服务器（全局 `.argo` 安装）能正常初始化、列出关键工具并响应 `ping`。
 - `design/KG/SystemArchitecture.json` 可通过 `argo` MCP 正常读取和校验。
+- 工作区缺少 `design/KG/SystemArchitecture.json` 时，非 `--check-only` 模式会自动从部署的 `defaults` 拷贝默认模板；工作区没有 `.feap` 时，自动以当前项目名拷贝默认 `EA-model-template.feap`。
 - 本机 Neo4j 连接可用。
 - canonical intent graph 至少完成一次 JSON -> Neo4j 初始同步，并通过一致性校验。
 - 非 `--check-only` 模式会在结构同步后执行语义生命周期：双 gate 未开启时记录 pending/disabled；双 gate 开启时执行全量 embedding backfill 与 readiness 对齐。

@@ -23,28 +23,33 @@ Write-Host '==> Deploying Argo toolchain'
 
 $schemaSrc = Join-Path $argoDir 'schema'
 $schemaDest = Join-Path $ArgoRoot 'schema'
-Write-Host "[1/4] argo\schema -> $schemaDest"
+Write-Host "[1/6] argo\schema -> $schemaDest"
 Copy-Tree -Source $schemaSrc -Destination $schemaDest
 
 $scriptsSrc = Join-Path $argoDir 'scripts'
 $scriptsDest = Join-Path $ArgoRoot 'scripts'
-Write-Host "[2/4] argo\scripts -> $scriptsDest"
+Write-Host "[2/6] argo\scripts -> $scriptsDest"
 Copy-Tree -Source $scriptsSrc -Destination $scriptsDest
+
+$defaultsSrc = Join-Path $argoDir 'defaults'
+$defaultsDest = Join-Path $ArgoRoot 'defaults'
+Write-Host "[3/6] argo\defaults -> $defaultsDest"
+Copy-Tree -Source $defaultsSrc -Destination $defaultsDest
 
 $skillSrc = Join-Path (Join-Path $argoDir 'skills') 'argo-init'
 $skillDest = Join-Path $SkillsRoot 'argo-init'
-Write-Host "[3/4] argo\skills\argo-init -> $skillDest"
+Write-Host "[4/6] argo\skills\argo-init -> $skillDest"
 Copy-Tree -Source $skillSrc -Destination $skillDest
 
 $ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
 $ruleDest = Join-Path $PromptsRoot 'archgraph.instructions.md'
-Write-Host "[4/4] argo\rules\archgraph.instructions.md -> $ruleDest"
+Write-Host "[5/6] argo\rules\archgraph.instructions.md -> $ruleDest"
 New-Item -ItemType Directory -Force -Path $PromptsRoot | Out-Null
 Copy-Item -Force -Path $ruleSrc -Destination $ruleDest
 
 $depsSrc = Join-Path $argoDir 'package.json'
 $depsDest = Join-Path $ArgoRoot 'package.json'
-Write-Host "[5/5] argo\package.json -> $depsDest"
+Write-Host "[6/6] argo\package.json -> $depsDest"
 Copy-Item -Force -Path $depsSrc -Destination $depsDest
 
 if ($SkipDeps) {
