@@ -49,11 +49,23 @@ if ($SkipDeps) {
     Write-Host 'Skipped dependency install (-SkipDeps).'
 } elseif (Get-Command npm -ErrorAction SilentlyContinue) {
     Write-Host "==> Installing Node dependencies in $ArgoRoot"
+    $vendorDir = Join-Path $PSScriptRoot 'vendor'
     Push-Location $ArgoRoot
     try {
-        npm install --omit=dev --no-audit --no-fund
-        if ($LASTEXITCODE -ne 0) {
-            throw "npm install failed with exit code $LASTEXITCODE"
+        $vendorTgzs = @(Get-ChildItem -Path $vendorDir -Filter '*.tgz' -ErrorAction SilentlyContinue)
+        if ($vendorTgzs.Count -gt 0) {
+            foreach ($tgz in $vendorTgzs) {
+                Write-Host "  installing bundled $($tgz.Name)"
+                npm install --no-save --omit=dev --no-audit --no-fund $tgz.FullName
+                if ($LASTEXITCODE -ne 0) {
+                    throw "npm install $($tgz.Name) failed with exit code $LASTEXITCODE"
+                }
+            }
+        } else {
+            npm install --omit=dev --no-audit --no-fund
+            if ($LASTEXITCODE -ne 0) {
+                throw "npm install failed with exit code $LASTEXITCODE"
+            }
         }
     } finally {
         Pop-Location

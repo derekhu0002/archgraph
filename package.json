@@ -1,6 +1,28 @@
 {
-  "name": "archgraph",
-  "dependencies": {
+  "name": "archgraph-argo",
+  "version": "0.1.0",
+  "description": "Deploy the ArchGraph ARGO toolchain, skills, and rules (schema, scripts, argo-init skill, global rule) with one command.",
+  "license": "MIT",
+  "bin": {
+    "argo-deploy": "bin/argo-deploy.js"
+  },
+  "files": [
+    "argo/scripts",
+    "argo/schema",
+    "argo/skills/argo-init",
+    "argo/rules",
+    "argo/package.json",
+    "vendor",
+    "install-argo.ps1",
+    "bin"
+  ],
+  "devDependencies": {
     "neo4j-driver": "^6.2.0"
+  },
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\""
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
