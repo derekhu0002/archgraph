@@ -8,6 +8,8 @@ applyTo: "**"
 当你领取到某个Workpackage后，进行任何开发活动前，必须先完成自我武装，从该Workpackage关联的元素中，找到完成任务需要使用的SKILL、需要遵守的全局规则。
 1. 对于需要的SKILL，请在.github/skills下创建一个或多个[SKILL名称]/SKILL.md;
 2. 对于要遵守的全局规则，需要在.github下面增加一个或多个 *.instructions.md文件。
+3. 工作完成后，需要将上面生成的SKILL和RULE刷新到知识图谱中对应的架构元素上，确保下次领取到该Workpackage的Agent可以直接获取到这些SKILL和RULE。
+4. 最后需要从.github/skills和.github下删除这些SKILL和RULE文件，确保仓库中不残留这些文件。
 </Principle>
 
 <Principle>
