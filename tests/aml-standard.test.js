@@ -31,19 +31,18 @@ test('aml-standard: graph models the AML standard Contract', () => {
   assert.equal(el.parent, '1249', 'AML 规范 should hang under the Implementation and Migration Viewpoint');
 });
 
-test('aml-standard: five workstream Work Packages hang under the AML standard', () => {
+test('aml-standard: three active workstream Work Packages hang under the AML standard', () => {
   // GIVEN the AML standardization roadmap is modeled
   // WHEN a reader inspects the graph
-  // THEN five Work Packages hang under the AML 规范 element, each with an acceptance testcase
+  // THEN three Work Packages hang under the AML 规范 element, each with an acceptance testcase,
+  // and the deferred workstreams (一致性测试套件, 下游厂商生态) are not modeled
   const aml = GRAPH.elements.find((entry) => entry.name === 'AML 规范');
   assert.ok(aml, 'AML 规范 element should exist');
 
   const expected = [
     '制定AML语言规范',
-    '建立AML一致性测试套件',
     '提供AML参考实现',
     '简化上游消费者建模体验',
-    '构建下游厂商生态',
   ];
 
   for (const name of expected) {
@@ -54,6 +53,14 @@ test('aml-standard: five workstream Work Packages hang under the AML standard', 
     assert.ok(
       Array.isArray(wp.testcases) && wp.testcases.length >= 1,
       `${name} should carry at least one acceptance testcase`
+    );
+  }
+
+  const removed = ['建立AML一致性测试套件', '构建下游厂商生态'];
+  for (const name of removed) {
+    assert.ok(
+      !GRAPH.elements.some((entry) => entry.name === name),
+      `graph should NOT contain Work Package "${name}"`
     );
   }
 });
