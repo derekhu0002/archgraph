@@ -1135,6 +1135,28 @@
           "value": "not_delivered"
         }
       ]
+    },
+    {
+      "id": "1364",
+      "name": "归档deepresearch两个参考项目到KGlibrary并发布首页",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "从 derekhu0002/deepresearch 仓库 design/KG/ 归档两个参考项目模型到 KGlibrary：gpt-researcher_Agent_探索方法.json（gpt-researcher Agent 行为模型：单智能体 GPTResearcher 编排 + 多智能体 LangGraph 协作研究）与 麦肯锡结构化战略分析新5步法.json（驱动因素→问题→MECE 决策树→假设→证据→三态验证）。每个项目目录含 info.md（遵循 kglibrary-info-format）与模型 JSON，并刷新 docs/kglibrary.html 列出两者后提交推送发布首页。",
+      "testcases": [
+        {
+          "name": "AT-1364-01-归档两个参考项目并同步主页",
+          "description": "GIVEN deepresearch 仓库 design/KG 下存在 gpt-researcher_Agent_探索方法.json 与 麦肯锡结构化战略分析新5步法.json；WHEN 归档到 KGlibrary 并刷新 Reference Library 页面 docs/kglibrary.html；THEN KGlibrary 下存在两个新项目目录（各含 info.md 与模型 JSON），docs/kglibrary.html 列出两者的 name、repo 与 description。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/kglibrary.html 与 KGlibrary 目录",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 docs/kglibrary.html，断言两个新项目的 name、repo、description 均出现在页面中。通过。"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "status",
+          "value": "IN_PROGRESS"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -1427,6 +1449,16 @@
       "target_id": "1320",
       "source_name": "补充KGlibrary GPT-Research参考项目信息",
       "target_name": "kglibrary-info-format"
+    },
+    {
+      "id": "1196",
+      "statement": "归档deepresearch两个参考项目到KGlibrary并发布首页 --(Association)--> kglibrary-info-format",
+      "name": "遵循该规则",
+      "type": "Association",
+      "source_id": "1364",
+      "target_id": "1320",
+      "source_name": "归档deepresearch两个参考项目到KGlibrary并发布首页",
+      "target_name": "kglibrary-info-format"
     }
   ],
   "views": [
@@ -1565,10 +1597,12 @@
       "description": "KGlibrary 参考项目知识库的管理视图：info 格式规则（kglibrary-info-format）与收录各参考项目 info.md 的工作包。",
       "included_elements": [
         "1320",
-        "1360"
+        "1360",
+        "1364"
       ],
       "included_relationships": [
-        "1195"
+        "1195",
+        "1196"
       ]
     },
     {
