@@ -46,14 +46,15 @@ test('layout-style: tech-simple light layout with nav, hero and sections', () =>
   assert.match(HTML, /data-theme="light"/, 'page should declare a light tech theme');
 });
 
-test('install-section: homepage shows npm install/deploy at the top', () => {
+test('install-section: homepage shows npm install/deploy near the top', () => {
   // GIVEN the ARGO toolchain is published as an npm package
   // WHEN a visitor opens the homepage
-  // THEN an Install section appears at the top (before About), showing the install/deploy commands and a one-line Neo4j + vector engine note
+  // THEN an Install section appears right after About, showing the install/deploy commands and a one-line Neo4j + vector engine note
   assert.match(HTML, /id="install"/, 'page should have an Install section');
   assert.ok(
-    HTML.indexOf('id="install"') < HTML.indexOf('id="about"'),
-    'Install section should appear before the About section'
+    HTML.indexOf('id="install"') > HTML.indexOf('id="about"') &&
+    HTML.indexOf('id="install"') < HTML.indexOf('id="howto"'),
+    'Install section should appear right after About'
   );
   assert.match(HTML, /npm install -g archgraph-argo/, 'should show the npm install command');
   assert.match(HTML, /argo-deploy/, 'should show the deploy command');
@@ -104,10 +105,6 @@ test('readme-sync: home page mirrors README how-to-use', () => {
   // WHEN a visitor opens the homepage in a browser
   // THEN the page mirrors the How to use section
   assert.match(HTML, /id="howto"/, 'page should have a How to use section');
-  assert.ok(
-    HTML.indexOf('id="howto"') < HTML.indexOf('id="about"'),
-    'How to use should appear before About (right after Install)'
-  );
   assert.match(HTML, /ArchiMate 3\.2/, 'How to use should mention ArchiMate 3.2');
   assert.match(HTML, /coding agent/, 'How to use should describe the coding-agent workflow');
   assert.match(HTML, /single source of truth/, 'How to use should state the graph is the single source of truth');

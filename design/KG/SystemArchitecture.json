@@ -193,7 +193,7 @@
           "description": "index.html; design/KG/SystemArchitecture.json"
         }
       ],
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力）、页面最上方的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、紧跟其后的 How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯），并提供 GitHub 仓库入口；Reference Library（KGlibrary 案例库）通过导航链接到独立页面 docs/kglibrary.html，Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
+      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力；What is this 置于页面最前）、紧随其后的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯），并提供 GitHub 仓库入口；Reference Library（KGlibrary 案例库）通过导航链接到独立页面 docs/kglibrary.html，Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
       "testcases": [
         {
           "Input": "浏览器访问 https://archgraph.org/",
@@ -204,8 +204,8 @@
         },
         {
           "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"install-section\"）：断言 index.html 含 id=\"install\" 且位于 id=\"about\" 之前，并包含 npm install -g archgraph-argo、argo-deploy、Neo4j 与 vector engine。通过。",
-          "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 访客打开主页；THEN 页面最上方（What is this 之前）以最简方式展示 Install 部署小节：仅含 npm install -g archgraph-argo 与 argo-deploy 两条命令，并一句话说明语义查询需要 Neo4j 与向量引擎。",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"install-section\"）：断言 index.html 含 id=\"install\" 且位于 id=\"about\" 之后、id=\"howto\" 之前，并包含 npm install -g archgraph-argo、argo-deploy、Neo4j 与 vector engine。通过。",
+          "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 访客打开主页；THEN What is this 之后紧跟 Install 部署小节：仅含 npm install -g archgraph-argo 与 argo-deploy 两条命令，并一句话说明语义查询需要 Neo4j 与向量引擎。",
           "name": "AT-1318-04-主页顶部展示安装部署",
           "type": "Acceptance Test"
         }
@@ -338,14 +338,14 @@
       "name": "根据README更新INDEX主页",
       "parent": "1249",
       "type": "Work Package",
-      "description": "根据 README 的当前内容同步更新网站主页 index.html：将 How to use（用户工作流）前置到 Install 之后（What is this 之前），并精简主页（移除 How we're going to do it、Repository map、Architecture、What is it for 小节；Architecture 仅保留在 README，KGlibrary 迁至独立页面 docs/kglibrary.html，What is it for 的额外收益内容迁至洞察文章 docs/insight-archgraph-benefits.html）。",
+      "description": "根据 README 的当前内容同步更新网站主页 index.html：页面顺序调整为 What is this → Install → How to use，并精简主页（移除 How we're going to do it、Repository map、Architecture、What is it for、Core principles 小节；Architecture 仅保留在 README，KGlibrary 迁至独立页面 docs/kglibrary.html，What is it for 的额外收益内容迁至洞察文章 docs/insight-archgraph-benefits.html）。",
       "testcases": [
         {
           "name": "AT-1332-01-主页与README同步",
-          "description": "GIVEN README 已包含 How to use（用户工作流）章节；WHEN 访客在浏览器打开网站首页；THEN 首页同步展示 How to use 内容（ArchiMate 3.2、coding agent 工作流与 single source of truth），且 How to use 位于 Install 之后、What is this（id=\"about\"）之前。",
+          "description": "GIVEN README 已包含 How to use（用户工作流）章节；WHEN 访客在浏览器打开网站首页；THEN 首页同步展示 How to use 内容（ArchiMate 3.2、coding agent 工作流与 single source of truth），且页面顺序为 What is this → Install → How to use。",
           "type": "Acceptance Test",
           "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"howto\" 区域且位于 id=\"about\" 之前，并提及 ArchiMate 3.2、coding agent 与 single source of truth。通过。"
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"howto\" 区域并提及 ArchiMate 3.2、coding agent 与 single source of truth。通过。"
         }
       ],
       "attributes": [
