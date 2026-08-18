@@ -787,6 +787,11 @@
           "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         },
         {
+          "name": "commit",
+          "value": "de9e21d",
+          "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         }
