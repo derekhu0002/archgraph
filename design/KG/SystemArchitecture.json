@@ -1050,6 +1050,11 @@
           "name": "commit",
           "value": "v0.6.0",
           "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz"
+        },
+        {
+          "name": "commit",
+          "value": "92f1123",
+          "description": "install-argo.ps1 (Cursor/OpenCode skills+rule+MCP deploy); tests/argo-deploy.test.js; README.md; design/KG/SystemArchitecture.json"
         }
       ]
     },
