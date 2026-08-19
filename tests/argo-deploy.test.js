@@ -10,17 +10,22 @@ const assert = require('node:assert/strict');
 const ROOT = path.resolve(__dirname, '..');
 const SCRIPT = path.join(ROOT, 'install-argo.ps1');
 
-function runInstall(argoRoot, skillsRoot, promptsRoot, mcpPath) {
+function runInstall(opts) {
   return spawnSync(
     'powershell.exe',
     [
       '-NoProfile',
       '-ExecutionPolicy', 'Bypass',
       '-File', SCRIPT,
-      '-ArgoRoot', argoRoot,
-      '-SkillsRoot', skillsRoot,
-      '-PromptsRoot', promptsRoot,
-      '-McpPath', mcpPath,
+      '-ArgoRoot', opts.argoRoot,
+      '-SkillsRoot', opts.skillsRoot,
+      '-PromptsRoot', opts.promptsRoot,
+      '-McpPath', opts.mcpPath,
+      '-CursorSkillsRoot', opts.cursorSkillsRoot,
+      '-CursorMcpPath', opts.cursorMcpPath,
+      '-OpenCodeSkillsRoot', opts.openCodeSkillsRoot,
+      '-OpenCodeAgentsPath', opts.openCodeAgentsPath,
+      '-OpenCodeConfigPath', opts.openCodeConfigPath,
       '-SkipEnv',
       '-SkipDeps',
     ],
@@ -33,9 +38,24 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
   const argoRoot = path.join(tmp, '.argo');
   const skillsRoot = path.join(tmp, '.copilot', 'skills');
   const promptsRoot = path.join(tmp, 'Code', 'User', 'prompts');
-  const mcpPath = path.join(tmp, 'mcp.json');
+  const mcpPath = path.join(tmp, 'vscode', 'mcp.json');
+  const cursorSkillsRoot = path.join(tmp, '.cursor', 'skills');
+  const cursorMcpPath = path.join(tmp, '.cursor', 'mcp.json');
+  const openCodeSkillsRoot = path.join(tmp, '.config', 'opencode', 'skills');
+  const openCodeAgentsPath = path.join(tmp, '.config', 'opencode', 'AGENTS.md');
+  const openCodeConfigPath = path.join(tmp, '.config', 'opencode', 'opencode.json');
   try {
-    const result = runInstall(argoRoot, skillsRoot, promptsRoot, mcpPath);
+    const result = runInstall({
+      argoRoot,
+      skillsRoot,
+      promptsRoot,
+      mcpPath,
+      cursorSkillsRoot,
+      cursorMcpPath,
+      openCodeSkillsRoot,
+      openCodeAgentsPath,
+      openCodeConfigPath,
+    });
     assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
 
     // 1) schema
@@ -64,14 +84,41 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(!fs.existsSync(path.join(argoRoot, 'temp')), 'temp must not be deployed');
     assert.ok(!fs.existsSync(path.join(argoRoot, '.env')), '.env must only be generated interactively');
 
-    // 6) VS Code MCP config registers the deployed argo server.
+    // 6) VS Code (Copilot) MCP config registers the deployed argo server.
     assert.ok(fs.existsSync(mcpPath), 'VS Code MCP config must be written');
     const mcp = JSON.parse(fs.readFileSync(mcpPath, 'utf8'));
     assert.ok(mcp.servers && mcp.servers.argo);
+    assert.equal(mcp.servers.argo.type, 'stdio');
     assert.equal(mcp.servers.argo.command, 'node');
     assert.ok(mcp.servers.argo.args[0].endsWith('argo-mcp-server.js'));
     assert.ok(!mcp.servers.argo.cwd, 'cwd must be omitted; workspace is discovered dynamically via MCP roots');
     assert.ok(!mcp.servers.argo.env, 'env must be omitted; workspace is discovered dynamically via MCP roots');
+
+    // 7) Cursor skill + MCP config.
+    assert.ok(fs.existsSync(path.join(cursorSkillsRoot, 'argo-init', 'SKILL.md')), 'Cursor skill must be deployed');
+    assert.ok(fs.existsSync(cursorMcpPath), 'Cursor MCP config must be written');
+    const cursorMcp = JSON.parse(fs.readFileSync(cursorMcpPath, 'utf8'));
+    assert.ok(cursorMcp.mcpServers && cursorMcp.mcpServers.argo);
+    assert.equal(cursorMcp.mcpServers.argo.type, 'stdio');
+    assert.equal(cursorMcp.mcpServers.argo.command, 'node');
+    assert.ok(cursorMcp.mcpServers.argo.args[0].endsWith('argo-mcp-server.js'));
+    assert.ok(!cursorMcp.mcpServers.argo.cwd, 'Cursor cwd must be omitted; roots resolve the workspace');
+    assert.ok(!cursorMcp.mcpServers.argo.env, 'Cursor env must be omitted; roots resolve the workspace');
+
+    // 8) OpenCode skill + global rule.
+    assert.ok(fs.existsSync(path.join(openCodeSkillsRoot, 'argo-init', 'SKILL.md')), 'OpenCode skill must be deployed');
+    assert.ok(fs.existsSync(openCodeAgentsPath), 'OpenCode global AGENTS.md must be written');
+    assert.match(fs.readFileSync(openCodeAgentsPath, 'utf8'), /ArchGraph ARGO Workflow Rules/);
+
+    // 9) OpenCode MCP config registers a local argo server without a hardcoded cwd.
+    assert.ok(fs.existsSync(openCodeConfigPath), 'OpenCode MCP config must be written');
+    const openCode = JSON.parse(fs.readFileSync(openCodeConfigPath, 'utf8'));
+    assert.ok(openCode.mcp && openCode.mcp.argo);
+    assert.equal(openCode.mcp.argo.type, 'local');
+    assert.equal(openCode.mcp.argo.command[0], 'node');
+    assert.ok(openCode.mcp.argo.command[1].endsWith('argo-mcp-server.js'));
+    assert.equal(openCode.mcp.argo.enabled, true);
+    assert.ok(!openCode.mcp.argo.cwd, 'OpenCode cwd must be omitted; default is the project directory');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

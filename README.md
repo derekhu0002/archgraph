@@ -26,7 +26,7 @@ npm install -g archgraph-argo
 argo-deploy
 ```
 
-Done &mdash; the ARGO toolchain, skills, and rules are deployed, and the `argo` MCP server is registered automatically.
+Done &mdash; the ARGO toolchain, skills, and rules are deployed, and the `argo` MCP server is registered automatically in **GitHub Copilot**, **Cursor**, and **OpenCode**.
 
 > Semantic (Graph RAG) queries also need **Neo4j** and a **vector engine** configured in
 > `~/.argo/.env`; everything else works out of the box.

@@ -3,6 +3,11 @@ param(
     [string]$ArgoRoot = "$env:USERPROFILE\.argo",
     [string]$SkillsRoot = "$env:USERPROFILE\.copilot\skills",
     [string]$PromptsRoot = "$env:APPDATA\Code\User\prompts",
+    [string]$CursorSkillsRoot = "$env:USERPROFILE\.cursor\skills",
+    [string]$CursorMcpPath = "$env:USERPROFILE\.cursor\mcp.json",
+    [string]$OpenCodeSkillsRoot = "$env:USERPROFILE\.config\opencode\skills",
+    [string]$OpenCodeAgentsPath = "$env:USERPROFILE\.config\opencode\AGENTS.md",
+    [string]$OpenCodeConfigPath = "$env:USERPROFILE\.config\opencode\opencode.json",
     [switch]$SkipEnv,
     [switch]$SkipDeps,
     [switch]$SkipMcp,
@@ -17,6 +22,64 @@ function Copy-Tree {
     param([string]$Source, [string]$Destination)
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
     Copy-Item -Recurse -Force -Path (Join-Path $Source '*') -Destination $Destination
+}
+
+function Write-McpConfig {
+    param(
+        [string]$Path,
+        [string]$ServersKey,
+        $ServerConfig
+    )
+
+    $root = [ordered]@{}
+    if (Test-Path $Path) {
+        try {
+            $existing = Get-Content $Path -Raw | ConvertFrom-Json
+            foreach ($p in $existing.PSObject.Properties) {
+                $root[$p.Name] = $p.Value
+            }
+        } catch {
+            # Ignore an unparseable existing file and start fresh.
+        }
+    }
+
+    $servers = [ordered]@{}
+    if ($root.Contains($ServersKey)) {
+        $serversValue = $root[$ServersKey]
+        if ($null -ne $serversValue) {
+            foreach ($p in $serversValue.PSObject.Properties) {
+                $servers[$p.Name] = $p.Value
+            }
+        }
+    }
+    $servers['argo'] = $ServerConfig
+    $root[$ServersKey] = $servers
+
+    New-Item -ItemType Directory -Force -Path (Split-Path $Path) | Out-Null
+    $json = $root | ConvertTo-Json -Depth 10
+    [System.IO.File]::WriteAllText($Path, $json, (New-Object System.Text.UTF8Encoding $false))
+}
+
+function Add-AgentsRule {
+    param(
+        [string]$AgentsPath,
+        [string]$RulePath
+    )
+
+    New-Item -ItemType Directory -Force -Path (Split-Path $AgentsPath) | Out-Null
+    $ruleContent = Get-Content $RulePath -Raw
+    $marker = 'ArchGraph ARGO Workflow Rules'
+
+    if (Test-Path $AgentsPath) {
+        $existing = Get-Content $AgentsPath -Raw
+        if ($existing -like "*$marker*") {
+            return
+        }
+        $combined = $existing.TrimEnd() + "`n`n" + $ruleContent
+        [System.IO.File]::WriteAllText($AgentsPath, $combined, (New-Object System.Text.UTF8Encoding $false))
+    } else {
+        [System.IO.File]::WriteAllText($AgentsPath, $ruleContent, (New-Object System.Text.UTF8Encoding $false))
+    }
 }
 
 Write-Host '==> Deploying Argo toolchain'
@@ -51,6 +114,17 @@ $depsSrc = Join-Path $argoDir 'package.json'
 $depsDest = Join-Path $ArgoRoot 'package.json'
 Write-Host "[6/6] argo\package.json -> $depsDest"
 Copy-Item -Force -Path $depsSrc -Destination $depsDest
+
+$cursorSkillDest = Join-Path $CursorSkillsRoot 'argo-init'
+Write-Host "[7/10] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
+Copy-Tree -Source $skillSrc -Destination $cursorSkillDest
+
+$openCodeSkillDest = Join-Path $OpenCodeSkillsRoot 'argo-init'
+Write-Host "[8/10] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
+Copy-Tree -Source $skillSrc -Destination $openCodeSkillDest
+
+Write-Host "[9/10] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
+Add-AgentsRule -AgentsPath $OpenCodeAgentsPath -RulePath $ruleSrc
 
 if ($SkipDeps) {
     Write-Host 'Skipped dependency install (-SkipDeps).'
@@ -118,35 +192,32 @@ if ($SkipEnv) {
 if ($SkipMcp) {
     Write-Host 'Skipped MCP configuration (-SkipMcp).'
 } else {
-    Write-Host '==> Registering argo MCP server in VS Code'
-    $mcpPath = if ($McpPath) { $McpPath } else { Join-Path $env:APPDATA 'Code\User\mcp.json' }
     $argoServer = (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js').Replace('\', '/')
 
-    $servers = [ordered]@{}
-    if (Test-Path $mcpPath) {
-        try {
-            $existing = Get-Content $mcpPath -Raw | ConvertFrom-Json
-            if ($existing.PSObject.Properties.Name -contains 'servers') {
-                foreach ($p in $existing.servers.PSObject.Properties) {
-                    $servers[$p.Name] = $p.Value
-                }
-            }
-        } catch {
-            # Ignore an unparseable existing file and start fresh.
-        }
-    }
-
-    $servers['argo'] = [ordered]@{
+    Write-Host '==> Registering argo MCP server in VS Code (GitHub Copilot)'
+    $mcpPath = if ($McpPath) { $McpPath } else { Join-Path $env:APPDATA 'Code\User\mcp.json' }
+    Write-McpConfig -Path $mcpPath -ServersKey 'servers' -ServerConfig ([ordered]@{
         type    = 'stdio'
         command = 'node'
         args    = @($argoServer)
-    }
-
-    $config = [ordered]@{ servers = $servers }
-    New-Item -ItemType Directory -Force -Path (Split-Path $mcpPath) | Out-Null
-    $json = $config | ConvertTo-Json -Depth 8
-    [System.IO.File]::WriteAllText($mcpPath, $json, (New-Object System.Text.UTF8Encoding $false))
+    })
     Write-Host "argo MCP config written -> $mcpPath"
+
+    Write-Host '==> Registering argo MCP server in Cursor'
+    Write-McpConfig -Path $CursorMcpPath -ServersKey 'mcpServers' -ServerConfig ([ordered]@{
+        type    = 'stdio'
+        command = 'node'
+        args    = @($argoServer)
+    })
+    Write-Host "argo MCP config written -> $CursorMcpPath"
+
+    Write-Host '==> Registering argo MCP server in OpenCode'
+    Write-McpConfig -Path $OpenCodeConfigPath -ServersKey 'mcp' -ServerConfig ([ordered]@{
+        type    = 'local'
+        command = @('node', $argoServer)
+        enabled = $true
+    })
+    Write-Host "argo MCP config written -> $OpenCodeConfigPath"
 }
 
 Write-Host ''
