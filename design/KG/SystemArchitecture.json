@@ -1690,6 +1690,13 @@
           "Input": "node --test tests/ea-import-new.test.js",
           "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言新脚本文件存在、包含 main/importElements/importRelationships 函数，且不含 schema_id/schema_parent/schema_element_json/schema_relationship_json/schema_view_id/schema_sub_view_map 等原ID持久化标记，且 Alias 不回填 data.id。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "1fde5dc",
+          "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
+        }
       ]
     }
   ],
