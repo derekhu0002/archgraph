@@ -10,52 +10,71 @@ const assert = require('node:assert/strict');
 const ROOT = path.resolve(__dirname, '..');
 const SCRIPT = path.join(ROOT, 'install-argo.ps1');
 
+const ENV_KEYS = [
+  'ARGO_EMBEDDING_BASE_URL',
+  'ARGO_EMBEDDING_MODEL',
+  'ARGO_EMBEDDING_PROVIDER',
+  'ARGO_EMBEDDING_MODEL_VERSION',
+  'ARGO_EMBEDDING_DIMENSIONS',
+  'ARGO_NEO4J_DATABASE_URL',
+  'ARGO_NEO4J_DATABASE_USERNAME',
+  'ARGO_NEO4J_DATABASE_PASSWORD',
+  'QWEN_KEY',
+  'ARGO_LIVE_PROVIDER_E2E',
+  'ARGO_W31_LIVE_MUTATION_VECTOR_E2E',
+];
+
+function buildInstallArgs(opts) {
+  return [
+    '-NoProfile',
+    '-ExecutionPolicy', 'Bypass',
+    '-File', SCRIPT,
+    '-ArgoRoot', opts.argoRoot,
+    '-SkillsRoot', opts.skillsRoot,
+    '-PromptsRoot', opts.promptsRoot,
+    '-McpPath', opts.mcpPath,
+    '-CursorSkillsRoot', opts.cursorSkillsRoot,
+    '-CursorMcpPath', opts.cursorMcpPath,
+    '-OpenCodeSkillsRoot', opts.openCodeSkillsRoot,
+    '-OpenCodeAgentsPath', opts.openCodeAgentsPath,
+    '-OpenCodeConfigPath', opts.openCodeConfigPath,
+    '-SkipDeps',
+    ...(opts.skipEnv ? ['-SkipEnv'] : []),
+  ];
+}
+
+function hostPaths(tmp) {
+  return {
+    argoRoot: path.join(tmp, '.argo'),
+    skillsRoot: path.join(tmp, '.copilot', 'skills'),
+    promptsRoot: path.join(tmp, 'Code', 'User', 'prompts'),
+    mcpPath: path.join(tmp, 'vscode', 'mcp.json'),
+    cursorSkillsRoot: path.join(tmp, '.cursor', 'skills'),
+    cursorMcpPath: path.join(tmp, '.cursor', 'mcp.json'),
+    openCodeSkillsRoot: path.join(tmp, '.config', 'opencode', 'skills'),
+    openCodeAgentsPath: path.join(tmp, '.config', 'opencode', 'AGENTS.md'),
+    openCodeConfigPath: path.join(tmp, '.config', 'opencode', 'opencode.json'),
+  };
+}
+
 function runInstall(opts) {
-  return spawnSync(
-    'powershell.exe',
-    [
-      '-NoProfile',
-      '-ExecutionPolicy', 'Bypass',
-      '-File', SCRIPT,
-      '-ArgoRoot', opts.argoRoot,
-      '-SkillsRoot', opts.skillsRoot,
-      '-PromptsRoot', opts.promptsRoot,
-      '-McpPath', opts.mcpPath,
-      '-CursorSkillsRoot', opts.cursorSkillsRoot,
-      '-CursorMcpPath', opts.cursorMcpPath,
-      '-OpenCodeSkillsRoot', opts.openCodeSkillsRoot,
-      '-OpenCodeAgentsPath', opts.openCodeAgentsPath,
-      '-OpenCodeConfigPath', opts.openCodeConfigPath,
-      '-SkipEnv',
-      '-SkipDeps',
-    ],
-    { cwd: ROOT, encoding: 'utf8' },
-  );
+  const spawnOpts = { cwd: ROOT, encoding: 'utf8' };
+  if (opts.timeout) {
+    spawnOpts.timeout = opts.timeout;
+  }
+  return spawnSync('powershell.exe', buildInstallArgs(opts), spawnOpts);
 }
 
 test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or temp', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-test-'));
-  const argoRoot = path.join(tmp, '.argo');
-  const skillsRoot = path.join(tmp, '.copilot', 'skills');
-  const promptsRoot = path.join(tmp, 'Code', 'User', 'prompts');
-  const mcpPath = path.join(tmp, 'vscode', 'mcp.json');
-  const cursorSkillsRoot = path.join(tmp, '.cursor', 'skills');
-  const cursorMcpPath = path.join(tmp, '.cursor', 'mcp.json');
-  const openCodeSkillsRoot = path.join(tmp, '.config', 'opencode', 'skills');
-  const openCodeAgentsPath = path.join(tmp, '.config', 'opencode', 'AGENTS.md');
-  const openCodeConfigPath = path.join(tmp, '.config', 'opencode', 'opencode.json');
+  const paths = hostPaths(tmp);
+  const {
+    argoRoot, skillsRoot, promptsRoot, mcpPath,
+    cursorSkillsRoot, cursorMcpPath,
+    openCodeSkillsRoot, openCodeAgentsPath, openCodeConfigPath,
+  } = paths;
   try {
-    const result = runInstall({
-      argoRoot,
-      skillsRoot,
-      promptsRoot,
-      mcpPath,
-      cursorSkillsRoot,
-      cursorMcpPath,
-      openCodeSkillsRoot,
-      openCodeAgentsPath,
-      openCodeConfigPath,
-    });
+    const result = runInstall({ ...paths, skipEnv: true });
     assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
 
     // 1) schema
@@ -119,6 +138,30 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(openCode.mcp.argo.command[1].endsWith('argo-mcp-server.js'));
     assert.equal(openCode.mcp.argo.enabled, true);
     assert.ok(!openCode.mcp.argo.cwd, 'OpenCode cwd must be omitted; default is the project directory');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('install-argo.ps1 keeps existing .env values and skips prompts', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-env-'));
+  const paths = hostPaths(tmp);
+  fs.mkdirSync(paths.argoRoot, { recursive: true });
+
+  const seeded = ENV_KEYS.map(key => `${key}=existing-${key}`).join('\n');
+  fs.writeFileSync(path.join(paths.argoRoot, '.env'), `# Argo live-provider and Neo4j configuration.\n${seeded}\n`);
+
+  try {
+    // No -SkipEnv and no stdin: the script must not call Read-Host because
+    // every known variable already holds a non-empty value. The timeout guards
+    // against an accidental interactive prompt hanging the test.
+    const result = runInstall({ ...paths, skipEnv: false, timeout: 30000 });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+
+    const env = fs.readFileSync(path.join(paths.argoRoot, '.env'), 'utf8');
+    for (const key of ENV_KEYS) {
+      assert.match(env, new RegExp(`^${key}=existing-${key}$`, 'm'), `${key} must keep its existing value`);
+    }
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

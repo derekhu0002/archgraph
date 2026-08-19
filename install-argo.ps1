@@ -158,8 +158,26 @@ if ($SkipDeps) {
 if ($SkipEnv) {
     Write-Host 'Skipped .env generation (-SkipEnv).'
 } else {
+    $envPath = Join-Path $ArgoRoot '.env'
+
+    # Load existing values so we can skip prompting for variables that already
+    # hold a non-empty value. Missing or empty variables still get prompted.
+    $existing = @{}
+    if (Test-Path $envPath) {
+        foreach ($line in Get-Content $envPath) {
+            $line = $line.Trim()
+            if (-not $line -or $line.StartsWith('#')) { continue }
+            $sep = $line.IndexOf('=')
+            if ($sep -le 0) { continue }
+            $key = $line.Substring(0, $sep).Trim()
+            if ($key) {
+                $existing[$key] = $line.Substring($sep + 1).Trim()
+            }
+        }
+    }
+
     Write-Host ''
-    Write-Host '==> Configure .env (press Enter to leave a value empty and fill it later)'
+    Write-Host '==> Configure .env (existing non-empty values are kept; press Enter to leave a value empty)'
     $envKeys = @(
         'ARGO_EMBEDDING_BASE_URL',
         'ARGO_EMBEDDING_MODEL',
@@ -176,11 +194,20 @@ if ($SkipEnv) {
 
     $lines = @('# Argo live-provider and Neo4j configuration.')
     foreach ($key in $envKeys) {
-        $value = Read-Host $key
+        $existingValue = $null
+        if ($existing.ContainsKey($key)) {
+            $existingValue = $existing[$key]
+        }
+
+        if ($null -ne $existingValue -and -not [string]::IsNullOrWhiteSpace([string]$existingValue)) {
+            $value = $existingValue
+        } else {
+            $value = Read-Host $key
+        }
+
         $lines += "$key=$value"
     }
 
-    $envPath = Join-Path $ArgoRoot '.env'
     [System.IO.File]::WriteAllLines(
         $envPath,
         $lines,
