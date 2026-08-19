@@ -164,6 +164,53 @@ test('install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese', ()
   }
 });
 
+test('install-argo.ps1 updates an outdated OpenCode AGENTS.md block and preserves other content', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-update-'));
+  const paths = hostPaths(tmp);
+  try {
+    fs.mkdirSync(path.dirname(paths.openCodeAgentsPath), { recursive: true });
+
+    // Seed an outdated ArchGraph rules block (with the marker) plus unrelated
+    // user content appended below it.
+    fs.writeFileSync(paths.openCodeAgentsPath, [
+      '---',
+      'description: "outdated"',
+      'name: "ArchGraph ARGO Workflow Rules"',
+      'applyTo: "**"',
+      '---',
+      '<Ontology>',
+      'stale relative path argo\\schema\\SystemArchitecture.schema.json',
+      '</Ontology>',
+      '</ToolsGuideline>',
+      '',
+      '# My OpenCode notes',
+      'keep this line',
+      '',
+    ].join('\n'), 'utf8');
+
+    const result = runInstall({ ...paths, skipEnv: true });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+
+    const agents = fs.readFileSync(paths.openCodeAgentsPath, 'utf8');
+    // The outdated block must be replaced by the current rule content.
+    assert.ok(
+      agents.includes('~/.argo/schema/SystemArchitecture.schema.json'),
+      'AGENTS.md must be updated to the current ~/.argo rule paths',
+    );
+    // Unrelated user content must be preserved.
+    assert.match(agents, /# My OpenCode notes/);
+    assert.match(agents, /keep this line/);
+    // The rules block must appear exactly once (no duplication).
+    assert.equal(
+      (agents.match(/ArchGraph ARGO Workflow Rules/g) || []).length,
+      1,
+      'rules block must not be duplicated',
+    );
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 test('install-argo.ps1 keeps existing .env values and skips prompts', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-env-'));
   const paths = hostPaths(tmp);

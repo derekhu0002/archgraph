@@ -73,6 +73,27 @@ function Add-AgentsRule {
     if (Test-Path $AgentsPath) {
         $existing = Get-Content $AgentsPath -Raw -Encoding UTF8
         if ($existing -like "*$marker*") {
+            # An existing ArchGraph rules block is present. Replace it with the
+            # current rule content while preserving any unrelated content that
+            # surrounds it (e.g. user-authored OpenCode instructions).
+            $endTag = '</ToolsGuideline>'
+            $markerIdx = $existing.IndexOf($marker)
+            if ($markerIdx -lt 0) { $markerIdx = 0 }
+            $startIdx = $existing.LastIndexOf('---', $markerIdx)
+            if ($startIdx -lt 0) { $startIdx = 0 }
+            $endIdx = $existing.IndexOf($endTag, $markerIdx)
+
+            $before = $existing.Substring(0, $startIdx).TrimEnd()
+            if ($endIdx -lt 0) {
+                $combined = $ruleContent
+            } else {
+                $after = $existing.Substring($endIdx + $endTag.Length)
+                $combined = $before
+                if ($combined.Length -gt 0) { $combined += "`n`n" }
+                $combined += $ruleContent
+                if ($after.Length -gt 0) { $combined += $after }
+            }
+            [System.IO.File]::WriteAllText($AgentsPath, $combined, (New-Object System.Text.UTF8Encoding $false))
             return
         }
         $combined = $existing.TrimEnd() + "`n`n" + $ruleContent

@@ -1022,6 +1022,13 @@
           "type": "Acceptance Test",
           "Input": "运行 tests/argo-deploy.test.js",
           "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）"
+        },
+        {
+          "name": "AT-1361-06-OpenCode规则更新旧块",
+          "description": "GIVEN ~/.config/opencode/AGENTS.md 已存在旧版 ArchGraph 规则块（含标记 ArchGraph ARGO Workflow Rules）且其下附有用户自有内容；WHEN 再次以 -SkipEnv -SkipDeps 非交互方式运行 install-argo.ps1；THEN 旧规则块被当前规则内容替换（含 ~/.argo/schema/SystemArchitecture.schema.json 路径），用户自有内容保留，且规则块不重复。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 updates an outdated OpenCode AGENTS.md block and preserves other content）"
         }
       ]
     },
