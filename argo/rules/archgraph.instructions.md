@@ -36,8 +36,9 @@ applyTo: "**"
 </ExplorationGuideline>
 
 <OrganizationGuideline>
-1. 每个 `Business Actor` 是一个持久的会话，一旦该会话被创建，它将一直存在，直到被明确地删除。当你要调用某个 `Business Actor` 时，你应该首先根据他的`sessionId`属性从历史会话中查找是否已经存在该 `Business Actor`，如果存在，则直接使用该会话；如果不存在，则创建一个新的会话。当一个 `Business Actor` 会话被创建，你应该将该会话ID通过属性 `sessionId` 登记到该 `Business Actor` 的架构元素中，以便于后续的会话调用。
+1. 每个 `Business Actor` 是一个持久的独立的会话，一旦该会话被创建，它将一直存在，直到被明确地删除。当你要调用某个 `Business Actor` 时，你应该首先根据他的`sessionId`属性从历史会话中查找是否已经存在该 `Business Actor`，如果存在，则直接使用该会话；如果不存在，则创建一个新的会话。当一个 `Business Actor` 会话被创建，你应该将该会话ID通过属性 `sessionId` 登记到该 `Business Actor` 的架构元素中，以便于后续的会话调用。
 2. 每个 `Business Actor` 要形成自己的长期记忆，该长期记忆是挂载在该 `Business Actor` 元素下的一个或多个View，包含了该 `Business Actor` 的所有历史工作信息。
+3. 每个 `Business Actor` 的会话和会话的 `sessionId` 属性必须是唯一的，不能与其他 `Business Actor` 的 会话和会话的 `sessionId` 冲突。
 </OrganizationGuideline>
 
 <ToolsGuideline>
