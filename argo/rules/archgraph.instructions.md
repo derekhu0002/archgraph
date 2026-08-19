@@ -53,6 +53,14 @@ applyTo: "**"
 4. 总结必须简洁、去重：优先更新已有记忆文件，仅在必要时新建；禁止把会话中的冗余过程内容原文复制进长期记忆。
 </SessionMemorySummarization>
 
+<MemoryTriggerTiming>
+除「会话结束」外，以下时机必须即时触发长期记忆写入，不得攒到会话结束：
+1. 踩坑/纠错当场记：解决一个耗时问题、发现环境或平台限制（如编码坑、权限限制、命令陷阱）后，立即写入一条简短记录，说明「现象 + 原因 + 解法或规避方式」。
+2. 关键决策当下记：做出影响后续走向的技术/架构决策时，立即记录「决策 + 理由 + 被否掉的备选方案」，保证理由在决策当下最清晰。
+3. 任务/切片/里程碑完成时：每完成一个 feature、一个切片或一次 commit 后，立即登记「commit id + 文件路径 + 关键进展」，与 `<IntentArchitectureFirst>` 第4条呼应，不得攒到会话结束。
+以上即时记录同样遵守 `<SessionMemorySummarization>` 第4条的简洁、去重要求。
+</MemoryTriggerTiming>
+
 <ToolsGuideline>
 你必须通过ARGO MCP server提供的工具来进行意图架构的读写操作，禁止直接修改意图架构的源文件：
 1. getSystemArchitecture: 语义化读取架构（推荐带 query.purpose + query.intent，而非全量读取）。
