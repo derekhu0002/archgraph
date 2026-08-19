@@ -1781,11 +1781,11 @@
       "attributes": [
         {
           "name": "status",
-          "value": "REQUIREMENT_ANALYSIS_DONE"
+          "value": "HANDED_OFF_TO_DESIGNER"
         },
         {
           "name": "note",
-          "value": "需求分析完成，方案定为 GitHub Discussions（零成本），待用户确认后交接给系统设计师(caoyang)进行方案设计。"
+          "value": "需求已由用户确认（GitHub Discussions 方案），已交接给系统设计师(caoyang)进行方案设计。"
         },
         {
           "name": "commit",
@@ -2390,6 +2390,16 @@
       "target_id": "2751",
       "source_name": "xiaoniu",
       "target_name": "开发者社区开发交付"
+    },
+    {
+      "id": "1967",
+      "statement": "caoyang --(Assignment)--> 开发者社区开发交付",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2739",
+      "target_id": "2751",
+      "source_name": "caoyang",
+      "target_name": "开发者社区开发交付"
     }
   ],
   "views": [
@@ -2524,11 +2534,13 @@
         "1318",
         "2748",
         "2751",
-        "2747"
+        "2747",
+        "2739"
       ],
       "included_relationships": [
         "1965",
-        "1966"
+        "1966",
+        "1967"
       ]
     },
     {
