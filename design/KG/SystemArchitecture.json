@@ -1775,11 +1775,11 @@
       "attributes": [
         {
           "name": "status",
-          "value": "HANDED_OFF_TO_DESIGNER"
+          "value": "DESIGN_DONE"
         },
         {
           "name": "note",
-          "value": "需求已由用户确认（GitHub Discussions 方案），已交接给系统设计师(caoyang)进行方案设计。"
+          "value": "方案设计完成（采用 GitHub Discussions），待规划专家(tanwen)与系统架构师(laodong)评审。"
         },
         {
           "name": "commit",
@@ -1790,6 +1790,11 @@
           "name": "commit",
           "value": "9bb4fd7",
           "description": "docs/developer-community-requirements.md; tests/developer-community.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "f7c3d0c",
+          "description": "docs/developer-community-design.md; design/KG/SystemArchitecture.json"
         }
       ]
     },
