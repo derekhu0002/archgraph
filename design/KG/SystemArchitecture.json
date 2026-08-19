@@ -33,6 +33,10 @@
           "view_name": "Content Publication and Announcement"
         },
         {
+          "view_id": "1800",
+          "view_name": "EA Tooling"
+        },
+        {
           "view_id": "174",
           "view_name": "Implementation and Migration"
         },
@@ -89,11 +93,6 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "098be4e",
-          "description": "docs/kglibrary.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "2458f97",
           "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
         },
@@ -101,6 +100,11 @@
           "name": "commit",
           "value": "aa932c3",
           "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "098be4e",
+          "description": "docs/kglibrary.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
@@ -137,28 +141,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "926aa9c",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "c3604e3",
-          "description": "index.html; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "ee62476",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "25bbc9e",
           "description": "design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "aa4ef69",
-          "description": "tests/custom-domain.test.js"
         },
         {
           "name": "commit",
@@ -167,7 +151,32 @@
         },
         {
           "name": "commit",
-          "value": "f98b61f",
+          "value": "7e230f3",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "51be801",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "ee62476",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "926aa9c",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "aa4ef69",
+          "description": "tests/custom-domain.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "e07c6a1",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
@@ -177,18 +186,8 @@
         },
         {
           "name": "commit",
-          "value": "098be4e",
-          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e651b0d",
-          "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "51be801",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "value": "c3604e3",
+          "description": "index.html; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -197,17 +196,22 @@
         },
         {
           "name": "commit",
+          "value": "098be4e",
+          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
           "value": "ed90f6a",
           "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "7e230f3",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "value": "e651b0d",
+          "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "e07c6a1",
+          "value": "f98b61f",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
@@ -263,31 +267,6 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "f4819fd",
-          "description": "README.md; index.html; tests/readme.test.js; .github/copilot-instructions.md (removed); .github/skills/argo-init/SKILL.md (removed); .cursor/skills/argo-init/SKILL.md; .opencode/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "c8f2d74",
-          "description": "restore .github/skills/argo-init/SKILL.md; README.md; index.html; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "51be801",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e07c6a1",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "f98b61f",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "54ad8dc",
           "description": "README.md; tests/readme.test.js"
         },
@@ -300,6 +279,31 @@
           "name": "commit",
           "value": "ca32794",
           "description": "README.md; tests/project-name.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "c8f2d74",
+          "description": "restore .github/skills/argo-init/SKILL.md; README.md; index.html; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "f4819fd",
+          "description": "README.md; index.html; tests/readme.test.js; .github/copilot-instructions.md (removed); .github/skills/argo-init/SKILL.md (removed); .cursor/skills/argo-init/SKILL.md; .opencode/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "51be801",
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "f98b61f",
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "e07c6a1",
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -341,13 +345,13 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "2e5c6b9",
-          "description": "docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
+          "value": "2040682",
+          "description": "README.md; design/KG/SystemArchitecture.json; .github/skills/diagram-draw/SKILL.md; .github/skills/diagram-draw/renderExcalidrawSvg.js; docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js"
         },
         {
           "name": "commit",
-          "value": "2040682",
-          "description": "README.md; design/KG/SystemArchitecture.json; .github/skills/diagram-draw/SKILL.md; .github/skills/diagram-draw/renderExcalidrawSvg.js; docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js"
+          "value": "2e5c6b9",
+          "description": "docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
@@ -389,12 +393,12 @@
         },
         {
           "name": "commit",
-          "value": "51be801",
+          "value": "4027dd0",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "926aa9c",
+          "value": "51be801",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
@@ -404,7 +408,7 @@
         },
         {
           "name": "commit",
-          "value": "4027dd0",
+          "value": "926aa9c",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
@@ -435,18 +439,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "e9bfbad",
+          "value": "9973aa1",
           "description": "docs/agent-programming-language.md"
-        },
-        {
-          "name": "commit",
-          "value": "ee62476",
-          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "2f6ac7c",
-          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -455,8 +449,18 @@
         },
         {
           "name": "commit",
-          "value": "9973aa1",
+          "value": "e9bfbad",
           "description": "docs/agent-programming-language.md"
+        },
+        {
+          "name": "commit",
+          "value": "2f6ac7c",
+          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "ee62476",
+          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
@@ -489,7 +493,6 @@
       "name": "Process Cooperation Viewpoint",
       "type": "Grouping",
       "description": "表达多个 Agent 角色之间为完成同一任务而进行的协作流程（ArchiMate 流程协作视角）。",
-      "subdiagram_views": [],
       "attributes": [
         {
           "name": "commit",
@@ -506,17 +509,17 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "a231760",
-          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js; tests/architecture-view-context.test.js"
-        },
-        {
-          "name": "commit",
           "value": "4d55487",
           "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js"
         },
         {
           "name": "commit",
           "value": "08f0eea",
+          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js; tests/architecture-view-context.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "a231760",
           "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js; tests/architecture-view-context.test.js"
         },
         {
@@ -527,8 +530,7 @@
           "name": "status",
           "value": "COMPLETED"
         }
-      ],
-      "testcases": []
+      ]
     },
     {
       "id": "1351",
@@ -539,23 +541,23 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "a231760",
-          "description": "design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "e9839a5",
           "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "08545d6",
-          "description": "index.html; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "value": "098be4e",
+          "description": "docs/insights.html; docs/insight-archgraph-benefits.html; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "098be4e",
-          "description": "docs/insights.html; docs/insight-archgraph-benefits.html; design/KG/SystemArchitecture.json"
+          "value": "a231760",
+          "description": "design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "08545d6",
+          "description": "index.html; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
@@ -634,13 +636,13 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "ca32794",
-          "description": "tests/project-name.test.js; design/KG/SystemArchitecture.json"
+          "value": "3b6fc91",
+          "description": "README.md; index.html; package.json; tests/website.test.js; tests/project-name.test.js; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; docs/industry-insight-graph-driven-agent.wechat.md; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "3b6fc91",
-          "description": "README.md; index.html; package.json; tests/website.test.js; tests/project-name.test.js; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; docs/industry-insight-graph-driven-agent.wechat.md; design/KG/SystemArchitecture.json"
+          "value": "ca32794",
+          "description": "tests/project-name.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
@@ -670,12 +672,12 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "cdbb063",
+          "value": "fa857e7",
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "fa857e7",
+          "value": "cdbb063",
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
@@ -745,23 +747,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "f4819fd",
-          "description": "argo-init skill moved to user-level (~/.copilot/skills/argo-init/SKILL.md); agent rules moved to user-level prompts (argo-copilot-instructions.instructions.md); removed .github/copilot-instructions.md and .github/skills/argo-init/SKILL.md"
-        },
-        {
-          "name": "commit",
           "value": "b39acb2",
           "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "fa857e7",
-          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "ea734d2",
-          "description": ".argo/scripts/argo-paths.js; .argo/scripts/*.js; .argo/scripts/graph-rag/*; .argo/scripts/test-executors/default.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -770,13 +757,28 @@
         },
         {
           "name": "commit",
-          "value": "e9de7b3",
-          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json"
+          "value": "c8f2d74",
+          "description": "restore .github/skills/argo-init/SKILL.md (repo-level compatibility)"
         },
         {
           "name": "commit",
-          "value": "c8f2d74",
-          "description": "restore .github/skills/argo-init/SKILL.md (repo-level compatibility)"
+          "value": "ea734d2",
+          "description": ".argo/scripts/argo-paths.js; .argo/scripts/*.js; .argo/scripts/graph-rag/*; .argo/scripts/test-executors/default.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "f4819fd",
+          "description": "argo-init skill moved to user-level (~/.copilot/skills/argo-init/SKILL.md); agent rules moved to user-level prompts (argo-copilot-instructions.instructions.md); removed .github/copilot-instructions.md and .github/skills/argo-init/SKILL.md"
+        },
+        {
+          "name": "commit",
+          "value": "fa857e7",
+          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "e9de7b3",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
@@ -884,28 +886,23 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "2c54b51",
-          "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)"
-        },
-        {
-          "name": "commit",
-          "value": "07d2c69",
-          "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)"
-        },
-        {
-          "name": "commit",
-          "value": "60e995e",
-          "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "499d802",
-          "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)"
+          "value": "7aebb2e",
+          "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js"
         },
         {
           "name": "commit",
           "value": "b39acb2",
           "description": "argo/defaults/design/KG/SystemArchitecture.json; argo/defaults/EA-model-template.feap; install-argo.ps1; package.json; tests/argo-deploy.test.js; argo/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "e982da1",
+          "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)"
+        },
+        {
+          "name": "commit",
+          "value": "de9e21d",
+          "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore"
         },
         {
           "name": "commit",
@@ -919,13 +916,13 @@
         },
         {
           "name": "commit",
-          "value": "e5f6f3d",
-          "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/"
+          "value": "ee05a15",
+          "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "v0.6.0",
-          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz"
+          "value": "60e995e",
+          "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -934,33 +931,28 @@
         },
         {
           "name": "commit",
+          "value": "07d2c69",
+          "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)"
+        },
+        {
+          "name": "commit",
+          "value": "v0.6.0",
+          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz"
+        },
+        {
+          "name": "commit",
+          "value": "2c54b51",
+          "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)"
+        },
+        {
+          "name": "commit",
+          "value": "e5f6f3d",
+          "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/"
+        },
+        {
+          "name": "commit",
           "value": "92f1123",
           "description": "install-argo.ps1 (Cursor/OpenCode skills+rule+MCP deploy); tests/argo-deploy.test.js; README.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "ee05a15",
-          "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "a4dc2f7",
-          "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)"
-        },
-        {
-          "name": "commit",
-          "value": "e982da1",
-          "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)"
-        },
-        {
-          "name": "commit",
-          "value": "7aebb2e",
-          "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "de9e21d",
-          "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore"
         },
         {
           "name": "commit",
@@ -971,6 +963,16 @@
           "name": "commit",
           "value": "2af92ba",
           "description": "argo/scripts/argo-paths.js (MCP roots workspace resolution); argo/scripts/argo-mcp-server.js (roots.listChanged capability); install-argo.ps1 (minimal MCP config); tests/argo-deploy.test.js; tests/argo-global-install.test.js; package.json (0.5.0)"
+        },
+        {
+          "name": "commit",
+          "value": "499d802",
+          "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)"
+        },
+        {
+          "name": "commit",
+          "value": "a4dc2f7",
+          "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)"
         },
         {
           "name": "deliveryStatus",
@@ -1028,23 +1030,23 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "7ba1940",
-          "description": "docs/diagrams/core-model.excalidraw; docs/diagrams/core-model.svg; README.md; tests/architecture-diagram.test.js"
-        },
-        {
-          "name": "commit",
           "value": "d52c52d",
           "description": "index.html (restored + image-1.png); tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "a2b0065",
-          "description": "tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "value": "7ba1940",
+          "description": "docs/diagrams/core-model.excalidraw; docs/diagrams/core-model.svg; README.md; tests/architecture-diagram.test.js"
         },
         {
           "name": "commit",
           "value": "a2c7c44",
           "description": "README.md; docs/diagrams/core-model.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "a2b0065",
+          "description": "tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
@@ -1184,13 +1186,6 @@
       "parent": "1249",
       "type": "Grouping",
       "description": "gpt-researcher 的 Agent 行为模型根分组，挂载于 AgentCapabilities 视图（Implementation and Migration Viewpoint）。",
-      "attributes": [
-        {
-          "name": "deliveryCommit",
-          "value": "e82ef00",
-          "description": "scripts/extract-gpt-researcher-subgraph.js; design/KG/gpt-researcher-subgraph.json"
-        }
-      ],
       "subdiagram_views": [
         {
           "view_id": "297",
@@ -1596,6 +1591,18 @@
       "parent": "1249",
       "type": "Work Package",
       "description": "基于 eatool/EA-jsscript/import_system_architecture_json_to_ea.js 开发新脚本 import_system_architecture_json_to_ea_new.js：不保留原 schema id，所有导入元素按新元素处理；执行时必须由用户提供导入文件路径。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "d989fce",
+          "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "1fde5dc",
+          "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
+        }
+      ],
       "testcases": [
         {
           "name": "AT-2100-01-不保留原ID按新元素导入",
@@ -1610,18 +1617,6 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/ea-import-new.test.js",
           "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言脚本包含 Session.Input 路径输入提示、包含空路径中止逻辑（no input file path was provided），且不含 resolveKnowledgeGraphPathFromCurrentModel 与 Repository.ConnectionString 等自动路径推断逻辑。"
-        }
-      ],
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "1fde5dc",
-          "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "d989fce",
-          "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     }
@@ -2098,6 +2093,17 @@
       "included_relationships": []
     },
     {
+      "view_id": "1800",
+      "view_name": "EA Tooling",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "description": "EA 导入/导出工具链视图：SystemArchitecture.json 导入 EA 的 JScript 脚本。",
+      "included_elements": [
+        "2100"
+      ],
+      "included_relationships": []
+    },
+    {
       "view_id": "174",
       "view_name": "Implementation and Migration",
       "parent_element_id": "1249",
@@ -2329,10 +2335,10 @@
       "parent_element_id": "1962",
       "parent_element_name": "AgentOrganization",
       "included_elements": [
-        "1963",
         "1964",
         "1965",
-        "1966"
+        "1966",
+        "1963"
       ],
       "included_relationships": [
         "1521",
@@ -2362,17 +2368,6 @@
       "included_relationships": [
         "1161"
       ]
-    },
-    {
-      "view_id": "1800",
-      "view_name": "EA Tooling",
-      "parent_element_id": "1249",
-      "parent_element_name": "Implementation and Migration Viewpoint",
-      "description": "EA 导入/导出工具链视图：SystemArchitecture.json 导入 EA 的 JScript 脚本。",
-      "included_elements": [
-        "2100"
-      ],
-      "included_relationships": []
     }
   ]
 }
