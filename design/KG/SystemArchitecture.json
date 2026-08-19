@@ -2026,7 +2026,27 @@
       ]
     },
     {
-      "attributes": [],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "2e461cb",
+          "description": "docs/developer-community.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "media_id",
+          "value": "BRZAMZ3b-CaOBH8qdG2KTdaiMQHgzy60pipjCc5cdmomrOTucQ42CWbCGGVcEq6k",
+          "description": "WeChat draft media_id"
+        },
+        {
+          "name": "status",
+          "value": "BLOCKED",
+          "description": "草稿已创建（media_id 已记录）；本账号为个人未认证订阅号，freepublish/sendall 永远返回 48001 api unauthorized，API 发布不可用，需在公众号后台手动发布"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        }
+      ],
       "description": "使用 wechat-public-cli 技能，撰写 ArchGraph 开发者社区（GitHub Discussions）介绍文章并发布到微信公众号。",
       "id": "2756",
       "name": "发布开发者社区介绍文章到微信公众号",
