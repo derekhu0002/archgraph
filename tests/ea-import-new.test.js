@@ -6,11 +6,11 @@ const { readFileSync, existsSync } = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
-const SCRIPT = path.join(ROOT, 'eatool', 'EA-jsscript', 'import_system_architecture_json_to_ea_new.js');
+const SCRIPT = path.join(ROOT, 'eatool', 'EA-jsscript', 'import-from-external-package.js');
 
 test('ea-import-new: new import script exists and imports as new elements', () => {
   // GIVEN the original import script preserves source-graph ids in aliases/tags
-  // WHEN a new import variant is provided at eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js
+  // WHEN a new import variant is provided at eatool/EA-jsscript/import-from-external-package.js
   // THEN the script exists and keeps the import entrypoints (main/importElements/importRelationships/importViews)
   assert.ok(existsSync(SCRIPT), 'new import script should exist');
 
