@@ -67,11 +67,11 @@ function Add-AgentsRule {
     )
 
     New-Item -ItemType Directory -Force -Path (Split-Path $AgentsPath) | Out-Null
-    $ruleContent = Get-Content $RulePath -Raw
+    $ruleContent = Get-Content $RulePath -Raw -Encoding UTF8
     $marker = 'ArchGraph ARGO Workflow Rules'
 
     if (Test-Path $AgentsPath) {
-        $existing = Get-Content $AgentsPath -Raw
+        $existing = Get-Content $AgentsPath -Raw -Encoding UTF8
         if ($existing -like "*$marker*") {
             return
         }

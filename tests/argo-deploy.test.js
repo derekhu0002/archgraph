@@ -143,6 +143,27 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
   }
 });
 
+test('install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-utf8-'));
+  const paths = hostPaths(tmp);
+  try {
+    const result = runInstall({ ...paths, skipEnv: true });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+
+    const agents = fs.readFileSync(paths.openCodeAgentsPath, 'utf8');
+    // The rule body must contain readable Chinese, not mojibake produced by
+    // decoding UTF-8 bytes with the system ANSI code page (e.g. GBK on zh-CN).
+    assert.match(agents, /全局工作流规则/);
+    assert.match(agents, /验收用例先行/);
+    assert.match(agents, /意图图谱/);
+    assert.match(agents, /GIVEN-WHEN-THEN/);
+    // Classic UTF-8-as-GBK mojibake markers must be absent.
+    assert.doesNotMatch(agents, /鍏ㄥ眬|閫氳繃|楠屾敹/);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 test('install-argo.ps1 keeps existing .env values and skips prompts', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-env-'));
   const paths = hostPaths(tmp);
