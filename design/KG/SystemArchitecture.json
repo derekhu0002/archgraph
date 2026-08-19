@@ -1062,6 +1062,11 @@
           "name": "commit",
           "value": "92f1123",
           "description": "install-argo.ps1 (Cursor/OpenCode skills+rule+MCP deploy); tests/argo-deploy.test.js; README.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "60e995e",
+          "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     },
