@@ -1757,25 +1757,25 @@
       "description": "本工作需要按VIEW:DevelopmentTeam 所示流程完成，首先交给产品经理后，由产品经理完成后续交付工作。",
       "testcases": [
         {
-          "name": "AT-2751-01-需求分析文档就绪",
+          "acceptanceCriteria": "tests/developer-community.test.js",
           "description": "GIVEN 产品经理对开发者社区进行需求分析；WHEN 读者打开 docs/developer-community-requirements.md；THEN 文档包含用户场景与用户故事（以「作为一个开发者」表述）。",
-          "type": "Acceptance Test",
           "Input": "打开 docs/developer-community-requirements.md",
-          "acceptanceCriteria": "tests/developer-community.test.js"
+          "name": "AT-2751-01-需求分析文档就绪",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-2751-02-验收标准GIVEN-WHEN-THEN",
+          "acceptanceCriteria": "tests/developer-community.test.js",
           "description": "GIVEN 开发者社区需要可外部验证的验收；WHEN 读者查看需求文档；THEN 以 GIVEN-WHEN-THEN 格式给出覆盖浏览、发布、详情、下载、讨论的验收标准。",
-          "type": "Acceptance Test",
           "Input": "打开 docs/developer-community-requirements.md",
-          "acceptanceCriteria": "tests/developer-community.test.js"
+          "name": "AT-2751-02-验收标准GIVEN-WHEN-THEN",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-2751-03-采用开源社区服务",
-          "description": "GIVEN 社区需低成本交付与维护；WHEN 读者查看非功能需求；THEN 文档要求采用业界知名开源社区服务（Discourse/Flarum/NodeBB），不自研。",
-          "type": "Acceptance Test",
+          "acceptanceCriteria": "tests/developer-community.test.js",
+          "description": "GIVEN 社区需低成本交付与维护；WHEN 读者查看非功能需求；THEN 文档要求采用 GitHub Discussions（零成本、零运维），不自研社区系统。",
           "Input": "打开 docs/developer-community-requirements.md",
-          "acceptanceCriteria": "tests/developer-community.test.js"
+          "name": "AT-2751-03-采用GitHubDiscussions",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [

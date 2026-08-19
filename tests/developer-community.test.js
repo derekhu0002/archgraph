@@ -38,12 +38,12 @@ test('requirements-acceptance: acceptance criteria use GIVEN-WHEN-THEN', () => {
   assert.match(doc, /评论/, 'acceptance should cover commenting on a work package');
 });
 
-test('requirements-open-source: community should reuse a well-known open-source service', () => {
+test('requirements-github-discussions: community should use GitHub Discussions at zero cost', () => {
   // GIVEN the community must be cheap to deliver and maintain
   // WHEN a reader inspects the non-functional requirements
-  // THEN the document requires reusing a well-known open-source community service
+  // THEN the document requires GitHub Discussions (zero cost, zero ops) instead of self-hosting a forum
   const doc = loadDoc();
-  assert.match(doc, /开源社区服务/, 'doc should require an open-source community service');
-  assert.match(doc, /Discourse|Flarum|NodeBB/, 'doc should name well-known open-source community services');
+  assert.match(doc, /GitHub Discussions/, 'doc should require GitHub Discussions');
+  assert.match(doc, /零成本/, 'doc should state zero cost');
   assert.match(doc, /不自研/, 'doc should rule out building the community from scratch');
 });
