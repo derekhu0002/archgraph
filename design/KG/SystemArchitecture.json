@@ -1665,7 +1665,13 @@
       "id": "2737",
       "name": "tanwen",
       "parent": "1962",
-      "type": "Business Actor"
+      "type": "Business Actor",
+      "attributes": [
+        {
+          "name": "sessionId",
+          "value": "4d92f815-12ba-4c21-82a1-f823ddcad0f2"
+        }
+      ]
     },
     {
       "id": "2738",
@@ -1697,7 +1703,13 @@
       "id": "2741",
       "name": "laodong",
       "parent": "1962",
-      "type": "Business Actor"
+      "type": "Business Actor",
+      "attributes": [
+        {
+          "name": "sessionId",
+          "value": "88bdf28a-55eb-48d8-9092-a01ecfb6a681"
+        }
+      ]
     },
     {
       "id": "2743",
