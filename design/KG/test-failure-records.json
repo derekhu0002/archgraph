@@ -143,19 +143,6 @@
     "stderr": "no test executor can handle: 执行 node --test tests/agent-programming-language.test.js（用例 \"aml-spec-html\"）：断言 docs/agent-programming-language.html 存在并包含 v0.1、AML、Abstract、Contents，以及 Scope and Extensions、Extended Elements、Extended Structures、Compliance and Extension Process 等章节。通过。"
   },
   {
-    "testcasename": "AT-1335-01-AML建模GPTResearcher多Agent流程",
-    "testdescription": "GIVEN 知识图谱具备 AML 建模能力；WHEN 读者查看 Process Cooperation Viewpoint（view 177）中的 GPT-Researcher 建模；THEN 图谱包含主流程 Course of Action、5 个 Business Process（Plan/Conduct/Write/Review/Publish）及其 Triggering 链、5 个 Business Role（Planner/Researcher/Editor/Reviewer/Publisher）及其 Assignment、Deliverable→Goal 的 Realization，以及 Constraint 与 Principle 约束。",
-    "acceptanceCriteria": "执行 node --test tests/gpt-researcher-model.test.js：断言图谱包含上述元素与关系。通过。",
-    "relatedIntentElementId": "1335",
-    "status": "invalid-criteria",
-    "resolvedScriptPath": "执行 node --test tests/gpt-researcher-model.test.js：断言图谱包含上述元素与关系。通过。",
-    "executionCommand": "",
-    "exitCode": null,
-    "failureError": "no test executor can handle: 执行 node --test tests/gpt-researcher-model.test.js：断言图谱包含上述元素与关系。通过。",
-    "stdout": "",
-    "stderr": "no test executor can handle: 执行 node --test tests/gpt-researcher-model.test.js：断言图谱包含上述元素与关系。通过。"
-  },
-  {
     "testcasename": "AT-1351-01-洞察报告归档docs",
     "testdescription": "GIVEN 业界洞察报告已完成；WHEN 读者访问 docs/ 目录；THEN 报告以 Markdown 归档于 docs/industry-insight-graph-driven-agent.md，包含研究背景、核心技术、主流框架、实证数据与引用来源。",
     "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"insight-report-archived\"）：断言 docs/industry-insight-graph-driven-agent.md 存在，并包含 GraphRAG、知识图谱、80% more truthful 与参考文献章节。通过。",
@@ -247,6 +234,19 @@
     "stderr": "no test executor can handle: 执行 node --test tests/aml-standard.test.js：断言“提供AML参考实现”Work Package 挂载于 AML 规范下并带验收用例。通过。"
   },
   {
+    "testcasename": "AT-1357-04-按视图ID解析视图完整成员",
+    "testdescription": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
+    "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
+    "relatedIntentElementId": "1357",
+    "status": "invalid-criteria",
+    "resolvedScriptPath": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
+    "executionCommand": "",
+    "exitCode": null,
+    "failureError": "no test executor can handle: 执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
+    "stdout": "",
+    "stderr": "no test executor can handle: 执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
+  },
+  {
     "testcasename": "AT-1358-01-上游消费者一次建模多处运行",
     "testdescription": "GIVEN 消费者已用 AML 描述其 harness；WHEN 需要切换或同时使用多个 agent 宿主；THEN 从同一份 AML 生成各宿主配置，无需重写意图与规则。",
     "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“简化上游消费者建模体验”Work Package 挂载于 AML 规范下并带验收用例。通过。",
@@ -273,6 +273,19 @@
     "stderr": "no test executor can handle: 执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言 GPT-Research 的 name、repo、description 均出现在页面中。通过。"
   },
   {
+    "testcasename": "AT-1361-05-OpenCode规则中文不乱码",
+    "testdescription": "GIVEN install-argo.ps1 已就绪且系统 ANSI 代码页非 UTF-8；WHEN 以 -SkipEnv -SkipDeps 与非交互方式将规则部署到 OpenCode 全局 AGENTS.md；THEN AGENTS.md 中的中文（如「全局工作流规则」「验收用例先行」「意图图谱」）以可读 UTF-8 呈现，且不含 UTF-8 被当作 GBK 解码产生的乱码（如「鍏ㄥ眬」）。",
+    "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）",
+    "relatedIntentElementId": "1361",
+    "status": "invalid-criteria",
+    "resolvedScriptPath": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）",
+    "executionCommand": "",
+    "exitCode": null,
+    "failureError": "no test executor can handle: tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）",
+    "stdout": "",
+    "stderr": "no test executor can handle: tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）"
+  },
+  {
     "testcasename": "AT-1362-01-核心模型图插入README与主页",
     "testdescription": "GIVEN 项目定位为统一语言（harness 设计与目标产品设计放同一模型）；WHEN 读者打开 README 或主页的 What is this? 章节；THEN 下方嵌入核心模型图 docs/diagrams/image.png（README 与主页均引用）。",
     "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js（用例 \"core-model-diagram\"）与 tests/website.test.js（用例 \"about-image\"）：断言 README 与 index.html 均引用 docs/diagrams/image.png，且该图片文件存在。通过。",
@@ -284,5 +297,57 @@
     "failureError": "no test executor can handle: 执行 node --test tests/architecture-diagram.test.js（用例 \"core-model-diagram\"）与 tests/website.test.js（用例 \"about-image\"）：断言 README 与 index.html 均引用 docs/diagrams/image.png，且该图片文件存在。通过。",
     "stdout": "",
     "stderr": "no test executor can handle: 执行 node --test tests/architecture-diagram.test.js（用例 \"core-model-diagram\"）与 tests/website.test.js（用例 \"about-image\"）：断言 README 与 index.html 均引用 docs/diagrams/image.png，且该图片文件存在。通过。"
+  },
+  {
+    "testcasename": "AT-1363-01-官宣文章就绪",
+    "testdescription": "GIVEN 项目已具备对外官宣条件；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号官宣文章 Markdown，且正文介绍 ArchGraph（架构图驱动的 Agentic Engineering）。",
+    "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-intro-ready\"）：断言 docs/archgraph-introduction.wechat.md 存在，frontmatter 含 title/author/digest，正文含 ArchGraph 与 Agentic Engineering。通过。",
+    "relatedIntentElementId": "1363",
+    "status": "invalid-criteria",
+    "resolvedScriptPath": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-intro-ready\"）：断言 docs/archgraph-introduction.wechat.md 存在，frontmatter 含 title/author/digest，正文含 ArchGraph 与 Agentic Engineering。通过。",
+    "executionCommand": "",
+    "exitCode": null,
+    "failureError": "no test executor can handle: 执行 node --test tests/wechat-article.test.js（用例 \"wechat-intro-ready\"）：断言 docs/archgraph-introduction.wechat.md 存在，frontmatter 含 title/author/digest，正文含 ArchGraph 与 Agentic Engineering。通过。",
+    "stdout": "",
+    "stderr": "no test executor can handle: 执行 node --test tests/wechat-article.test.js（用例 \"wechat-intro-ready\"）：断言 docs/archgraph-introduction.wechat.md 存在，frontmatter 含 title/author/digest，正文含 ArchGraph 与 Agentic Engineering。通过。"
+  },
+  {
+    "testcasename": "AT-1364-01-归档两个参考项目并同步主页",
+    "testdescription": "GIVEN deepresearch 仓库 design/KG 下存在 gpt-researcher_Agent_探索方法.json 与 麦肯锡结构化战略分析新5步法.json；WHEN 归档到 KGlibrary 并刷新 Reference Library 页面 docs/kglibrary.html；THEN KGlibrary 下存在两个新项目目录（各含 info.md 与模型 JSON），docs/kglibrary.html 列出两者的 name、repo 与 description。",
+    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 docs/kglibrary.html，断言两个新项目的 name、repo、description 均出现在页面中。通过。",
+    "relatedIntentElementId": "1364",
+    "status": "invalid-criteria",
+    "resolvedScriptPath": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 docs/kglibrary.html，断言两个新项目的 name、repo、description 均出现在页面中。通过。",
+    "executionCommand": "",
+    "exitCode": null,
+    "failureError": "no test executor can handle: 执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 docs/kglibrary.html，断言两个新项目的 name、repo、description 均出现在页面中。通过。",
+    "stdout": "",
+    "stderr": "no test executor can handle: 执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 docs/kglibrary.html，断言两个新项目的 name、repo、description 均出现在页面中。通过。"
+  },
+  {
+    "testcasename": "AT-2100-01-不保留原ID按新元素导入",
+    "testdescription": "GIVEN 已存在基础导入脚本 eatool/EA-jsscript/import_system_architecture_json_to_ea.js；WHEN 运行新导入脚本 eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js 导入 SystemArchitecture.json；THEN 所有元素/关系/视图均作为新元素创建，不写入任何 schema_id/schema_parent/schema_view_id 等原ID标记。",
+    "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言新脚本文件存在、包含 main/importElements/importRelationships 函数，且不含 schema_id/schema_parent/schema_element_json/schema_relationship_json/schema_view_id/schema_sub_view_map 等原ID持久化标记，且 Alias 不回填 data.id。",
+    "relatedIntentElementId": "2100",
+    "status": "invalid-criteria",
+    "resolvedScriptPath": "执行 node --test tests/ea-import-new.test.js：断言新脚本文件存在、包含 main/importElements/importRelationships 函数，且不含 schema_id/schema_parent/schema_element_json/schema_relationship_json/schema_view_id/schema_sub_view_map 等原ID持久化标记，且 Alias 不回填 data.id。",
+    "executionCommand": "",
+    "exitCode": null,
+    "failureError": "no test executor can handle: 执行 node --test tests/ea-import-new.test.js：断言新脚本文件存在、包含 main/importElements/importRelationships 函数，且不含 schema_id/schema_parent/schema_element_json/schema_relationship_json/schema_view_id/schema_sub_view_map 等原ID持久化标记，且 Alias 不回填 data.id。",
+    "stdout": "",
+    "stderr": "no test executor can handle: 执行 node --test tests/ea-import-new.test.js：断言新脚本文件存在、包含 main/importElements/importRelationships 函数，且不含 schema_id/schema_parent/schema_element_json/schema_relationship_json/schema_view_id/schema_sub_view_map 等原ID持久化标记，且 Alias 不回填 data.id。"
+  },
+  {
+    "testcasename": "AT-2100-02-必须由用户提供导入文件路径",
+    "testdescription": "GIVEN 新导入脚本 eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js 已存在；WHEN 用户运行该脚本；THEN 脚本弹出输入框要求用户提供要导入的 SystemArchitecture.json 的完整路径，用户未提供路径时中止导入，且不自动从当前 EA 模型连接串推断路径。",
+    "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言脚本包含 Session.Input 路径输入提示、包含空路径中止逻辑（no input file path was provided），且不含 resolveKnowledgeGraphPathFromCurrentModel 与 Repository.ConnectionString 等自动路径推断逻辑。",
+    "relatedIntentElementId": "2100",
+    "status": "invalid-criteria",
+    "resolvedScriptPath": "执行 node --test tests/ea-import-new.test.js：断言脚本包含 Session.Input 路径输入提示、包含空路径中止逻辑（no input file path was provided），且不含 resolveKnowledgeGraphPathFromCurrentModel 与 Repository.ConnectionString 等自动路径推断逻辑。",
+    "executionCommand": "",
+    "exitCode": null,
+    "failureError": "no test executor can handle: 执行 node --test tests/ea-import-new.test.js：断言脚本包含 Session.Input 路径输入提示、包含空路径中止逻辑（no input file path was provided），且不含 resolveKnowledgeGraphPathFromCurrentModel 与 Repository.ConnectionString 等自动路径推断逻辑。",
+    "stdout": "",
+    "stderr": "no test executor can handle: 执行 node --test tests/ea-import-new.test.js：断言脚本包含 Session.Input 路径输入提示、包含空路径中止逻辑（no input file path was provided），且不含 resolveKnowledgeGraphPathFromCurrentModel 与 Repository.ConnectionString 等自动路径推断逻辑。"
   }
 ]

@@ -21,6 +21,10 @@
       "type": "Grouping",
       "subdiagram_views": [
         {
+          "view_id": "432",
+          "view_name": "workpackage_ground"
+        },
+        {
           "view_id": "178",
           "view_name": "AML Standardization"
         },
@@ -66,12 +70,12 @@
           "description": "index.html; .nojekyll; .github/skills/create-github-repository-page/SKILL.md"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -93,11 +97,6 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "2458f97",
-          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "aa932c3",
           "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; design/KG/SystemArchitecture.json"
         },
@@ -107,12 +106,17 @@
           "description": "docs/kglibrary.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
+          "name": "commit",
+          "value": "2458f97",
+          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
         },
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -141,18 +145,18 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "25bbc9e",
-          "description": "design/KG/SystemArchitecture.json"
+          "value": "098be4e",
+          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "e9839a5",
-          "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "7e230f3",
+          "value": "e07c6a1",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "c3604e3",
+          "description": "index.html; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -166,17 +170,27 @@
         },
         {
           "name": "commit",
-          "value": "926aa9c",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "aa4ef69",
           "description": "tests/custom-domain.test.js"
         },
         {
           "name": "commit",
-          "value": "e07c6a1",
+          "value": "e651b0d",
+          "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "e9839a5",
+          "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "25bbc9e",
+          "description": "design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "926aa9c",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
@@ -186,8 +200,13 @@
         },
         {
           "name": "commit",
-          "value": "c3604e3",
-          "description": "index.html; design/KG/SystemArchitecture.json"
+          "value": "f98b61f",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "7e230f3",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -196,35 +215,20 @@
         },
         {
           "name": "commit",
-          "value": "098be4e",
-          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "ed90f6a",
           "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e651b0d",
-          "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "f98b61f",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "custom_domain",
           "value": "https://archgraph.org/"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "website",
           "value": "https://derekhu0002.github.io/archgraph/"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -267,13 +271,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "54ad8dc",
+          "value": "dc84086",
           "description": "README.md; tests/readme.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "2acf056",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -282,8 +281,28 @@
         },
         {
           "name": "commit",
+          "value": "f98b61f",
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "54ad8dc",
+          "description": "README.md; tests/readme.test.js"
+        },
+        {
+          "name": "commit",
           "value": "c8f2d74",
           "description": "restore .github/skills/argo-init/SKILL.md; README.md; index.html; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "2acf056",
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "e07c6a1",
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -296,27 +315,12 @@
           "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "commit",
-          "value": "f98b61f",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e07c6a1",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "dc84086",
-          "description": "README.md; tests/readme.test.js"
+          "name": "status",
+          "value": "COMPLETED"
         },
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -345,21 +349,21 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "2040682",
-          "description": "README.md; design/KG/SystemArchitecture.json; .github/skills/diagram-draw/SKILL.md; .github/skills/diagram-draw/renderExcalidrawSvg.js; docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js"
-        },
-        {
-          "name": "commit",
           "value": "2e5c6b9",
           "description": "docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
+          "name": "commit",
+          "value": "2040682",
+          "description": "README.md; design/KG/SystemArchitecture.json; .github/skills/diagram-draw/SKILL.md; .github/skills/diagram-draw/renderExcalidrawSvg.js; docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js"
         },
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -388,8 +392,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "098be4e",
-          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "value": "e9839a5",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -398,13 +402,8 @@
         },
         {
           "name": "commit",
-          "value": "51be801",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e9839a5",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "value": "098be4e",
+          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -412,12 +411,17 @@
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
+          "name": "commit",
+          "value": "51be801",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -439,13 +443,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "9973aa1",
-          "description": "docs/agent-programming-language.md"
-        },
-        {
-          "name": "commit",
-          "value": "44e1cf0",
-          "description": "docs/agent-programming-language.md; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
+          "value": "ee62476",
+          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -459,16 +458,21 @@
         },
         {
           "name": "commit",
-          "value": "ee62476",
-          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
+          "value": "44e1cf0",
+          "description": "docs/agent-programming-language.md; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
+          "name": "commit",
+          "value": "9973aa1",
+          "description": "docs/agent-programming-language.md"
         },
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -509,13 +513,13 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "4d55487",
-          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js"
+          "value": "08f0eea",
+          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js; tests/architecture-view-context.test.js"
         },
         {
           "name": "commit",
-          "value": "08f0eea",
-          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js; tests/architecture-view-context.test.js"
+          "value": "4d55487",
+          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js"
         },
         {
           "name": "commit",
@@ -546,11 +550,6 @@
         },
         {
           "name": "commit",
-          "value": "098be4e",
-          "description": "docs/insights.html; docs/insight-archgraph-benefits.html; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "a231760",
           "description": "design/KG/SystemArchitecture.json"
         },
@@ -560,12 +559,17 @@
           "description": "index.html; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
+          "name": "commit",
+          "value": "098be4e",
+          "description": "docs/insights.html; docs/insight-archgraph-benefits.html; design/KG/SystemArchitecture.json"
         },
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -594,17 +598,13 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "e9abada",
-          "description": "docs/industry-insight-graph-driven-agent.wechat.md; tests/wechat-article.test.js; .gitignore; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "4516b04",
           "description": "docs/industry-insight-graph-driven-agent.wechat.md"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
+          "name": "commit",
+          "value": "e9abada",
+          "description": "docs/industry-insight-graph-driven-agent.wechat.md; tests/wechat-article.test.js; .gitignore; design/KG/SystemArchitecture.json"
         },
         {
           "name": "media_id",
@@ -615,6 +615,10 @@
           "name": "status",
           "value": "BLOCKED",
           "description": "草稿已创建；freepublish 被 48001 api unauthorized 拒绝（账号无 API 发布权限）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -645,12 +649,12 @@
           "description": "tests/project-name.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -681,16 +685,16 @@
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "spec",
           "value": "docs/agent-programming-language.md"
         },
         {
           "name": "version",
           "value": "v0.1"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -716,16 +720,16 @@
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "note",
           "value": "后续重点建设"
         },
         {
           "name": "status",
           "value": "PLANNED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -747,11 +751,6 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "b39acb2",
-          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "c315b5c",
           "description": "argo/scripts/argo-mcp-server.js"
         },
@@ -759,6 +758,11 @@
           "name": "commit",
           "value": "c8f2d74",
           "description": "restore .github/skills/argo-init/SKILL.md (repo-level compatibility)"
+        },
+        {
+          "name": "commit",
+          "value": "b39acb2",
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -772,21 +776,21 @@
         },
         {
           "name": "commit",
-          "value": "fa857e7",
-          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "e9de7b3",
           "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
+          "name": "commit",
+          "value": "fa857e7",
+          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "status",
           "value": "PLANNED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -828,12 +832,12 @@
       "description": "让消费者用一份 AML 描述其 harness，即可生成 .github/、.opencode/、.cursor/ 等多宿主配置，实现一次建模、多处运行。",
       "attributes": [
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "PLANNED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -859,12 +863,12 @@
           "description": "KGlibrary/GPT-Research/info.md; index.html; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -886,28 +890,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "7aebb2e",
-          "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "b39acb2",
-          "description": "argo/defaults/design/KG/SystemArchitecture.json; argo/defaults/EA-model-template.feap; install-argo.ps1; package.json; tests/argo-deploy.test.js; argo/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e982da1",
-          "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)"
-        },
-        {
-          "name": "commit",
-          "value": "de9e21d",
-          "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore"
-        },
-        {
-          "name": "commit",
-          "value": "025ceae",
-          "description": "install-argo.ps1 (restore workspaceFolder in MCP config); tests/argo-deploy.test.js; package.json (0.4.2)"
+          "value": "c315b5c",
+          "description": "removed eatool/default/EA-model-template.feap; removed eatool/default/design/KG/SystemArchitecture.json; argo/scripts/argo-mcp-server.js"
         },
         {
           "name": "commit",
@@ -916,48 +900,8 @@
         },
         {
           "name": "commit",
-          "value": "ee05a15",
-          "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "60e995e",
-          "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "411bf25",
-          "description": "argo/rules/archgraph.instructions.md (renamed from copilot-instructions.md); package.json (0.3.0)"
-        },
-        {
-          "name": "commit",
-          "value": "07d2c69",
-          "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)"
-        },
-        {
-          "name": "commit",
-          "value": "v0.6.0",
-          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz"
-        },
-        {
-          "name": "commit",
-          "value": "2c54b51",
-          "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)"
-        },
-        {
-          "name": "commit",
-          "value": "e5f6f3d",
-          "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/"
-        },
-        {
-          "name": "commit",
           "value": "92f1123",
           "description": "install-argo.ps1 (Cursor/OpenCode skills+rule+MCP deploy); tests/argo-deploy.test.js; README.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "c315b5c",
-          "description": "removed eatool/default/EA-model-template.feap; removed eatool/default/design/KG/SystemArchitecture.json; argo/scripts/argo-mcp-server.js"
         },
         {
           "name": "commit",
@@ -966,8 +910,43 @@
         },
         {
           "name": "commit",
+          "value": "ee05a15",
+          "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
           "value": "499d802",
           "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)"
+        },
+        {
+          "name": "commit",
+          "value": "2c54b51",
+          "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)"
+        },
+        {
+          "name": "commit",
+          "value": "b39acb2",
+          "description": "argo/defaults/design/KG/SystemArchitecture.json; argo/defaults/EA-model-template.feap; install-argo.ps1; package.json; tests/argo-deploy.test.js; argo/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "025ceae",
+          "description": "install-argo.ps1 (restore workspaceFolder in MCP config); tests/argo-deploy.test.js; package.json (0.4.2)"
+        },
+        {
+          "name": "commit",
+          "value": "e5f6f3d",
+          "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/"
+        },
+        {
+          "name": "commit",
+          "value": "60e995e",
+          "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "v0.6.0",
+          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz"
         },
         {
           "name": "commit",
@@ -975,12 +954,37 @@
           "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
+          "name": "commit",
+          "value": "411bf25",
+          "description": "argo/rules/archgraph.instructions.md (renamed from copilot-instructions.md); package.json (0.3.0)"
+        },
+        {
+          "name": "commit",
+          "value": "e982da1",
+          "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)"
+        },
+        {
+          "name": "commit",
+          "value": "07d2c69",
+          "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)"
+        },
+        {
+          "name": "commit",
+          "value": "de9e21d",
+          "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore"
+        },
+        {
+          "name": "commit",
+          "value": "7aebb2e",
+          "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js"
         },
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1030,18 +1034,13 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "d52c52d",
-          "description": "index.html (restored + image-1.png); tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "7ba1940",
           "description": "docs/diagrams/core-model.excalidraw; docs/diagrams/core-model.svg; README.md; tests/architecture-diagram.test.js"
         },
         {
           "name": "commit",
-          "value": "a2c7c44",
-          "description": "README.md; docs/diagrams/core-model.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
+          "value": "d52c52d",
+          "description": "index.html (restored + image-1.png); tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -1049,12 +1048,17 @@
           "description": "tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
+          "name": "commit",
+          "value": "a2c7c44",
+          "description": "README.md; docs/diagrams/core-model.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1080,10 +1084,6 @@
           "description": "docs/archgraph-introduction.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "media_id",
           "value": "BRZAMZ3b-CaOBH8qdG2KTet7kAaHQ8GK03n8aoe7vKH_Bjq2L3aDrpbM36sNE3iY",
           "description": "WeChat draft media_id"
@@ -1092,6 +1092,10 @@
           "name": "status",
           "value": "BLOCKED",
           "description": "草稿已创建（media_id 已记录）；freepublish 与 sendall 均被 48001 api unauthorized 拒绝（账号无 API 发布/群发权限），需在公众号后台手动发布"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1119,6 +1123,10 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1148,6 +1156,10 @@
       "parent": "1961",
       "type": "Grouping",
       "subdiagram_views": [
+        {
+          "view_id": "430",
+          "view_name": "DevelopmentTeam"
+        },
         {
           "view_id": "299",
           "view_name": "AgentOrganization"
@@ -1594,13 +1606,17 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "d989fce",
+          "value": "1fde5dc",
           "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "1fde5dc",
+          "value": "d989fce",
           "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1619,6 +1635,127 @@
           "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言脚本包含 Session.Input 路径输入提示、包含空路径中止逻辑（no input file path was provided），且不含 resolveKnowledgeGraphPathFromCurrentModel 与 Repository.ConnectionString 等自动路径推断逻辑。"
         }
       ]
+    },
+    {
+      "id": "2732",
+      "name": "Reviewer",
+      "parent": "1962",
+      "type": "Business Role",
+      "description": "对代码进行检视，包括架构和安全性检视。并将检视结果告知对方。"
+    },
+    {
+      "id": "2733",
+      "name": "adam",
+      "parent": "1962",
+      "type": "Business Actor"
+    },
+    {
+      "id": "2734",
+      "name": "Developer",
+      "parent": "1962",
+      "type": "Business Role",
+      "description": "负责生产代码开发和自测试。完成后交给Reviewer进行代码检视，如果检视不通过，则需要根据检视意见修改，直到通过为止。如果检视完全没有问题，则通知验证测试工程师进程测试验证。"
+    },
+    {
+      "id": "2735",
+      "name": "Xiaoming",
+      "parent": "1962",
+      "type": "Business Actor"
+    },
+    {
+      "id": "2736",
+      "name": "规划专家",
+      "parent": "1962",
+      "type": "Business Role",
+      "description": "负责对对系统设计师提供的方案进行技术先进性进行分析，如果发现更好的方案，则反馈给设计师。"
+    },
+    {
+      "id": "2737",
+      "name": "tanwen",
+      "parent": "1962",
+      "type": "Business Actor"
+    },
+    {
+      "id": "2738",
+      "name": "系统设计师",
+      "parent": "1962",
+      "type": "Business Role",
+      "description": "负责基于需求进行方案设计，并将设计好的方案交给规划专家、系统架构师进行分析，如果规划专家认为需要修改则修改，知道规划专家没有意见为止。没有任务设计问题后，交给Developer进行开发。"
+    },
+    {
+      "id": "2739",
+      "name": "caoyang",
+      "parent": "1962",
+      "type": "Business Actor"
+    },
+    {
+      "id": "2740",
+      "name": "系统架构师",
+      "parent": "1962",
+      "type": "Business Role",
+      "description": "和系统设计师合作，对系统设计师提出的方案进行架构分析，确保架构符合SOLID原则。以及安全性、性能都需要最优。"
+    },
+    {
+      "id": "2741",
+      "name": "laodong",
+      "parent": "1962",
+      "type": "Business Actor"
+    },
+    {
+      "id": "2743",
+      "name": "验证测试工程师",
+      "parent": "1962",
+      "type": "Business Role"
+    },
+    {
+      "id": "2745",
+      "name": "chenlin",
+      "parent": "1962",
+      "type": "Business Actor"
+    },
+    {
+      "id": "2746",
+      "name": "需求分析专家",
+      "parent": "1962",
+      "type": "Business Role",
+      "description": "负责对用户提出的意图进行需求分析，需要整理出具体的用户场景、用户故事，并和用户确认OK后，交给系统设计师进行设计。"
+    },
+    {
+      "id": "2747",
+      "name": "xiaoniu",
+      "parent": "1962",
+      "type": "Business Actor"
+    },
+    {
+      "id": "2748",
+      "name": "ArchGraph开发者社区",
+      "parent": "1240",
+      "type": "Application Component",
+      "description": "这个开发者社区的目的，是为了便于ArchGraph开发者交流他们的“工作包”，这个工作包就是通过eatool\\EA-jsscript\\export-to-kg.js导出的他们认为可以和其他人分享的子图。\r\n最好采用业界有名的开源的社区服务。",
+      "subdiagram_views": [
+        {
+          "view_id": "431",
+          "view_name": "ArchGraph开发者社区"
+        }
+      ]
+    },
+    {
+      "id": "2749",
+      "name": "开发者社区WEB前端",
+      "parent": "2748",
+      "type": "Application Component"
+    },
+    {
+      "id": "2750",
+      "name": "开发者社区后端服务",
+      "parent": "2748",
+      "type": "Application Component"
+    },
+    {
+      "id": "2751",
+      "name": "开发者社区开发交付",
+      "parent": "1249",
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -2051,9 +2188,179 @@
       "target_id": "1964",
       "source_name": "John",
       "target_name": "图谱语法正确性分析师"
+    },
+    {
+      "id": "1949",
+      "statement": "adam --(Assignment)--> Reviewer",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2733",
+      "target_id": "2732",
+      "source_name": "adam",
+      "target_name": "Reviewer"
+    },
+    {
+      "id": "1950",
+      "statement": "Xiaoming --(Assignment)--> Developer",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2735",
+      "target_id": "2734",
+      "source_name": "Xiaoming",
+      "target_name": "Developer"
+    },
+    {
+      "id": "1951",
+      "statement": "tanwen --(Assignment)--> 规划专家",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2737",
+      "target_id": "2736",
+      "source_name": "tanwen",
+      "target_name": "规划专家"
+    },
+    {
+      "id": "1952",
+      "statement": "caoyang --(Assignment)--> 系统设计师",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2739",
+      "target_id": "2738",
+      "source_name": "caoyang",
+      "target_name": "系统设计师"
+    },
+    {
+      "id": "1953",
+      "statement": "laodong --(Assignment)--> 系统架构师",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2741",
+      "target_id": "2740",
+      "source_name": "laodong",
+      "target_name": "系统架构师"
+    },
+    {
+      "id": "1954",
+      "statement": "Developer --(Triggering)--> Reviewer",
+      "name": "Triggering",
+      "type": "Triggering",
+      "source_id": "2734",
+      "target_id": "2732",
+      "source_name": "Developer",
+      "target_name": "Reviewer"
+    },
+    {
+      "id": "1957",
+      "statement": "Developer --(Triggering)--> 验证测试工程师",
+      "name": "Triggering",
+      "type": "Triggering",
+      "source_id": "2734",
+      "target_id": "2743",
+      "source_name": "Developer",
+      "target_name": "验证测试工程师"
+    },
+    {
+      "id": "1958",
+      "statement": "系统设计师 --(Triggering)--> Developer",
+      "name": "Triggering",
+      "type": "Triggering",
+      "source_id": "2738",
+      "target_id": "2734",
+      "source_name": "系统设计师",
+      "target_name": "Developer"
+    },
+    {
+      "id": "1959",
+      "statement": "系统设计师 --(Triggering)--> 规划专家",
+      "name": "Triggering",
+      "type": "Triggering",
+      "source_id": "2738",
+      "target_id": "2736",
+      "source_name": "系统设计师",
+      "target_name": "规划专家"
+    },
+    {
+      "id": "1960",
+      "statement": "系统设计师 --(Triggering)--> 系统架构师",
+      "name": "Triggering",
+      "type": "Triggering",
+      "source_id": "2738",
+      "target_id": "2740",
+      "source_name": "系统设计师",
+      "target_name": "系统架构师"
+    },
+    {
+      "id": "1961",
+      "statement": "chenlin --(Assignment)--> 验证测试工程师",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2745",
+      "target_id": "2743",
+      "source_name": "chenlin",
+      "target_name": "验证测试工程师"
+    },
+    {
+      "id": "1962",
+      "statement": "需求分析专家 --(Triggering)--> 系统设计师",
+      "name": "Triggering",
+      "type": "Triggering",
+      "source_id": "2746",
+      "target_id": "2738",
+      "source_name": "需求分析专家",
+      "target_name": "系统设计师"
+    },
+    {
+      "id": "1963",
+      "statement": "xiaoniu --(Assignment)--> 需求分析专家",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2747",
+      "target_id": "2746",
+      "source_name": "xiaoniu",
+      "target_name": "需求分析专家"
+    },
+    {
+      "id": "1964",
+      "statement": "开发者社区WEB前端 --(Triggering)--> 开发者社区后端服务",
+      "name": "访问",
+      "type": "Triggering",
+      "source_id": "2749",
+      "target_id": "2750",
+      "source_name": "开发者社区WEB前端",
+      "target_name": "开发者社区后端服务"
+    },
+    {
+      "id": "1965",
+      "statement": "开发者社区开发交付 --(Realization)--> ArchGraph开发者社区",
+      "name": "Realization",
+      "type": "Realization",
+      "source_id": "2751",
+      "target_id": "2748",
+      "source_name": "开发者社区开发交付",
+      "target_name": "ArchGraph开发者社区"
+    },
+    {
+      "id": "1966",
+      "statement": "xiaoniu --(Assignment)--> 开发者社区开发交付",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2747",
+      "target_id": "2751",
+      "source_name": "xiaoniu",
+      "target_name": "开发者社区开发交付"
     }
   ],
   "views": [
+    {
+      "view_id": "432",
+      "view_name": "workpackage_ground",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "included_elements": [
+        "2751"
+      ],
+      "included_relationships": []
+    },
     {
       "view_id": "178",
       "view_name": "AML Standardization",
@@ -2154,14 +2461,33 @@
       ]
     },
     {
+      "view_id": "431",
+      "view_name": "ArchGraph开发者社区",
+      "parent_element_id": "2748",
+      "parent_element_name": "ArchGraph开发者社区",
+      "included_elements": [
+        "2749",
+        "2750"
+      ],
+      "included_relationships": [
+        "1964"
+      ]
+    },
+    {
       "view_id": "169",
       "view_name": "Application Cooperation",
       "parent_element_id": "1240",
       "parent_element_name": "Application Cooperation Viewpoint",
       "included_elements": [
-        "1318"
+        "1318",
+        "2748",
+        "2751",
+        "2747"
       ],
-      "included_relationships": []
+      "included_relationships": [
+        "1965",
+        "1966"
+      ]
     },
     {
       "view_id": "1763",
@@ -2290,10 +2616,6 @@
       "parent_element_id": "2012",
       "parent_element_name": "GPTResearcher 多智能体研究方法",
       "included_elements": [
-        "2082",
-        "2071",
-        "2070",
-        "2069",
         "2068",
         "2067",
         "2066",
@@ -2302,7 +2624,11 @@
         "2063",
         "2062",
         "2061",
-        "2060"
+        "2060",
+        "2082",
+        "2071",
+        "2070",
+        "2069"
       ],
       "included_relationships": [
         "1230",
@@ -2328,6 +2654,43 @@
         "2012"
       ],
       "included_relationships": []
+    },
+    {
+      "view_id": "430",
+      "view_name": "DevelopmentTeam",
+      "parent_element_id": "1962",
+      "parent_element_name": "AgentOrganization",
+      "included_elements": [
+        "2732",
+        "2733",
+        "2734",
+        "2735",
+        "2736",
+        "2737",
+        "2738",
+        "2739",
+        "2740",
+        "2741",
+        "2745",
+        "2743",
+        "2746",
+        "2747"
+      ],
+      "included_relationships": [
+        "1949",
+        "1950",
+        "1951",
+        "1952",
+        "1953",
+        "1954",
+        "1957",
+        "1958",
+        "1959",
+        "1960",
+        "1961",
+        "1962",
+        "1963"
+      ]
     },
     {
       "view_id": "299",
@@ -2357,7 +2720,7 @@
       "included_relationships": []
     },
     {
-      "view_id": "170",
+      "view_id": "429",
       "view_name": "SystemArchitecture",
       "included_elements": [
         "1249",
