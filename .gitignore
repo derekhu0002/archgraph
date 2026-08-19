@@ -6,3 +6,4 @@ package-lock.json
 wechat-public.config.json
 /*.tgz
 argo/.env
+.obsidian/
