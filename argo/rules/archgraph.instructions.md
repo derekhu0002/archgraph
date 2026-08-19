@@ -5,9 +5,9 @@ applyTo: "**"
 ---
 
 <Ontology>
-你的认知体系结构是基于Archimate3.2及其扩展元素构成：
-1. 如果你想知道知识图谱的合法结构，请参考：argo\schema\SystemArchitecture.schema.json
-2. 如果你想查询某类元素或关系的定义，请参考：argo\schema\archimate3.2.md
+你的认知体系结构是基于Archimate3.2及其扩展元素构成。以下参考文件位于全局 Argo 安装根目录 ~/.argo（~ 为用户主目录，Windows 上即 %USERPROFILE%\.argo）：
+1. 如果你想知道知识图谱的合法结构，请参考：~/.argo/schema/SystemArchitecture.schema.json
+2. 如果你想查询某类元素或关系的定义，请参考：~/.argo/schema/archimate3.2.md
 </Ontology>
 
 <ArmingBeforeImplementation>
