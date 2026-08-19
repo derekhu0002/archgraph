@@ -1652,7 +1652,13 @@
       "id": "2735",
       "name": "Xiaoming",
       "parent": "1962",
-      "type": "Business Actor"
+      "type": "Business Actor",
+      "attributes": [
+        {
+          "name": "sessionId",
+          "value": "d2d221b2-1cc1-4e9e-9377-550aa95cb5ce"
+        }
+      ]
     },
     {
       "id": "2736",
@@ -1801,11 +1807,11 @@
       "attributes": [
         {
           "name": "status",
-          "value": "DESIGN_REVISED"
+          "value": "DESIGN_APPROVED"
         },
         {
           "name": "note",
-          "value": "方案已按系统架构师 laodong 反馈修订，补充发布脱敏控制与下载导入前置校验，待复审。"
+          "value": "方案评审通过（规划专家tanwen通过、系统架构师laodong复审通过），已交接给Developer(Xiaoming)开发。"
         },
         {
           "name": "commit",
@@ -2437,6 +2443,16 @@
       "target_id": "2748",
       "source_name": "GitHub Discussions",
       "target_name": "ArchGraph开发者社区"
+    },
+    {
+      "id": "1969",
+      "name": "Assignment",
+      "source_id": "2735",
+      "source_name": "Xiaoming",
+      "statement": "Xiaoming --(Assignment)--> 开发者社区开发交付",
+      "target_id": "2751",
+      "target_name": "开发者社区开发交付",
+      "type": "Assignment"
     }
   ],
   "views": [
@@ -2573,13 +2589,15 @@
         "2751",
         "2747",
         "2739",
-        "2752"
+        "2752",
+        "2735"
       ],
       "included_relationships": [
         "1965",
         "1966",
         "1967",
-        "1968"
+        "1968",
+        "1969"
       ]
     },
     {
