@@ -2,8 +2,10 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync, existsSync } = require('node:fs');
+const { readFileSync, existsSync, writeFileSync, rmSync } = require('node:fs');
+const { spawnSync } = require('node:child_process');
 const path = require('node:path');
+const os = require('node:os');
 
 const ROOT = path.resolve(__dirname, '..');
 const DOC_PATH = path.join(ROOT, 'docs', 'developer-community-requirements.md');
@@ -205,4 +207,101 @@ test('import-validate: accepts a well-formed subgraph within the size limit', ()
   const result = validateSubgraph(buildCleanSubgraph(), 1024 * 1024);
   assert.equal(result.valid, true);
   assert.deepEqual(result.errors, []);
+});
+
+test('publish-cli: masks sensitive values so raw secrets are not leaked to stderr', () => {
+  // GIVEN a subgraph JSON file carrying credentials, paths and personal info
+  // WHEN a developer runs the publish CLI against it
+  // THEN it exits non-zero but stderr reports hits without the raw sensitive values
+  const tmpFile = path.join(os.tmpdir(), `dev-community-publish-${process.pid}.json`);
+  writeFileSync(tmpFile, JSON.stringify(buildSensitiveSubgraph()));
+  try {
+    const result = spawnSync(
+      process.execPath,
+      [path.join(ROOT, 'scripts', 'developer-community-publish.js'), tmpFile],
+      { encoding: 'utf8' },
+    );
+    assert.equal(result.status, 1, 'CLI should exit 1 when sensitive hits are found');
+    assert.match(result.stderr, /credential/, 'stderr should report the credential hit type');
+    const rawValues = [
+      'sk-1234567890abcdefghijklmnop',
+      'p@ssw0rd',
+      '13800138000',
+      'xiaoming@example.com',
+      'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0',
+    ];
+    for (const raw of rawValues) {
+      assert.ok(!result.stderr.includes(raw), `stderr must not leak raw value: ${raw}`);
+    }
+  } finally {
+    rmSync(tmpFile, { force: true });
+  }
+});
+
+test('import-validate-cli: rejects an oversized file before reading its contents', () => {
+  // GIVEN a file larger than the size limit whose content is not even valid JSON
+  // WHEN a developer runs the validate CLI with a small size limit
+  // THEN it rejects with a size error (exit 1) before attempting to read/parse
+  const tmpFile = path.join(os.tmpdir(), `dev-community-validate-${process.pid}.json`);
+  writeFileSync(tmpFile, 'x'.repeat(1024));
+  try {
+    const result = spawnSync(
+      process.execPath,
+      [path.join(ROOT, 'scripts', 'developer-community-validate.js'), tmpFile, '16'],
+      { encoding: 'utf8' },
+    );
+    assert.equal(result.status, 1, 'oversized file should be rejected with exit code 1');
+    assert.match(result.stderr, /size/i, 'stderr should mention the size error');
+    assert.ok(!result.stderr.includes('Failed to read'), 'size check must happen before file read/parse');
+  } finally {
+    rmSync(tmpFile, { force: true });
+  }
+});
+
+test('import-validate: rejects entries missing required string fields', () => {
+  // GIVEN subgraph entries missing required structural fields (element name, relationship type, view name)
+  // WHEN a developer validates it before import
+  // THEN validation fails listing each missing field
+  const invalid = {
+    elements: [{ id: 'el-1', type: 'Application Component' }],
+    relationships: [{ source_id: 'el-1', target_id: 'el-2' }],
+    views: [{ view_id: 'v1' }],
+  };
+  const result = validateSubgraph(invalid, 1024 * 1024);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((e) => e.includes("'name'")), `errors should flag missing element name: ${result.errors.join('; ')}`);
+  assert.ok(result.errors.some((e) => e.includes("'type'")), `errors should flag missing relationship type: ${result.errors.join('; ')}`);
+  assert.ok(result.errors.some((e) => e.includes("'view_name'")), `errors should flag missing view name: ${result.errors.join('; ')}`);
+});
+
+test('publish-scan: deeply nested JSON does not crash and yields empty hits', () => {
+  // GIVEN an object nested far beyond a naive recursive walk
+  // WHEN a developer runs the sensitive-info scan
+  // THEN the scan returns without throwing (empty hits)
+  const deep = {};
+  let cursor = deep;
+  for (let i = 0; i < 50000; i++) {
+    cursor.a = {};
+    cursor = cursor.a;
+  }
+  let hits;
+  assert.doesNotThrow(() => { hits = scanSensitiveInfo(deep); });
+  assert.deepEqual(hits, []);
+});
+
+test('import-validate: deeply nested JSON does not crash', () => {
+  // GIVEN a subgraph with a deeply nested field that JSON.stringify cannot serialize
+  // WHEN a developer validates it before import
+  // THEN validation returns a graceful failure instead of throwing
+  const subgraph = buildCleanSubgraph();
+  subgraph.extra = {};
+  let cursor = subgraph.extra;
+  for (let i = 0; i < 50000; i++) {
+    cursor.a = {};
+    cursor = cursor.a;
+  }
+  let result;
+  assert.doesNotThrow(() => { result = validateSubgraph(subgraph, 1024 * 1024); });
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.length > 0, 'deeply nested JSON should be reported as invalid');
 });

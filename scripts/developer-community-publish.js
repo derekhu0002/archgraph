@@ -3,39 +3,60 @@
 const fs = require('fs');
 const path = require('path');
 
-const CREDENTIAL_KEY_PATTERN = /token|password|passwd|secret|api[-_]?key|apikey|credential|pwd/i;
+const CREDENTIAL_KEY_PATTERN = /token|password|passwd|secret|api[-_]?key|apikey|credential|pwd|private[-_]?key|access[-_]?key|\bconnection|\bauth\b|\bbearer\b|\bjwt\b/i;
 const CREDENTIAL_VALUE_PATTERN = /\b(sk|pk|AKIA|ASIA|ghp|gho|ghu|ghs|ghr|xox[baprs]|eyJ)[-_A-Za-z0-9]{8,}/;
 const COMMIT_KEY_PATTERN = /commit/i;
 const WINDOWS_DRIVE_PATH_PATTERN = /[A-Za-z]:[\\/]/;
 const UNC_PATH_PATTERN = /\\\\[A-Za-z0-9._-]+\\/;
-const UNIX_ABSOLUTE_PATH_PATTERN = /(^|[^A-Za-z0-9_])\/(?:home|usr|opt|etc|var|root|tmp|srv|mnt|media|proc|sys)\//;
+const UNIX_ABSOLUTE_PATH_PATTERN = /(^|[^A-Za-z0-9_])\/(?:home|usr|opt|etc|var|root|tmp|srv|mnt|media|proc|sys|data|apps|projects)\//;
+const ENV_VAR_PATH_PATTERN = /\$[A-Z_][A-Z0-9_]*|%[A-Z_][A-Z0-9_]*%/;
+const TILDE_PATH_PATTERN = /~[/\\]/;
+const GIT_BASH_PATH_PATTERN = /(^|[^A-Za-z0-9_])\/c\//;
 const GIT_HASH_PATTERN = /\b[0-9a-f]{40}\b/;
 const EMAIL_PATTERN = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
 const PHONE_PATTERN = /\b\d{11}\b/;
 
+const MAX_WALK_DEPTH = 10000;
+const SCAN_DISCLAIMER = '提示：本扫描为辅助性质，『内部备注』等无法启发式识别的项仍需人工核对。';
+
 function scanSensitiveInfo(obj) {
     const hits = [];
-    walk(obj, '', hits);
+    try {
+        walk(obj, hits);
+    } catch (error) {
+        hits.push({ type: 'scan-error', path: '', value: error.message });
+    }
     return hits;
 }
 
-function walk(node, pathPrefix, hits) {
-    if (node === null || typeof node !== 'object') {
-        return;
-    }
+function walk(root, hits) {
+    const stack = [{ node: root, pathPrefix: '', depth: 0 }];
+    while (stack.length > 0) {
+        const { node, pathPrefix, depth } = stack.pop();
 
-    if (Array.isArray(node)) {
-        for (let i = 0; i < node.length; i++) {
-            walk(node[i], `${pathPrefix}[${i}]`, hits);
+        if (node === null || typeof node !== 'object') {
+            continue;
         }
-        return;
-    }
 
-    for (const key of Object.keys(node)) {
-        const childPath = pathPrefix ? `${pathPrefix}.${key}` : key;
-        const value = node[key];
-        checkField(key, value, childPath, hits);
-        walk(value, childPath, hits);
+        if (depth > MAX_WALK_DEPTH) {
+            continue;
+        }
+
+        if (Array.isArray(node)) {
+            for (let i = node.length - 1; i >= 0; i--) {
+                stack.push({ node: node[i], pathPrefix: `${pathPrefix}[${i}]`, depth: depth + 1 });
+            }
+            continue;
+        }
+
+        const keys = Object.keys(node);
+        for (let i = keys.length - 1; i >= 0; i--) {
+            const key = keys[i];
+            const childPath = pathPrefix ? `${pathPrefix}.${key}` : key;
+            const value = node[key];
+            checkField(key, value, childPath, hits);
+            stack.push({ node: value, pathPrefix: childPath, depth: depth + 1 });
+        }
     }
 }
 
@@ -60,7 +81,7 @@ function checkField(key, value, fieldPath, hits) {
         hits.push({ type: 'credential', path: fieldPath, value: text });
     }
 
-    if (WINDOWS_DRIVE_PATH_PATTERN.test(text) || UNC_PATH_PATTERN.test(text) || UNIX_ABSOLUTE_PATH_PATTERN.test(text)) {
+    if (WINDOWS_DRIVE_PATH_PATTERN.test(text) || UNC_PATH_PATTERN.test(text) || UNIX_ABSOLUTE_PATH_PATTERN.test(text) || ENV_VAR_PATH_PATTERN.test(text) || TILDE_PATH_PATTERN.test(text) || GIT_BASH_PATH_PATTERN.test(text)) {
         hits.push({ type: 'absolute-path', path: fieldPath, value: text });
     }
 
@@ -75,6 +96,16 @@ function checkField(key, value, fieldPath, hits) {
     if (PHONE_PATTERN.test(text)) {
         hits.push({ type: 'personal-info', path: fieldPath, value: text });
     }
+}
+
+function maskValue(value) {
+    if (typeof value !== 'string') {
+        return '****';
+    }
+    if (value.length <= 4) {
+        return '****';
+    }
+    return value.slice(0, 4) + '****';
 }
 
 function generatePostTemplate({ name, description, author, link }) {
@@ -117,12 +148,14 @@ function main() {
     if (hits.length > 0) {
         console.error('命中即告警，需清理后再发布');
         for (const hit of hits) {
-            console.error(`- [${hit.type}] ${hit.path}: ${hit.value}`);
+            console.error(`- [${hit.type}] ${hit.path}: ${maskValue(hit.value)}`);
         }
+        console.error(SCAN_DISCLAIMER);
         process.exit(1);
     }
 
     console.log('敏感信息扫描通过：未命中敏感模式。');
+    console.log(SCAN_DISCLAIMER);
 }
 
 if (require.main === module) {
@@ -132,4 +165,5 @@ if (require.main === module) {
 module.exports = {
     scanSensitiveInfo,
     generatePostTemplate,
+    maskValue,
 };
