@@ -1819,11 +1819,11 @@
       "attributes": [
         {
           "name": "status",
-          "value": "REVIEW_PASSED"
+          "value": "TEST_PASSED"
         },
         {
           "name": "note",
-          "value": "代码检视通过（Reviewer adam 复检通过，验收测试16/16通过），已交接给验证测试工程师(chenlin)测试验证。"
+          "value": "验证测试通过（16/16通过），交付完成，待产品经理(xiaoniu)最终验收。"
         },
         {
           "name": "commit",
@@ -1854,6 +1854,11 @@
           "name": "commit",
           "value": "fef9c35",
           "description": "scripts/developer-community-publish.js; scripts/developer-community-validate.js; tests/developer-community.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "96e32ea",
+          "description": "docs/developer-community-test-report.md"
         }
       ]
     },
