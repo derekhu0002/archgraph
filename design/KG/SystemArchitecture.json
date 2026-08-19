@@ -979,6 +979,11 @@
           "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js"
         },
         {
+          "name": "commit",
+          "value": "aaffc53",
+          "description": "install-argo.ps1 (Add-AgentsRule replaces outdated OpenCode AGENTS.md block); tests/argo-deploy.test.js (regression); design/KG/SystemArchitecture.json (AT-1361-06)"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         },
