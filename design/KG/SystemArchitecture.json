@@ -514,6 +514,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "08f0eea",
+          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js; tests/architecture-view-context.test.js"
         }
       ],
       "testcases": [
@@ -1055,6 +1060,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "7aebb2e",
+          "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js"
         }
       ],
       "testcases": [
@@ -1085,6 +1095,13 @@
           "type": "Acceptance Test",
           "Input": "运行 tests/argo-deploy.test.js",
           "acceptanceCriteria": "tests/argo-deploy.test.js"
+        },
+        {
+          "name": "AT-1361-05-OpenCode规则中文不乱码",
+          "description": "GIVEN install-argo.ps1 已就绪且系统 ANSI 代码页非 UTF-8；WHEN 以 -SkipEnv -SkipDeps 与非交互方式将规则部署到 OpenCode 全局 AGENTS.md；THEN AGENTS.md 中的中文（如「全局工作流规则」「验收用例先行」「意图图谱」）以可读 UTF-8 呈现，且不含 UTF-8 被当作 GBK 解码产生的乱码（如「鍏ㄥ眬」）。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）"
         }
       ]
     },
