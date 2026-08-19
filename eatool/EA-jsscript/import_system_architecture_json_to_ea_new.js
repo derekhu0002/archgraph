@@ -3,8 +3,9 @@
 
 /*
  * Script Name: Import SystemArchitecture JSON to EA (as new elements)
- * Purpose: Reads design\KG\SystemArchitecture.json and creates an EA model
- *          matching .argo/schema/SystemArchitecture.schema.json.
+ * Purpose: Reads a SystemArchitecture.json file whose full path is entered by
+ *          the user at runtime and creates an EA model matching
+ *          .argo/schema/SystemArchitecture.schema.json.
  *          Unlike import_system_architecture_json_to_ea.js, this variant does
  *          NOT preserve the original graph ids. Every element, relationship
  *          and diagram is imported as a brand new EA object: EA assigns new
@@ -14,6 +15,8 @@
  *   1. Copy this file into EA local scripts with JSON-Parser.js available.
  *   2. Select the target Package in EA Project Browser.
  *   3. Run the script.
+ *   4. Enter the full path to the SystemArchitecture.json file when prompted.
+ *      The script requires this path and aborts if no path is provided.
  *
  * Notes:
  *   - Internal in-memory maps are still keyed by the source-graph ids so that
@@ -25,7 +28,6 @@
  *     diagrams under their owning elements.
  */
 
-var SYSTEM_ARCHITECTURE_JSON_RELATIVE_PATH = 'design\\KG\\SystemArchitecture.json';
 var SYSTEM_ARCHITECTURE_JSON_PATH = '';
 var IMPORT_PACKAGE_SUFFIX = ' EA Import (New)';
 var DIAGRAM_TYPE = 'Logical';
@@ -48,9 +50,9 @@ function main() {
       return;
     }
 
-    SYSTEM_ARCHITECTURE_JSON_PATH = resolveKnowledgeGraphPathFromCurrentModel();
+    SYSTEM_ARCHITECTURE_JSON_PATH = promptForInputFilePath();
     if (SYSTEM_ARCHITECTURE_JSON_PATH == '') {
-      fail('Could not resolve design\\KG\\SystemArchitecture.json from the current EA model path.');
+      fail('Import aborted: no input file path was provided.');
       return;
     }
 
@@ -119,6 +121,17 @@ function parseJson(jsonString) {
   } catch (e) {
     throw new Error('Invalid JSON: ' + errorMessage(e));
   }
+}
+
+function promptForInputFilePath() {
+  var input = '';
+  try {
+    input = Session.Input('Enter the full path to SystemArchitecture.json to import:');
+  } catch (e) {
+    warnOnce('input-prompt', 'Could not show input prompt: ' + errorMessage(e));
+    return '';
+  }
+  return trimString(input);
 }
 
 function validateGraph(graph) {
@@ -1130,75 +1143,6 @@ function autoLayoutDiagram(diagram) {
   } catch (e) {
     warnOnce('layout-' + diagram.DiagramID, 'Could not auto-layout diagram ' + diagram.Name + ': ' + errorMessage(e));
   }
-}
-
-function resolveKnowledgeGraphPathFromCurrentModel() {
-  var modelFilePath = resolveModelFilePathFromConnectionString();
-  if (modelFilePath == '') {
-    return '';
-  }
-
-  try {
-    var fso = new ActiveXObject('Scripting.FileSystemObject');
-    var rootPath = fso.GetParentFolderName(modelFilePath);
-    return fso.BuildPath(rootPath, SYSTEM_ARCHITECTURE_JSON_RELATIVE_PATH);
-  } catch (e) {
-    fail('Could not build knowledge graph path: ' + errorMessage(e));
-    return '';
-  }
-}
-
-function resolveModelFilePathFromConnectionString() {
-  var connectionString = '';
-  try {
-    connectionString = '' + Repository.ConnectionString;
-  } catch (e) {
-    return '';
-  }
-  if (connectionString == '') {
-    return '';
-  }
-
-  var dataSource = getConnectionProperty(connectionString, 'Data Source');
-  if (dataSource == '') {
-    dataSource = getConnectionProperty(connectionString, 'DataSource');
-  }
-  if (dataSource == '') {
-    dataSource = getConnectionProperty(connectionString, 'DBQ');
-  }
-  if (dataSource != '') {
-    return stripWrappedQuotes(dataSource);
-  }
-
-  var direct = stripWrappedQuotes(connectionString);
-  if (/^[A-Za-z]:\\/.test(direct) || /^\\\\/.test(direct)) {
-    return direct;
-  }
-  return '';
-}
-
-function getConnectionProperty(connectionString, keyName) {
-  if (connectionString == null || connectionString == '') {
-    return '';
-  }
-  var pattern = new RegExp('(?:^|;)\\s*' + keyName + '\\s*=\\s*([^;]+)', 'i');
-  var match = ('' + connectionString).match(pattern);
-  if (match && match.length > 1) {
-    return trimString(match[1]);
-  }
-  return '';
-}
-
-function stripWrappedQuotes(s) {
-  var value = trimString(s);
-  if (value.length >= 2) {
-    var first = value.charAt(0);
-    var last = value.charAt(value.length - 1);
-    if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
-      return value.substring(1, value.length - 1);
-    }
-  }
-  return value;
 }
 
 function assignIfPresent(obj, key, value) {

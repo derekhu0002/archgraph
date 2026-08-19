@@ -60,3 +60,33 @@ test('ea-import-new: script does not persist source-graph ids', () => {
     'script should not set a connector Alias from the source id'
   );
 });
+
+test('ea-import-new: script requires the user to provide the import file path', () => {
+  // GIVEN the import file must not be inferred from the current EA model
+  // WHEN the script is inspected
+  // THEN it prompts the user for the full path and aborts when no path is given
+  const content = readFileSync(SCRIPT, 'utf8');
+
+  assert.match(content, /Session\.Input\s*\(/, 'script should prompt the user for input');
+  assert.match(
+    content,
+    /Enter the full path to SystemArchitecture\.json/,
+    'script should ask for the SystemArchitecture.json path'
+  );
+  assert.match(
+    content,
+    /Import aborted: no input file path was provided\./,
+    'script should abort when no input file path is provided'
+  );
+
+  assert.doesNotMatch(
+    content,
+    /resolveKnowledgeGraphPathFromCurrentModel/,
+    'script should not resolve the path from the current EA model'
+  );
+  assert.doesNotMatch(
+    content,
+    /Repository\.ConnectionString/,
+    'script should not infer the path from the EA connection string'
+  );
+});

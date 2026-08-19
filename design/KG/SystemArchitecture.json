@@ -1681,7 +1681,7 @@
       "name": "开发不保留原ID的EA导入脚本",
       "parent": "1249",
       "type": "Work Package",
-      "description": "基于 eatool/EA-jsscript/import_system_architecture_json_to_ea.js 开发新脚本 import_system_architecture_json_to_ea_new.js：不保留原 schema id，所有导入元素按新元素处理。",
+      "description": "基于 eatool/EA-jsscript/import_system_architecture_json_to_ea.js 开发新脚本 import_system_architecture_json_to_ea_new.js：不保留原 schema id，所有导入元素按新元素处理；执行时必须由用户提供导入文件路径。",
       "testcases": [
         {
           "name": "AT-2100-01-不保留原ID按新元素导入",
@@ -1689,6 +1689,13 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/ea-import-new.test.js",
           "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言新脚本文件存在、包含 main/importElements/importRelationships 函数，且不含 schema_id/schema_parent/schema_element_json/schema_relationship_json/schema_view_id/schema_sub_view_map 等原ID持久化标记，且 Alias 不回填 data.id。"
+        },
+        {
+          "name": "AT-2100-02-必须由用户提供导入文件路径",
+          "description": "GIVEN 新导入脚本 eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js 已存在；WHEN 用户运行该脚本；THEN 脚本弹出输入框要求用户提供要导入的 SystemArchitecture.json 的完整路径，用户未提供路径时中止导入，且不自动从当前 EA 模型连接串推断路径。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-import-new.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言脚本包含 Session.Input 路径输入提示、包含空路径中止逻辑（no input file path was provided），且不含 resolveKnowledgeGraphPathFromCurrentModel 与 Repository.ConnectionString 等自动路径推断逻辑。"
         }
       ],
       "attributes": [
