@@ -489,7 +489,14 @@
       "name": "Process Cooperation Viewpoint",
       "type": "Grouping",
       "description": "表达多个 Agent 角色之间为完成同一任务而进行的协作流程（ArchiMate 流程协作视角）。",
-      "subdiagram_views": []
+      "subdiagram_views": [],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "a231760",
+          "description": "design/KG/SystemArchitecture.json"
+        }
+      ]
     },
     {
       "id": "1335",
@@ -497,6 +504,11 @@
       "type": "Work Package",
       "description": "用 AML 对主流开源深度研究项目 GPT-Researcher（github.com/assafelovic/gpt-researcher）的多 Agent 研究工作流建模：Planner 规划 → Researcher 并行子研究 → Editor 撰写 → Reviewer 评审 → Publisher 发布，产出带引用来源的研究报告。（该建模视图已删除）",
       "attributes": [
+        {
+          "name": "commit",
+          "value": "a231760",
+          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js; tests/architecture-view-context.test.js"
+        },
         {
           "name": "commit",
           "value": "4d55487",
@@ -525,6 +537,11 @@
       "type": "Work Package",
       "description": "将《知识图谱驱动的 Agent 构建》业界洞察报告归档到 docs/industry-insight-graph-driven-agent.md，并发布为独立子页 docs/industry-insight-graph-driven-agent.html；提供洞察文章列表页 docs/insights.html（首页导航 Insights 指向列表页）。",
       "attributes": [
+        {
+          "name": "commit",
+          "value": "a231760",
+          "description": "design/KG/SystemArchitecture.json"
+        },
         {
           "name": "commit",
           "value": "e9839a5",
