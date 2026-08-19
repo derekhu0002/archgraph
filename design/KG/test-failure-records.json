@@ -1,16 +1,16 @@
 [
   {
-    "testcasename": "can view the content through the website.",
-    "testdescription": "can view the content through the website.",
-    "acceptanceCriteria": "can view the content through the website.",
+    "testcasename": "AT-1311-01-网站首页可浏览",
+    "testdescription": "GIVEN 项目首页已创建并发布；WHEN 访客在浏览器打开网站首页；THEN 页面完整呈现项目定位与内容（含导航栏、Hero 区与项目名）。",
+    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"layout-style\"）：断言 index.html 含 <nav> 导航、class=\"hero\"、<h1> 项目名 与 ≥4 个 section。通过。",
     "relatedIntentElementId": "1311",
     "status": "invalid-criteria",
-    "resolvedScriptPath": "can view the content through the website.",
+    "resolvedScriptPath": "执行 node --test tests/website.test.js（用例 \"layout-style\"）：断言 index.html 含 <nav> 导航、class=\"hero\"、<h1> 项目名 与 ≥4 个 section。通过。",
     "executionCommand": "",
     "exitCode": null,
-    "failureError": "no test executor can handle: can view the content through the website.",
+    "failureError": "acceptanceCriteria must be a single workspace-relative test entry only, without extra command wrappers or arguments",
     "stdout": "",
-    "stderr": "no test executor can handle: can view the content through the website."
+    "stderr": "acceptanceCriteria must be a single workspace-relative test entry only, without extra command wrappers or arguments"
   },
   {
     "testcasename": "AT-1317-01-科技简洁布局风格",
@@ -236,15 +236,15 @@
   {
     "testcasename": "AT-1357-04-按视图ID解析视图完整成员",
     "testdescription": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
-    "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
+    "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331 与 2753、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 9 个子视图（169/174/176/178/179/180/1800/298/432）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
     "relatedIntentElementId": "1357",
     "status": "invalid-criteria",
-    "resolvedScriptPath": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
+    "resolvedScriptPath": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331 与 2753、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 9 个子视图（169/174/176/178/179/180/1800/298/432）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
     "executionCommand": "",
     "exitCode": null,
-    "failureError": "no test executor can handle: 执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
+    "failureError": "no test executor can handle: 执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331 与 2753、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 9 个子视图（169/174/176/178/179/180/1800/298/432）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
     "stdout": "",
-    "stderr": "no test executor can handle: 执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
+    "stderr": "no test executor can handle: 执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331 与 2753、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 9 个子视图（169/174/176/178/179/180/1800/298/432）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
   },
   {
     "testcasename": "AT-1358-01-上游消费者一次建模多处运行",

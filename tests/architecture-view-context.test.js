@@ -60,7 +60,7 @@ test('architecture-view-context: resolves complete view membership by view_id', 
   const agentCapabilities = callPayload(responses, 3);
   assert.equal(agentCapabilities.status, 'passed');
   assert.equal(agentCapabilities.view.view_id, '176');
-  assert.deepEqual(agentCapabilities.elements.map(element => element.id).sort(), ['1310', '1319']);
+  assert.deepEqual(agentCapabilities.elements.map(element => element.id).sort(), ['1310', '1319', '1331', '2753']);
   assert.equal(agentCapabilities.relationships.length, 0);
   assert.equal(agentCapabilities.parentElement.id, '1249');
   assert.equal(agentCapabilities.parentElement.name, 'Implementation and Migration Viewpoint');
