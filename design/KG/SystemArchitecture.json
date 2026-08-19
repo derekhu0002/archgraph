@@ -1831,7 +1831,7 @@
         },
         {
           "name": "note",
-          "value": "验证测试通过（16/16通过），交付完成，待产品经理(xiaoniu)最终验收。"
+          "value": "验证测试通过（16/16通过），交付完成（含开通指南），待产品经理(xiaoniu)最终验收。"
         },
         {
           "name": "commit",
@@ -1867,6 +1867,11 @@
           "name": "commit",
           "value": "96e32ea",
           "description": "docs/developer-community-test-report.md"
+        },
+        {
+          "name": "commit",
+          "value": "97a80b6",
+          "description": "docs/developer-community-setup.md"
         },
         {
           "name": "deliveryStatus",
