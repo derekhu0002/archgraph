@@ -70,12 +70,12 @@
           "description": "index.html; .nojekyll; .github/skills/create-github-repository-page/SKILL.md"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -111,12 +111,12 @@
           "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -223,12 +223,12 @@
           "value": "https://archgraph.org/"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "website",
           "value": "https://derekhu0002.github.io/archgraph/"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -315,12 +315,12 @@
           "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -358,12 +358,12 @@
           "description": "README.md; design/KG/SystemArchitecture.json; .github/skills/diagram-draw/SKILL.md; .github/skills/diagram-draw/renderExcalidrawSvg.js; docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -416,12 +416,12 @@
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -467,12 +467,12 @@
           "description": "docs/agent-programming-language.md"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -564,12 +564,12 @@
           "description": "docs/insights.html; docs/insight-archgraph-benefits.html; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -607,10 +607,6 @@
           "description": "docs/industry-insight-graph-driven-agent.wechat.md; tests/wechat-article.test.js; .gitignore; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "media_id",
           "value": "BRZAMZ3b-CaOBH8qdG2KTSVtDhlz7tQPi5y2JvVDpTKytc8780o6c3wQDUk3UtU0",
           "description": "WeChat draft media_id"
@@ -619,6 +615,10 @@
           "name": "status",
           "value": "BLOCKED",
           "description": "草稿已创建；freepublish 被 48001 api unauthorized 拒绝（账号无 API 发布权限）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -649,12 +649,12 @@
           "description": "tests/project-name.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -685,16 +685,16 @@
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "spec",
           "value": "docs/agent-programming-language.md"
         },
         {
           "name": "version",
           "value": "v0.1"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -720,16 +720,16 @@
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "note",
           "value": "后续重点建设"
         },
         {
           "name": "status",
           "value": "PLANNED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -785,12 +785,12 @@
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "PLANNED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -832,12 +832,12 @@
       "description": "让消费者用一份 AML 描述其 harness，即可生成 .github/、.opencode/、.cursor/ 等多宿主配置，实现一次建模、多处运行。",
       "attributes": [
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "PLANNED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -863,12 +863,12 @@
           "description": "KGlibrary/GPT-Research/info.md; index.html; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -979,12 +979,12 @@
           "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1053,12 +1053,12 @@
           "description": "README.md; docs/diagrams/core-model.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1084,10 +1084,6 @@
           "description": "docs/archgraph-introduction.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "media_id",
           "value": "BRZAMZ3b-CaOBH8qdG2KTet7kAaHQ8GK03n8aoe7vKH_Bjq2L3aDrpbM36sNE3iY",
           "description": "WeChat draft media_id"
@@ -1096,6 +1092,10 @@
           "name": "status",
           "value": "BLOCKED",
           "description": "草稿已创建（media_id 已记录）；freepublish 与 sendall 均被 48001 api unauthorized 拒绝（账号无 API 发布/群发权限），需在公众号后台手动发布"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1123,6 +1123,10 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1609,6 +1613,10 @@
           "name": "commit",
           "value": "d989fce",
           "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1859,6 +1867,10 @@
           "name": "commit",
           "value": "96e32ea",
           "description": "docs/developer-community-test-report.md"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
