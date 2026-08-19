@@ -1227,6 +1227,10 @@
         {
           "view_id": "299",
           "view_name": "AgentOrganization"
+        },
+        {
+          "view_id": "433",
+          "view_name": "公众号发布团队"
         }
       ]
     },
@@ -1976,6 +1980,29 @@
           "description": ".github/skills/@ai-chen2050/wechat-public-cli/* (removed); design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "id": "2754",
+      "name": "公众号发布",
+      "parent": "1962",
+      "type": "Business Role",
+      "description": "负责将 ArchGraph 项目的文章（洞察报告、官宣介绍等）撰写为符合微信公众号格式的文章，并通过 wechat-public-cli 创建草稿，跟进公众号后台手动发布流程。"
+    },
+    {
+      "id": "2755",
+      "name": "公众号发布员",
+      "parent": "1962",
+      "type": "Business Actor",
+      "description": "专门负责将 ArchGraph 项目文章发布到微信公众号的 Business Actor。工作流程：(1) 使用 .github/skills/@ai-chen2050/wechat-public-cli 技能，将带 YAML frontmatter（title/author/digest/banner）的 Markdown 文章通过 wechat:draft 命令创建草稿；(2) 凭证配置 wechat-public.config.json（已 gitignore，含真实 appid/secret），自定义 CSS 为 .github/skills/@ai-chen2050/wechat-public-cli/custom.css（经 --css 传入）；(3) 关键约束：本公众号是个人未认证订阅号（appid wxdf79e7cb44995aa3），freepublish/sendall 永远返回 48001 api unauthorized，API 发布不可用，只能创建草稿后在公众号后台手动发布；(4) 发布前需确认当前公网 IP 已加入公众号后台 IP 白名单（否则 token 刷新报 40164）。",
+      "testcases": [
+        {
+          "name": "AT-2755-01-公众号发布员角色就绪",
+          "description": "GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找专门发布微信公众号的 Business Actor；THEN 图谱中存在全局唯一 name 为「公众号发布员」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description 作为其 system prompt，并通过 Assignment 关系指派给「公众号发布」Business Role，三者均包含于「公众号发布团队」视图(433)。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/wechat-publisher-actor.test.js",
+          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js：断言 SystemArchitecture.json 中恰好存在一个 name=公众号发布员、type=Business Actor、parent=1962 且 description 非空的元素；存在 Assignment 关系（source_id=该 actor、target_id=name 为「公众号发布」的 Business Role）；视图 433 的 included_elements 含该 actor 与 role，included_relationships 含该 Assignment 关系。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -2608,6 +2635,16 @@
       "target_id": "2751",
       "target_name": "开发者社区开发交付",
       "type": "Assignment"
+    },
+    {
+      "id": "1972",
+      "statement": "公众号发布员 --(Assignment)--> 公众号发布",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2755",
+      "target_id": "2754",
+      "source_name": "公众号发布员",
+      "target_name": "公众号发布"
     }
   ],
   "views": [
@@ -3002,6 +3039,19 @@
       ],
       "included_relationships": [
         "1161"
+      ]
+    },
+    {
+      "view_id": "433",
+      "view_name": "公众号发布团队",
+      "parent_element_id": "1962",
+      "parent_element_name": "AgentOrganization",
+      "included_elements": [
+        "2754",
+        "2755"
+      ],
+      "included_relationships": [
+        "1972"
       ]
     }
   ]
