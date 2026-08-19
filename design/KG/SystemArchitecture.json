@@ -1,1641 +1,1660 @@
 {
-  "name": "System",
-  "description": "Exported from EA package System\r\n\r\nImported from: D:\\Projects\\Argo\\design\\KG\\SystemArchitecture.json\r\nSchema: .argo/schema/SystemArchitecture.schema.json",
-  "elements": [
-    {
-      "id": "1240",
-      "name": "Application Cooperation Viewpoint",
-      "alias": "1211",
-      "type": "Grouping",
-      "subdiagram_views": [
+    "name": "System",
+    "description": "Exported from EA package System\r\n\r\nImported from: D:\\Projects\\Argo\\design\\KG\\SystemArchitecture.json\r\nSchema: .argo/schema/SystemArchitecture.schema.json",
+    "elements": [
         {
-          "view_id": "169",
-          "view_name": "Application Cooperation"
+            "id": "1240",
+            "name": "Application Cooperation Viewpoint",
+            "alias": "1211",
+            "type": "Grouping",
+            "subdiagram_views": [
+                {
+                    "view_id": "169",
+                    "view_name": "Application Cooperation"
+                }
+            ]
+        },
+        {
+            "id": "1249",
+            "name": "Implementation and Migration Viewpoint",
+            "alias": "1211",
+            "type": "Grouping",
+            "subdiagram_views": [
+                {
+                    "view_id": "178",
+                    "view_name": "AML Standardization"
+                },
+                {
+                    "view_id": "176",
+                    "view_name": "AgentCapabilities"
+                },
+                {
+                    "view_id": "180",
+                    "view_name": "Content Publication and Announcement"
+                },
+                {
+                    "view_id": "174",
+                    "view_name": "Implementation and Migration"
+                },
+                {
+                    "view_id": "179",
+                    "view_name": "KGlibrary Reference Library"
+                }
+            ]
+        },
+        {
+            "id": "1310",
+            "name": "create-github-repository-page",
+            "parent": "1249",
+            "type": "Skill",
+            "description": "create a website based on your github repo:https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site\r\nTODO:完成后刷新本描述"
+        },
+        {
+            "id": "1311",
+            "name": "create our home web site",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "create a home website for this project.",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "4252ca8",
+                    "description": "index.html; .nojekyll; .github/skills/create-github-repository-page/SKILL.md"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "can view the content through the website.",
+                    "description": "can view the content through the website.",
+                    "type": "Acceptance Test",
+                    "Input": "N/A",
+                    "acceptanceCriteria": "can view the content through the website."
+                }
+            ]
+        },
+        {
+            "id": "1317",
+            "name": "优化WEB布局和风格",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "对于本站的网站，做如下优化：\r\n1. 采用科技简洁的布局风格，参考https://www.deepseek.com/；\r\n2. 要有一个区域用来接啥当前项目中已经积累的参考库KGlibrary中的其他项目信息；",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "098be4e",
+                    "description": "docs/kglibrary.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "aa932c3",
+                    "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "2458f97",
+                    "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1317-01-科技简洁布局风格",
+                    "description": "GIVEN 网站已发布；WHEN 访客在浏览器打开网站首页；THEN 页面以科技简洁布局呈现：顶部导航栏、首屏 Hero（项目名+标语+行动按钮）、正文分节卡片化、浅色科技主题。",
+                    "type": "Acceptance Test",
+                    "Input": "浏览器打开网站首页",
+                    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"layout-style\"）：断言 index.html 含导航栏、Hero 区、h1 项目名、≥4 个 section、data-theme=\"light\" 浅色主题标记。通过。"
+                },
+                {
+                    "name": "AT-1317-02-KGlibrary参考库区域",
+                    "description": "GIVEN KGlibrary 目录下存在参考项目（当前为 XKG-TEST 与 GPT-Research）；WHEN 访客打开 Reference Library 页面 docs/kglibrary.html；THEN 页面存在 KGlibrary 区域，列出每个参考项目的名称、简介与仓库链接。",
+                    "type": "Acceptance Test",
+                    "Input": "浏览器打开网站首页并点击 Reference Library",
+                    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：断言 index.html 含指向 docs/kglibrary.html 的链接，docs/kglibrary.html 存在 id=\"kglibrary\" 区域，且每个项目的 name 与 repo 链接均出现在该页面中。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1318",
+            "name": "project website",
+            "parent": "1240",
+            "type": "Application Component",
+            "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力；What is this 置于页面最前）、紧随其后的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯），并提供 GitHub 仓库入口；Reference Library（KGlibrary 案例库）通过导航链接到独立页面 docs/kglibrary.html，Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "7e230f3",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "aa4ef69",
+                    "description": "tests/custom-domain.test.js"
+                },
+                {
+                    "name": "commit",
+                    "value": "e4c74b5",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "ee62476",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "25bbc9e",
+                    "description": "design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "e9839a5",
+                    "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "926aa9c",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "1e777e6",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "51be801",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "c3604e3",
+                    "description": "index.html; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "e07c6a1",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "e651b0d",
+                    "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "f98b61f",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "098be4e",
+                    "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "ed90f6a",
+                    "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "custom_domain",
+                    "value": "https://archgraph.org/"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "website",
+                    "value": "https://derekhu0002.github.io/archgraph/"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1318-01-自定义域名访问",
+                    "description": "GIVEN 已在 DNS 提供商为 archgraph.org 配置指向 GitHub Pages 的 A 记录（185.199.108.153 / 185.199.109.153 / 185.199.110.153 / 185.199.111.153），且仓库发布源根目录含 CNAME 文件（内容 archgraph.org）；WHEN 访客通过 https://archgraph.org/ 访问网站；THEN 返回与 https://derekhu0002.github.io/archgraph/ 相同的 ArchGraph 项目主页内容。",
+                    "type": "Acceptance Test",
+                    "Input": "浏览器访问 https://archgraph.org/",
+                    "acceptanceCriteria": "执行 node --test tests/custom-domain.test.js：断言 CNAME 文件内容恰为 archgraph.org；并对 archgraph.org 做 DNS A 解析，断言其解析到 GitHub Pages 的 4 个 IP（DNS 记录未配置时该用例跳过）。通过。"
+                },
+                {
+                    "name": "AT-1318-04-主页顶部展示安装部署",
+                    "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 访客打开主页；THEN What is this 之后紧跟 Install 部署小节：仅含 npm install -g archgraph-argo 与 argo-deploy 两条命令，并一句话说明语义查询需要 Neo4j 与向量引擎。",
+                    "type": "Acceptance Test",
+                    "Input": "浏览器打开网站首页",
+                    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"install-section\"）：断言 index.html 含 id=\"install\" 且位于 id=\"about\" 之后、id=\"howto\" 之前，并包含 npm install -g archgraph-argo、argo-deploy、Neo4j 与 vector engine。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1319",
+            "name": "optimize-web-layout-style",
+            "parent": "1249",
+            "type": "Skill",
+            "description": "Materialized at .github/skills/optimize-web-layout-style/SKILL.md. Guides applying a tech-simple, clean layout and visual style to the project website (referencing https://www.deepseek.com/) and rendering a Reference Library (KGlibrary) area that lists projects from KGlibrary."
+        },
+        {
+            "id": "1320",
+            "name": "kglibrary-info-format",
+            "parent": "1249",
+            "type": "Rule",
+            "description": "Materialized at .github/kglibrary.instructions.md. Every project under KGlibrary/<project>/info.md MUST use YAML frontmatter keys: name, description, repo, branch, commit_id, so the website and agents can uniformly consume reference project info."
+        },
+        {
+            "id": "1321",
+            "name": "update README",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "Update README.md to a concise, external-facing form: What is this? (unified-language positioning matching the homepage), Architecture, Install (npm install -g archgraph-argo + argo-deploy, with the Neo4j + vector engine note for semantic queries), and How to use (user-facing coding-agent workflow). Internal-detail sections (Core principles, Repository map, ARGO MCP harness, KGlibrary reference library, Tests, Requirements) are removed.",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "2acf056",
+                    "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "f4819fd",
+                    "description": "README.md; index.html; tests/readme.test.js; .github/copilot-instructions.md (removed); .github/skills/argo-init/SKILL.md (removed); .cursor/skills/argo-init/SKILL.md; .opencode/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "54ad8dc",
+                    "description": "README.md; tests/readme.test.js"
+                },
+                {
+                    "name": "commit",
+                    "value": "f98b61f",
+                    "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "c8f2d74",
+                    "description": "restore .github/skills/argo-init/SKILL.md; README.md; index.html; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "51be801",
+                    "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "ca32794",
+                    "description": "README.md; tests/project-name.test.js"
+                },
+                {
+                    "name": "commit",
+                    "value": "dc84086",
+                    "description": "README.md; tests/readme.test.js"
+                },
+                {
+                    "name": "commit",
+                    "value": "e07c6a1",
+                    "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1321-01-README精简对外形态",
+                    "description": "GIVEN README 已精简为对外简洁形态；WHEN 读者打开 README.md；THEN What is this? 章节以主页一致的口径说明统一语言目标（unified language / one model / single view），How to use 章节以用户视角说明编码代理工作流，Install 章节文档化 npm 部署方式，且已移除内部细节章节（Core principles、Repository map、ARGO MCP harness、KGlibrary reference library、Tests、Requirements）。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 README.md",
+                    "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 What is this? 章节包含 unified language、one model 与 single view；断言 How to use 章节包含 ArchiMate 3.2、coding agent、Skills and Rules 与 single source of truth；断言 Install 章节包含 npm install -g archgraph-argo、argo-deploy、MCP server、Neo4j 与 vector engine。通过。"
+                },
+                {
+                    "name": "AT-1321-02-README文档化npm安装部署",
+                    "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 读者打开 README.md 的 Install 章节；THEN 以最简方式文档化 npm install -g archgraph-argo 与 argo-deploy 的部署方式，并一句话说明语义查询需要 Neo4j 与向量引擎。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 README.md",
+                    "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 的 Install 章节包含 npm install -g archgraph-argo、argo-deploy、MCP server、Neo4j 与 vector engine。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1330",
+            "name": "画一个全局架构图",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "使用Layered Viewpoint,画一个架构图插入README中，重点表达granph-driven agentic engineering中AGENT、ARGO MCP、graph、ARCHIMATE3.2、EA、人类间的关系\r\n\r\nLayered Viewpoint \r\nThe layered viewpoint pictures several layers and aspects of an Enterprise Architecture in one \r\ndiagram. There are two categories of layers, namely dedicated layers and service layers. The \r\nlayers are the result of the use of the “grouping” relationship for a natural partitioning of the entire \r\nset of objects and relationships that belong to a model. The technology, application, process, and \r\nactor/role layers belong to the first category. The structural principle behind a fully layered \r\nviewpoint is that each dedicated layer exposes, by means of the “realization” relationship, a layer \r\nof services, which are further on “serving” the next dedicated layer. Thus, we can easily separate \r\nthe internal structure and organization of a dedicated layer from its externally observable behavior \r\nexpressed as the service layer that the dedicated layer realizes. The order, number, or nature of \r\nthese layers are not fixed, but in general a (more or less) complete and natural layering of an \r\nArchiMate model should contain the succession of layers depicted in the example given in Table \r\n27. However, this example is by no means intended to be prescriptive. The main goal of the layered \r\nviewpoint is to provide an overview in one diagram. Furthermore, this viewpoint can be used as \r\nsupport for impact of change analysis and performance analysis or for extending the service \r\nportfolio. ",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "2e5c6b9",
+                    "description": "docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "2040682",
+                    "description": "README.md; design/KG/SystemArchitecture.json; .github/skills/diagram-draw/SKILL.md; .github/skills/diagram-draw/renderExcalidrawSvg.js; docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1330-01-全局架构图插入README",
+                    "description": "GIVEN 项目 README 需要呈现 graph-driven agentic engineering 的全局架构；WHEN 读者打开 README 的 Architecture 章节；THEN README 内嵌一张 Layered Viewpoint 架构图，图中表达 人类(Human)、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA(Enterprise Architect)、Neo4j 之间的关系。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 README.md",
+                    "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js：断言 README 引用 docs/diagrams/global-architecture.svg，且该 SVG 与源文件 docs/diagrams/global-architecture.excalidraw 均存在，并包含 人类、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA、Neo4j 等标签。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1331",
+            "name": "DIAGRAM DRAW SKILL",
+            "parent": "1249",
+            "type": "Skill",
+            "description": "https://github.com/coleam00/excalidraw-diagram-skill"
+        },
+        {
+            "id": "1332",
+            "name": "根据README更新INDEX主页",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "根据 README 的当前内容同步更新网站主页 index.html：页面顺序调整为 What is this → Install → How to use，并精简主页（移除 How we're going to do it、Repository map、Architecture、What is it for、Core principles 小节；Architecture 仅保留在 README，KGlibrary 迁至独立页面 docs/kglibrary.html，What is it for 的额外收益内容迁至洞察文章 docs/insight-archgraph-benefits.html）。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "4027dd0",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "e9839a5",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "098be4e",
+                    "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "51be801",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "926aa9c",
+                    "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1332-01-主页与README同步",
+                    "description": "GIVEN README 已包含 How to use（用户工作流）章节；WHEN 访客在浏览器打开网站首页；THEN 首页同步展示 How to use 内容（ArchiMate 3.2、coding agent 工作流与 single source of truth），且页面顺序为 What is this → Install → How to use。",
+                    "type": "Acceptance Test",
+                    "Input": "浏览器打开网站首页",
+                    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"howto\" 区域并提及 ArchiMate 3.2、coding agent 与 single source of truth。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1333",
+            "name": "编写Agent编程语言规范",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "将基于知识图谱（ArchiMate 3.2 schema）的 Agent 编程“词汇与语法”整理成技术规范文档 docs/agent-programming-language.md（v0.1），定义元素→编程概念的词汇表与关系→语法语义，并以正式 HTML 页面 docs/agent-programming-language.html 呈现。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "2f6ac7c",
+                    "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "44e1cf0",
+                    "description": "docs/agent-programming-language.md; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "9973aa1",
+                    "description": "docs/agent-programming-language.md"
+                },
+                {
+                    "name": "commit",
+                    "value": "ee62476",
+                    "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "e9bfbad",
+                    "description": "docs/agent-programming-language.md"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1333-01-编程语言规范文档",
+                    "description": "GIVEN 仓库已建立基于知识图谱的记忆系统（schema 见 .argo/schema/SystemArchitecture.schema.json）；WHEN 读者打开 docs/agent-programming-language.md；THEN 文档以技术规范形式定义 Agent 编程词汇表（元素类型→编程语义）与语法（关系类型→语法语义），并包含验收断言（testcases GIVEN-WHEN-THEN）与持久化元素/运行时实例边界。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 docs/agent-programming-language.md",
+                    "acceptanceCriteria": "执行 node --test tests/agent-programming-language.test.js：断言 docs/agent-programming-language.md 存在并包含“词汇表/词汇”“语法”“testcases/验收”“持久化/运行时”等关键章节，以及 Work Package、Business Actor、Business Process、Course of Action、Constraint、Principle、Triggering、Flow 等映射。通过。"
+                },
+                {
+                    "name": "AT-1333-02-规范HTML正式版",
+                    "description": "GIVEN 技术规范文档 docs/agent-programming-language.md 已存在；WHEN 读者打开英文正式 HTML 页面 docs/agent-programming-language.html；THEN 页面以正式规范风格（英文）呈现：声明版本/状态、摘要、目录，并包含 Scope and Extensions、Extended Elements、Extended Structures、Compliance and Extension Process 等章节。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 docs/agent-programming-language.html",
+                    "acceptanceCriteria": "执行 node --test tests/agent-programming-language.test.js（用例 \"aml-spec-html\"）：断言 docs/agent-programming-language.html 存在并包含 v0.1、AML、Abstract、Contents，以及 Scope and Extensions、Extended Elements、Extended Structures、Compliance and Extension Process 等章节。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1334",
+            "name": "Process Cooperation Viewpoint",
+            "type": "Grouping",
+            "description": "表达多个 Agent 角色之间为完成同一任务而进行的协作流程（ArchiMate 流程协作视角）。",
+            "subdiagram_views": [
+                {
+                    "view_id": "177",
+                    "view_name": "GPT-Researcher Multi-Agent Research"
+                }
+            ]
+        },
+        {
+            "id": "1335",
+            "name": "用AML建模GPT-Researcher多Agent研究流程",
+            "type": "Work Package",
+            "description": "用 AML 对主流开源深度研究项目 GPT-Researcher（github.com/assafelovic/gpt-researcher）的多 Agent 研究工作流建模：Planner 规划 → Researcher 并行子研究 → Editor 撰写 → Reviewer 评审 → Publisher 发布，产出带引用来源的研究报告。建模结果见 Process Cooperation Viewpoint（view 177）。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "4d55487",
+                    "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1335-01-AML建模GPTResearcher多Agent流程",
+                    "description": "GIVEN 知识图谱具备 AML 建模能力；WHEN 读者查看 Process Cooperation Viewpoint（view 177）中的 GPT-Researcher 建模；THEN 图谱包含主流程 Course of Action、5 个 Business Process（Plan/Conduct/Write/Review/Publish）及其 Triggering 链、5 个 Business Role（Planner/Researcher/Editor/Reviewer/Publisher）及其 Assignment、Deliverable→Goal 的 Realization，以及 Constraint 与 Principle 约束。",
+                    "type": "Acceptance Test",
+                    "Input": "查看 design/KG/SystemArchitecture.json 的 view 177",
+                    "acceptanceCriteria": "执行 node --test tests/gpt-researcher-model.test.js：断言图谱包含上述元素与关系。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1336",
+            "name": "gpt-researcher-research-program",
+            "type": "Course of Action",
+            "description": "GPT-Researcher 多 Agent 研究主流程：从研究查询到发布报告的整体计划（Plan-and-Solve + RAG，参考 STORM 论文）。"
+        },
+        {
+            "id": "1337",
+            "name": "Plan Research",
+            "type": "Business Process",
+            "description": "规划研究：将研究查询分解为一组子问题，形成研究大纲。"
+        },
+        {
+            "id": "1338",
+            "name": "Conduct Sub-research",
+            "type": "Business Process",
+            "description": "执行子研究：并行抓取每个子问题相关的网络/本地文档信息，总结并追踪来源。"
+        },
+        {
+            "id": "1339",
+            "name": "Write Report",
+            "type": "Business Process",
+            "description": "撰写报告：过滤并聚合各子研究摘要，撰写研究报告草稿。"
+        },
+        {
+            "id": "1340",
+            "name": "Review Report",
+            "type": "Business Process",
+            "description": "评审报告：审阅草稿，检查事实准确性、客观性与引用完整性，给出修改意见。"
+        },
+        {
+            "id": "1341",
+            "name": "Publish Report",
+            "type": "Business Process",
+            "description": "发布报告：生成最终报告，输出 Markdown/PDF/Docx 等格式。"
+        },
+        {
+            "id": "1342",
+            "name": "Planner",
+            "type": "Business Role",
+            "description": "规划者：生成研究问题与研究大纲。"
+        },
+        {
+            "id": "1343",
+            "name": "Researcher",
+            "type": "Business Role",
+            "description": "研究员：并行收集各子问题的信息并溯源。"
+        },
+        {
+            "id": "1344",
+            "name": "Editor",
+            "type": "Business Role",
+            "description": "编辑：聚合摘要并撰写报告。"
+        },
+        {
+            "id": "1345",
+            "name": "Reviewer",
+            "type": "Business Role",
+            "description": "审稿人：评审草稿并提出修改意见。"
+        },
+        {
+            "id": "1346",
+            "name": "Publisher",
+            "type": "Business Role",
+            "description": "发布者：输出最终研究报告。"
+        },
+        {
+            "id": "1347",
+            "name": "Research Report",
+            "type": "Deliverable",
+            "description": "研究报告：包含引用来源的最终报告（Markdown/PDF/Docx）。"
+        },
+        {
+            "id": "1348",
+            "name": "Produce objective research report",
+            "type": "Goal",
+            "description": "产出客观、事实性、带引用的研究报告。"
+        },
+        {
+            "id": "1349",
+            "name": "Cite every fact with source",
+            "type": "Constraint",
+            "description": "局部约束：报告中每个事实必须附引用来源（作用于 Conduct Sub-research）。"
+        },
+        {
+            "id": "1350",
+            "name": "Reduce bias and hallucination",
+            "type": "Principle",
+            "description": "全局约束：通过多源抓取与交叉验证减少偏见与幻觉。"
+        },
+        {
+            "id": "1351",
+            "name": "归档洞察报告并发布网站子页",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "将《知识图谱驱动的 Agent 构建》业界洞察报告归档到 docs/industry-insight-graph-driven-agent.md，并发布为独立子页 docs/industry-insight-graph-driven-agent.html；提供洞察文章列表页 docs/insights.html（首页导航 Insights 指向列表页）。洞察方法采用 view 177「GPT-Researcher Multi-Agent Research」的多 Agent 研究流程。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "e9839a5",
+                    "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "08545d6",
+                    "description": "index.html; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "098be4e",
+                    "description": "docs/insights.html; docs/insight-archgraph-benefits.html; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1351-01-洞察报告归档docs",
+                    "description": "GIVEN 业界洞察报告已完成；WHEN 读者访问 docs/ 目录；THEN 报告以 Markdown 归档于 docs/industry-insight-graph-driven-agent.md，包含研究背景、核心技术、主流框架、实证数据与引用来源。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 docs/industry-insight-graph-driven-agent.md",
+                    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"insight-report-archived\"）：断言 docs/industry-insight-graph-driven-agent.md 存在，并包含 GraphRAG、知识图谱、80% more truthful 与参考文献章节。通过。"
+                },
+                {
+                    "name": "AT-1351-02-洞察报告网站子页",
+                    "description": "GIVEN 洞察报告已归档；WHEN 访客从网站首页导航点击 Insights 链接；THEN 打开独立洞察列表页 docs/insights.html，列表页链接到洞察报告子页 docs/industry-insight-graph-driven-agent.html（呈现报告全文）。",
+                    "type": "Acceptance Test",
+                    "Input": "浏览器打开网站首页并点击 Insights",
+                    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"insight-subpage\"）：断言 index.html 含指向 docs/insights.html 的链接，docs/insights.html 存在并链接到 industry-insight-graph-driven-agent.html，且该报告子页存在并包含报告标题与关键内容。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1352",
+            "name": "发布洞察报告到微信公众号",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "使用 .argo/skills/@ai-chen2050/wechat-public-cli 技能，将已归档的《知识图谱驱动的 Agent 构建》洞察报告发布到微信公众号。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "e9abada",
+                    "description": "docs/industry-insight-graph-driven-agent.wechat.md; tests/wechat-article.test.js; .gitignore; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "4516b04",
+                    "description": "docs/industry-insight-graph-driven-agent.wechat.md"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "media_id",
+                    "value": "BRZAMZ3b-CaOBH8qdG2KTSVtDhlz7tQPi5y2JvVDpTKytc8780o6c3wQDUk3UtU0",
+                    "description": "WeChat draft media_id"
+                },
+                {
+                    "name": "status",
+                    "value": "BLOCKED",
+                    "description": "草稿已创建；freepublish 被 48001 api unauthorized 拒绝（账号无 API 发布权限）"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1352-01-公众号文章就绪",
+                    "description": "GIVEN 洞察报告已归档；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号文章 Markdown，且正文包含报告内容。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 docs/industry-insight-graph-driven-agent.wechat.md",
+                    "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-article-ready\"）：断言 docs/industry-insight-graph-driven-agent.wechat.md 存在，frontmatter 含 title/author/digest，正文含 GraphRAG。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1353",
+            "name": "rename project to ArchGraph",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "将项目对外品牌名从 open_knowledge_graph_engineering 更名为 ArchGraph（完整名 ArchGraph Framework；tagline：An architecture-graph driven framework for Agentic Engineering），同步更新 README.md、index.html、docs/industry-insight-graph-driven-agent.* 文档、tests 用例，并更新意图图谱中 project website 元素的 website 属性。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "3b6fc91",
+                    "description": "README.md; index.html; package.json; tests/website.test.js; tests/project-name.test.js; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; docs/industry-insight-graph-driven-agent.wechat.md; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "ca32794",
+                    "description": "tests/project-name.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1353-01-项目品牌名统一为ArchGraph",
+                    "description": "GIVEN 项目品牌名确定为 ArchGraph；WHEN 读者访问 README、网站首页与 docs 洞察报告文档；THEN 对外文案统一使用新名字 ArchGraph（完整名 ArchGraph Framework），不再出现旧名 open_knowledge_graph_engineering，且主页 GitHub 链接指向 archgraph 仓库。",
+                    "type": "Acceptance Test",
+                    "Input": "读取 README.md、index.html、docs/industry-insight-graph-driven-agent.md/.html/.wechat.md",
+                    "acceptanceCriteria": "执行 node --test tests/project-name.test.js：断言 README.md、index.html、docs/industry-insight-graph-driven-agent.md|.html|.wechat.md 均包含 ArchGraph 且不含 open_knowledge_graph_engineering，并断言 index.html 的 GitHub 链接指向 github.com/derekhu0002/archgraph。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1354",
+            "name": "AML 规范",
+            "parent": "1249",
+            "type": "Contract",
+            "description": "Agent 建模语言（AML）标准：连接上游消费者与下游厂商的建模语言契约。AML 扩展 ArchiMate 3.2（新增 Skill/Rule 元素与 testcases/attributes 结构约定），现行规范文档为 docs/agent-programming-language.md（v0.1）。消费者用一份 AML 描述 harness 即可多处运行，厂商按 AML 实现接入。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "cdbb063",
+                    "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "fa857e7",
+                    "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "spec",
+                    "value": "docs/agent-programming-language.md"
+                },
+                {
+                    "name": "version",
+                    "value": "v0.1"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1354-01-AML规范已建模",
+                    "description": "GIVEN 仓库已有 AML 规范文档（docs/agent-programming-language.md，v0.1）并将 AML 标准化为一等架构元素；WHEN 读者查看意图图谱；THEN 图谱包含 AML 规范（Contract）元素，其下挂载三条标准化工作主线 Work Package（语言规范、参考实现、上游消费者体验），每个 Work Package 均带 GIVEN-WHEN-THEN 验收用例。",
+                    "type": "Acceptance Test",
+                    "Input": "查看 design/KG/SystemArchitecture.json 与 docs/agent-programming-language.md",
+                    "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言 docs/agent-programming-language.md 声明 v0.1 与 ArchiMate 3.2 扩展，且图谱包含 AML 规范（Contract，parent=1249）及其下三个 Work Package（各带验收用例）。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1355",
+            "name": "制定AML语言规范",
+            "parent": "1354",
+            "type": "Work Package",
+            "description": "将 docs/agent-programming-language.md 的 v0.1 草案演进为带版本号的正式 AML 规范：固化元模型（元素类型与 Profile 约定）、语法（关系用法与结构扩展）、语义（GIVEN-WHEN-THEN 断言与持久化/运行时边界）与交换格式（.argo/schema/SystemArchitecture.schema.json），并声明与 ArchiMate 3.2 的扩展关系。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "fa857e7",
+                    "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "note",
+                    "value": "后续重点建设"
+                },
+                {
+                    "name": "status",
+                    "value": "PLANNED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1355-01-AML语言规范正式化",
+                    "description": "GIVEN AML v0.1 草案已存在；WHEN 完成语言规范正式化；THEN 存在带版本号的 AML 规范文档，定义词汇、语法、语义与交换格式，并声明与 ArchiMate 3.2 的扩展关系。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 docs/agent-programming-language.md",
+                    "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言规范文档声明 v0.1 与 ArchiMate 3.2 扩展，且“制定AML语言规范”Work Package 挂载于 AML 规范下并带验收用例。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1357",
+            "name": "提供AML参考实现",
+            "parent": "1354",
+            "type": "Work Package",
+            "description": "以 ARGO harness 作为 AML 参考实现：MCP server 读写图谱、schema 校验、语义（Graph RAG）生命周期与 Neo4j 同步，作为厂商实现与消费者接入的样板。当前参考样例为本仓 KGlibrary（以 AML 建模的案例），暂存本仓，后续可沉淀为市场。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "c8f2d74",
+                    "description": "restore .github/skills/argo-init/SKILL.md (repo-level compatibility)"
+                },
+                {
+                    "name": "commit",
+                    "value": "fa857e7",
+                    "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "b39acb2",
+                    "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "f4819fd",
+                    "description": "argo-init skill moved to user-level (~/.copilot/skills/argo-init/SKILL.md); agent rules moved to user-level prompts (argo-copilot-instructions.instructions.md); removed .github/copilot-instructions.md and .github/skills/argo-init/SKILL.md"
+                },
+                {
+                    "name": "commit",
+                    "value": "c315b5c",
+                    "description": "argo/scripts/argo-mcp-server.js"
+                },
+                {
+                    "name": "commit",
+                    "value": "ea734d2",
+                    "description": ".argo/scripts/argo-paths.js; .argo/scripts/*.js; .argo/scripts/graph-rag/*; .argo/scripts/test-executors/default.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "e9de7b3",
+                    "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "PLANNED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1357-01-AML参考实现",
+                    "description": "GIVEN AML 规范已定义；WHEN 消费者或厂商需要参考实现；THEN ARGO harness 提供可运行的 MCP server、schema 校验器与 Graph RAG 生命周期实现。",
+                    "type": "Acceptance Test",
+                    "Input": "运行 node .argo/scripts/argo-mcp-server.js",
+                    "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“提供AML参考实现”Work Package 挂载于 AML 规范下并带验收用例。通过。"
+                },
+                {
+                    "name": "AT-1357-02-ARGO全局安装可运行",
+                    "description": "GIVEN .argo 工具链被复制到仓库外的全局目录（如用户目录）；WHEN 以 ARGO_REPO_ROOT 指向当前仓库并启动全局安装的 .argo/scripts/argo-mcp-server.js；THEN MCP server 能完成 initialize 与 tools/list，且 validateSystemArchitecture 与 getSystemArchitecture 工具调用均通过（脚本与 schema 从安装目录解析，workspace 从 ARGO_REPO_ROOT 解析）。",
+                    "type": "Acceptance Test",
+                    "Input": "运行 tests/argo-global-install.test.js",
+                    "acceptanceCriteria": "tests/argo-global-install.test.js"
+                },
+                {
+                    "name": "AT-1357-03-WorkspaceBootstrap拷贝默认文件",
+                    "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）在非 --check-only 模式运行于缺少 design/KG/SystemArchitecture.json 与 .feap 模板的工作区；WHEN 执行初始化脚本；THEN 自动从部署的 defaults 拷贝 design/KG/SystemArchitecture.json，并以当前项目名拷贝 defaults/EA-model-template.feap 为 <项目名>.feap；--check-only 模式不修改工作区。",
+                    "type": "Acceptance Test",
+                    "Input": "运行 tests/argo-workspace-bootstrap.test.js",
+                    "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js"
+                },
+                {
+                    "name": "AT-1357-04-按视图ID解析视图完整成员",
+                    "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
+                    "type": "Acceptance Test",
+                    "Input": "运行 tests/architecture-view-context.test.js",
+                    "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1358",
+            "name": "简化上游消费者建模体验",
+            "parent": "1354",
+            "type": "Work Package",
+            "description": "让消费者用一份 AML 描述其 harness，即可生成 .github/、.opencode/、.cursor/ 等多宿主配置，实现一次建模、多处运行。",
+            "attributes": [
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "PLANNED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1358-01-上游消费者一次建模多处运行",
+                    "description": "GIVEN 消费者已用 AML 描述其 harness；WHEN 需要切换或同时使用多个 agent 宿主；THEN 从同一份 AML 生成各宿主配置，无需重写意图与规则。",
+                    "type": "Acceptance Test",
+                    "Input": "用 AML 描述 harness 并生成多宿主配置",
+                    "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“简化上游消费者建模体验”Work Package 挂载于 AML 规范下并带验收用例。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1360",
+            "name": "补充KGlibrary GPT-Research参考项目信息",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "为 KGlibrary/GPT-Research 补充 info.md（YAML frontmatter 含 name/description/repo，遵循 kglibrary-info-format 规则），并同步刷新 index.html 的 #kglibrary 区域，使网站与自动化脚本可统一消费该参考项目信息。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "a1c915d",
+                    "description": "KGlibrary/GPT-Research/info.md; index.html; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1360-01-GPTResearch信息归档并同步主页",
+                    "description": "GIVEN KGlibrary/GPT-Research 目录下存在 GPT-Researcher 多 Agent 研究流程模型；WHEN 补充 info.md 并同步网站主页；THEN 存在 KGlibrary/GPT-Research/info.md（YAML frontmatter 含 name/description/repo），且 index.html 的 #kglibrary 区域列出该项目的 name、repo 与 description。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 KGlibrary/GPT-Research/info.md 与 index.html",
+                    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言 GPT-Research 的 name、repo、description 均出现在页面中。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1361",
+            "name": "ARGO 部署脚本",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo；将 argo-init skill 部署到 Copilot（~/.copilot/skills）、Cursor（~/.cursor/skills）与 OpenCode（~/.config/opencode/skills）；将 archgraph.instructions.md 规则部署到 Copilot（%APPDATA%\\Code\\User\\prompts）与 OpenCode 全局规则（~/.config/opencode/AGENTS.md）；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补；若 .env 已存在且对应变量已有非空值则跳过输入并保留原值，仅对缺失或空值的变量提示输入）；自动在 VS Code（%APPDATA%\\Code\\User\\mcp.json）、Cursor（~/.cursor/mcp.json，mcpServers）与 OpenCode（~/.config/opencode/opencode.json，mcp）注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行，多工作区时优先选择含 design/KG/SystemArchitecture.json 的根；Cursor 支持 MCP roots，OpenCode 声明 roots 并响应且默认以项目目录为 cwd 启动，故均能正确解析当前项目目录）；temp 保留在仓库目录不部署。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "ee05a15",
+                    "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "60e995e",
+                    "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "c315b5c",
+                    "description": "removed eatool/default/EA-model-template.feap; removed eatool/default/design/KG/SystemArchitecture.json; argo/scripts/argo-mcp-server.js"
+                },
+                {
+                    "name": "commit",
+                    "value": "92f1123",
+                    "description": "install-argo.ps1 (Cursor/OpenCode skills+rule+MCP deploy); tests/argo-deploy.test.js; README.md; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "de9e21d",
+                    "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore"
+                },
+                {
+                    "name": "commit",
+                    "value": "446ec0a",
+                    "description": "argo-deploy/ (package.json; bin/argo-deploy.js; lib/deploy.js; scripts/sync-assets.js; assets/**; README.md); tests/argo-deploy.test.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "v0.6.0",
+                    "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz"
+                },
+                {
+                    "name": "commit",
+                    "value": "025ceae",
+                    "description": "install-argo.ps1 (restore workspaceFolder in MCP config); tests/argo-deploy.test.js; package.json (0.4.2)"
+                },
+                {
+                    "name": "commit",
+                    "value": "07d2c69",
+                    "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)"
+                },
+                {
+                    "name": "commit",
+                    "value": "e5f6f3d",
+                    "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/"
+                },
+                {
+                    "name": "commit",
+                    "value": "2c54b51",
+                    "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)"
+                },
+                {
+                    "name": "commit",
+                    "value": "499d802",
+                    "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)"
+                },
+                {
+                    "name": "commit",
+                    "value": "a4dc2f7",
+                    "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)"
+                },
+                {
+                    "name": "commit",
+                    "value": "411bf25",
+                    "description": "argo/rules/archgraph.instructions.md (renamed from copilot-instructions.md); package.json (0.3.0)"
+                },
+                {
+                    "name": "commit",
+                    "value": "2af92ba",
+                    "description": "argo/scripts/argo-paths.js (MCP roots workspace resolution); argo/scripts/argo-mcp-server.js (roots.listChanged capability); install-argo.ps1 (minimal MCP config); tests/argo-deploy.test.js; tests/argo-global-install.test.js; package.json (0.5.0)"
+                },
+                {
+                    "name": "commit",
+                    "value": "e982da1",
+                    "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)"
+                },
+                {
+                    "name": "commit",
+                    "value": "b39acb2",
+                    "description": "argo/defaults/design/KG/SystemArchitecture.json; argo/defaults/EA-model-template.feap; install-argo.ps1; package.json; tests/argo-deploy.test.js; argo/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1361-01-部署脚本可运行",
+                    "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 与非交互方式运行到临时目录；THEN 生成 schema/SystemArchitecture.schema.json、scripts/argo-mcp-server.js、defaults/design/KG/SystemArchitecture.json、defaults/EA-model-template.feap、skills/argo-init/SKILL.md、prompts/archgraph.instructions.md 与 package.json（含 neo4j-driver 依赖），并写入 VS Code mcp.json、Cursor mcp.json 与 OpenCode opencode.json 注册 argo MCP server，且不部署 temp 与 .env。",
+                    "type": "Acceptance Test",
+                    "Input": "运行 tests/argo-deploy.test.js",
+                    "acceptanceCriteria": "tests/argo-deploy.test.js"
+                },
+                {
+                    "name": "AT-1361-02-全局server动态发现工作区",
+                    "description": "GIVEN argo MCP server 已部署到 ~/.argo 且 mcp.json/opencode.json 不含 cwd/env；WHEN VS Code、Cursor 或 OpenCode 启动 server、完成 initialize/initialized 后 server 发送 roots/list 请求，客户端返回当前工作区 roots（Cursor 支持 MCP roots；OpenCode 声明 roots 并响应，且默认以项目目录为 cwd 启动）；THEN 工作区相关的 tools/call 以该工作区为 workspaceRoot 解析 design/KG/SystemArchitecture.json 并通过验证（而非 home 目录）。",
+                    "type": "Acceptance Test",
+                    "Input": "运行 tests/argo-global-install.test.js",
+                    "acceptanceCriteria": "tests/argo-global-install.test.js"
+                },
+                {
+                    "name": "AT-1361-03-默认模板随包部署",
+                    "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署到 ~/.argo；THEN 部署目录包含 defaults/design/KG/SystemArchitecture.json 与 defaults/EA-model-template.feap，且 package.json files 包含 argo/defaults。",
+                    "type": "Acceptance Test",
+                    "Input": "运行 tests/argo-deploy.test.js",
+                    "acceptanceCriteria": "tests/argo-deploy.test.js"
+                },
+                {
+                    "name": "AT-1361-04-已存在的env值跳过输入",
+                    "description": "GIVEN ~/.argo/.env 已存在且包含 ARGO_* 等已知变量的非空值；WHEN 以非交互方式运行 install-argo.ps1 且不传 -SkipEnv；THEN 脚本不提示输入（不调用 Read-Host），重写 .env 时保留这些已有非空值；仅当某变量缺失或为空时才提示输入。",
+                    "type": "Acceptance Test",
+                    "Input": "运行 tests/argo-deploy.test.js",
+                    "acceptanceCriteria": "tests/argo-deploy.test.js"
+                }
+            ]
+        },
+        {
+            "id": "1362",
+            "name": "画一张核心模型图",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "按核心思路（统一语言：将 harness 设计与目标产品设计放进同一模型）画一张核心模型图 image.png，插入 README 与主页的 What is this? 章节下，表达 Harness Design、Target System Design、AgentHarness、Target Project 之间的关系：AgentHarness 从 Harness Design 武装自己（Access），Harness Design 描述 Target System Design，Target System Design 描述 Target Project，AgentHarness 创建 Target Project。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "d52c52d",
+                    "description": "index.html (restored + image-1.png); tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "a2b0065",
+                    "description": "tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "commit",
+                    "value": "7ba1940",
+                    "description": "docs/diagrams/core-model.excalidraw; docs/diagrams/core-model.svg; README.md; tests/architecture-diagram.test.js"
+                },
+                {
+                    "name": "commit",
+                    "value": "a2c7c44",
+                    "description": "README.md; docs/diagrams/core-model.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1362-01-核心模型图插入README与主页",
+                    "description": "GIVEN 项目定位为统一语言（harness 设计与目标产品设计放同一模型）；WHEN 读者打开 README 或主页的 What is this? 章节；THEN 下方嵌入核心模型图 docs/diagrams/image.png（README 与主页均引用）。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 README.md 与 index.html",
+                    "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js（用例 \"core-model-diagram\"）与 tests/website.test.js（用例 \"about-image\"）：断言 README 与 index.html 均引用 docs/diagrams/image.png，且该图片文件存在。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1363",
+            "name": "发布项目官宣介绍文章到微信公众号",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "使用 .github/skills/@ai-chen2050/wechat-public-cli 技能，撰写 ArchGraph 项目官宣介绍文章并发布到微信公众号。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "03ad558",
+                    "description": "docs/archgraph-introduction.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
+                },
+                {
+                    "name": "deliveryStatus",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "media_id",
+                    "value": "BRZAMZ3b-CaOBH8qdG2KTet7kAaHQ8GK03n8aoe7vKH_Bjq2L3aDrpbM36sNE3iY",
+                    "description": "WeChat draft media_id"
+                },
+                {
+                    "name": "status",
+                    "value": "BLOCKED",
+                    "description": "草稿已创建（media_id 已记录）；freepublish 与 sendall 均被 48001 api unauthorized 拒绝（账号无 API 发布/群发权限），需在公众号后台手动发布"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1363-01-官宣文章就绪",
+                    "description": "GIVEN 项目已具备对外官宣条件；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号官宣文章 Markdown，且正文介绍 ArchGraph（架构图驱动的 Agentic Engineering）。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 docs/archgraph-introduction.wechat.md",
+                    "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-intro-ready\"）：断言 docs/archgraph-introduction.wechat.md 存在，frontmatter 含 title/author/digest，正文含 ArchGraph 与 Agentic Engineering。通过。"
+                }
+            ]
+        },
+        {
+            "id": "1364",
+            "name": "归档deepresearch两个参考项目到KGlibrary并发布首页",
+            "parent": "1249",
+            "type": "Work Package",
+            "description": "从 derekhu0002/deepresearch 仓库 design/KG/ 归档两个参考项目模型到 KGlibrary：gpt-researcher_Agent_探索方法.json（gpt-researcher Agent 行为模型：单智能体 GPTResearcher 编排 + 多智能体 LangGraph 协作研究）与 麦肯锡结构化战略分析新5步法.json（驱动因素→问题→MECE 决策树→假设→证据→三态验证）。每个项目目录含 info.md（遵循 kglibrary-info-format）与模型 JSON，并刷新 docs/kglibrary.html 列出两者后提交推送发布首页。",
+            "attributes": [
+                {
+                    "name": "commit",
+                    "value": "e5204fc",
+                    "description": "design/KG/SystemArchitecture.json; docs/kglibrary.html; KGlibrary/GPT-Researcher-Agent-Method/info.md; KGlibrary/GPT-Researcher-Agent-Method/gpt-researcher_Agent_探索方法.json; KGlibrary/McKinsey-5-Step/info.md; KGlibrary/McKinsey-5-Step/麦肯锡结构化战略分析新5步法.json"
+                },
+                {
+                    "name": "status",
+                    "value": "COMPLETED"
+                }
+            ],
+            "testcases": [
+                {
+                    "name": "AT-1364-01-归档两个参考项目并同步主页",
+                    "description": "GIVEN deepresearch 仓库 design/KG 下存在 gpt-researcher_Agent_探索方法.json 与 麦肯锡结构化战略分析新5步法.json；WHEN 归档到 KGlibrary 并刷新 Reference Library 页面 docs/kglibrary.html；THEN KGlibrary 下存在两个新项目目录（各含 info.md 与模型 JSON），docs/kglibrary.html 列出两者的 name、repo 与 description。",
+                    "type": "Acceptance Test",
+                    "Input": "打开 docs/kglibrary.html 与 KGlibrary 目录",
+                    "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 docs/kglibrary.html，断言两个新项目的 name、repo、description 均出现在页面中。通过。"
+                }
+            ]
         }
-      ]
-    },
-    {
-      "id": "1249",
-      "name": "Implementation and Migration Viewpoint",
-      "alias": "1211",
-      "type": "Grouping",
-      "subdiagram_views": [
+    ],
+    "relationships": [
         {
-          "view_id": "176",
-          "view_name": "AgentCapabilities"
+            "id": "1161",
+            "statement": "Implementation and Migration Viewpoint --(Association)--> Application Cooperation Viewpoint",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1249",
+            "target_id": "1240",
+            "source_name": "Implementation and Migration Viewpoint",
+            "target_name": "Application Cooperation Viewpoint"
         },
         {
-          "view_id": "174",
-          "view_name": "Implementation and Migration"
+            "id": "1162",
+            "statement": "create our home web site --(Association)--> create-github-repository-page",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1311",
+            "target_id": "1310",
+            "source_name": "create our home web site",
+            "target_name": "create-github-repository-page"
+        },
+        {
+            "id": "1166",
+            "statement": "优化WEB布局和风格 --(Association)--> project website",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1317",
+            "target_id": "1318",
+            "source_name": "优化WEB布局和风格",
+            "target_name": "project website"
+        },
+        {
+            "id": "1167",
+            "statement": "优化WEB布局和风格 --(Association)--> optimize-web-layout-style",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1317",
+            "target_id": "1319",
+            "source_name": "优化WEB布局和风格",
+            "target_name": "optimize-web-layout-style"
+        },
+        {
+            "id": "1168",
+            "statement": "优化WEB布局和风格 --(Association)--> kglibrary-info-format",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1317",
+            "target_id": "1320",
+            "source_name": "优化WEB布局和风格",
+            "target_name": "kglibrary-info-format"
+        },
+        {
+            "id": "1172",
+            "statement": "画一个全局架构图 --(Association)--> DIAGRAM DRAW SKILL",
+            "name": "使用这个SKILL来作图",
+            "type": "Association",
+            "source_id": "1330",
+            "target_id": "1331",
+            "source_name": "画一个全局架构图",
+            "target_name": "DIAGRAM DRAW SKILL"
+        },
+        {
+            "id": "1173",
+            "statement": "根据README更新INDEX主页 --(Association)--> project website",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1332",
+            "target_id": "1318",
+            "source_name": "根据README更新INDEX主页",
+            "target_name": "project website"
+        },
+        {
+            "id": "1174",
+            "statement": "Plan Research --(Realization)--> gpt-researcher-research-program",
+            "name": "Realization",
+            "type": "Realization",
+            "source_id": "1337",
+            "target_id": "1336",
+            "source_name": "Plan Research",
+            "target_name": "gpt-researcher-research-program"
+        },
+        {
+            "id": "1175",
+            "statement": "Conduct Sub-research --(Realization)--> gpt-researcher-research-program",
+            "name": "Realization",
+            "type": "Realization",
+            "source_id": "1338",
+            "target_id": "1336",
+            "source_name": "Conduct Sub-research",
+            "target_name": "gpt-researcher-research-program"
+        },
+        {
+            "id": "1176",
+            "statement": "Write Report --(Realization)--> gpt-researcher-research-program",
+            "name": "Realization",
+            "type": "Realization",
+            "source_id": "1339",
+            "target_id": "1336",
+            "source_name": "Write Report",
+            "target_name": "gpt-researcher-research-program"
+        },
+        {
+            "id": "1177",
+            "statement": "Review Report --(Realization)--> gpt-researcher-research-program",
+            "name": "Realization",
+            "type": "Realization",
+            "source_id": "1340",
+            "target_id": "1336",
+            "source_name": "Review Report",
+            "target_name": "gpt-researcher-research-program"
+        },
+        {
+            "id": "1178",
+            "statement": "Publish Report --(Realization)--> gpt-researcher-research-program",
+            "name": "Realization",
+            "type": "Realization",
+            "source_id": "1341",
+            "target_id": "1336",
+            "source_name": "Publish Report",
+            "target_name": "gpt-researcher-research-program"
+        },
+        {
+            "id": "1179",
+            "statement": "Plan Research --(Triggering)--> Conduct Sub-research",
+            "name": "Triggering",
+            "type": "Triggering",
+            "source_id": "1337",
+            "target_id": "1338",
+            "source_name": "Plan Research",
+            "target_name": "Conduct Sub-research"
+        },
+        {
+            "id": "1180",
+            "statement": "Conduct Sub-research --(Triggering)--> Write Report",
+            "name": "Triggering",
+            "type": "Triggering",
+            "source_id": "1338",
+            "target_id": "1339",
+            "source_name": "Conduct Sub-research",
+            "target_name": "Write Report"
+        },
+        {
+            "id": "1181",
+            "statement": "Write Report --(Triggering)--> Review Report",
+            "name": "Triggering",
+            "type": "Triggering",
+            "source_id": "1339",
+            "target_id": "1340",
+            "source_name": "Write Report",
+            "target_name": "Review Report"
+        },
+        {
+            "id": "1182",
+            "statement": "Review Report --(Triggering)--> Publish Report",
+            "name": "Triggering",
+            "type": "Triggering",
+            "source_id": "1340",
+            "target_id": "1341",
+            "source_name": "Review Report",
+            "target_name": "Publish Report"
+        },
+        {
+            "id": "1183",
+            "statement": "Planner --(Assignment)--> Plan Research",
+            "name": "Assignment",
+            "type": "Assignment",
+            "source_id": "1342",
+            "target_id": "1337",
+            "source_name": "Planner",
+            "target_name": "Plan Research"
+        },
+        {
+            "id": "1184",
+            "statement": "Researcher --(Assignment)--> Conduct Sub-research",
+            "name": "Assignment",
+            "type": "Assignment",
+            "source_id": "1343",
+            "target_id": "1338",
+            "source_name": "Researcher",
+            "target_name": "Conduct Sub-research"
+        },
+        {
+            "id": "1185",
+            "statement": "Editor --(Assignment)--> Write Report",
+            "name": "Assignment",
+            "type": "Assignment",
+            "source_id": "1344",
+            "target_id": "1339",
+            "source_name": "Editor",
+            "target_name": "Write Report"
+        },
+        {
+            "id": "1186",
+            "statement": "Reviewer --(Assignment)--> Review Report",
+            "name": "Assignment",
+            "type": "Assignment",
+            "source_id": "1345",
+            "target_id": "1340",
+            "source_name": "Reviewer",
+            "target_name": "Review Report"
+        },
+        {
+            "id": "1187",
+            "statement": "Publisher --(Assignment)--> Publish Report",
+            "name": "Assignment",
+            "type": "Assignment",
+            "source_id": "1346",
+            "target_id": "1341",
+            "source_name": "Publisher",
+            "target_name": "Publish Report"
+        },
+        {
+            "id": "1188",
+            "statement": "Publish Report --(Association)--> Research Report",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1341",
+            "target_id": "1347",
+            "source_name": "Publish Report",
+            "target_name": "Research Report"
+        },
+        {
+            "id": "1189",
+            "statement": "Research Report --(Realization)--> Produce objective research report",
+            "name": "Realization",
+            "type": "Realization",
+            "source_id": "1347",
+            "target_id": "1348",
+            "source_name": "Research Report",
+            "target_name": "Produce objective research report"
+        },
+        {
+            "id": "1190",
+            "statement": "Cite every fact with source --(Association)--> Conduct Sub-research",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1349",
+            "target_id": "1338",
+            "source_name": "Cite every fact with source",
+            "target_name": "Conduct Sub-research"
+        },
+        {
+            "id": "1191",
+            "statement": "Reduce bias and hallucination --(Influence)--> Produce objective research report",
+            "name": "Influence",
+            "type": "Influence",
+            "source_id": "1350",
+            "target_id": "1348",
+            "source_name": "Reduce bias and hallucination",
+            "target_name": "Produce objective research report"
+        },
+        {
+            "id": "1192",
+            "statement": "归档洞察报告并发布网站子页 --(Association)--> project website",
+            "name": "发布为网站子页",
+            "type": "Association",
+            "source_id": "1351",
+            "target_id": "1318",
+            "source_name": "归档洞察报告并发布网站子页",
+            "target_name": "project website"
+        },
+        {
+            "id": "1193",
+            "statement": "发布洞察报告到微信公众号 --(Association)--> 归档洞察报告并发布网站子页",
+            "name": "基于已归档报告发布",
+            "type": "Association",
+            "source_id": "1352",
+            "target_id": "1351",
+            "source_name": "发布洞察报告到微信公众号",
+            "target_name": "归档洞察报告并发布网站子页"
+        },
+        {
+            "id": "1194",
+            "statement": "rename project to ArchGraph --(Association)--> project website",
+            "name": "Association",
+            "type": "Association",
+            "source_id": "1353",
+            "target_id": "1318",
+            "source_name": "rename project to ArchGraph",
+            "target_name": "project website"
+        },
+        {
+            "id": "1195",
+            "statement": "补充KGlibrary GPT-Research参考项目信息 --(Association)--> kglibrary-info-format",
+            "name": "遵循该规则",
+            "type": "Association",
+            "source_id": "1360",
+            "target_id": "1320",
+            "source_name": "补充KGlibrary GPT-Research参考项目信息",
+            "target_name": "kglibrary-info-format"
+        },
+        {
+            "id": "1196",
+            "statement": "归档deepresearch两个参考项目到KGlibrary并发布首页 --(Association)--> kglibrary-info-format",
+            "name": "遵循该规则",
+            "type": "Association",
+            "source_id": "1364",
+            "target_id": "1320",
+            "source_name": "归档deepresearch两个参考项目到KGlibrary并发布首页",
+            "target_name": "kglibrary-info-format"
         }
-      ]
-    },
-    {
-      "id": "1310",
-      "name": "create-github-repository-page",
-      "parent": "1249",
-      "type": "Skill",
-      "description": "create a website based on your github repo:https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site\r\nTODO:完成后刷新本描述"
-    },
-    {
-      "id": "1311",
-      "name": "create our home web site",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "create a home website for this project.",
-      "attributes": [
+    ],
+    "views": [
         {
-          "name": "commit",
-          "value": "4252ca8",
-          "description": "index.html; .nojekyll; .github/skills/create-github-repository-page/SKILL.md"
+            "view_id": "178",
+            "view_name": "AML Standardization",
+            "parent_element_id": "1249",
+            "parent_element_name": "Implementation and Migration Viewpoint",
+            "description": "AML 规范及其标准化工作主线：语言规范、参考实现、上游消费者体验。",
+            "included_elements": [
+                "1354",
+                "1355",
+                "1357",
+                "1358",
+                "1361",
+                "1362"
+            ],
+            "included_relationships": []
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
+            "view_id": "176",
+            "view_name": "AgentCapabilities",
+            "parent_element_id": "1249",
+            "parent_element_name": "Implementation and Migration Viewpoint",
+            "included_elements": [
+                "1310",
+                "1319"
+            ],
+            "included_relationships": []
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
+            "view_id": "180",
+            "view_name": "Content Publication and Announcement",
+            "parent_element_id": "1249",
+            "parent_element_name": "Implementation and Migration Viewpoint",
+            "description": "对外内容发布与官宣类工作包：公众号文章撰写与发布、项目官宣介绍。",
+            "included_elements": [
+                "1363"
+            ],
+            "included_relationships": []
+        },
+        {
+            "view_id": "174",
+            "view_name": "Implementation and Migration",
+            "parent_element_id": "1249",
+            "parent_element_name": "Implementation and Migration Viewpoint",
+            "included_elements": [
+                "1330",
+                "1310",
+                "1311",
+                "1317",
+                "1318",
+                "1319",
+                "1320",
+                "1321",
+                "1331",
+                "1332",
+                "1333",
+                "1335",
+                "1351",
+                "1352",
+                "1353"
+            ],
+            "included_relationships": [
+                "1162",
+                "1166",
+                "1167",
+                "1168",
+                "1172",
+                "1173",
+                "1192",
+                "1193",
+                "1194"
+            ]
+        },
+        {
+            "view_id": "179",
+            "view_name": "KGlibrary Reference Library",
+            "parent_element_id": "1249",
+            "parent_element_name": "Implementation and Migration Viewpoint",
+            "description": "KGlibrary 参考项目知识库的管理视图：info 格式规则（kglibrary-info-format）与收录各参考项目 info.md 的工作包。",
+            "included_elements": [
+                "1320",
+                "1360",
+                "1364"
+            ],
+            "included_relationships": [
+                "1195",
+                "1196"
+            ]
+        },
+        {
+            "view_id": "169",
+            "view_name": "Application Cooperation",
+            "parent_element_id": "1240",
+            "parent_element_name": "Application Cooperation Viewpoint",
+            "included_elements": [
+                "1318"
+            ],
+            "included_relationships": []
+        },
+        {
+            "view_id": "177",
+            "view_name": "GPT-Researcher Multi-Agent Research",
+            "parent_element_id": "1334",
+            "parent_element_name": "Process Cooperation Viewpoint",
+            "description": "用 AML 对 GPT-Researcher 多 Agent 研究工作流的建模视图：Planner 规划 → Researcher 并行子研究 → Editor 撰写 → Reviewer 评审 → Publisher 发布。",
+            "included_elements": [
+                "1336",
+                "1337",
+                "1338",
+                "1339",
+                "1340",
+                "1341",
+                "1342",
+                "1343",
+                "1344",
+                "1345",
+                "1346",
+                "1347",
+                "1348",
+                "1349",
+                "1350"
+            ],
+            "included_relationships": [
+                "1174",
+                "1175",
+                "1176",
+                "1177",
+                "1178",
+                "1179",
+                "1180",
+                "1181",
+                "1182",
+                "1183",
+                "1184",
+                "1185",
+                "1186",
+                "1187",
+                "1188",
+                "1189",
+                "1190",
+                "1191"
+            ]
+        },
+        {
+            "view_id": "170",
+            "view_name": "SystemArchitecture",
+            "included_elements": [
+                "1249",
+                "1240",
+                "1334"
+            ],
+            "included_relationships": [
+                "1161"
+            ]
         }
-      ],
-      "testcases": [
-        {
-          "name": "can view the content through the website.",
-          "description": "can view the content through the website.",
-          "type": "Acceptance Test",
-          "Input": "N/A",
-          "acceptanceCriteria": "can view the content through the website."
-        }
-      ]
-    },
-    {
-      "id": "1317",
-      "name": "优化WEB布局和风格",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "对于本站的网站，做如下优化：\r\n1. 采用科技简洁的布局风格，参考https://www.deepseek.com/；\r\n2. 要有一个区域用来接啥当前项目中已经积累的参考库KGlibrary中的其他项目信息；",
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "2458f97",
-          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "aa932c3",
-          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "commit",
-          "value": "098be4e",
-          "description": "docs/kglibrary.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ],
-      "testcases": [
-        {
-          "name": "AT-1317-01-科技简洁布局风格",
-          "description": "GIVEN 网站已发布；WHEN 访客在浏览器打开网站首页；THEN 页面以科技简洁布局呈现：顶部导航栏、首屏 Hero（项目名+标语+行动按钮）、正文分节卡片化、浅色科技主题。",
-          "type": "Acceptance Test",
-          "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"layout-style\"）：断言 index.html 含导航栏、Hero 区、h1 项目名、≥4 个 section、data-theme=\"light\" 浅色主题标记。通过。"
-        },
-        {
-          "name": "AT-1317-02-KGlibrary参考库区域",
-          "description": "GIVEN KGlibrary 目录下存在参考项目（当前为 XKG-TEST 与 GPT-Research）；WHEN 访客打开 Reference Library 页面 docs/kglibrary.html；THEN 页面存在 KGlibrary 区域，列出每个参考项目的名称、简介与仓库链接。",
-          "type": "Acceptance Test",
-          "Input": "浏览器打开网站首页并点击 Reference Library",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：断言 index.html 含指向 docs/kglibrary.html 的链接，docs/kglibrary.html 存在 id=\"kglibrary\" 区域，且每个项目的 name 与 repo 链接均出现在该页面中。通过。"
-        }
-      ]
-    },
-    {
-      "id": "1318",
-      "name": "project website",
-      "parent": "1240",
-      "type": "Application Component",
-      "attributes": [
-        {
-          "name": "website",
-          "value": "https://derekhu0002.github.io/archgraph/"
-        },
-        {
-          "name": "custom_domain",
-          "value": "https://archgraph.org/"
-        },
-        {
-          "name": "commit",
-          "value": "25bbc9e",
-          "description": "design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e651b0d",
-          "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "ed90f6a",
-          "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "aa4ef69",
-          "description": "tests/custom-domain.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "7e230f3",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e4c74b5",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "1e777e6",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "ee62476",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "f98b61f",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e07c6a1",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "51be801",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e9839a5",
-          "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "098be4e",
-          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "c3604e3",
-          "description": "index.html; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "926aa9c",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ],
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力；What is this 置于页面最前）、紧随其后的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯），并提供 GitHub 仓库入口；Reference Library（KGlibrary 案例库）通过导航链接到独立页面 docs/kglibrary.html，Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
-      "testcases": [
-        {
-          "Input": "浏览器访问 https://archgraph.org/",
-          "acceptanceCriteria": "执行 node --test tests/custom-domain.test.js：断言 CNAME 文件内容恰为 archgraph.org；并对 archgraph.org 做 DNS A 解析，断言其解析到 GitHub Pages 的 4 个 IP（DNS 记录未配置时该用例跳过）。通过。",
-          "description": "GIVEN 已在 DNS 提供商为 archgraph.org 配置指向 GitHub Pages 的 A 记录（185.199.108.153 / 185.199.109.153 / 185.199.110.153 / 185.199.111.153），且仓库发布源根目录含 CNAME 文件（内容 archgraph.org）；WHEN 访客通过 https://archgraph.org/ 访问网站；THEN 返回与 https://derekhu0002.github.io/archgraph/ 相同的 ArchGraph 项目主页内容。",
-          "name": "AT-1318-01-自定义域名访问",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"install-section\"）：断言 index.html 含 id=\"install\" 且位于 id=\"about\" 之后、id=\"howto\" 之前，并包含 npm install -g archgraph-argo、argo-deploy、Neo4j 与 vector engine。通过。",
-          "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 访客打开主页；THEN What is this 之后紧跟 Install 部署小节：仅含 npm install -g archgraph-argo 与 argo-deploy 两条命令，并一句话说明语义查询需要 Neo4j 与向量引擎。",
-          "name": "AT-1318-04-主页顶部展示安装部署",
-          "type": "Acceptance Test"
-        }
-      ]
-    },
-    {
-      "id": "1319",
-      "name": "optimize-web-layout-style",
-      "parent": "1249",
-      "type": "Skill",
-      "description": "Materialized at .github/skills/optimize-web-layout-style/SKILL.md. Guides applying a tech-simple, clean layout and visual style to the project website (referencing https://www.deepseek.com/) and rendering a Reference Library (KGlibrary) area that lists projects from KGlibrary."
-    },
-    {
-      "id": "1320",
-      "name": "kglibrary-info-format",
-      "parent": "1249",
-      "type": "Rule",
-      "description": "Materialized at .github/kglibrary.instructions.md. Every project under KGlibrary/<project>/info.md MUST use YAML frontmatter keys: name, description, repo, branch, commit_id, so the website and agents can uniformly consume reference project info."
-    },
-    {
-      "id": "1321",
-      "name": "update README",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "Update README.md to a concise, external-facing form: What is this? (unified-language positioning matching the homepage), Architecture, Install (npm install -g archgraph-argo + argo-deploy, with the Neo4j + vector engine note for semantic queries), and How to use (user-facing coding-agent workflow). Internal-detail sections (Core principles, Repository map, ARGO MCP harness, KGlibrary reference library, Tests, Requirements) are removed.",
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "54ad8dc",
-          "description": "README.md; tests/readme.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "dc84086",
-          "description": "README.md; tests/readme.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "ca32794",
-          "description": "README.md; tests/project-name.test.js"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "commit",
-          "value": "f4819fd",
-          "description": "README.md; index.html; tests/readme.test.js; .github/copilot-instructions.md (removed); .github/skills/argo-init/SKILL.md (removed); .cursor/skills/argo-init/SKILL.md; .opencode/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "c8f2d74",
-          "description": "restore .github/skills/argo-init/SKILL.md; README.md; index.html; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "f98b61f",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e07c6a1",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "51be801",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "2acf056",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ],
-      "testcases": [
-        {
-          "name": "AT-1321-01-README精简对外形态",
-          "description": "GIVEN README 已精简为对外简洁形态；WHEN 读者打开 README.md；THEN What is this? 章节以主页一致的口径说明统一语言目标（unified language / one model / single view），How to use 章节以用户视角说明编码代理工作流，Install 章节文档化 npm 部署方式，且已移除内部细节章节（Core principles、Repository map、ARGO MCP harness、KGlibrary reference library、Tests、Requirements）。",
-          "type": "Acceptance Test",
-          "Input": "打开 README.md",
-          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 What is this? 章节包含 unified language、one model 与 single view；断言 How to use 章节包含 ArchiMate 3.2、coding agent、Skills and Rules 与 single source of truth；断言 Install 章节包含 npm install -g archgraph-argo、argo-deploy、MCP server、Neo4j 与 vector engine。通过。"
-        },
-        {
-          "name": "AT-1321-02-README文档化npm安装部署",
-          "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 读者打开 README.md 的 Install 章节；THEN 以最简方式文档化 npm install -g archgraph-argo 与 argo-deploy 的部署方式，并一句话说明语义查询需要 Neo4j 与向量引擎。",
-          "type": "Acceptance Test",
-          "Input": "打开 README.md",
-          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 的 Install 章节包含 npm install -g archgraph-argo、argo-deploy、MCP server、Neo4j 与 vector engine。通过。"
-        }
-      ]
-    },
-    {
-      "id": "1330",
-      "name": "画一个全局架构图",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "使用Layered Viewpoint,画一个架构图插入README中，重点表达granph-driven agentic engineering中AGENT、ARGO MCP、graph、ARCHIMATE3.2、EA、人类间的关系\r\n\r\nLayered Viewpoint \r\nThe layered viewpoint pictures several layers and aspects of an Enterprise Architecture in one \r\ndiagram. There are two categories of layers, namely dedicated layers and service layers. The \r\nlayers are the result of the use of the “grouping” relationship for a natural partitioning of the entire \r\nset of objects and relationships that belong to a model. The technology, application, process, and \r\nactor/role layers belong to the first category. The structural principle behind a fully layered \r\nviewpoint is that each dedicated layer exposes, by means of the “realization” relationship, a layer \r\nof services, which are further on “serving” the next dedicated layer. Thus, we can easily separate \r\nthe internal structure and organization of a dedicated layer from its externally observable behavior \r\nexpressed as the service layer that the dedicated layer realizes. The order, number, or nature of \r\nthese layers are not fixed, but in general a (more or less) complete and natural layering of an \r\nArchiMate model should contain the succession of layers depicted in the example given in Table \r\n27. However, this example is by no means intended to be prescriptive. The main goal of the layered \r\nviewpoint is to provide an overview in one diagram. Furthermore, this viewpoint can be used as \r\nsupport for impact of change analysis and performance analysis or for extending the service \r\nportfolio. ",
-      "testcases": [
-        {
-          "name": "AT-1330-01-全局架构图插入README",
-          "description": "GIVEN 项目 README 需要呈现 graph-driven agentic engineering 的全局架构；WHEN 读者打开 README 的 Architecture 章节；THEN README 内嵌一张 Layered Viewpoint 架构图，图中表达 人类(Human)、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA(Enterprise Architect)、Neo4j 之间的关系。",
-          "type": "Acceptance Test",
-          "Input": "打开 README.md",
-          "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js：断言 README 引用 docs/diagrams/global-architecture.svg，且该 SVG 与源文件 docs/diagrams/global-architecture.excalidraw 均存在，并包含 人类、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA、Neo4j 等标签。通过。"
-        }
-      ],
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "2040682",
-          "description": "README.md; design/KG/SystemArchitecture.json; .github/skills/diagram-draw/SKILL.md; .github/skills/diagram-draw/renderExcalidrawSvg.js; docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "2e5c6b9",
-          "description": "docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
-      "id": "1331",
-      "name": "DIAGRAM DRAW SKILL",
-      "parent": "1249",
-      "type": "Skill",
-      "description": "https://github.com/coleam00/excalidraw-diagram-skill"
-    },
-    {
-      "id": "1332",
-      "name": "根据README更新INDEX主页",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "根据 README 的当前内容同步更新网站主页 index.html：页面顺序调整为 What is this → Install → How to use，并精简主页（移除 How we're going to do it、Repository map、Architecture、What is it for、Core principles 小节；Architecture 仅保留在 README，KGlibrary 迁至独立页面 docs/kglibrary.html，What is it for 的额外收益内容迁至洞察文章 docs/insight-archgraph-benefits.html）。",
-      "testcases": [
-        {
-          "name": "AT-1332-01-主页与README同步",
-          "description": "GIVEN README 已包含 How to use（用户工作流）章节；WHEN 访客在浏览器打开网站首页；THEN 首页同步展示 How to use 内容（ArchiMate 3.2、coding agent 工作流与 single source of truth），且页面顺序为 What is this → Install → How to use。",
-          "type": "Acceptance Test",
-          "Input": "浏览器打开网站首页",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"howto\" 区域并提及 ArchiMate 3.2、coding agent 与 single source of truth。通过。"
-        }
-      ],
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "4027dd0",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "commit",
-          "value": "51be801",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e9839a5",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "098be4e",
-          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "926aa9c",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
-      "description": "将基于知识图谱（ArchiMate 3.2 schema）的 Agent 编程“词汇与语法”整理成技术规范文档 docs/agent-programming-language.md（v0.1），定义元素→编程概念的词汇表与关系→语法语义，并以正式 HTML 页面 docs/agent-programming-language.html 呈现。",
-      "id": "1333",
-      "name": "编写Agent编程语言规范",
-      "parent": "1249",
-      "testcases": [
-        {
-          "Input": "打开 docs/agent-programming-language.md",
-          "acceptanceCriteria": "执行 node --test tests/agent-programming-language.test.js：断言 docs/agent-programming-language.md 存在并包含“词汇表/词汇”“语法”“testcases/验收”“持久化/运行时”等关键章节，以及 Work Package、Business Actor、Business Process、Course of Action、Constraint、Principle、Triggering、Flow 等映射。通过。",
-          "description": "GIVEN 仓库已建立基于知识图谱的记忆系统（schema 见 .argo/schema/SystemArchitecture.schema.json）；WHEN 读者打开 docs/agent-programming-language.md；THEN 文档以技术规范形式定义 Agent 编程词汇表（元素类型→编程语义）与语法（关系类型→语法语义），并包含验收断言（testcases GIVEN-WHEN-THEN）与持久化元素/运行时实例边界。",
-          "name": "AT-1333-01-编程语言规范文档",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "打开 docs/agent-programming-language.html",
-          "acceptanceCriteria": "执行 node --test tests/agent-programming-language.test.js（用例 \"aml-spec-html\"）：断言 docs/agent-programming-language.html 存在并包含 v0.1、AML、Abstract、Contents，以及 Scope and Extensions、Extended Elements、Extended Structures、Compliance and Extension Process 等章节。通过。",
-          "description": "GIVEN 技术规范文档 docs/agent-programming-language.md 已存在；WHEN 读者打开英文正式 HTML 页面 docs/agent-programming-language.html；THEN 页面以正式规范风格（英文）呈现：声明版本/状态、摘要、目录，并包含 Scope and Extensions、Extended Elements、Extended Structures、Compliance and Extension Process 等章节。",
-          "name": "AT-1333-02-规范HTML正式版",
-          "type": "Acceptance Test"
-        }
-      ],
-      "type": "Work Package",
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "44e1cf0",
-          "description": "docs/agent-programming-language.md; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "9973aa1",
-          "description": "docs/agent-programming-language.md"
-        },
-        {
-          "name": "commit",
-          "value": "e9bfbad",
-          "description": "docs/agent-programming-language.md"
-        },
-        {
-          "name": "commit",
-          "value": "ee62476",
-          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "2f6ac7c",
-          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
-      "id": "1334",
-      "name": "Process Cooperation Viewpoint",
-      "type": "Grouping",
-      "description": "表达多个 Agent 角色之间为完成同一任务而进行的协作流程（ArchiMate 流程协作视角）。"
-    },
-    {
-      "description": "用 AML 对主流开源深度研究项目 GPT-Researcher（github.com/assafelovic/gpt-researcher）的多 Agent 研究工作流建模：Planner 规划 → Researcher 并行子研究 → Editor 撰写 → Reviewer 评审 → Publisher 发布，产出带引用来源的研究报告。建模结果见 Process Cooperation Viewpoint（view 177）。",
-      "id": "1335",
-      "name": "用AML建模GPT-Researcher多Agent研究流程",
-      "testcases": [
-        {
-          "Input": "查看 design/KG/SystemArchitecture.json 的 view 177",
-          "acceptanceCriteria": "执行 node --test tests/gpt-researcher-model.test.js：断言图谱包含上述元素与关系。通过。",
-          "description": "GIVEN 知识图谱具备 AML 建模能力；WHEN 读者查看 Process Cooperation Viewpoint（view 177）中的 GPT-Researcher 建模；THEN 图谱包含主流程 Course of Action、5 个 Business Process（Plan/Conduct/Write/Review/Publish）及其 Triggering 链、5 个 Business Role（Planner/Researcher/Editor/Reviewer/Publisher）及其 Assignment、Deliverable→Goal 的 Realization，以及 Constraint 与 Principle 约束。",
-          "name": "AT-1335-01-AML建模GPTResearcher多Agent流程",
-          "type": "Acceptance Test"
-        }
-      ],
-      "type": "Work Package",
-      "attributes": [
-        {
-          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js",
-          "name": "commit",
-          "value": "4d55487"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
-      "description": "GPT-Researcher 多 Agent 研究主流程：从研究查询到发布报告的整体计划（Plan-and-Solve + RAG，参考 STORM 论文）。",
-      "id": "1336",
-      "name": "gpt-researcher-research-program",
-      "type": "Course of Action"
-    },
-    {
-      "description": "规划研究：将研究查询分解为一组子问题，形成研究大纲。",
-      "id": "1337",
-      "name": "Plan Research",
-      "type": "Business Process"
-    },
-    {
-      "description": "执行子研究：并行抓取每个子问题相关的网络/本地文档信息，总结并追踪来源。",
-      "id": "1338",
-      "name": "Conduct Sub-research",
-      "type": "Business Process"
-    },
-    {
-      "description": "撰写报告：过滤并聚合各子研究摘要，撰写研究报告草稿。",
-      "id": "1339",
-      "name": "Write Report",
-      "type": "Business Process"
-    },
-    {
-      "description": "评审报告：审阅草稿，检查事实准确性、客观性与引用完整性，给出修改意见。",
-      "id": "1340",
-      "name": "Review Report",
-      "type": "Business Process"
-    },
-    {
-      "description": "发布报告：生成最终报告，输出 Markdown/PDF/Docx 等格式。",
-      "id": "1341",
-      "name": "Publish Report",
-      "type": "Business Process"
-    },
-    {
-      "description": "规划者：生成研究问题与研究大纲。",
-      "id": "1342",
-      "name": "Planner",
-      "type": "Business Role"
-    },
-    {
-      "description": "研究员：并行收集各子问题的信息并溯源。",
-      "id": "1343",
-      "name": "Researcher",
-      "type": "Business Role"
-    },
-    {
-      "description": "编辑：聚合摘要并撰写报告。",
-      "id": "1344",
-      "name": "Editor",
-      "type": "Business Role"
-    },
-    {
-      "description": "审稿人：评审草稿并提出修改意见。",
-      "id": "1345",
-      "name": "Reviewer",
-      "type": "Business Role"
-    },
-    {
-      "description": "发布者：输出最终研究报告。",
-      "id": "1346",
-      "name": "Publisher",
-      "type": "Business Role"
-    },
-    {
-      "description": "研究报告：包含引用来源的最终报告（Markdown/PDF/Docx）。",
-      "id": "1347",
-      "name": "Research Report",
-      "type": "Deliverable"
-    },
-    {
-      "description": "产出客观、事实性、带引用的研究报告。",
-      "id": "1348",
-      "name": "Produce objective research report",
-      "type": "Goal"
-    },
-    {
-      "description": "局部约束：报告中每个事实必须附引用来源（作用于 Conduct Sub-research）。",
-      "id": "1349",
-      "name": "Cite every fact with source",
-      "type": "Constraint"
-    },
-    {
-      "description": "全局约束：通过多源抓取与交叉验证减少偏见与幻觉。",
-      "id": "1350",
-      "name": "Reduce bias and hallucination",
-      "type": "Principle"
-    },
-    {
-      "id": "1351",
-      "name": "归档洞察报告并发布网站子页",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "将《知识图谱驱动的 Agent 构建》业界洞察报告归档到 docs/industry-insight-graph-driven-agent.md，并发布为独立子页 docs/industry-insight-graph-driven-agent.html；提供洞察文章列表页 docs/insights.html（首页导航 Insights 指向列表页）。洞察方法采用 view 177「GPT-Researcher Multi-Agent Research」的多 Agent 研究流程。",
-      "testcases": [
-        {
-          "name": "AT-1351-01-洞察报告归档docs",
-          "description": "GIVEN 业界洞察报告已完成；WHEN 读者访问 docs/ 目录；THEN 报告以 Markdown 归档于 docs/industry-insight-graph-driven-agent.md，包含研究背景、核心技术、主流框架、实证数据与引用来源。",
-          "type": "Acceptance Test",
-          "Input": "打开 docs/industry-insight-graph-driven-agent.md",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"insight-report-archived\"）：断言 docs/industry-insight-graph-driven-agent.md 存在，并包含 GraphRAG、知识图谱、80% more truthful 与参考文献章节。通过。"
-        },
-        {
-          "name": "AT-1351-02-洞察报告网站子页",
-          "description": "GIVEN 洞察报告已归档；WHEN 访客从网站首页导航点击 Insights 链接；THEN 打开独立洞察列表页 docs/insights.html，列表页链接到洞察报告子页 docs/industry-insight-graph-driven-agent.html（呈现报告全文）。",
-          "type": "Acceptance Test",
-          "Input": "浏览器打开网站首页并点击 Insights",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"insight-subpage\"）：断言 index.html 含指向 docs/insights.html 的链接，docs/insights.html 存在并链接到 industry-insight-graph-driven-agent.html，且该报告子页存在并包含报告标题与关键内容。通过。"
-        }
-      ],
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "08545d6",
-          "description": "index.html; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "commit",
-          "value": "e9839a5",
-          "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "098be4e",
-          "description": "docs/insights.html; docs/insight-archgraph-benefits.html; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
-      "id": "1352",
-      "name": "发布洞察报告到微信公众号",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "使用 .argo/skills/@ai-chen2050/wechat-public-cli 技能，将已归档的《知识图谱驱动的 Agent 构建》洞察报告发布到微信公众号。",
-      "testcases": [
-        {
-          "name": "AT-1352-01-公众号文章就绪",
-          "description": "GIVEN 洞察报告已归档；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号文章 Markdown，且正文包含报告内容。",
-          "type": "Acceptance Test",
-          "Input": "打开 docs/industry-insight-graph-driven-agent.wechat.md",
-          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-article-ready\"）：断言 docs/industry-insight-graph-driven-agent.wechat.md 存在，frontmatter 含 title/author/digest，正文含 GraphRAG。通过。"
-        }
-      ],
-      "attributes": [
-        {
-          "description": "docs/industry-insight-graph-driven-agent.wechat.md; tests/wechat-article.test.js; .gitignore; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "e9abada"
-        },
-        {
-          "description": "docs/industry-insight-graph-driven-agent.wechat.md",
-          "name": "commit",
-          "value": "4516b04"
-        },
-        {
-          "description": "WeChat draft media_id",
-          "name": "media_id",
-          "value": "BRZAMZ3b-CaOBH8qdG2KTSVtDhlz7tQPi5y2JvVDpTKytc8780o6c3wQDUk3UtU0"
-        },
-        {
-          "description": "草稿已创建；freepublish 被 48001 api unauthorized 拒绝（账号无 API 发布权限）",
-          "name": "status",
-          "value": "BLOCKED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
-      "id": "1353",
-      "name": "rename project to ArchGraph",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "将项目对外品牌名从 open_knowledge_graph_engineering 更名为 ArchGraph（完整名 ArchGraph Framework；tagline：An architecture-graph driven framework for Agentic Engineering），同步更新 README.md、index.html、docs/industry-insight-graph-driven-agent.* 文档、tests 用例，并更新意图图谱中 project website 元素的 website 属性。",
-      "testcases": [
-        {
-          "name": "AT-1353-01-项目品牌名统一为ArchGraph",
-          "description": "GIVEN 项目品牌名确定为 ArchGraph；WHEN 读者访问 README、网站首页与 docs 洞察报告文档；THEN 对外文案统一使用新名字 ArchGraph（完整名 ArchGraph Framework），不再出现旧名 open_knowledge_graph_engineering，且主页 GitHub 链接指向 archgraph 仓库。",
-          "type": "Acceptance Test",
-          "Input": "读取 README.md、index.html、docs/industry-insight-graph-driven-agent.md/.html/.wechat.md",
-          "acceptanceCriteria": "执行 node --test tests/project-name.test.js：断言 README.md、index.html、docs/industry-insight-graph-driven-agent.md|.html|.wechat.md 均包含 ArchGraph 且不含 open_knowledge_graph_engineering，并断言 index.html 的 GitHub 链接指向 github.com/derekhu0002/archgraph。通过。"
-        }
-      ],
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "3b6fc91",
-          "description": "README.md; index.html; package.json; tests/website.test.js; tests/project-name.test.js; docs/industry-insight-graph-driven-agent.md; docs/industry-insight-graph-driven-agent.html; docs/industry-insight-graph-driven-agent.wechat.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "ca32794",
-          "description": "tests/project-name.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
-      "attributes": [
-        {
-          "name": "spec",
-          "value": "docs/agent-programming-language.md"
-        },
-        {
-          "name": "version",
-          "value": "v0.1"
-        },
-        {
-          "name": "commit",
-          "value": "cdbb063",
-          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "fa857e7",
-          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ],
-      "description": "Agent 建模语言（AML）标准：连接上游消费者与下游厂商的建模语言契约。AML 扩展 ArchiMate 3.2（新增 Skill/Rule 元素与 testcases/attributes 结构约定），现行规范文档为 docs/agent-programming-language.md（v0.1）。消费者用一份 AML 描述 harness 即可多处运行，厂商按 AML 实现接入。",
-      "id": "1354",
-      "name": "AML 规范",
-      "parent": "1249",
-      "testcases": [
-        {
-          "name": "AT-1354-01-AML规范已建模",
-          "description": "GIVEN 仓库已有 AML 规范文档（docs/agent-programming-language.md，v0.1）并将 AML 标准化为一等架构元素；WHEN 读者查看意图图谱；THEN 图谱包含 AML 规范（Contract）元素，其下挂载三条标准化工作主线 Work Package（语言规范、参考实现、上游消费者体验），每个 Work Package 均带 GIVEN-WHEN-THEN 验收用例。",
-          "type": "Acceptance Test",
-          "Input": "查看 design/KG/SystemArchitecture.json 与 docs/agent-programming-language.md",
-          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言 docs/agent-programming-language.md 声明 v0.1 与 ArchiMate 3.2 扩展，且图谱包含 AML 规范（Contract，parent=1249）及其下三个 Work Package（各带验收用例）。通过。"
-        }
-      ],
-      "type": "Contract"
-    },
-    {
-      "attributes": [
-        {
-          "name": "status",
-          "value": "PLANNED"
-        },
-        {
-          "name": "note",
-          "value": "后续重点建设"
-        },
-        {
-          "name": "commit",
-          "value": "fa857e7",
-          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ],
-      "description": "将 docs/agent-programming-language.md 的 v0.1 草案演进为带版本号的正式 AML 规范：固化元模型（元素类型与 Profile 约定）、语法（关系用法与结构扩展）、语义（GIVEN-WHEN-THEN 断言与持久化/运行时边界）与交换格式（.argo/schema/SystemArchitecture.schema.json），并声明与 ArchiMate 3.2 的扩展关系。",
-      "id": "1355",
-      "name": "制定AML语言规范",
-      "parent": "1354",
-      "testcases": [
-        {
-          "Input": "打开 docs/agent-programming-language.md",
-          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言规范文档声明 v0.1 与 ArchiMate 3.2 扩展，且“制定AML语言规范”Work Package 挂载于 AML 规范下并带验收用例。通过。",
-          "description": "GIVEN AML v0.1 草案已存在；WHEN 完成语言规范正式化；THEN 存在带版本号的 AML 规范文档，定义词汇、语法、语义与交换格式，并声明与 ArchiMate 3.2 的扩展关系。",
-          "name": "AT-1355-01-AML语言规范正式化",
-          "type": "Acceptance Test"
-        }
-      ],
-      "type": "Work Package"
-    },
-    {
-      "attributes": [
-        {
-          "name": "status",
-          "value": "PLANNED"
-        },
-        {
-          "name": "commit",
-          "value": "fa857e7",
-          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "ea734d2",
-          "description": ".argo/scripts/argo-paths.js; .argo/scripts/*.js; .argo/scripts/graph-rag/*; .argo/scripts/test-executors/default.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "f4819fd",
-          "description": "argo-init skill moved to user-level (~/.copilot/skills/argo-init/SKILL.md); agent rules moved to user-level prompts (argo-copilot-instructions.instructions.md); removed .github/copilot-instructions.md and .github/skills/argo-init/SKILL.md"
-        },
-        {
-          "name": "commit",
-          "value": "c8f2d74",
-          "description": "restore .github/skills/argo-init/SKILL.md (repo-level compatibility)"
-        },
-        {
-          "name": "commit",
-          "value": "b39acb2",
-          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "c315b5c",
-          "description": "argo/scripts/argo-mcp-server.js"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
-          "name": "commit",
-          "value": "e9de7b3",
-          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json"
-        }
-      ],
-      "description": "以 ARGO harness 作为 AML 参考实现：MCP server 读写图谱、schema 校验、语义（Graph RAG）生命周期与 Neo4j 同步，作为厂商实现与消费者接入的样板。当前参考样例为本仓 KGlibrary（以 AML 建模的案例），暂存本仓，后续可沉淀为市场。",
-      "id": "1357",
-      "name": "提供AML参考实现",
-      "parent": "1354",
-      "testcases": [
-        {
-          "Input": "运行 node .argo/scripts/argo-mcp-server.js",
-          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“提供AML参考实现”Work Package 挂载于 AML 规范下并带验收用例。通过。",
-          "description": "GIVEN AML 规范已定义；WHEN 消费者或厂商需要参考实现；THEN ARGO harness 提供可运行的 MCP server、schema 校验器与 Graph RAG 生命周期实现。",
-          "name": "AT-1357-01-AML参考实现",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "运行 tests/argo-global-install.test.js",
-          "acceptanceCriteria": "tests/argo-global-install.test.js",
-          "description": "GIVEN .argo 工具链被复制到仓库外的全局目录（如用户目录）；WHEN 以 ARGO_REPO_ROOT 指向当前仓库并启动全局安装的 .argo/scripts/argo-mcp-server.js；THEN MCP server 能完成 initialize 与 tools/list，且 validateSystemArchitecture 与 getSystemArchitecture 工具调用均通过（脚本与 schema 从安装目录解析，workspace 从 ARGO_REPO_ROOT 解析）。",
-          "name": "AT-1357-02-ARGO全局安装可运行",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "运行 tests/argo-workspace-bootstrap.test.js",
-          "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js",
-          "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）在非 --check-only 模式运行于缺少 design/KG/SystemArchitecture.json 与 .feap 模板的工作区；WHEN 执行初始化脚本；THEN 自动从部署的 defaults 拷贝 design/KG/SystemArchitecture.json，并以当前项目名拷贝 defaults/EA-model-template.feap 为 <项目名>.feap；--check-only 模式不修改工作区。",
-          "name": "AT-1357-03-WorkspaceBootstrap拷贝默认文件",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "运行 tests/architecture-view-context.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
-          "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
-          "name": "AT-1357-04-按视图ID解析视图完整成员",
-          "type": "Acceptance Test"
-        }
-      ],
-      "type": "Work Package"
-    },
-    {
-      "attributes": [
-        {
-          "name": "status",
-          "value": "PLANNED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ],
-      "description": "让消费者用一份 AML 描述其 harness，即可生成 .github/、.opencode/、.cursor/ 等多宿主配置，实现一次建模、多处运行。",
-      "id": "1358",
-      "name": "简化上游消费者建模体验",
-      "parent": "1354",
-      "testcases": [
-        {
-          "Input": "用 AML 描述 harness 并生成多宿主配置",
-          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“简化上游消费者建模体验”Work Package 挂载于 AML 规范下并带验收用例。通过。",
-          "description": "GIVEN 消费者已用 AML 描述其 harness；WHEN 需要切换或同时使用多个 agent 宿主；THEN 从同一份 AML 生成各宿主配置，无需重写意图与规则。",
-          "name": "AT-1358-01-上游消费者一次建模多处运行",
-          "type": "Acceptance Test"
-        }
-      ],
-      "type": "Work Package"
-    },
-    {
-      "id": "1360",
-      "name": "补充KGlibrary GPT-Research参考项目信息",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "为 KGlibrary/GPT-Research 补充 info.md（YAML frontmatter 含 name/description/repo，遵循 kglibrary-info-format 规则），并同步刷新 index.html 的 #kglibrary 区域，使网站与自动化脚本可统一消费该参考项目信息。",
-      "testcases": [
-        {
-          "name": "AT-1360-01-GPTResearch信息归档并同步主页",
-          "description": "GIVEN KGlibrary/GPT-Research 目录下存在 GPT-Researcher 多 Agent 研究流程模型；WHEN 补充 info.md 并同步网站主页；THEN 存在 KGlibrary/GPT-Research/info.md（YAML frontmatter 含 name/description/repo），且 index.html 的 #kglibrary 区域列出该项目的 name、repo 与 description。",
-          "type": "Acceptance Test",
-          "Input": "打开 KGlibrary/GPT-Research/info.md 与 index.html",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 index.html，断言 GPT-Research 的 name、repo、description 均出现在页面中。通过。"
-        }
-      ],
-      "attributes": [
-        {
-          "description": "KGlibrary/GPT-Research/info.md; index.html; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "a1c915d"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
-      "id": "1361",
-      "name": "ARGO 部署脚本",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo；将 argo-init skill 部署到 Copilot（~/.copilot/skills）、Cursor（~/.cursor/skills）与 OpenCode（~/.config/opencode/skills）；将 archgraph.instructions.md 规则部署到 Copilot（%APPDATA%\\Code\\User\\prompts）与 OpenCode 全局规则（~/.config/opencode/AGENTS.md）；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补；若 .env 已存在且对应变量已有非空值则跳过输入并保留原值，仅对缺失或空值的变量提示输入）；自动在 VS Code（%APPDATA%\\Code\\User\\mcp.json）、Cursor（~/.cursor/mcp.json，mcpServers）与 OpenCode（~/.config/opencode/opencode.json，mcp）注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行，多工作区时优先选择含 design/KG/SystemArchitecture.json 的根；Cursor 支持 MCP roots，OpenCode 声明 roots 并响应且默认以项目目录为 cwd 启动，故均能正确解析当前项目目录）；temp 保留在仓库目录不部署。",
-      "testcases": [
-        {
-          "name": "AT-1361-01-部署脚本可运行",
-          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 与非交互方式运行到临时目录；THEN 生成 schema/SystemArchitecture.schema.json、scripts/argo-mcp-server.js、defaults/design/KG/SystemArchitecture.json、defaults/EA-model-template.feap、skills/argo-init/SKILL.md、prompts/archgraph.instructions.md 与 package.json（含 neo4j-driver 依赖），并写入 VS Code mcp.json、Cursor mcp.json 与 OpenCode opencode.json 注册 argo MCP server，且不部署 temp 与 .env。",
-          "type": "Acceptance Test",
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
-        },
-        {
-          "name": "AT-1361-02-全局server动态发现工作区",
-          "description": "GIVEN argo MCP server 已部署到 ~/.argo 且 mcp.json/opencode.json 不含 cwd/env；WHEN VS Code、Cursor 或 OpenCode 启动 server、完成 initialize/initialized 后 server 发送 roots/list 请求，客户端返回当前工作区 roots（Cursor 支持 MCP roots；OpenCode 声明 roots 并响应，且默认以项目目录为 cwd 启动）；THEN 工作区相关的 tools/call 以该工作区为 workspaceRoot 解析 design/KG/SystemArchitecture.json 并通过验证（而非 home 目录）。",
-          "type": "Acceptance Test",
-          "Input": "运行 tests/argo-global-install.test.js",
-          "acceptanceCriteria": "tests/argo-global-install.test.js"
-        },
-        {
-          "name": "AT-1361-03-默认模板随包部署",
-          "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署到 ~/.argo；THEN 部署目录包含 defaults/design/KG/SystemArchitecture.json 与 defaults/EA-model-template.feap，且 package.json files 包含 argo/defaults。",
-          "type": "Acceptance Test",
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
-        },
-        {
-          "name": "AT-1361-04-已存在的env值跳过输入",
-          "description": "GIVEN ~/.argo/.env 已存在且包含 ARGO_* 等已知变量的非空值；WHEN 以非交互方式运行 install-argo.ps1 且不传 -SkipEnv；THEN 脚本不提示输入（不调用 Read-Host），重写 .env 时保留这些已有非空值；仅当某变量缺失或为空时才提示输入。",
-          "type": "Acceptance Test",
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
-        }
-      ],
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "446ec0a",
-          "description": "argo-deploy/ (package.json; bin/argo-deploy.js; lib/deploy.js; scripts/sync-assets.js; assets/**; README.md); tests/argo-deploy.test.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e5f6f3d",
-          "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/"
-        },
-        {
-          "name": "commit",
-          "value": "ee05a15",
-          "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "de9e21d",
-          "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore"
-        },
-        {
-          "name": "commit",
-          "value": "e982da1",
-          "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)"
-        },
-        {
-          "name": "commit",
-          "value": "411bf25",
-          "description": "argo/rules/archgraph.instructions.md (renamed from copilot-instructions.md); package.json (0.3.0)"
-        },
-        {
-          "name": "commit",
-          "value": "499d802",
-          "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)"
-        },
-        {
-          "name": "commit",
-          "value": "2c54b51",
-          "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)"
-        },
-        {
-          "name": "commit",
-          "value": "025ceae",
-          "description": "install-argo.ps1 (restore workspaceFolder in MCP config); tests/argo-deploy.test.js; package.json (0.4.2)"
-        },
-        {
-          "name": "commit",
-          "value": "2af92ba",
-          "description": "argo/scripts/argo-paths.js (MCP roots workspace resolution); argo/scripts/argo-mcp-server.js (roots.listChanged capability); install-argo.ps1 (minimal MCP config); tests/argo-deploy.test.js; tests/argo-global-install.test.js; package.json (0.5.0)"
-        },
-        {
-          "name": "commit",
-          "value": "a4dc2f7",
-          "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)"
-        },
-        {
-          "name": "commit",
-          "value": "07d2c69",
-          "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)"
-        },
-        {
-          "name": "commit",
-          "value": "b39acb2",
-          "description": "argo/defaults/design/KG/SystemArchitecture.json; argo/defaults/EA-model-template.feap; install-argo.ps1; package.json; tests/argo-deploy.test.js; argo/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "c315b5c",
-          "description": "removed eatool/default/EA-model-template.feap; removed eatool/default/design/KG/SystemArchitecture.json; argo/scripts/argo-mcp-server.js"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
-          "name": "commit",
-          "value": "v0.6.0",
-          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz"
-        },
-        {
-          "name": "commit",
-          "value": "92f1123",
-          "description": "install-argo.ps1 (Cursor/OpenCode skills+rule+MCP deploy); tests/argo-deploy.test.js; README.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "60e995e",
-          "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
-        }
-      ]
-    },
-    {
-      "description": "按核心思路（统一语言：将 harness 设计与目标产品设计放进同一模型）画一张核心模型图 image.png，插入 README 与主页的 What is this? 章节下，表达 Harness Design、Target System Design、AgentHarness、Target Project 之间的关系：AgentHarness 从 Harness Design 武装自己（Access），Harness Design 描述 Target System Design，Target System Design 描述 Target Project，AgentHarness 创建 Target Project。",
-      "id": "1362",
-      "name": "画一张核心模型图",
-      "parent": "1249",
-      "testcases": [
-        {
-          "name": "AT-1362-01-核心模型图插入README与主页",
-          "description": "GIVEN 项目定位为统一语言（harness 设计与目标产品设计放同一模型）；WHEN 读者打开 README 或主页的 What is this? 章节；THEN 下方嵌入核心模型图 docs/diagrams/image.png（README 与主页均引用）。",
-          "type": "Acceptance Test",
-          "Input": "打开 README.md 与 index.html",
-          "acceptanceCriteria": "执行 node --test tests/architecture-diagram.test.js（用例 \"core-model-diagram\"）与 tests/website.test.js（用例 \"about-image\"）：断言 README 与 index.html 均引用 docs/diagrams/image.png，且该图片文件存在。通过。"
-        }
-      ],
-      "type": "Work Package",
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "a2c7c44",
-          "description": "README.md; docs/diagrams/core-model.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "7ba1940",
-          "description": "docs/diagrams/core-model.excalidraw; docs/diagrams/core-model.svg; README.md; tests/architecture-diagram.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "d52c52d",
-          "description": "index.html (restored + image-1.png); tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "a2b0065",
-          "description": "tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
-      "id": "1363",
-      "name": "发布项目官宣介绍文章到微信公众号",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "使用 .github/skills/@ai-chen2050/wechat-public-cli 技能，撰写 ArchGraph 项目官宣介绍文章并发布到微信公众号。",
-      "testcases": [
-        {
-          "name": "AT-1363-01-官宣文章就绪",
-          "description": "GIVEN 项目已具备对外官宣条件；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号官宣文章 Markdown，且正文介绍 ArchGraph（架构图驱动的 Agentic Engineering）。",
-          "type": "Acceptance Test",
-          "Input": "打开 docs/archgraph-introduction.wechat.md",
-          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-intro-ready\"）：断言 docs/archgraph-introduction.wechat.md 存在，frontmatter 含 title/author/digest，正文含 ArchGraph 与 Agentic Engineering。通过。"
-        }
-      ],
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "03ad558",
-          "description": "docs/archgraph-introduction.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "status",
-          "value": "BLOCKED",
-          "description": "草稿已创建（media_id 已记录）；freepublish 与 sendall 均被 48001 api unauthorized 拒绝（账号无 API 发布/群发权限），需在公众号后台手动发布"
-        },
-        {
-          "name": "media_id",
-          "value": "BRZAMZ3b-CaOBH8qdG2KTet7kAaHQ8GK03n8aoe7vKH_Bjq2L3aDrpbM36sNE3iY",
-          "description": "WeChat draft media_id"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
-      "id": "1364",
-      "name": "归档deepresearch两个参考项目到KGlibrary并发布首页",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "从 derekhu0002/deepresearch 仓库 design/KG/ 归档两个参考项目模型到 KGlibrary：gpt-researcher_Agent_探索方法.json（gpt-researcher Agent 行为模型：单智能体 GPTResearcher 编排 + 多智能体 LangGraph 协作研究）与 麦肯锡结构化战略分析新5步法.json（驱动因素→问题→MECE 决策树→假设→证据→三态验证）。每个项目目录含 info.md（遵循 kglibrary-info-format）与模型 JSON，并刷新 docs/kglibrary.html 列出两者后提交推送发布首页。",
-      "testcases": [
-        {
-          "name": "AT-1364-01-归档两个参考项目并同步主页",
-          "description": "GIVEN deepresearch 仓库 design/KG 下存在 gpt-researcher_Agent_探索方法.json 与 麦肯锡结构化战略分析新5步法.json；WHEN 归档到 KGlibrary 并刷新 Reference Library 页面 docs/kglibrary.html；THEN KGlibrary 下存在两个新项目目录（各含 info.md 与模型 JSON），docs/kglibrary.html 列出两者的 name、repo 与 description。",
-          "type": "Acceptance Test",
-          "Input": "打开 docs/kglibrary.html 与 KGlibrary 目录",
-          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"kglibrary-area\"）：读取 KGlibrary/*/info.md 与 docs/kglibrary.html，断言两个新项目的 name、repo、description 均出现在页面中。通过。"
-        }
-      ],
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "e5204fc",
-          "description": "design/KG/SystemArchitecture.json; docs/kglibrary.html; KGlibrary/GPT-Researcher-Agent-Method/info.md; KGlibrary/GPT-Researcher-Agent-Method/gpt-researcher_Agent_探索方法.json; KGlibrary/McKinsey-5-Step/info.md; KGlibrary/McKinsey-5-Step/麦肯锡结构化战略分析新5步法.json"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        }
-      ]
-    }
-  ],
-  "relationships": [
-    {
-      "id": "1161",
-      "statement": "Implementation and Migration Viewpoint --(Association)--> Application Cooperation Viewpoint",
-      "name": "Association",
-      "type": "Association",
-      "source_id": "1249",
-      "target_id": "1240",
-      "source_name": "Implementation and Migration Viewpoint",
-      "target_name": "Application Cooperation Viewpoint"
-    },
-    {
-      "id": "1162",
-      "statement": "create our home web site --(Association)--> create-github-repository-page",
-      "name": "Association",
-      "type": "Association",
-      "source_id": "1311",
-      "target_id": "1310",
-      "source_name": "create our home web site",
-      "target_name": "create-github-repository-page"
-    },
-    {
-      "id": "1166",
-      "statement": "优化WEB布局和风格 --(Association)--> project website",
-      "name": "Association",
-      "type": "Association",
-      "source_id": "1317",
-      "target_id": "1318",
-      "source_name": "优化WEB布局和风格",
-      "target_name": "project website"
-    },
-    {
-      "id": "1167",
-      "statement": "优化WEB布局和风格 --(Association)--> optimize-web-layout-style",
-      "name": "Association",
-      "type": "Association",
-      "source_id": "1317",
-      "target_id": "1319",
-      "source_name": "优化WEB布局和风格",
-      "target_name": "optimize-web-layout-style"
-    },
-    {
-      "id": "1168",
-      "statement": "优化WEB布局和风格 --(Association)--> kglibrary-info-format",
-      "name": "Association",
-      "type": "Association",
-      "source_id": "1317",
-      "target_id": "1320",
-      "source_name": "优化WEB布局和风格",
-      "target_name": "kglibrary-info-format"
-    },
-    {
-      "id": "1172",
-      "statement": "画一个全局架构图 --(Association)--> DIAGRAM DRAW SKILL",
-      "name": "使用这个SKILL来作图",
-      "type": "Association",
-      "source_id": "1330",
-      "target_id": "1331",
-      "source_name": "画一个全局架构图",
-      "target_name": "DIAGRAM DRAW SKILL"
-    },
-    {
-      "id": "1173",
-      "statement": "根据README更新INDEX主页 --(Association)--> project website",
-      "name": "Association",
-      "type": "Association",
-      "source_id": "1332",
-      "target_id": "1318",
-      "source_name": "根据README更新INDEX主页",
-      "target_name": "project website"
-    },
-    {
-      "id": "1174",
-      "name": "Realization",
-      "source_id": "1337",
-      "source_name": "Plan Research",
-      "statement": "Plan Research --(Realization)--> gpt-researcher-research-program",
-      "target_id": "1336",
-      "target_name": "gpt-researcher-research-program",
-      "type": "Realization"
-    },
-    {
-      "id": "1175",
-      "name": "Realization",
-      "source_id": "1338",
-      "source_name": "Conduct Sub-research",
-      "statement": "Conduct Sub-research --(Realization)--> gpt-researcher-research-program",
-      "target_id": "1336",
-      "target_name": "gpt-researcher-research-program",
-      "type": "Realization"
-    },
-    {
-      "id": "1176",
-      "name": "Realization",
-      "source_id": "1339",
-      "source_name": "Write Report",
-      "statement": "Write Report --(Realization)--> gpt-researcher-research-program",
-      "target_id": "1336",
-      "target_name": "gpt-researcher-research-program",
-      "type": "Realization"
-    },
-    {
-      "id": "1177",
-      "name": "Realization",
-      "source_id": "1340",
-      "source_name": "Review Report",
-      "statement": "Review Report --(Realization)--> gpt-researcher-research-program",
-      "target_id": "1336",
-      "target_name": "gpt-researcher-research-program",
-      "type": "Realization"
-    },
-    {
-      "id": "1178",
-      "name": "Realization",
-      "source_id": "1341",
-      "source_name": "Publish Report",
-      "statement": "Publish Report --(Realization)--> gpt-researcher-research-program",
-      "target_id": "1336",
-      "target_name": "gpt-researcher-research-program",
-      "type": "Realization"
-    },
-    {
-      "id": "1179",
-      "name": "Triggering",
-      "source_id": "1337",
-      "source_name": "Plan Research",
-      "statement": "Plan Research --(Triggering)--> Conduct Sub-research",
-      "target_id": "1338",
-      "target_name": "Conduct Sub-research",
-      "type": "Triggering"
-    },
-    {
-      "id": "1180",
-      "name": "Triggering",
-      "source_id": "1338",
-      "source_name": "Conduct Sub-research",
-      "statement": "Conduct Sub-research --(Triggering)--> Write Report",
-      "target_id": "1339",
-      "target_name": "Write Report",
-      "type": "Triggering"
-    },
-    {
-      "id": "1181",
-      "name": "Triggering",
-      "source_id": "1339",
-      "source_name": "Write Report",
-      "statement": "Write Report --(Triggering)--> Review Report",
-      "target_id": "1340",
-      "target_name": "Review Report",
-      "type": "Triggering"
-    },
-    {
-      "id": "1182",
-      "name": "Triggering",
-      "source_id": "1340",
-      "source_name": "Review Report",
-      "statement": "Review Report --(Triggering)--> Publish Report",
-      "target_id": "1341",
-      "target_name": "Publish Report",
-      "type": "Triggering"
-    },
-    {
-      "id": "1183",
-      "name": "Assignment",
-      "source_id": "1342",
-      "source_name": "Planner",
-      "statement": "Planner --(Assignment)--> Plan Research",
-      "target_id": "1337",
-      "target_name": "Plan Research",
-      "type": "Assignment"
-    },
-    {
-      "id": "1184",
-      "name": "Assignment",
-      "source_id": "1343",
-      "source_name": "Researcher",
-      "statement": "Researcher --(Assignment)--> Conduct Sub-research",
-      "target_id": "1338",
-      "target_name": "Conduct Sub-research",
-      "type": "Assignment"
-    },
-    {
-      "id": "1185",
-      "name": "Assignment",
-      "source_id": "1344",
-      "source_name": "Editor",
-      "statement": "Editor --(Assignment)--> Write Report",
-      "target_id": "1339",
-      "target_name": "Write Report",
-      "type": "Assignment"
-    },
-    {
-      "id": "1186",
-      "name": "Assignment",
-      "source_id": "1345",
-      "source_name": "Reviewer",
-      "statement": "Reviewer --(Assignment)--> Review Report",
-      "target_id": "1340",
-      "target_name": "Review Report",
-      "type": "Assignment"
-    },
-    {
-      "id": "1187",
-      "name": "Assignment",
-      "source_id": "1346",
-      "source_name": "Publisher",
-      "statement": "Publisher --(Assignment)--> Publish Report",
-      "target_id": "1341",
-      "target_name": "Publish Report",
-      "type": "Assignment"
-    },
-    {
-      "id": "1188",
-      "name": "Association",
-      "source_id": "1341",
-      "source_name": "Publish Report",
-      "statement": "Publish Report --(Association)--> Research Report",
-      "target_id": "1347",
-      "target_name": "Research Report",
-      "type": "Association"
-    },
-    {
-      "id": "1189",
-      "name": "Realization",
-      "source_id": "1347",
-      "source_name": "Research Report",
-      "statement": "Research Report --(Realization)--> Produce objective research report",
-      "target_id": "1348",
-      "target_name": "Produce objective research report",
-      "type": "Realization"
-    },
-    {
-      "id": "1190",
-      "name": "Association",
-      "source_id": "1349",
-      "source_name": "Cite every fact with source",
-      "statement": "Cite every fact with source --(Association)--> Conduct Sub-research",
-      "target_id": "1338",
-      "target_name": "Conduct Sub-research",
-      "type": "Association"
-    },
-    {
-      "id": "1191",
-      "name": "Influence",
-      "source_id": "1350",
-      "source_name": "Reduce bias and hallucination",
-      "statement": "Reduce bias and hallucination --(Influence)--> Produce objective research report",
-      "target_id": "1348",
-      "target_name": "Produce objective research report",
-      "type": "Influence"
-    },
-    {
-      "id": "1192",
-      "statement": "归档洞察报告并发布网站子页 --(Association)--> project website",
-      "name": "发布为网站子页",
-      "type": "Association",
-      "source_id": "1351",
-      "target_id": "1318",
-      "source_name": "归档洞察报告并发布网站子页",
-      "target_name": "project website"
-    },
-    {
-      "id": "1193",
-      "statement": "发布洞察报告到微信公众号 --(Association)--> 归档洞察报告并发布网站子页",
-      "name": "基于已归档报告发布",
-      "type": "Association",
-      "source_id": "1352",
-      "target_id": "1351",
-      "source_name": "发布洞察报告到微信公众号",
-      "target_name": "归档洞察报告并发布网站子页"
-    },
-    {
-      "id": "1194",
-      "name": "Association",
-      "type": "Association",
-      "source_id": "1353",
-      "target_id": "1318",
-      "source_name": "rename project to ArchGraph",
-      "target_name": "project website",
-      "statement": "rename project to ArchGraph --(Association)--> project website"
-    },
-    {
-      "id": "1195",
-      "statement": "补充KGlibrary GPT-Research参考项目信息 --(Association)--> kglibrary-info-format",
-      "name": "遵循该规则",
-      "type": "Association",
-      "source_id": "1360",
-      "target_id": "1320",
-      "source_name": "补充KGlibrary GPT-Research参考项目信息",
-      "target_name": "kglibrary-info-format"
-    },
-    {
-      "id": "1196",
-      "statement": "归档deepresearch两个参考项目到KGlibrary并发布首页 --(Association)--> kglibrary-info-format",
-      "name": "遵循该规则",
-      "type": "Association",
-      "source_id": "1364",
-      "target_id": "1320",
-      "source_name": "归档deepresearch两个参考项目到KGlibrary并发布首页",
-      "target_name": "kglibrary-info-format"
-    }
-  ],
-  "views": [
-    {
-      "view_id": "176",
-      "view_name": "AgentCapabilities",
-      "parent_element_id": "1249",
-      "parent_element_name": "Implementation and Migration Viewpoint",
-      "included_elements": [
-        "1310",
-        "1319"
-      ],
-      "included_relationships": []
-    },
-    {
-      "view_id": "174",
-      "view_name": "Implementation and Migration",
-      "parent_element_id": "1249",
-      "parent_element_name": "Implementation and Migration Viewpoint",
-      "included_elements": [
-        "1330",
-        "1310",
-        "1311",
-        "1317",
-        "1318",
-        "1319",
-        "1320",
-        "1321",
-        "1331",
-        "1332",
-        "1333",
-        "1335",
-        "1351",
-        "1352",
-        "1353"
-      ],
-      "included_relationships": [
-        "1162",
-        "1166",
-        "1167",
-        "1168",
-        "1172",
-        "1173",
-        "1192",
-        "1193",
-        "1194"
-      ]
-    },
-    {
-      "view_id": "169",
-      "view_name": "Application Cooperation",
-      "parent_element_id": "1240",
-      "parent_element_name": "Application Cooperation Viewpoint",
-      "included_elements": [
-        "1318"
-      ],
-      "included_relationships": []
-    },
-    {
-      "view_id": "170",
-      "view_name": "SystemArchitecture",
-      "included_elements": [
-        "1249",
-        "1240",
-        "1334"
-      ],
-      "included_relationships": [
-        "1161"
-      ]
-    },
-    {
-      "view_id": "177",
-      "view_name": "GPT-Researcher Multi-Agent Research",
-      "parent_element_id": "1334",
-      "parent_element_name": "Process Cooperation Viewpoint",
-      "description": "用 AML 对 GPT-Researcher 多 Agent 研究工作流的建模视图：Planner 规划 → Researcher 并行子研究 → Editor 撰写 → Reviewer 评审 → Publisher 发布。",
-      "included_elements": [
-        "1336",
-        "1337",
-        "1338",
-        "1339",
-        "1340",
-        "1341",
-        "1342",
-        "1343",
-        "1344",
-        "1345",
-        "1346",
-        "1347",
-        "1348",
-        "1349",
-        "1350"
-      ],
-      "included_relationships": [
-        "1174",
-        "1175",
-        "1176",
-        "1177",
-        "1178",
-        "1179",
-        "1180",
-        "1181",
-        "1182",
-        "1183",
-        "1184",
-        "1185",
-        "1186",
-        "1187",
-        "1188",
-        "1189",
-        "1190",
-        "1191"
-      ]
-    },
-    {
-      "description": "AML 规范及其标准化工作主线：语言规范、参考实现、上游消费者体验。",
-      "parent_element_id": "1249",
-      "parent_element_name": "Implementation and Migration Viewpoint",
-      "view_id": "178",
-      "view_name": "AML Standardization",
-      "included_elements": [
-        "1354",
-        "1355",
-        "1357",
-        "1358",
-        "1361",
-        "1362"
-      ],
-      "included_relationships": []
-    },
-    {
-      "view_id": "179",
-      "view_name": "KGlibrary Reference Library",
-      "parent_element_id": "1249",
-      "parent_element_name": "Implementation and Migration Viewpoint",
-      "description": "KGlibrary 参考项目知识库的管理视图：info 格式规则（kglibrary-info-format）与收录各参考项目 info.md 的工作包。",
-      "included_elements": [
-        "1320",
-        "1360",
-        "1364"
-      ],
-      "included_relationships": [
-        "1195",
-        "1196"
-      ]
-    },
-    {
-      "view_id": "180",
-      "view_name": "Content Publication and Announcement",
-      "parent_element_id": "1249",
-      "parent_element_name": "Implementation and Migration Viewpoint",
-      "description": "对外内容发布与官宣类工作包：公众号文章撰写与发布、项目官宣介绍。",
-      "included_elements": [
-        "1363"
-      ]
-    }
-  ]
+    ]
 }
