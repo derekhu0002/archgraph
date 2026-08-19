@@ -13,6 +13,15 @@ const GRAPH = JSON.parse(
 const byId = new Map(GRAPH.elements.map((e) => [e.id, e]));
 const relsOfType = (type) => GRAPH.relationships.filter((r) => r.type === type);
 
+const AML_PROCESS_NAMES = [
+  'Plan Research',
+  'Conduct Sub-research',
+  'Write Report',
+  'Review Report',
+  'Publish Report',
+];
+const AML_ROLE_NAMES = ['Planner', 'Researcher', 'Editor', 'Reviewer', 'Publisher'];
+
 test('gpt-researcher-model: course of action and five processes exist', () => {
   // GIVEN the graph models GPT-Researcher multi-agent research
   // WHEN a reader inspects view 177
@@ -21,14 +30,7 @@ test('gpt-researcher-model: course of action and five processes exist', () => {
   assert.ok(coa, 'course of action should exist');
   assert.equal(coa.type, 'Course of Action');
 
-  const processNames = [
-    'Plan Research',
-    'Conduct Sub-research',
-    'Write Report',
-    'Review Report',
-    'Publish Report',
-  ];
-  for (const name of processNames) {
+  for (const name of AML_PROCESS_NAMES) {
     const p = GRAPH.elements.find((e) => e.name === name && e.type === 'Business Process');
     assert.ok(p, `process "${name}" should exist`);
   }
@@ -36,9 +38,11 @@ test('gpt-researcher-model: course of action and five processes exist', () => {
 
 test('gpt-researcher-model: triggering chain links the five processes', () => {
   // GIVEN the five processes exist
-  // WHEN inspecting Triggering relationships
+  // WHEN inspecting Triggering relationships among the AML flow
   // THEN Plan -> Conduct -> Write -> Review -> Publish form a chain
-  const trig = relsOfType('Triggering');
+  const trig = relsOfType('Triggering').filter(
+    (r) => AML_PROCESS_NAMES.includes(r.source_name) && AML_PROCESS_NAMES.includes(r.target_name)
+  );
   assert.equal(trig.length, 4, 'should have four triggering links');
   const expected = [
     ['Plan Research', 'Conduct Sub-research'],
@@ -56,9 +60,11 @@ test('gpt-researcher-model: triggering chain links the five processes', () => {
 
 test('gpt-researcher-model: five roles assigned to their processes', () => {
   // GIVEN the five roles exist
-  // WHEN inspecting Assignment relationships
+  // WHEN inspecting Assignment relationships among the AML flow
   // THEN each role is assigned to its process (role -> process)
-  const assign = relsOfType('Assignment');
+  const assign = relsOfType('Assignment').filter(
+    (r) => AML_ROLE_NAMES.includes(r.source_name) && AML_PROCESS_NAMES.includes(r.target_name)
+  );
   assert.equal(assign.length, 5, 'should have five assignments');
   const expected = [
     ['Planner', 'Plan Research'],

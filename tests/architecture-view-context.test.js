@@ -74,7 +74,10 @@ test('architecture-view-context: resolves complete view membership by view_id', 
 
   const childViews = callPayload(responses, 5);
   assert.equal(childViews.status, 'passed');
-  assert.deepEqual(childViews.childViews.map(view => view.view_id).sort(), ['169', '174', '176']);
+  assert.deepEqual(
+    childViews.childViews.map(view => view.view_id).sort(),
+    ['169', '174', '176', '177', '178', '179', '180', '298']
+  );
 
   const missing = callPayload(responses, 6);
   assert.equal(missing.status, 'failed');
