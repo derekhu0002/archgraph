@@ -290,8 +290,13 @@
       "description": "KGlibrary 参考项目 info.md 的 YAML frontmatter 格式规则：每个 KGlibrary/<project>/info.md 必须用 frontmatter（name/description/repo，建议 branch/commit_id），供网站主页、Agent 与自动化脚本统一消费；修改后需同步刷新 index.html #kglibrary 区域并运行 node --test tests/website.test.js 验证同步。",
       "attributes": [
         {
-          "name": "kglibrary.instructions.md",
-          "content": "# KGlibrary Info Format (global rule)\n\nKGlibrary 是本项目积累的参考项目知识库。每个参考项目位于 `KGlibrary/<project>/`，并必须提供一份 `info.md`，供网站主页、Agent 与自动化脚本统一消费。\n\n## Rules\n\n- **MUST** 每个参考项目在 `KGlibrary/<project>/info.md` 顶部使用 YAML frontmatter，且至少包含以下键：\n  - `name`：项目名（字符串）\n  - `description`：一句话简介（字符串，建议加引号）\n  - `repo`：GitHub 仓库完整 URL（https://github.com/<owner>/<repo>）\n- **SHOULD** 额外提供：\n  - `branch`：主分支名（默认 `main`）\n  - `commit_id`：被收录时的提交 SHA\n- **MUST** frontmatter 之后可以书写正文（如该项目 SystemArchitecture.json 的摘要），正文不影响机器消费。\n- **MUST** 当新增或修改 `KGlibrary/*/info.md` 时，同步刷新网站主页 `index.html` 中的 `#kglibrary` 区域，并运行 `node --test tests/website.test.js` 验证同步。\n\n## Example\n\n```markdown\n---\nname: XKG-TEST\ndescription: \"a test repo which created a online mindmapping draft panel\"\nrepo: https://github.com/derekhu0002/XKG-TEST\nbranch: main\ncommit_id: 1372c4e528f1ae93538af37272f0937fa52bdfee\n---\n\n正文摘要…\n```"
+          "content": "# KGlibrary Info Format (global rule)\n\nKGlibrary 是本项目积累的参考项目知识库。每个参考项目位于 `KGlibrary/<project>/`，并必须提供一份 `info.md`，供网站主页、Agent 与自动化脚本统一消费。\n\n## Rules\n\n- **MUST** 每个参考项目在 `KGlibrary/<project>/info.md` 顶部使用 YAML frontmatter，且至少包含以下键：\n  - `name`：项目名（字符串）\n  - `description`：一句话简介（字符串，建议加引号）\n  - `repo`：GitHub 仓库完整 URL（https://github.com/<owner>/<repo>）\n- **SHOULD** 额外提供：\n  - `branch`：主分支名（默认 `main`）\n  - `commit_id`：被收录时的提交 SHA\n- **MUST** frontmatter 之后可以书写正文（如该项目 SystemArchitecture.json 的摘要），正文不影响机器消费。\n- **MUST** 当新增或修改 `KGlibrary/*/info.md` 时，同步刷新网站主页 `index.html` 中的 `#kglibrary` 区域，并运行 `node --test tests/website.test.js` 验证同步。\n\n## Example\n\n```markdown\n---\nname: XKG-TEST\ndescription: \"a test repo which created a online mindmapping draft panel\"\nrepo: https://github.com/derekhu0002/XKG-TEST\nbranch: main\ncommit_id: 1372c4e528f1ae93538af37272f0937fa52bdfee\n---\n\n正文摘要…\n```",
+          "name": "kglibrary.instructions.md"
+        },
+        {
+          "description": ".github/kglibrary.instructions.md (removed); design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "6dcc740"
         }
       ]
     },
