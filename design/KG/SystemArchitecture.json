@@ -76,6 +76,11 @@
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "commit",
+          "value": "0e54ddd",
+          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
         }
       ],
       "testcases": [
@@ -533,6 +538,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "0e54ddd",
+          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
         }
       ],
       "parent": "1334"
@@ -792,6 +802,11 @@
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "commit",
+          "value": "0e54ddd",
+          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
         }
       ],
       "testcases": [
@@ -1622,6 +1637,11 @@
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "commit",
+          "value": "0e54ddd",
+          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
         }
       ],
       "testcases": [
