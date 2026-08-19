@@ -32,7 +32,7 @@ function callPayload(responses, id) {
 
 test('architecture-view-context: resolves complete view membership by view_id', () => {
   // GIVEN the ARGO MCP server exposes getArchitectureViewContext
-  // WHEN a caller resolves views 176, 174, and 170 (with child views)
+  // WHEN a caller resolves views 176, 174, and 429 (with child views)
   // THEN the tool returns the view plus fully resolved elements and relationships
   const responses = runMcp([
     {
@@ -49,7 +49,7 @@ test('architecture-view-context: resolves complete view membership by view_id', 
     { jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} },
     { jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: '176' } } },
     { jsonrpc: '2.0', id: 4, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: '174' } } },
-    { jsonrpc: '2.0', id: 5, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: '170', includeChildViews: true } } },
+    { jsonrpc: '2.0', id: 5, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: '429', includeChildViews: true } } },
     { jsonrpc: '2.0', id: 6, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: 'does-not-exist' } } },
   ]);
 
@@ -76,7 +76,7 @@ test('architecture-view-context: resolves complete view membership by view_id', 
   assert.equal(childViews.status, 'passed');
   assert.deepEqual(
     childViews.childViews.map(view => view.view_id).sort(),
-    ['169', '174', '176', '178', '179', '180', '298']
+    ['169', '174', '176', '178', '179', '180', '1800', '298', '432']
   );
 
   const missing = callPayload(responses, 6);

@@ -80,11 +80,11 @@
       ],
       "testcases": [
         {
-          "name": "can view the content through the website.",
-          "description": "can view the content through the website.",
+          "name": "AT-1311-01-网站首页可浏览",
+          "description": "GIVEN 项目首页已创建并发布；WHEN 访客在浏览器打开网站首页；THEN 页面完整呈现项目定位与内容（含导航栏、Hero 区与项目名）。",
           "type": "Acceptance Test",
-          "Input": "N/A",
-          "acceptanceCriteria": "can view the content through the website."
+          "Input": "浏览器打开网站首页",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"layout-style\"）：断言 index.html 含 <nav> 导航、class=\"hero\"、<h1> 项目名 与 ≥4 个 section。通过。"
         }
       ]
     },
@@ -534,7 +534,8 @@
           "name": "status",
           "value": "COMPLETED"
         }
-      ]
+      ],
+      "parent": "1334"
     },
     {
       "id": "1351",
@@ -820,7 +821,7 @@
           "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
           "type": "Acceptance Test",
           "Input": "运行 tests/architecture-view-context.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 170 在 includeChildViews 时解析出子视图 176/174/169；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
+          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310 与 1319、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 9 个子视图（169/174/176/178/179/180/1800/298/432）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
         }
       ]
     },
@@ -1613,6 +1614,10 @@
           "name": "commit",
           "value": "d989fce",
           "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         },
         {
           "name": "deliveryStatus",
