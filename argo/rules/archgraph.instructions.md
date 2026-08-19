@@ -36,11 +36,12 @@ applyTo: "**"
 </ExplorationGuideline>
 
 <OrganizationGuideline>
-1. `Business Actor` 元素本身就是持久化实体：一旦在意图图谱中创建，就持续存在，直到被显式删除。持久化载体是「图谱元素 + 其名下挂载的 View」，而非宿主聊天会话——聊天会话是临时的，宿主分配的会话 ID 会随会话结束而失效，不能作为持久化依据。
-2. 当你要调用某个 `Business Actor` 时，按其稳定身份标识（`name`，创建时登记）在意图图谱中查找：已存在则直接复用该元素，并读取其名下 View 恢复长期记忆；不存在则新建该 `Business Actor` 元素并登记一个全局唯一的 `name`。
-3. 每个 `Business Actor` 的长期记忆挂载在该元素名下的一个或多个 View 中，包含该 `Business Actor` 的所有历史工作信息。
-4. 每个 `Business Actor` 工作时必须与其他 `Business Actor` 保持隔离，即各自使用独立的会话/工作上下文：调用某个 `Business Actor` 时，只加载其自己名下 View 的长期记忆，不得读取或写入其他 `Business Actor` 的 View，不同 `Business Actor` 的记忆与上下文不得混用。
-5. 每个 `Business Actor` 的 `name` 必须全局唯一，不能与其他 `Business Actor` 的 `name` 冲突。
+1. `Business Actor` 元素本身就是持久化实体：一旦在意图图谱中创建，就持续存在，直到被显式删除。持久化载体是「图谱元素 + 其名下挂载的 View」。
+2. 当你要调用某个 `Business Actor` 时，按其稳定身份标识（`name`或 `id` ，创建时登记）在意图图谱中查找：已存在则直接复用该元素，并读取其名下 View 恢复长期记忆；不存在则新建该 `Business Actor` 元素并登记一个全局唯一的 `name`。
+3. 启动某个 `Business Actor` 前，先读取该元素的 `description`，把它作为该 agent 的定义（system prompt）来构造 agent，再开始工作；每次收工前，必须把本次关键进展回写到该 Actor 名下的长期记忆 View，刷新长期记忆，防止长会话遗忘。
+4. 每个 `Business Actor` 的长期记忆挂载在该元素名下的一个或多个 View 中，包含该 `Business Actor` 的所有历史工作信息。
+5. 每个 `Business Actor` 工作时必须与其他 `Business Actor` 保持隔离，即各自使用独立的会话/工作上下文：调用某个 `Business Actor` 时，只加载其自己名下 View 的长期记忆，不得读取或写入其他 `Business Actor` 的 View，不同 `Business Actor` 的记忆与上下文不得混用。
+6. 每个 `Business Actor` 的 `name` 必须全局唯一，不能与其他 `Business Actor` 的 `name` 冲突。
 </OrganizationGuideline>
 
 <ToolsGuideline>
