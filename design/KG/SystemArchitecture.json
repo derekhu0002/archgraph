@@ -2024,6 +2024,23 @@
           "description": "design/KG/SystemArchitecture.json; tests/wechat-publisher-actor.test.js"
         }
       ]
+    },
+    {
+      "attributes": [],
+      "description": "使用 wechat-public-cli 技能，撰写 ArchGraph 开发者社区（GitHub Discussions）介绍文章并发布到微信公众号。",
+      "id": "2756",
+      "name": "发布开发者社区介绍文章到微信公众号",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "打开 docs/developer-community.wechat.md",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-community-ready\"）：断言 docs/developer-community.wechat.md 存在，frontmatter 含 title/author/digest，正文含 GitHub Discussions 与 工作包。通过。",
+          "description": "GIVEN ArchGraph 开发者社区（GitHub Discussions）已设计；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号社区介绍文章 Markdown，且正文介绍 GitHub Discussions 与工作包分享。",
+          "name": "AT-2756-01-社区介绍文章就绪",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -2715,7 +2732,8 @@
       "parent_element_name": "Implementation and Migration Viewpoint",
       "description": "对外内容发布与官宣类工作包：公众号文章撰写与发布、项目官宣介绍。",
       "included_elements": [
-        "1363"
+        "1363",
+        "2756"
       ],
       "included_relationships": []
     },

@@ -8,6 +8,7 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..');
 const ARTICLE = path.join(ROOT, 'docs', 'industry-insight-graph-driven-agent.wechat.md');
 const ANNOUNCEMENT = path.join(ROOT, 'docs', 'archgraph-introduction.wechat.md');
+const COMMUNITY = path.join(ROOT, 'docs', 'developer-community.wechat.md');
 
 function parseFrontmatter(md) {
   const m = md.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n/);
@@ -57,4 +58,18 @@ test('wechat-intro-ready: project announcement article with required frontmatter
   assert.ok(meta.digest, 'frontmatter should declare a digest');
   assert.match(md, /ArchGraph/, 'article body should introduce ArchGraph');
   assert.match(md, /Agentic Engineering/, 'article body should mention Agentic Engineering');
+});
+
+test('wechat-community-ready: developer community article with required frontmatter', () => {
+  // GIVEN the developer community (GitHub Discussions) has been designed
+  // WHEN the wechat-public-cli skill prepares to publish
+  // THEN a WeChat-ready markdown exists with title/author/digest frontmatter and community intro body
+  const md = readFileSync(COMMUNITY, 'utf8');
+  const meta = parseFrontmatter(md);
+
+  assert.ok(meta.title, 'frontmatter should declare a title');
+  assert.ok(meta.author, 'frontmatter should declare an author');
+  assert.ok(meta.digest, 'frontmatter should declare a digest');
+  assert.match(md, /GitHub Discussions/, 'article body should introduce GitHub Discussions');
+  assert.match(md, /工作包/, 'article body should mention work packages');
 });
