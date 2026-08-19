@@ -1639,7 +1639,13 @@
       "id": "2733",
       "name": "adam",
       "parent": "1962",
-      "type": "Business Actor"
+      "type": "Business Actor",
+      "attributes": [
+        {
+          "name": "sessionId",
+          "value": "4080fecb-0190-488c-83d7-9bc2c9cf72ba"
+        }
+      ]
     },
     {
       "id": "2734",
@@ -1807,11 +1813,11 @@
       "attributes": [
         {
           "name": "status",
-          "value": "DESIGN_APPROVED"
+          "value": "DEVELOPMENT_DONE"
         },
         {
           "name": "note",
-          "value": "方案评审通过（规划专家tanwen通过、系统架构师laodong复审通过），已交接给Developer(Xiaoming)开发。"
+          "value": "开发完成（发布辅助脚本+导入校验脚本，验收测试11/11通过），已交接给Reviewer(adam)代码检视。"
         },
         {
           "name": "commit",
@@ -1832,6 +1838,11 @@
           "name": "commit",
           "value": "ec827006f7aff24ba472d6ec2171fcb09cd73ebd",
           "description": "docs/developer-community-design.md; docs/developer-community-guide.md"
+        },
+        {
+          "name": "commit",
+          "value": "8c02b85",
+          "description": "scripts/developer-community-publish.js; scripts/developer-community-validate.js; tests/developer-community.test.js"
         }
       ]
     },
@@ -2453,6 +2464,16 @@
       "target_id": "2751",
       "target_name": "开发者社区开发交付",
       "type": "Assignment"
+    },
+    {
+      "id": "1970",
+      "name": "Assignment",
+      "source_id": "2733",
+      "source_name": "adam",
+      "statement": "adam --(Assignment)--> 开发者社区开发交付",
+      "target_id": "2751",
+      "target_name": "开发者社区开发交付",
+      "type": "Assignment"
     }
   ],
   "views": [
@@ -2590,14 +2611,16 @@
         "2747",
         "2739",
         "2752",
-        "2735"
+        "2735",
+        "2733"
       ],
       "included_relationships": [
         "1965",
         "1966",
         "1967",
         "1968",
-        "1969"
+        "1969",
+        "1970"
       ]
     },
     {
