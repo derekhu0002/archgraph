@@ -44,6 +44,15 @@ applyTo: "**"
 6. 每个 `Business Actor` 的 `name` 必须全局唯一，不能与其他 `Business Actor` 的 `name` 冲突。
 </OrganizationGuideline>
 
+<SessionMemorySummarization>
+每次会话结束（收工）前，必须执行一次短期记忆总结，并将总结写入长期记忆，防止跨会话遗忘：
+1. 先读取短期（会话）记忆：查看 `/memories/session/` 下本次会话的记录；若为空，则依据本次会话的实际工作内容进行总结。
+2. 生成结构化总结，至少包含：本次目标、已完成的关键进展、关键决策及其原因、遗留问题与待办、可复用的经验与教训。
+3. 将总结写入长期记忆：
+   - 若本次工作属于某个 `Business Actor` 的角色工作，按 `<OrganizationGuideline>` 写入该 Actor 名下挂载的长期记忆 View；
+4. 总结必须简洁、去重：优先更新已有记忆文件，仅在必要时新建；禁止把会话中的冗余过程内容原文复制进长期记忆。
+</SessionMemorySummarization>
+
 <ToolsGuideline>
 你必须通过ARGO MCP server提供的工具来进行意图架构的读写操作，禁止直接修改意图架构的源文件：
 1. getSystemArchitecture: 语义化读取架构（推荐带 query.purpose + query.intent，而非全量读取）。
