@@ -1747,7 +1747,7 @@
       "name": "ArchGraph开发者社区",
       "parent": "1240",
       "type": "Application Component",
-      "description": "这个开发者社区的目的，是为了便于ArchGraph开发者交流他们的“工作包”，这个工作包就是通过eatool\\EA-jsscript\\export-to-kg.js导出的他们认为可以和其他人分享的子图。\r\n最好采用业界有名的开源的社区服务。",
+      "description": "这个开发者社区的目的，是为了便于ArchGraph开发者交流他们的「工作包」，这个工作包就是通过eatool\\EA-jsscript\\export-to-kg.js导出的他们认为可以和其他人分享的子图。载体为 GitHub Discussions（零成本、零运维、GitHub 生态内），存在供应商锁定/单点依赖（GitHub 平台中断即不可用，可接受）。子图工作包默认以公开 Gist 承载，超过 Gist 单文件约 10MB 上限改用仓库 KGlibrary/ 文件承载。",
       "subdiagram_views": [
         {
           "view_id": "431",
@@ -1782,16 +1782,30 @@
           "Input": "打开 docs/developer-community-requirements.md",
           "name": "AT-2751-03-采用GitHubDiscussions",
           "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/developer-community.test.js",
+          "description": "GIVEN 待发布的子图 JSON 含敏感信息（密钥/token、内部绝对路径、commit 详情、个人信息）；WHEN 开发者按发布流程发布；THEN 敏感信息被脱敏或发布被拦截（命中即告警）。",
+          "Input": "打开 docs/developer-community-guide.md",
+          "name": "AT-2751-04-发布前脱敏",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/developer-community.test.js",
+          "description": "GIVEN 工作包帖子包含子图 JSON 链接；WHEN 开发者获取并准备导入；THEN 子图 JSON 通过 export-to-kg.js 导出格式校验与大小上限校验，不符合则被拒绝导入。",
+          "Input": "打开 docs/developer-community-guide.md",
+          "name": "AT-2751-05-下载导入格式校验",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
         {
           "name": "status",
-          "value": "DESIGN_DONE"
+          "value": "DESIGN_REVISED"
         },
         {
           "name": "note",
-          "value": "方案设计完成（采用 GitHub Discussions），待规划专家(tanwen)与系统架构师(laodong)评审。"
+          "value": "方案已按系统架构师 laodong 反馈修订，补充发布脱敏控制与下载导入前置校验，待复审。"
         },
         {
           "name": "commit",
@@ -1807,6 +1821,11 @@
           "name": "commit",
           "value": "f7c3d0c",
           "description": "docs/developer-community-design.md; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "ec827006f7aff24ba472d6ec2171fcb09cd73ebd",
+          "description": "docs/developer-community-design.md; docs/developer-community-guide.md"
         }
       ]
     },
@@ -1815,7 +1834,7 @@
       "name": "GitHub Discussions",
       "type": "Application Service",
       "parent": "1240",
-      "description": "GitHub 提供的讨论区服务，作为 ArchGraph 开发者社区的载体（零成本、零运维、GitHub 生态内）。"
+      "description": "GitHub 提供的讨论区服务，作为 ArchGraph 开发者社区的载体（零成本、零运维、GitHub 生态内）。存在平台锁定边界（作为社区唯一外部平台载体）；公开 Gist 单文件约 10MB 上限，超限工作包由仓库文件承载。"
     }
   ],
   "relationships": [
