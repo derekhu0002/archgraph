@@ -1232,6 +1232,13 @@
           "view_id": "433",
           "view_name": "公众号发布团队"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "5ef24d4",
+          "description": "design/KG/SystemArchitecture.json（AgentOrganization 新增子视图 433 公众号发布团队）"
+        }
       ]
     },
     {
@@ -1986,7 +1993,14 @@
       "name": "公众号发布",
       "parent": "1962",
       "type": "Business Role",
-      "description": "负责将 ArchGraph 项目的文章（洞察报告、官宣介绍等）撰写为符合微信公众号格式的文章，并通过 wechat-public-cli 创建草稿，跟进公众号后台手动发布流程。"
+      "description": "负责将 ArchGraph 项目的文章（洞察报告、官宣介绍等）撰写为符合微信公众号格式的文章，并通过 wechat-public-cli 创建草稿，跟进公众号后台手动发布流程。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "5ef24d4",
+          "description": "design/KG/SystemArchitecture.json; tests/wechat-publisher-actor.test.js"
+        }
+      ]
     },
     {
       "id": "2755",
@@ -2001,6 +2015,13 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/wechat-publisher-actor.test.js",
           "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js：断言 SystemArchitecture.json 中恰好存在一个 name=公众号发布员、type=Business Actor、parent=1962 且 description 非空的元素；存在 Assignment 关系（source_id=该 actor、target_id=name 为「公众号发布」的 Business Role）；视图 433 的 included_elements 含该 actor 与 role，included_relationships 含该 Assignment 关系。通过。"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "5ef24d4",
+          "description": "design/KG/SystemArchitecture.json; tests/wechat-publisher-actor.test.js"
         }
       ]
     }
