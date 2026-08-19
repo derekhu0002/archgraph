@@ -36,10 +36,11 @@ applyTo: "**"
 </ExplorationGuideline>
 
 <OrganizationGuideline>
-1. `Business Actor` 的会话进程由宿主系统（当前运行模型的运行环境）在会话开始时创建，并由系统分配一个全局唯一的 `sessionId`。`sessionId` 是系统分配的真实标识，模型**禁止自行生成、编造或随机产生** `sessionId`。
-2. 当你要调用某个 `Business Actor` 时，先读取当前会话系统分配的真实 `sessionId`（优先从宿主环境变量或系统接口读取，例如 `SESSION_ID`、`OPENCODE_SESSION_ID` 等，以当前宿主工具实际暴露的名称为准），再据此在历史会话进程中查找：已存在则直接复用该会话进程；不存在则新建该 `Business Actor`，并将系统分配的真实 `sessionId` 登记到其 `sessionId` 属性。若当前宿主未暴露真实 `sessionId`，则不得伪造随机值，应将该属性标记为未知，并在描述中说明该值需由系统提供。
-3. 每个 `Business Actor` 要形成自己的长期记忆，该长期记忆是挂载在该 `Business Actor` 元素下的一个或多个View，包含了该 `Business Actor` 的所有历史工作信息。
-4. 每个 `Business Actor` 的 `sessionId` 必须来自系统分配的真实值且全局唯一，不能与其他 `Business Actor` 的 `sessionId` 冲突；任何由模型自行生成的 ID 一律视为无效。
+1. `Business Actor` 元素本身就是持久化实体：一旦在意图图谱中创建，就持续存在，直到被显式删除。持久化载体是「图谱元素 + 其名下挂载的 View」，而非宿主聊天会话——聊天会话是临时的，宿主分配的会话 ID 会随会话结束而失效，不能作为持久化依据。
+2. 当你要调用某个 `Business Actor` 时，按其稳定身份标识（`name`，创建时登记）在意图图谱中查找：已存在则直接复用该元素，并读取其名下 View 恢复长期记忆；不存在则新建该 `Business Actor` 元素并登记一个全局唯一的 `name`。
+3. 每个 `Business Actor` 的长期记忆挂载在该元素名下的一个或多个 View 中，包含该 `Business Actor` 的所有历史工作信息。
+4. 每个 `Business Actor` 工作时必须与其他 `Business Actor` 保持隔离，即各自使用独立的会话/工作上下文：调用某个 `Business Actor` 时，只加载其自己名下 View 的长期记忆，不得读取或写入其他 `Business Actor` 的 View，不同 `Business Actor` 的记忆与上下文不得混用。
+5. 每个 `Business Actor` 的 `name` 必须全局唯一，不能与其他 `Business Actor` 的 `name` 冲突。
 </OrganizationGuideline>
 
 <ToolsGuideline>
