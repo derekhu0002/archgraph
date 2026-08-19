@@ -1678,7 +1678,13 @@
       "id": "2739",
       "name": "caoyang",
       "parent": "1962",
-      "type": "Business Actor"
+      "type": "Business Actor",
+      "attributes": [
+        {
+          "name": "sessionId",
+          "value": "7b7b6994-5cdf-4f15-9224-a7be04eccf2f"
+        }
+      ]
     },
     {
       "id": "2740",
@@ -1738,18 +1744,6 @@
       ]
     },
     {
-      "id": "2749",
-      "name": "开发者社区WEB前端",
-      "parent": "2748",
-      "type": "Application Component"
-    },
-    {
-      "id": "2750",
-      "name": "开发者社区后端服务",
-      "parent": "2748",
-      "type": "Application Component"
-    },
-    {
       "id": "2751",
       "name": "开发者社区开发交付",
       "parent": "1249",
@@ -1798,6 +1792,13 @@
           "description": "docs/developer-community-requirements.md; tests/developer-community.test.js; design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "id": "2752",
+      "name": "GitHub Discussions",
+      "type": "Application Service",
+      "parent": "1240",
+      "description": "GitHub 提供的讨论区服务，作为 ArchGraph 开发者社区的载体（零成本、零运维、GitHub 生态内）。"
     }
   ],
   "relationships": [
@@ -2362,16 +2363,6 @@
       "target_name": "产品经理"
     },
     {
-      "id": "1964",
-      "statement": "开发者社区WEB前端 --(Triggering)--> 开发者社区后端服务",
-      "name": "访问",
-      "type": "Triggering",
-      "source_id": "2749",
-      "target_id": "2750",
-      "source_name": "开发者社区WEB前端",
-      "target_name": "开发者社区后端服务"
-    },
-    {
       "id": "1965",
       "statement": "开发者社区开发交付 --(Realization)--> ArchGraph开发者社区",
       "name": "Realization",
@@ -2400,6 +2391,16 @@
       "target_id": "2751",
       "source_name": "caoyang",
       "target_name": "开发者社区开发交付"
+    },
+    {
+      "id": "1968",
+      "statement": "GitHub Discussions --(Serving)--> ArchGraph开发者社区",
+      "name": "Serving",
+      "type": "Serving",
+      "source_id": "2752",
+      "target_id": "2748",
+      "source_name": "GitHub Discussions",
+      "target_name": "ArchGraph开发者社区"
     }
   ],
   "views": [
@@ -2518,11 +2519,11 @@
       "parent_element_id": "2748",
       "parent_element_name": "ArchGraph开发者社区",
       "included_elements": [
-        "2749",
-        "2750"
+        "2752",
+        "2748"
       ],
       "included_relationships": [
-        "1964"
+        "1968"
       ]
     },
     {
@@ -2535,12 +2536,14 @@
         "2748",
         "2751",
         "2747",
-        "2739"
+        "2739",
+        "2752"
       ],
       "included_relationships": [
         "1965",
         "1966",
-        "1967"
+        "1967",
+        "1968"
       ]
     },
     {
