@@ -1703,6 +1703,11 @@
           "name": "commit",
           "value": "1fde5dc",
           "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "d989fce",
+          "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     }
