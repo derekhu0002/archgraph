@@ -2162,6 +2162,50 @@
       "name": "create-agent-for-actor",
       "parent": "1249",
       "type": "Skill"
+    },
+    {
+      "id": "2758",
+      "name": "开发EA知识图谱导入导出本地Web服务",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "将目前依赖 Sparx Enterprise Architect (EA) JScript 脚本（eatool/EA-jsscript/export-to-kg.js、import-from-kg.js、import-from-external-package.js）导入/导出知识图谱（design/KG/SystemArchitecture.json）的能力，迁移到一个本地 Web 服务：让从未用过 EA 的用户也能通过浏览器一键导入/导出 ArchGraph 知识图谱（本地运行、零配置、零 EA 依赖、格式与大小校验）。",
+      "testcases": [
+        {
+          "name": "AT-2758-01-本地Web服务导入",
+          "description": "GIVEN 本地 Web 服务已启动且用户持有一个符合 schema 的 SystemArchitecture.json 文件；WHEN 用户在浏览器上传该文件并执行导入；THEN 文件通过校验并成功写入本地图谱 design/KG/SystemArchitecture.json，返回成功结果。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言 docs/ea-web-service-requirements.md 存在并包含 AC-1（导入）与『本地 Web 服务』『不依赖』关键词。"
+        },
+        {
+          "name": "AT-2758-02-导出",
+          "description": "GIVEN 本地 Web 服务已启动且 design/KG/SystemArchitecture.json 存在；WHEN 用户点击导出；THEN 浏览器下载该 JSON 文件，内容与本地文件一致（UTF-8 无 BOM）。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-2（导出）。"
+        },
+        {
+          "name": "AT-2758-03-零EA依赖",
+          "description": "GIVEN 一台未安装 Sparx EA 的机器；WHEN 用户启动本地 Web 服务并执行导入/导出；THEN 功能正常工作，全程不调用任何 EA COM/JScript 组件。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-3（无 EA 依赖）。"
+        },
+        {
+          "name": "AT-2758-04-格式校验",
+          "description": "GIVEN 用户上传一个非法/损坏的 JSON（缺少 elements 或结构不符合 schema）；WHEN 执行导入；THEN 服务返回明确的校验错误信息，且本地图谱 SystemArchitecture.json 不被修改。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-4（格式校验）。"
+        },
+        {
+          "name": "AT-2758-05-大小校验",
+          "description": "GIVEN 用户上传超大文件或非 JSON 文件；WHEN 执行导入；THEN 服务拒绝该文件并给出可读提示，不写入本地图谱。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-5（大小校验）。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -2864,9 +2908,10 @@
       "view_name": "EA Tooling",
       "parent_element_id": "1249",
       "parent_element_name": "Implementation and Migration Viewpoint",
-      "description": "EA 导入/导出工具链视图：SystemArchitecture.json 导入 EA 的 JScript 脚本。",
+      "description": "EA 导入/导出工具链视图：SystemArchitecture.json 导入 EA 的 JScript 脚本，以及本地 Web 服务导入/导出知识图谱（面向无 EA 经验用户）。",
       "included_elements": [
-        "2100"
+        "2100",
+        "2758"
       ],
       "included_relationships": []
     },
