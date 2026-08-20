@@ -667,7 +667,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         },
         {
           "name": "media_id",
@@ -676,8 +676,8 @@
         },
         {
           "name": "status",
-          "value": "BLOCKED",
-          "description": "草稿已创建；freepublish 被 48001 api unauthorized 拒绝（账号无 API 发布权限）"
+          "value": "published",
+          "description": "已在公众号后台手动发布"
         }
       ],
       "testcases": [
@@ -1171,7 +1171,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         },
         {
           "name": "media_id",
@@ -1180,8 +1180,8 @@
         },
         {
           "name": "status",
-          "value": "BLOCKED",
-          "description": "草稿已创建（media_id 已记录）；freepublish 与 sendall 均被 48001 api unauthorized 拒绝（账号无 API 发布/群发权限），需在公众号后台手动发布"
+          "value": "published",
+          "description": "已在公众号后台手动发布"
         }
       ],
       "testcases": [
