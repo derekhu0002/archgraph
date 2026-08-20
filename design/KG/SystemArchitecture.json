@@ -2314,6 +2314,13 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/ea-web-service-impl.test.js",
           "acceptanceCriteria": "执行 node --test tests/ea-web-service-impl.test.js：断言服务模块存在且导出 createServer/discoverProjects/importGraph/exportGraph/editGraph/undoGraph/redoGraph 等；编辑 op 映射到 ARGO MCP 写图接口；真实 MCP 写图回滚；导入校验/撤销重做/服务冒烟通过。"
+        },
+        {
+          "name": "AT-2760-04-代码检视通过",
+          "description": "GIVEN Reviewer 已完成对本地 Web 服务 MVP 的代码检视（架构与安全性）；WHEN 检查检视报告与意图图谱登记；THEN docs/ea-web-service-code-review.md 存在且包含总体结论与问题清单（编号/级别/位置/建议），组件 2760 携带 AT-2760-04（GIVEN-WHEN-THEN、可执行）。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service-code-review.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service-code-review.test.js：断言检视报告存在且含总体结论与问题清单格式；断言组件 2760 携带 AT-2760-04（GIVEN-WHEN-THEN、可执行）。"
         }
       ],
       "type": "Application Component",
