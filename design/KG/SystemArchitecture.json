@@ -3524,6 +3524,17 @@
         "2758"
       ],
       "included_relationships": []
+    },
+    {
+      "view_id": "1802",
+      "view_name": "系统设计师工作记录",
+      "parent_element_id": "2739",
+      "parent_element_name": "caoyang",
+      "description": "系统设计师 caoyang 的长期记忆子视图：EA 知识图谱导入导出本地 Web 服务方案设计。切片（commit fca257c）：产出 docs/ea-web-service-design.md（总体架构分层 + AD-a..AD-i 九个决策 + REST API 清单 + 编辑↔ARGO MCP 映射表 + 前端图数据形态），并登记解决方案架构——Application Component 2760「ArchGraph 本地 Web 服务」+ 5 个 Application Service（导入 2761/导出 2762/搜索 2763/图形化查看 2764/编辑 2765）+ Realization 关系 1980-1985（WP 2758 → 组件；组件 → 各服务），加入 EA Tooling 视图 1800；新增 tests/ea-web-service-design.test.js（8 断言全绿）。关键决策：导入=整体替换+备份；技术栈=Node 内置 http；UI+API 并存；项目按 design/KG/SystemArchitecture.json marker 递归发现、basename 命名；实时读取=fs.watch+轮询兜底；写图=进程内 import argo-mcp-server.js callTool（ARGO_REPO_ROOT 定位项目）；渲染=SVG+力导向（可切分层）；撤销重做=Command+内存栈+快照兜底；数据安全=备份+串行队列+文件锁。转交规划专家/系统架构师评审。",
+      "included_elements": [
+        "2760"
+      ],
+      "included_relationships": []
     }
   ]
 }
