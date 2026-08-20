@@ -21,10 +21,6 @@
       "type": "Grouping",
       "subdiagram_views": [
         {
-          "view_id": "432",
-          "view_name": "workpackage_ground"
-        },
-        {
           "view_id": "178",
           "view_name": "AML Standardization"
         },
@@ -47,6 +43,10 @@
         {
           "view_id": "179",
           "view_name": "KGlibrary Reference Library"
+        },
+        {
+          "view_id": "432",
+          "view_name": "workpackage_ground"
         }
       ]
     },
@@ -58,13 +58,13 @@
       "description": "基于 GitHub 仓库创建 GitHub Pages 主页（home web site），把仓库内容通过静态网页对外发布。Use when the user asks to create a home website for a repository, publish repo content via GitHub Pages, or add an index.html entry page. Reference: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site",
       "attributes": [
         {
-          "content": "---\nname: create-github-repository-page\ndescription: \"基于 GitHub 仓库创建 GitHub Pages 主页（home web site），把仓库内容通过静态网页对外发布。Use when the user asks to create a home website for a repository, publish repo content via GitHub Pages, or add an index.html entry page. Reference: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site\"\nargument-hint: publishing-source-or-repo-root\ndisable-model-invocation: true\n---\n\n# CREATE GITHUB REPOSITORY PAGE\n\n`create-github-repository-page` 负责为当前 GitHub 仓库创建一个可通过浏览器访问的主页（GitHub Pages project site），用静态文件（首选 `index.html`）呈现项目内容。\n\n- 站点入口文件：GitHub Pages 会在发布源根目录查找 `index.html`、`index.md` 或 `README.md` 作为入口。\n- 发布源为分支 + 文件夹时，入口文件必须位于该源文件夹的顶层（例如 `main` 分支的根目录）。\n- Project site 的访问地址固定为 `https://<owner>.github.io/<repository>/`。\n- GitHub Pages 只支持静态内容，不支持 PHP/Ruby/Python 等服务端语言。\n\n## Rules\n\n- **MUST** 在发布源根目录创建 `index.html` 作为主页入口（纯静态站点）。\n- **MUST** 在纯静态 HTML 且不想走 Jekyll 构建时，在发布源根目录放置一个空的 `.nojekyll` 文件。\n- **MUST** 确保仓库对 Pages 可见：GitHub Free 账户下仓库必须是 public。\n- **MUST** 提交并推送到发布源分支后，站点才会构建/发布（首次发布最长约 10 分钟）。\n- **MUST NOT** 在站点内容中暴露密钥或敏感信息（Pages 站点对互联网公开）。\n- **MUST** 通过 `gh` CLI 或 GitHub API 检查/启用 Pages 发布源；若 `gh` 不可用或无权限，则以文档形式给出 Settings → Pages 的手动配置步骤。\n\n## Workflow\n\n### 1. Confirm Repository And Target\n\n确认远程仓库与发布源：\n\n```powershell\ngit remote -v\ngit branch --show-current\n```\n\n项目站点地址：`https://<owner>.github.io/<repository>/`。\n\n### 2. Create The Entry Page\n\n在发布源根目录创建 `index.html`，内容为项目主页：项目名、一句话简介、核心内容说明、仓库链接。保持纯静态、可离线打开。\n\n### 3. Disable Jekyll For Plain Static Sites\n\n发布源根目录放置空文件 `.nojekyll`，避免 GitHub Pages 对纯 HTML 做 Jekyll 处理。\n\n### 4. Enable Pages Publishing Source\n\n优先使用 `gh` CLI（若已认证）：\n\n```powershell\ngh api repos/{owner}/{repo}/pages -X POST -f \"source[branch]=main\" -f \"source[path]=/\"\n```\n\n若 `gh` 不可用，则引导用户在仓库 Settings → Pages 下选择：\n- Source: Deploy from a branch\n- Branch: `main`\n- Folder: `/ (root)`\n\n### 5. Commit And Push\n\n```powershell\ngit add index.html .nojekyll\ngit commit -m \"docs: add GitHub Pages home site\"\ngit push\n```\n\n### 6. Verify\n\n- 本地：直接打开 `index.html` 或用静态服务器验证渲染与内容可读。\n- 线上：访问 `https://<owner>.github.io/<repository>/`，确认内容可查看（首次发布等待构建完成）。\n\n## Output\n\n- 站点入口文件路径\n- 是否放置 `.nojekyll`\n- Pages 发布源配置结果（API 已启用 / 需手动配置）\n- 站点访问 URL\n- 验收结果：内容是否可通过网站查看",
-          "name": "SKILL.md"
-        },
-        {
           "name": "commit",
           "value": "2964b26",
           "description": ".github/skills/create-github-repository-page/SKILL.md (removed); design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "SKILL.md",
+          "description": "---\nname: create-github-repository-page\ndescription: \"基于 GitHub 仓库创建 GitHub Pages 主页（home web site），把仓库内容通过静态网页对外发布。Use when the user asks to create a home website for a repository, publish repo content via GitHub Pages, or add an index.html entry page. Reference: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site\"\nargument-hint: publishing-source-or-repo-root\ndisable-model-invocation: true\n---\n\n# CREATE GITHUB REPOSITORY PAGE\n\n`create-github-repository-page` 负责为当前 GitHub 仓库创建一个可通过浏览器访问的主页（GitHub Pages project site），用静态文件（首选 `index.html`）呈现项目内容。\n\n- 站点入口文件：GitHub Pages 会在发布源根目录查找 `index.html`、`index.md` 或 `README.md` 作为入口。\n- 发布源为分支 + 文件夹时，入口文件必须位于该源文件夹的顶层（例如 `main` 分支的根目录）。\n- Project site 的访问地址固定为 `https://<owner>.github.io/<repository>/`。\n- GitHub Pages 只支持静态内容，不支持 PHP/Ruby/Python 等服务端语言。\n\n## Rules\n\n- **MUST** 在发布源根目录创建 `index.html` 作为主页入口（纯静态站点）。\n- **MUST** 在纯静态 HTML 且不想走 Jekyll 构建时，在发布源根目录放置一个空的 `.nojekyll` 文件。\n- **MUST** 确保仓库对 Pages 可见：GitHub Free 账户下仓库必须是 public。\n- **MUST** 提交并推送到发布源分支后，站点才会构建/发布（首次发布最长约 10 分钟）。\n- **MUST NOT** 在站点内容中暴露密钥或敏感信息（Pages 站点对互联网公开）。\n- **MUST** 通过 `gh` CLI 或 GitHub API 检查/启用 Pages 发布源；若 `gh` 不可用或无权限，则以文档形式给出 Settings → Pages 的手动配置步骤。\n\n## Workflow\n\n### 1. Confirm Repository And Target\n\n确认远程仓库与发布源：\n\n```powershell\ngit remote -v\ngit branch --show-current\n```\n\n项目站点地址：`https://<owner>.github.io/<repository>/`。\n\n### 2. Create The Entry Page\n\n在发布源根目录创建 `index.html`，内容为项目主页：项目名、一句话简介、核心内容说明、仓库链接。保持纯静态、可离线打开。\n\n### 3. Disable Jekyll For Plain Static Sites\n\n发布源根目录放置空文件 `.nojekyll`，避免 GitHub Pages 对纯 HTML 做 Jekyll 处理。\n\n### 4. Enable Pages Publishing Source\n\n优先使用 `gh` CLI（若已认证）：\n\n```powershell\ngh api repos/{owner}/{repo}/pages -X POST -f \"source[branch]=main\" -f \"source[path]=/\"\n```\n\n若 `gh` 不可用，则引导用户在仓库 Settings → Pages 下选择：\n- Source: Deploy from a branch\n- Branch: `main`\n- Folder: `/ (root)`\n\n### 5. Commit And Push\n\n```powershell\ngit add index.html .nojekyll\ngit commit -m \"docs: add GitHub Pages home site\"\ngit push\n```\n\n### 6. Verify\n\n- 本地：直接打开 `index.html` 或用静态服务器验证渲染与内容可读。\n- 线上：访问 `https://<owner>.github.io/<repository>/`，确认内容可查看（首次发布等待构建完成）。\n\n## Output\n\n- 站点入口文件路径\n- 是否放置 `.nojekyll`\n- Pages 发布源配置结果（API 已启用 / 需手动配置）\n- 站点访问 URL\n- 验收结果：内容是否可通过网站查看"
         }
       ]
     },
@@ -77,21 +77,21 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "4252ca8",
-          "description": "index.html; .nojekyll; .github/skills/create-github-repository-page/SKILL.md"
+          "value": "0e54ddd",
+          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
+          "name": "commit",
+          "value": "4252ca8",
+          "description": "index.html; .nojekyll; .github/skills/create-github-repository-page/SKILL.md"
         },
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
         },
         {
-          "name": "commit",
-          "value": "0e54ddd",
-          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -113,8 +113,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "aa932c3",
-          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; design/KG/SystemArchitecture.json"
+          "value": "2458f97",
+          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -123,16 +123,16 @@
         },
         {
           "name": "commit",
-          "value": "2458f97",
-          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; .github/kglibrary.instructions.md; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
+          "value": "aa932c3",
+          "description": "index.html; tests/website.test.js; .github/skills/optimize-web-layout-style/SKILL.md; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -161,57 +161,12 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "098be4e",
-          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e07c6a1",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "c3604e3",
-          "description": "index.html; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "51be801",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "ee62476",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "aa4ef69",
-          "description": "tests/custom-domain.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "e651b0d",
-          "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "e9839a5",
-          "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "25bbc9e",
-          "description": "design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "926aa9c",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "1e777e6",
+          "value": "e07c6a1",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
@@ -221,7 +176,7 @@
         },
         {
           "name": "commit",
-          "value": "7e230f3",
+          "value": "51be801",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
@@ -231,20 +186,65 @@
         },
         {
           "name": "commit",
+          "value": "c3604e3",
+          "description": "index.html; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "e651b0d",
+          "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "926aa9c",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "e9839a5",
+          "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "aa4ef69",
+          "description": "tests/custom-domain.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "25bbc9e",
+          "description": "design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
           "value": "ed90f6a",
           "description": "CNAME; tests/custom-domain.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "7e230f3",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "098be4e",
+          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "1e777e6",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "custom_domain",
           "value": "https://archgraph.org/"
         },
         {
-          "name": "website",
-          "value": "https://derekhu0002.github.io/archgraph/"
-        },
-        {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "website",
+          "value": "https://derekhu0002.github.io/archgraph/"
         }
       ],
       "testcases": [
@@ -272,13 +272,13 @@
       "description": "For the project website (index.html), apply a tech-simple, clean layout and visual style referencing https://www.deepseek.com/, and render a Reference Library (KGlibrary) area that surfaces the reference projects under KGlibrary/. Use when the user asks to optimize/redesign the home website layout or style, or to add a KGlibrary projects section to the site.",
       "attributes": [
         {
-          "content": "---\nname: optimize-web-layout-style\ndescription: \"For the project website (index.html), apply a tech-simple, clean layout and visual style referencing https://www.deepseek.com/, and render a Reference Library (KGlibrary) area that surfaces the reference projects under KGlibrary/. Use when the user asks to optimize/redesign the home website layout or style, or to add a KGlibrary projects section to the site.\"\nargument-hint: site-root\ndisable-model-invocation: true\n---\n\n# OPTIMIZE WEB LAYOUT AND STYLE\n\n`optimize-web-layout-style` 负责把本项目主页（`index.html`）优化为「科技简洁」的布局与风格，并在页面中呈现 KGlibrary 参考库里的其他项目信息。\n\n- 视觉参考：https://www.deepseek.com/ —— 浅色科技主题、留白充足、克制的边框、单一主强调色（蓝）、卡片化内容分区。\n- 页面是纯静态 GitHub Pages 站点：保持 `index.html` 单文件、可离线打开、不依赖服务端语言。\n- KGlibrary 参考库：`KGlibrary/<project>/info.md` 使用 YAML frontmatter 描述项目（见 `.github/kglibrary.instructions.md`）。\n\n## Rules\n\n- **MUST** 保持纯静态、单文件 `index.html`，不引入构建步骤或运行时依赖（CDN 字体/图标除外，且需可降级）。\n- **MUST** 采用科技简洁风格：浅色背景 + 单一蓝色主强调色，顶部固定导航栏，Hero 首屏，正文卡片化分区。\n- **MUST** 在页面中提供 `id=\"kglibrary\"` 的 Reference Library 区域，列出 KGlibrary 中每个参考项目的 `name`、`description` 与 `repo` 链接。\n- **MUST** 给 `<html>`（或 `<body>`）标注 `data-theme=\"light\"`，作为浅色科技主题的可验证标记。\n- **MUST** 页面内容与 `KGlibrary/*/info.md` 保持同步；修改 KGlibrary 后需同步刷新该区域。\n- **MUST NOT** 在站点中暴露密钥、token 等敏感信息（Pages 站点公开可访问）。\n\n## Workflow\n\n### 1. Inventory KGlibrary Projects\n\n读取 `KGlibrary/*/info.md` 的 frontmatter（`name`、`description`、`repo`、`branch`、`commit_id`），得到需要展示的项目列表。\n\n### 2. Redesign The Layout\n\n在 `index.html` 中按「科技简洁」风格组织内容：\n\n1. 顶部固定导航栏（项目名 + 锚点链接 + GitHub 仓库链接）。\n2. Hero 首屏：项目名、一句话标语、行动按钮（GitHub / Reference Library）。\n3. 正文分区：What is this? / Core principles（卡片）/ Repository map / Reference Library（`#kglibrary`）/ Links。\n4. 页脚。\n\n### 3. Render The Reference Library Area\n\n在 `#kglibrary` 区域内，为每个 KGlibrary 项目生成一张卡片：项目名、描述、仓库链接（`repo`）、分支与 commit 短哈希（若 frontmatter 提供）。\n\n### 4. Verify\n\n- 本地：用静态服务器或直接打开 `index.html`，确认导航、Hero、各分区与 KGlibrary 区域渲染正常。\n- 自动化：运行 `node --test tests/website.test.js`，确保 `layout-style` 与 `kglibrary-area` 两个验收用例全部通过。\n\n### 5. Commit And Register\n\n`git add` 变更文件并提交，然后把「commit id + 相关文件路径」回登记到意图架构图谱中对应的 Work Package（本任务为 1317）。\n\n## Output\n\n- 重写后的 `index.html` 路径\n- KGlibrary 区域展示的项目清单\n- 验收测试运行结果\n- commit id 与回登记结果",
-          "name": "SKILL.md"
-        },
-        {
           "name": "commit",
           "value": "2964b26",
           "description": ".github/skills/optimize-web-layout-style/SKILL.md (removed); design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "SKILL.md",
+          "description": "---\nname: optimize-web-layout-style\ndescription: \"For the project website (index.html), apply a tech-simple, clean layout and visual style referencing https://www.deepseek.com/, and render a Reference Library (KGlibrary) area that surfaces the reference projects under KGlibrary/. Use when the user asks to optimize/redesign the home website layout or style, or to add a KGlibrary projects section to the site.\"\nargument-hint: site-root\ndisable-model-invocation: true\n---\n\n# OPTIMIZE WEB LAYOUT AND STYLE\n\n`optimize-web-layout-style` 负责把本项目主页（`index.html`）优化为「科技简洁」的布局与风格，并在页面中呈现 KGlibrary 参考库里的其他项目信息。\n\n- 视觉参考：https://www.deepseek.com/ —— 浅色科技主题、留白充足、克制的边框、单一主强调色（蓝）、卡片化内容分区。\n- 页面是纯静态 GitHub Pages 站点：保持 `index.html` 单文件、可离线打开、不依赖服务端语言。\n- KGlibrary 参考库：`KGlibrary/<project>/info.md` 使用 YAML frontmatter 描述项目（见 `.github/kglibrary.instructions.md`）。\n\n## Rules\n\n- **MUST** 保持纯静态、单文件 `index.html`，不引入构建步骤或运行时依赖（CDN 字体/图标除外，且需可降级）。\n- **MUST** 采用科技简洁风格：浅色背景 + 单一蓝色主强调色，顶部固定导航栏，Hero 首屏，正文卡片化分区。\n- **MUST** 在页面中提供 `id=\"kglibrary\"` 的 Reference Library 区域，列出 KGlibrary 中每个参考项目的 `name`、`description` 与 `repo` 链接。\n- **MUST** 给 `<html>`（或 `<body>`）标注 `data-theme=\"light\"`，作为浅色科技主题的可验证标记。\n- **MUST** 页面内容与 `KGlibrary/*/info.md` 保持同步；修改 KGlibrary 后需同步刷新该区域。\n- **MUST NOT** 在站点中暴露密钥、token 等敏感信息（Pages 站点公开可访问）。\n\n## Workflow\n\n### 1. Inventory KGlibrary Projects\n\n读取 `KGlibrary/*/info.md` 的 frontmatter（`name`、`description`、`repo`、`branch`、`commit_id`），得到需要展示的项目列表。\n\n### 2. Redesign The Layout\n\n在 `index.html` 中按「科技简洁」风格组织内容：\n\n1. 顶部固定导航栏（项目名 + 锚点链接 + GitHub 仓库链接）。\n2. Hero 首屏：项目名、一句话标语、行动按钮（GitHub / Reference Library）。\n3. 正文分区：What is this? / Core principles（卡片）/ Repository map / Reference Library（`#kglibrary`）/ Links。\n4. 页脚。\n\n### 3. Render The Reference Library Area\n\n在 `#kglibrary` 区域内，为每个 KGlibrary 项目生成一张卡片：项目名、描述、仓库链接（`repo`）、分支与 commit 短哈希（若 frontmatter 提供）。\n\n### 4. Verify\n\n- 本地：用静态服务器或直接打开 `index.html`，确认导航、Hero、各分区与 KGlibrary 区域渲染正常。\n- 自动化：运行 `node --test tests/website.test.js`，确保 `layout-style` 与 `kglibrary-area` 两个验收用例全部通过。\n\n### 5. Commit And Register\n\n`git add` 变更文件并提交，然后把「commit id + 相关文件路径」回登记到意图架构图谱中对应的 Work Package（本任务为 1317）。\n\n## Output\n\n- 重写后的 `index.html` 路径\n- KGlibrary 区域展示的项目清单\n- 验收测试运行结果\n- commit id 与回登记结果"
         }
       ]
     },
@@ -290,13 +290,13 @@
       "description": "KGlibrary 参考项目 info.md 的 YAML frontmatter 格式规则：每个 KGlibrary/<project>/info.md 必须用 frontmatter（name/description/repo，建议 branch/commit_id），供网站主页、Agent 与自动化脚本统一消费；修改后需同步刷新 index.html #kglibrary 区域并运行 node --test tests/website.test.js 验证同步。",
       "attributes": [
         {
-          "content": "# KGlibrary Info Format (global rule)\n\nKGlibrary 是本项目积累的参考项目知识库。每个参考项目位于 `KGlibrary/<project>/`，并必须提供一份 `info.md`，供网站主页、Agent 与自动化脚本统一消费。\n\n## Rules\n\n- **MUST** 每个参考项目在 `KGlibrary/<project>/info.md` 顶部使用 YAML frontmatter，且至少包含以下键：\n  - `name`：项目名（字符串）\n  - `description`：一句话简介（字符串，建议加引号）\n  - `repo`：GitHub 仓库完整 URL（https://github.com/<owner>/<repo>）\n- **SHOULD** 额外提供：\n  - `branch`：主分支名（默认 `main`）\n  - `commit_id`：被收录时的提交 SHA\n- **MUST** frontmatter 之后可以书写正文（如该项目 SystemArchitecture.json 的摘要），正文不影响机器消费。\n- **MUST** 当新增或修改 `KGlibrary/*/info.md` 时，同步刷新网站主页 `index.html` 中的 `#kglibrary` 区域，并运行 `node --test tests/website.test.js` 验证同步。\n\n## Example\n\n```markdown\n---\nname: XKG-TEST\ndescription: \"a test repo which created a online mindmapping draft panel\"\nrepo: https://github.com/derekhu0002/XKG-TEST\nbranch: main\ncommit_id: 1372c4e528f1ae93538af37272f0937fa52bdfee\n---\n\n正文摘要…\n```",
-          "name": "kglibrary.instructions.md"
+          "name": "commit",
+          "value": "6dcc740",
+          "description": ".github/kglibrary.instructions.md (removed); design/KG/SystemArchitecture.json"
         },
         {
-          "description": ".github/kglibrary.instructions.md (removed); design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "6dcc740"
+          "name": "kglibrary.instructions.md",
+          "description": "# KGlibrary Info Format (global rule)\n\nKGlibrary 是本项目积累的参考项目知识库。每个参考项目位于 `KGlibrary/<project>/`，并必须提供一份 `info.md`，供网站主页、Agent 与自动化脚本统一消费。\n\n## Rules\n\n- **MUST** 每个参考项目在 `KGlibrary/<project>/info.md` 顶部使用 YAML frontmatter，且至少包含以下键：\n  - `name`：项目名（字符串）\n  - `description`：一句话简介（字符串，建议加引号）\n  - `repo`：GitHub 仓库完整 URL（https://github.com/<owner>/<repo>）\n- **SHOULD** 额外提供：\n  - `branch`：主分支名（默认 `main`）\n  - `commit_id`：被收录时的提交 SHA\n- **MUST** frontmatter 之后可以书写正文（如该项目 SystemArchitecture.json 的摘要），正文不影响机器消费。\n- **MUST** 当新增或修改 `KGlibrary/*/info.md` 时，同步刷新网站主页 `index.html` 中的 `#kglibrary` 区域，并运行 `node --test tests/website.test.js` 验证同步。\n\n## Example\n\n```markdown\n---\nname: XKG-TEST\ndescription: \"a test repo which created a online mindmapping draft panel\"\nrepo: https://github.com/derekhu0002/XKG-TEST\nbranch: main\ncommit_id: 1372c4e528f1ae93538af37272f0937fa52bdfee\n---\n\n正文摘要…\n```"
         }
       ]
     },
@@ -309,17 +309,7 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "dc84086",
-          "description": "README.md; tests/readme.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "ca32794",
-          "description": "README.md; tests/project-name.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "f98b61f",
+          "value": "51be801",
           "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
         },
         {
@@ -329,13 +319,18 @@
         },
         {
           "name": "commit",
-          "value": "c8f2d74",
-          "description": "restore .github/skills/argo-init/SKILL.md; README.md; index.html; design/KG/SystemArchitecture.json"
+          "value": "dc84086",
+          "description": "README.md; tests/readme.test.js"
         },
         {
           "name": "commit",
-          "value": "2acf056",
+          "value": "f98b61f",
           "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "ca32794",
+          "description": "README.md; tests/project-name.test.js"
         },
         {
           "name": "commit",
@@ -349,16 +344,21 @@
         },
         {
           "name": "commit",
-          "value": "51be801",
+          "value": "2acf056",
           "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
+          "name": "commit",
+          "value": "c8f2d74",
+          "description": "restore .github/skills/argo-init/SKILL.md; README.md; index.html; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -387,21 +387,21 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "2e5c6b9",
-          "description": "docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "2040682",
           "description": "README.md; design/KG/SystemArchitecture.json; .github/skills/diagram-draw/SKILL.md; .github/skills/diagram-draw/renderExcalidrawSvg.js; docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js"
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
+          "name": "commit",
+          "value": "2e5c6b9",
+          "description": "docs/diagrams/global-architecture.excalidraw; docs/diagrams/global-architecture.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -422,17 +422,17 @@
       "description": "Draw architecture diagrams as Excalidraw JSON and render them to SVG for embedding in the README. Use when the user asks to draw or insert a diagram (e.g. a Layered Viewpoint architecture diagram) into documentation. Reference: https://github.com/coleam00/excalidraw-diagram-skill",
       "attributes": [
         {
-          "content": "---\nname: diagram-draw\ndescription: \"Draw architecture diagrams as Excalidraw JSON and render them to SVG for embedding in the README. Use when the user asks to draw or insert a diagram (e.g. a Layered Viewpoint architecture diagram) into documentation. Reference: https://github.com/coleam00/excalidraw-diagram-skill\"\nargument-hint: viewpoint-or-topic\ndisable-model-invocation: true\n---\n\n# DIAGRAM DRAW\n\n`diagram-draw` 负责用 Excalidraw 格式绘制架构图，并通过仓库原生的 SVG 渲染器导出为可嵌入 README 的 SVG 图片。方法论源自 [excalidraw-diagram-skill](https://github.com/coleam00/excalidraw-diagram-skill)。\n\n- 图要「论证」而不是「陈列」：形状、分层与箭头要表达关系与因果，而不是一排等宽卡片。\n- 采用 ArchiMate 的 **Layered Viewpoint**：按 Actor/Role、Business/Process、Application、Technology 等专用层组织，层与层之间用箭头表达 realize/serve/use 关系。\n- 每一层是一个横向 band（虚线框 + 层标题），层内放置对应元素，层间用带箭头的连线表达关系。\n\n## Rules\n\n- **MUST** 先确定要表达的元素与关系，再决定坐标；每张图至少覆盖 Actor/Role、Application、Technology 三个专用层。\n- **MUST** 使用语义色区分元素类别：Actor（蓝）、Process/AGENT（绿）、Application（橙）、Technology/Data（紫）、标准/约束（灰），不随意新造颜色。\n- **MUST** 将可编辑源文件保存为 `docs/diagrams/<name>.excalidraw`（Excalidraw JSON v2）。\n- **MUST** 用仓库原生渲染器导出 SVG：`node .github/skills/diagram-draw/renderExcalidrawSvg.js docs/diagrams/<name>.excalidraw docs/diagrams/<name>.svg`，并将 SVG 嵌入 README。\n- **MUST** 元素 ID 使用可读的 `snake_case`，文本 `text` 只包含可读文字。\n- **MUST NOT** 在图中暴露密钥或敏感信息。\n\n## Workflow\n\n### 1. Plan the layers and relationships\n\n列出要表达的元素（如 人类、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA），把它们归入 Layered Viewpoint 的专用层，并写出每一条关系（谁作用于谁、方向如何）。\n\n### 2. Author the Excalidraw source\n\n在 `docs/diagrams/<name>.excalidraw` 中手写 Excalidraw JSON v2，元素类型仅用：\n\n- `rectangle` — 层 band 与元素框\n- `ellipse` — 起止点/外部系统\n- `diamond` — 决策\n- `text` — 层标题、框内标签、箭头旁注释\n- `arrow` — 层间关系（`points` 为相对 `x,y` 的偏移）\n\n常用属性：`roughness: 0`、`opacity: 100`、`strokeStyle: \"solid\"|\"dashed\"`、`fontFamily: 3`。\n\n### 3. Render to SVG\n\n```powershell\nnode .github/skills/diagram-draw/renderExcalidrawSvg.js docs/diagrams/<name>.excalidraw docs/diagrams/<name>.svg\n```\n\n### 4. Embed in README\n\n在 README 中新增 Architecture 章节，用 Markdown 图片语法引用 SVG，并保留 `.excalidraw` 源文件链接：\n\n```markdown\n![<名称>](docs/diagrams/<name>.svg)\n\nEditable source: [`docs/diagrams/<name>.excalidraw`](docs/diagrams/<name>.excalidraw)\n```\n\n### 5. Verify\n\n```powershell\nnode --test\n```\n\n## Output\n\n- `.excalidraw` 源文件路径\n- 生成的 `.svg` 路径\n- README 中嵌入的章节\n- 验收测试运行结果\n- commit id 与回登记结果",
-          "name": "SKILL.md"
-        },
-        {
-          "content": "#!/usr/bin/env node\n'use strict';\n\n/**\n * Render a subset of Excalidraw JSON v2 elements to a standalone SVG file.\n *\n * Usage:\n *   node .github/skills/diagram-draw/renderExcalidrawSvg.js <input.excalidraw> [output.svg]\n *\n * Supported element types: rectangle, ellipse, diamond, line, arrow, text.\n * Text supports `\\n` line breaks and textAlign/verticalAlign centering.\n */\n\nconst fs = require('node:fs');\nconst path = require('node:path');\n\nconst DEFAULT_VIEWBOX = { x: 0, y: 0, width: 1400, height: 760 };\n\nfunction attr(attributes) {\n  return Object.entries(attributes)\n    .filter(([, value]) => value !== undefined && value !== null)\n    .map(([key, value]) => `${key}=\"${escapeXml(String(value))}\"`)\n    .join(' ');\n}\n\nfunction escapeXml(value) {\n  return String(value)\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;');\n}\n\nfunction paintAttributes(el) {\n  const dash = el.strokeStyle === 'dashed' ? '6 4' : el.strokeStyle === 'dotted' ? '2 4' : undefined;\n  return {\n    fill: el.backgroundColor && el.backgroundColor !== 'transparent' ? el.backgroundColor : 'none',\n    stroke: el.strokeColor || '#1e1e1e',\n    'stroke-width': el.strokeWidth || 1,\n    'stroke-dasharray': dash,\n    'stroke-linecap': 'round',\n    'stroke-linejoin': 'round',\n    opacity: typeof el.opacity === 'number' ? el.opacity / 100 : 1,\n  };\n}\n\nfunction renderRectangle(el) {\n  const roundness = el.roundness && el.roundness.type === 3 ? Math.min(el.width, el.height) * 0.15 : 0;\n  return `<rect x=\"${el.x}\" y=\"${el.y}\" width=\"${el.width}\" height=\"${el.height}\" rx=\"${roundness}\" ${attr(paintAttributes(el))} />`;\n}\n\nfunction renderEllipse(el) {\n  return `<ellipse cx=\"${el.x + el.width / 2}\" cy=\"${el.y + el.height / 2}\" rx=\"${el.width / 2}\" ry=\"${el.height / 2}\" ${attr(paintAttributes(el))} />`;\n}\n\nfunction renderDiamond(el) {\n  const points = [\n    `${el.x + el.width / 2},${el.y}`,\n    `${el.x + el.width},${el.y + el.height / 2}`,\n    `${el.x + el.width / 2},${el.y + el.height}`,\n    `${el.x},${el.y + el.height / 2}`,\n  ].join(' ');\n  return `<polygon points=\"${points}\" ${attr(paintAttributes(el))} />`;\n}\n\nfunction absolutePoints(el) {\n  return (el.points || []).map(([px, py]) => [el.x + px, el.y + py]);\n}\n\nfunction renderLine(el, isArrow) {\n  const points = absolutePoints(el);\n  if (points.length < 2) return '';\n  const polyline = points.map(([x, y]) => `${x},${y}`).join(' ');\n  const marker = isArrow && el.endArrowhead ? ' marker-end=\"url(#arrowhead)\"' : '';\n  return `<polyline points=\"${polyline}\" ${attr(paintAttributes(el))}${marker} />`;\n}\n\nfunction renderText(el) {\n  const lines = String(el.text || '').split('\\n');\n  const fontSize = el.fontSize || 16;\n  const lineHeight = (el.lineHeight || 1.25) * fontSize;\n  const anchor = el.textAlign === 'center' ? 'middle' : el.textAlign === 'right' ? 'end' : 'start';\n  const x =\n    anchor === 'middle' ? el.x + el.width / 2 : anchor === 'end' ? el.x + el.width : el.x;\n\n  let firstBaseline;\n  if (el.verticalAlign === 'middle') {\n    firstBaseline = el.y + el.height / 2 - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.75;\n  } else if (el.verticalAlign === 'bottom') {\n    firstBaseline = el.y + el.height - (lines.length - 1) * lineHeight - fontSize * 0.25;\n  } else {\n    firstBaseline = el.y + fontSize;\n  }\n\n  const tspans = lines\n    .map((line, index) => {\n      const dy = index === 0 ? '' : ` dy=\"${lineHeight}\"`;\n      return `<tspan x=\"${x}\"${dy}>${escapeXml(line)}</tspan>`;\n    })\n    .join('');\n\n  return `<text x=\"${x}\" y=\"${firstBaseline}\" text-anchor=\"${anchor}\" font-family=\"ui-monospace, 'Cascadia Code', Consolas, monospace\" font-size=\"${fontSize}\" fill=\"${el.strokeColor || '#1e1e1e'}\" style=\"white-space: pre;\">${tspans}</text>`;\n}\n\nfunction renderElement(el) {\n  switch (el.type) {\n    case 'rectangle':\n      return renderRectangle(el);\n    case 'ellipse':\n      return renderEllipse(el);\n    case 'diamond':\n      return renderDiamond(el);\n    case 'line':\n      return renderLine(el, false);\n    case 'arrow':\n      return renderLine(el, true);\n    case 'text':\n      return renderText(el);\n    default:\n      return '';\n  }\n}\n\nfunction computeViewBox(document) {\n  if (!Array.isArray(document.elements) || document.elements.length === 0) return DEFAULT_VIEWBOX;\n  const xs = [];\n  const ys = [];\n  for (const el of document.elements) {\n    if (el.type === 'line' || el.type === 'arrow') {\n      for (const [x, y] of absolutePoints(el)) {\n        xs.push(x);\n        ys.push(y);\n      }\n    } else {\n      xs.push(el.x);\n      ys.push(el.y);\n      if (typeof el.width === 'number') xs.push(el.x + el.width);\n      if (typeof el.height === 'number') ys.push(el.y + el.height);\n    }\n  }\n  const minX = Math.min(...xs) - 20;\n  const minY = Math.min(...ys) - 20;\n  const maxX = Math.max(...xs) + 20;\n  const maxY = Math.max(...ys) + 20;\n  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };\n}\n\nfunction render(document) {\n  const viewBox = computeViewBox(document);\n  const body = (document.elements || []).map(renderElement).filter(Boolean).join('\\n  ');\n  return [\n    '<svg xmlns=\"http://www.w3.org/2000/svg\"',\n    `  viewBox=\"${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}\"`,\n    '  width=\"100%\"',\n    '  style=\"background:#ffffff; max-width: 1100px;\">',\n    '  <defs>',\n    '    <marker id=\"arrowhead\" markerWidth=\"10\" markerHeight=\"10\" refX=\"8\" refY=\"3\" orient=\"auto\" markerUnits=\"strokeWidth\">',\n    '      <path d=\"M0,0 L0,6 L9,3 z\" fill=\"#3b5bdb\" />',\n    '    </marker>',\n    '  </defs>',\n    `  ${body}`,\n    '</svg>',\n    '',\n  ].join('\\n');\n}\n\nfunction main() {\n  const input = process.argv[2];\n  if (!input) {\n    console.error('Usage: node .github/skills/diagram-draw/renderExcalidrawSvg.js <input.excalidraw> [output.svg]');\n    process.exit(1);\n  }\n  const inputPath = path.resolve(input);\n  const outputPath = path.resolve(process.argv[3] || inputPath.replace(/\\.excalidraw$/, '.svg'));\n  const document = JSON.parse(fs.readFileSync(inputPath, 'utf8'));\n  fs.writeFileSync(outputPath, render(document), 'utf8');\n  console.log(`Rendered ${path.basename(outputPath)} from ${path.basename(inputPath)}`);\n}\n\nmain();\n",
-          "name": "renderExcalidrawSvg.js"
-        },
-        {
           "name": "commit",
           "value": "2964b26",
           "description": ".github/skills/diagram-draw/SKILL.md (removed); .github/skills/diagram-draw/renderExcalidrawSvg.js (removed); design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "renderExcalidrawSvg.js",
+          "description": "#!/usr/bin/env node\n'use strict';\n\n/**\n * Render a subset of Excalidraw JSON v2 elements to a standalone SVG file.\n *\n * Usage:\n *   node .github/skills/diagram-draw/renderExcalidrawSvg.js <input.excalidraw> [output.svg]\n *\n * Supported element types: rectangle, ellipse, diamond, line, arrow, text.\n * Text supports `\\n` line breaks and textAlign/verticalAlign centering.\n */\n\nconst fs = require('node:fs');\nconst path = require('node:path');\n\nconst DEFAULT_VIEWBOX = { x: 0, y: 0, width: 1400, height: 760 };\n\nfunction attr(attributes) {\n  return Object.entries(attributes)\n    .filter(([, value]) => value !== undefined && value !== null)\n    .map(([key, value]) => `${key}=\"${escapeXml(String(value))}\"`)\n    .join(' ');\n}\n\nfunction escapeXml(value) {\n  return String(value)\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;');\n}\n\nfunction paintAttributes(el) {\n  const dash = el.strokeStyle === 'dashed' ? '6 4' : el.strokeStyle === 'dotted' ? '2 4' : undefined;\n  return {\n    fill: el.backgroundColor && el.backgroundColor !== 'transparent' ? el.backgroundColor : 'none',\n    stroke: el.strokeColor || '#1e1e1e',\n    'stroke-width': el.strokeWidth || 1,\n    'stroke-dasharray': dash,\n    'stroke-linecap': 'round',\n    'stroke-linejoin': 'round',\n    opacity: typeof el.opacity === 'number' ? el.opacity / 100 : 1,\n  };\n}\n\nfunction renderRectangle(el) {\n  const roundness = el.roundness && el.roundness.type === 3 ? Math.min(el.width, el.height) * 0.15 : 0;\n  return `<rect x=\"${el.x}\" y=\"${el.y}\" width=\"${el.width}\" height=\"${el.height}\" rx=\"${roundness}\" ${attr(paintAttributes(el))} />`;\n}\n\nfunction renderEllipse(el) {\n  return `<ellipse cx=\"${el.x + el.width / 2}\" cy=\"${el.y + el.height / 2}\" rx=\"${el.width / 2}\" ry=\"${el.height / 2}\" ${attr(paintAttributes(el))} />`;\n}\n\nfunction renderDiamond(el) {\n  const points = [\n    `${el.x + el.width / 2},${el.y}`,\n    `${el.x + el.width},${el.y + el.height / 2}`,\n    `${el.x + el.width / 2},${el.y + el.height}`,\n    `${el.x},${el.y + el.height / 2}`,\n  ].join(' ');\n  return `<polygon points=\"${points}\" ${attr(paintAttributes(el))} />`;\n}\n\nfunction absolutePoints(el) {\n  return (el.points || []).map(([px, py]) => [el.x + px, el.y + py]);\n}\n\nfunction renderLine(el, isArrow) {\n  const points = absolutePoints(el);\n  if (points.length < 2) return '';\n  const polyline = points.map(([x, y]) => `${x},${y}`).join(' ');\n  const marker = isArrow && el.endArrowhead ? ' marker-end=\"url(#arrowhead)\"' : '';\n  return `<polyline points=\"${polyline}\" ${attr(paintAttributes(el))}${marker} />`;\n}\n\nfunction renderText(el) {\n  const lines = String(el.text || '').split('\\n');\n  const fontSize = el.fontSize || 16;\n  const lineHeight = (el.lineHeight || 1.25) * fontSize;\n  const anchor = el.textAlign === 'center' ? 'middle' : el.textAlign === 'right' ? 'end' : 'start';\n  const x =\n    anchor === 'middle' ? el.x + el.width / 2 : anchor === 'end' ? el.x + el.width : el.x;\n\n  let firstBaseline;\n  if (el.verticalAlign === 'middle') {\n    firstBaseline = el.y + el.height / 2 - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.75;\n  } else if (el.verticalAlign === 'bottom') {\n    firstBaseline = el.y + el.height - (lines.length - 1) * lineHeight - fontSize * 0.25;\n  } else {\n    firstBaseline = el.y + fontSize;\n  }\n\n  const tspans = lines\n    .map((line, index) => {\n      const dy = index === 0 ? '' : ` dy=\"${lineHeight}\"`;\n      return `<tspan x=\"${x}\"${dy}>${escapeXml(line)}</tspan>`;\n    })\n    .join('');\n\n  return `<text x=\"${x}\" y=\"${firstBaseline}\" text-anchor=\"${anchor}\" font-family=\"ui-monospace, 'Cascadia Code', Consolas, monospace\" font-size=\"${fontSize}\" fill=\"${el.strokeColor || '#1e1e1e'}\" style=\"white-space: pre;\">${tspans}</text>`;\n}\n\nfunction renderElement(el) {\n  switch (el.type) {\n    case 'rectangle':\n      return renderRectangle(el);\n    case 'ellipse':\n      return renderEllipse(el);\n    case 'diamond':\n      return renderDiamond(el);\n    case 'line':\n      return renderLine(el, false);\n    case 'arrow':\n      return renderLine(el, true);\n    case 'text':\n      return renderText(el);\n    default:\n      return '';\n  }\n}\n\nfunction computeViewBox(document) {\n  if (!Array.isArray(document.elements) || document.elements.length === 0) return DEFAULT_VIEWBOX;\n  const xs = [];\n  const ys = [];\n  for (const el of document.elements) {\n    if (el.type === 'line' || el.type === 'arrow') {\n      for (const [x, y] of absolutePoints(el)) {\n        xs.push(x);\n        ys.push(y);\n      }\n    } else {\n      xs.push(el.x);\n      ys.push(el.y);\n      if (typeof el.width === 'number') xs.push(el.x + el.width);\n      if (typeof el.height === 'number') ys.push(el.y + el.height);\n    }\n  }\n  const minX = Math.min(...xs) - 20;\n  const minY = Math.min(...ys) - 20;\n  const maxX = Math.max(...xs) + 20;\n  const maxY = Math.max(...ys) + 20;\n  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };\n}\n\nfunction render(document) {\n  const viewBox = computeViewBox(document);\n  const body = (document.elements || []).map(renderElement).filter(Boolean).join('\\n  ');\n  return [\n    '<svg xmlns=\"http://www.w3.org/2000/svg\"',\n    `  viewBox=\"${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}\"`,\n    '  width=\"100%\"',\n    '  style=\"background:#ffffff; max-width: 1100px;\">',\n    '  <defs>',\n    '    <marker id=\"arrowhead\" markerWidth=\"10\" markerHeight=\"10\" refX=\"8\" refY=\"3\" orient=\"auto\" markerUnits=\"strokeWidth\">',\n    '      <path d=\"M0,0 L0,6 L9,3 z\" fill=\"#3b5bdb\" />',\n    '    </marker>',\n    '  </defs>',\n    `  ${body}`,\n    '</svg>',\n    '',\n  ].join('\\n');\n}\n\nfunction main() {\n  const input = process.argv[2];\n  if (!input) {\n    console.error('Usage: node .github/skills/diagram-draw/renderExcalidrawSvg.js <input.excalidraw> [output.svg]');\n    process.exit(1);\n  }\n  const inputPath = path.resolve(input);\n  const outputPath = path.resolve(process.argv[3] || inputPath.replace(/\\.excalidraw$/, '.svg'));\n  const document = JSON.parse(fs.readFileSync(inputPath, 'utf8'));\n  fs.writeFileSync(outputPath, render(document), 'utf8');\n  console.log(`Rendered ${path.basename(outputPath)} from ${path.basename(inputPath)}`);\n}\n\nmain();\n"
+        },
+        {
+          "name": "SKILL.md",
+          "description": "---\nname: diagram-draw\ndescription: \"Draw architecture diagrams as Excalidraw JSON and render them to SVG for embedding in the README. Use when the user asks to draw or insert a diagram (e.g. a Layered Viewpoint architecture diagram) into documentation. Reference: https://github.com/coleam00/excalidraw-diagram-skill\"\nargument-hint: viewpoint-or-topic\ndisable-model-invocation: true\n---\n\n# DIAGRAM DRAW\n\n`diagram-draw` 负责用 Excalidraw 格式绘制架构图，并通过仓库原生的 SVG 渲染器导出为可嵌入 README 的 SVG 图片。方法论源自 [excalidraw-diagram-skill](https://github.com/coleam00/excalidraw-diagram-skill)。\n\n- 图要「论证」而不是「陈列」：形状、分层与箭头要表达关系与因果，而不是一排等宽卡片。\n- 采用 ArchiMate 的 **Layered Viewpoint**：按 Actor/Role、Business/Process、Application、Technology 等专用层组织，层与层之间用箭头表达 realize/serve/use 关系。\n- 每一层是一个横向 band（虚线框 + 层标题），层内放置对应元素，层间用带箭头的连线表达关系。\n\n## Rules\n\n- **MUST** 先确定要表达的元素与关系，再决定坐标；每张图至少覆盖 Actor/Role、Application、Technology 三个专用层。\n- **MUST** 使用语义色区分元素类别：Actor（蓝）、Process/AGENT（绿）、Application（橙）、Technology/Data（紫）、标准/约束（灰），不随意新造颜色。\n- **MUST** 将可编辑源文件保存为 `docs/diagrams/<name>.excalidraw`（Excalidraw JSON v2）。\n- **MUST** 用仓库原生渲染器导出 SVG：`node .github/skills/diagram-draw/renderExcalidrawSvg.js docs/diagrams/<name>.excalidraw docs/diagrams/<name>.svg`，并将 SVG 嵌入 README。\n- **MUST** 元素 ID 使用可读的 `snake_case`，文本 `text` 只包含可读文字。\n- **MUST NOT** 在图中暴露密钥或敏感信息。\n\n## Workflow\n\n### 1. Plan the layers and relationships\n\n列出要表达的元素（如 人类、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA），把它们归入 Layered Viewpoint 的专用层，并写出每一条关系（谁作用于谁、方向如何）。\n\n### 2. Author the Excalidraw source\n\n在 `docs/diagrams/<name>.excalidraw` 中手写 Excalidraw JSON v2，元素类型仅用：\n\n- `rectangle` — 层 band 与元素框\n- `ellipse` — 起止点/外部系统\n- `diamond` — 决策\n- `text` — 层标题、框内标签、箭头旁注释\n- `arrow` — 层间关系（`points` 为相对 `x,y` 的偏移）\n\n常用属性：`roughness: 0`、`opacity: 100`、`strokeStyle: \"solid\"|\"dashed\"`、`fontFamily: 3`。\n\n### 3. Render to SVG\n\n```powershell\nnode .github/skills/diagram-draw/renderExcalidrawSvg.js docs/diagrams/<name>.excalidraw docs/diagrams/<name>.svg\n```\n\n### 4. Embed in README\n\n在 README 中新增 Architecture 章节，用 Markdown 图片语法引用 SVG，并保留 `.excalidraw` 源文件链接：\n\n```markdown\n![<名称>](docs/diagrams/<name>.svg)\n\nEditable source: [`docs/diagrams/<name>.excalidraw`](docs/diagrams/<name>.excalidraw)\n```\n\n### 5. Verify\n\n```powershell\nnode --test\n```\n\n## Output\n\n- `.excalidraw` 源文件路径\n- 生成的 `.svg` 路径\n- README 中嵌入的章节\n- 验收测试运行结果\n- commit id 与回登记结果"
         }
       ]
     },
@@ -450,18 +450,8 @@
         },
         {
           "name": "commit",
-          "value": "4027dd0",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "098be4e",
           "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; tests/website.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "926aa9c",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -469,12 +459,22 @@
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
+          "name": "commit",
+          "value": "4027dd0",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "926aa9c",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -496,8 +496,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "ee62476",
-          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
+          "value": "9973aa1",
+          "description": "docs/agent-programming-language.md"
         },
         {
           "name": "commit",
@@ -506,26 +506,26 @@
         },
         {
           "name": "commit",
-          "value": "2f6ac7c",
-          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
           "value": "44e1cf0",
           "description": "docs/agent-programming-language.md; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "9973aa1",
-          "description": "docs/agent-programming-language.md"
+          "value": "ee62476",
+          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
+          "name": "commit",
+          "value": "2f6ac7c",
+          "description": "docs/agent-programming-language.html; tests/agent-programming-language.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -561,13 +561,14 @@
     {
       "id": "1335",
       "name": "用AML建模GPT-Researcher多Agent研究流程",
+      "parent": "1334",
       "type": "Work Package",
       "description": "用 AML 对主流开源深度研究项目 GPT-Researcher（github.com/assafelovic/gpt-researcher）的多 Agent 研究工作流建模：Planner 规划 → Researcher 并行子研究 → Editor 撰写 → Reviewer 评审 → Publisher 发布，产出带引用来源的研究报告。（该建模视图已删除）",
       "attributes": [
         {
           "name": "commit",
-          "value": "08f0eea",
-          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js; tests/architecture-view-context.test.js"
+          "value": "0e54ddd",
+          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
         },
         {
           "name": "commit",
@@ -580,20 +581,19 @@
           "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js; tests/architecture-view-context.test.js"
         },
         {
+          "name": "commit",
+          "value": "08f0eea",
+          "description": "design/KG/SystemArchitecture.json; tests/gpt-researcher-model.test.js; tests/architecture-view-context.test.js"
+        },
+        {
           "name": "deliveryStatus",
           "value": "not_delivered"
         },
         {
           "name": "status",
           "value": "COMPLETED"
-        },
-        {
-          "name": "commit",
-          "value": "0e54ddd",
-          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
         }
-      ],
-      "parent": "1334"
+      ]
     },
     {
       "id": "1351",
@@ -604,13 +604,13 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "e9839a5",
-          "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "value": "a231760",
+          "description": "design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "a231760",
-          "description": "design/KG/SystemArchitecture.json"
+          "value": "e9839a5",
+          "description": "index.html; docs/insights.html; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
@@ -623,12 +623,12 @@
           "description": "docs/insights.html; docs/insight-archgraph-benefits.html; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -666,6 +666,10 @@
           "description": "docs/industry-insight-graph-driven-agent.wechat.md; tests/wechat-article.test.js; .gitignore; design/KG/SystemArchitecture.json"
         },
         {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        },
+        {
           "name": "media_id",
           "value": "BRZAMZ3b-CaOBH8qdG2KTSVtDhlz7tQPi5y2JvVDpTKytc8780o6c3wQDUk3UtU0",
           "description": "WeChat draft media_id"
@@ -674,10 +678,6 @@
           "name": "status",
           "value": "BLOCKED",
           "description": "草稿已创建；freepublish 被 48001 api unauthorized 拒绝（账号无 API 发布权限）"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -708,12 +708,12 @@
           "description": "tests/project-name.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -735,13 +735,17 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "fa857e7",
+          "value": "cdbb063",
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "commit",
-          "value": "cdbb063",
+          "value": "fa857e7",
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         },
         {
           "name": "spec",
@@ -750,10 +754,6 @@
         {
           "name": "version",
           "value": "v0.1"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -779,16 +779,16 @@
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        },
+        {
           "name": "note",
           "value": "后续重点建设"
         },
         {
           "name": "status",
           "value": "PLANNED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -810,28 +810,13 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "c315b5c",
-          "description": "argo/scripts/argo-mcp-server.js"
-        },
-        {
-          "name": "commit",
           "value": "c8f2d74",
           "description": "restore .github/skills/argo-init/SKILL.md (repo-level compatibility)"
         },
         {
           "name": "commit",
-          "value": "b39acb2",
-          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "ea734d2",
-          "description": ".argo/scripts/argo-paths.js; .argo/scripts/*.js; .argo/scripts/graph-rag/*; .argo/scripts/test-executors/default.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "f4819fd",
-          "description": "argo-init skill moved to user-level (~/.copilot/skills/argo-init/SKILL.md); agent rules moved to user-level prompts (argo-copilot-instructions.instructions.md); removed .github/copilot-instructions.md and .github/skills/argo-init/SKILL.md"
+          "value": "0e54ddd",
+          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
         },
         {
           "name": "commit",
@@ -840,51 +825,66 @@
         },
         {
           "name": "commit",
+          "value": "ea734d2",
+          "description": ".argo/scripts/argo-paths.js; .argo/scripts/*.js; .argo/scripts/graph-rag/*; .argo/scripts/test-executors/default.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "c315b5c",
+          "description": "argo/scripts/argo-mcp-server.js"
+        },
+        {
+          "name": "commit",
           "value": "fa857e7",
           "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "status",
-          "value": "PLANNED"
+          "name": "commit",
+          "value": "f4819fd",
+          "description": "argo-init skill moved to user-level (~/.copilot/skills/argo-init/SKILL.md); agent rules moved to user-level prompts (argo-copilot-instructions.instructions.md); removed .github/copilot-instructions.md and .github/skills/argo-init/SKILL.md"
+        },
+        {
+          "name": "commit",
+          "value": "b39acb2",
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
         },
         {
-          "name": "commit",
-          "value": "0e54ddd",
-          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
+          "name": "status",
+          "value": "PLANNED"
         }
       ],
       "testcases": [
         {
-          "Input": "运行 node .argo/scripts/argo-mcp-server.js",
-          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“提供AML参考实现”Work Package 挂载于 AML 规范下并带验收用例。通过。",
-          "description": "GIVEN AML 规范已定义；WHEN 消费者或厂商需要参考实现；THEN ARGO harness 提供可运行的 MCP server、schema 校验器与 Graph RAG 生命周期实现。",
           "name": "AT-1357-01-AML参考实现",
-          "type": "Acceptance Test"
+          "description": "GIVEN AML 规范已定义；WHEN 消费者或厂商需要参考实现；THEN ARGO harness 提供可运行的 MCP server、schema 校验器与 Graph RAG 生命周期实现。",
+          "type": "Acceptance Test",
+          "Input": "运行 node .argo/scripts/argo-mcp-server.js",
+          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“提供AML参考实现”Work Package 挂载于 AML 规范下并带验收用例。通过。"
         },
         {
-          "Input": "运行 tests/argo-global-install.test.js",
-          "acceptanceCriteria": "tests/argo-global-install.test.js",
-          "description": "GIVEN .argo 工具链被复制到仓库外的全局目录（如用户目录）；WHEN 以 ARGO_REPO_ROOT 指向当前仓库并启动全局安装的 .argo/scripts/argo-mcp-server.js；THEN MCP server 能完成 initialize 与 tools/list，且 validateSystemArchitecture 与 getSystemArchitecture 工具调用均通过（脚本与 schema 从安装目录解析，workspace 从 ARGO_REPO_ROOT 解析）。",
           "name": "AT-1357-02-ARGO全局安装可运行",
-          "type": "Acceptance Test"
+          "description": "GIVEN .argo 工具链被复制到仓库外的全局目录（如用户目录）；WHEN 以 ARGO_REPO_ROOT 指向当前仓库并启动全局安装的 .argo/scripts/argo-mcp-server.js；THEN MCP server 能完成 initialize 与 tools/list，且 validateSystemArchitecture 与 getSystemArchitecture 工具调用均通过（脚本与 schema 从安装目录解析，workspace 从 ARGO_REPO_ROOT 解析）。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-global-install.test.js",
+          "acceptanceCriteria": "tests/argo-global-install.test.js"
         },
         {
-          "Input": "运行 tests/argo-workspace-bootstrap.test.js",
-          "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js",
-          "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）在非 --check-only 模式运行于缺少 design/KG/SystemArchitecture.json 与 .feap 模板的工作区；WHEN 执行初始化脚本；THEN 自动从部署的 defaults 拷贝 design/KG/SystemArchitecture.json，并以当前项目名拷贝 defaults/EA-model-template.feap 为 <项目名>.feap；--check-only 模式不修改工作区。",
           "name": "AT-1357-03-WorkspaceBootstrap拷贝默认文件",
-          "type": "Acceptance Test"
+          "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）在非 --check-only 模式运行于缺少 design/KG/SystemArchitecture.json 与 .feap 模板的工作区；WHEN 执行初始化脚本；THEN 自动从部署的 defaults 拷贝 design/KG/SystemArchitecture.json，并以当前项目名拷贝 defaults/EA-model-template.feap 为 <项目名>.feap；--check-only 模式不修改工作区。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-workspace-bootstrap.test.js",
+          "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js"
         },
         {
-          "Input": "运行 tests/architecture-view-context.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331 与 2753、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 9 个子视图（169/174/176/178/179/180/1800/298/432）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
-          "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
           "name": "AT-1357-04-按视图ID解析视图完整成员",
-          "type": "Acceptance Test"
+          "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/architecture-view-context.test.js",
+          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331 与 2753、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 9 个子视图（169/174/176/178/179/180/1800/298/432）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
         }
       ]
     },
@@ -896,12 +896,12 @@
       "description": "让消费者用一份 AML 描述其 harness，即可生成 .github/、.opencode/、.cursor/ 等多宿主配置，实现一次建模、多处运行。",
       "attributes": [
         {
-          "name": "status",
-          "value": "PLANNED"
-        },
-        {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "PLANNED"
         }
       ],
       "testcases": [
@@ -927,12 +927,12 @@
           "description": "KGlibrary/GPT-Research/info.md; index.html; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -953,161 +953,161 @@
       "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo；将 argo-init skill 部署到 Copilot（~/.copilot/skills）、Cursor（~/.cursor/skills）与 OpenCode（~/.config/opencode/skills）；将 archgraph.instructions.md 规则部署到 Copilot（%APPDATA%\\Code\\User\\prompts）与 OpenCode 全局规则（~/.config/opencode/AGENTS.md）；将 argo/agents 中的 .agent.md 部署到 Copilot（~/.copilot/agents，保持 VS Code 格式）、Cursor（~/.cursor/agents，转换为 .md，保留 name/description/model 并去除 tools 数组等 VS Code 专属字段）与 OpenCode（~/.config/opencode/agents，转换为 .md，保留 description/model、去除 tools 数组等 VS Code 专属字段并声明 mode: all）；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补；若 .env 已存在且对应变量已有非空值则跳过输入并保留原值，仅对缺失或空值的变量提示输入）；自动在 VS Code（%APPDATA%\\Code\\User\\mcp.json）、Cursor（~/.cursor/mcp.json，mcpServers）与 OpenCode（~/.config/opencode/opencode.json，mcp）注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行，多工作区时优先选择含 design/KG/SystemArchitecture.json 的根；Cursor 支持 MCP roots，OpenCode 声明 roots 并响应且默认以项目目录为 cwd 启动，故均能正确解析当前项目目录）；temp 保留在仓库目录不部署。",
       "attributes": [
         {
-          "description": "removed eatool/default/EA-model-template.feap; removed eatool/default/design/KG/SystemArchitecture.json; argo/scripts/argo-mcp-server.js",
           "name": "commit",
-          "value": "c315b5c"
+          "value": "225e21d",
+          "description": "install-argo.ps1 (deploy argo/agents to Copilot/Cursor/OpenCode); package.json (argo/agents in files); tests/argo-deploy.test.js; tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "description": "argo-deploy/ (package.json; bin/argo-deploy.js; lib/deploy.js; scripts/sync-assets.js; assets/**; README.md); tests/argo-deploy.test.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "446ec0a"
+          "value": "2c54b51",
+          "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)"
         },
         {
-          "description": "install-argo.ps1 (Cursor/OpenCode skills+rule+MCP deploy); tests/argo-deploy.test.js; README.md; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "92f1123"
+          "value": "ee05a15",
+          "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "description": "argo/scripts/argo-paths.js (MCP roots workspace resolution); argo/scripts/argo-mcp-server.js (roots.listChanged capability); install-argo.ps1 (minimal MCP config); tests/argo-deploy.test.js; tests/argo-global-install.test.js; package.json (0.5.0)",
           "name": "commit",
-          "value": "2af92ba"
+          "value": "1aa3cb3",
+          "description": "install-argo.ps1 (preserve model in Cursor/OpenCode agent frontmatter); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "ee05a15"
+          "value": "446ec0a",
+          "description": "argo-deploy/ (package.json; bin/argo-deploy.js; lib/deploy.js; scripts/sync-assets.js; assets/**; README.md); tests/argo-deploy.test.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)",
           "name": "commit",
-          "value": "499d802"
+          "value": "b39acb2",
+          "description": "argo/defaults/design/KG/SystemArchitecture.json; argo/defaults/EA-model-template.feap; install-argo.ps1; package.json; tests/argo-deploy.test.js; argo/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
         },
         {
-          "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)",
           "name": "commit",
-          "value": "2c54b51"
+          "value": "491bdb7",
+          "description": "install-argo.ps1 (convert agent frontmatter for Cursor/OpenCode); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "description": "argo/defaults/design/KG/SystemArchitecture.json; argo/defaults/EA-model-template.feap; install-argo.ps1; package.json; tests/argo-deploy.test.js; argo/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "b39acb2"
+          "value": "2af92ba",
+          "description": "argo/scripts/argo-paths.js (MCP roots workspace resolution); argo/scripts/argo-mcp-server.js (roots.listChanged capability); install-argo.ps1 (minimal MCP config); tests/argo-deploy.test.js; tests/argo-global-install.test.js; package.json (0.5.0)"
         },
         {
-          "description": "install-argo.ps1 (restore workspaceFolder in MCP config); tests/argo-deploy.test.js; package.json (0.4.2)",
           "name": "commit",
-          "value": "025ceae"
+          "value": "499d802",
+          "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)"
         },
         {
-          "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/",
           "name": "commit",
-          "value": "e5f6f3d"
+          "value": "a4dc2f7",
+          "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)"
         },
         {
-          "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "60e995e"
+          "value": "07d2c69",
+          "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)"
         },
         {
-          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz",
           "name": "commit",
-          "value": "v0.6.0"
+          "value": "60e995e",
+          "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)",
           "name": "commit",
-          "value": "a4dc2f7"
+          "value": "e982da1",
+          "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)"
         },
         {
-          "description": "argo/rules/archgraph.instructions.md (renamed from copilot-instructions.md); package.json (0.3.0)",
           "name": "commit",
-          "value": "411bf25"
+          "value": "025ceae",
+          "description": "install-argo.ps1 (restore workspaceFolder in MCP config); tests/argo-deploy.test.js; package.json (0.4.2)"
         },
         {
-          "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)",
           "name": "commit",
-          "value": "e982da1"
+          "value": "de9e21d",
+          "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore"
         },
         {
-          "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)",
           "name": "commit",
-          "value": "07d2c69"
+          "value": "411bf25",
+          "description": "argo/rules/archgraph.instructions.md (renamed from copilot-instructions.md); package.json (0.3.0)"
         },
         {
-          "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore",
           "name": "commit",
-          "value": "de9e21d"
+          "value": "c315b5c",
+          "description": "removed eatool/default/EA-model-template.feap; removed eatool/default/design/KG/SystemArchitecture.json; argo/scripts/argo-mcp-server.js"
         },
         {
-          "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js",
           "name": "commit",
-          "value": "7aebb2e"
+          "value": "92f1123",
+          "description": "install-argo.ps1 (Cursor/OpenCode skills+rule+MCP deploy); tests/argo-deploy.test.js; README.md; design/KG/SystemArchitecture.json"
         },
         {
-          "description": "install-argo.ps1 (deploy argo/agents to Copilot/Cursor/OpenCode); package.json (argo/agents in files); tests/argo-deploy.test.js; tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "225e21d"
+          "value": "e5f6f3d",
+          "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/"
         },
         {
-          "description": "install-argo.ps1 (convert agent frontmatter for Cursor/OpenCode); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "491bdb7"
+          "value": "v0.6.0",
+          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz"
         },
         {
-          "description": "install-argo.ps1 (preserve model in Cursor/OpenCode agent frontmatter); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "1aa3cb3"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
+          "value": "7aebb2e",
+          "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js"
         },
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
         {
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js",
-          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 与非交互方式运行到临时目录；THEN 生成 schema/SystemArchitecture.schema.json、scripts/argo-mcp-server.js、defaults/design/KG/SystemArchitecture.json、defaults/EA-model-template.feap、skills/argo-init/SKILL.md、prompts/archgraph.instructions.md 与 package.json（含 neo4j-driver 依赖），并写入 VS Code mcp.json、Cursor mcp.json 与 OpenCode opencode.json 注册 argo MCP server，且不部署 temp 与 .env。",
           "name": "AT-1361-01-部署脚本可运行",
-          "type": "Acceptance Test"
+          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 与非交互方式运行到临时目录；THEN 生成 schema/SystemArchitecture.schema.json、scripts/argo-mcp-server.js、defaults/design/KG/SystemArchitecture.json、defaults/EA-model-template.feap、skills/argo-init/SKILL.md、prompts/archgraph.instructions.md 与 package.json（含 neo4j-driver 依赖），并写入 VS Code mcp.json、Cursor mcp.json 与 OpenCode opencode.json 注册 argo MCP server，且不部署 temp 与 .env。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js"
         },
         {
-          "Input": "运行 tests/argo-global-install.test.js",
-          "acceptanceCriteria": "tests/argo-global-install.test.js",
-          "description": "GIVEN argo MCP server 已部署到 ~/.argo 且 mcp.json/opencode.json 不含 cwd/env；WHEN VS Code、Cursor 或 OpenCode 启动 server、完成 initialize/initialized 后 server 发送 roots/list 请求，客户端返回当前工作区 roots（Cursor 支持 MCP roots；OpenCode 声明 roots 并响应，且默认以项目目录为 cwd 启动）；THEN 工作区相关的 tools/call 以该工作区为 workspaceRoot 解析 design/KG/SystemArchitecture.json 并通过验证（而非 home 目录）。",
           "name": "AT-1361-02-全局server动态发现工作区",
-          "type": "Acceptance Test"
+          "description": "GIVEN argo MCP server 已部署到 ~/.argo 且 mcp.json/opencode.json 不含 cwd/env；WHEN VS Code、Cursor 或 OpenCode 启动 server、完成 initialize/initialized 后 server 发送 roots/list 请求，客户端返回当前工作区 roots（Cursor 支持 MCP roots；OpenCode 声明 roots 并响应，且默认以项目目录为 cwd 启动）；THEN 工作区相关的 tools/call 以该工作区为 workspaceRoot 解析 design/KG/SystemArchitecture.json 并通过验证（而非 home 目录）。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-global-install.test.js",
+          "acceptanceCriteria": "tests/argo-global-install.test.js"
         },
         {
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js",
-          "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署到 ~/.argo；THEN 部署目录包含 defaults/design/KG/SystemArchitecture.json 与 defaults/EA-model-template.feap，且 package.json files 包含 argo/defaults。",
           "name": "AT-1361-03-默认模板随包部署",
-          "type": "Acceptance Test"
+          "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署到 ~/.argo；THEN 部署目录包含 defaults/design/KG/SystemArchitecture.json 与 defaults/EA-model-template.feap，且 package.json files 包含 argo/defaults。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js"
         },
         {
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js",
-          "description": "GIVEN ~/.argo/.env 已存在且包含 ARGO_* 等已知变量的非空值；WHEN 以非交互方式运行 install-argo.ps1 且不传 -SkipEnv；THEN 脚本不提示输入（不调用 Read-Host），重写 .env 时保留这些已有非空值；仅当某变量缺失或为空时才提示输入。",
           "name": "AT-1361-04-已存在的env值跳过输入",
-          "type": "Acceptance Test"
+          "description": "GIVEN ~/.argo/.env 已存在且包含 ARGO_* 等已知变量的非空值；WHEN 以非交互方式运行 install-argo.ps1 且不传 -SkipEnv；THEN 脚本不提示输入（不调用 Read-Host），重写 .env 时保留这些已有非空值；仅当某变量缺失或为空时才提示输入。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js"
         },
         {
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）",
-          "description": "GIVEN install-argo.ps1 已就绪且系统 ANSI 代码页非 UTF-8；WHEN 以 -SkipEnv -SkipDeps 与非交互方式将规则部署到 OpenCode 全局 AGENTS.md；THEN AGENTS.md 中的中文（如「全局工作流规则」「验收用例先行」「意图图谱」）以可读 UTF-8 呈现，且不含 UTF-8 被当作 GBK 解码产生的乱码（如「鍏ㄥ眬」）。",
           "name": "AT-1361-05-OpenCode规则中文不乱码",
-          "type": "Acceptance Test"
+          "description": "GIVEN install-argo.ps1 已就绪且系统 ANSI 代码页非 UTF-8；WHEN 以 -SkipEnv -SkipDeps 与非交互方式将规则部署到 OpenCode 全局 AGENTS.md；THEN AGENTS.md 中的中文（如「全局工作流规则」「验收用例先行」「意图图谱」）以可读 UTF-8 呈现，且不含 UTF-8 被当作 GBK 解码产生的乱码（如「鍏ㄥ眬」）。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）"
         },
         {
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js",
-          "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署；THEN package.json files 包含 argo/agents，且 argo/agents 中的 .agent.md 被部署到 Copilot（~/.copilot/agents，保持 VS Code 格式）、Cursor（~/.cursor/agents，转换为 .md，保留 name/description/model 且无 tools 数组）与 OpenCode（~/.config/opencode/agents，转换为 .md，含 description、model 与 mode: all 且无 tools 数组）。",
           "name": "AT-1361-06-Agent随包部署到三工具",
-          "type": "Acceptance Test"
+          "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署；THEN package.json files 包含 argo/agents，且 argo/agents 中的 .agent.md 被部署到 Copilot（~/.copilot/agents，保持 VS Code 格式）、Cursor（~/.cursor/agents，转换为 .md，保留 name/description/model 且无 tools 数组）与 OpenCode（~/.config/opencode/agents，转换为 .md，含 description、model 与 mode: all 且无 tools 数组）。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js"
         }
       ]
     },
@@ -1118,6 +1118,11 @@
       "type": "Work Package",
       "description": "按核心思路（统一语言：将 harness 设计与目标产品设计放进同一模型）画一张核心模型图 image.png，插入 README 与主页的 What is this? 章节下，表达 Harness Design、Target System Design、AgentHarness、Target Project 之间的关系：AgentHarness 从 Harness Design 武装自己（Access），Harness Design 描述 Target System Design，Target System Design 描述 Target Project，AgentHarness 创建 Target Project。",
       "attributes": [
+        {
+          "name": "commit",
+          "value": "a2c7c44",
+          "description": "README.md; docs/diagrams/core-model.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
+        },
         {
           "name": "commit",
           "value": "7ba1940",
@@ -1134,17 +1139,12 @@
           "description": "tests/architecture-diagram.test.js; tests/website.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "commit",
-          "value": "a2c7c44",
-          "description": "README.md; docs/diagrams/core-model.svg; tests/architecture-diagram.test.js; design/KG/SystemArchitecture.json"
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         },
         {
           "name": "status",
           "value": "COMPLETED"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1170,6 +1170,10 @@
           "description": "docs/archgraph-introduction.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
         },
         {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        },
+        {
           "name": "media_id",
           "value": "BRZAMZ3b-CaOBH8qdG2KTet7kAaHQ8GK03n8aoe7vKH_Bjq2L3aDrpbM36sNE3iY",
           "description": "WeChat draft media_id"
@@ -1178,10 +1182,6 @@
           "name": "status",
           "value": "BLOCKED",
           "description": "草稿已创建（media_id 已记录）；freepublish 与 sendall 均被 48001 api unauthorized 拒绝（账号无 API 发布/群发权限），需在公众号后台手动发布"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -1207,12 +1207,12 @@
           "description": "design/KG/SystemArchitecture.json; docs/kglibrary.html; KGlibrary/GPT-Researcher-Agent-Method/info.md; KGlibrary/GPT-Researcher-Agent-Method/gpt-researcher_Agent_探索方法.json; KGlibrary/McKinsey-5-Step/info.md; KGlibrary/McKinsey-5-Step/麦肯锡结构化战略分析新5步法.json"
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -1241,25 +1241,25 @@
       "name": "AgentOrganization",
       "parent": "1961",
       "type": "Grouping",
-      "subdiagram_views": [
-        {
-          "view_id": "430",
-          "view_name": "DevelopmentTeam"
-        },
-        {
-          "view_id": "299",
-          "view_name": "AgentOrganization"
-        },
-        {
-          "view_id": "433",
-          "view_name": "公众号发布团队"
-        }
-      ],
       "attributes": [
         {
           "name": "commit",
           "value": "5ef24d4",
           "description": "design/KG/SystemArchitecture.json（AgentOrganization 新增子视图 433 公众号发布团队）"
+        }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "299",
+          "view_name": "AgentOrganization"
+        },
+        {
+          "view_id": "430",
+          "view_name": "DevelopmentTeam"
+        },
+        {
+          "view_id": "433",
+          "view_name": "公众号发布团队"
         }
       ]
     },
@@ -1703,6 +1703,11 @@
       "attributes": [
         {
           "name": "commit",
+          "value": "0e54ddd",
+          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
+        },
+        {
+          "name": "commit",
           "value": "1fde5dc",
           "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
         },
@@ -1712,17 +1717,12 @@
           "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "status",
-          "value": "COMPLETED"
-        },
-        {
           "name": "deliveryStatus",
           "value": "not_delivered"
         },
         {
-          "name": "commit",
-          "value": "0e54ddd",
-          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
+          "name": "status",
+          "value": "COMPLETED"
         }
       ],
       "testcases": [
@@ -1893,60 +1893,25 @@
       "parent": "1249",
       "type": "Work Package",
       "description": "本工作需要按VIEW:DevelopmentTeam 所示流程完成，首先交给产品经理后，由产品经理完成后续交付工作。",
-      "testcases": [
-        {
-          "acceptanceCriteria": "tests/developer-community.test.js",
-          "description": "GIVEN 产品经理对开发者社区进行需求分析；WHEN 读者打开 docs/developer-community-requirements.md；THEN 文档包含用户场景与用户故事（以「作为一个开发者」表述）。",
-          "Input": "打开 docs/developer-community-requirements.md",
-          "name": "AT-2751-01-需求分析文档就绪",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/developer-community.test.js",
-          "description": "GIVEN 开发者社区需要可外部验证的验收；WHEN 读者查看需求文档；THEN 以 GIVEN-WHEN-THEN 格式给出覆盖浏览、发布、详情、下载、讨论的验收标准。",
-          "Input": "打开 docs/developer-community-requirements.md",
-          "name": "AT-2751-02-验收标准GIVEN-WHEN-THEN",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/developer-community.test.js",
-          "description": "GIVEN 社区需低成本交付与维护；WHEN 读者查看非功能需求；THEN 文档要求采用 GitHub Discussions（零成本、零运维），不自研社区系统。",
-          "Input": "打开 docs/developer-community-requirements.md",
-          "name": "AT-2751-03-采用GitHubDiscussions",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/developer-community.test.js",
-          "description": "GIVEN 待发布的子图 JSON 含敏感信息（密钥/token、内部绝对路径、commit 详情、个人信息）；WHEN 开发者按发布流程发布；THEN 敏感信息被脱敏或发布被拦截（命中即告警）。",
-          "Input": "打开 docs/developer-community-guide.md",
-          "name": "AT-2751-04-发布前脱敏",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/developer-community.test.js",
-          "description": "GIVEN 工作包帖子包含子图 JSON 链接；WHEN 开发者获取并准备导入；THEN 子图 JSON 通过 export-to-kg.js 导出格式校验与大小上限校验，不符合则被拒绝导入。",
-          "Input": "打开 docs/developer-community-guide.md",
-          "name": "AT-2751-05-下载导入格式校验",
-          "type": "Acceptance Test"
-        }
-      ],
       "attributes": [
         {
-          "name": "status",
-          "value": "TEST_PASSED"
-        },
-        {
-          "name": "note",
-          "value": "验证测试通过（16/16通过），交付完成（含开通指南），待产品经理(xiaoniu)最终验收。"
+          "name": "commit",
+          "value": "ec827006f7aff24ba472d6ec2171fcb09cd73ebd",
+          "description": "docs/developer-community-design.md; docs/developer-community-guide.md"
         },
         {
           "name": "commit",
-          "value": "7e1213a",
-          "description": "docs/developer-community-requirements.md; tests/developer-community.test.js; design/KG/SystemArchitecture.json"
+          "value": "fef9c35",
+          "description": "scripts/developer-community-publish.js; scripts/developer-community-validate.js; tests/developer-community.test.js"
         },
         {
           "name": "commit",
           "value": "9bb4fd7",
+          "description": "docs/developer-community-requirements.md; tests/developer-community.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "7e1213a",
           "description": "docs/developer-community-requirements.md; tests/developer-community.test.js; design/KG/SystemArchitecture.json"
         },
         {
@@ -1956,18 +1921,8 @@
         },
         {
           "name": "commit",
-          "value": "ec827006f7aff24ba472d6ec2171fcb09cd73ebd",
-          "description": "docs/developer-community-design.md; docs/developer-community-guide.md"
-        },
-        {
-          "name": "commit",
-          "value": "8c02b85",
-          "description": "scripts/developer-community-publish.js; scripts/developer-community-validate.js; tests/developer-community.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "fef9c35",
-          "description": "scripts/developer-community-publish.js; scripts/developer-community-validate.js; tests/developer-community.test.js"
+          "value": "97a80b6",
+          "description": "docs/developer-community-setup.md"
         },
         {
           "name": "commit",
@@ -1976,20 +1931,65 @@
         },
         {
           "name": "commit",
-          "value": "97a80b6",
-          "description": "docs/developer-community-setup.md"
+          "value": "8c02b85",
+          "description": "scripts/developer-community-publish.js; scripts/developer-community-validate.js; tests/developer-community.test.js"
         },
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "note",
+          "value": "验证测试通过（16/16通过），交付完成（含开通指南），待产品经理(xiaoniu)最终验收。"
+        },
+        {
+          "name": "status",
+          "value": "TEST_PASSED"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-2751-01-需求分析文档就绪",
+          "description": "GIVEN 产品经理对开发者社区进行需求分析；WHEN 读者打开 docs/developer-community-requirements.md；THEN 文档包含用户场景与用户故事（以「作为一个开发者」表述）。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/developer-community-requirements.md",
+          "acceptanceCriteria": "tests/developer-community.test.js"
+        },
+        {
+          "name": "AT-2751-02-验收标准GIVEN-WHEN-THEN",
+          "description": "GIVEN 开发者社区需要可外部验证的验收；WHEN 读者查看需求文档；THEN 以 GIVEN-WHEN-THEN 格式给出覆盖浏览、发布、详情、下载、讨论的验收标准。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/developer-community-requirements.md",
+          "acceptanceCriteria": "tests/developer-community.test.js"
+        },
+        {
+          "name": "AT-2751-03-采用GitHubDiscussions",
+          "description": "GIVEN 社区需低成本交付与维护；WHEN 读者查看非功能需求；THEN 文档要求采用 GitHub Discussions（零成本、零运维），不自研社区系统。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/developer-community-requirements.md",
+          "acceptanceCriteria": "tests/developer-community.test.js"
+        },
+        {
+          "name": "AT-2751-04-发布前脱敏",
+          "description": "GIVEN 待发布的子图 JSON 含敏感信息（密钥/token、内部绝对路径、commit 详情、个人信息）；WHEN 开发者按发布流程发布；THEN 敏感信息被脱敏或发布被拦截（命中即告警）。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/developer-community-guide.md",
+          "acceptanceCriteria": "tests/developer-community.test.js"
+        },
+        {
+          "name": "AT-2751-05-下载导入格式校验",
+          "description": "GIVEN 工作包帖子包含子图 JSON 链接；WHEN 开发者获取并准备导入；THEN 子图 JSON 通过 export-to-kg.js 导出格式校验与大小上限校验，不符合则被拒绝导入。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/developer-community-guide.md",
+          "acceptanceCriteria": "tests/developer-community.test.js"
         }
       ]
     },
     {
       "id": "2752",
       "name": "GitHub Discussions",
-      "type": "Application Service",
       "parent": "1240",
+      "type": "Application Service",
       "description": "GitHub 提供的讨论区服务，作为 ArchGraph 开发者社区的载体（零成本、零运维、GitHub 生态内）。存在平台锁定边界（作为社区唯一外部平台载体）；公开 Gist 单文件约 10MB 上限，超限工作包由仓库文件承载。"
     },
     {
@@ -2000,13 +2000,13 @@
       "description": "Publish and download WeChat Public Platform content and Baijiahao articles via a local CLI. homepage: https://github.com/ai-chen2050/obsidian-wechat-public-platform",
       "attributes": [
         {
-          "content": "---\nname: wechat-public-cli\ndescription: Publish and download WeChat Public Platform content and Baijiahao articles via a local CLI.\nhomepage: https://github.com/ai-chen2050/obsidian-wechat-public-platform\nmetadata:\n    {\n        \"openclaw\":\n            {\n                \"emoji\": \"📰\",\n                \"requires\": { \"bins\": [\"wechat-public-cli\"] },\n                \"install\":\n                    [\n                        {\n                            \"id\": \"npm\",\n                            \"kind\": \"shell\",\n                            \"label\": \"Install wechat-public-cli (npm)\",\n                            \"command\": \"npm install -g wechat-public-cli\",\n                        },\n                        {\n                            \"id\": \"git\",\n                            \"kind\": \"shell\",\n                            \"label\": \"Clone repo and install dependencies\",\n                            \"command\": \"git clone https://github.com/ai-chen2050/obsidian-wechat-public-platform.git && cd obsidian-wechat-public-platform && npm install\",\n                        },\n                    ],\n            },\n    }\n---\n\n# Wechat Public CLI Skill\n\n## Goal\n\nPublish an Obsidian markdown article to WeChat Public Platform or Baidu Baijiahao using a local CLI.\n\n## Requirements\n\n- Node.js 16+\n- Config file or environment variables for credentials\n- Markdown file with frontmatter (author, digest, banner or banner_path, thumb_media_id optional)\n\n## Article Template\n\n---\n\ntitle: \"Test\"\nauthor: Blake\ndigest: Short summary\nbanner: \"https://image.png\"\n\n---\n\n## Install\n\n```bash\ngit clone https://github.com/ai-chen2050/obsidian-wechat-public-platform.git\ncd obsidian-wechat-public-platform\nnpm install\n\nOr by clawdhub\nclaw install wechat-public-cli\n```\n\nOr install globally via npm:\n\n```bash\nnpm install -g wechat-public-cli\n```\n\nIf this CLI is published to npm, you can run it via npx without cloning:\n\n```bash\nnpx wechat-public-cli wechat:draft --file /path/to/article.md\n```\n\n## Config\n\nCreate a JSON file in the repo root named `wechat-public.config.json`:\n\n```json\n{\n\t\"wechat\": {\n\t\t\"appid\": \"YOUR_APP_ID\",\n\t\t\"secret\": \"YOUR_APP_SECRET\",\n\t\t\"accessToken\": \"\"\n\t},\n\t\"baidu\": {\n\t\t\"cookie\": \"YOUR_BJH_COOKIE\",\n\t\t\"token\": \"YOUR_BJH_TOKEN\",\n\t\t\"appId\": \"YOUR_BJH_APP_ID\"\n\t},\n\t\"paths\": {\n\t\t\"customCss\": \"./custom.css\",\n\t\t\"downloadDir\": \"./wechat-downloads\"\n\t}\n}\n```\n\nEnv override:\n\n- `WECHAT_APPID`, `WECHAT_SECRET`, `WECHAT_ACCESS_TOKEN`\n- `BJH_COOKIE`, `BJH_TOKEN`, `BJH_APP_ID`\n- `WECHAT_CUSTOM_CSS`, `WECHAT_PUBLIC_CONFIG`\n- `WECHAT_DOWNLOAD_DIR`\n\n## Build\n\n```bash\nnpm run build:cli\n```\n\n## Commands\n\n- Create WeChat draft:\n    ```bash\n    wechat-public-cli wechat:draft --file /path/to/article.md\n    # 使用自定义 CSS\n    wechat-public-cli wechat:draft --file /path/to/article.md --css /path/to/tech.css\n    ```\n- Publish WeChat (from file):\n    ```bash\n    wechat-public-cli wechat:publish --file /path/to/article.md\n    # 使用自定义 CSS\n    wechat-public-cli wechat:publish --file /path/to/article.md --css /path/to/business.css\n    ```\n- Publish WeChat (from media_id):\n    ```bash\n    wechat-public-cli wechat:publish --media-id YOUR_MEDIA_ID\n    ```\n- Send to all WeChat followers:\n    ```bash\n    wechat-public-cli wechat:sendall --file /path/to/article.md\n    ```\n- Publish Baijiahao:\n    ```bash\n    wechat-public-cli bjh:publish --file /path/to/article.md\n    # 使用自定义 CSS\n    wechat-public-cli bjh:publish --file /path/to/article.md --css /path/to/custom.css\n    ```\n- Convert markdown to HTML:\n    ```bash\n    wechat-public-cli convert --file /path/to/article.md --platform wechat\n    # 使用自定义 CSS\n    wechat-public-cli convert --file /path/to/article.md --platform wechat --css /path/to/style.css\n    ```\n- Download recent N WeChat articles:\n    ```bash\n    wechat-public-cli wechat:download --count 10 --out-dir ./wechat-downloads\n    ```\n- Get cumulative user statistics:\n    ```bash\n    # 查询最近7天（默认）\n    wechat-public-cli wechat:stats:cumulate\n    # 指定日期范围（最多30天）\n    wechat-public-cli wechat:stats:cumulate --begin-date 2025-11-01 --end-date 2025-11-07\n    ```\n- Get published content overview statistics:\n    ```bash\n    # 查询最近7天（默认）\n    wechat-public-cli wechat:stats:bizsummary\n    # 指定日期范围（最多30天）\n    wechat-public-cli wechat:stats:bizsummary --begin-date 2025-11-01 --end-date 2025-11-07\n    ```\n\n### 使用自定义 CSS 样式\n\n所有发布命令都支持通过 `--css` 参数指定自定义样式文件：\n\n```bash\n# 使用技术类文章样式\nwechat-public-cli wechat:draft --file tech-article.md --css ./styles/tech.css\n\n# 使用营销类文章样式\nwechat-public-cli wechat:publish --file marketing.md --css ./styles/marketing.css\n\n# 使用教程类文章样式\nwechat-public-cli bjh:publish --file tutorial.md --css ./styles/tutorial.css\n```\n\n## 自定义公众号格式\n\n你可以通过定义和修改 CSS 文件，来调整发布到微信公众号的文章样式。支持为不同类型的文章使用不同的样式文件。\n\n### CSS 文件加载优先级\n\n1. **命令行参数** `--css` （最高优先级）\n2. **配置文件** `wechat-public.config.json` 中的 `paths.customCss`\n3. **默认文件** 当前目录下的 `custom.css`\n4. **空样式** 如果以上都不存在，则不应用自定义样式\n\n### 使用场景示例\n\n#### 1. 使用默认样式\n\n在项目根目录创建 `custom.css`，不传任何参数时自动使用：\n\n```bash\nwechat-public-cli wechat:publish --file article.md\n```\n\n#### 2. 为不同类型文章使用不同样式\n\n创建多个 CSS 文件，通过 `--css` 参数指定：\n\n```bash\n# 技术类文章使用 tech.css\nwechat-public-cli wechat:publish --file tech-article.md --css ./styles/tech.css\n\n# 商业类文章使用 business.css\nwechat-public-cli wechat:publish --file business-article.md --css ./styles/business.css\n\n# 教程类文章使用 tutorial.css\nwechat-public-cli wechat:publish --file tutorial.md --css ./styles/tutorial.css\n```\n\n#### 3. 在配置文件中指定默认样式\n\n在 `wechat-public.config.json` 的 `paths.customCss` 字段指定默认样式文件路径：\n\n```json\n{\n\t\"paths\": {\n\t\t\"customCss\": \"./styles/default.css\"\n\t}\n}\n```\n\n这样不传 `--css` 参数时，会使用配置文件中指定的样式。\n\n### CSS 示例\n\n```css\n/* tech.css - 技术文章样式 */\n.wechat-title {\n\tfont-size: 2em;\n\tcolor: #2c3e50;\n\tfont-family: \"Monaco\", \"Consolas\", monospace;\n}\n.wechat-banner {\n\tborder-radius: 8px;\n}\ncode {\n\tbackground-color: #f4f4f4;\n\tpadding: 2px 4px;\n}\n\n/* business.css - 商业文章样式 */\n.wechat-title {\n\tfont-size: 2.2em;\n\tcolor: #c7254e;\n\tfont-family: \"Arial\", \"Helvetica\", sans-serif;\n}\n```\n\nAI 也可通过自动生成或修改 CSS 文件，实现对公众号内容格式的智能优化。\n\n## Notes\n\n- WeChat draft requires `thumb_media_id` or `banner`/`banner_path` in frontmatter.\n- Baijiahao publish requires `banner` or `banner_path` in frontmatter.\n- The CLI uploads inline images to the target platform automatically.\n- `wechat:download` saves recent articles in update_time order and writes all `news_item` entries.\n- `wechat:stats:cumulate` / `wechat:stats:bizsummary` must be called server-side; the date range can be at most 30 days. Results are printed as JSON to stdout.",
-          "name": "SKILL.md"
-        },
-        {
           "name": "commit",
           "value": "2964b26",
           "description": ".github/skills/@ai-chen2050/wechat-public-cli/* (removed); design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "SKILL.md",
+          "description": "---\nname: wechat-public-cli\ndescription: Publish and download WeChat Public Platform content and Baijiahao articles via a local CLI.\nhomepage: https://github.com/ai-chen2050/obsidian-wechat-public-platform\nmetadata:\n    {\n        \"openclaw\":\n            {\n                \"emoji\": \"📰\",\n                \"requires\": { \"bins\": [\"wechat-public-cli\"] },\n                \"install\":\n                    [\n                        {\n                            \"id\": \"npm\",\n                            \"kind\": \"shell\",\n                            \"label\": \"Install wechat-public-cli (npm)\",\n                            \"command\": \"npm install -g wechat-public-cli\",\n                        },\n                        {\n                            \"id\": \"git\",\n                            \"kind\": \"shell\",\n                            \"label\": \"Clone repo and install dependencies\",\n                            \"command\": \"git clone https://github.com/ai-chen2050/obsidian-wechat-public-platform.git && cd obsidian-wechat-public-platform && npm install\",\n                        },\n                    ],\n            },\n    }\n---\n\n# Wechat Public CLI Skill\n\n## Goal\n\nPublish an Obsidian markdown article to WeChat Public Platform or Baidu Baijiahao using a local CLI.\n\n## Requirements\n\n- Node.js 16+\n- Config file or environment variables for credentials\n- Markdown file with frontmatter (author, digest, banner or banner_path, thumb_media_id optional)\n\n## Article Template\n\n---\n\ntitle: \"Test\"\nauthor: Blake\ndigest: Short summary\nbanner: \"https://image.png\"\n\n---\n\n## Install\n\n```bash\ngit clone https://github.com/ai-chen2050/obsidian-wechat-public-platform.git\ncd obsidian-wechat-public-platform\nnpm install\n\nOr by clawdhub\nclaw install wechat-public-cli\n```\n\nOr install globally via npm:\n\n```bash\nnpm install -g wechat-public-cli\n```\n\nIf this CLI is published to npm, you can run it via npx without cloning:\n\n```bash\nnpx wechat-public-cli wechat:draft --file /path/to/article.md\n```\n\n## Config\n\nCreate a JSON file in the repo root named `wechat-public.config.json`:\n\n```json\n{\n\t\"wechat\": {\n\t\t\"appid\": \"YOUR_APP_ID\",\n\t\t\"secret\": \"YOUR_APP_SECRET\",\n\t\t\"accessToken\": \"\"\n\t},\n\t\"baidu\": {\n\t\t\"cookie\": \"YOUR_BJH_COOKIE\",\n\t\t\"token\": \"YOUR_BJH_TOKEN\",\n\t\t\"appId\": \"YOUR_BJH_APP_ID\"\n\t},\n\t\"paths\": {\n\t\t\"customCss\": \"./custom.css\",\n\t\t\"downloadDir\": \"./wechat-downloads\"\n\t}\n}\n```\n\nEnv override:\n\n- `WECHAT_APPID`, `WECHAT_SECRET`, `WECHAT_ACCESS_TOKEN`\n- `BJH_COOKIE`, `BJH_TOKEN`, `BJH_APP_ID`\n- `WECHAT_CUSTOM_CSS`, `WECHAT_PUBLIC_CONFIG`\n- `WECHAT_DOWNLOAD_DIR`\n\n## Build\n\n```bash\nnpm run build:cli\n```\n\n## Commands\n\n- Create WeChat draft:\n    ```bash\n    wechat-public-cli wechat:draft --file /path/to/article.md\n    # 使用自定义 CSS\n    wechat-public-cli wechat:draft --file /path/to/article.md --css /path/to/tech.css\n    ```\n- Publish WeChat (from file):\n    ```bash\n    wechat-public-cli wechat:publish --file /path/to/article.md\n    # 使用自定义 CSS\n    wechat-public-cli wechat:publish --file /path/to/article.md --css /path/to/business.css\n    ```\n- Publish WeChat (from media_id):\n    ```bash\n    wechat-public-cli wechat:publish --media-id YOUR_MEDIA_ID\n    ```\n- Send to all WeChat followers:\n    ```bash\n    wechat-public-cli wechat:sendall --file /path/to/article.md\n    ```\n- Publish Baijiahao:\n    ```bash\n    wechat-public-cli bjh:publish --file /path/to/article.md\n    # 使用自定义 CSS\n    wechat-public-cli bjh:publish --file /path/to/article.md --css /path/to/custom.css\n    ```\n- Convert markdown to HTML:\n    ```bash\n    wechat-public-cli convert --file /path/to/article.md --platform wechat\n    # 使用自定义 CSS\n    wechat-public-cli convert --file /path/to/article.md --platform wechat --css /path/to/style.css\n    ```\n- Download recent N WeChat articles:\n    ```bash\n    wechat-public-cli wechat:download --count 10 --out-dir ./wechat-downloads\n    ```\n- Get cumulative user statistics:\n    ```bash\n    # 查询最近7天（默认）\n    wechat-public-cli wechat:stats:cumulate\n    # 指定日期范围（最多30天）\n    wechat-public-cli wechat:stats:cumulate --begin-date 2025-11-01 --end-date 2025-11-07\n    ```\n- Get published content overview statistics:\n    ```bash\n    # 查询最近7天（默认）\n    wechat-public-cli wechat:stats:bizsummary\n    # 指定日期范围（最多30天）\n    wechat-public-cli wechat:stats:bizsummary --begin-date 2025-11-01 --end-date 2025-11-07\n    ```\n\n### 使用自定义 CSS 样式\n\n所有发布命令都支持通过 `--css` 参数指定自定义样式文件：\n\n```bash\n# 使用技术类文章样式\nwechat-public-cli wechat:draft --file tech-article.md --css ./styles/tech.css\n\n# 使用营销类文章样式\nwechat-public-cli wechat:publish --file marketing.md --css ./styles/marketing.css\n\n# 使用教程类文章样式\nwechat-public-cli bjh:publish --file tutorial.md --css ./styles/tutorial.css\n```\n\n## 自定义公众号格式\n\n你可以通过定义和修改 CSS 文件，来调整发布到微信公众号的文章样式。支持为不同类型的文章使用不同的样式文件。\n\n### CSS 文件加载优先级\n\n1. **命令行参数** `--css` （最高优先级）\n2. **配置文件** `wechat-public.config.json` 中的 `paths.customCss`\n3. **默认文件** 当前目录下的 `custom.css`\n4. **空样式** 如果以上都不存在，则不应用自定义样式\n\n### 使用场景示例\n\n#### 1. 使用默认样式\n\n在项目根目录创建 `custom.css`，不传任何参数时自动使用：\n\n```bash\nwechat-public-cli wechat:publish --file article.md\n```\n\n#### 2. 为不同类型文章使用不同样式\n\n创建多个 CSS 文件，通过 `--css` 参数指定：\n\n```bash\n# 技术类文章使用 tech.css\nwechat-public-cli wechat:publish --file tech-article.md --css ./styles/tech.css\n\n# 商业类文章使用 business.css\nwechat-public-cli wechat:publish --file business-article.md --css ./styles/business.css\n\n# 教程类文章使用 tutorial.css\nwechat-public-cli wechat:publish --file tutorial.md --css ./styles/tutorial.css\n```\n\n#### 3. 在配置文件中指定默认样式\n\n在 `wechat-public.config.json` 的 `paths.customCss` 字段指定默认样式文件路径：\n\n```json\n{\n\t\"paths\": {\n\t\t\"customCss\": \"./styles/default.css\"\n\t}\n}\n```\n\n这样不传 `--css` 参数时，会使用配置文件中指定的样式。\n\n### CSS 示例\n\n```css\n/* tech.css - 技术文章样式 */\n.wechat-title {\n\tfont-size: 2em;\n\tcolor: #2c3e50;\n\tfont-family: \"Monaco\", \"Consolas\", monospace;\n}\n.wechat-banner {\n\tborder-radius: 8px;\n}\ncode {\n\tbackground-color: #f4f4f4;\n\tpadding: 2px 4px;\n}\n\n/* business.css - 商业文章样式 */\n.wechat-title {\n\tfont-size: 2.2em;\n\tcolor: #c7254e;\n\tfont-family: \"Arial\", \"Helvetica\", sans-serif;\n}\n```\n\nAI 也可通过自动生成或修改 CSS 文件，实现对公众号内容格式的智能优化。\n\n## Notes\n\n- WeChat draft requires `thumb_media_id` or `banner`/`banner_path` in frontmatter.\n- Baijiahao publish requires `banner` or `banner_path` in frontmatter.\n- The CLI uploads inline images to the target platform automatically.\n- `wechat:download` saves recent articles in update_time order and writes all `news_item` entries.\n- `wechat:stats:cumulate` / `wechat:stats:bizsummary` must be called server-side; the date range can be at most 30 days. Results are printed as JSON to stdout."
         }
       ]
     },
@@ -2015,7 +2015,7 @@
       "name": "公众号发布",
       "parent": "1962",
       "type": "Business Role",
-      "description": "负责将 ArchGraph 项目的文章（洞察报告、官宣介绍等）撰写为符合微信公众号格式的文章，并通过 wechat-public-cli 创建草稿，跟进公众号后台手动发布流程。",
+      "description": "负责将 ArchGraph 项目的文章（洞察报告、官宣介绍等）撰写为符合微信公众号格式的文章，并通过 wechat-public-cli 创建草稿，跟进公众号后台手动发布流程。\r\n工作流程：(1) 使用 wechat-public-cli 技能，将带 YAML frontmatter（title/author/digest/banner）的 Markdown 文章通过 wechat:draft 命令创建草稿；(2) 凭证配置 wechat-public.config.json（已 gitignore，含真实 appid/secret），自定义 CSS 为 wechat-public-cli/custom.css（经 --css 传入）；(3) 关键约束：本公众号是个人未认证订阅号（appid wxdf79e7cb44995aa3），freepublish/sendall 永远返回 48001 api unauthorized，API 发布不可用，只能创建草稿后在公众号后台手动发布；(4) 发布前需确认当前公网 IP 已加入公众号后台 IP 白名单（否则 token 刷新报 40164）。\r\n",
       "attributes": [
         {
           "name": "commit",
@@ -2029,52 +2029,61 @@
       "name": "公众号发布员",
       "parent": "1962",
       "type": "Business Actor",
-      "description": "专门负责将 ArchGraph 项目文章发布到微信公众号的 Business Actor。工作流程：(1) 使用 .github/skills/@ai-chen2050/wechat-public-cli 技能，将带 YAML frontmatter（title/author/digest/banner）的 Markdown 文章通过 wechat:draft 命令创建草稿；(2) 凭证配置 wechat-public.config.json（已 gitignore，含真实 appid/secret），自定义 CSS 为 .github/skills/@ai-chen2050/wechat-public-cli/custom.css（经 --css 传入）；(3) 关键约束：本公众号是个人未认证订阅号（appid wxdf79e7cb44995aa3），freepublish/sendall 永远返回 48001 api unauthorized，API 发布不可用，只能创建草稿后在公众号后台手动发布；(4) 发布前需确认当前公网 IP 已加入公众号后台 IP 白名单（否则 token 刷新报 40164）。",
-      "testcases": [
-        {
-          "Input": "node --test tests/wechat-publisher-actor.test.js",
-          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js：断言 SystemArchitecture.json 中恰好存在一个 name=公众号发布员、type=Business Actor、parent=1962 且 description 非空的元素；存在 Assignment 关系（source_id=该 actor、target_id=name 为「公众号发布」的 Business Role）；视图 433 的 included_elements 含该 actor 与 role，included_relationships 含该 Assignment 关系。通过。",
-          "description": "GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找专门发布微信公众号的 Business Actor；THEN 图谱中存在全局唯一 name 为「公众号发布员」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description 作为其 system prompt，并通过 Assignment 关系指派给「公众号发布」Business Role，三者均包含于「公众号发布团队」视图(433)。",
-          "name": "AT-2755-01-公众号发布员角色就绪",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "node --test tests/wechat-publisher-actor.test.js",
-          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js（用例 \"wechat-publisher-agent-file\"）：断言 argo/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus 与 tools 列表，正文含 wechat:draft 与 48001。通过。",
-          "description": "GIVEN 公众号发布员需要以 VS Code 自定义 agent 方式被调用；WHEN 查找其 agent 定义文件；THEN 工作区 argo/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus、tools 包含 read/edit/search/execute，正文含 wechat:draft 与 48001 约束。",
-          "name": "AT-2755-02-公众号发布员Agent文件就绪",
-          "type": "Acceptance Test"
-        }
-      ],
+      "description": "专门负责将 ArchGraph 项目文章发布到微信公众号的 Business Actor。",
       "attributes": [
         {
-          "description": "design/KG/SystemArchitecture.json; tests/wechat-publisher-actor.test.js",
           "name": "commit",
-          "value": "5ef24d4"
+          "value": "225e21d",
+          "description": "argo/agents/wechat-publisher.agent.md (moved from .github/agents); package.json (argo/agents); install-argo.ps1; tests/wechat-publisher-actor.test.js; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "description": ".github/agents/wechat-publisher.agent.md; tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "2e5fddd"
+          "value": "82e2360",
+          "description": ".github/agents/wechat-publisher.agent.md (model Qwen3.7-Plus); tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "description": ".github/agents/wechat-publisher.agent.md (model Qwen3.7-Plus); tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "82e2360"
+          "value": "5ef24d4",
+          "description": "design/KG/SystemArchitecture.json; tests/wechat-publisher-actor.test.js"
         },
         {
-          "description": "argo/agents/wechat-publisher.agent.md (moved from .github/agents); package.json (argo/agents); install-argo.ps1; tests/wechat-publisher-actor.test.js; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "225e21d"
+          "value": "2e5fddd",
+          "description": ".github/agents/wechat-publisher.agent.md; tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-2755-01-公众号发布员角色就绪",
+          "description": "GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找专门发布微信公众号的 Business Actor；THEN 图谱中存在全局唯一 name 为「公众号发布员」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description 作为其 system prompt，并通过 Assignment 关系指派给「公众号发布」Business Role，三者均包含于「公众号发布团队」视图(433)。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/wechat-publisher-actor.test.js",
+          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js：断言 SystemArchitecture.json 中恰好存在一个 name=公众号发布员、type=Business Actor、parent=1962 且 description 非空的元素；存在 Assignment 关系（source_id=该 actor、target_id=name 为「公众号发布」的 Business Role）；视图 433 的 included_elements 含该 actor 与 role，included_relationships 含该 Assignment 关系。通过。"
+        },
+        {
+          "name": "AT-2755-02-公众号发布员Agent文件就绪",
+          "description": "GIVEN 公众号发布员需要以 VS Code 自定义 agent 方式被调用；WHEN 查找其 agent 定义文件；THEN 工作区 argo/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus、tools 包含 read/edit/search/execute，正文含 wechat:draft 与 48001 约束。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/wechat-publisher-actor.test.js",
+          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js（用例 \"wechat-publisher-agent-file\"）：断言 argo/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus 与 tools 列表，正文含 wechat:draft 与 48001。通过。"
         }
       ]
     },
     {
+      "id": "2756",
+      "name": "发布开发者社区介绍文章到微信公众号",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "使用 wechat-public-cli 技能，撰写 ArchGraph 开发者社区（GitHub Discussions）介绍文章并发布到微信公众号。",
       "attributes": [
         {
           "name": "commit",
           "value": "2e461cb",
           "description": "docs/developer-community.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         },
         {
           "name": "media_id",
@@ -2085,26 +2094,17 @@
           "name": "status",
           "value": "BLOCKED",
           "description": "草稿已创建（media_id 已记录）；本账号为个人未认证订阅号，freepublish/sendall 永远返回 48001 api unauthorized，API 发布不可用，需在公众号后台手动发布"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
         }
       ],
-      "description": "使用 wechat-public-cli 技能，撰写 ArchGraph 开发者社区（GitHub Discussions）介绍文章并发布到微信公众号。",
-      "id": "2756",
-      "name": "发布开发者社区介绍文章到微信公众号",
-      "parent": "1249",
       "testcases": [
         {
-          "Input": "打开 docs/developer-community.wechat.md",
-          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-community-ready\"）：断言 docs/developer-community.wechat.md 存在，frontmatter 含 title/author/digest，正文含 GitHub Discussions 与 工作包。通过。",
-          "description": "GIVEN ArchGraph 开发者社区（GitHub Discussions）已设计；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号社区介绍文章 Markdown，且正文介绍 GitHub Discussions 与工作包分享。",
           "name": "AT-2756-01-社区介绍文章就绪",
-          "type": "Acceptance Test"
+          "description": "GIVEN ArchGraph 开发者社区（GitHub Discussions）已设计；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号社区介绍文章 Markdown，且正文介绍 GitHub Discussions 与工作包分享。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/developer-community.wechat.md",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-community-ready\"）：断言 docs/developer-community.wechat.md 存在，frontmatter 含 title/author/digest，正文含 GitHub Discussions 与 工作包。通过。"
         }
-      ],
-      "type": "Work Package"
+      ]
     }
   ],
   "relationships": [
@@ -2710,33 +2710,33 @@
     },
     {
       "id": "1969",
-      "name": "Assignment",
-      "source_id": "2735",
-      "source_name": "Xiaoming",
       "statement": "Xiaoming --(Assignment)--> 开发者社区开发交付",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2735",
       "target_id": "2751",
-      "target_name": "开发者社区开发交付",
-      "type": "Assignment"
+      "source_name": "Xiaoming",
+      "target_name": "开发者社区开发交付"
     },
     {
       "id": "1970",
-      "name": "Assignment",
-      "source_id": "2733",
-      "source_name": "adam",
       "statement": "adam --(Assignment)--> 开发者社区开发交付",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2733",
       "target_id": "2751",
-      "target_name": "开发者社区开发交付",
-      "type": "Assignment"
+      "source_name": "adam",
+      "target_name": "开发者社区开发交付"
     },
     {
       "id": "1971",
-      "name": "Assignment",
-      "source_id": "2745",
-      "source_name": "chenlin",
       "statement": "chenlin --(Assignment)--> 开发者社区开发交付",
+      "name": "Assignment",
+      "type": "Assignment",
+      "source_id": "2745",
       "target_id": "2751",
-      "target_name": "开发者社区开发交付",
-      "type": "Assignment"
+      "source_name": "chenlin",
+      "target_name": "开发者社区开发交付"
     },
     {
       "id": "1972",
@@ -2747,19 +2747,19 @@
       "target_id": "2754",
       "source_name": "公众号发布员",
       "target_name": "公众号发布"
+    },
+    {
+      "id": "2095",
+      "statement": "公众号发布 --(Access)--> wechat-public-cli",
+      "name": "uses",
+      "type": "Access",
+      "source_id": "2754",
+      "target_id": "2753",
+      "source_name": "公众号发布",
+      "target_name": "wechat-public-cli"
     }
   ],
   "views": [
-    {
-      "view_id": "432",
-      "view_name": "workpackage_ground",
-      "parent_element_id": "1249",
-      "parent_element_name": "Implementation and Migration Viewpoint",
-      "included_elements": [
-        "2751"
-      ],
-      "included_relationships": []
-    },
     {
       "view_id": "178",
       "view_name": "AML Standardization",
@@ -2861,6 +2861,16 @@
         "1195",
         "1196"
       ]
+    },
+    {
+      "view_id": "432",
+      "view_name": "workpackage_ground",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "included_elements": [
+        "2751"
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "431",
@@ -3068,6 +3078,22 @@
       "included_relationships": []
     },
     {
+      "view_id": "299",
+      "view_name": "AgentOrganization",
+      "parent_element_id": "1962",
+      "parent_element_name": "AgentOrganization",
+      "included_elements": [
+        "1964",
+        "1965",
+        "1966",
+        "1963"
+      ],
+      "included_relationships": [
+        "1521",
+        "1522"
+      ]
+    },
+    {
       "view_id": "430",
       "view_name": "DevelopmentTeam",
       "parent_element_id": "1962",
@@ -3105,19 +3131,18 @@
       ]
     },
     {
-      "view_id": "299",
-      "view_name": "AgentOrganization",
+      "view_id": "433",
+      "view_name": "公众号发布团队",
       "parent_element_id": "1962",
       "parent_element_name": "AgentOrganization",
       "included_elements": [
-        "1964",
-        "1965",
-        "1966",
-        "1963"
+        "2753",
+        "2754",
+        "2755"
       ],
       "included_relationships": [
-        "1521",
-        "1522"
+        "1972",
+        "2095"
       ]
     },
     {
@@ -3142,19 +3167,6 @@
       ],
       "included_relationships": [
         "1161"
-      ]
-    },
-    {
-      "view_id": "433",
-      "view_name": "公众号发布团队",
-      "parent_element_id": "1962",
-      "parent_element_name": "AgentOrganization",
-      "included_elements": [
-        "2754",
-        "2755"
-      ],
-      "included_relationships": [
-        "1972"
       ]
     }
   ]
