@@ -77,6 +77,47 @@ test('ea-web-service-design: design doc covers every AD decision from requiremen
   assert.ok(rejectedCount >= 9, `each AD should list a rejected alternative (found ${rejectedCount})`);
 });
 
+test('ea-web-service-design: AD-c adopts a zero-build SPA shell with an open-source graph core (G6/Cytoscape)', () => {
+  // GIVEN the planner feedback replaced the all-hand-rolled SVG UI with a zero-build SPA + open-source graph core
+  // WHEN the AD-c decision is inspected
+  // THEN it keeps the built-in SPA + REST API form, uses G6 v5 (primary) / Cytoscape.js (fallback), and is zero-build
+  const doc = readDoc();
+  assert.match(doc, /G6\s*v?5/, 'AD-c should name AntV G6 v5 as the primary graph kernel');
+  assert.match(doc, /Cytoscape/, 'AD-c should name Cytoscape.js as the fallback');
+  assert.match(doc, /零构建/, 'AD-c should keep the zero-build static page');
+  assert.match(doc, /开源图库/, 'AD-c should reference an open-source graph library');
+  assert.match(doc, /REST\/HTTP JSON API|REST\s*JSON\s*API/, 'AD-c should keep the REST JSON API');
+  assert.match(doc, /React\/Vite/, 'AD-c should name React/Vite as a rejected/evolution alternative');
+  assert.match(doc, /被否方案/, 'AD-c should keep rejected alternatives');
+  assert.match(doc, /ui-insight|2766/, 'AD-c should trace back to the planner insight report/element 2766');
+});
+
+test('ea-web-service-design: AD-g renders with AntV G6 v5 (Canvas default, built-in layouts, native drag/hit)', () => {
+  // GIVEN the planner feedback replaced self-built SVG + force-directed + fx/fy with G6 v5
+  // WHEN the AD-g decision is inspected
+  // THEN G6 v5 renders Canvas by default, uses built-in force/dagre layouts and native drag/select/hit, no self-built fx/fy
+  const doc = readDoc();
+  assert.match(doc, /G6\s*v?5/, 'AD-g should name AntV G6 v5');
+  assert.match(doc, /Canvas/, 'AD-g should default to Canvas rendering');
+  assert.match(doc, /dagre/, 'AD-g should use the built-in dagre layout');
+  assert.match(doc, /force/, 'AD-g should use the built-in force layout');
+  assert.match(doc, /内置.*拖动|drag-node|拖动\/选择\/命中|拖动\/命中/, 'AD-g should rely on library-native drag/select/hit');
+  assert.match(doc, /固定节点|固定.*位置/, 'AD-g should rely on native fixed-node positioning');
+  assert.match(doc, /无需自研.*fx\/fy|不再.*fx\/fy|自研.*fx\/fy/, 'AD-g should retire the self-built fx/fy mechanism');
+  assert.match(doc, /Cytoscape\.js/, 'AD-g should keep Cytoscape.js as the fallback');
+});
+
+test('ea-web-service-design: design doc specifies local vendored G6 assets (no CDN, no build chain)', () => {
+  // GIVEN zero-config requires no external network or build step
+  // WHEN the tech-stack/dependency section is inspected
+  // THEN G6 is vendored locally, not loaded from a CDN, and React/Vite is recorded as an evolution item
+  const doc = readDoc();
+  assert.match(doc, /vendor/, 'doc should mention local vendored assets (web/vendor/)');
+  assert.match(doc, /不引入\s*CDN|不.*CDN/, 'doc should avoid CDN to preserve zero-config offline operation');
+  assert.match(doc, /零配置/, 'doc should keep the zero-config requirement');
+  assert.match(doc, /演进项|后续演进/, 'doc should record React/Vite as a future evolution item');
+});
+
 test('ea-web-service-design: design doc lists the API and the edit↔MCP mapping table', () => {
   // GIVEN the service exposes REST endpoints and must map edits to ARGO MCP writes
   // WHEN the design doc is inspected
@@ -176,6 +217,23 @@ test('ea-web-service-design: new elements carry executable GIVEN-WHEN-THEN testc
       assert.ok(tc.acceptanceCriteria && tc.acceptanceCriteria.trim().length > 0, `${id} testcase should carry acceptanceCriteria`);
     }
   }
+});
+
+test('ea-web-service-design: component carries a testcase asserting the open-source graph core (not hand-rolled SVG)', () => {
+  // GIVEN the planner feedback introduced an open-source graph core
+  // WHEN the component testcases are inspected
+  // THEN 2760 carries a GIVEN-WHEN-THEN testcase asserting the UI uses G6/Cytoscape, not all-hand-rolled SVG
+  const component = elementById(COMPONENT_ID);
+  assert.ok(component, 'component 2760 should exist');
+  assert.ok(Array.isArray(component.testcases) && component.testcases.length >= 2, 'component should carry at least 2 testcases');
+  const tc = component.testcases.find((entry) => /2760-02|开源图库|G6/.test(entry.name || ''));
+  assert.ok(tc, 'component should carry a testcase asserting the open-source graph core');
+  assert.match(tc.description, /GIVEN/, 'testcase should contain GIVEN');
+  assert.match(tc.description, /WHEN/, 'testcase should contain WHEN');
+  assert.match(tc.description, /THEN/, 'testcase should contain THEN');
+  assert.match(tc.description, /G6|Cytoscape/, 'testcase should name G6/Cytoscape');
+  assert.equal(tc.type, 'Acceptance Test', 'testcase type should be Acceptance Test');
+  assert.ok(tc.Input && tc.Input.includes('node --test tests/ea-web-service-design.test.js'), 'testcase Input should be executable');
 });
 
 test('ea-web-service-design: design doc includes design-stage GIVEN-WHEN-THEN acceptance criteria', () => {
