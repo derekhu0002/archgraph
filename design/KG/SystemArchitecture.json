@@ -2106,6 +2106,11 @@
           "description": "docs/developer-community.wechat.md (banner_path); docs/diagrams/developer-community-banner.png; tests/wechat-article.test.js (wechat-community-banner)"
         },
         {
+          "name": "commit",
+          "value": "576262d",
+          "description": "design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "deliveryStatus",
           "value": "not_delivered"
         },
