@@ -2264,39 +2264,44 @@
       ],
       "attributes": [
         {
+          "description": "docs/ea-web-service-requirements.md; tests/ea-web-service.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "dbb5a64",
-          "description": "docs/ea-web-service-requirements.md; tests/ea-web-service.test.js; design/KG/SystemArchitecture.json"
+          "value": "dbb5a64"
         },
         {
+          "description": "docs/ea-web-service-requirements.md; tests/ea-web-service.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "b12165b",
-          "description": "docs/ea-web-service-requirements.md; tests/ea-web-service.test.js; design/KG/SystemArchitecture.json"
+          "value": "b12165b"
         },
         {
+          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "fca257c",
-          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json"
+          "value": "fca257c"
         },
         {
+          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "b42a3dd",
-          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json"
+          "value": "b42a3dd"
         },
         {
+          "description": "design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "9e6a5b3",
-          "description": "design/KG/SystemArchitecture.json"
+          "value": "9e6a5b3"
         },
         {
+          "description": "scripts/ea-web-service.js; web/index.html; web/app.js; web/style.css; tests/ea-web-service-impl.test.js",
           "name": "commit",
-          "value": "1c35760",
-          "description": "scripts/ea-web-service.js; web/index.html; web/app.js; web/style.css; tests/ea-web-service-impl.test.js"
+          "value": "1c35760"
         },
         {
+          "description": "scripts/ea-web-service.js; docs/ea-web-service-design.md; tests/ea-web-service-impl.test.js",
           "name": "commit",
-          "value": "a3df906",
-          "description": "scripts/ea-web-service.js; docs/ea-web-service-design.md; tests/ea-web-service-impl.test.js"
+          "value": "a3df906"
+        },
+        {
+          "description": "docs/ea-web-service-test-report.md; tests/ea-web-service-test-report.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "2ef30ed"
         }
       ]
     },
@@ -2338,39 +2343,44 @@
       "type": "Application Component",
       "attributes": [
         {
+          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "fca257c",
-          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json"
+          "value": "fca257c"
         },
         {
+          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "b42a3dd",
-          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json"
+          "value": "b42a3dd"
         },
         {
+          "description": "design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "9e6a5b3",
-          "description": "design/KG/SystemArchitecture.json"
+          "value": "9e6a5b3"
         },
         {
+          "description": "scripts/ea-web-service.js; web/index.html; web/app.js; web/style.css; tests/ea-web-service-impl.test.js",
           "name": "commit",
-          "value": "1c35760",
-          "description": "scripts/ea-web-service.js; web/index.html; web/app.js; web/style.css; tests/ea-web-service-impl.test.js"
+          "value": "1c35760"
         },
         {
+          "description": "docs/ea-web-service-code-review.md; tests/ea-web-service-code-review.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "84c33e5",
-          "description": "docs/ea-web-service-code-review.md; tests/ea-web-service-code-review.test.js; design/KG/SystemArchitecture.json"
+          "value": "84c33e5"
         },
         {
+          "description": "tests/ea-web-service-design.test.js",
           "name": "commit",
-          "value": "20754d0",
-          "description": "tests/ea-web-service-design.test.js"
+          "value": "20754d0"
         },
         {
+          "description": "scripts/ea-web-service.js; docs/ea-web-service-design.md; tests/ea-web-service-impl.test.js",
           "name": "commit",
-          "value": "a3df906",
-          "description": "scripts/ea-web-service.js; docs/ea-web-service-design.md; tests/ea-web-service-impl.test.js"
+          "value": "a3df906"
+        },
+        {
+          "description": "docs/ea-web-service-test-report.md; tests/ea-web-service-test-report.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "2ef30ed"
         }
       ]
     },
