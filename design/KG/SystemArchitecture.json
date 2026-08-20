@@ -2112,7 +2112,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         },
         {
           "name": "media_id",
@@ -2121,8 +2121,8 @@
         },
         {
           "name": "status",
-          "value": "BLOCKED",
-          "description": "草稿已创建；API 发布不可用（个人未认证订阅号），需在公众号后台手动发布"
+          "value": "published",
+          "description": "已在公众号后台手动发布"
         }
       ],
       "testcases": [
