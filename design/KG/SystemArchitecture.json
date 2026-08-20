@@ -3338,7 +3338,7 @@
       "view_name": "产品经理工作记录",
       "parent_element_id": "2747",
       "parent_element_name": "xiaoniu",
-      "description": "产品经理 xiaoniu 的长期记忆子视图：记录本会话需求分析切片（EA 知识图谱导入导出本地 Web 服务，Work Package 2758）。",
+      "description": "产品经理 xiaoniu 的长期记忆子视图：EA 知识图谱导入导出本地 Web 服务的需求分析。切片1（commit dbb5a64）：初始需求（本地 Web 服务导入/导出、零 EA 依赖、格式/大小校验）。切片2（commit b12165b）：吸收功能标注 TODO，扩展为多项目管理 + 项目选择 + 搜索（语义检索 getSystemArchitecture / 上下文检索 getIntentElementContext）+ 图形化查看（视图列表→展开→自动布局→拖动）+ 编辑（新增视图/元素、编辑元素属性、删除元素、编辑关系属性、删除关系）+ 撤销/重做 + 导入导出，写图统一走 ARGO MCP 与 Agent 一致；Work Package 2758 testcases 增至 12 条（AT-2758-01..12）。",
       "included_elements": [
         "2758"
       ],
