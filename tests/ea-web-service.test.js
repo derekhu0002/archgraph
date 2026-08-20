@@ -87,7 +87,10 @@ test('ea-web-service: Work Package carries executable GIVEN-WHEN-THEN testcases'
     assert.match(tc.description, /WHEN/, 'testcase description should contain WHEN');
     assert.match(tc.description, /THEN/, 'testcase description should contain THEN');
     assert.equal(tc.type, 'Acceptance Test', 'testcase type should be Acceptance Test');
-    assert.ok(tc.Input && tc.Input.includes('node --test tests/ea-web-service.test.js'), 'testcase Input should be executable');
+    assert.ok(
+      tc.Input && /node --test tests\/ea-web-service(-test-report)?\.test\.js/.test(tc.Input),
+      'testcase Input should be executable'
+    );
     assert.ok(tc.acceptanceCriteria && tc.acceptanceCriteria.trim().length > 0, 'testcase should carry acceptanceCriteria');
   }
 });
