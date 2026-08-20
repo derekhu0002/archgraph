@@ -2111,6 +2111,11 @@
           "description": "design/KG/SystemArchitecture.json"
         },
         {
+          "name": "commit",
+          "value": "1057958",
+          "description": "design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "deliveryStatus",
           "value": "delivered"
         },
