@@ -2018,8 +2018,8 @@
         },
         {
           "Input": "node --test tests/wechat-publisher-actor.test.js",
-          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js（用例 \"wechat-publisher-agent-file\"）：断言 .github/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员 与 tools 列表，正文含 wechat:draft 与 48001。通过。",
-          "description": "GIVEN 公众号发布员需要以 VS Code 自定义 agent 方式被调用；WHEN 查找其 agent 定义文件；THEN 工作区 .github/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、tools 包含 read/edit/search/execute，正文含 wechat:draft 与 48001 约束。",
+          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js（用例 \"wechat-publisher-agent-file\"）：断言 .github/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus 与 tools 列表，正文含 wechat:draft 与 48001。通过。",
+          "description": "GIVEN 公众号发布员需要以 VS Code 自定义 agent 方式被调用；WHEN 查找其 agent 定义文件；THEN 工作区 .github/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus、tools 包含 read/edit/search/execute，正文含 wechat:draft 与 48001 约束。",
           "name": "AT-2755-02-公众号发布员Agent文件就绪",
           "type": "Acceptance Test"
         }

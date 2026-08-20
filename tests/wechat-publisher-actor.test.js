@@ -92,6 +92,7 @@ test('wechat-publisher-agent-file: a VS Code custom agent defines the publisher 
   const meta = parseAgentFrontmatter(md);
 
   assert.equal(meta.name, '公众号发布员', 'frontmatter should name the agent 公众号发布员');
+  assert.equal(meta.model, 'Qwen3.7-Plus', 'frontmatter should pin the Qwen3.7-Plus model');
   assert.ok(meta.tools, 'frontmatter should declare a tools list');
   assert.match(meta.tools, /read/, 'tools should include read');
   assert.match(meta.tools, /edit/, 'tools should include edit');
