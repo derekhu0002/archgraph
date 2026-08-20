@@ -2034,6 +2034,11 @@
           "description": ".github/agents/wechat-publisher.agent.md; tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
           "value": "2e5fddd"
+        },
+        {
+          "description": ".github/agents/wechat-publisher.agent.md (model Qwen3.7-Plus); tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "82e2360"
         }
       ]
     },
