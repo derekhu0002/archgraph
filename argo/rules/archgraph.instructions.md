@@ -21,7 +21,7 @@ Your cognitive architecture is composed of ArchiMate 3.2 elements and their exte
 </Ontology>
 
 <WakeupGuideline>
-1. When you are started, first identify which `Business Actor` you are, then find your long-term memory under that `Business Actor` in the knowledge graph and restore it into your session memory.
+1. When you are started, first identify which `Business Actor` you are, then find your long-term memory — the SUBVIEW hierarchy mounted under that `Business Actor` element (the Views whose `parent_element_id` points to this Actor, plus the elements, relationships, and further nested sub-views inside them; NOT the View that merely includes the Actor in its `included_elements`) — and restore it into your session memory.
 2. If you are not sure, query all existing `Business Actor`s, then consult your human partner to confirm your role. If the Agent type (the `agent` attribute) corresponding to the confirmed role differs from the current Agent type, switch to that Agent type, or delegate to an Agent of that type per `<CoperationGuideline>` item 2.
 </WakeupGuideline>
 
@@ -54,16 +54,16 @@ When you are about to build an element, first look up the skills and resources n
 0. You must not do the work of another `Business Actor`; you may only work in the role you are delegated to and must strictly stay within that role's responsibilities. If you need help from another `Business Actor`, you must go through a formal delegation process.
 1. When you need to delegate to a `Business Actor`, look it up in the intent graph by its stable identity (`name` or `id`, registered at creation): if it already exists, delegate to it directly; if not, create the `Business Actor` element and register a globally unique `name`.
 2. Before delegating to a `Business Actor`, read the element's "agent" attribute: if present, this Actor has a corresponding Agent, so launch an Agent of that type directly; if absent, or if launching the Agent fails, delegate to a general-purpose Agent and pass this element's `description` to that Agent.
-3. Each `Business Actor`'s long-term memory is mounted in one or more Views under that element (along with the elements and relationships inside them), containing all of the `Business Actor`'s historical work information.
+3. Each `Business Actor`'s long-term memory is a SUBVIEW hierarchy mounted under that Actor element: the Views whose `parent_element_id` points to this Actor (along with the elements and relationships inside them, and any further sub-views recursively mounted under those elements). It is NOT the View that merely includes the Actor in its `included_elements`. This sub-view hierarchy contains all of the `Business Actor`'s historical work information.
 4. Each `Business Actor` must stay isolated from other `Business Actor`s while working, i.e., each uses its own independent session/working context and must not interfere with others.
 </CoperationGuideline>
 
 <SessionMemorySummarization>
-Before every session ends (before finishing work), you MUST perform a short-term memory summarization and write the summary into a long-term memory View (create it if none exists; you may mount multiple Views, or expand new Views under the elements of a View, forming a hierarchical long-term memory system), refreshing long-term memory to prevent cross-session forgetting:
+Before every session ends (before finishing work), you MUST perform a short-term memory summarization and write the summary into long-term memory — a SUBVIEW hierarchy mounted under the relevant `Business Actor` element, i.e. Views whose `parent_element_id` points to that Actor (create the first sub-view if none exists; you may mount multiple sub-views under the Actor, or expand new sub-views under the elements of an existing sub-view, forming a hierarchical long-term memory system) — refreshing long-term memory to prevent cross-session forgetting:
 1. First read the short-term (session) memory: check the records of this session under `/memories/session/`; if empty, summarize based on the actual work done in this session.
 2. Produce a structured summary containing at least: this session's goal, completed key progress, key decisions and their reasons, remaining issues and TODOs, and reusable experience and lessons.
 3. Write the summary into long-term memory:
-   - If this session's work belongs to a `Business Actor` role, write it into the long-term memory View mounted under that Actor (see `<CoperationGuideline>` item 3);
+   - If this session's work belongs to a `Business Actor` role, write it into the long-term memory sub-views mounted under that Actor (the Views whose `parent_element_id` points to this Actor, NOT the View that merely contains the Actor itself; see `<CoperationGuideline>` item 3);
 4. The summary must be concise and de-duplicated: prefer updating existing memory files and only create new ones when necessary; do not copy redundant process content verbatim from the session into long-term memory.
 </SessionMemorySummarization>
 
