@@ -2285,6 +2285,11 @@
           "name": "commit",
           "value": "1c35760",
           "description": "scripts/ea-web-service.js; web/index.html; web/app.js; web/style.css; tests/ea-web-service-impl.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "a3df906",
+          "description": "scripts/ea-web-service.js; docs/ea-web-service-design.md; tests/ea-web-service-impl.test.js"
         }
       ]
     },
@@ -2354,6 +2359,11 @@
           "name": "commit",
           "value": "20754d0",
           "description": "tests/ea-web-service-design.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "a3df906",
+          "description": "scripts/ea-web-service.js; docs/ea-web-service-design.md; tests/ea-web-service-impl.test.js"
         }
       ]
     },
