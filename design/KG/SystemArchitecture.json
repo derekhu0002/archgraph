@@ -2104,6 +2104,20 @@
           "name": "commit",
           "value": "85c5891",
           "description": "docs/developer-community.wechat.md (banner_path); docs/diagrams/developer-community-banner.png; tests/wechat-article.test.js (wechat-community-banner)"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        },
+        {
+          "name": "media_id",
+          "value": "BRZAMZ3b-CaOBH8qdG2KTTVlZEVz5vzNsB4Z8a0rgcjjHu6rpZ4x7857EQcNd-3h",
+          "description": "WeChat draft media_id"
+        },
+        {
+          "name": "status",
+          "value": "BLOCKED",
+          "description": "草稿已创建；API 发布不可用（个人未认证订阅号），需在公众号后台手动发布"
         }
       ],
       "testcases": [
