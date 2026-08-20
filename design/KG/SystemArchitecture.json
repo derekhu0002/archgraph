@@ -2344,6 +2344,11 @@
           "name": "commit",
           "value": "1c35760",
           "description": "scripts/ea-web-service.js; web/index.html; web/app.js; web/style.css; tests/ea-web-service-impl.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "84c33e5",
+          "description": "docs/ea-web-service-code-review.md; tests/ea-web-service-code-review.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     },
