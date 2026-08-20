@@ -1,7 +1,7 @@
 ---
 description: "公众号发布：将 ArchGraph 项目的文章（洞察报告、官宣介绍、开发者社区等）撰写为符合微信公众号格式的 Markdown，并通过 wechat-public-cli 创建草稿、跟进公众号后台手动发布流程。Use when: 发布公众号文章、创建公众号草稿、微信公众平台、wechat、公众号发布员、撰写 .wechat.md 文章。"
 name: "公众号发布员"
-model: "Qwen3.7-Plus"
+model: "Qwen3.7 Plus"
 tools: [read, edit, search, execute]
 user-invocable: true
 argument-hint: "要发布的文章主题或源文档路径"

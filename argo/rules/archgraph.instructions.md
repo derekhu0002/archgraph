@@ -4,6 +4,16 @@ name: "ArchGraph ARGO Workflow Rules"
 applyTo: "**"
 ---
 
+<CoreRules>
+以下为本 Agent 不可违反的红线（MUST），任何时候不得跳过；详细展开见各 `<...>` 章节。
+1. 动手修改仓库任何内容前，必须先通过 ARGO MCP 在图谱中定位（或先创建）对应的架构元素与 View。见 `<IntentArchitectureFirst>`。
+2. 意图图谱只能通过 ARGO MCP 工具读写，禁止直接编辑图谱源文件（design/KG/SystemArchitecture.json）。见 `<ToolsGuideline>`。
+3. 每次改动必须 git commit，并把「commit id + 相关文件路径」登记到对应架构元素的 `commit` 属性。见 `<IntentArchitectureFirst>` 第 4 条。
+4. 任何改动必须先确认并通过所有受影响验收用例的回归测试；验收用例缺失则先补充。见 `<AcceptanceTestFirst>`。
+5. 收工前必须把本次关键进展总结并回写长期记忆，防止长会话/跨会话遗忘。见 `<SessionMemorySummarization>` 与 `<MemoryTriggerTiming>`。
+6. 全过程中持续遵守以上红线，不得跳过、简化或静默违反任何一条。
+</CoreRules>
+
 <Ontology>
 你的认知体系结构是基于Archimate3.2及其扩展元素构成。以下参考文件位于全局 Argo 安装根目录 ~/.argo（~ 为用户主目录，Windows 上即 %USERPROFILE%\.argo）：
 1. 如果你想知道知识图谱的合法结构，请参考：~/.argo/schema/SystemArchitecture.schema.json
@@ -12,7 +22,7 @@ applyTo: "**"
 
 <WakeupGuideline>
 1. 当你被启动时，先明确你是哪个 `Business Actor` ，然后从知识图谱中该 `Business Actor` 下面找到你的长期记忆并恢复到你的会话记忆。
-2. 如果你不能确定，可以查询出所有已有的 `Business Actor`，然后咨询人类伙伴，让人类伙伴确认你的角色。
+2. 如果你不能确定，可以查询出所有已有的 `Business Actor`，然后咨询人类伙伴，让人类伙伴确认你的角色。若确认的角色对应的 Agent 类型（`agent` 属性）与当前 Agent 类型不一致，则切换为对应类型的 Agent，或按 `<CoperationGuideline>` 第 2 条委派给对应类型的 Agent。
 </WakeupGuideline>
 
 <ExplorationGuideline>
@@ -53,7 +63,7 @@ applyTo: "**"
 1. 先读取短期（会话）记忆：查看 `/memories/session/` 下本次会话的记录；若为空，则依据本次会话的实际工作内容进行总结。
 2. 生成结构化总结，至少包含：本次目标、已完成的关键进展、关键决策及其原因、遗留问题与待办、可复用的经验与教训。
 3. 将总结写入长期记忆：
-   - 若本次工作属于某个 `Business Actor` 的角色工作，按 `<OrganizationGuideline>` 写入该 Actor 名下挂载的长期记忆 View；
+   - 若本次工作属于某个 `Business Actor` 的角色工作，写入该 Actor 名下挂载的长期记忆 View（见 `<CoperationGuideline>` 第 3 条）；
 4. 总结必须简洁、去重：优先更新已有记忆文件，仅在必要时新建；禁止把会话中的冗余过程内容原文复制进长期记忆。
 </SessionMemorySummarization>
 
