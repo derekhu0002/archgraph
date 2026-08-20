@@ -2205,6 +2205,13 @@
           "Input": "node --test tests/ea-web-service.test.js",
           "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-5（大小校验）。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "dbb5a64",
+          "description": "docs/ea-web-service-requirements.md; tests/ea-web-service.test.js; design/KG/SystemArchitecture.json"
+        }
       ]
     }
   ],
