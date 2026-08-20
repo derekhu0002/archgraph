@@ -950,7 +950,7 @@
       "name": "ARGO 部署脚本",
       "parent": "1249",
       "type": "Work Package",
-      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo；将 argo-init skill 部署到 Copilot（~/.copilot/skills）、Cursor（~/.cursor/skills）与 OpenCode（~/.config/opencode/skills）；将 archgraph.instructions.md 规则部署到 Copilot（%APPDATA%\\Code\\User\\prompts）与 OpenCode 全局规则（~/.config/opencode/AGENTS.md）；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补；若 .env 已存在且对应变量已有非空值则跳过输入并保留原值，仅对缺失或空值的变量提示输入）；自动在 VS Code（%APPDATA%\\Code\\User\\mcp.json）、Cursor（~/.cursor/mcp.json，mcpServers）与 OpenCode（~/.config/opencode/opencode.json，mcp）注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行，多工作区时优先选择含 design/KG/SystemArchitecture.json 的根；Cursor 支持 MCP roots，OpenCode 声明 roots 并响应且默认以项目目录为 cwd 启动，故均能正确解析当前项目目录）；temp 保留在仓库目录不部署。",
+      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo；将 argo-init skill 部署到 Copilot（~/.copilot/skills）、Cursor（~/.cursor/skills）与 OpenCode（~/.config/opencode/skills）；将 archgraph.instructions.md 规则部署到 Copilot（%APPDATA%\\Code\\User\\prompts）与 OpenCode 全局规则（~/.config/opencode/AGENTS.md）；将 argo/agents 中的 .agent.md 部署到 Copilot（~/.copilot/agents）、Cursor（~/.cursor/agents，重命名为 .md）与 OpenCode（~/.config/opencode/agents，重命名为 .md）；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补；若 .env 已存在且对应变量已有非空值则跳过输入并保留原值，仅对缺失或空值的变量提示输入）；自动在 VS Code（%APPDATA%\\Code\\User\\mcp.json）、Cursor（~/.cursor/mcp.json，mcpServers）与 OpenCode（~/.config/opencode/opencode.json，mcp）注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行，多工作区时优先选择含 design/KG/SystemArchitecture.json 的根；Cursor 支持 MCP roots，OpenCode 声明 roots 并响应且默认以项目目录为 cwd 启动，故均能正确解析当前项目目录）；temp 保留在仓库目录不部署。",
       "attributes": [
         {
           "name": "commit",
@@ -1053,39 +1053,46 @@
       ],
       "testcases": [
         {
-          "name": "AT-1361-01-部署脚本可运行",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js",
           "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 与非交互方式运行到临时目录；THEN 生成 schema/SystemArchitecture.schema.json、scripts/argo-mcp-server.js、defaults/design/KG/SystemArchitecture.json、defaults/EA-model-template.feap、skills/argo-init/SKILL.md、prompts/archgraph.instructions.md 与 package.json（含 neo4j-driver 依赖），并写入 VS Code mcp.json、Cursor mcp.json 与 OpenCode opencode.json 注册 argo MCP server，且不部署 temp 与 .env。",
-          "type": "Acceptance Test",
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
+          "name": "AT-1361-01-部署脚本可运行",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1361-02-全局server动态发现工作区",
-          "description": "GIVEN argo MCP server 已部署到 ~/.argo 且 mcp.json/opencode.json 不含 cwd/env；WHEN VS Code、Cursor 或 OpenCode 启动 server、完成 initialize/initialized 后 server 发送 roots/list 请求，客户端返回当前工作区 roots（Cursor 支持 MCP roots；OpenCode 声明 roots 并响应，且默认以项目目录为 cwd 启动）；THEN 工作区相关的 tools/call 以该工作区为 workspaceRoot 解析 design/KG/SystemArchitecture.json 并通过验证（而非 home 目录）。",
-          "type": "Acceptance Test",
           "Input": "运行 tests/argo-global-install.test.js",
-          "acceptanceCriteria": "tests/argo-global-install.test.js"
+          "acceptanceCriteria": "tests/argo-global-install.test.js",
+          "description": "GIVEN argo MCP server 已部署到 ~/.argo 且 mcp.json/opencode.json 不含 cwd/env；WHEN VS Code、Cursor 或 OpenCode 启动 server、完成 initialize/initialized 后 server 发送 roots/list 请求，客户端返回当前工作区 roots（Cursor 支持 MCP roots；OpenCode 声明 roots 并响应，且默认以项目目录为 cwd 启动）；THEN 工作区相关的 tools/call 以该工作区为 workspaceRoot 解析 design/KG/SystemArchitecture.json 并通过验证（而非 home 目录）。",
+          "name": "AT-1361-02-全局server动态发现工作区",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1361-03-默认模板随包部署",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js",
           "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署到 ~/.argo；THEN 部署目录包含 defaults/design/KG/SystemArchitecture.json 与 defaults/EA-model-template.feap，且 package.json files 包含 argo/defaults。",
-          "type": "Acceptance Test",
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
+          "name": "AT-1361-03-默认模板随包部署",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1361-04-已存在的env值跳过输入",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js",
           "description": "GIVEN ~/.argo/.env 已存在且包含 ARGO_* 等已知变量的非空值；WHEN 以非交互方式运行 install-argo.ps1 且不传 -SkipEnv；THEN 脚本不提示输入（不调用 Read-Host），重写 .env 时保留这些已有非空值；仅当某变量缺失或为空时才提示输入。",
-          "type": "Acceptance Test",
-          "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
+          "name": "AT-1361-04-已存在的env值跳过输入",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1361-05-OpenCode规则中文不乱码",
-          "description": "GIVEN install-argo.ps1 已就绪且系统 ANSI 代码页非 UTF-8；WHEN 以 -SkipEnv -SkipDeps 与非交互方式将规则部署到 OpenCode 全局 AGENTS.md；THEN AGENTS.md 中的中文（如「全局工作流规则」「验收用例先行」「意图图谱」）以可读 UTF-8 呈现，且不含 UTF-8 被当作 GBK 解码产生的乱码（如「鍏ㄥ眬」）。",
-          "type": "Acceptance Test",
           "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）"
+          "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）",
+          "description": "GIVEN install-argo.ps1 已就绪且系统 ANSI 代码页非 UTF-8；WHEN 以 -SkipEnv -SkipDeps 与非交互方式将规则部署到 OpenCode 全局 AGENTS.md；THEN AGENTS.md 中的中文（如「全局工作流规则」「验收用例先行」「意图图谱」）以可读 UTF-8 呈现，且不含 UTF-8 被当作 GBK 解码产生的乱码（如「鍏ㄥ眬」）。",
+          "name": "AT-1361-05-OpenCode规则中文不乱码",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js",
+          "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署；THEN package.json files 包含 argo/agents，且 argo/agents 中的 .agent.md 被部署到 Copilot（~/.copilot/agents，保持 .agent.md）、Cursor（~/.cursor/agents，重命名为 .md）与 OpenCode（~/.config/opencode/agents，重命名为 .md）。",
+          "name": "AT-1361-06-Agent随包部署到三工具",
+          "type": "Acceptance Test"
         }
       ]
     },
@@ -2018,8 +2025,8 @@
         },
         {
           "Input": "node --test tests/wechat-publisher-actor.test.js",
-          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js（用例 \"wechat-publisher-agent-file\"）：断言 .github/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus 与 tools 列表，正文含 wechat:draft 与 48001。通过。",
-          "description": "GIVEN 公众号发布员需要以 VS Code 自定义 agent 方式被调用；WHEN 查找其 agent 定义文件；THEN 工作区 .github/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus、tools 包含 read/edit/search/execute，正文含 wechat:draft 与 48001 约束。",
+          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js（用例 \"wechat-publisher-agent-file\"）：断言 argo/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus 与 tools 列表，正文含 wechat:draft 与 48001。通过。",
+          "description": "GIVEN 公众号发布员需要以 VS Code 自定义 agent 方式被调用；WHEN 查找其 agent 定义文件；THEN 工作区 argo/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus、tools 包含 read/edit/search/execute，正文含 wechat:draft 与 48001 约束。",
           "name": "AT-2755-02-公众号发布员Agent文件就绪",
           "type": "Acceptance Test"
         }

@@ -8,6 +8,9 @@ param(
     [string]$OpenCodeSkillsRoot = "$env:USERPROFILE\.config\opencode\skills",
     [string]$OpenCodeAgentsPath = "$env:USERPROFILE\.config\opencode\AGENTS.md",
     [string]$OpenCodeConfigPath = "$env:USERPROFILE\.config\opencode\opencode.json",
+    [string]$CopilotAgentsRoot = "$env:USERPROFILE\.copilot\agents",
+    [string]$CursorAgentsRoot = "$env:USERPROFILE\.cursor\agents",
+    [string]$OpenCodeAgentsRoot = "$env:USERPROFILE\.config\opencode\agents",
     [switch]$SkipEnv,
     [switch]$SkipDeps,
     [switch]$SkipMcp,
@@ -22,6 +25,24 @@ function Copy-Tree {
     param([string]$Source, [string]$Destination)
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
     Copy-Item -Recurse -Force -Path (Join-Path $Source '*') -Destination $Destination
+}
+
+function Copy-Agents {
+    param(
+        [string]$Source,
+        [string]$Destination,
+        [switch]$AsMd
+    )
+    New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+    $files = @(Get-ChildItem -Path (Join-Path $Source '*.agent.md') -ErrorAction SilentlyContinue)
+    foreach ($file in $files) {
+        if ($AsMd) {
+            $targetName = ($file.BaseName -replace '\.agent$', '') + '.md'
+        } else {
+            $targetName = $file.Name
+        }
+        Copy-Item -Force -Path $file.FullName -Destination (Join-Path $Destination $targetName)
+    }
 }
 
 function Write-McpConfig {
@@ -107,45 +128,55 @@ Write-Host '==> Deploying Argo toolchain'
 
 $schemaSrc = Join-Path $argoDir 'schema'
 $schemaDest = Join-Path $ArgoRoot 'schema'
-Write-Host "[1/6] argo\schema -> $schemaDest"
+Write-Host "[1/12] argo\schema -> $schemaDest"
 Copy-Tree -Source $schemaSrc -Destination $schemaDest
 
 $scriptsSrc = Join-Path $argoDir 'scripts'
 $scriptsDest = Join-Path $ArgoRoot 'scripts'
-Write-Host "[2/6] argo\scripts -> $scriptsDest"
+Write-Host "[2/12] argo\scripts -> $scriptsDest"
 Copy-Tree -Source $scriptsSrc -Destination $scriptsDest
 
 $defaultsSrc = Join-Path $argoDir 'defaults'
 $defaultsDest = Join-Path $ArgoRoot 'defaults'
-Write-Host "[3/6] argo\defaults -> $defaultsDest"
+Write-Host "[3/12] argo\defaults -> $defaultsDest"
 Copy-Tree -Source $defaultsSrc -Destination $defaultsDest
 
 $skillSrc = Join-Path (Join-Path $argoDir 'skills') 'argo-init'
 $skillDest = Join-Path $SkillsRoot 'argo-init'
-Write-Host "[4/6] argo\skills\argo-init -> $skillDest"
+Write-Host "[4/12] argo\skills\argo-init -> $skillDest"
 Copy-Tree -Source $skillSrc -Destination $skillDest
 
 $ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
 $ruleDest = Join-Path $PromptsRoot 'archgraph.instructions.md'
-Write-Host "[5/6] argo\rules\archgraph.instructions.md -> $ruleDest"
+Write-Host "[5/12] argo\rules\archgraph.instructions.md -> $ruleDest"
 New-Item -ItemType Directory -Force -Path $PromptsRoot | Out-Null
 Copy-Item -Force -Path $ruleSrc -Destination $ruleDest
 
 $depsSrc = Join-Path $argoDir 'package.json'
 $depsDest = Join-Path $ArgoRoot 'package.json'
-Write-Host "[6/6] argo\package.json -> $depsDest"
+Write-Host "[6/12] argo\package.json -> $depsDest"
 Copy-Item -Force -Path $depsSrc -Destination $depsDest
 
 $cursorSkillDest = Join-Path $CursorSkillsRoot 'argo-init'
-Write-Host "[7/10] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
+Write-Host "[7/12] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
 Copy-Tree -Source $skillSrc -Destination $cursorSkillDest
 
 $openCodeSkillDest = Join-Path $OpenCodeSkillsRoot 'argo-init'
-Write-Host "[8/10] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
+Write-Host "[8/12] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
 Copy-Tree -Source $skillSrc -Destination $openCodeSkillDest
 
-Write-Host "[9/10] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
+Write-Host "[9/12] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
 Add-AgentsRule -AgentsPath $OpenCodeAgentsPath -RulePath $ruleSrc
+
+$agentsSrc = Join-Path $argoDir 'agents'
+Write-Host "[10/12] argo\agents -> $CopilotAgentsRoot (Copilot user-level)"
+Copy-Agents -Source $agentsSrc -Destination $CopilotAgentsRoot
+
+Write-Host "[11/12] argo\agents -> $CursorAgentsRoot (Cursor user-level, renamed to .md)"
+Copy-Agents -Source $agentsSrc -Destination $CursorAgentsRoot -AsMd
+
+Write-Host "[12/12] argo\agents -> $OpenCodeAgentsRoot (OpenCode user-level, renamed to .md)"
+Copy-Agents -Source $agentsSrc -Destination $OpenCodeAgentsRoot -AsMd
 
 if ($SkipDeps) {
     Write-Host 'Skipped dependency install (-SkipDeps).'

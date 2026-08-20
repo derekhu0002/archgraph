@@ -9,7 +9,7 @@ const ROOT = path.resolve(__dirname, '..');
 const GRAPH = JSON.parse(
   readFileSync(path.join(ROOT, 'design', 'KG', 'SystemArchitecture.json'), 'utf8')
 );
-const AGENT_FILE = path.join(ROOT, '.github', 'agents', 'wechat-publisher.agent.md');
+const AGENT_FILE = path.join(ROOT, 'argo', 'agents', 'wechat-publisher.agent.md');
 
 function parseAgentFrontmatter(md) {
   const m = md.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n/);

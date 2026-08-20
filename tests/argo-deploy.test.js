@@ -38,6 +38,9 @@ function buildInstallArgs(opts) {
     '-OpenCodeSkillsRoot', opts.openCodeSkillsRoot,
     '-OpenCodeAgentsPath', opts.openCodeAgentsPath,
     '-OpenCodeConfigPath', opts.openCodeConfigPath,
+    '-CopilotAgentsRoot', opts.copilotAgentsRoot,
+    '-CursorAgentsRoot', opts.cursorAgentsRoot,
+    '-OpenCodeAgentsRoot', opts.openCodeAgentsRoot,
     '-SkipDeps',
     ...(opts.skipEnv ? ['-SkipEnv'] : []),
   ];
@@ -54,6 +57,9 @@ function hostPaths(tmp) {
     openCodeSkillsRoot: path.join(tmp, '.config', 'opencode', 'skills'),
     openCodeAgentsPath: path.join(tmp, '.config', 'opencode', 'AGENTS.md'),
     openCodeConfigPath: path.join(tmp, '.config', 'opencode', 'opencode.json'),
+    copilotAgentsRoot: path.join(tmp, '.copilot', 'agents'),
+    cursorAgentsRoot: path.join(tmp, '.cursor', 'agents'),
+    openCodeAgentsRoot: path.join(tmp, '.config', 'opencode', 'agents'),
   };
 }
 
@@ -72,6 +78,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     argoRoot, skillsRoot, promptsRoot, mcpPath,
     cursorSkillsRoot, cursorMcpPath,
     openCodeSkillsRoot, openCodeAgentsPath, openCodeConfigPath,
+    copilotAgentsRoot, cursorAgentsRoot, openCodeAgentsRoot,
   } = paths;
   try {
     const result = runInstall({ ...paths, skipEnv: true });
@@ -98,6 +105,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     // 5b) npm package manifest ships the defaults directory.
     const npmManifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
     assert.ok(Array.isArray(npmManifest.files) && npmManifest.files.includes('argo/defaults'));
+    assert.ok(npmManifest.files.includes('argo/agents'), 'npm package must ship the agents directory');
 
     // temp stays in the repository, and no .env is written in non-interactive mode.
     assert.ok(!fs.existsSync(path.join(argoRoot, 'temp')), 'temp must not be deployed');
@@ -138,6 +146,20 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(openCode.mcp.argo.command[1].endsWith('argo-mcp-server.js'));
     assert.equal(openCode.mcp.argo.enabled, true);
     assert.ok(!openCode.mcp.argo.cwd, 'OpenCode cwd must be omitted; default is the project directory');
+
+    // 10) custom agents deploy to user-level agent dirs for Copilot, Cursor, and OpenCode.
+    assert.ok(
+      fs.existsSync(path.join(copilotAgentsRoot, 'wechat-publisher.agent.md')),
+      'Copilot user-level agent must be deployed',
+    );
+    assert.ok(
+      fs.existsSync(path.join(cursorAgentsRoot, 'wechat-publisher.md')),
+      'Cursor user-level agent must be deployed as .md',
+    );
+    assert.ok(
+      fs.existsSync(path.join(openCodeAgentsRoot, 'wechat-publisher.md')),
+      'OpenCode user-level agent must be deployed as .md',
+    );
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
