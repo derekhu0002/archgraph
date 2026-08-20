@@ -11,7 +11,8 @@ applyTo: "**"
 </Ontology>
 
 <WakeupGuideline>
-当你被启动时，先明确你是哪个 `Business Actor` ，然后从知识图谱中该 `Business Actor` 下面找到你的长期记忆并恢复到你的会话记忆。
+1. 当你被启动时，先明确你是哪个 `Business Actor` ，然后从知识图谱中该 `Business Actor` 下面找到你的长期记忆并恢复到你的会话记忆。
+2. 如果你不能确定，可以查询出所有已有的 `Business Actor`，然后咨询人类伙伴，让人类伙伴确认你的角色。
 </WakeupGuideline>
 
 <ExplorationGuideline>
@@ -42,10 +43,9 @@ applyTo: "**"
 <CoperationGuideline>
 0. 你不能替代其他 `Business Actor` 工作，你只能在你被委派的角色下工作，且必须严格遵守该角色的职责范围，如果需要其他 `Business Actor` 的帮助，必须通过正式的委派流程。
 1. 当你要委派某个 `Business Actor` 时，按其稳定身份标识（`name`或 `id` ，创建时登记）在意图图谱中查找：已存在则直接按委派；不存在则新建该 `Business Actor` 元素并登记一个全局唯一的 `name`。
-2. 委派某个 `Business Actor` 前，先读取该元素的"agent"属性，如果有该属性则说明这个Actor有对应的Agent，请直接启动一个该类型的Agent，如果没有该属性，或者有但是启动Agent失败，则读取该元素的 `description`，把它作为该 agent 的定义（system prompt）加载进当前上下文，随即以该角色开始工作；
-3. 每个 `Business Actor` 的长期记忆挂载在该元素名下的一个或多个 View 中，包含该 `Business Actor` 的所有历史工作信息。
-4. 每个 `Business Actor` 工作时必须与其他 `Business Actor` 保持隔离，即各自使用独立的会话/工作上下文：调用某个 `Business Actor` 时，只加载其自己名下 View 的长期记忆，不得读取或写入其他 `Business Actor` 的 View，不同 `Business Actor` 的记忆与上下文不得混用。
-5. 每个 `Business Actor` 的 `name` 必须全局唯一，不能与其他 `Business Actor` 的 `name` 冲突。
+2. 委派某个 `Business Actor` 前，先读取该元素的"agent"属性，如果有该属性则说明这个Actor有对应的Agent，请直接启动一个该类型的Agent，如果没有该属性，或者有但是启动Agent失败，则委派一个通用Agent，读取该元素的 `description`传递给该 Agent；
+3. 每个 `Business Actor` 的长期记忆挂载在该元素名下的一个或多个 View （以及其中的元素和关系）中，包含该 `Business Actor` 的所有历史工作信息。
+4. 每个 `Business Actor` 工作时必须与其他 `Business Actor` 保持隔离，即各自使用独立的会话/工作上下文，不得互相干扰。
 </CoperationGuideline>
 
 <SessionMemorySummarization>
