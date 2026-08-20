@@ -214,6 +214,7 @@ test('ea-web-service-design: new elements carry executable GIVEN-WHEN-THEN testc
         tc.Input && (
           tc.Input.includes('node --test tests/ea-web-service-design.test.js')
           || tc.Input.includes('node --test tests/ea-web-service-impl.test.js')
+          || tc.Input.includes('node --test tests/ea-web-service-code-review.test.js')
         ),
         `${id} testcase Input should be executable`
       );
