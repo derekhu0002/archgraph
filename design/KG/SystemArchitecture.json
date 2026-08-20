@@ -1048,6 +1048,11 @@
           "value": "225e21d"
         },
         {
+          "description": "install-argo.ps1 (convert agent frontmatter for Cursor/OpenCode); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "491bdb7"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         },
