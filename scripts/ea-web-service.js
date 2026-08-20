@@ -9,7 +9,9 @@
  * 写图红线：所有「编辑」操作（新增/修改/删除视图/元素/关系）统一通过 ARGO MCP
  * 写图接口完成（进程内 callTool，fallback 为 stdio 子进程 MCP 客户端），
  * 与 Agent 写图路径一致；禁止在编辑路径直接改写 SystemArchitecture.json。
- * 「导入」为整体替换操作（校验 → 备份 → 原子写），按需求/设计 AD-a 直接落盘。
+ * 「导入」为整体替换操作（受控例外，见设计 AD-a）：属于文档级批量操作，
+ * 校验（结构/引用完整，与 ARGO MCP 同 schema）→ 备份 → 原子写（temp+rename），
+ * 写图原语与 ARGO MCP 内部一致；「编辑」类（元素/关系/视图级增删改）必须经 ARGO MCP。
  */
 
 const http = require('node:http');
@@ -257,6 +259,12 @@ function validateGraphDocument(doc) {
         errors.push(`视图 '${view.view_id}' 引用的关系 '${id}' 不存在`);
       }
     }
+    if (view.parent_element_id && !elementIds.has(view.parent_element_id)) {
+      errors.push(`视图 '${view.view_id}' 的 parent_element_id '${view.parent_element_id}' 不存在`);
+    }
+  }
+  if (doc.attributes !== undefined && !Array.isArray(doc.attributes)) {
+    errors.push("'attributes' 必须是数组");
   }
   return errors;
 }
@@ -739,6 +747,48 @@ function atomicWriteFile(filePath, text) {
   fs.renameSync(tempPath, filePath);
 }
 
+// 跨进程文件锁（AD-i）：锁文件 + 原子创建（'wx'）；占用时短暂重试后拒绝（409）。
+const LOCK_SLEEP = new Int32Array(new SharedArrayBuffer(4));
+function sleepSync(ms) {
+  Atomics.wait(LOCK_SLEEP, 0, 0, ms);
+}
+
+function acquireFileLock(graphPath, { timeoutMs = 3000, retryMs = 40 } = {}) {
+  const lockPath = `${graphPath}.lock`;
+  const start = Date.now();
+  for (;;) {
+    let fd;
+    try {
+      fd = fs.openSync(lockPath, 'wx');
+      try {
+        fs.writeSync(fd, String(process.pid));
+      } catch {
+        /* ignore */
+      }
+      return () => {
+        try {
+          fs.closeSync(fd);
+        } catch {
+          /* ignore */
+        }
+        try {
+          fs.unlinkSync(lockPath);
+        } catch {
+          /* ignore */
+        }
+      };
+    } catch (error) {
+      if (error.code !== 'EEXIST') {
+        throw error;
+      }
+      if (Date.now() - start > timeoutMs) {
+        throw new HttpError(409, '图谱正被其他进程写入，请稍后重试');
+      }
+      sleepSync(retryMs);
+    }
+  }
+}
+
 // ---------------------------------------------------------------------------
 // 服务
 // ---------------------------------------------------------------------------
@@ -826,38 +876,59 @@ function createService(options = {}) {
     }
     const args = buildEditArgs(op, payload);
     return withProjectWriteLock(projectId, async () => {
-      const beforeDoc = readGraphDocument(project.graphPath);
-      backupGraph(project);
-      const result = await mcpAdapter.callTool(toolName, args, project.root);
-      if (!result.ok) {
-        throw new HttpError(400, `编辑失败：${JSON.stringify(result.error || result.payload)}`);
+      const release = acquireFileLock(project.graphPath);
+      try {
+        const beforeDoc = readGraphDocument(project.graphPath);
+        backupGraph(project);
+        const result = await mcpAdapter.callTool(toolName, args, project.root);
+        if (!result.ok) {
+          throw new HttpError(400, `编辑失败：${JSON.stringify(result.error || result.payload)}`);
+        }
+        let command;
+        if (op === 'applyMutation') {
+          const afterDoc = readGraphDocument(project.graphPath);
+          command = { op, kind: 'snapshot', before: beforeDoc, after: afterDoc };
+        } else {
+          command = {
+            op,
+            tool: toolName,
+            args,
+            inverse: deriveInverseCommand(op, args, beforeDoc),
+          };
+        }
+        pushUndo(projectId, command);
+        state.redoStacks.delete(projectId);
+        return { ok: true, op, tool: toolName, result: result.payload };
+      } finally {
+        release();
       }
-      const command = {
-        op,
-        tool: toolName,
-        args,
-        inverse: deriveInverseCommand(op, args, beforeDoc),
-      };
-      pushUndo(projectId, command);
-      state.redoStacks.delete(projectId);
-      return { ok: true, op, tool: toolName, result: result.payload };
     });
   }
 
   async function undoProject(projectId) {
     const project = getProject(projectId);
     const command = popUndo(projectId);
-    if (!command || !command.inverse) {
+    if (!command || (!command.inverse && command.kind !== 'snapshot')) {
       throw new HttpError(400, '无可撤销的操作');
     }
     return withProjectWriteLock(projectId, async () => {
-      const result = await mcpAdapter.callTool(command.inverse.tool, command.inverse.args, project.root);
-      if (!result.ok) {
-        pushUndo(projectId, command);
-        throw new HttpError(400, `撤销失败：${JSON.stringify(result.error || result.payload)}`);
+      const release = acquireFileLock(project.graphPath);
+      try {
+        if (command.kind === 'snapshot') {
+          atomicWriteFile(project.graphPath, JSON.stringify(command.before, null, 2));
+          pushRedo(projectId, command);
+          return { ok: true, undone: command.op };
+        }
+        const result = await mcpAdapter.callTool(command.inverse.tool, command.inverse.args, project.root);
+        if (!result.ok) {
+          pushUndo(projectId, command);
+          throw new HttpError(400, `撤销失败：${JSON.stringify(result.error || result.payload)}`);
+        }
+        pushRedo(projectId, command);
+        return { ok: true, undone: command.op, result: result.payload };
+      } finally {
+        release();
       }
-      pushRedo(projectId, command);
-      return { ok: true, undone: command.op, result: result.payload };
     });
   }
 
@@ -868,13 +939,23 @@ function createService(options = {}) {
       throw new HttpError(400, '无可重做的操作');
     }
     return withProjectWriteLock(projectId, async () => {
-      const result = await mcpAdapter.callTool(command.tool, command.args, project.root);
-      if (!result.ok) {
-        pushRedo(projectId, command);
-        throw new HttpError(400, `重做失败：${JSON.stringify(result.error || result.payload)}`);
+      const release = acquireFileLock(project.graphPath);
+      try {
+        if (command.kind === 'snapshot') {
+          atomicWriteFile(project.graphPath, JSON.stringify(command.after, null, 2));
+          pushUndo(projectId, command);
+          return { ok: true, redone: command.op };
+        }
+        const result = await mcpAdapter.callTool(command.tool, command.args, project.root);
+        if (!result.ok) {
+          pushRedo(projectId, command);
+          throw new HttpError(400, `重做失败：${JSON.stringify(result.error || result.payload)}`);
+        }
+        pushUndo(projectId, command);
+        return { ok: true, redone: command.op, result: result.payload };
+      } finally {
+        release();
       }
-      pushUndo(projectId, command);
-      return { ok: true, redone: command.op, result: result.payload };
     });
   }
 
@@ -894,17 +975,27 @@ function createService(options = {}) {
       throw new HttpError(400, `校验失败：${errors.join('; ')}`);
     }
     return withProjectWriteLock(projectId, async () => {
-      backupGraph(project);
-      atomicWriteFile(project.graphPath, text);
-      state.undoStacks.delete(projectId);
-      state.redoStacks.delete(projectId);
-      return { ok: true, elements: doc.elements.length, relationships: doc.relationships.length, views: doc.views.length };
+      const release = acquireFileLock(project.graphPath);
+      try {
+        backupGraph(project);
+        atomicWriteFile(project.graphPath, text);
+        state.undoStacks.delete(projectId);
+        state.redoStacks.delete(projectId);
+        return { ok: true, elements: doc.elements.length, relationships: doc.relationships.length, views: doc.views.length };
+      } finally {
+        release();
+      }
     });
   }
 
   async function handle(req, res) {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-    const pathname = decodeURIComponent(url.pathname);
+    let pathname;
+    try {
+      pathname = decodeURIComponent(url.pathname);
+    } catch {
+      return sendJson(res, 400, { error: '非法的 URL 编码' });
+    }
     try {
       if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html')) {
         return serveStatic(res, path.join(staticDir, 'index.html'), staticDir);
@@ -939,6 +1030,18 @@ function createService(options = {}) {
   async function handleProjectRoute(req, res, projectId, rest) {
     if (rest === '' || rest === '/') {
       return sendJson(res, 200, { project: computeStatus(getProject(projectId)) });
+    }
+    if (req.method === 'POST' && rest === '/select') {
+      return sendJson(res, 200, { project: computeStatus(getProject(projectId)) });
+    }
+    const contextMatch = rest.match(/^\/context\/([A-Za-z0-9._-]+)$/);
+    if (req.method === 'GET' && contextMatch) {
+      const project = getProject(projectId);
+      const result = await mcpAdapter.callTool('getIntentElementContext', { elementId: contextMatch[1] }, project.root);
+      if (result.ok) {
+        return sendJson(res, 200, { elementId: contextMatch[1], context: result.payload });
+      }
+      return sendJson(res, 502, { error: (result.error && result.error.message) || 'getIntentElementContext failed' });
     }
     if (req.method === 'GET' && rest === '/status') {
       return sendJson(res, 200, computeStatus(getProject(projectId)));
@@ -997,10 +1100,52 @@ function createService(options = {}) {
     throw new HttpError(404, `not found: ${rest}`);
   }
 
+  let refreshTimer = null;
+  const watchers = [];
+  const refreshIntervalMs = options.refreshIntervalMs !== undefined ? options.refreshIntervalMs : 5000;
+
+  function debounce(fn, ms) {
+    let timer = null;
+    return () => {
+      clearTimeout(timer);
+      timer = setTimeout(fn, ms);
+    };
+  }
+
+  const debouncedRefresh = debounce(() => { try { refreshProjects(); } catch { /* ignore */ } }, 1000);
+
+  function startRefreshing() {
+    refreshProjects();
+    if (refreshTimer) clearInterval(refreshTimer);
+    refreshTimer = setInterval(() => { try { refreshProjects(); } catch { /* ignore */ } }, refreshIntervalMs);
+    for (const root of searchRoots) {
+      try {
+        watchers.push(fs.watch(root, { recursive: true }, debouncedRefresh));
+      } catch {
+        /* watch 不支持则靠轮询兜底 */
+      }
+    }
+  }
+
+  function stopRefreshing() {
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+      refreshTimer = null;
+    }
+    for (const watcher of watchers) {
+      try {
+        watcher.close();
+      } catch {
+        /* ignore */
+      }
+    }
+    watchers.length = 0;
+  }
+
   const server = http.createServer(handle);
 
   function start() {
-    refreshProjects();
+    startRefreshing();
     return new Promise((resolve, reject) => {
       server.once('error', reject);
       server.listen(port, host, () => {
@@ -1011,7 +1156,10 @@ function createService(options = {}) {
   }
 
   function stop() {
-    return new Promise((resolve) => server.close(() => resolve()));
+    return new Promise((resolve) => {
+      stopRefreshing();
+      server.close(() => resolve());
+    });
   }
 
   return {
@@ -1045,7 +1193,7 @@ function sendJson(res, status, payload) {
 function serveStatic(res, filePath, baseDir) {
   const safe = path.resolve(filePath);
   const base = path.resolve(baseDir || path.dirname(filePath));
-  if (!safe.startsWith(base)) {
+  if (safe !== base && !safe.startsWith(base + path.sep)) {
     res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
     return res.end('forbidden');
   }
@@ -1127,6 +1275,7 @@ module.exports = {
   deriveInverseCommand,
   createMcpAdapter,
   normalizeMcpResult,
+  acquireFileLock,
   createService,
   readGraphDocument,
   layerOf,

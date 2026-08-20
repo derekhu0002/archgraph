@@ -16,6 +16,7 @@ const {
   buildEditArgs,
   deriveInverseCommand,
   createMcpAdapter,
+  acquireFileLock,
   createService,
   EDIT_OP_TOOL_MAP,
   MAX_IMPORT_BYTES,
@@ -359,6 +360,106 @@ test('图谱登记：组件 2760 携带实现验收用例 AT-2760-03', () => {
   assert.match(tc.description, /THEN/);
   assert.equal(tc.type, 'Acceptance Test');
   assert.ok(tc.Input && tc.Input.includes('node --test tests/ea-web-service-impl.test.js'), 'AT-2760-03 的 Input 应指向实现测试');
+});
+
+test('导入校验：视图 parent_element_id 引用断裂不改动文件', async () => {
+  // GIVEN 一个视图引用不存在元素的 JSON
+  // WHEN 执行 importProject
+  // THEN 抛出引用完整性错误且文件内容不变
+  const { tmp, graphPath } = makeFixture();
+  const before = fs.readFileSync(graphPath, 'utf8');
+  const service = createService({ searchRoots: [tmp] });
+  service.refreshProjects();
+  const project = [...service.state.projects.values()][0];
+  const bad = miniGraph();
+  bad.views[0].parent_element_id = '9999';
+  await assert.rejects(
+    () => service.importProject(project.id, JSON.stringify(bad)),
+    (error) => error.message.includes('parent_element_id'),
+  );
+  assert.equal(fs.readFileSync(graphPath, 'utf8'), before);
+});
+
+test('跨进程文件锁：占用期间再获取被拒绝，释放后可获取', () => {
+  // GIVEN 一个图谱文件
+  // WHEN 持有锁期间再次获取
+  // THEN 抛出 409；释放后可再次获取
+  const { graphPath } = makeFixture();
+  const release = acquireFileLock(graphPath);
+  try {
+    assert.throws(
+      () => acquireFileLock(graphPath, { timeoutMs: 200, retryMs: 20 }),
+      (error) => error.status === 409,
+    );
+  } finally {
+    release();
+  }
+  const release2 = acquireFileLock(graphPath, { timeoutMs: 200, retryMs: 20 });
+  release2();
+});
+
+test('撤销/重做：applyMutation 快照回退（真实文件状态）', async () => {
+  // GIVEN 一个支持 applySystemArchitectureMutation 的适配器
+  // WHEN 执行 applyMutation → undo → redo
+  // THEN 文件分别出现/消失/再出现该元素（快照回退）
+  const { tmp, graphPath } = makeFixture();
+  const adapter = {
+    available: true,
+    mode: 'fake',
+    async callTool(toolName, args, projectRoot) {
+      const gp = path.join(projectRoot, ...GRAPH_REL);
+      const doc = readGraph(gp);
+      if (toolName === 'applySystemArchitectureMutation') {
+        for (const mutation of args.mutations || []) {
+          if (mutation.type === 'addElement' && !doc.elements.some((e) => e.id === mutation.element.id)) {
+            doc.elements.push(mutation.element);
+          }
+          if (mutation.type === 'removeElement') {
+            doc.elements = doc.elements.filter((e) => e.id !== mutation.id);
+          }
+        }
+        fs.writeFileSync(gp, JSON.stringify(doc, null, 2));
+        return { ok: true, payload: { status: 'passed', written: true } };
+      }
+      return { ok: false, error: { message: `unsupported ${toolName}` } };
+    },
+  };
+  const service = createService({ searchRoots: [tmp], mcpAdapter: adapter });
+  service.refreshProjects();
+  const project = [...service.state.projects.values()][0];
+
+  await service.editProject(project.id, 'applyMutation', {
+    mutations: [{ type: 'addElement', element: { id: '77', name: 'Z', type: 'Application Component' } }],
+  });
+  assert.ok(readGraph(graphPath).elements.some((e) => e.id === '77'), 'applyMutation 后元素应存在');
+
+  await service.undoProject(project.id);
+  assert.ok(!readGraph(graphPath).elements.some((e) => e.id === '77'), 'undo 后元素应消失');
+
+  await service.redoProject(project.id);
+  assert.ok(readGraph(graphPath).elements.some((e) => e.id === '77'), 'redo 后元素应恢复');
+});
+
+test('服务端点：POST /select 与 GET /context 可用', async () => {
+  // GIVEN 一个启动中的服务与临时项目
+  // WHEN 请求 POST /select 与 GET /context/:elementId
+  // THEN /select 返回 200；/context 在 fake 适配器下返回 502（getIntentElementContext 不可用）
+  const { tmp } = makeFixture();
+  const service = createService({ searchRoots: [tmp], port: 0, mcpAdapter: createFakeAdapter() });
+  const { port } = await service.start();
+  try {
+    const projectsRes = await fetch(`http://127.0.0.1:${port}/api/projects`);
+    const { projects } = await projectsRes.json();
+    const id = projects[0].id;
+
+    const selectRes = await fetch(`http://127.0.0.1:${port}/api/projects/${id}/select`, { method: 'POST' });
+    assert.equal(selectRes.status, 200);
+
+    const ctxRes = await fetch(`http://127.0.0.1:${port}/api/projects/${id}/context/1`);
+    assert.equal(ctxRes.status, 502);
+  } finally {
+    await service.stop();
+  }
 });
 
 test('真实 MCP 写图回滚：in-process addElement + removeElement', async (t) => {

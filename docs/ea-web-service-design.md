@@ -56,7 +56,7 @@ flowchart TB
 1. **读**：前端 → `GET /api/projects`（枚举 + 状态）→ 选择项目 → `GET /api/projects/:id/views` / `GET /api/projects/:id/views/:vid/graph`（视图图数据）→ G6 渲染 + 自动布局。
 2. **搜索**：前端 → `POST /api/projects/:id/search` → MCP 适配层 → `getSystemArchitecture(query)`（语义）或 `getIntentElementContext` / `getArchitectureViewContext`（上下文）→ 返回命中元素/关系/视图。
 3. **写**：前端编辑 → `POST /api/projects/:id/edit` → 适配层映射 → ARGO MCP 写图接口（`addArchitectureElement` / `updateArchitectureElement` / `removeArchitectureElement` / `addArchitectureView` / `updateArchitectureView` / `removeArchitectureView` / `addArchitectureRelationship` / `updateArchitectureRelationship` / `removeArchitectureRelationship` / `applySystemArchitectureMutation`）→ 落盘 `SystemArchitecture.json`；编辑前自动备份、写后过 schema 校验，Command 栈记录逆操作供撤销/重做。
-4. **导入/导出**：导出读文件以 UTF-8 无 BOM 返回；导入上传 JSON → schema 校验 → 备份 → 整体替换当前项目图谱（经 ARGO MCP 落盘以保持一致，见 AD-a）。
+4. **导入/导出**：导出读文件以 UTF-8 无 BOM 返回；导入上传 JSON → 结构/引用校验 → 备份 → 原子写整体替换当前项目图谱（文档级批量操作，受控例外口径见 AD-a；元素级编辑仍经 ARGO MCP）。
 
 ## 2. 关键设计决策（§7 逐点 AD）
 
@@ -65,6 +65,7 @@ flowchart TB
 - **决策**：导入 = **整体替换**当前选中项目的 `design/KG/SystemArchitecture.json`（校验通过后，先备份，再以替换语义写入）。
 - **理由**：需求（FR-14 / AC-11）语义是「导入外部图谱到当前项目」，图谱是单一 `System` 文档（schema 根字段 `name`/`description`/`elements`/`relationships`/`views`）；合并/追加需要 id 重映射、去重、悬空引用修复与视图合并等复杂且难以向无技术背景用户解释的语义，违背 NF-3（易用性）。整体替换 + 备份回滚最安全、最可预期。
 - **被否方案**：合并/追加 —— 需要定义并实现 id 冲突、引用重映射、重复视图/元素去重等大量边角语义，复杂度高、易破坏图谱一致性。
+- **写图口径（与 FR-13 的关系）**：`FR-13`「所有写入图谱必须经 ARGO MCP」适用于**元素/关系/视图级编辑**（add/update/remove/applySystemArchitectureMutation）。「整体替换导入」是**文档级批量操作**，ARGO MCP 目前没有整图替换工具，故作为**受控例外**：校验沿用与 ARGO MCP 相同的 schema（`argo/schema/SystemArchitecture.schema.json`），写入采用与 ARGO MCP 内部一致的「备份 + 原子写（temp+rename）+ 跨进程文件锁」原语；若后续 ARGO MCP 新增整图替换接口，再切回 MCP 路径。
 
 ### AD-b：技术栈与零配置启动 —— Node.js（内置 http + 静态文件服务）
 
