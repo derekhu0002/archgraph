@@ -2390,6 +2390,13 @@
           "Input": "node --test tests/ea-web-service-ui-insight.test.js",
           "acceptanceCriteria": "执行 node --test tests/ea-web-service-ui-insight.test.js：断言报告存在并含『对比表』『AD-c』『AD-g』『G6』『Cytoscape』；图谱含 Skill 元素 2766（parent=1249、GIVEN-WHEN-THEN testcase、Input 指向本测试文件）且在 EA Tooling 视图 1800 的 included_elements 中。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "af1ae36",
+          "description": "docs/ea-web-service-ui-insight.md; tests/ea-web-service-ui-insight.test.js; design/KG/SystemArchitecture.json"
+        }
       ]
     }
   ],
