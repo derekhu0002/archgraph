@@ -2302,6 +2302,11 @@
           "description": "docs/ea-web-service-test-report.md; tests/ea-web-service-test-report.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
           "value": "2ef30ed"
+        },
+        {
+          "description": "scripts/ea-web-service.js; tests/ea-web-service-impl.test.js; docs/ea-web-service-test-report.md",
+          "name": "commit",
+          "value": "605680e"
         }
       ]
     },
@@ -2381,6 +2386,11 @@
           "description": "docs/ea-web-service-test-report.md; tests/ea-web-service-test-report.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
           "value": "2ef30ed"
+        },
+        {
+          "description": "scripts/ea-web-service.js; tests/ea-web-service-impl.test.js; docs/ea-web-service-test-report.md",
+          "name": "commit",
+          "value": "605680e"
         }
       ]
     },
