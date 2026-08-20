@@ -2375,6 +2375,22 @@
         }
       ],
       "type": "Application Service"
+    },
+    {
+      "id": "2766",
+      "name": "本地Web服务 UI/UX 技术洞察",
+      "parent": "1249",
+      "type": "Skill",
+      "description": "对「ArchGraph 本地 Web 服务」方案设计（docs/ea-web-service-design.md）的 UI/UX 技术先进性洞察：结论=保留 AD-c「内置单页 UI + REST JSON API 并存」形态（单页应用本身够用），但图形内核从「自研 SVG + 自研力导向」改为引入成熟开源图库（首选 AntV G6 v5 MIT，备选 Cytoscape.js MIT，均可零构建接入），AD-g 修订为 G6 Canvas 渲染 + 内置 force/dagre 布局 + 原生拖动/命中，无需自研 fx/fy。产出 docs/ea-web-service-ui-insight.md + tests/ea-web-service-ui-insight.test.js，反馈给系统设计师 caoyang。",
+      "testcases": [
+        {
+          "name": "AT-2766-01-UI洞察报告与图谱登记",
+          "description": "GIVEN 规划专家已完成本地 Web 服务 UI/UX 技术先进性洞察；WHEN 检查洞察报告与意图图谱；THEN docs/ea-web-service-ui-insight.md 存在并含候选对比表与 AD-c/AD-g 修订建议，图谱存在 Skill「本地Web服务 UI/UX 技术洞察」（parent=1249）且位于 EA Tooling 视图 1800，其 testcase 为 GIVEN-WHEN-THEN 且 Input 指向测试文件。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service-ui-insight.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service-ui-insight.test.js：断言报告存在并含『对比表』『AD-c』『AD-g』『G6』『Cytoscape』；图谱含 Skill 元素 2766（parent=1249、GIVEN-WHEN-THEN testcase、Input 指向本测试文件）且在 EA Tooling 视图 1800 的 included_elements 中。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -3087,6 +3103,16 @@
       "target_id": "2760",
       "target_name": "ArchGraph 本地 Web 服务",
       "type": "Realization"
+    },
+    {
+      "id": "1986",
+      "name": "Association",
+      "type": "Association",
+      "source_id": "2766",
+      "source_name": "本地Web服务 UI/UX 技术洞察",
+      "target_id": "2760",
+      "target_name": "ArchGraph 本地 Web 服务",
+      "statement": "本地Web服务 UI/UX 技术洞察 --(Association)--> ArchGraph 本地 Web 服务"
     }
   ],
   "views": [
@@ -3146,7 +3172,8 @@
         "2762",
         "2763",
         "2764",
-        "2765"
+        "2765",
+        "2766"
       ],
       "included_relationships": [
         "1980",
@@ -3154,7 +3181,8 @@
         "1982",
         "1983",
         "1984",
-        "1985"
+        "1985",
+        "1986"
       ]
     },
     {
@@ -3533,6 +3561,17 @@
       "description": "系统设计师 caoyang 的长期记忆子视图：EA 知识图谱导入导出本地 Web 服务方案设计。切片（commit fca257c）：产出 docs/ea-web-service-design.md（总体架构分层 + AD-a..AD-i 九个决策 + REST API 清单 + 编辑↔ARGO MCP 映射表 + 前端图数据形态），并登记解决方案架构——Application Component 2760「ArchGraph 本地 Web 服务」+ 5 个 Application Service（导入 2761/导出 2762/搜索 2763/图形化查看 2764/编辑 2765）+ Realization 关系 1980-1985（WP 2758 → 组件；组件 → 各服务），加入 EA Tooling 视图 1800；新增 tests/ea-web-service-design.test.js（8 断言全绿）。关键决策：导入=整体替换+备份；技术栈=Node 内置 http；UI+API 并存；项目按 design/KG/SystemArchitecture.json marker 递归发现、basename 命名；实时读取=fs.watch+轮询兜底；写图=进程内 import argo-mcp-server.js callTool（ARGO_REPO_ROOT 定位项目）；渲染=SVG+力导向（可切分层）；撤销重做=Command+内存栈+快照兜底；数据安全=备份+串行队列+文件锁。转交规划专家/系统架构师评审。",
       "included_elements": [
         "2760"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "1803",
+      "view_name": "规划专家工作记录",
+      "parent_element_id": "2737",
+      "parent_element_name": "tanwen",
+      "description": "规划专家 tanwen 的长期记忆子视图：对「ArchGraph 本地 Web 服务」方案设计的 UI/UX 技术先进性洞察。结论=保留 AD-c「内置单页 UI + REST JSON API 并存」形态（单页应用本身够用），但图形内核从自研 SVG+力导向改为引入成熟开源图库（首选 AntV G6 v5 MIT，备选 Cytoscape.js MIT，零构建接入）；AD-g 修订为 G6 Canvas 渲染 + 内置 force/dagre 布局 + 原生拖动/命中，无需自研 fx/fy。产出 docs/ea-web-service-ui-insight.md + tests/ea-web-service-ui-insight.test.js；反馈给系统设计师 caoyang。",
+      "included_elements": [
+        "2766"
       ],
       "included_relationships": []
     }
