@@ -64,7 +64,7 @@
 ## 5. 遗留风险（不阻塞本次验证）
 
 - R-2（Major，后续切片）：图形内核接入 AntV G6 v5（`web/vendor/g6.min.js` 本地 vendor），当前为 MVP 基础 SVG 渲染 + 拖动。
-- 语义检索（AC-7 的 semantic 模式）需 Neo4j/向量基础设施，无则明确降级为 local 检索。
+- 语义检索（AC-7 的 semantic 模式）复用 ARGO MCP `getSystemArchitecture` 语义查询接口（无需本服务自建 Neo4j/向量基础设施）；已实测进程内语义检索可返回命中元素。失败/超时时自动降级为 local 检索。
 - `fs.watch` 在 Windows/网络盘/rename 场景可靠性需实测（已有 5s 轮询兜底）。
 - NF-9 大图谱性能基准尚未量化。
 - 跨进程文件锁已实现（锁文件 + 原子创建），并发写压力测试未覆盖。

@@ -649,8 +649,23 @@ function withTimeout(promise, ms, fallbackError) {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
+// 把 ARGO MCP 语义/上下文检索结果（document/result 形态）归一化为前端可渲染的 hits。
+function hitsFromPayload(payload) {
+  const source = (payload && payload.document) || (payload && payload.result) || {};
+  const elements = Array.isArray(source.elements) ? source.elements : [];
+  const relationships = Array.isArray(source.relationships) ? source.relationships : [];
+  const views = Array.isArray(source.views) ? source.views : [];
+  const hits = [
+    ...elements.map((e) => ({ kind: 'element', id: e.id, name: e.name, type: e.type })),
+    ...relationships.map((r) => ({ kind: 'relationship', id: r.id, name: r.name || r.type, type: r.type })),
+    ...views.map((v) => ({ kind: 'view', id: v.view_id || v.id, name: v.view_name || v.name || v.view_id || v.id, type: 'View' })),
+  ];
+  return hits.slice(0, 50);
+}
+
 async function searchSemantic(adapter, project, query) {
-  const timeoutMs = 5000;
+  // 首次语义检索需初始化语义旅程/嵌入生命周期，可能耗时数秒；给足超时，后续调用会更快。
+  const timeoutMs = 15000;
   const args = {
     architecturePath: GRAPH_MARKER.join('/'),
     query: { purpose: 'implementation-design', intent: query },
@@ -661,7 +676,7 @@ async function searchSemantic(adapter, project, query) {
     return {
       mode: 'semantic',
       supported: false,
-      message: '暂不支持语义检索（TODO：需要 Neo4j/向量基础设施，检索超时）',
+      message: '语义检索超时，已回退本地检索',
       fallback: searchLocal(readGraphDocument(project.graphPath), query),
     };
   }
@@ -669,12 +684,12 @@ async function searchSemantic(adapter, project, query) {
     return {
       mode: 'semantic',
       supported: false,
-      message: '暂不支持语义检索（TODO：需要 Neo4j/向量基础设施）',
+      message: '语义检索失败，已回退本地检索',
       detail: (result.error && result.error.message) || 'getSystemArchitecture failed',
       fallback: searchLocal(readGraphDocument(project.graphPath), query),
     };
   }
-  return { mode: 'semantic', supported: true, result: result.payload };
+  return { mode: 'semantic', supported: true, hits: hitsFromPayload(result.payload) };
 }
 
 async function searchContext(adapter, project, query, elementId) {
@@ -695,12 +710,12 @@ async function searchContext(adapter, project, query, elementId) {
     return {
       mode: 'context',
       supported: false,
-      message: '上下文检索暂不可用（TODO）',
+      message: '上下文检索失败，已回退本地检索',
       detail: (result.error && result.error.message) || 'getIntentElementContext failed',
       hits: local.hits,
     };
   }
-  return { mode: 'context', supported: true, elementId: elementHit.id, result: result.payload };
+  return { mode: 'context', supported: true, elementId: elementHit.id, hits: hitsFromPayload(result.payload) };
 }
 
 async function searchProject(adapter, project, body) {
@@ -1271,6 +1286,9 @@ module.exports = {
   validateGraphDocument,
   buildViewGraph,
   searchLocal,
+  searchSemantic,
+  searchContext,
+  hitsFromPayload,
   buildEditArgs,
   deriveInverseCommand,
   createMcpAdapter,

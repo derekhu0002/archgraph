@@ -13,6 +13,8 @@ const {
   validateGraphDocument,
   buildViewGraph,
   searchLocal,
+  searchSemantic,
+  hitsFromPayload,
   buildEditArgs,
   deriveInverseCommand,
   createMcpAdapter,
@@ -460,6 +462,40 @@ test('服务端点：POST /select 与 GET /context 可用', async () => {
   } finally {
     await service.stop();
   }
+});
+
+test('hitsFromPayload：归一化语义/上下文结果为前端 hits', () => {
+  // GIVEN 一个 ARGO MCP 语义检索结果（document 形态）
+  // WHEN 调用 hitsFromPayload
+  // THEN 返回含元素/视图的 hits（kind/id/name/type）
+  const hits = hitsFromPayload({
+    document: {
+      elements: [{ id: '1', name: 'A', type: 'Application Component' }],
+      relationships: [],
+      views: [{ view_id: '100', view_name: 'V' }],
+    },
+  });
+  assert.equal(hits.length, 2);
+  assert.equal(hits[0].kind, 'element');
+  assert.equal(hits[0].name, 'A');
+  assert.equal(hits[1].kind, 'view');
+  assert.equal(hits[1].id, '100');
+});
+
+test('语义检索：经 ARGO MCP getSystemArchitecture 返回 hits（真实后端）', async (t) => {
+  // GIVEN ARGO MCP 进程内后端可用
+  // WHEN 调用 searchSemantic
+  // THEN 返回 supported=true 且 hits 含元素（复用 ARGO MCP 语义查询，无需自建向量/图库基础设施）
+  const adapter = createMcpAdapter();
+  if (!adapter.available) {
+    t.skip('ARGO MCP in-process backend unavailable');
+    return;
+  }
+  const project = { id: 'archgraph', name: 'archgraph', root: ROOT, graphPath: REAL_GRAPH };
+  const result = await searchSemantic(adapter, project, 'EA 知识图谱导入导出本地Web服务');
+  assert.equal(result.supported, true);
+  assert.ok(Array.isArray(result.hits) && result.hits.length > 0, '语义检索应返回命中');
+  assert.ok(result.hits.some((h) => h.kind === 'element'), '命中应包含元素');
 });
 
 test('真实 MCP 写图回滚：in-process addElement + removeElement', async (t) => {
