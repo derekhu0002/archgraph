@@ -2,7 +2,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
+const { readFileSync, existsSync } = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -72,4 +72,21 @@ test('wechat-community-ready: developer community article with required frontmat
   assert.ok(meta.digest, 'frontmatter should declare a digest');
   assert.match(md, /GitHub Discussions/, 'article body should introduce GitHub Discussions');
   assert.match(md, /工作包/, 'article body should mention work packages');
+});
+
+test('wechat-community-banner: developer community article has a dedicated themed banner', () => {
+  // GIVEN the developer community article is about to be published
+  // WHEN the publisher prepares the title image
+  // THEN the article declares a dedicated themed banner (distinct from the generic core-model image) and the file exists
+  const md = readFileSync(COMMUNITY, 'utf8');
+  const meta = parseFrontmatter(md);
+
+  assert.ok(meta.banner_path, 'frontmatter should declare a banner_path');
+  assert.notEqual(
+    meta.banner_path,
+    'diagrams/image.png',
+    'should use a dedicated themed banner, not the generic core-model image'
+  );
+  const bannerAbs = path.join(ROOT, 'docs', meta.banner_path);
+  assert.ok(existsSync(bannerAbs), `banner image should exist: ${bannerAbs}`);
 });

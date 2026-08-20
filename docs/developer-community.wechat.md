@@ -2,7 +2,7 @@
 title: "开源｜ArchGraph 开发者社区：用 GitHub Discussions 分享你的知识图谱工作包"
 author: "derek"
 digest: "ArchGraph 开发者社区上线，依托 GitHub Discussions，零成本、零运维。在这里分享、浏览与复用你的知识图谱工作包。"
-banner_path: "diagrams/image.png"
+banner_path: "diagrams/developer-community-banner.png"
 open_comment: 1
 source_url: "https://github.com/derekhu0002/archgraph/discussions"
 ---
