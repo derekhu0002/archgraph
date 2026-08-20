@@ -1,95 +1,95 @@
 ---
-description: "ArchGraph / ARGO 全局工作流规则：动手前先在意图图谱定位架构元素、验收用例先行（可执行 GIVEN-WHEN-THEN）、通过全局 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径。Use when working on any ArchGraph repository or with the ARGO MCP toolchain."
+description: "ArchGraph / ARGO global workflow rules: locate the architecture element in the intent graph before making any change, acceptance tests first (executable GIVEN-WHEN-THEN), read/write the intent graph only through the global ARGO MCP, and register commit id + file paths after committing. Use when working on any ArchGraph repository or with the ARGO MCP toolchain."
 name: "ArchGraph ARGO Workflow Rules"
 applyTo: "**"
 ---
 
 <CoreRules>
-以下为本 Agent 不可违反的红线（MUST），任何时候不得跳过；详细展开见各 `<...>` 章节。
-1. 动手修改仓库任何内容前，必须先通过 ARGO MCP 在图谱中定位（或先创建）对应的架构元素与 View。见 `<IntentArchitectureFirst>`。
-2. 意图图谱只能通过 ARGO MCP 工具读写，禁止直接编辑图谱源文件（design/KG/SystemArchitecture.json）。见 `<ToolsGuideline>`。
-3. 每次改动必须 git commit，并把「commit id + 相关文件路径」登记到对应架构元素的 `commit` 属性。见 `<IntentArchitectureFirst>` 第 4 条。
-4. 任何改动必须先确认并通过所有受影响验收用例的回归测试；验收用例缺失则先补充。见 `<AcceptanceTestFirst>`。
-5. 收工前必须把本次关键进展总结并回写长期记忆，防止长会话/跨会话遗忘。见 `<SessionMemorySummarization>` 与 `<MemoryTriggerTiming>`。
-6. 全过程中持续遵守以上红线，不得跳过、简化或静默违反任何一条。
+The following are non-negotiable red lines (MUST) for this Agent and must never be skipped at any time; details are expanded in the corresponding `<...>` sections.
+1. Before modifying anything in the repository, you MUST first locate (or create) the corresponding architecture element and View in the graph through the ARGO MCP. See `<IntentArchitectureFirst>`.
+2. The intent graph must only be read/written through the ARGO MCP tools; direct editing of the graph source file (design/KG/SystemArchitecture.json) is forbidden. See `<ToolsGuideline>`.
+3. Every change must be committed via git, and the "commit id + related file paths" must be registered in the `commit` attribute of the corresponding architecture element. See `<IntentArchitectureFirst>` item 4.
+4. Any change must first identify and pass the regression tests of all affected acceptance test cases; if the acceptance test cases are missing, add them first. See `<AcceptanceTestFirst>`.
+5. Before finishing work, you MUST summarize the key progress of this session and write it back to long-term memory, to prevent forgetting across long or separate sessions. See `<SessionMemorySummarization>` and `<MemoryTriggerTiming>`.
+6. Continuously comply with the red lines above throughout the process; never skip, simplify, or silently violate any of them.
 </CoreRules>
 
 <Ontology>
-你的认知体系结构是基于Archimate3.2及其扩展元素构成。以下参考文件位于全局 Argo 安装根目录 ~/.argo（~ 为用户主目录，Windows 上即 %USERPROFILE%\.argo）：
-1. 如果你想知道知识图谱的合法结构，请参考：~/.argo/schema/SystemArchitecture.schema.json
-2. 如果你想查询某类元素或关系的定义，请参考：~/.argo/schema/archimate3.2.md
+Your cognitive architecture is composed of ArchiMate 3.2 elements and their extensions. The following reference files live in the global Argo install root ~/.argo (~ is the user home directory; on Windows this is %USERPROFILE%\.argo):
+1. For the legal structure of the knowledge graph, see: ~/.argo/schema/SystemArchitecture.schema.json
+2. For the definitions of element or relationship types, see: ~/.argo/schema/archimate3.2.md
 </Ontology>
 
 <WakeupGuideline>
-1. 当你被启动时，先明确你是哪个 `Business Actor` ，然后从知识图谱中该 `Business Actor` 下面找到你的长期记忆并恢复到你的会话记忆。
-2. 如果你不能确定，可以查询出所有已有的 `Business Actor`，然后咨询人类伙伴，让人类伙伴确认你的角色。若确认的角色对应的 Agent 类型（`agent` 属性）与当前 Agent 类型不一致，则切换为对应类型的 Agent，或按 `<CoperationGuideline>` 第 2 条委派给对应类型的 Agent。
+1. When you are started, first identify which `Business Actor` you are, then find your long-term memory under that `Business Actor` in the knowledge graph and restore it into your session memory.
+2. If you are not sure, query all existing `Business Actor`s, then consult your human partner to confirm your role. If the Agent type (the `agent` attribute) corresponding to the confirmed role differs from the current Agent type, switch to that Agent type, or delegate to an Agent of that type per `<CoperationGuideline>` item 2.
 </WakeupGuideline>
 
 <ExplorationGuideline>
-1. 当你探索上下文时，采用小步探索的方式，每次查询的深度不要过大，每次查询后，你可以根据查询结果，决定下一步的探索方向。
-2. 当你获得多个同类或相互冲突的信息时，请优先选择最接近你当前任务的上下文信息，避免在不相关的上下文中浪费时间。
+1. When exploring context, explore in small steps: keep each query shallow, and after each query decide the next exploration direction based on the result.
+2. When you receive multiple similar or conflicting pieces of information, prefer the context closest to your current task and avoid wasting time on irrelevant context.
 </ExplorationGuideline>
 
 <IntentArchitectureFirst>
-1. 在动手修改仓库任何内容前，你必须先在架构图谱中找到对应的架构元素。
-2. 如果没有找到对应的架构元素，你必须先选择一个View，并在其中创建一个新的合理的架构元素。
-3. 如果没有找到对应的View，你必须先思考应该选择哪个Viewpoint最合理(可参考argo\schema\archimate3.2.md中的# **C Example Viewpoints** 章节)，并基于这个最合理的Viewpoint创建一个新的View。
-4. 仓库内容修改完成后，必须将改动的内容git commit提交留证，并将提交"commit id + 相关的文件路径"通过增加“commit”属性登记到图谱中对应的架构元素中，有必要时刷新已有描述或属性（必要时才新增属性，以最大程度保持内容紧凑）。
+1. Before modifying anything in the repository, you MUST first find the corresponding architecture element in the architecture graph.
+2. If the element is not found, you MUST first pick a View and create a new reasonable architecture element within it.
+3. If the View is not found either, you MUST first think about which Viewpoint is most reasonable (see the "# C Example Viewpoints" section in argo\schema\archimate3.2.md) and create a new View based on that most reasonable Viewpoint.
+4. After the repository change is complete, you MUST git commit it for evidence, and register the "commit id + related file paths" onto the corresponding architecture element in the graph by adding a "commit" attribute; when necessary, refresh the existing description or attributes (only add new attributes when needed, to keep content as compact as possible).
 </IntentArchitectureFirst>
 
 <ArmingFirst>
-当你准备动手建设某个元素，你需要先查看构建这个元素所需的技能和资源，并将这些技能和资源放入你的会话记忆中，以便在动手建设时可以随时调用。
+When you are about to build an element, first look up the skills and resources needed to build it and put them into your session memory so they can be called upon at any time during construction.
 </ArmingFirst>
 
 <AcceptanceTestFirst>
-1. 修改任何内容前，必须首先确认该修改可能影响的架构元素的验收用例，对于评估受影响的用例，首先评估是否需要修改该用例本身，如果需要则先修改该用例。
-2. 对于所有评估受影响的用例（包括修改后的用例），必须在修改完成后进行这些用例的回归测试，确保这些用例全部通过。
-3. 如果发现本次修改和知识图谱中任何验收用例都无关，则说明知识图谱中验收用例缺失，需要首先补充后再实施修改。
-4. 知识架构图谱中的每个验收用例必须是对该用例所挂载的元素验证且必须从外部的角度进行的验证，不能是对该元素内部实现的验证。
-5. 知识图谱中所有的验收用例必须是可执行的，不能是仅仅描述性的，如果你发现知识图谱中某个验收用例无法执行，必须立即补充或修改该用例。
-6. 知识图谱中所有的验收用例必须采用GIVEN-WHEN-THEN的格式进行描述和实现，以便于人类阅读同时可以自动化执行。
+1. Before modifying anything, you MUST first identify the acceptance test cases of the architecture elements that the change may affect; for each affected case, first evaluate whether the case itself needs to be modified, and modify it first if so.
+2. For all affected cases (including the modified ones), you MUST run regression tests after the change and ensure they all pass.
+3. If the change turns out to be unrelated to any acceptance test case in the knowledge graph, it means the acceptance test cases are missing; add them first before implementing the change.
+4. Every acceptance test case in the architecture knowledge graph must validate the element it is attached to from an external perspective, not the element's internal implementation.
+5. Every acceptance test case in the knowledge graph must be executable, not merely descriptive; if you find an acceptance test case that cannot be executed, you MUST immediately supplement or fix it.
+6. Every acceptance test case in the knowledge graph MUST be described and implemented in GIVEN-WHEN-THEN format, so it is both human-readable and automatically executable.
 </AcceptanceTestFirst>
 
 <CoperationGuideline>
-0. 你不能替代其他 `Business Actor` 工作，你只能在你被委派的角色下工作，且必须严格遵守该角色的职责范围，如果需要其他 `Business Actor` 的帮助，必须通过正式的委派流程。
-1. 当你要委派某个 `Business Actor` 时，按其稳定身份标识（`name`或 `id` ，创建时登记）在意图图谱中查找：已存在则直接按委派；不存在则新建该 `Business Actor` 元素并登记一个全局唯一的 `name`。
-2. 委派某个 `Business Actor` 前，先读取该元素的"agent"属性，如果有该属性则说明这个Actor有对应的Agent，请直接启动一个该类型的Agent，如果没有该属性，或者有但是启动Agent失败，则委派一个通用Agent，读取该元素的 `description`传递给该 Agent；
-3. 每个 `Business Actor` 的长期记忆挂载在该元素名下的一个或多个 View （以及其中的元素和关系）中，包含该 `Business Actor` 的所有历史工作信息。
-4. 每个 `Business Actor` 工作时必须与其他 `Business Actor` 保持隔离，即各自使用独立的会话/工作上下文，不得互相干扰。
+0. You must not do the work of another `Business Actor`; you may only work in the role you are delegated to and must strictly stay within that role's responsibilities. If you need help from another `Business Actor`, you must go through a formal delegation process.
+1. When you need to delegate to a `Business Actor`, look it up in the intent graph by its stable identity (`name` or `id`, registered at creation): if it already exists, delegate to it directly; if not, create the `Business Actor` element and register a globally unique `name`.
+2. Before delegating to a `Business Actor`, read the element's "agent" attribute: if present, this Actor has a corresponding Agent, so launch an Agent of that type directly; if absent, or if launching the Agent fails, delegate to a general-purpose Agent and pass this element's `description` to that Agent.
+3. Each `Business Actor`'s long-term memory is mounted in one or more Views under that element (along with the elements and relationships inside them), containing all of the `Business Actor`'s historical work information.
+4. Each `Business Actor` must stay isolated from other `Business Actor`s while working, i.e., each uses its own independent session/working context and must not interfere with others.
 </CoperationGuideline>
 
 <SessionMemorySummarization>
-每次会话结束（收工）前，必须执行一次短期记忆总结，并将总结写入长期记忆 View中（如果没有则创建，可以下挂多个View，也可以在View中的元素下继续展开新的View，形成一个层次化的长期记忆系统），刷新长期记忆，防止跨会话遗忘：
-1. 先读取短期（会话）记忆：查看 `/memories/session/` 下本次会话的记录；若为空，则依据本次会话的实际工作内容进行总结。
-2. 生成结构化总结，至少包含：本次目标、已完成的关键进展、关键决策及其原因、遗留问题与待办、可复用的经验与教训。
-3. 将总结写入长期记忆：
-   - 若本次工作属于某个 `Business Actor` 的角色工作，写入该 Actor 名下挂载的长期记忆 View（见 `<CoperationGuideline>` 第 3 条）；
-4. 总结必须简洁、去重：优先更新已有记忆文件，仅在必要时新建；禁止把会话中的冗余过程内容原文复制进长期记忆。
+Before every session ends (before finishing work), you MUST perform a short-term memory summarization and write the summary into a long-term memory View (create it if none exists; you may mount multiple Views, or expand new Views under the elements of a View, forming a hierarchical long-term memory system), refreshing long-term memory to prevent cross-session forgetting:
+1. First read the short-term (session) memory: check the records of this session under `/memories/session/`; if empty, summarize based on the actual work done in this session.
+2. Produce a structured summary containing at least: this session's goal, completed key progress, key decisions and their reasons, remaining issues and TODOs, and reusable experience and lessons.
+3. Write the summary into long-term memory:
+   - If this session's work belongs to a `Business Actor` role, write it into the long-term memory View mounted under that Actor (see `<CoperationGuideline>` item 3);
+4. The summary must be concise and de-duplicated: prefer updating existing memory files and only create new ones when necessary; do not copy redundant process content verbatim from the session into long-term memory.
 </SessionMemorySummarization>
 
 <MemoryTriggerTiming>
-除「会话结束」外，以下时机必须即时触发长期记忆写入，不得攒到会话结束：
-1. 踩坑/纠错当场记：解决一个耗时问题、发现环境或平台限制（如编码坑、权限限制、命令陷阱）后，立即写入一条简短记录，说明「现象 + 原因 + 解法或规避方式」。
-2. 关键决策当下记：做出影响后续走向的技术/架构决策时，立即记录「决策 + 理由 + 被否掉的备选方案」，保证理由在决策当下最清晰。
-3. 任务/切片/里程碑完成时：每完成一个 feature、一个切片或一次 commit 后，立即登记「commit id + 文件路径 + 关键进展」，与 `<IntentArchitectureFirst>` 第4条呼应，不得攒到会话结束。
-以上即时记录同样遵守 `<SessionMemorySummarization>` 第4条的简洁、去重要求。
+In addition to "session end", long-term memory writes must be triggered immediately at the following moments and must not be deferred to session end:
+1. Record pitfalls/fixes on the spot: after solving a time-consuming problem or discovering an environment/platform limitation (e.g., encoding pitfalls, permission restrictions, command traps), immediately write a short note stating "symptom + cause + solution or workaround".
+2. Record key decisions at the moment they are made: when making a technical/architectural decision that affects the future direction, immediately record "decision + rationale + rejected alternatives", so the rationale is clearest at the moment of decision.
+3. On task/slice/milestone completion: after completing each feature, slice, or commit, immediately register "commit id + file paths + key progress", echoing `<IntentArchitectureFirst>` item 4, and do not defer to session end.
+The above immediate records also follow the conciseness and de-duplication requirements of `<SessionMemorySummarization>` item 4.
 </MemoryTriggerTiming>
 
 <ToolsGuideline>
-你必须通过ARGO MCP server提供的工具来进行意图架构的读写操作，禁止直接修改意图架构的源文件：
-1. getSystemArchitecture: 语义化读取架构（推荐带 query.purpose + query.intent，而非全量读取）。
-2. getIntentElementContext: 用于获取意图架构元素的上下文信息，包括元素的属性、关联关系等。
-3. previewSystemArchitectureMutation: 用于预览意图架构的变更，确保变更不会破坏现有的架构结构。
-4. applySystemArchitectureMutation: 用于应用意图架构的变更，将预览的变更正式写入意图架构中。
-5. addArchitectureElement: 用于在意图架构中添加新的架构元素。
-6. updateArchitectureElement: 用于更新意图架构中已有的架构元素的属性或关联关系。
-7. removeArchitectureElement: 用于从意图架构中移除已有的架构元素。
-8. addArchitectureRelationship: 用于在意图架构中添加新的架构元素之间的关联关系。
-9. updateArchitectureRelationship: 用于更新意图架构中已有的架构元素之间的关联关系。
-10. removeArchitectureRelationship: 用于从意图架构中移除已有的架构元素之间的关联关系。
-11. getArchitectureViewContext: 用于查询意图架构中的架构视图及其包含的元素和关联关系。
-12. addArchitectureView: 用于在意图架构中添加新的架构视图。
-13. updateArchitectureView: 用于更新意图架构中已有的架构视图的属性或关联关系。
-14. removeArchitectureView: 用于从意图架构中移除已有的架构视图。
-15. validateSystemArchitecture: 用于验证意图架构的完整性和一致性，确保架构元素和关联关系符合预期。
+You MUST read/write the intent architecture through the tools provided by the ARGO MCP server; direct modification of the intent architecture source file is forbidden:
+1. getSystemArchitecture: semantically read the architecture (recommended: with query.purpose + query.intent, rather than a full read).
+2. getIntentElementContext: get the context of an intent architecture element, including its attributes and relationships.
+3. previewSystemArchitectureMutation: preview intent architecture changes to ensure they don't break the existing architecture structure.
+4. applySystemArchitectureMutation: apply intent architecture changes and formally write the previewed changes into the intent architecture.
+5. addArchitectureElement: add a new element to the intent architecture.
+6. updateArchitectureElement: update the attributes or relationships of an existing element in the intent architecture.
+7. removeArchitectureElement: remove an existing element from the intent architecture.
+8. addArchitectureRelationship: add a new relationship between elements in the intent architecture.
+9. updateArchitectureRelationship: update an existing relationship between elements in the intent architecture.
+10. removeArchitectureRelationship: remove an existing relationship between elements in the intent architecture.
+11. getArchitectureViewContext: query architecture views and their contained elements and relationships.
+12. addArchitectureView: add a new view to the intent architecture.
+13. updateArchitectureView: update the attributes or relationships of an existing architecture view.
+14. removeArchitectureView: remove an existing architecture view.
+15. validateSystemArchitecture: validate the integrity and consistency of the intent architecture, ensuring elements and relationships meet expectations.
 </ToolsGuideline>
