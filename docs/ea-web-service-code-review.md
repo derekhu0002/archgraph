@@ -133,5 +133,12 @@ MVP 实现了需求中的核心能力：项目发现、状态展示、视图图�
 
 ## 6. 变更记录（提交后回填）
 
-- commit id：`<待回填>`
+- commit id：`84c33e5`（检视报告 + 测试 + 图谱 AT-2760-04）
+- 后续登记 commit：`828bc69`（在组件 2760 的 commit 属性登记 84c33e5）
 - 变更文件：`docs/ea-web-service-code-review.md`、`tests/ea-web-service-code-review.test.js`、`design/KG/SystemArchitecture.json`
+
+### 测试与校验最终结果
+
+- 基线（检视时点，45/45 通过）：`node --test tests/ea-web-service-impl.test.js tests/ea-web-service-design.test.js tests/ea-web-service-ui-insight.test.js tests/ea-web-service.test.js` → 45 pass / 0 fail
+- 检视验收测试：`node --test tests/ea-web-service-code-review.test.js` → 3 pass / 0 fail
+- 意图图谱校验：`validateSystemArchitecture` → passed（`design/KG/SystemArchitecture.json`）
