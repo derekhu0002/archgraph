@@ -666,6 +666,11 @@
           "description": "docs/industry-insight-graph-driven-agent.wechat.md; tests/wechat-article.test.js; .gitignore; design/KG/SystemArchitecture.json"
         },
         {
+          "name": "commit",
+          "value": "9f20ffd",
+          "description": "design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "deliveryStatus",
           "value": "delivered"
         },
@@ -1168,6 +1173,11 @@
           "name": "commit",
           "value": "03ad558",
           "description": "docs/archgraph-introduction.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "9f20ffd",
+          "description": "design/KG/SystemArchitecture.json"
         },
         {
           "name": "deliveryStatus",
