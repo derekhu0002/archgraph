@@ -2270,6 +2270,11 @@
           "name": "commit",
           "value": "fca257c",
           "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "b42a3dd",
+          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     },
@@ -2299,6 +2304,11 @@
         {
           "name": "commit",
           "value": "fca257c",
+          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "b42a3dd",
           "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json"
         }
       ]
@@ -3572,7 +3582,7 @@
       "view_name": "系统设计师工作记录",
       "parent_element_id": "2739",
       "parent_element_name": "caoyang",
-      "description": "系统设计师 caoyang 的长期记忆子视图：EA 知识图谱导入导出本地 Web 服务方案设计。切片（commit fca257c）：产出 docs/ea-web-service-design.md（总体架构分层 + AD-a..AD-i 九个决策 + REST API 清单 + 编辑↔ARGO MCP 映射表 + 前端图数据形态），并登记解决方案架构——Application Component 2760「ArchGraph 本地 Web 服务」+ 5 个 Application Service（导入 2761/导出 2762/搜索 2763/图形化查看 2764/编辑 2765）+ Realization 关系 1980-1985（WP 2758 → 组件；组件 → 各服务），加入 EA Tooling 视图 1800；新增 tests/ea-web-service-design.test.js（8 断言全绿）。关键决策：导入=整体替换+备份；技术栈=Node 内置 http；UI+API 并存；项目按 design/KG/SystemArchitecture.json marker 递归发现、basename 命名；实时读取=fs.watch+轮询兜底；写图=进程内 import argo-mcp-server.js callTool（ARGO_REPO_ROOT 定位项目）；渲染=SVG+力导向（可切分层）；撤销重做=Command+内存栈+快照兜底；数据安全=备份+串行队列+文件锁。转交规划专家/系统架构师评审。",
+      "description": "系统设计师 caoyang 的长期记忆子视图：EA 知识图谱导入导出本地 Web 服务方案设计。切片1（commit fca257c）：产出 docs/ea-web-service-design.md（总体架构分层 + AD-a..AD-i + REST API 清单 + 编辑↔ARGO MCP 映射表 + 前端图数据形态），登记 Application Component 2760 + 5 Application Services 2761-2765 + Realization 1980-1985，入 EA Tooling 视图 1800；tests/ea-web-service-design.test.js（8 断言全绿）。切片2（commit b42a3dd）：落实规划专家洞察 2766 反馈——AD-c 修订为「内置单页 UI（零构建静态页）+ 开源图库内核（首选 AntV G6 v5，备选 Cytoscape.js，均 MIT）」，不引入 React/Vite 构建链（列演进项）；AD-g 修订为 G6 v5（默认 Canvas 可切 SVG/WebGL、内置 force/dagre 布局、原生拖动/选择/命中/固定节点，无需自研 fx/fy）；新增 4.1 技术栈/依赖段（G6 本地 vendor 引入、不引 CDN）；组件 2760 新增 testcase AT-2760-02-开源图库内核；tests/ea-web-service-design.test.js 增至 12 断言全绿。转交 Developer 实现。",
       "included_elements": [
         "2760"
       ],
