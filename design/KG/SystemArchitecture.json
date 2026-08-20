@@ -2280,6 +2280,11 @@
           "name": "commit",
           "value": "9e6a5b3",
           "description": "design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "1c35760",
+          "description": "scripts/ea-web-service.js; web/index.html; web/app.js; web/style.css; tests/ea-web-service-impl.test.js"
         }
       ]
     },
@@ -2302,6 +2307,13 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/ea-web-service-design.test.js",
           "acceptanceCriteria": "执行 node --test tests/ea-web-service-design.test.js：断言设计文档 AD-c 含 G6 v5、Cytoscape、零构建、React/Vite 被否/演进，AD-g 含 G6 v5、Canvas、force、dagre、内置拖动/命中、无需自研 fx/fy，并以本地 vendor 引入（不引 CDN）。"
+        },
+        {
+          "name": "AT-2760-03-本地Web服务实现",
+          "description": "GIVEN 需求与设计已冻结；WHEN Developer 实现本地 Web 服务 MVP；THEN scripts/ea-web-service.js 与 web/（index.html/app.js/style.css）存在，提供项目发现/状态/视图图数据/搜索/导入/导出/编辑（走 ARGO MCP）/撤销重做 API，且 tests/ea-web-service-impl.test.js 全部通过。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service-impl.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service-impl.test.js：断言服务模块存在且导出 createServer/discoverProjects/importGraph/exportGraph/editGraph/undoGraph/redoGraph 等；编辑 op 映射到 ARGO MCP 写图接口；真实 MCP 写图回滚；导入校验/撤销重做/服务冒烟通过。"
         }
       ],
       "type": "Application Component",
@@ -2320,6 +2332,11 @@
           "name": "commit",
           "value": "9e6a5b3",
           "description": "design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "1c35760",
+          "description": "scripts/ea-web-service.js; web/index.html; web/app.js; web/style.css; tests/ea-web-service-impl.test.js"
         }
       ]
     },

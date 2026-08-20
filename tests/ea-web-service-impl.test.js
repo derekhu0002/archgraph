@@ -345,6 +345,22 @@ test('服务启动冒烟：临时端口启动，GET /api/projects 与 /export �
   }
 });
 
+test('图谱登记：组件 2760 携带实现验收用例 AT-2760-03', () => {
+  // GIVEN Developer 已完成实现并在意图图谱登记
+  // WHEN 检查组件 2760 的 testcases
+  // THEN 存在 AT-2760-03（GIVEN-WHEN-THEN、可执行，Input 指向实现测试文件）
+  const graph = readGraph(REAL_GRAPH);
+  const component = (graph.elements || []).find((el) => el.id === '2760');
+  assert.ok(component, '组件 2760 应存在');
+  const tc = (component.testcases || []).find((entry) => entry.name && entry.name.includes('AT-2760-03'));
+  assert.ok(tc, '组件 2760 应携带 AT-2760-03 实现验收用例');
+  assert.match(tc.description, /GIVEN/);
+  assert.match(tc.description, /WHEN/);
+  assert.match(tc.description, /THEN/);
+  assert.equal(tc.type, 'Acceptance Test');
+  assert.ok(tc.Input && tc.Input.includes('node --test tests/ea-web-service-impl.test.js'), 'AT-2760-03 的 Input 应指向实现测试');
+});
+
 test('真实 MCP 写图回滚：in-process addElement + removeElement', async (t) => {
   // GIVEN ARGO MCP 进程内后端可用且有一个真实图谱副本
   // WHEN 通过适配器真实执行一次 addElement 再 removeElement

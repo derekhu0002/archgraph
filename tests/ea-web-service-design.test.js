@@ -211,7 +211,10 @@ test('ea-web-service-design: new elements carry executable GIVEN-WHEN-THEN testc
       assert.match(tc.description, /THEN/, `${id} testcase description should contain THEN`);
       assert.equal(tc.type, 'Acceptance Test', `${id} testcase type should be Acceptance Test`);
       assert.ok(
-        tc.Input && tc.Input.includes('node --test tests/ea-web-service-design.test.js'),
+        tc.Input && (
+          tc.Input.includes('node --test tests/ea-web-service-design.test.js')
+          || tc.Input.includes('node --test tests/ea-web-service-impl.test.js')
+        ),
         `${id} testcase Input should be executable`
       );
       assert.ok(tc.acceptanceCriteria && tc.acceptanceCriteria.trim().length > 0, `${id} testcase should carry acceptanceCriteria`);
