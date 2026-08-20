@@ -1053,6 +1053,11 @@
           "value": "491bdb7"
         },
         {
+          "description": "install-argo.ps1 (preserve model in Cursor/OpenCode agent frontmatter); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "1aa3cb3"
+        },
+        {
           "name": "status",
           "value": "COMPLETED"
         },
