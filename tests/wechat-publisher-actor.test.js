@@ -9,6 +9,29 @@ const ROOT = path.resolve(__dirname, '..');
 const GRAPH = JSON.parse(
   readFileSync(path.join(ROOT, 'design', 'KG', 'SystemArchitecture.json'), 'utf8')
 );
+const AGENT_FILE = path.join(ROOT, '.github', 'agents', 'wechat-publisher.agent.md');
+
+function parseAgentFrontmatter(md) {
+  const m = md.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n/);
+  if (!m) {
+    throw new Error('agent file is missing a YAML frontmatter block');
+  }
+  const meta = {};
+  for (const line of m[1].split(/\r?\n/)) {
+    const kv = line.match(/^([A-Za-z_][A-Za-z0-9_-]*):\s*(.*)$/);
+    if (kv) {
+      let value = kv[2].trim();
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      meta[kv[1]] = value;
+    }
+  }
+  return meta;
+}
 
 test('wechat-publisher-actor: a dedicated Business Actor is registered for WeChat publishing', () => {
   // GIVEN the intent graph models the AgentOrganization team
@@ -59,4 +82,21 @@ test('wechat-publisher-actor: actor, role, and assignment are visible in the 公
   assert.ok(view.included_elements.includes(actor.id), 'view should include the actor');
   assert.ok(view.included_elements.includes(role.id), 'view should include the role');
   assert.ok(view.included_relationships.includes(assignment.id), 'view should include the assignment');
+});
+
+test('wechat-publisher-agent-file: a VS Code custom agent defines the publisher role', () => {
+  // GIVEN the 公众号发布员 needs to be invokable as a VS Code custom agent
+  // WHEN a caller inspects the agent definition file
+  // THEN .github/agents/wechat-publisher.agent.md exists with name/tools frontmatter and draft-only constraints
+  const md = readFileSync(AGENT_FILE, 'utf8');
+  const meta = parseAgentFrontmatter(md);
+
+  assert.equal(meta.name, '公众号发布员', 'frontmatter should name the agent 公众号发布员');
+  assert.ok(meta.tools, 'frontmatter should declare a tools list');
+  assert.match(meta.tools, /read/, 'tools should include read');
+  assert.match(meta.tools, /edit/, 'tools should include edit');
+  assert.match(meta.tools, /search/, 'tools should include search');
+  assert.match(meta.tools, /execute/, 'tools should include execute');
+  assert.match(md, /wechat:draft/, 'agent body should document the wechat:draft command');
+  assert.match(md, /48001/, 'agent body should document the 48001 api unauthorized constraint');
 });

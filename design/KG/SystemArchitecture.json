@@ -2010,11 +2010,18 @@
       "description": "专门负责将 ArchGraph 项目文章发布到微信公众号的 Business Actor。工作流程：(1) 使用 .github/skills/@ai-chen2050/wechat-public-cli 技能，将带 YAML frontmatter（title/author/digest/banner）的 Markdown 文章通过 wechat:draft 命令创建草稿；(2) 凭证配置 wechat-public.config.json（已 gitignore，含真实 appid/secret），自定义 CSS 为 .github/skills/@ai-chen2050/wechat-public-cli/custom.css（经 --css 传入）；(3) 关键约束：本公众号是个人未认证订阅号（appid wxdf79e7cb44995aa3），freepublish/sendall 永远返回 48001 api unauthorized，API 发布不可用，只能创建草稿后在公众号后台手动发布；(4) 发布前需确认当前公网 IP 已加入公众号后台 IP 白名单（否则 token 刷新报 40164）。",
       "testcases": [
         {
-          "name": "AT-2755-01-公众号发布员角色就绪",
-          "description": "GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找专门发布微信公众号的 Business Actor；THEN 图谱中存在全局唯一 name 为「公众号发布员」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description 作为其 system prompt，并通过 Assignment 关系指派给「公众号发布」Business Role，三者均包含于「公众号发布团队」视图(433)。",
-          "type": "Acceptance Test",
           "Input": "node --test tests/wechat-publisher-actor.test.js",
-          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js：断言 SystemArchitecture.json 中恰好存在一个 name=公众号发布员、type=Business Actor、parent=1962 且 description 非空的元素；存在 Assignment 关系（source_id=该 actor、target_id=name 为「公众号发布」的 Business Role）；视图 433 的 included_elements 含该 actor 与 role，included_relationships 含该 Assignment 关系。通过。"
+          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js：断言 SystemArchitecture.json 中恰好存在一个 name=公众号发布员、type=Business Actor、parent=1962 且 description 非空的元素；存在 Assignment 关系（source_id=该 actor、target_id=name 为「公众号发布」的 Business Role）；视图 433 的 included_elements 含该 actor 与 role，included_relationships 含该 Assignment 关系。通过。",
+          "description": "GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找专门发布微信公众号的 Business Actor；THEN 图谱中存在全局唯一 name 为「公众号发布员」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description 作为其 system prompt，并通过 Assignment 关系指派给「公众号发布」Business Role，三者均包含于「公众号发布团队」视图(433)。",
+          "name": "AT-2755-01-公众号发布员角色就绪",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "node --test tests/wechat-publisher-actor.test.js",
+          "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js（用例 \"wechat-publisher-agent-file\"）：断言 .github/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员 与 tools 列表，正文含 wechat:draft 与 48001。通过。",
+          "description": "GIVEN 公众号发布员需要以 VS Code 自定义 agent 方式被调用；WHEN 查找其 agent 定义文件；THEN 工作区 .github/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、tools 包含 read/edit/search/execute，正文含 wechat:draft 与 48001 约束。",
+          "name": "AT-2755-02-公众号发布员Agent文件就绪",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
