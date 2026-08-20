@@ -2026,9 +2026,14 @@
       ],
       "attributes": [
         {
+          "description": "design/KG/SystemArchitecture.json; tests/wechat-publisher-actor.test.js",
           "name": "commit",
-          "value": "5ef24d4",
-          "description": "design/KG/SystemArchitecture.json; tests/wechat-publisher-actor.test.js"
+          "value": "5ef24d4"
+        },
+        {
+          "description": ".github/agents/wechat-publisher.agent.md; tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "2e5fddd"
         }
       ]
     },
