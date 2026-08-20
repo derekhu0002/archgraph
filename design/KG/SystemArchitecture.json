@@ -2265,6 +2265,11 @@
           "name": "commit",
           "value": "b12165b",
           "description": "docs/ea-web-service-requirements.md; tests/ea-web-service.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "fca257c",
+          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     },
@@ -2282,7 +2287,14 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Application Component"
+      "type": "Application Component",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "fca257c",
+          "description": "docs/ea-web-service-design.md; tests/ea-web-service-design.test.js; design/KG/SystemArchitecture.json"
+        }
+      ]
     },
     {
       "description": "导入外部知识图谱 JSON：按 SystemArchitecture.schema.json 校验（JSON 合法性、结构、id 唯一、引用完整性）通过后，先备份再整体替换当前项目 design/KG/SystemArchitecture.json；写入经 ARGO MCP 适配层落盘，与 Agent 写图一致。",
