@@ -31,18 +31,60 @@ function Copy-Agents {
     param(
         [string]$Source,
         [string]$Destination,
-        [switch]$AsMd
+        [string]$Target
     )
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
     $files = @(Get-ChildItem -Path (Join-Path $Source '*.agent.md') -ErrorAction SilentlyContinue)
     foreach ($file in $files) {
-        if ($AsMd) {
-            $targetName = ($file.BaseName -replace '\.agent$', '') + '.md'
-        } else {
-            $targetName = $file.Name
+        if (-not $Target) {
+            # Copilot: VS Code format, keep the .agent.md extension verbatim.
+            Copy-Item -Force -Path $file.FullName -Destination (Join-Path $Destination $file.Name)
+            continue
         }
-        Copy-Item -Force -Path $file.FullName -Destination (Join-Path $Destination $targetName)
+        $targetName = ($file.BaseName -replace '\.agent$', '') + '.md'
+        Convert-AgentFile -SourceFile $file.FullName -DestinationFile (Join-Path $Destination $targetName) -Target $Target
     }
+}
+
+function Convert-AgentFile {
+    param(
+        [string]$SourceFile,
+        [string]$DestinationFile,
+        [string]$Target
+    )
+    $content = Get-Content $SourceFile -Raw -Encoding UTF8
+    $m = [regex]::Match($content, '(?s)^---\s*\r?\n(.*?)\r?\n---\s*\r?\n(.*)$')
+    if (-not $m.Success) {
+        Copy-Item -Force -Path $SourceFile -Destination $DestinationFile
+        return
+    }
+    $front = $m.Groups[1].Value
+    $body = $m.Groups[2].Value
+
+    $name = ''
+    $desc = ''
+    $nm = [regex]::Match($front, '(?m)^name:\s*(.*)$')
+    if ($nm.Success) { $name = $nm.Groups[1].Value.Trim().Trim('"').Trim("'") }
+    $dm = [regex]::Match($front, '(?m)^description:\s*(.*)$')
+    if ($dm.Success) { $desc = $dm.Groups[1].Value.Trim().Trim('"').Trim("'") }
+
+    if ($Target -eq 'opencode') {
+        # OpenCode markdown agent: description is required; mode: all keeps it
+        # usable as primary and subagent. Drop VS Code-only fields (tools array,
+        # model, user-invocable, argument-hint) which OpenCode rejects.
+        $newFront = "---`r`n"
+        if ($desc) { $newFront += "description: `"$($desc -replace '"','\"')`"`r`n" }
+        $newFront += "mode: all`r`n---`r`n"
+    } else {
+        # Cursor markdown agent: name + description; drop VS Code-only fields.
+        $newFront = "---`r`n"
+        if ($name) { $newFront += "name: `"$name`"`r`n" }
+        if ($desc) { $newFront += "description: `"$($desc -replace '"','\"')`"`r`n" }
+        $newFront += "---`r`n"
+    }
+
+    $result = $newFront + "`r`n" + $body
+    [System.IO.File]::WriteAllText($DestinationFile, $result, (New-Object System.Text.UTF8Encoding $false))
 }
 
 function Write-McpConfig {
@@ -172,11 +214,11 @@ $agentsSrc = Join-Path $argoDir 'agents'
 Write-Host "[10/12] argo\agents -> $CopilotAgentsRoot (Copilot user-level)"
 Copy-Agents -Source $agentsSrc -Destination $CopilotAgentsRoot
 
-Write-Host "[11/12] argo\agents -> $CursorAgentsRoot (Cursor user-level, renamed to .md)"
-Copy-Agents -Source $agentsSrc -Destination $CursorAgentsRoot -AsMd
+Write-Host "[11/12] argo\agents -> $CursorAgentsRoot (Cursor user-level, converted to .md)"
+Copy-Agents -Source $agentsSrc -Destination $CursorAgentsRoot -Target cursor
 
-Write-Host "[12/12] argo\agents -> $OpenCodeAgentsRoot (OpenCode user-level, renamed to .md)"
-Copy-Agents -Source $agentsSrc -Destination $OpenCodeAgentsRoot -AsMd
+Write-Host "[12/12] argo\agents -> $OpenCodeAgentsRoot (OpenCode user-level, converted to .md)"
+Copy-Agents -Source $agentsSrc -Destination $OpenCodeAgentsRoot -Target opencode
 
 if ($SkipDeps) {
     Write-Host 'Skipped dependency install (-SkipDeps).'
