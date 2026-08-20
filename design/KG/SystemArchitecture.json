@@ -671,6 +671,11 @@
           "description": "design/KG/SystemArchitecture.json"
         },
         {
+          "name": "commit",
+          "value": "2a2b5a3",
+          "description": "design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "deliveryStatus",
           "value": "delivered"
         },
@@ -1177,6 +1182,11 @@
         {
           "name": "commit",
           "value": "9f20ffd",
+          "description": "design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "2a2b5a3",
           "description": "design/KG/SystemArchitecture.json"
         },
         {
