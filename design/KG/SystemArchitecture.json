@@ -3278,6 +3278,17 @@
       "included_relationships": [
         "1161"
       ]
+    },
+    {
+      "view_id": "1801",
+      "view_name": "产品经理工作记录",
+      "parent_element_id": "2747",
+      "parent_element_name": "xiaoniu",
+      "description": "产品经理 xiaoniu 的长期记忆子视图：记录本会话需求分析切片（EA 知识图谱导入导出本地 Web 服务，Work Package 2758）。",
+      "included_elements": [
+        "2758"
+      ],
+      "included_relationships": []
     }
   ]
 }
