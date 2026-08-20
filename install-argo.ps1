@@ -63,23 +63,29 @@ function Convert-AgentFile {
 
     $name = ''
     $desc = ''
+    $model = ''
     $nm = [regex]::Match($front, '(?m)^name:\s*(.*)$')
     if ($nm.Success) { $name = $nm.Groups[1].Value.Trim().Trim('"').Trim("'") }
     $dm = [regex]::Match($front, '(?m)^description:\s*(.*)$')
     if ($dm.Success) { $desc = $dm.Groups[1].Value.Trim().Trim('"').Trim("'") }
+    $mm = [regex]::Match($front, '(?m)^model:\s*(.*)$')
+    if ($mm.Success) { $model = $mm.Groups[1].Value.Trim().Trim('"').Trim("'") }
 
     if ($Target -eq 'opencode') {
         # OpenCode markdown agent: description is required; mode: all keeps it
-        # usable as primary and subagent. Drop VS Code-only fields (tools array,
-        # model, user-invocable, argument-hint) which OpenCode rejects.
+        # usable as primary and subagent. Keep model so each agent pins its
+        # required model; drop VS Code-only fields (tools array, user-invocable,
+        # argument-hint) which OpenCode rejects.
         $newFront = "---`r`n"
         if ($desc) { $newFront += "description: `"$($desc -replace '"','\"')`"`r`n" }
+        if ($model) { $newFront += "model: `"$model`"`r`n" }
         $newFront += "mode: all`r`n---`r`n"
     } else {
-        # Cursor markdown agent: name + description; drop VS Code-only fields.
+        # Cursor markdown agent: name + description + model; drop VS Code-only fields.
         $newFront = "---`r`n"
         if ($name) { $newFront += "name: `"$name`"`r`n" }
         if ($desc) { $newFront += "description: `"$($desc -replace '"','\"')`"`r`n" }
+        if ($model) { $newFront += "model: `"$model`"`r`n" }
         $newFront += "---`r`n"
     }
 
