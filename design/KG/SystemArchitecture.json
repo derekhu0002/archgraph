@@ -2168,7 +2168,7 @@
       "name": "开发EA知识图谱导入导出本地Web服务",
       "parent": "1249",
       "type": "Work Package",
-      "description": "将目前依赖 Sparx Enterprise Architect (EA) JScript 脚本（eatool/EA-jsscript/export-to-kg.js、import-from-kg.js、import-from-external-package.js）导入/导出知识图谱（design/KG/SystemArchitecture.json）的能力，迁移到一个本地 Web 服务：让从未用过 EA 的用户也能通过浏览器一键导入/导出 ArchGraph 知识图谱（本地运行、零配置、零 EA 依赖、格式与大小校验）。",
+      "description": "将目前依赖 Sparx Enterprise Architect (EA) JScript 脚本（eatool/EA-jsscript/）导入/导出知识图谱（design/KG/SystemArchitecture.json）的能力，迁移到一个本地 Web 服务（多项目管理 + 查看/编辑 + 搜索 + 图形化 + 导入导出）：后台自动实时读取「多项目」的 SystemArchitecture.json 并展示各项目图谱状态；用户选择项目后可查看/编辑——搜索（语义检索 getSystemArchitecture、上下文检索 getIntentElementContext/getArchitectureViewContext）、图形化查看（视图列表选择→图形化展开→自动布局→节点拖动）、编辑（新增视图/新增元素/编辑元素属性/删除元素/编辑关系属性/删除关系，支持撤销/重做）、导入导出（导入外部 JSON、导出当前项目 JSON）；所有写图操作统一通过 ARGO MCP 提供的接口，与 Agent 保持一致。本地运行、零配置、零 EA 依赖、格式与大小校验。",
       "testcases": [
         {
           "name": "AT-2758-01-本地Web服务导入",
@@ -2204,6 +2204,55 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/ea-web-service.test.js",
           "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-5（大小校验）。"
+        },
+        {
+          "name": "AT-2758-06-多项目状态展示",
+          "description": "GIVEN 存在多个项目且各自拥有 SystemArchitecture.json；WHEN 用户打开前端页面；THEN 后台自动读取并展示各项目的图谱状态（有效性、元素/关系/视图数量等），用户可从中选择某个项目。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-6（多项目状态展示）与『多项目』『图谱状态』关键词。"
+        },
+        {
+          "name": "AT-2758-07-搜索语义与上下文检索",
+          "description": "GIVEN 用户已选中某项目；WHEN 用户输入查询并选用语义检索或上下文检索；THEN 返回与 ARGO MCP 检索方法（getSystemArchitecture 语义查询 / getIntentElementContext 上下文检索）一致的结果，可定位到元素/关系/视图。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-7（搜索）与『语义检索』『上下文检索』『getSystemArchitecture』『getIntentElementContext』。"
+        },
+        {
+          "name": "AT-2758-08-图形化查看自动布局拖动",
+          "description": "GIVEN 用户已选中某项目并打开视图列表；WHEN 用户选择某视图；THEN 该视图以图形化方式展开并自动布局，节点可拖动调整位置。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-8（图形化查看）与『图形化』『自动布局』『拖动』。"
+        },
+        {
+          "name": "AT-2758-09-编辑写图一致性",
+          "description": "GIVEN 用户已选中某项目并进入编辑；WHEN 用户执行新增视图/新增元素/编辑元素属性/删除元素/编辑关系属性/删除关系；THEN 操作通过 ARGO MCP 提供的接口写入图谱，与 Agent 写图保持一致，且写后图谱通过 schema 校验。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-9（编辑写图一致性）与『addArchitectureElement』『applySystemArchitectureMutation』『ARGO MCP』。"
+        },
+        {
+          "name": "AT-2758-10-撤销重做",
+          "description": "GIVEN 用户已执行若干编辑操作；WHEN 用户点击撤销或重做；THEN 图谱状态分别回退或前进到对应历史状态。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-10（撤销/重做）与『撤销』『重做』。"
+        },
+        {
+          "name": "AT-2758-11-导入到当前项目",
+          "description": "GIVEN 用户已选中某项目并持有外部知识图谱 JSON；WHEN 用户执行导入；THEN 文件通过校验后写入当前项目图谱，返回成功结果。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-11（导入到当前项目）。"
+        },
+        {
+          "name": "AT-2758-12-导出当前项目",
+          "description": "GIVEN 用户已选中某项目且该项目图谱 JSON 存在；WHEN 用户点击导出；THEN 下载当前项目知识图谱 JSON 文件（UTF-8 无 BOM）。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-12（导出当前项目）。"
         }
       ],
       "attributes": [

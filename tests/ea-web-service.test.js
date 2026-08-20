@@ -91,3 +91,92 @@ test('ea-web-service: Work Package carries executable GIVEN-WHEN-THEN testcases'
     assert.ok(tc.acceptanceCriteria && tc.acceptanceCriteria.trim().length > 0, 'testcase should carry acceptanceCriteria');
   }
 });
+
+test('ea-web-service: doc covers multi-project discovery, status display and project selection', () => {
+  // GIVEN the web service must manage multiple projects
+  // WHEN the doc is inspected
+  // THEN it covers automatic multi-project reading, graph status display and project selection
+  const doc = readDoc();
+  assert.match(doc, /多项目/, 'doc should mention multi-project');
+  assert.match(doc, /项目选择|选择某个项目/, 'doc should mention project selection');
+  assert.match(doc, /图谱状态/, 'doc should mention graph status');
+  assert.match(doc, /S6/, 'doc should contain scenario S6');
+  assert.match(doc, /US-6/, 'doc should contain user story US-6');
+  assert.match(doc, /FR-7（多项目自动发现与状态展示）/, 'FR-7 should be present');
+  assert.match(doc, /AC-6（多项目状态展示）/, 'AC-6 should be present');
+});
+
+test('ea-web-service: doc covers search with semantic and context retrieval via ARGO MCP', () => {
+  // GIVEN the service must reuse ARGO MCP retrieval methods
+  // WHEN the doc is inspected
+  // THEN it covers search, semantic retrieval and context retrieval
+  const doc = readDoc();
+  assert.match(doc, /搜索/, 'doc should mention search');
+  assert.match(doc, /语义检索/, 'doc should mention semantic retrieval');
+  assert.match(doc, /上下文检索/, 'doc should mention context retrieval');
+  assert.match(doc, /getSystemArchitecture/, 'doc should reference getSystemArchitecture');
+  assert.match(doc, /getIntentElementContext/, 'doc should reference getIntentElementContext');
+  assert.match(doc, /FR-9（搜索）/, 'FR-9 should be present');
+  assert.match(doc, /AC-7（搜索）/, 'AC-7 should be present');
+});
+
+test('ea-web-service: doc covers graphical view with auto-layout and node dragging', () => {
+  // GIVEN the service must offer a human-friendly graphical view
+  // WHEN the doc is inspected
+  // THEN it covers graphical expansion, auto-layout and node dragging
+  const doc = readDoc();
+  assert.match(doc, /图形化/, 'doc should mention graphical view');
+  assert.match(doc, /自动布局/, 'doc should mention auto layout');
+  assert.match(doc, /拖动/, 'doc should mention node dragging');
+  assert.match(doc, /FR-10（图形化查看）/, 'FR-10 should be present');
+  assert.match(doc, /AC-8（图形化查看）/, 'AC-8 should be present');
+});
+
+test('ea-web-service: doc covers editing operations, undo/redo and ARGO MCP write consistency', () => {
+  // GIVEN the service must support editing consistent with the Agent write path
+  // WHEN the doc is inspected
+  // THEN it covers the full edit operation set, undo/redo and ARGO MCP write interfaces
+  const doc = readDoc();
+  assert.match(doc, /新增视图/, 'doc should mention add view');
+  assert.match(doc, /新增元素/, 'doc should mention add element');
+  assert.match(doc, /编辑元素属性/, 'doc should mention edit element attributes');
+  assert.match(doc, /删除元素/, 'doc should mention delete element');
+  assert.match(doc, /编辑关系属性/, 'doc should mention edit relationship attributes');
+  assert.match(doc, /删除关系/, 'doc should mention delete relationship');
+  assert.match(doc, /撤销/, 'doc should mention undo');
+  assert.match(doc, /重做/, 'doc should mention redo');
+  assert.match(doc, /ARGO MCP/, 'doc should mention ARGO MCP');
+  assert.match(doc, /addArchitectureElement/, 'doc should reference the add element write interface');
+  assert.match(doc, /applySystemArchitectureMutation/, 'doc should reference the mutation write interface');
+  assert.match(doc, /FR-13（写图一致性）/, 'FR-13 should be present');
+  assert.match(doc, /AC-9（编辑写图一致性）/, 'AC-9 should be present');
+  assert.match(doc, /AC-10（撤销\/重做）/, 'AC-10 should be present');
+});
+
+test('ea-web-service: doc covers import and export of the selected project graph JSON', () => {
+  // GIVEN the service must import/export per selected project
+  // WHEN the doc is inspected
+  // THEN import and export of the current project graph JSON are covered
+  const doc = readDoc();
+  assert.match(doc, /FR-14（导入导出）/, 'FR-14 should be present');
+  assert.match(doc, /AC-11（导入到当前项目）/, 'AC-11 should be present');
+  assert.match(doc, /AC-12（导出当前项目）/, 'AC-12 should be present');
+});
+
+test('ea-web-service: Work Package testcases cover the new multi-project/view/edit acceptance criteria', () => {
+  // GIVEN the new capabilities must be traced to executable GIVEN-WHEN-THEN testcases
+  // WHEN the Work Package 2758 testcases are inspected
+  // THEN the new acceptance testcases AT-2758-06..12 exist and the description reflects the expanded scope
+  const element = GRAPH.elements.find((entry) => entry.id === WORK_PACKAGE_ID);
+  assert.ok(element, 'Work Package should exist');
+  assert.ok(Array.isArray(element.testcases), 'testcases should be an array');
+
+  const names = element.testcases.map((tc) => tc.name);
+  for (const prefix of ['AT-2758-06', 'AT-2758-07', 'AT-2758-08', 'AT-2758-09', 'AT-2758-10', 'AT-2758-11', 'AT-2758-12']) {
+    assert.ok(names.some((n) => n.startsWith(prefix)), `testcase ${prefix}* should exist`);
+  }
+  assert.ok(element.testcases.length >= 12, 'at least 12 testcases should exist');
+  assert.match(element.description, /多项目/, 'WP description should mention multi-project');
+  assert.match(element.description, /查看\/编辑|查看与编辑|查看和编辑/, 'WP description should mention view and edit');
+  assert.match(element.description, /ARGO MCP/, 'WP description should mention the ARGO MCP write path');
+});
