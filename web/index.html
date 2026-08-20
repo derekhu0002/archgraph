@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArchGraph 本地知识图谱工具</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>ArchGraph 本地知识图谱工具</h1>
+    <p class="subtitle">面向无 EA 经验的用户：导入 / 导出 / 查看 / 编辑本地知识图谱</p>
+  </header>
+
+  <main>
+    <section id="projects-panel">
+      <h2>项目</h2>
+      <button id="refresh-projects">刷新项目</button>
+      <ul id="project-list"></ul>
+    </section>
+
+    <section id="main-panel">
+      <div id="no-selection" class="placeholder">请从左侧选择一个项目。</div>
+
+      <div id="workspace" hidden>
+        <div id="toolbar">
+          <span id="current-project"></span>
+          <button id="btn-export" title="导出当前项目图谱 JSON">导出</button>
+          <button id="btn-import" title="导入外部图谱 JSON（整体替换）">导入</button>
+          <button id="btn-undo" title="撤销上一步编辑">撤销</button>
+          <button id="btn-redo" title="重做">重做</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+        </div>
+
+        <div id="status-bar"></div>
+
+        <div id="columns">
+          <aside id="left-col">
+            <div id="search-box">
+              <input id="search-input" placeholder="搜索元素 / 关系 / 视图">
+              <select id="search-mode">
+                <option value="local">本地检索</option>
+                <option value="semantic">语义检索</option>
+                <option value="context">上下文检索</option>
+              </select>
+              <button id="btn-search">搜索</button>
+            </div>
+            <ul id="search-results"></ul>
+
+            <h3>视图列表</h3>
+            <ul id="view-list"></ul>
+
+            <h3>编辑</h3>
+            <div id="edit-panel">
+              <div id="edit-form"></div>
+              <div id="edit-actions">
+                <select id="edit-op">
+                  <option value="addElement">新增元素</option>
+                  <option value="updateElement">编辑元素属性</option>
+                  <option value="removeElement">删除元素</option>
+                  <option value="addView">新增视图</option>
+                  <option value="updateRelationship">编辑关系属性</option>
+                  <option value="removeRelationship">删除关系</option>
+                </select>
+                <button id="btn-edit">执行</button>
+              </div>
+              <div id="edit-feedback"></div>
+            </div>
+          </aside>
+
+          <div id="graph-panel">
+            <h3 id="graph-title">图形化视图</h3>
+            <svg id="graph-svg" width="760" height="520"></svg>
+            <p class="hint">拖动节点调整位置。图形内核后续接入 AntV G6 v5（本地 vendor）。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>本地运行（127.0.0.1），数据不离开本机。</footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
