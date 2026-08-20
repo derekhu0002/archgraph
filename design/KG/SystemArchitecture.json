@@ -2032,6 +2032,10 @@
 ,"description": "专门负责将 ArchGraph 项目文章发布到微信公众号的 Business Actor。"
 ,"attributes": [
 {
+"name": "agent"
+,"value": "wechat-publisher"
+},
+{
 "name": "commit"
 ,"value": "225e21d"
 ,"description": "argo/agents/wechat-publisher.agent.md (moved from .github/agents); package.json (argo/agents); install-argo.ps1; tests/wechat-publisher-actor.test.js; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
