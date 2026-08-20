@@ -2253,6 +2253,13 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/ea-web-service.test.js",
           "acceptanceCriteria": "执行 node --test tests/ea-web-service.test.js：断言需求文档包含 AC-12（导出当前项目）。"
+        },
+        {
+          "name": "AT-2758-13-验证测试通过",
+          "description": "GIVEN 本地 Web 服务实现已通过代码检视且 Critical 项 R-1 已处置；WHEN 验证测试工程师执行全量回归与端到端冒烟；THEN 全部验收测试通过，图谱结构校验通过，测试报告（docs/ea-web-service-test-report.md）给出 PASS 结论并覆盖 AC-1..AC-12。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/ea-web-service-test-report.test.js",
+          "acceptanceCriteria": "执行 node --test tests/ea-web-service-test-report.test.js：断言测试报告存在且含 AC-1..AC-12 覆盖追踪表与 PASS 结论；WP 2758 携带 AT-2758-13。"
         }
       ],
       "attributes": [
