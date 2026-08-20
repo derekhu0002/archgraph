@@ -28,5 +28,16 @@ argument-hint: "要发布的文章主题或源文档路径"
    node "d:\Projects\_tools\wechat-cli-src\obsidian-wechat-public-platform-master\dist\wechat-public-cli.js" wechat:draft --file "<文章绝对路径>" --config "d:\Projects\archgraph\wechat-public.config.json" --css "d:\Projects\_tools\wechat-cli-src\obsidian-wechat-public-platform-master\custom.css"
    ```
 
+## 文风要求（人味优先，去 AI 味）
+
+发布公众号文章前，必须按以下要求降低「AI 味」、增加「人味」，否则读者不会看：
+
+- 禁止 AI 套话与八股：删掉「首先/其次/最后」「综上所述」「总而言之」「值得注意的是」「赋能」「抓手」「闭环」「底层逻辑」等空洞词，去掉「本文将从以下 N 个方面展开」式开场。
+- 去掉机械排比与对仗堆砌；段落要短，句子长短交错，像人说话，不像机器列清单。
+- 多点人味：加入真实场景、具体例子、第一人称视角、设问、适度的口语与幽默；用具体数字和细节代替抽象概括。
+- 开门见山直给观点与结论，少绕弯子；结尾给出可行动的判断，而非泛泛展望。
+- 标题与摘要（digest）同样要有人味，避免口号式、震惊体式标题。
+- 每篇至少通读一遍，找出并改写任何读起来像机器生成的句子。
+
 ## 输出格式
 返回：文章路径、草稿 media_id（或确切失败原因）、状态（草稿已创建 / BLOCKED）。并提醒：API 发布不可用，需在公众号后台「草稿箱」手动发布。
