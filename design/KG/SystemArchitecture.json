@@ -51,6 +51,10 @@
         {
           "view_id": "434",
           "view_name": "DSH Plugin Publishing"
+        },
+        {
+          "view_id": "argo-workflow-rules-view",
+          "view_name": "ARGO Workflow Rules"
         }
       ]
     },
@@ -2689,6 +2693,34 @@
           "description": "argo/scripts/argo-mcp-server.js; argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js; design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "id": "archgraph-workflow-rules",
+      "name": "ArchGraph ARGO Workflow Rules",
+      "parent": "1249",
+      "type": "Rule",
+      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md）：定位元素再改动、验收测试先行（可执行 GIVEN-WHEN-THEN）、仅通过 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径，并通过只读 queryNeo4jGraph 进行结构化图查询。",
+      "testcases": [
+        {
+          "name": "AT-archgraph-workflow-rules-01-规则文档登记图查询接口",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 阅读该规则；THEN ToolsGuideline 登记了 queryNeo4jGraph 工具，且存在 GraphQueryGuideline 章节指导 Agent 用 {schema: true} 获取投影 schema、用 $graphKey 占位符构造只读 Cypher 进行结构化图查询，并禁止写子句。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/neo4j-cypher-query.test.js",
+          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js（用例 archgraph-rules-document-queryNeo4jGraph）：断言 argo/rules/archgraph.instructions.md 包含 queryNeo4jGraph、GraphQueryGuideline 与 $graphKey，并包含只读拒绝的写子句关键字 CREATE/MERGE/DELETE。通过。"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "eca098b",
+          "description": "argo/rules/archgraph.instructions.md; tests/neo4j-cypher-query.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "539366d",
+          "description": "argo/rules/archgraph.instructions.md"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -3935,6 +3967,16 @@
         "neo4j-cypher-query-interface"
       ],
       "included_relationships": []
+    },
+    {
+      "view_id": "argo-workflow-rules-view",
+      "view_name": "ARGO Workflow Rules",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "description": "ARGO 全局工作流规则（argo/rules/archgraph.instructions.md）的管理视图，包含 Rule 元素 archgraph-workflow-rules。",
+      "included_elements": [
+        "archgraph-workflow-rules"
+      ]
     }
   ]
 }
