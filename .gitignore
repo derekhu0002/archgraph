@@ -7,3 +7,4 @@ wechat-public.config.json
 /*.tgz
 argo/.env
 .obsidian/
+pnpm-lock.yaml
