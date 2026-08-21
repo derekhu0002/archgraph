@@ -350,7 +350,8 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     );
     assert.match(bridge, /export const name = 'dsh-argo-workspace'/, 'bridge must export its name');
     assert.match(bridge, /export const inject = \['tools'\]/, 'bridge must inject the tools registry');
-    assert.match(bridge, /StdioClientTransport/, 'bridge must spawn the argo server directly');
+    assert.match(bridge, /spawn\('node', \[serverPath\]/, 'bridge must spawn the argo server directly');
+    assert.match(bridge, /render: \(_args, value\) => value\.content/, 'bridge must declare output.render for the tool registry');
     assert.match(bridge, /mcp__argo__/, 'bridge must register the public mcp__argo__ tool names');
     assert.doesNotMatch(bridge, /mcp__argo-core__/, 'bridge must not create internal tool names');
     assert.match(bridge, /workspaceRoot/, 'bridge must inject workspaceRoot into every call');

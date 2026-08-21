@@ -485,10 +485,14 @@ export async function apply(ctx, config) {
       output: {
         schema: {
           type: 'object',
-          properties: { content: { type: 'array', items: {} } },
+          properties: {
+            content: { type: 'array', items: {} },
+            structuredContent: {},
+          },
           required: ['content'],
           additionalProperties: false,
         },
+        render: (_args, value) => value.content,
       },
       execute: async (args, exec) => {
         const sessionCwd = exec && exec.agent && exec.agent.session
