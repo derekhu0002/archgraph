@@ -2669,7 +2669,7 @@
       "name": "Neo4j Cypher Query Interface",
       "parent": "1961",
       "type": "Application Component",
-      "description": "ARGO MCP 只读 Cypher 图查询接口（queryNeo4jGraph 工具）：Agent 可先请求结构投影 schema（节点标签/关系类型/属性键 + ArchiMate 元素与关系类型枚举），再自行构造只读 Cypher 查询 Neo4j 结构投影；写子句（CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS）被拒绝，以保护 canonical JSON 单一事实源。源码：argo/scripts/neo4j-system-architecture-store.js、argo/scripts/systemarchitecture-mcp-server.js、argo/scripts/argo-mcp-server.js。",
+      "description": "ARGO MCP 只读 Cypher 图查询接口（queryNeo4jGraph 工具）：Agent 可先请求结构投影 schema（节点标签/关系类型/属性键 + ArchiMate 元素与关系类型枚举），再自行构造只读 Cypher 查询 Neo4j 结构投影；写子句（CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS）被拒绝，以保护 canonical JSON 单一事实源。查询结果顶层返回 database 名称并校验其与本仓库对应的 Neo4j 数据库一致（不一致则 NEO4J_DATABASE_MISMATCH）。源码：argo/scripts/neo4j-system-architecture-store.js、argo/scripts/systemarchitecture-mcp-server.js、argo/scripts/argo-mcp-server.js。",
       "testcases": [
         {
           "name": "AT-neo4j-cypher-query-interface-01-只读Cypher校验",
@@ -2684,6 +2684,13 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/neo4j-cypher-query.test.js",
           "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js：断言 callTool(\"queryNeo4jGraph\",{schema:true}) 返回 status=passed 且 schema.nodeLabels/relationshipTypes 齐全，archimateElementTypes 含 \"Business Actor\"，archimateRelationshipTypes 含 \"Assignment\"。通过。"
+        },
+        {
+          "name": "AT-neo4j-cypher-query-interface-03-返回database名称并校验一致",
+          "description": "GIVEN queryNeo4jGraph 执行只读 Cypher 查询且 Neo4j 结构投影就绪；WHEN 查询返回；THEN 结果顶层包含 database 字段，其值等于本仓库对应的 Neo4j 数据库名（getDefaultNeo4jDatabaseName），且当实际查询的数据库与本仓库期望不一致时以 NEO4J_DATABASE_MISMATCH 拒绝。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/neo4j-cypher-query.test.js",
+          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js（用例 runNeo4jCypherQuery returns the repository database name 与 runNeo4jCypherQuery rejects a mismatched database）：断言 runNeo4jCypherQuery 返回顶层 database 等于 getDefaultNeo4jDatabaseName() 且 summary.database 一致；数据库名不一致时以 NEO4J_DATABASE_MISMATCH 拒绝（queriedDatabase/expectedDatabase 正确）。通过。"
         }
       ],
       "attributes": [
@@ -2691,6 +2698,11 @@
           "name": "commit",
           "value": "4b1456f",
           "description": "argo/scripts/argo-mcp-server.js; argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "c88deea",
+          "description": "argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js"
         }
       ]
     },
