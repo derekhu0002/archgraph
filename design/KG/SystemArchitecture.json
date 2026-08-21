@@ -1083,6 +1083,11 @@
           "value": "v0.9.3"
         },
         {
+          "description": "install-argo.ps1 (dsh-argo-workspace bridge declares output.render); tests/argo-deploy.test.js",
+          "name": "commit",
+          "value": "17dc0f4"
+        },
+        {
           "name": "deliveryStatus",
           "value": "not_delivered"
         },
