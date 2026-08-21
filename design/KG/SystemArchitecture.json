@@ -1,6 +1,6 @@
 {
   "name": "System",
-  "description": "Exported from EA package System\r\n\r\nImported from: D:\\Projects\\Argo\\design\\KG\\SystemArchitecture.json\r\nSchema: .argo/schema/SystemArchitecture.schema.json",
+  "description": "Exported from EA package System",
   "elements": [
     {
       "id": "1240",
@@ -963,137 +963,9 @@
       "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo；将 argo-init skill 部署到 Copilot（~/.copilot/skills）、Cursor（~/.cursor/skills）与 OpenCode（~/.config/opencode/skills）；将 archgraph.instructions.md 规则部署到 Copilot（%APPDATA%\\Code\\User\\prompts）与 OpenCode 全局规则（~/.config/opencode/AGENTS.md）；将 argo/agents 中的 .agent.md 部署到 Copilot（~/.copilot/agents，保持 VS Code 格式）、Cursor（~/.cursor/agents，转换为 .md，保留 name/description/model 并去除 tools 数组等 VS Code 专属字段）与 OpenCode（~/.config/opencode/agents，转换为 .md，保留 description/model、去除 tools 数组等 VS Code 专属字段并声明 mode: all）；将 argo/plugins 中的 opencode 插件部署到 ~/.argo/plugins，并在 OpenCode opencode.json 的 plugin 数组注册（file:// 绝对路径）；将 archgraph.instructions.md 规则转换为 Cursor 全局规则 ~/.cursor/rules/archgraph.mdc（description + alwaysApply: true），使启动闸门（WakeupGuideline STEP 0）对 Cursor 所有项目生效；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补；若 .env 已存在且对应变量已有非空值则跳过输入并保留原值，仅对缺失或空值的变量提示输入）；自动在 VS Code（%APPDATA%\\Code\\User\\mcp.json）、Cursor（~/.cursor/mcp.json，mcpServers）与 OpenCode（~/.config/opencode/opencode.json，mcp）注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行，多工作区时优先选择含 design/KG/SystemArchitecture.json 的根；Cursor 支持 MCP roots，OpenCode 声明 roots 并响应且默认以项目目录为 cwd 启动，故均能正确解析当前项目目录）；temp 保留在仓库目录不部署。",
       "attributes": [
         {
-          "description": "install-argo.ps1 (deploy argo/agents to Copilot/Cursor/OpenCode); package.json (argo/agents in files); tests/argo-deploy.test.js; tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "225e21d"
-        },
-        {
-          "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)",
-          "name": "commit",
-          "value": "2c54b51"
-        },
-        {
-          "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "ee05a15"
-        },
-        {
-          "description": "install-argo.ps1 (preserve model in Cursor/OpenCode agent frontmatter); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "1aa3cb3"
-        },
-        {
-          "description": "argo-deploy/ (package.json; bin/argo-deploy.js; lib/deploy.js; scripts/sync-assets.js; assets/**; README.md); tests/argo-deploy.test.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "446ec0a"
-        },
-        {
-          "description": "argo/defaults/design/KG/SystemArchitecture.json; argo/defaults/EA-model-template.feap; install-argo.ps1; package.json; tests/argo-deploy.test.js; argo/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "b39acb2"
-        },
-        {
-          "description": "install-argo.ps1 (convert agent frontmatter for Cursor/OpenCode); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "491bdb7"
-        },
-        {
-          "description": "argo/scripts/argo-paths.js (MCP roots workspace resolution); argo/scripts/argo-mcp-server.js (roots.listChanged capability); install-argo.ps1 (minimal MCP config); tests/argo-deploy.test.js; tests/argo-global-install.test.js; package.json (0.5.0)",
-          "name": "commit",
-          "value": "2af92ba"
-        },
-        {
-          "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)",
-          "name": "commit",
-          "value": "499d802"
-        },
-        {
-          "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)",
-          "name": "commit",
-          "value": "a4dc2f7"
-        },
-        {
-          "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)",
-          "name": "commit",
-          "value": "07d2c69"
-        },
-        {
-          "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "60e995e"
-        },
-        {
-          "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)",
-          "name": "commit",
-          "value": "e982da1"
-        },
-        {
-          "description": "install-argo.ps1 (restore workspaceFolder in MCP config); tests/argo-deploy.test.js; package.json (0.4.2)",
-          "name": "commit",
-          "value": "025ceae"
-        },
-        {
-          "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore",
-          "name": "commit",
-          "value": "de9e21d"
-        },
-        {
-          "description": "argo/rules/archgraph.instructions.md (renamed from copilot-instructions.md); package.json (0.3.0)",
-          "name": "commit",
-          "value": "411bf25"
-        },
-        {
-          "description": "removed eatool/default/EA-model-template.feap; removed eatool/default/design/KG/SystemArchitecture.json; argo/scripts/argo-mcp-server.js",
-          "name": "commit",
-          "value": "c315b5c"
-        },
-        {
-          "description": "install-argo.ps1 (Cursor/OpenCode skills+rule+MCP deploy); tests/argo-deploy.test.js; README.md; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "92f1123"
-        },
-        {
-          "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/",
-          "name": "commit",
-          "value": "e5f6f3d"
-        },
-        {
-          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz",
-          "name": "commit",
-          "value": "v0.6.0"
-        },
-        {
-          "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js",
-          "name": "commit",
-          "value": "7aebb2e"
-        },
-        {
-          "description": "argo/rules/archgraph.instructions.md (clarify long-term memory as SUBVIEW hierarchy under Business Actor)",
-          "name": "commit",
-          "value": "74b28f1"
-        },
-        {
-          "description": "argo/rules/archgraph.instructions.md (move WakeupGuideline to top as STEP 0 gate); argo/plugins/argo-wakeup.js; install-argo.ps1 (deploy plugin + register opencode.json + Cursor global rule); package.json (argo/plugins in files); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "f6fe5a4"
-        },
-        {
-          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.9.3 (commit 40db89c); package.json (0.9.3); asset archgraph-argo-0.9.3.tgz",
-          "name": "commit",
-          "value": "v0.9.3"
-        },
-        {
-          "description": "install-argo.ps1 (dsh-argo-workspace bridge declares output.render); tests/argo-deploy.test.js",
-          "name": "commit",
-          "value": "17dc0f4"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
+          "value": "a948515",
+          "description": "argo/scripts/argo-paths.js (resolveCallWorkspaceRoot honors per-call workspaceRoot unconditionally, drop ARGO_WORKSPACE_ROOTS allowlist); argo/scripts/argo-mcp-server.js; argo/scripts/validator-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; install-argo.ps1; tests/argo-deploy.test.js; tests/argo-global-install.test.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
@@ -3754,7 +3626,7 @@
       "view_name": "Reviewer工作记录"
     },
     {
-      "description": "Developer（Business Actor Xiaoming/2735）的长期记忆子视图：修复 DeepSeek Harness 集成 bug——install-argo.ps1 生成的 dsh-argo-workspace 桥接插件在 tools.register 时缺少 output.render（DSH 工具注册契约要求 output { schema, render, presentationMeta? }），导致 dsh 启动失败 \"tool mcp__argo__initializeWorkspace must declare output\"。修复：为 output 增加 render: (_args, value) => value.content，并把 schema 增加 structuredContent 属性以匹配 execute 返回值；同步修正 tests/argo-deploy.test.js 中过期的 StdioClientTransport 断言。验收：node --test tests/argo-deploy.test.js 6/6 通过；桥接插件对桩 MCP server 冒烟通过；注册 commit 17dc0f4（install-argo.ps1; tests/argo-deploy.test.js）。",
+      "description": "Developer（Business Actor Xiaoming/2735）的长期记忆子视图。切片1（commit 17dc0f4）：修复 DeepSeek Harness 集成 bug——install-argo.ps1 生成的 dsh-argo-workspace 桥接插件 tools.register 缺少 output.render 导致 dsh 启动失败，为 output 增加 render 并同步修正 tests/argo-deploy.test.js。切片2（commit a948515）：去掉 ARGO MCP 服务端 resolveCallWorkspaceRoot 的 ARGO_WORKSPACE_ROOTS allowlist 判断，per-call workspaceRoot 无条件生效——解决 ARGO MCP 默认以 deepseek-harness 为工作区、校验错图谱（本仓库图谱被误指向）的问题；同步修改三个 MCP server 的工具描述/注释与 install-argo.ps1；同步全局部署 ~/.argo/scripts（4 个脚本逐字节一致）；验收：argo-deploy/argo-global-install/argo-workspace-bootstrap + ea-web-service-impl 隔离运行全绿（wechat-publisher-agent-file 为既有失败，与本次无关）；重启 dsh web 后 MCP 正确解析 D:\\Projects\\archgraph，commit 已登记到元素 1361。",
       "included_elements": [
         "1361"
       ],
