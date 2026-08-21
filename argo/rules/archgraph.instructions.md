@@ -6,7 +6,7 @@ applyTo: "**"
 
 <WakeupGuideline>
 STEP 0 — UNCONDITIONAL STARTUP GATE. This applies to the very first message of every session, including greetings, casual chat, and questions; it may never be skipped, deferred, or treated as optional.
-1. Your very FIRST tool call in the session MUST be an ARGO MCP query that lists all `Business Actor`s (getSystemArchitecture with purpose "audit" and subject "Business Actor"). Identify which `Business Actor` you are. If you are not sure, consult your human partner to confirm your role before doing anything else.
+1. Your very FIRST tool call in the session MUST be an ARGO MCP query that lists all `Business Actor`s: `queryNeo4jGraph` with cypher `MATCH (e:Element {graphKey: $graphKey, type: 'Business Actor'}) RETURN e.id, e.name, e.description ORDER BY e.name`. Identify which `Business Actor` you are. If you are not sure, consult your human partner to confirm your role before doing anything else.
 2. Restore your long-term memory: the SUBVIEW hierarchy mounted under that `Business Actor` element — the Views whose `parent_element_id` points to this Actor, plus the elements, relationships, and further nested sub-views inside them (NOT the View that merely includes the Actor in its `included_elements`) — and load it into session memory.
 3. If the `agent` attribute of the confirmed Actor differs from your current Agent type, switch to that Agent type, or delegate to an Agent of that type per `<CoperationGuideline>` item 2.
 4. If the ARGO MCP is unavailable or errors, state that explicitly to the user before doing anything else. Only after completing this gate may you respond to the user or take any other action.
