@@ -382,12 +382,12 @@ const TOOLS = [
 ];
 
 // Every tool accepts an optional per-call `workspaceRoot` (absolute path,
-// honored only when listed in ARGO_WORKSPACE_ROOTS). The DeepSeek Harness
-// bridge injects the current session's workspace directory here automatically.
+// honored unconditionally when provided). The DeepSeek Harness bridge injects
+// the current session's workspace directory here automatically.
 const WORKSPACE_ROOT_PARAM = Object.freeze({
   type: 'string',
   description:
-    'Optional absolute workspace root for this call. Honored only when listed in ARGO_WORKSPACE_ROOTS; otherwise the server launch directory is used.',
+    'Optional absolute workspace root for this call. When provided it is used as-is; otherwise the server launch directory is used.',
 });
 for (const tool of TOOLS) {
   const inputSchema = tool && tool.inputSchema;
@@ -466,8 +466,8 @@ function mutationInputSchema() {
 }
 
 function resolveWorkspaceRoot(args) {
-  // Per-call workspaceRoot override (honored only when in the
-  // ARGO_WORKSPACE_ROOTS allowlist); defaults to the launch-directory root.
+  // Per-call workspaceRoot override, honored unconditionally when provided;
+  // defaults to the launch-directory root.
   return resolveCallWorkspaceRoot(args);
 }
 

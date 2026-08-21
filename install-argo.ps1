@@ -389,8 +389,7 @@ function New-DshWorkspaceBridge {
     # (SessionHeader.cwd) as the per-call `workspaceRoot`, so ONE dsh instance
     # follows whichever workspace the user switched to - no model-visible
     # parameters, no internal tool names, no restart. The argo server honors
-    # workspaceRoot only when listed in ARGO_WORKSPACE_ROOTS (install-argo.ps1
-    # -DshWorkspaces).
+    # the injected workspaceRoot unconditionally.
     param(
         [string]$DshHome
     )
@@ -405,8 +404,7 @@ function New-DshWorkspaceBridge {
 // directory (SessionHeader.cwd) as the per-call `workspaceRoot` argument, so
 // one dsh instance follows whichever workspace the user switched to - the
 // model sees no extra parameters and no internal tool names. The argo server
-// honors workspaceRoot only when the workspace is listed in its
-// ARGO_WORKSPACE_ROOTS allowlist.
+// honors the injected workspaceRoot unconditionally.
 //
 // Zero dependencies on purpose: implements the minimal MCP stdio client
 // (JSON-RPC 2.0, one JSON object per line) with Node built-ins only, so the
@@ -699,8 +697,8 @@ if ($SkipDsh) {
     # server (no dsh-mcp-client row), registers every tool as mcp__argo__* and
     # injects the current session's workspace (SessionHeader.cwd) as the
     # per-call workspaceRoot, so one dsh instance follows the workspace the
-    # user switched to. The server honors workspaceRoot only when the workspace
-    # is listed in ARGO_WORKSPACE_ROOTS (pass -DshWorkspaces "D:/a;D:/b").
+    # user switched to. The server honors the injected workspaceRoot
+    # unconditionally.
     $bridgeDshPath = New-DshWorkspaceBridge -DshHome $DshHome
     if ($bridgeDshPath) {
         $bridgeUrl = 'file:///' + (($bridgeDshPath -replace '\\', '/').TrimStart('/'))
@@ -730,16 +728,9 @@ if ($SkipDsh) {
 
     Write-Host '  Restart `dsh web` to activate the MCP bridge and the wakeup plugin;'
     Write-Host '  new sessions pick up the global rule and the argo-init skill automatically.'
-    if ($DshWorkspaces) {
-        Write-Host "  Workspace following enabled: ARGO_WORKSPACE_ROOTS=$DshWorkspaces"
-        Write-Host '  The argo tools (mcp__argo__*) now auto-follow the workspace the user switched to'
-        Write-Host '  in one dsh instance - no restart needed between workspaces.'
-    } else {
-        Write-Host '  Multi-workspace: to let one dsh instance follow whichever workspace the user'
-        Write-Host '  switches to, re-run with -DshWorkspaces "D:/proj-a;D:/proj-b" (the argo server'
-        Write-Host '  only honors workspaces listed in ARGO_WORKSPACE_ROOTS). Without it the server'
-        Write-Host '  keeps resolving from the directory dsh was launched from.'
-    }
+    Write-Host '  The argo tools (mcp__argo__*) auto-follow the workspace the user switched to'
+    Write-Host '  in one dsh instance - no restart needed between workspaces (the server honors'
+    Write-Host '  the injected workspaceRoot unconditionally).'
 }
 
 if ($SkipDeps) {
