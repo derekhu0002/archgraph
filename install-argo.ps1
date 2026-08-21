@@ -726,7 +726,7 @@ if ($SkipDsh) {
         Write-DshManagedBlock -Path $patchPath -Block $block -MarkerStart '# BEGIN ArchGraph ARGO deployment' -MarkerEnd '# END ArchGraph ARGO deployment'
     }
 
-    Write-Host "[19/19] argo\agents2 -> $DshHome\.agent-presets\<id> (DeepSeek Harness agent presets)"
+    Write-Host "[19/19] argo\agents5 -> $DshHome\.agent-presets\<id> (DeepSeek Harness agent presets)"
     New-DshAgentPresets -DshHome $DshHome -AgentsSrc (Join-Path $argoDir 'agents')
 
     Write-Host '  Restart `dsh web` to activate the MCP bridge and the wakeup plugin;'
