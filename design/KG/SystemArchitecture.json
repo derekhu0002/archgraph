@@ -1752,18 +1752,32 @@
       ],
       "testcases": [
         {
-          "name": "AT-2100-01-不保留原ID按新元素导入",
-          "description": "GIVEN 已存在基础导入脚本 eatool/EA-jsscript/import_system_architecture_json_to_ea.js；WHEN 运行新导入脚本 eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js 导入 SystemArchitecture.json；THEN 所有元素/关系/视图均作为新元素创建，不写入任何 schema_id/schema_parent/schema_view_id 等原ID标记。",
-          "type": "Acceptance Test",
+          "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言新脚本文件存在、包含 main/importElements/importRelationships 函数，且不含 schema_id/schema_parent/schema_element_json/schema_relationship_json/schema_view_id/schema_sub_view_map 等原ID持久化标记，且 Alias 不回填 data.id。",
           "Input": "node --test tests/ea-import-new.test.js",
-          "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言新脚本文件存在、包含 main/importElements/importRelationships 函数，且不含 schema_id/schema_parent/schema_element_json/schema_relationship_json/schema_view_id/schema_sub_view_map 等原ID持久化标记，且 Alias 不回填 data.id。"
+          "description": "GIVEN 已存在基础导入脚本 eatool/EA-jsscript/import_system_architecture_json_to_ea.js；WHEN 运行新导入脚本 eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js 导入 SystemArchitecture.json；THEN 所有元素/关系/视图均作为新元素创建，不写入任何 schema_id/schema_parent/schema_view_id 等原ID标记。",
+          "name": "AT-2100-01-不保留原ID按新元素导入",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-2100-02-必须由用户提供导入文件路径",
-          "description": "GIVEN 新导入脚本 eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js 已存在；WHEN 用户运行该脚本；THEN 脚本弹出输入框要求用户提供要导入的 SystemArchitecture.json 的完整路径，用户未提供路径时中止导入，且不自动从当前 EA 模型连接串推断路径。",
-          "type": "Acceptance Test",
+          "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言脚本包含 Session.Input 路径输入提示、包含空路径中止逻辑（no input file path was provided），且不含 resolveKnowledgeGraphPathFromCurrentModel 与 Repository.ConnectionString 等自动路径推断逻辑。",
           "Input": "node --test tests/ea-import-new.test.js",
-          "acceptanceCriteria": "执行 node --test tests/ea-import-new.test.js：断言脚本包含 Session.Input 路径输入提示、包含空路径中止逻辑（no input file path was provided），且不含 resolveKnowledgeGraphPathFromCurrentModel 与 Repository.ConnectionString 等自动路径推断逻辑。"
+          "description": "GIVEN 新导入脚本 eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js 已存在；WHEN 用户运行该脚本；THEN 脚本弹出输入框要求用户提供要导入的 SystemArchitecture.json 的完整路径，用户未提供路径时中止导入，且不自动从当前 EA 模型连接串推断路径。",
+          "name": "AT-2100-02-必须由用户提供导入文件路径",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "执行 node --test tests/ea-import-perf.test.js：断言两个脚本均含 Repository.EnableUIUpdates(false) 与 Repository.EnableUIUpdates(true)，且 Repository.RefreshModelView(importPkg.PackageID) 仅出现一次并位于 Repository.EnableUIUpdates(true) 之后（即导入完成后才刷新目录树）。",
+          "Input": "node --test tests/ea-import-perf.test.js",
+          "description": "GIVEN 导入脚本 eatool/EA-jsscript/import-from-kg.js 与 eatool/EA-jsscript/import-from-external-package.js；WHEN 检查两个脚本的 main 流程；THEN 两个脚本在导入开始时调用 Repository.EnableUIUpdates(false) 关闭 UI 刷新，导入结束（finally）后调用 Repository.EnableUIUpdates(true) 恢复 UI 刷新，并在恢复 UI 刷新之后仅调用一次 Repository.RefreshModelView(importPkg.PackageID) 刷新目录树。",
+          "name": "AT-2100-03-导入期间关闭UI刷新且完成后仅刷新一次目录树",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "执行 node --test tests/ea-import-perf.test.js：断言两个脚本均不含 Repository.OpenDiagram、OpenDiagram、ShowInProjectView 等自动打开视图的调用。",
+          "Input": "node --test tests/ea-import-perf.test.js",
+          "description": "GIVEN 导入脚本 eatool/EA-jsscript/import-from-kg.js 与 eatool/EA-jsscript/import-from-external-package.js；WHEN 检查两个脚本的视图处理流程；THEN 两个脚本在导入完成后只刷新目录树，不调用 Repository.OpenDiagram/OpenDiagram/ShowInProjectView 等自动打开任何视图的操作。",
+          "name": "AT-2100-04-导入完成后不自动打开任何视图",
+          "type": "Acceptance Test"
         }
       ]
     },

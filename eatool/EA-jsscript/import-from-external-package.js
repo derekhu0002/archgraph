@@ -41,6 +41,8 @@ function main() {
   Repository.EnsureOutputVisible('Script');
   Repository.EnableUIUpdates(false);
 
+  var importPkg = null;
+
   try {
     Session.Output('Starting SystemArchitecture JSON import (as new elements)...');
 
@@ -66,7 +68,7 @@ function main() {
     var graph = parseJson(jsonString);
     validateGraph(graph);
 
-    var importPkg = createImportPackage(parentPkg, graph);
+    importPkg = createImportPackage(parentPkg, graph);
 
     var elementDataMap = buildElementDataMap(graph.elements);
     var elementMap = {};
@@ -78,8 +80,6 @@ function main() {
     var relationshipCount = importRelationships(importPkg, graph.relationships, elementMap, relationshipMap);
     var viewCount = importViews(importPkg, graph.views, graph.elements, elementMap, relationshipMap, viewMap, subdiagramParentMap);
 
-    Repository.RefreshModelView(importPkg.PackageID);
-
     Session.Output('=======================================');
     Session.Output('SystemArchitecture import (as new elements) complete.');
     Session.Output('Elements created: ' + elementCount);
@@ -90,6 +90,15 @@ function main() {
     fail('Import failed: ' + errorMessage(e));
   } finally {
     Repository.EnableUIUpdates(true);
+  }
+
+  // Single Project Browser tree refresh after import completes. Do not auto-open any diagram/view.
+  if (importPkg != null) {
+    try {
+      Repository.RefreshModelView(importPkg.PackageID);
+    } catch (e) {
+      warnOnce('refresh-tree', 'Could not refresh the Project Browser tree: ' + errorMessage(e));
+    }
   }
 }
 
