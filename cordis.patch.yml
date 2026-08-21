@@ -1,0 +1,6 @@
+# ArchGraph ARGO bundle patch：随 bundle 安装，按包名引用包内插件（非 file://）。
+- insert:
+    - id: argo-workspace
+      name: archgraph-argo/dsh-argo-workspace
+    - id: argo-wakeup
+      name: archgraph-argo/dsh-argo-wakeup

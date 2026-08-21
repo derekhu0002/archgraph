@@ -17,8 +17,22 @@
     "argo/package.json",
     "vendor",
     "install-argo.ps1",
-    "bin"
+    "bin",
+    "cordis.patch.yml",
+    "dsh-argo-workspace",
+    "dsh-argo-wakeup"
   ],
+  "exports": {
+    "./dsh-argo-workspace": "./dsh-argo-workspace/index.js",
+    "./dsh-argo-wakeup": "./dsh-argo-wakeup/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
   "devDependencies": {
     "neo4j-driver": "^6.2.0"
   },
