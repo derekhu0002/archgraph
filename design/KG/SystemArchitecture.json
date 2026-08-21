@@ -2459,46 +2459,53 @@
       "description": "将 ArchGraph 发布为原生 DeepSeek Harness（dsh）插件：把目前由 install-argo.ps1 生成并写入 ~/.dsh/cordis.patch.yml 的两个 Cordis 插件（dsh-argo-workspace MCP 桥、dsh-argo-wakeup 唤醒门）封装为可 `dsh plugin add github:derekhu0002/archgraph` 安装的 bundle（package.json dsh.bundle + cordis.patch.yml + 入口模块），并给 GitHub 仓库 derekhu0002/archgraph 打上 dsh-plugin 标签使其出现在 github.com/topics/dsh-plugin。参考 deepseek-harness docs/user/develop/basic（index.md / publish.md）。",
       "testcases": [
         {
-          "name": "AT-2767-01-需求文档就绪",
+          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 requirements-ready）：断言文档含用户场景、GIVEN/WHEN/THEN、dsh.bundle、dsh-plugin。通过。",
+          "Input": "node --test tests/dsh-plugin-publish.test.js",
           "description": "GIVEN 产品经理已对发布为 dsh 插件做需求分析；WHEN 打开 docs/dsh-plugin-publish.md；THEN 文档包含用户场景与 GIVEN-WHEN-THEN 验收准则，并引用 dsh.bundle 与 dsh-plugin 主题。",
-          "type": "Acceptance Test",
-          "Input": "node --test tests/dsh-plugin-publish.test.js",
-          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 requirements-ready）：断言文档含用户场景、GIVEN/WHEN/THEN、dsh.bundle、dsh-plugin。通过。"
+          "name": "AT-2767-01-需求文档就绪",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-2767-02-bundle清单",
+          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 bundle-manifest）：断言 package.json 声明 dsh.bundle 且 patch=./cordis.patch.yml。通过。",
+          "Input": "node --test tests/dsh-plugin-publish.test.js",
           "description": "GIVEN 仓库已封装为可安装 dsh bundle；WHEN 读取 package.json 的 dsh 键；THEN 存在 dsh.bundle.patch 且指向 ./cordis.patch.yml。",
-          "type": "Acceptance Test",
-          "Input": "node --test tests/dsh-plugin-publish.test.js",
-          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 bundle-manifest）：断言 package.json 声明 dsh.bundle 且 patch=./cordis.patch.yml。通过。"
+          "name": "AT-2767-02-bundle清单",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-2767-03-行插入",
+          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 bundle-patch）：断言 cordis.patch.yml 含 argo-workspace、argo-wakeup 且不含 file://。通过。",
+          "Input": "node --test tests/dsh-plugin-publish.test.js",
           "description": "GIVEN bundle 贡献其配置层；WHEN 某 profile 列出该 bundle；THEN cordis.patch.yml 以包名插入 argo-workspace 与 argo-wakeup 两行（非 file://）。",
-          "type": "Acceptance Test",
-          "Input": "node --test tests/dsh-plugin-publish.test.js",
-          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 bundle-patch）：断言 cordis.patch.yml 含 argo-workspace、argo-wakeup 且不含 file://。通过。"
+          "name": "AT-2767-03-行插入",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-2767-04-入口模块",
+          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 bundle-entry）：断言两个入口模块存在且含 export function apply。通过。",
+          "Input": "node --test tests/dsh-plugin-publish.test.js",
           "description": "GIVEN bundle 随包发布插件模块；WHEN Node 按包名解析 patch 行；THEN dsh-argo-workspace/index.js 与 dsh-argo-wakeup/index.js 存在且导出 apply。",
-          "type": "Acceptance Test",
-          "Input": "node --test tests/dsh-plugin-publish.test.js",
-          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 bundle-entry）：断言两个入口模块存在且含 export function apply。通过。"
+          "name": "AT-2767-04-入口模块",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-2767-05-话题标签",
+          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 topic-tag）：断言 topics.names 含 dsh-plugin（gh 不可用时跳过）。通过。",
+          "Input": "node --test tests/dsh-plugin-publish.test.js",
           "description": "GIVEN 仓库为 public 且已打标签；WHEN 查询 gh api repos/derekhu0002/archgraph/topics；THEN names 含 dsh-plugin。",
-          "type": "Acceptance Test",
-          "Input": "node --test tests/dsh-plugin-publish.test.js",
-          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 topic-tag）：断言 topics.names 含 dsh-plugin（gh 不可用时跳过）。通过。"
+          "name": "AT-2767-05-话题标签",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-2767-06-无回归",
-          "description": "GIVEN 既有部署路径与全部验收测试；WHEN 运行 node --test tests/*.test.js；THEN 全部通过，argo-deploy / install-argo.ps1 的 DSH 部署逻辑不受影响。",
-          "type": "Acceptance Test",
+          "acceptanceCriteria": "执行 node --test \"tests/*.test.js\"：全部用例通过，无回归失败。通过。",
           "Input": "node --test \"tests/*.test.js\"",
-          "acceptanceCriteria": "执行 node --test \"tests/*.test.js\"：全部用例通过，无回归失败。通过。"
+          "description": "GIVEN 既有部署路径与全部验收测试；WHEN 运行 node --test tests/*.test.js；THEN 全部通过，argo-deploy / install-argo.ps1 的 DSH 部署逻辑不受影响。",
+          "name": "AT-2767-06-无回归",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "执行 node tests/dsh-plugin-code-review.test.js：断言 docs/dsh-plugin-code-review.md 存在、含总体结论与问题清单（编号/级别/位置/描述/修复建议）且含 R-1/R-2，图谱 2767 携带 AT-2767-07。通过。",
+          "Input": "node tests/dsh-plugin-code-review.test.js",
+          "description": "GIVEN Reviewer 已对 dsh-plugin bundle（commit 3f95448）完成架构与安全性检视；WHEN 执行 node tests/dsh-plugin-code-review.test.js；THEN 检视报告存在且含总体结论与问题清单（R-1..R-n）结构，图谱工作包 2767 携带 AT-2767-07。",
+          "name": "AT-2767-07-代码检视通过",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
