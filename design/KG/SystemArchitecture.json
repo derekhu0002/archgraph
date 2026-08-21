@@ -828,44 +828,49 @@
       "description": "以 ARGO harness 作为 AML 参考实现：MCP server 读写图谱、schema 校验、语义（Graph RAG）生命周期与 Neo4j 同步，作为厂商实现与消费者接入的样板。当前参考样例为本仓 KGlibrary（以 AML 建模的案例），暂存本仓，后续可沉淀为市场。",
       "attributes": [
         {
+          "description": "restore .github/skills/argo-init/SKILL.md (repo-level compatibility)",
           "name": "commit",
-          "value": "c8f2d74",
-          "description": "restore .github/skills/argo-init/SKILL.md (repo-level compatibility)"
+          "value": "c8f2d74"
         },
         {
+          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js",
           "name": "commit",
-          "value": "0e54ddd",
-          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
+          "value": "0e54ddd"
         },
         {
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "e9de7b3",
-          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json"
+          "value": "e9de7b3"
         },
         {
+          "description": ".argo/scripts/argo-paths.js; .argo/scripts/*.js; .argo/scripts/graph-rag/*; .argo/scripts/test-executors/default.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "ea734d2",
-          "description": ".argo/scripts/argo-paths.js; .argo/scripts/*.js; .argo/scripts/graph-rag/*; .argo/scripts/test-executors/default.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json"
+          "value": "ea734d2"
         },
         {
+          "description": "argo/scripts/argo-mcp-server.js",
           "name": "commit",
-          "value": "c315b5c",
-          "description": "argo/scripts/argo-mcp-server.js"
+          "value": "c315b5c"
         },
         {
+          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "fa857e7",
-          "description": "tests/aml-standard.test.js; design/KG/SystemArchitecture.json"
+          "value": "fa857e7"
         },
         {
+          "description": "argo-init skill moved to user-level (~/.copilot/skills/argo-init/SKILL.md); agent rules moved to user-level prompts (argo-copilot-instructions.instructions.md); removed .github/copilot-instructions.md and .github/skills/argo-init/SKILL.md",
           "name": "commit",
-          "value": "f4819fd",
-          "description": "argo-init skill moved to user-level (~/.copilot/skills/argo-init/SKILL.md); agent rules moved to user-level prompts (argo-copilot-instructions.instructions.md); removed .github/copilot-instructions.md and .github/skills/argo-init/SKILL.md"
+          "value": "f4819fd"
         },
         {
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "b39acb2",
-          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
+          "value": "b39acb2"
+        },
+        {
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/repair-subdiagram-views.js; tests/architecture-view-mutation.test.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "73687d5"
         },
         {
           "name": "deliveryStatus",
