@@ -1073,6 +1073,11 @@
           "description": "argo/rules/archgraph.instructions.md (clarify long-term memory as SUBVIEW hierarchy under Business Actor)"
         },
         {
+          "name": "commit",
+          "value": "f6fe5a4",
+          "description": "argo/rules/archgraph.instructions.md (move WakeupGuideline to top as STEP 0 gate); argo/plugins/argo-wakeup.js; install-argo.ps1 (deploy plugin + register opencode.json + Cursor global rule); package.json (argo/plugins in files); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "deliveryStatus",
           "value": "not_delivered"
         },
