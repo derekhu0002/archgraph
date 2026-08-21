@@ -878,6 +878,11 @@
           "value": "92c3752"
         },
         {
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; tests/architecture-element-mutation.test.js",
+          "name": "commit",
+          "value": "02df6fa"
+        },
+        {
           "name": "deliveryStatus",
           "value": "not_delivered"
         },
@@ -927,6 +932,13 @@
           "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）运行于图谱存在但父元素 subdiagram_views 与视图 parent_element_id 不一致的工作区；WHEN 执行 prepare-and-check 模式；THEN 自动回填父元素 subdiagram_views（直接写文件并留 .bak）；--check-only 模式只报告差异不改写；校验失败时跳过回填。",
           "Input": "运行 node --test tests/argo-subdiagram-repair.test.js",
           "name": "AT-1357-06-init回填subdiagram_views",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "执行 node --test tests/architecture-element-mutation.test.js：断言 addElement 反向挂载 subdiagram_views、updateElement 对 subdiagram_views 双向同步、removeElement 有子视图时拒绝删除、updateRelationship 改端点清旧端点、removeRelationship 清未使用端点（共享端点保留）。通过。",
+          "description": "GIVEN ARGO MCP 提供 add/update/remove element·relationship 写入口；WHEN 新增元素声明 subdiagram_views、更新元素 subdiagram_views、删除含子视图的元素、或改/删关系的端点；THEN 元素与视图的父子挂载双向一致，删除含子视图的元素被拒绝，关系端点从视图 included_elements 中同步清理（被其它关系共享的端点保留）。",
+          "Input": "运行 node --test tests/architecture-element-mutation.test.js",
+          "name": "AT-1357-07-元素关系写入同步与删除保护",
           "type": "Acceptance Test"
         }
       ]
