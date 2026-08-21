@@ -16,6 +16,8 @@ param(
     [switch]$SkipEnv,
     [switch]$SkipDeps,
     [switch]$SkipMcp,
+    [switch]$SkipDsh,
+    [string]$DshHome = "$env:USERPROFILE\.dsh",
     [string]$McpPath
 )
 
@@ -235,6 +237,245 @@ function Add-AgentsRule {
     }
 }
 
+# ---- DeepSeek Harness (dsh) conversion helpers ----
+# The ArchGraph repository keeps ONE source file per artifact (rule / skill /
+# mcp / plugin / agent). The targets below convert that single source into the
+# DeepSeek Harness shape at deploy time, exactly like Convert-AgentFile and
+# Convert-RuleFile do for Cursor / OpenCode.
+
+function Get-MarkdownBody {
+    # Strip a leading YAML frontmatter block (--- ... ---) from markdown text.
+    # DeepSeek Harness injects AGENTS.md-style instruction files verbatim, so
+    # the frontmatter must not reach the model prompt.
+    param([string]$Content)
+    $m = [regex]::Match($Content, '(?s)^---\s*\r?\n(.*?)\r?\n---\s*\r?\n(.*)$')
+    if (-not $m.Success) { return $Content }
+    return $m.Groups[2].Value
+}
+
+function Get-WakeupGuideline {
+    # Extract the <WakeupGuideline>...</WakeupGuideline> block from the rule
+    # text, so the DSH wakeup plugin is generated from the same source the
+    # Copilot / Cursor / OpenCode rules use.
+    param([string]$RuleText)
+    $m = [regex]::Match($RuleText, '(?s)<WakeupGuideline>(.*?)</WakeupGuideline>')
+    if (-not $m.Success) { return '' }
+    return $m.Groups[1].Value.Trim()
+}
+
+function Write-DshAgentRule {
+    # Merge the frontmatter-stripped ArchGraph rule (plus a DSH adapter note
+    # explaining the mcp__argo__ tool prefix) into ~/.dsh/AGENTS.md, replacing
+    # the previous ArchGraph block while preserving surrounding user content.
+    param(
+        [string]$DshHome,
+        [string]$RuleText
+    )
+    $adapterNote = @'
+# ArchGraph ARGO Workflow Rules (DeepSeek Harness edition)
+
+> Deployed by install-argo.ps1 from argo/rules/archgraph.instructions.md
+> (single source of truth; this file is a deployment artifact).
+> DeepSeek Harness injects ~/.dsh/AGENTS.md through dsh-agent-instructions as
+> user-global instructions; the file is injected verbatim, so the YAML
+> frontmatter of the source rule is stripped here.
+
+## DSH adapter note
+- The ARGO MCP server is registered under serverName "argo" through the
+  @deepseek-ai/dsh-mcp-client plugin; its tools are exposed to the model with
+  the mcp__argo__ prefix (e.g. mcp__argo__getSystemArchitecture). When a rule
+  below names a tool like getSystemArchitecture, call the mcp__argo__* form.
+- The argo-init skill is installed at ~/.dsh/skills/argo-init/SKILL.md and is
+  loadable through the harness skill tool.
+'@
+    $body = Get-MarkdownBody -Content $RuleText
+    $ruleContent = $adapterNote + "`n`n" + $body
+    $dest = Join-Path $DshHome 'AGENTS.md'
+    $marker = 'ArchGraph ARGO Workflow Rules'
+    New-Item -ItemType Directory -Force -Path $DshHome | Out-Null
+    if (Test-Path $dest) {
+        $existing = Get-Content $dest -Raw -Encoding UTF8
+        if ($existing -like "*$marker*") {
+            $endTag = '</ToolsGuideline>'
+            $markerIdx = $existing.IndexOf($marker)
+            if ($markerIdx -lt 0) { $markerIdx = 0 }
+            $startIdx = $existing.LastIndexOf('# ArchGraph', $markerIdx)
+            if ($startIdx -lt 0) { $startIdx = 0 }
+            $endIdx = $existing.IndexOf($endTag, $markerIdx)
+            $before = $existing.Substring(0, $startIdx).TrimEnd()
+            if ($endIdx -lt 0) {
+                $combined = $before
+                if ($combined.Length -gt 0) { $combined += "`n`n" }
+                $combined += $ruleContent
+            } else {
+                $after = $existing.Substring($endIdx + $endTag.Length)
+                $combined = $before
+                if ($combined.Length -gt 0) { $combined += "`n`n" }
+                $combined += $ruleContent
+                if ($after.Length -gt 0) { $combined += $after }
+            }
+            [System.IO.File]::WriteAllText($dest, $combined, (New-Object System.Text.UTF8Encoding $false))
+        } else {
+            $combined = $existing.TrimEnd() + "`n`n" + $ruleContent
+            [System.IO.File]::WriteAllText($dest, $combined, (New-Object System.Text.UTF8Encoding $false))
+        }
+    } else {
+        [System.IO.File]::WriteAllText($dest, $ruleContent, (New-Object System.Text.UTF8Encoding $false))
+    }
+    Write-Host "  DSH rule installed -> $dest"
+}
+
+function Write-DshManagedBlock {
+    # Text-level upsert of a marker-delimited block into a file (used for the
+    # managed rows in ~/.dsh/cordis.patch.yml): replaces the previous managed
+    # block and preserves surrounding content. No YAML dependency needed.
+    param(
+        [string]$Path,
+        [string]$Block,
+        [string]$MarkerStart,
+        [string]$MarkerEnd
+    )
+    New-Item -ItemType Directory -Force -Path (Split-Path $Path) | Out-Null
+    $existing = if (Test-Path $Path) { Get-Content $Path -Raw -Encoding UTF8 } else { '' }
+    $startIdx = $existing.IndexOf($MarkerStart)
+    $endIdx = if ($startIdx -ge 0) { $existing.IndexOf($MarkerEnd, $startIdx) } else { -1 }
+    if ($startIdx -ge 0 -and $endIdx -ge 0) {
+        $endIdx += $MarkerEnd.Length
+        $combined = $existing.Substring(0, $startIdx).TrimEnd()
+        if ($combined.Length -gt 0) { $combined += "`n`n" }
+        $combined += $Block
+        $after = $existing.Substring($endIdx).TrimStart()
+        if ($after.Length -gt 0) { $combined += "`n`n" + $after }
+        [System.IO.File]::WriteAllText($Path, $combined, (New-Object System.Text.UTF8Encoding $false))
+    } else {
+        $combined = $existing.TrimEnd()
+        if ($combined.Length -gt 0) { $combined += "`n`n" }
+        $combined += $Block + "`n"
+        [System.IO.File]::WriteAllText($Path, $combined, (New-Object System.Text.UTF8Encoding $false))
+    }
+}
+
+function New-DshWakeupPlugin {
+    # Generate the DSH wakeup-gate Cordis plugin under ~/.dsh/plugins from the
+    # <WakeupGuideline> block of the rule file. This is the DeepSeek Harness
+    # equivalent of the OpenCode hook plugin argo/plugins/argo-wakeup.js: it
+    # registers the gate as the first system-prompt section after the harness
+    # identity (order -100), before the deployment persona (order 0).
+    param(
+        [string]$DshHome,
+        [string]$RuleText
+    )
+    $gate = Get-WakeupGuideline -RuleText $RuleText
+    if (-not $gate) {
+        Write-Warning '  <WakeupGuideline> not found in the rule file; DSH wakeup plugin skipped.'
+        return $null
+    }
+    $dir = Join-Path (Join-Path $DshHome 'plugins') 'dsh-argo-wakeup'
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    $gateJson = $gate | ConvertTo-Json
+    $plugin = @"
+// dsh-argo-wakeup - generated by install-argo.ps1 from
+// argo/rules/archgraph.instructions.md (single source of truth: the rule file;
+// this file is a deployment artifact, do not edit by hand).
+// DeepSeek Harness equivalent of the OpenCode hook argo/plugins/argo-wakeup.js:
+// registers the unconditional wakeup gate as the first system-prompt section
+// after the harness identity, so every session identifies its Business Actor
+// through the argo MCP server before responding.
+export const name = 'dsh-argo-wakeup'
+export const inject = ['systemPrompt']
+const WAKEUP_GATE = $gateJson
+export function apply(ctx) {
+  ctx.effect(() => ctx.systemPrompt.section({
+    name: 'argo:wakeup',
+    order: -90,
+    text: WAKEUP_GATE,
+  }), 'argo:wakeup.section()')
+}
+"@
+    $indexPath = Join-Path $dir 'index.js'
+    [System.IO.File]::WriteAllText($indexPath, $plugin, (New-Object System.Text.UTF8Encoding $false))
+    Write-Host "  DSH wakeup plugin generated -> $indexPath"
+    return $indexPath
+}
+
+function New-DshAgentPresets {
+    # Generate DSH agent presets under ~/.dsh/.agent-presets/<id>/ from
+    # argo/agents/*.agent.md (the same single source the Copilot / Cursor /
+    # OpenCode agent files are converted from). persona.md is a
+    # frontmatter-stripped copy of the agent body; persona.js is a fixed
+    # self-contained row that mounts it as the session persona
+    # (deployment:persona section, order 0).
+    param(
+        [string]$DshHome,
+        [string]$AgentsSrc
+    )
+    $files = @(Get-ChildItem -Path (Join-Path $AgentsSrc '*.agent.md') -ErrorAction SilentlyContinue)
+    if ($files.Count -eq 0) {
+        Write-Warning '  no *.agent.md files found; DSH agent presets skipped.'
+        return
+    }
+    foreach ($file in $files) {
+        $content = Get-Content $file.FullName -Raw -Encoding UTF8
+        $m = [regex]::Match($content, '(?s)^---\s*\r?\n(.*?)\r?\n---\s*\r?\n(.*)$')
+        $name = ''
+        $desc = ''
+        $body = $content
+        if ($m.Success) {
+            $front = $m.Groups[1].Value
+            $body = $m.Groups[2].Value.TrimStart("`r", "`n")
+            $nm = [regex]::Match($front, '(?m)^name:\s*(.*)$')
+            if ($nm.Success) { $name = $nm.Groups[1].Value.Trim().Trim('"').Trim("'") }
+            $dm = [regex]::Match($front, '(?m)^description:\s*(.*)$')
+            if ($dm.Success) { $desc = $dm.Groups[1].Value.Trim().Trim('"').Trim("'") }
+        }
+        $id = $file.BaseName -replace '\.agent$', ''
+        if (-not $name) { $name = $id }
+        $dir = Join-Path (Join-Path $DshHome '.agent-presets') $id
+        New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+        # preset.yml: display metadata (name + description).
+        $presetYml = "name: $name`n"
+        if ($desc) { $presetYml += "description: `"$($desc -replace '"', '\"')`"`n" }
+        [System.IO.File]::WriteAllText((Join-Path $dir 'preset.yml'), $presetYml, (New-Object System.Text.UTF8Encoding $false))
+
+        # persona.md: the agent body verbatim (single source: the .agent.md file).
+        [System.IO.File]::WriteAllText((Join-Path $dir 'persona.md'), $body, (New-Object System.Text.UTF8Encoding $false))
+
+        # agent.cordis.yml: mount the local persona row.
+        $cordisYml = @"
+# ArchGraph agent preset "$name" - generated by install-argo.ps1 from
+# argo/agents/$($file.Name) (single source of truth; this file is a deployment
+# artifact, do not edit by hand). The persona is the frontmatter-stripped agent
+# body (persona.md), mounted as the session's deployment:persona section.
+- id: persona
+  name: './persona.js'
+"@
+        [System.IO.File]::WriteAllText((Join-Path $dir 'agent.cordis.yml'), $cordisYml, (New-Object System.Text.UTF8Encoding $false))
+
+        # persona.js: fixed row implementation.
+        $personaJs = @'
+// persona row for an ArchGraph agent preset (generated by install-argo.ps1).
+// Loads persona.md next to this file and registers it as the
+// deployment:persona system-prompt section (order 0), shadowing the
+// deployment persona for the session that mounts this preset.
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+export const name = 'persona'
+export const inject = ['systemPrompt']
+export function apply(ctx) {
+  const text = readFileSync(fileURLToPath(new URL('./persona.md', import.meta.url)), 'utf8')
+  ctx.effect(() => ctx.systemPrompt.section({
+    name: 'deployment:persona',
+    order: 0,
+    text,
+  }), 'persona.section()')
+}
+'@
+        [System.IO.File]::WriteAllText((Join-Path $dir 'persona.js'), $personaJs, (New-Object System.Text.UTF8Encoding $false))
+        Write-Host "  DSH agent preset generated -> $dir"
+    }
+}
+
 Write-Host '==> Deploying Argo toolchain'
 
 $schemaSrc = Join-Path $argoDir 'schema'
@@ -425,6 +666,45 @@ if (Test-Path $wakeupPluginPath) {
     Write-Host '==> Registering argo-wakeup plugin in OpenCode'
     Register-OpenCodePlugin -ConfigPath $OpenCodeConfigPath -PluginFilePath $wakeupPluginPath
     Write-Host "argo-wakeup plugin registered -> $OpenCodeConfigPath"
+}
+
+if ($SkipDsh) {
+    Write-Host 'Skipped DeepSeek Harness integration (-SkipDsh).'
+} else {
+    Write-Host '==> Deploying DeepSeek Harness integration (rule / skill / mcp / plugin / agent)'
+
+    $ruleSrcContent = Get-Content $ruleSrc -Raw -Encoding UTF8
+
+    # 1. rule -> ~/.dsh/AGENTS.md (frontmatter stripped; DSH injects verbatim)
+    Write-DshAgentRule -DshHome $DshHome -RuleText $ruleSrcContent
+
+    # 2. skill -> ~/.dsh/skills/argo-init (frontmatter is already DSH-compatible:
+    #    name / description / disable-model-invocation are parsed by dsh-skill-filesystem)
+    $dshSkillDest = Join-Path (Join-Path $DshHome 'skills') 'argo-init'
+    Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $dshSkillDest
+    Write-Host "  argo-init skill installed -> $dshSkillDest"
+
+    # 3. plugin -> ~/.dsh/plugins/dsh-argo-wakeup/index.js generated from the
+    #    rule's <WakeupGuideline> block (single source: the rule file)
+    $wakeupDshPath = New-DshWakeupPlugin -DshHome $DshHome -RuleText $ruleSrcContent
+
+    # 4. mcp + plugin rows -> ~/.dsh/cordis.patch.yml (marker-delimited managed block)
+    $argoServer = (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js').Replace('\', '/')
+    $rows = "  - id: mcp-argo`n    name: '@deepseek-ai/dsh-mcp-client'`n    config:`n      serverName: argo`n      transport: stdio`n      command: node`n      args:`n        - $argoServer`n"
+    if ($wakeupDshPath) {
+        $pluginUrl = 'file:///' + (($wakeupDshPath -replace '\\', '/').TrimStart('/'))
+        $rows += "  - id: argo-wakeup`n    name: '$pluginUrl'`n"
+    }
+    $block = "# BEGIN ArchGraph ARGO deployment (managed by install-argo.ps1)`n- insert:`n" + $rows + "# END ArchGraph ARGO deployment"
+    $patchPath = Join-Path $DshHome 'cordis.patch.yml'
+    Write-DshManagedBlock -Path $patchPath -Block $block -MarkerStart '# BEGIN ArchGraph ARGO deployment' -MarkerEnd '# END ArchGraph ARGO deployment'
+    Write-Host "  DSH MCP + wakeup rows written -> $patchPath"
+
+    # 5. agents -> ~/.dsh/.agent-presets/<id>/ generated from argo/agents/*.agent.md
+    New-DshAgentPresets -DshHome $DshHome -AgentsSrc (Join-Path $argoDir 'agents')
+
+    Write-Host '  Restart `dsh web` to activate the MCP server and the wakeup plugin;'
+    Write-Host '  new sessions pick up the global rule and the argo-init skill automatically.'
 }
 
 Write-Host ''

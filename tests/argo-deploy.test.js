@@ -43,6 +43,7 @@ function buildInstallArgs(opts) {
     '-CursorAgentsRoot', opts.cursorAgentsRoot,
     '-OpenCodeAgentsRoot', opts.openCodeAgentsRoot,
     '-PluginsRoot', opts.pluginsRoot,
+    '-DshHome', opts.dshHome,
     '-SkipDeps',
     ...(opts.skipEnv ? ['-SkipEnv'] : []),
   ];
@@ -64,6 +65,7 @@ function hostPaths(tmp) {
     cursorRulesRoot: path.join(tmp, '.cursor', 'rules'),
     openCodeAgentsRoot: path.join(tmp, '.config', 'opencode', 'agents'),
     pluginsRoot: path.join(tmp, '.argo', 'plugins'),
+    dshHome: path.join(tmp, '.dsh'),
   };
 }
 
@@ -284,6 +286,83 @@ test('install-argo.ps1 keeps existing .env values and skips prompts', () => {
     for (const key of ENV_KEYS) {
       assert.match(env, new RegExp(`^${key}=existing-${key}$`, 'm'), `${key} must keep its existing value`);
     }
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('install-argo.ps1 deploys DeepSeek Harness integration from the single-source artifacts', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-dsh-'));
+  const paths = hostPaths(tmp);
+  const { dshHome } = paths;
+  try {
+    const result = runInstall({ ...paths, skipEnv: true });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+
+    // 1) rule -> ~/.dsh/AGENTS.md: frontmatter stripped (DSH injects verbatim),
+    //    carries the DSH adapter note, the wakeup gate, and the core rules.
+    const agents = fs.readFileSync(path.join(dshHome, 'AGENTS.md'), 'utf8');
+    assert.ok(!agents.startsWith('---'), 'DSH AGENTS.md must not start with YAML frontmatter');
+    assert.match(agents, /DeepSeek Harness edition/, 'must identify as the DSH edition');
+    assert.match(agents, /mcp__argo__getSystemArchitecture/, 'must document the mcp__argo__ tool prefix');
+    assert.match(agents, /<WakeupGuideline>/, 'must carry the wakeup gate');
+    assert.match(agents, /<CoreRules>/, 'must carry the core rules');
+    assert.match(agents, /<ToolsGuideline>/, 'must carry the tools guideline');
+
+    // 2) skill -> ~/.dsh/skills/argo-init (same single source as the others).
+    const skill = fs.readFileSync(path.join(dshHome, 'skills', 'argo-init', 'SKILL.md'), 'utf8');
+    assert.match(skill, /name: argo-init/, 'skill must keep its DSH-compatible frontmatter');
+
+    // 3+4) mcp + wakeup rows -> ~/.dsh/cordis.patch.yml (managed block).
+    const patch = fs.readFileSync(path.join(dshHome, 'cordis.patch.yml'), 'utf8');
+    assert.match(patch, /BEGIN ArchGraph ARGO deployment/, 'managed block marker must be present');
+    assert.match(patch, /id: mcp-argo/, 'must insert the mcp-argo row');
+    assert.match(patch, /@deepseek-ai\/dsh-mcp-client/, 'must use the DSH MCP bridge plugin');
+    assert.match(patch, /serverName: argo/, 'must use the argo server namespace');
+    assert.match(patch, /transport: stdio/, 'must use stdio transport');
+    assert.match(patch, /argo-mcp-server\.js/, 'must reference the deployed argo MCP server');
+    assert.match(patch, /id: argo-wakeup/, 'must insert the argo-wakeup row');
+    assert.match(patch, /file:\/\/\//, 'must reference the generated plugin via file: URL');
+    assert.match(patch, /END ArchGraph ARGO deployment/, 'managed block end marker must be present');
+
+    // 4b) wakeup plugin generated from the rule's <WakeupGuideline> block.
+    const wakeup = fs.readFileSync(
+      path.join(dshHome, 'plugins', 'dsh-argo-wakeup', 'index.js'),
+      'utf8',
+    );
+    assert.match(wakeup, /export const name = 'dsh-argo-wakeup'/, 'plugin must export its name');
+    assert.match(wakeup, /export const inject = \['systemPrompt'\]/, 'plugin must inject the prompt registry');
+    assert.match(wakeup, /order: -90/, 'gate section must sit right after the harness identity');
+    assert.match(wakeup, /WAKEUP_GATE|STARTUP GATE/, 'plugin must carry the gate text from the rule');
+
+    // 5) agents -> ~/.dsh/.agent-presets/<id>/ generated from argo/agents/*.agent.md.
+    const preset = path.join(dshHome, '.agent-presets', 'wechat-publisher');
+    assert.ok(fs.existsSync(path.join(preset, 'agent.cordis.yml')), 'agent.cordis.yml must exist');
+    assert.ok(fs.existsSync(path.join(preset, 'persona.js')), 'persona.js must exist');
+    assert.ok(fs.existsSync(path.join(preset, 'preset.yml')), 'preset.yml must exist');
+    const personaMd = fs.readFileSync(path.join(preset, 'persona.md'), 'utf8');
+    assert.match(personaMd, /公众号发布员/, 'persona must carry the publisher role from the agent file');
+    assert.match(personaMd, /wechat:draft/, 'persona must keep the draft-only constraint');
+    const cordis = fs.readFileSync(path.join(preset, 'agent.cordis.yml'), 'utf8');
+    assert.match(cordis, /\.\/persona\.js/, 'preset must mount the local persona row');
+    const presetMeta = fs.readFileSync(path.join(preset, 'preset.yml'), 'utf8');
+    assert.match(presetMeta, /name: 公众号发布员/, 'preset metadata must name the publisher');
+
+    // 6) idempotency: a second run must not duplicate the managed block.
+    const second = runInstall({ ...paths, skipEnv: true });
+    assert.equal(second.status, 0, `second install exited with ${second.status}: ${second.stderr}`);
+    const patch2 = fs.readFileSync(path.join(dshHome, 'cordis.patch.yml'), 'utf8');
+    assert.equal(
+      (patch2.match(/BEGIN ArchGraph ARGO deployment/g) || []).length,
+      1,
+      'managed block must not be duplicated across re-installs',
+    );
+    const agents2 = fs.readFileSync(path.join(dshHome, 'AGENTS.md'), 'utf8');
+    assert.equal(
+      (agents2.match(/DeepSeek Harness edition/g) || []).length,
+      1,
+      'DSH rule block must not be duplicated across re-installs',
+    );
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
