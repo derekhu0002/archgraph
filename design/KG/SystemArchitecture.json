@@ -2450,6 +2450,57 @@
           "description": "design/KG/SystemArchitecture.json（John 长期记忆子视图 jlm-001 及会话记录元素）"
         }
       ]
+    },
+    {
+      "id": "2767",
+      "name": "发布 ArchGraph 为 DSH 插件 (dsh-plugin)",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "将 ArchGraph 发布为原生 DeepSeek Harness（dsh）插件：把目前由 install-argo.ps1 生成并写入 ~/.dsh/cordis.patch.yml 的两个 Cordis 插件（dsh-argo-workspace MCP 桥、dsh-argo-wakeup 唤醒门）封装为可 `dsh plugin add github:derekhu0002/archgraph` 安装的 bundle（package.json dsh.bundle + cordis.patch.yml + 入口模块），并给 GitHub 仓库 derekhu0002/archgraph 打上 dsh-plugin 标签使其出现在 github.com/topics/dsh-plugin。参考 deepseek-harness docs/user/develop/basic（index.md / publish.md）。",
+      "testcases": [
+        {
+          "name": "AT-2767-01-需求文档就绪",
+          "description": "GIVEN 产品经理已对发布为 dsh 插件做需求分析；WHEN 打开 docs/dsh-plugin-publish.md；THEN 文档包含用户场景与 GIVEN-WHEN-THEN 验收准则，并引用 dsh.bundle 与 dsh-plugin 主题。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/dsh-plugin-publish.test.js",
+          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 requirements-ready）：断言文档含用户场景、GIVEN/WHEN/THEN、dsh.bundle、dsh-plugin。通过。"
+        },
+        {
+          "name": "AT-2767-02-bundle清单",
+          "description": "GIVEN 仓库已封装为可安装 dsh bundle；WHEN 读取 package.json 的 dsh 键；THEN 存在 dsh.bundle.patch 且指向 ./cordis.patch.yml。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/dsh-plugin-publish.test.js",
+          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 bundle-manifest）：断言 package.json 声明 dsh.bundle 且 patch=./cordis.patch.yml。通过。"
+        },
+        {
+          "name": "AT-2767-03-行插入",
+          "description": "GIVEN bundle 贡献其配置层；WHEN 某 profile 列出该 bundle；THEN cordis.patch.yml 以包名插入 argo-workspace 与 argo-wakeup 两行（非 file://）。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/dsh-plugin-publish.test.js",
+          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 bundle-patch）：断言 cordis.patch.yml 含 argo-workspace、argo-wakeup 且不含 file://。通过。"
+        },
+        {
+          "name": "AT-2767-04-入口模块",
+          "description": "GIVEN bundle 随包发布插件模块；WHEN Node 按包名解析 patch 行；THEN dsh-argo-workspace/index.js 与 dsh-argo-wakeup/index.js 存在且导出 apply。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/dsh-plugin-publish.test.js",
+          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 bundle-entry）：断言两个入口模块存在且含 export function apply。通过。"
+        },
+        {
+          "name": "AT-2767-05-话题标签",
+          "description": "GIVEN 仓库为 public 且已打标签；WHEN 查询 gh api repos/derekhu0002/archgraph/topics；THEN names 含 dsh-plugin。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/dsh-plugin-publish.test.js",
+          "acceptanceCriteria": "执行 node --test tests/dsh-plugin-publish.test.js（用例 topic-tag）：断言 topics.names 含 dsh-plugin（gh 不可用时跳过）。通过。"
+        },
+        {
+          "name": "AT-2767-06-无回归",
+          "description": "GIVEN 既有部署路径与全部验收测试；WHEN 运行 node --test tests/*.test.js；THEN 全部通过，argo-deploy / install-argo.ps1 的 DSH 部署逻辑不受影响。",
+          "type": "Acceptance Test",
+          "Input": "node --test \"tests/*.test.js\"",
+          "acceptanceCriteria": "执行 node --test \"tests/*.test.js\"：全部用例通过，无回归失败。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -3663,6 +3714,16 @@
         "john-mem-001"
       ],
       "included_relationships": []
+    },
+    {
+      "view_id": "434",
+      "view_name": "DSH Plugin Publishing",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "description": "把 ArchGraph 发布为原生 DeepSeek Harness 插件（dsh.bundle）并打 dsh-plugin 标签的发布类工作包。",
+      "included_elements": [
+        "2767"
+      ]
     }
   ]
 }
