@@ -964,8 +964,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "a948515",
-          "description": "argo/scripts/argo-paths.js (resolveCallWorkspaceRoot honors per-call workspaceRoot unconditionally, drop ARGO_WORKSPACE_ROOTS allowlist); argo/scripts/argo-mcp-server.js; argo/scripts/validator-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; install-argo.ps1; tests/argo-deploy.test.js; tests/argo-global-install.test.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json"
+          "value": "59e91d7",
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; install-argo.ps1 (bridge session.header?.cwd); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
@@ -3626,7 +3626,7 @@
       "view_name": "Reviewer工作记录"
     },
     {
-      "description": "Developer（Business Actor Xiaoming/2735）的长期记忆子视图。切片1（commit 17dc0f4）：修复 DeepSeek Harness 集成 bug——install-argo.ps1 生成的 dsh-argo-workspace 桥接插件 tools.register 缺少 output.render 导致 dsh 启动失败，为 output 增加 render 并同步修正 tests/argo-deploy.test.js。切片2（commit a948515）：去掉 ARGO MCP 服务端 resolveCallWorkspaceRoot 的 ARGO_WORKSPACE_ROOTS allowlist 判断，per-call workspaceRoot 无条件生效——解决 ARGO MCP 默认以 deepseek-harness 为工作区、校验错图谱（本仓库图谱被误指向）的问题；同步修改三个 MCP server 的工具描述/注释与 install-argo.ps1；同步全局部署 ~/.argo/scripts（4 个脚本逐字节一致）；验收：argo-deploy/argo-global-install/argo-workspace-bootstrap + ea-web-service-impl 隔离运行全绿（wechat-publisher-agent-file 为既有失败，与本次无关）；重启 dsh web 后 MCP 正确解析 D:\\Projects\\archgraph，commit 已登记到元素 1361。",
+      "description": "Developer（Business Actor Xiaoming/2735）的长期记忆子视图。切片1（commit 17dc0f4）：修复 dsh-argo-workspace 桥 tools.register 缺 output.render。切片2（commit a948515）：去掉 resolveCallWorkspaceRoot 的 ARGO_WORKSPACE_ROOTS allowlist，per-call workspaceRoot 无条件生效。切片3（commit 59e91d7）：审计发现并修复「所有 MCP 工具解析到错误工作区」——根因是桥插件读 exec.agent.session.requestHeader().cwd，而 requestHeader() 返回请求级 EpochHeader（config/system/tools，无 cwd 字段），注入永远为 undefined，所有工具回退到 server 启动目录 deepseek-harness。修复：桥改读 session.header?.cwd（SessionHeader 持久化 cwd）；服务端把已解析 workspaceRoot 贯穿语义 journey/embedding lifecycle/PlantUML diff/Neo4j 库名推导等 6 处无参 resolveWorkspaceRoot()；重启 dsh web 后无参调用全部正确解析 D:\\Projects\\archgraph（读/写/validator 20 工具全部验证通过）。验收：argo-deploy/argo-global-install/argo-workspace-bootstrap/ea-web-service-impl 35/35 通过。",
       "included_elements": [
         "1361"
       ],
