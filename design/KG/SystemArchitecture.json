@@ -2715,6 +2715,11 @@
           "description": "argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js",
           "name": "commit",
           "value": "3b53691"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "5a9a371"
         }
       ]
     },
