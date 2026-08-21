@@ -2513,6 +2513,11 @@
           "value": "342cd54"
         },
         {
+          "description": "package.json; cordis.patch.yml; dsh-argo-workspace/index.js; dsh-argo-workspace/package.json; dsh-argo-wakeup/index.js; dsh-argo-wakeup/package.json",
+          "name": "commit",
+          "value": "3f95448"
+        },
+        {
           "name": "deliveryStatus",
           "value": "not_delivered"
         },
