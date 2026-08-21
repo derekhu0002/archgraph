@@ -162,6 +162,8 @@ export async function apply(ctx, config) {
 - **风险与缓解**：
   1. **单一事实源漂移**：入口模块现在是 `install-argo.ps1` 内联生成；引入仓库根静态副本后存在两份内容漂移风险。缓解：仓库根副本为**新的单一事实源**，后续（可选、非本阶段）让 `install-argo.ps1` 直接拷贝这两个文件替代内联生成，消除漂移；本阶段不改既有路径即不引入回归。
   2. **运行时依赖 `neo4j-driver`**：`argo/scripts` 的语义检索路径（graph-rag）懒加载 `require('neo4j-driver')`；该依赖现仅列在根 `devDependencies`（与 `argo/package.json` 的 `dependencies`），`dsh plugin add` 只装根 `dependencies` 不会装它。缓解：实现期验证「语义检索在缺 `neo4j-driver` 时是否优雅降级到文件读」；若否，把 `neo4j-driver` 从 `devDependencies` 提升到根 `dependencies`（零风险、幂等）。基础工具（`getSystemArchitecture` 非语义、`getIntentElementContext`、`getArchitectureViewContext`、`updateArchitectureElement` 等）不依赖 neo4j，不受影响。
+
+> **已处置（Reviewer R-1，Major）**：Reviewer 确认 `require('neo4j-driver')` 在两处语义检索路径（`argo/scripts/systemarchitecture-mcp-server.js:2751`、`argo/scripts/graph-rag/defaultSemanticRetrieval.js:239`）无 try/catch 保护，`dsh plugin add` 安装用户配置 Neo4j 后会抛 `MODULE_NOT_FOUND`（Developer 先前「优雅降级」的判断只覆盖「未配置凭证」分支，不覆盖「已配置但驱动未安装」分支）。已按本 AD-e 既定方案把 `neo4j-driver` 从 `devDependencies` 提升到根 `dependencies`。
 - **被否方案**：本阶段即重写 `install-argo.ps1` 让它拷贝仓库根模块（扩大变更面、引入回归风险，延后到后续重构）。
 
 ## 3. 与验收测试对应关系
