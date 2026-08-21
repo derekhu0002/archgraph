@@ -2437,7 +2437,14 @@
       "name": "SessionRecord-GraphValidation",
       "type": "Business Object",
       "parent": "1966",
-      "description": "会话记录（2025-06-27）：目标——使用 ARGO MCP 验证意图图谱并返回 workspaceRoot；结果——validateSystemArchitecture 通过（exit 0，stdout: SystemArchitecture validation passed for design/KG/SystemArchitecture.json），workspaceRoot = D:\\Projects\\archgraph，无任何图谱/仓库改动。可复用经验：getSystemArchitecture 语义查询 subject=Business Actor 时可能返回 Skill 而非 Actor 列表，需结合 getIntentElementContext 核对角色职责来确认 Agent 身份。"
+      "description": "会话记录（2025-06-27）：目标——使用 ARGO MCP 验证意图图谱并返回 workspaceRoot；结果——validateSystemArchitecture 通过（exit 0，stdout: SystemArchitecture validation passed for design/KG/SystemArchitecture.json），workspaceRoot = D:\\Projects\\archgraph，无任何图谱/仓库改动。可复用经验：getSystemArchitecture 语义查询 subject=Business Actor 时可能返回 Skill 而非 Actor 列表，需结合 getIntentElementContext 核对角色职责来确认 Agent 身份。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "0cc5775",
+          "description": "design/KG/SystemArchitecture.json（John 长期记忆子视图 jlm-001 及会话记录元素）"
+        }
+      ]
     }
   ],
   "relationships": [
