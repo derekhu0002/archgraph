@@ -3699,9 +3699,10 @@
       "view_name": "产品经理工作记录",
       "parent_element_id": "2747",
       "parent_element_name": "xiaoniu",
-      "description": "产品经理 xiaoniu 的长期记忆子视图：EA 知识图谱导入导出本地 Web 服务的需求分析。切片1（commit dbb5a64）：初始需求（本地 Web 服务导入/导出、零 EA 依赖、格式/大小校验）。切片2（commit b12165b）：吸收功能标注 TODO，扩展为多项目管理 + 项目选择 + 搜索（语义检索 getSystemArchitecture / 上下文检索 getIntentElementContext）+ 图形化查看（视图列表→展开→自动布局→拖动）+ 编辑（新增视图/元素、编辑元素属性、删除元素、编辑关系属性、删除关系）+ 撤销/重做 + 导入导出，写图统一走 ARGO MCP 与 Agent 一致；Work Package 2758 testcases 增至 12 条（AT-2758-01..12）。",
+      "description": "产品经理 xiaoniu 的长期记忆子视图：EA 知识图谱导入导出本地 Web 服务的需求分析。切片1（commit dbb5a64）：初始需求（本地 Web 服务导入/导出、零 EA 依赖、格式/大小校验）。切片2（commit b12165b）：吸收功能标注 TODO，扩展为多项目管理 + 项目选择 + 搜索（语义检索 getSystemArchitecture / 上下文检索 getIntentElementContext）+ 图形化查看（视图列表→展开→自动布局→拖动）+ 编辑 + 撤销/重做 + 导入导出，写图统一走 ARGO MCP；Work Package 2758 testcases 增至 12 条。切片3（dsh 插件发布，WP 2767，status COMPLETED）：把 ArchGraph 发布为原生 DeepSeek Harness 插件并打 dsh-plugin 标签。流程：需求（docs/dsh-plugin-publish.md + tests/dsh-plugin-publish.test.js，AT-2767-01..06）→ 系统设计师设计（docs/dsh-plugin-design.md，AD-a..e：单包 bundle、serverPath 用 import.meta.url 相对定位、纯 JS 无 prepare、install-argo.ps1 无回归）→ Developer 实现（package.json dsh.bundle + exports + files、根 cordis.patch.yml 两行包名、dsh-argo-workspace/dsh-argo-wakeup 入口）→ Reviewer 检视（docs/dsh-plugin-code-review.md，有条件通过 R-1..R-7）→ R-1 处置（neo4j-driver 提升到根 dependencies，commit cf72b18）→ gh --add-topic dsh-plugin 成功（topics=[dsh-plugin]）。验收：publish 5/5、design 9/9、review 3/3 全绿，图谱校验通过。可复用经验：① updateArchitectureElement 的 attributes patch 是「整体替换」非合并，登记多个 commit 必须传全量数组（曾误删 4 条历史 commit 后手工恢复）；② 本沙箱 node --test 因子进程 piped stdio EPERM 不可用，用 node <file> 进程内跑测试；③ 子代理在本环境多次卡在工具调用，委托时需禁止 Get-ChildItem -Recurse 扫大目录 / node --test / dsh CLI。待办：R-2..R-7 Minor 未处置；README 补 dsh plugin add 说明（R-6 可选）。",
       "included_elements": [
-        "2758"
+        "2758",
+        "2767"
       ],
       "included_relationships": []
     },
