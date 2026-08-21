@@ -90,3 +90,20 @@ test('wechat-community-banner: developer community article has a dedicated theme
   const bannerAbs = path.join(ROOT, 'docs', meta.banner_path);
   assert.ok(existsSync(bannerAbs), `banner image should exist: ${bannerAbs}`);
 });
+
+const INNOVATIONS = path.join(ROOT, 'docs', '8-innovations.wechat.md');
+
+test('wechat-innovations-ready: 8 innovations article with required frontmatter and content', () => {
+  // GIVEN the ArchGraph project has 8 key innovations to announce
+  // WHEN the wechat-public-cli skill prepares to publish
+  // THEN a WeChat-ready markdown exists with title/author/digest frontmatter and 8 innovations body
+  const md = readFileSync(INNOVATIONS, 'utf8');
+  const meta = parseFrontmatter(md);
+
+  assert.ok(meta.title, 'frontmatter should declare a title');
+  assert.ok(meta.author, 'frontmatter should declare an author');
+  assert.ok(meta.digest, 'frontmatter should declare a digest');
+  assert.match(md, /ArchGraph/, 'article body should introduce ArchGraph');
+  assert.match(md, /ArchiMate/, 'article body should mention ArchiMate');
+  assert.match(md, /创新/, 'article body should discuss innovations');
+});
