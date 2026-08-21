@@ -31,6 +31,7 @@ Your cognitive architecture is composed of ArchiMate 3.2 elements and their exte
 <ExplorationGuideline>
 1. When exploring context, explore in small steps: keep each query shallow, and after each query decide the next exploration direction based on the result.
 2. When you receive multiple similar or conflicting pieces of information, prefer the context closest to your current task and avoid wasting time on irrelevant context.
+3. For structural/type-based graph lookups (list elements of a type, traverse relationships, count, aggregate), use `queryNeo4jGraph` per `<GraphQueryGuideline>` instead of reading the JSON file directly.
 </ExplorationGuideline>
 
 <IntentArchitectureFirst>
@@ -95,8 +96,19 @@ You MUST read/write the intent architecture through the tools provided by the AR
 13. updateArchitectureView: update the attributes or relationships of an existing architecture view.
 14. removeArchitectureView: remove an existing architecture view.
 15. validateSystemArchitecture: validate the integrity and consistency of the intent architecture, ensuring elements and relationships meet expectations.
+16. queryNeo4jGraph: run a read-only Cypher query against the Neo4j structural projection of the intent graph, or request the projection schema with {schema: true}. Use for structural/type-based graph queries (see <GraphQueryGuideline>).
 
 <Attention>
 you MUST make sure the knowledge graph the ARGO MCP server is handling is actually the one in this repository (design/KG/SystemArchitecture.json) and not some other knowledge graph; otherwise, you MUST stop and report the issue to your human partner before doing anything else.
 </Attention>
 </ToolsGuideline>
+
+<GraphQueryGuideline>
+For structural/type-based graph lookups, use the read-only Neo4j Cypher interface `queryNeo4jGraph` instead of reading the canonical JSON file directly. It never mutates the graph; all writes still go through the mutation tools.
+1. Ask for the projection schema first: call `queryNeo4jGraph` with {schema: true} to learn node labels (ArchitectureGraph, Element, ArchitectureRelationship, View), relationship types (OWNS_ELEMENT, OWNS_RELATIONSHIP, OWNS_VIEW, RELATIONSHIP_SOURCE, RELATIONSHIP_TARGET, ARCHIMATE_RELATES, VIEW_OF, INCLUDES_ELEMENT, INCLUDES_RELATIONSHIP, HAS_SUBDIAGRAM), property keys, and the legal ArchiMate element/relationship type enums (e.g. 'Business Actor', 'Assignment').
+2. Construct a read-only Cypher statement and scope every pattern to the current graph with the server-injected `$graphKey` parameter (the value is filled by the server; the agent only writes the placeholder):
+   MATCH (e:Element {graphKey: $graphKey, type: 'Business Actor'}) RETURN e.id, e.name ORDER BY e.name
+3. Never submit write clauses (CREATE, MERGE, DELETE, SET, REMOVE, DROP, LOAD CSV, FOREACH, IN TRANSACTIONS); the interface rejects them to protect the canonical JSON single source of truth.
+4. Use it for structural queries: list elements of a type, traverse ARCHIMATE_RELATES edges, count and aggregate. For semantic/context reading (subgraph context, dependency traversal, view membership), keep using getSystemArchitecture (semantic query), getIntentElementContext, and getArchitectureViewContext.
+5. The query is read-only; never attempt to mutate the graph through Cypher.
+</GraphQueryGuideline>

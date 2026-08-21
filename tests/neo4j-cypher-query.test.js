@@ -1,5 +1,7 @@
 'use strict';
 
+const fs = require('node:fs');
+const path = require('node:path');
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
@@ -158,4 +160,19 @@ test('queryNeo4jGraph is registered in the tool list', () => {
   assert.ok(tool);
   assert.ok(tool.inputSchema.properties.cypher);
   assert.ok(tool.inputSchema.properties.schema);
+});
+
+test('archgraph-rules-document-queryNeo4jGraph', () => {
+  // GIVEN the global ARGO workflow rules file
+  const rules = fs.readFileSync(
+    path.join(__dirname, '..', 'argo', 'rules', 'archgraph.instructions.md'),
+    'utf8',
+  );
+  // THEN it documents the queryNeo4jGraph interface and its read-only contract
+  assert.match(rules, /queryNeo4jGraph/);
+  assert.match(rules, /GraphQueryGuideline/);
+  assert.match(rules, /\$graphKey/);
+  assert.match(rules, /CREATE/);
+  assert.match(rules, /MERGE/);
+  assert.match(rules, /DELETE/);
 });
