@@ -1041,6 +1041,7 @@ function applyMutations(document, mutations) {
       const existingElement = findById(nextDocument.elements, mutation.element.id);
       if (!existingElement) {
         nextDocument.elements.push(clone(mutation.element));
+        syncViewsToElementSubdiagramViews(nextDocument, findById(nextDocument.elements, mutation.element.id));
       }
       for (const view of scopedViews) {
         view.included_elements = addUnique(view.included_elements || [], [mutation.element.id]);
@@ -1065,7 +1066,12 @@ function applyMutations(document, mutations) {
         throw new Error(`Element '${mutation.id}' does not exist`);
       }
       requirePatchDoesNotChangeElementIdentityOrType(mutation.id, mutation.patch);
+      const patchesSubdiagramViews = Object.prototype.hasOwnProperty.call(mutation.patch, 'subdiagram_views');
+      const patchesName = Object.prototype.hasOwnProperty.call(mutation.patch, 'name');
       Object.assign(element, clone(mutation.patch));
+      if (patchesSubdiagramViews || patchesName) {
+        reconcileSubdiagramViewsForElement(nextDocument, element);
+      }
       touchedElementIds.add(element.id);
       mutationSummaries.push({ type: mutation.type, id: element.id });
       continue;
@@ -1076,6 +1082,10 @@ function applyMutations(document, mutations) {
       const element = findById(nextDocument.elements, mutation.id);
       if (!element) {
         throw new Error(`Element '${mutation.id}' does not exist`);
+      }
+      const childViewIds = collectChildViewIds(nextDocument, mutation.id);
+      if (childViewIds.length > 0) {
+        throw new Error(`Element '${mutation.id}' cannot be removed: it still has ${childViewIds.length} sub-view(s) mounted under it (${childViewIds.join(', ')}). Remove or re-parent those sub-views first.`);
       }
       const scopedViews = mutation.view_ids === undefined
         ? nextDocument.views
@@ -1155,13 +1165,25 @@ function applyMutations(document, mutations) {
         throw new Error(`Relationship '${mutation.id}' does not exist`);
       }
       requirePatchDoesNotChangeRelationshipIdentityOrType(mutation.id, mutation.patch);
+      const oldSourceId = relationship.source_id;
+      const oldTargetId = relationship.target_id;
       Object.assign(relationship, clone(mutation.patch));
       for (const view of nextDocument.views) {
-        if ((view.included_relationships || []).includes(relationship.id)) {
-          view.included_elements = addUnique(view.included_elements || [], [
-            relationship.source_id,
-            relationship.target_id,
-          ]);
+        if (!(view.included_relationships || []).includes(relationship.id)) {
+          continue;
+        }
+        view.included_elements = addUnique(view.included_elements || [], [
+          relationship.source_id,
+          relationship.target_id,
+        ]);
+        for (const oldEndpointId of [oldSourceId, oldTargetId]) {
+          if (oldEndpointId === relationship.source_id || oldEndpointId === relationship.target_id) {
+            continue;
+          }
+          if (isElementUsedByRelationship(nextDocument, view, oldEndpointId, relationship.id)) {
+            continue;
+          }
+          view.included_elements = removeEntries(view.included_elements || [], [oldEndpointId]);
         }
       }
       touchedRelationshipIds.add(relationship.id);
@@ -1180,6 +1202,12 @@ function applyMutations(document, mutations) {
         : requireViewScope(nextDocument.views, mutation.view_ids, 'mutation.view_ids');
       for (const view of scopedViews) {
         view.included_relationships = removeEntries(view.included_relationships || [], [mutation.id]);
+        for (const endpointId of [relationship.source_id, relationship.target_id]) {
+          if (isElementUsedByRelationship(nextDocument, view, endpointId, mutation.id)) {
+            continue;
+          }
+          view.included_elements = removeEntries(view.included_elements || [], [endpointId]);
+        }
         touchedViewIds.add(view.view_id);
       }
       const stillIncludedInView = nextDocument.views.some(view => (
@@ -1347,6 +1375,78 @@ function upsertSubdiagramViewIntoElement(document, elementId, view) {
   } else {
     element.subdiagram_views.push({ view_id: view.view_id, view_name: view.view_name });
   }
+}
+
+// Forward-sync: make every view listed in `element.subdiagram_views` point back
+// to this element (stealing the view from any previous parent when necessary).
+function syncViewsToElementSubdiagramViews(document, element) {
+  if (!element || !Array.isArray(element.subdiagram_views)) {
+    return;
+  }
+  for (const entry of element.subdiagram_views) {
+    if (!entry || !entry.view_id) {
+      continue;
+    }
+    const view = findView(document.views, entry.view_id);
+    if (!view) {
+      continue;
+    }
+    if (view.parent_element_id && view.parent_element_id !== element.id) {
+      removeSubdiagramViewFromElement(document, view.parent_element_id, view.view_id);
+    }
+    view.parent_element_id = element.id;
+    view.parent_element_name = element.name;
+  }
+}
+
+// Bidirectional sync after an element's subdiagram_views (or name) changed:
+// listed views point back, and views no longer listed stop pointing at this element.
+function reconcileSubdiagramViewsForElement(document, element) {
+  const currentViewIds = new Set(
+    (element.subdiagram_views || [])
+      .filter(entry => entry && entry.view_id)
+      .map(entry => entry.view_id),
+  );
+  syncViewsToElementSubdiagramViews(document, element);
+  for (const view of document.views || []) {
+    if (view && view.parent_element_id === element.id && !currentViewIds.has(view.view_id)) {
+      delete view.parent_element_id;
+      delete view.parent_element_name;
+    }
+  }
+}
+
+function collectChildViewIds(document, elementId) {
+  const viewIds = new Set();
+  const element = findById(document.elements, elementId);
+  if (element && Array.isArray(element.subdiagram_views)) {
+    for (const entry of element.subdiagram_views) {
+      if (entry && entry.view_id) {
+        viewIds.add(entry.view_id);
+      }
+    }
+  }
+  for (const view of document.views || []) {
+    if (view && view.parent_element_id === elementId && view.view_id) {
+      viewIds.add(view.view_id);
+    }
+  }
+  return Array.from(viewIds);
+}
+
+// Whether any relationship in the view (other than exceptRelationshipId) still
+// references elementId as one of its endpoints.
+function isElementUsedByRelationship(document, view, elementId, exceptRelationshipId) {
+  for (const relationshipId of view.included_relationships || []) {
+    if (relationshipId === exceptRelationshipId) {
+      continue;
+    }
+    const relationship = findById(document.relationships, relationshipId);
+    if (relationship && (relationship.source_id === elementId || relationship.target_id === elementId)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function addUnique(existing, additions) {
