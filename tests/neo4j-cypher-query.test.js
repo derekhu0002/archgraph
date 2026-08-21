@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -254,5 +255,44 @@ test('runNeo4jCypherQuery rejects a mismatched database', async () => {
         && error.queriedDatabase === 'some-other-database'
         && error.expectedDatabase === getDefaultNeo4jDatabaseName(),
     );
+  });
+});
+
+test('getDefaultNeo4jDatabaseName honors a per-call workspaceRoot', () => {
+  // GIVEN a workspace directory whose basename differs from the launch root
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-workspace-root-'));
+  try {
+    // WHEN the database name is derived from that workspaceRoot
+    const derived = getDefaultNeo4jDatabaseName(tempRoot);
+    // THEN it is derived from the workspaceRoot basename, not the launch root
+    assert.equal(derived, getDefaultNeo4jDatabaseName(tempRoot));
+    assert.equal(derived, path.basename(tempRoot).toLowerCase());
+    // AND it differs from the launch-root-derived name (the misresolution the fix prevents)
+    assert.notEqual(derived, getDefaultNeo4jDatabaseName());
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('runNeo4jCypherQuery derives the database from the per-call workspaceRoot', async () => {
+  await withNeo4jEnv(async () => {
+    // GIVEN a workspace directory whose basename differs from the launch root
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-workspace-root-'));
+    try {
+      const expectedDatabase = getDefaultNeo4jDatabaseName(tempRoot);
+      // GIVEN a Neo4j session that reports the workspace-derived database
+      // WHEN the query runs with that workspaceRoot
+      const result = await runNeo4jCypherQuery({
+        architecturePath: 'design/KG/SystemArchitecture.json',
+        cypher: 'MATCH (n) RETURN n LIMIT 1',
+        workspaceRoot: tempRoot,
+        driver: fakeDriver(expectedDatabase),
+      });
+      // THEN the top-level database matches the per-call workspace, not the launch root
+      assert.equal(result.database, expectedDatabase);
+      assert.equal(result.summary.database, expectedDatabase);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
   });
 });

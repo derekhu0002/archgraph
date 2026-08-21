@@ -498,6 +498,7 @@ async function syncCanonicalStructuralProjection(request) {
   return syncArchitectureToNeo4j({
     architecturePath: context.graphPath.relativePath,
     document: context.document,
+    workspaceRoot: context.workspaceRoot,
   });
 }
 
@@ -556,6 +557,7 @@ async function loadContext(args = {}) {
   context.neo4jSyncRecovery = await recoverNeo4jSyncIfNeeded({
     architecturePath: graphPath.relativePath,
     document: context.document,
+    workspaceRoot: context.workspaceRoot,
   });
   return context;
 }
@@ -1536,6 +1538,7 @@ async function buildMutationResult(context, mutations, write) {
       const syncResult = await syncArchitectureToNeo4j({
         architecturePath: context.graphPath.relativePath,
         document: mutationResult.document,
+        workspaceRoot: context.workspaceRoot,
       });
       result.neo4jSync = {
         status: 'passed',
@@ -2179,15 +2182,17 @@ async function callTool(name, args = {}, dependencies = undefined) {
 
 async function queryNeo4jGraphTool(args = {}) {
   const architecturePath = args.architecturePath || DEFAULT_GRAPH_PATH;
+  const workspaceRoot = resolveWorkspaceRoot(args);
 
   if (args.schema === true) {
-    return queryNeo4jGraphSchemaResult(architecturePath);
+    return queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot);
   }
 
   try {
     const result = await runNeo4jCypherQuery({
       architecturePath,
       cypher: args.cypher,
+      workspaceRoot,
     });
     return toolResult({
       status: 'passed',
@@ -2212,12 +2217,12 @@ async function queryNeo4jGraphTool(args = {}) {
   }
 }
 
-function queryNeo4jGraphSchemaResult(architecturePath) {
+function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
   const schema = buildNeo4jGraphSchema(architecturePath);
   let typeEnums = {};
   try {
-    const workspaceRoot = resolveWorkspaceRoot({ architecturePath });
-    const schemaPath = resolveSchemaPath(workspaceRoot);
+    const resolvedRoot = workspaceRoot || resolveWorkspaceRoot({ architecturePath });
+    const schemaPath = resolveSchemaPath(resolvedRoot);
     const jsonSchema = readJson(schemaPath.absolutePath, schemaPath.relativePath);
     typeEnums = {
       archimateElementTypes: (jsonSchema.$defs.archimateElementType || {}).enum || [],

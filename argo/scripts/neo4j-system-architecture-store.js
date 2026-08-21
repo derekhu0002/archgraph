@@ -35,20 +35,22 @@ function requireNeo4jDriver() {
   return neo4jDriverModule;
 }
 
-function getRepoRoot() {
-  return getWorkspaceRoot();
+function getRepoRoot(workspaceRoot) {
+  return workspaceRoot && typeof workspaceRoot === 'string' && workspaceRoot.trim() !== ''
+    ? path.resolve(workspaceRoot)
+    : getWorkspaceRoot();
 }
 
-function resolveArchitecturePath(architecturePath = DEFAULT_GRAPH_PATH) {
-  return path.join(getRepoRoot(), architecturePath);
+function resolveArchitecturePath(architecturePath = DEFAULT_GRAPH_PATH, workspaceRoot) {
+  return path.join(getRepoRoot(workspaceRoot), architecturePath);
 }
 
-function resolveSyncStatePath() {
-  return path.join(getRepoRoot(), SYNC_STATE_RELATIVE_PATH);
+function resolveSyncStatePath(workspaceRoot) {
+  return path.join(getRepoRoot(workspaceRoot), SYNC_STATE_RELATIVE_PATH);
 }
 
-function getDefaultNeo4jDatabaseName() {
-  const repoName = path.basename(getRepoRoot());
+function getDefaultNeo4jDatabaseName(workspaceRoot) {
+  const repoName = path.basename(getRepoRoot(workspaceRoot));
   const normalized = String(repoName)
     .toLowerCase()
     .replace(/[^a-z0-9.-]+/g, '-')
@@ -86,7 +88,7 @@ function getNeo4jConfig(overrides = {}) {
     uri: external.neo4jUri,
     username: external.neo4jUsername,
     password: external.neo4jPassword,
-    database: overrides.database || process.env.ARGO_NEO4J_DATABASE || getDefaultNeo4jDatabaseName(),
+    database: overrides.database || process.env.ARGO_NEO4J_DATABASE || getDefaultNeo4jDatabaseName(overrides.workspaceRoot),
   };
 }
 
@@ -133,8 +135,8 @@ function createDriver(config = {}) {
   );
 }
 
-function readArchitectureDocument(architecturePath = DEFAULT_GRAPH_PATH) {
-  const absolutePath = resolveArchitecturePath(architecturePath);
+function readArchitectureDocument(architecturePath = DEFAULT_GRAPH_PATH, workspaceRoot) {
+  const absolutePath = resolveArchitecturePath(architecturePath, workspaceRoot);
   if (!fs.existsSync(absolutePath)) {
     throw new Error(`System architecture file is missing at ${architecturePath}`);
   }
@@ -146,8 +148,8 @@ function readArchitectureDocument(architecturePath = DEFAULT_GRAPH_PATH) {
   }
 }
 
-function digestCanonicalArchitecture(architecturePath = DEFAULT_GRAPH_PATH) {
-  const absolutePath = resolveArchitecturePath(architecturePath);
+function digestCanonicalArchitecture(architecturePath = DEFAULT_GRAPH_PATH, workspaceRoot) {
+  const absolutePath = resolveArchitecturePath(architecturePath, workspaceRoot);
   try {
     return crypto.createHash('sha256').update(fs.readFileSync(absolutePath)).digest('hex');
   } catch {
@@ -188,8 +190,8 @@ function createEmptySyncState() {
   };
 }
 
-function readNeo4jSyncState() {
-  const statePath = resolveSyncStatePath();
+function readNeo4jSyncState(workspaceRoot) {
+  const statePath = resolveSyncStatePath(workspaceRoot);
   if (!fs.existsSync(statePath)) {
     return createEmptySyncState();
   }
@@ -205,15 +207,15 @@ function readNeo4jSyncState() {
   }
 }
 
-function writeNeo4jSyncState(state) {
-  const statePath = resolveSyncStatePath();
+function writeNeo4jSyncState(state, workspaceRoot) {
+  const statePath = resolveSyncStatePath(workspaceRoot);
   fs.mkdirSync(path.dirname(statePath), { recursive: true });
   fs.writeFileSync(statePath, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
 }
 
-function getNeo4jGraphSyncState(architecturePath = DEFAULT_GRAPH_PATH) {
+function getNeo4jGraphSyncState(architecturePath = DEFAULT_GRAPH_PATH, workspaceRoot) {
   const graphKey = buildGraphKey(architecturePath);
-  const state = readNeo4jSyncState();
+  const state = readNeo4jSyncState(workspaceRoot);
   return {
     graphKey,
     dirty: false,
@@ -221,30 +223,30 @@ function getNeo4jGraphSyncState(architecturePath = DEFAULT_GRAPH_PATH) {
   };
 }
 
-function updateNeo4jGraphSyncState(architecturePath, patch) {
+function updateNeo4jGraphSyncState(architecturePath, patch, workspaceRoot) {
   const graphKey = buildGraphKey(architecturePath);
-  const state = readNeo4jSyncState();
+  const state = readNeo4jSyncState(workspaceRoot);
   state.graphs[graphKey] = {
     graphKey,
     dirty: false,
     ...(state.graphs[graphKey] || {}),
     ...patch,
   };
-  writeNeo4jSyncState(state);
+  writeNeo4jSyncState(state, workspaceRoot);
   return state.graphs[graphKey];
 }
 
-function markNeo4jSyncDirty(architecturePath, error) {
+function markNeo4jSyncDirty(architecturePath, error, workspaceRoot) {
   return updateNeo4jGraphSyncState(architecturePath, {
     dirty: true,
     lastError: String(error && error.message ? error.message : error),
     lastFailureAt: new Date().toISOString(),
-  });
+  }, workspaceRoot);
 }
 
-function markNeo4jSyncClean(architecturePath, verification) {
-  const current = getNeo4jGraphSyncState(architecturePath);
-  const canonicalDigest = digestCanonicalArchitecture(architecturePath);
+function markNeo4jSyncClean(architecturePath, verification, workspaceRoot) {
+  const current = getNeo4jGraphSyncState(architecturePath, workspaceRoot);
+  const canonicalDigest = digestCanonicalArchitecture(architecturePath, workspaceRoot);
   return updateNeo4jGraphSyncState(architecturePath, {
     dirty: false,
     lastError: undefined,
@@ -252,7 +254,7 @@ function markNeo4jSyncClean(architecturePath, verification) {
     lastSuccessAt: new Date().toISOString(),
     lastVerifiedCounts: verification ? verification.actual : current.lastVerifiedCounts,
     canonicalDigest,
-  });
+  }, workspaceRoot);
 }
 
 function isCanonicalArchitecturePath(architecturePath = DEFAULT_GRAPH_PATH) {
@@ -544,8 +546,9 @@ async function writeSubdiagramLinks(tx, graphKey, elements) {
 
 async function syncArchitectureToNeo4j(options = {}) {
   const architecturePath = options.architecturePath || DEFAULT_GRAPH_PATH;
+  const workspaceRoot = options.workspaceRoot;
   const graphKey = buildGraphKey(architecturePath);
-  const document = options.document || readArchitectureDocument(architecturePath);
+  const document = options.document || readArchitectureDocument(architecturePath, workspaceRoot);
   const config = getNeo4jConfig(options);
   const driver = options.driver || createDriver(config);
   const ownDriver = !options.driver;
@@ -583,7 +586,7 @@ async function syncArchitectureToNeo4j(options = {}) {
     }
 
     if (isCanonicalArchitecturePath(architecturePath)) {
-      markNeo4jSyncClean(architecturePath, verification);
+      markNeo4jSyncClean(architecturePath, verification, workspaceRoot);
     }
 
     return {
@@ -598,7 +601,7 @@ async function syncArchitectureToNeo4j(options = {}) {
     };
   } catch (error) {
     if (isCanonicalArchitecturePath(architecturePath)) {
-      markNeo4jSyncDirty(architecturePath, error);
+      markNeo4jSyncDirty(architecturePath, error, workspaceRoot);
     }
     throw error;
   } finally {
@@ -610,6 +613,7 @@ async function syncArchitectureToNeo4j(options = {}) {
 
 async function recoverNeo4jSyncIfNeeded(options = {}) {
   const architecturePath = options.architecturePath || DEFAULT_GRAPH_PATH;
+  const workspaceRoot = options.workspaceRoot;
   if (!isCanonicalArchitecturePath(architecturePath)) {
     return {
       attempted: false,
@@ -618,8 +622,8 @@ async function recoverNeo4jSyncIfNeeded(options = {}) {
     };
   }
 
-  const syncState = getNeo4jGraphSyncState(architecturePath);
-  const stale = isNeo4jGraphSyncStale(syncState, digestCanonicalArchitecture(architecturePath));
+  const syncState = getNeo4jGraphSyncState(architecturePath, workspaceRoot);
+  const stale = isNeo4jGraphSyncStale(syncState, digestCanonicalArchitecture(architecturePath, workspaceRoot));
   if (!syncState.dirty && !stale) {
     return {
       attempted: false,
@@ -658,8 +662,9 @@ async function recoverNeo4jSyncIfNeeded(options = {}) {
 
 async function verifyArchitectureSync(options = {}) {
   const architecturePath = options.architecturePath || DEFAULT_GRAPH_PATH;
+  const workspaceRoot = options.workspaceRoot;
   const graphKey = buildGraphKey(architecturePath);
-  const document = options.document || readArchitectureDocument(architecturePath);
+  const document = options.document || readArchitectureDocument(architecturePath, workspaceRoot);
   const config = getNeo4jConfig(options);
   const driver = options.driver || createDriver(config);
   const ownDriver = !options.driver;
