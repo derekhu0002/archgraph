@@ -23,6 +23,9 @@ const {
   getWorkspaceRoot,
   resolveArgoPath,
 } = require('./argo-paths.js');
+const {
+  repairSubdiagramViews,
+} = require('./repair-subdiagram-views.js');
 
 const REQUIRED_TOOL_NAMES = [
   'getSystemArchitecture',
@@ -51,6 +54,16 @@ async function main() {
     });
     report.mcp = verifyArgoMcpServer({ workspaceRoot });
     report.systemArchitecture = await verifyCanonicalSystemArchitecture();
+    report.subdiagramViews = report.systemArchitecture.status === 'ok'
+      ? await ensureSubdiagramViewsConsistency({
+          checkOnly: options.checkOnly,
+          workspaceRoot,
+        })
+      : {
+          status: 'skipped',
+          mode: options.checkOnly ? 'check' : 'fix-direct',
+          reason: 'system architecture invalid; subdiagram_views repair skipped',
+        };
     report.neo4j = await ensureNeo4jProjection({ checkOnly: options.checkOnly });
     report.semanticLifecycle = await ensureCanonicalSemanticLifecycle({
       checkOnly: options.checkOnly,
@@ -75,6 +88,9 @@ async function main() {
     report.status = 'failed';
   }
   if (report.semanticLifecycle && report.semanticLifecycle.status === 'failed') {
+    report.status = 'failed';
+  }
+  if (report.subdiagramViews && report.subdiagramViews.status === 'failed') {
     report.status = 'failed';
   }
 
@@ -262,6 +278,34 @@ async function verifyCanonicalSystemArchitecture() {
     viewCount: Array.isArray(getPayload.document && getPayload.document.views) ? getPayload.document.views.length : 0,
     neo4jRecovery: getPayload.neo4jRecovery || null,
   };
+}
+
+async function ensureSubdiagramViewsConsistency({ checkOnly, workspaceRoot }) {
+  const mode = checkOnly ? 'check' : 'fix-direct';
+  try {
+    const result = await repairSubdiagramViews({
+      workspaceRoot,
+      architecturePath: DEFAULT_GRAPH_PATH,
+      mode,
+    });
+    return {
+      status: result.status,
+      mode,
+      graphPath: result.graphPath,
+      driftCount: result.driftCount,
+      fixedCount: result.fixedCount,
+      written: Boolean(result.written),
+      backupPath: result.backupPath || null,
+      reports: result.reports || [],
+      ...(result.error === undefined ? {} : { error: result.error }),
+    };
+  } catch (error) {
+    return {
+      status: 'failed',
+      mode,
+      error: String(error && error.message ? error.message : error),
+    };
+  }
 }
 
 async function ensureNeo4jProjection({ checkOnly }) {

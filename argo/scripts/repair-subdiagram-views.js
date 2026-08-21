@@ -148,55 +148,133 @@ function printReports(reports) {
   }
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const { workspaceRoot, absolutePath, relativePath } = resolveGraphPath(args);
+// Rebuild each element's subdiagram_views from view.parent_element_id, returning a
+// structured report. Modes:
+//   'check'      dry-run: report drift, never write.
+//   'fix-direct' apply corrections by writing the JSON directly with a .bak backup.
+//   'fix-mcp'    apply corrections through ARGO MCP applySystemArchitectureMutation
+//                (only for the intent graph, whose validation rules hold).
+async function repairSubdiagramViews({
+  workspaceRoot,
+  architecturePath = DEFAULT_GRAPH_PATH,
+  mode = 'check',
+} = {}) {
+  const { workspaceRoot: resolvedRoot, absolutePath, relativePath } = resolveGraphPath({
+    workspaceRoot,
+    graphPath: architecturePath,
+  });
   const document = readDocument(absolutePath, relativePath);
   const desired = computeDesired(document);
   const { mutations, reports } = computeMutations(document, desired);
 
-  if (args.check) {
-    printReports(reports);
-    process.exitCode = reports.length === 0 ? 0 : 1;
-    return;
+  if (mode === 'check') {
+    return {
+      status: reports.length === 0 ? 'ok' : 'failed',
+      graphPath: relativePath,
+      driftCount: reports.length,
+      fixedCount: 0,
+      written: false,
+      reports,
+    };
   }
 
   if (reports.length === 0) {
-    console.log('Nothing to fix: subdiagram_views already consistent.');
-    return;
+    return {
+      status: 'ok',
+      graphPath: relativePath,
+      driftCount: 0,
+      fixedCount: 0,
+      written: false,
+      reports: [],
+    };
   }
 
-  if (args.direct) {
+  if (mode === 'fix-direct') {
     const { document: fixedDocument } = applyMutations(document, mutations);
     const backupPath = `${absolutePath}.bak`;
     fs.copyFileSync(absolutePath, backupPath);
     fs.writeFileSync(absolutePath, `${JSON.stringify(fixedDocument, null, 2)}\n`, 'utf8');
-    console.log(`Fixed ${reports.length} element(s) directly in ${relativePath} (backup: ${backupPath}).`);
+    return {
+      status: 'ok',
+      graphPath: relativePath,
+      driftCount: reports.length,
+      fixedCount: reports.length,
+      written: true,
+      backupPath,
+      reports,
+    };
+  }
+
+  if (mode === 'fix-mcp') {
+    const result = await callTool(
+      'applySystemArchitectureMutation',
+      {
+        mutations,
+        workspaceRoot: resolvedRoot,
+        architecturePath: relativePath,
+      },
+      undefined,
+    );
+    if (result && result.status === 'passed' && result.written === true) {
+      return {
+        status: 'ok',
+        graphPath: relativePath,
+        driftCount: reports.length,
+        fixedCount: reports.length,
+        written: true,
+        reports,
+      };
+    }
+    return {
+      status: 'failed',
+      graphPath: relativePath,
+      driftCount: reports.length,
+      fixedCount: 0,
+      written: false,
+      reports,
+      error: result && Array.isArray(result.errors) ? result.errors : result,
+    };
+  }
+
+  throw new Error(`Unsupported repair mode: ${mode}`);
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const mode = args.check ? 'check' : (args.direct ? 'fix-direct' : 'fix-mcp');
+  const result = await repairSubdiagramViews({
+    workspaceRoot: args.workspaceRoot,
+    architecturePath: args.graphPath,
+    mode,
+  });
+
+  if (mode === 'check') {
+    printReports(result.reports);
+    process.exitCode = result.driftCount === 0 ? 0 : 1;
     return;
   }
 
-  // Intent-graph write path: go through ARGO MCP (applySystemArchitectureMutation).
-  const result = await callTool(
-    'applySystemArchitectureMutation',
-    {
-      mutations,
-      workspaceRoot,
-      architecturePath: relativePath,
-    },
-    undefined,
-  );
-
-  if (result && result.status === 'passed' && result.written === true) {
-    console.log(`Fixed ${reports.length} element(s) through ARGO MCP applySystemArchitectureMutation.`);
-  } else {
-    console.error(`MCP repair failed: ${JSON.stringify(result, null, 2)}`);
+  if (result.status !== 'ok') {
+    console.error(`Repair failed: ${JSON.stringify(result.error === undefined ? result : result.error, null, 2)}`);
     process.exitCode = 1;
+    return;
+  }
+
+  if (result.driftCount === 0) {
+    console.log('Nothing to fix: subdiagram_views already consistent.');
+    return;
+  }
+
+  if (mode === 'fix-direct') {
+    console.log(`Fixed ${result.fixedCount} element(s) directly in ${result.graphPath} (backup: ${result.backupPath}).`);
+  } else {
+    console.log(`Fixed ${result.fixedCount} element(s) through ARGO MCP applySystemArchitectureMutation.`);
   }
 }
 
 if (require.main === module) {
   main().catch((error) => {
-    console.error(`MCP repair failed: ${String(error && error.stack ? error.stack : error)}`);
+    console.error(`Repair failed: ${String(error && error.stack ? error.stack : error)}`);
     process.exitCode = 1;
   });
 }
@@ -205,5 +283,6 @@ module.exports = {
   computeDesired,
   computeMutations,
   parseArgs,
+  repairSubdiagramViews,
   sortedEntries,
 };
