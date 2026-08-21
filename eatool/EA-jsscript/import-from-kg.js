@@ -24,7 +24,10 @@ var SYSTEM_ARCHITECTURE_JSON_PATH = '';
 var IMPORT_PACKAGE_SUFFIX = ' EA Import';
 var DIAGRAM_TYPE = 'Logical';
 var CREATE_MISSING_SUBDIAGRAMS = true;
-var ENABLE_AUTOLAYOUT = true;
+// Auto-layout invokes LayoutDiagramEx for every diagram, which opens each view one
+// by one in the EA UI (slow) and conflicts with "do not auto-open views". Elements
+// already receive deterministic grid positions in addElementToDiagram, so keep it off.
+var ENABLE_AUTOLAYOUT = false;
 var MAX_ATTRIBUTE_DEFAULT_LENGTH = 250;
 
 var WARNED = {};

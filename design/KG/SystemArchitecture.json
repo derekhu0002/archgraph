@@ -1783,6 +1783,13 @@
           "description": "GIVEN 导入脚本 eatool/EA-jsscript/import-from-kg.js 与 eatool/EA-jsscript/import-from-external-package.js；WHEN 检查两个脚本的视图处理流程；THEN 两个脚本在导入完成后只刷新目录树，不调用 Repository.OpenDiagram/OpenDiagram/ShowInProjectView 等自动打开任何视图的操作。",
           "name": "AT-2100-04-导入完成后不自动打开任何视图",
           "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "执行 node --test tests/ea-import-perf.test.js：断言两个脚本的 ENABLE_AUTOLAYOUT 为 false（禁用自动布局），从而导入过程中不调用 LayoutDiagramEx 逐个打开视图。",
+          "Input": "node --test tests/ea-import-perf.test.js",
+          "description": "GIVEN 导入脚本 eatool/EA-jsscript/import-from-kg.js 与 eatool/EA-jsscript/import-from-external-package.js；WHEN 检查两个脚本的视图布局流程；THEN 两个脚本禁用自动布局（ENABLE_AUTOLAYOUT=false），导入过程中不通过 LayoutDiagramEx 逐个打开视图，元素以确定性网格位置放置。",
+          "name": "AT-2100-05-导入过程中不逐个打开视图",
+          "type": "Acceptance Test"
         }
       ]
     },

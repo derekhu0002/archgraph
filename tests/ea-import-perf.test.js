@@ -63,3 +63,18 @@ test('ea-import-perf: import does not auto-open any diagram/view', () => {
     );
   }
 });
+
+test('ea-import-perf: auto-layout is disabled so diagrams are not opened one by one', () => {
+  // GIVEN both EA import scripts
+  // WHEN the layout flag is inspected
+  // THEN auto-layout is off, so LayoutDiagramEx is not invoked per diagram during import
+  for (const file of SCRIPTS) {
+    const content = readScript(file);
+    const label = path.basename(file);
+    assert.match(
+      content,
+      /ENABLE_AUTOLAYOUT\s*=\s*false/,
+      `${label} should keep auto-layout off (LayoutDiagramEx opens diagrams one by one)`
+    );
+  }
+});
