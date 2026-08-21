@@ -781,9 +781,255 @@ function toNumber(value) {
   return Number(value);
 }
 
+// --- Read-only Cypher query + structural projection schema -------------------
+
+const FORBIDDEN_CYPHER_CLAUSES = Object.freeze([
+  'CREATE',
+  'MERGE',
+  'DELETE',
+  'SET',
+  'REMOVE',
+  'DROP',
+  'LOAD CSV',
+  'FOREACH',
+  'IN TRANSACTIONS',
+]);
+
+function stripCypherNoise(cypher) {
+  let result = String(cypher);
+  // Block comments.
+  result = result.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  // Line comments.
+  result = result.replace(/\/\/[^\r\n]*/g, ' ');
+  // Single-quoted string literals.
+  result = result.replace(/'(?:[^'\\]|\\.)*'/g, ' ');
+  // Double-quoted identifiers/literals.
+  result = result.replace(/"(?:[^"\\]|\\.)*"/g, ' ');
+  // Backtick-escaped identifiers.
+  result = result.replace(/`(?:[^`\\]|\\.)*`/g, ' ');
+  return result;
+}
+
+function assertReadOnlyCypher(cypher) {
+  if (typeof cypher !== 'string' || cypher.trim().length === 0) {
+    const error = new Error('cypher must be a non-empty string');
+    error.category = 'CYPHER_QUERY_REQUIRED';
+    throw error;
+  }
+  if (cypher.length > 20000) {
+    const error = new Error('cypher exceeds the 20000 character limit');
+    error.category = 'CYPHER_QUERY_TOO_LONG';
+    throw error;
+  }
+
+  const normalized = stripCypherNoise(cypher).toUpperCase();
+  const found = FORBIDDEN_CYPHER_CLAUSES.find(clause => {
+    const escaped = clause.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`\\b${escaped}\\b`).test(normalized);
+  });
+  if (found) {
+    const error = new Error(`Cypher write clause '${found}' is not allowed; the Neo4j graph query interface is read-only`);
+    error.category = 'READ_ONLY_CYPHER_REQUIRED';
+    error.clause = found;
+    throw error;
+  }
+  return true;
+}
+
+function serializeNeo4jValue(value) {
+  if (value === null || value === undefined) {
+    return value === undefined ? null : value;
+  }
+  if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean') {
+    return value;
+  }
+
+  let neo4j = null;
+  try {
+    neo4j = requireNeo4jDriver();
+  } catch {
+    neo4j = null;
+  }
+
+  if (neo4j && typeof neo4j.isInt === 'function' && neo4j.isInt(value)) {
+    if (typeof value.inSafeRange === 'function' && value.inSafeRange()) {
+      return value.toNumber();
+    }
+    return value.toString();
+  }
+  if (neo4j && typeof neo4j.isNode === 'function' && neo4j.isNode(value)) {
+    return {
+      $node: {
+        identity: value.identity ? String(value.identity) : null,
+        labels: Array.isArray(value.labels) ? value.labels : [],
+        properties: serializeNeo4jValue(value.properties),
+      },
+    };
+  }
+  if (neo4j && typeof neo4j.isRelationship === 'function' && neo4j.isRelationship(value)) {
+    return {
+      $relationship: {
+        identity: value.identity ? String(value.identity) : null,
+        type: value.type,
+        start: value.start ? String(value.start) : null,
+        end: value.end ? String(value.end) : null,
+        properties: serializeNeo4jValue(value.properties),
+      },
+    };
+  }
+  if (neo4j && typeof neo4j.isPath === 'function' && neo4j.isPath(value)) {
+    return {
+      $path: {
+        start: serializeNeo4jValue(value.start),
+        end: serializeNeo4jValue(value.end),
+        length: serializeNeo4jValue(value.length),
+        segments: Array.isArray(value.segments) ? value.segments.map(serializeNeo4jValue) : [],
+      },
+    };
+  }
+  if (Array.isArray(value)) {
+    return value.map(serializeNeo4jValue);
+  }
+  if (typeof value === 'object') {
+    const result = {};
+    for (const [key, item] of Object.entries(value)) {
+      result[key] = serializeNeo4jValue(item);
+    }
+    return result;
+  }
+  return String(value);
+}
+
+function buildNeo4jGraphSchema(architecturePath = DEFAULT_GRAPH_PATH) {
+  return {
+    graphKey: buildGraphKey(architecturePath),
+    nodeLabels: {
+      ArchitectureGraph: {
+        description: 'One node per canonical graph document; identified by graphKey.',
+        properties: [
+          'graphKey',
+          'source_path',
+          'name',
+          'description',
+          'attributes_json',
+          'raw_json',
+          'element_count',
+          'relationship_count',
+          'view_count',
+        ],
+      },
+      Element: {
+        description: 'Canonical architecture elements. Element.type holds the ArchiMate element type.',
+        properties: [
+          'graphKey',
+          'id',
+          'name',
+          'type',
+          'parent',
+          'alias',
+          'classifier',
+          'description',
+          'attributes_json',
+          'subdiagram_views_json',
+          'testcases_json',
+          'raw_json',
+        ],
+      },
+      ArchitectureRelationship: {
+        description: 'Canonical architecture relationships. type holds the ArchiMate relationship type; source_id/target_id reference Element.id.',
+        properties: [
+          'graphKey',
+          'id',
+          'name',
+          'type',
+          'statement',
+          'description',
+          'document',
+          'attributes_json',
+          'source_id',
+          'source_name',
+          'target_id',
+          'target_name',
+          'raw_json',
+        ],
+      },
+      View: {
+        description: 'Canonical views; identified by view_id.',
+        properties: [
+          'graphKey',
+          'view_id',
+          'view_name',
+          'parent_element_id',
+          'parent_element_name',
+          'description',
+          'included_elements_json',
+          'included_relationships_json',
+          'raw_json',
+        ],
+      },
+    },
+    relationshipTypes: {
+      OWNS_ELEMENT: { from: 'ArchitectureGraph', to: 'Element' },
+      OWNS_RELATIONSHIP: { from: 'ArchitectureGraph', to: 'ArchitectureRelationship' },
+      OWNS_VIEW: { from: 'ArchitectureGraph', to: 'View' },
+      RELATIONSHIP_SOURCE: { from: 'ArchitectureRelationship', to: 'Element', description: 'Source endpoint element of a relationship record.' },
+      RELATIONSHIP_TARGET: { from: 'ArchitectureRelationship', to: 'Element', description: 'Target endpoint element of a relationship record.' },
+      ARCHIMATE_RELATES: { from: 'Element', to: 'Element', properties: ['graphKey', 'relationship_id'], description: 'Direct ArchiMate semantic edge between two elements.' },
+      VIEW_OF: { from: 'View', to: 'Element', description: 'Parent element of a sub-view.' },
+      INCLUDES_ELEMENT: { from: 'View', to: 'Element', properties: ['order'] },
+      INCLUDES_RELATIONSHIP: { from: 'View', to: 'ArchitectureRelationship', properties: ['order'] },
+      HAS_SUBDIAGRAM: { from: 'Element', to: 'View' },
+    },
+  };
+}
+
+async function runNeo4jCypherQuery(options = {}) {
+  const architecturePath = options.architecturePath || DEFAULT_GRAPH_PATH;
+  const cypher = options.cypher;
+  assertReadOnlyCypher(cypher);
+
+  const graphKey = buildGraphKey(architecturePath);
+  const config = getNeo4jConfig(options);
+  const driver = options.driver || createDriver(config);
+  const ownDriver = !options.driver;
+  const session = driver.session({ database: config.database });
+
+  try {
+    const result = await session.executeRead(tx => tx.run(cypher, { graphKey }));
+    const records = result.records.map(record => {
+      const entry = {};
+      for (const key of record.keys) {
+        entry[key] = serializeNeo4jValue(record.get(key));
+      }
+      return entry;
+    });
+
+    const summary = result.summary;
+    return {
+      architecturePath,
+      graphKey,
+      records,
+      summary: {
+        queryType: summary ? summary.queryType : null,
+        database: summary && summary.database ? summary.database.name : null,
+        containsUpdates: summary && summary.counters && typeof summary.counters.containsUpdates === 'function'
+          ? summary.counters.containsUpdates()
+          : null,
+      },
+    };
+  } finally {
+    await session.close();
+    if (ownDriver) {
+      await driver.close();
+    }
+  }
+}
+
 module.exports = {
   DEFAULT_GRAPH_PATH,
+  assertReadOnlyCypher,
   buildGraphKey,
+  buildNeo4jGraphSchema,
   createDriver,
   digestCanonicalArchitecture,
   ensureDatabaseExists,
@@ -797,6 +1043,8 @@ module.exports = {
   readNeo4jSyncState,
   recoverNeo4jSyncIfNeeded,
   resolveArchitecturePath,
+  runNeo4jCypherQuery,
+  serializeNeo4jValue,
   syncArchitectureToNeo4j,
   verifyArchitectureSync,
   waitForDatabaseOnline,

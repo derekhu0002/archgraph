@@ -2653,6 +2653,29 @@
         }
       ],
       "type": "Application Component"
+    },
+    {
+      "id": "neo4j-cypher-query-interface",
+      "name": "Neo4j Cypher Query Interface",
+      "parent": "1961",
+      "type": "Application Component",
+      "description": "ARGO MCP 只读 Cypher 图查询接口（queryNeo4jGraph 工具）：Agent 可先请求结构投影 schema（节点标签/关系类型/属性键 + ArchiMate 元素与关系类型枚举），再自行构造只读 Cypher 查询 Neo4j 结构投影；写子句（CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS）被拒绝，以保护 canonical JSON 单一事实源。源码：argo/scripts/neo4j-system-architecture-store.js、argo/scripts/systemarchitecture-mcp-server.js、argo/scripts/argo-mcp-server.js。",
+      "testcases": [
+        {
+          "name": "AT-neo4j-cypher-query-interface-01-只读Cypher校验",
+          "description": "GIVEN queryNeo4jGraph 工具已注册且 Neo4j 结构投影存在；WHEN Agent 提交包含写子句（CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS）的 Cypher；THEN 工具在访问 Neo4j 前即以 READ_ONLY_CYPHER_REQUIRED 拒绝，canonical JSON 单一事实源不受影响。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/neo4j-cypher-query.test.js",
+          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js：断言 assertReadOnlyCypher 接受 MATCH/CALL db.*/SHOW CONSTRAINTS 等只读语句，并拒绝 CREATE/MERGE/DELETE/DETACH DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS（错误类别 READ_ONLY_CYPHER_REQUIRED），且字符串与注释内的关键字被忽略。通过。"
+        },
+        {
+          "name": "AT-neo4j-cypher-query-interface-02-schema可检索",
+          "description": "GIVEN queryNeo4jGraph 工具已注册；WHEN Agent 以 schema:true 请求结构投影 schema；THEN 返回节点标签（ArchitectureGraph/Element/ArchitectureRelationship/View）、关系类型（OWNS_*/ARCHIMATE_RELATES/VIEW_OF/INCLUDES_*/HAS_SUBDIAGRAM）、属性键，以及 ArchiMate 元素类型与关系类型枚举（含 Business Actor 与 Assignment），使 Agent 可据此选择要查询的元素或关系类型。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/neo4j-cypher-query.test.js",
+          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js：断言 callTool(\"queryNeo4jGraph\",{schema:true}) 返回 status=passed 且 schema.nodeLabels/relationshipTypes 齐全，archimateElementTypes 含 \"Business Actor\"，archimateRelationshipTypes 含 \"Assignment\"。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -3788,7 +3811,8 @@
       "included_elements": [
         "2010",
         "1962",
-        "neo4j-sync-store"
+        "neo4j-sync-store",
+        "neo4j-cypher-query-interface"
       ],
       "included_relationships": []
     },

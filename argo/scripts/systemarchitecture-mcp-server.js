@@ -164,7 +164,10 @@ const {
 } = require('./graph-rag/mutationEmbeddingVectorLifecycle.js');
 const {
   DEFAULT_GRAPH_PATH: NEO4J_DEFAULT_GRAPH_PATH,
+  buildGraphKey,
+  buildNeo4jGraphSchema,
   recoverNeo4jSyncIfNeeded,
+  runNeo4jCypherQuery,
   syncArchitectureToNeo4j,
   verifyArchitectureSync,
 } = require('./neo4j-system-architecture-store.js');
@@ -375,6 +378,19 @@ const TOOLS = [
         view_id: { type: 'string' },
         dryRun: { type: 'boolean', description: 'When true, validates and returns the result without writing to the graph. Default: false.' },
         architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'queryNeo4jGraph',
+    description: 'Run a read-only Cypher query against the Neo4j structural projection of the intent architecture, or request the projection schema so an agent can construct its own Cypher. Pass {schema: true} to return node labels, relationship types, property keys, and the legal ArchiMate element/relationship type enums. Pass {cypher: "..."} to execute a read-only query; scope it with {graphKey: $graphKey}. Write clauses (CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS) are rejected.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
+        cypher: { type: 'string', description: 'Read-only Cypher query to execute. Use $graphKey to scope to the current architecture graph, e.g. MATCH (e:Element {graphKey: $graphKey}) RETURN e.id, e.name.' },
+        schema: { type: 'boolean', description: 'When true, return the Neo4j projection schema instead of running a Cypher query.' },
       },
       additionalProperties: false,
     },
@@ -2154,7 +2170,78 @@ async function callTool(name, args = {}, dependencies = undefined) {
     return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'removeView', view_id: args.view_id }], write), context), write);
   }
 
+  if (name === 'queryNeo4jGraph') {
+    return queryNeo4jGraphTool(args);
+  }
+
   throw new Error(`Unknown tool: ${name}`);
+}
+
+async function queryNeo4jGraphTool(args = {}) {
+  const architecturePath = args.architecturePath || DEFAULT_GRAPH_PATH;
+
+  if (args.schema === true) {
+    return queryNeo4jGraphSchemaResult(architecturePath);
+  }
+
+  try {
+    const result = await runNeo4jCypherQuery({
+      architecturePath,
+      cypher: args.cypher,
+    });
+    return toolResult({
+      status: 'passed',
+      architecturePath: result.architecturePath,
+      graphKey: result.graphKey,
+      records: result.records,
+      summary: result.summary,
+    });
+  } catch (error) {
+    return toolResult(queryError(
+      error && error.category ? error.category : 'NEO4J_QUERY_FAILED',
+      String(error && error.message ? error.message : error),
+      {
+        architecturePath,
+        graphKey: buildGraphKey(architecturePath),
+        ...(error && error.clause ? { clause: error.clause } : {}),
+      },
+    ));
+  }
+}
+
+function queryNeo4jGraphSchemaResult(architecturePath) {
+  const schema = buildNeo4jGraphSchema(architecturePath);
+  let typeEnums = {};
+  try {
+    const workspaceRoot = resolveWorkspaceRoot({ architecturePath });
+    const schemaPath = resolveSchemaPath(workspaceRoot);
+    const jsonSchema = readJson(schemaPath.absolutePath, schemaPath.relativePath);
+    typeEnums = {
+      archimateElementTypes: (jsonSchema.$defs.archimateElementType || {}).enum || [],
+      archimateRelationshipTypes: (jsonSchema.$defs.archimateRelationshipType || {}).enum || [],
+    };
+  } catch (error) {
+    typeEnums = {
+      archimateElementTypes: [],
+      archimateRelationshipTypes: [],
+      schemaEnumError: String(error && error.message ? error.message : error),
+    };
+  }
+
+  return toolResult({
+    status: 'passed',
+    architecturePath,
+    graphKey: buildGraphKey(architecturePath),
+    schema: {
+      ...schema,
+      ...typeEnums,
+    },
+    usage: {
+      scopeGraph: 'MATCH (e:Element {graphKey: $graphKey}) ...',
+      exampleAllBusinessActors: "MATCH (e:Element {graphKey: $graphKey}) WHERE e.type = 'Business Actor' RETURN e.id, e.name, e.description",
+      exampleAssignments: "MATCH (a:Element {graphKey: $graphKey, type: 'Business Actor'})-[r:ARCHIMATE_RELATES]->(b:Element {graphKey: $graphKey}) WHERE r.relationship_id IS NOT NULL RETURN a.name, type(r), b.name, r.relationship_id",
+    },
+  });
 }
 
 async function resolveSemanticOperatorJourney(dependencies) {
