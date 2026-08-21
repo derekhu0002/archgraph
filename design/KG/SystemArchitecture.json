@@ -2503,9 +2503,14 @@
       ],
       "attributes": [
         {
+          "description": "docs/dsh-plugin-publish.md; tests/dsh-plugin-publish.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "85285d3",
-          "description": "docs/dsh-plugin-publish.md; tests/dsh-plugin-publish.test.js; design/KG/SystemArchitecture.json"
+          "value": "85285d3"
+        },
+        {
+          "description": "docs/dsh-plugin-design.md; tests/dsh-plugin-design.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "342cd54"
         },
         {
           "name": "deliveryStatus",
