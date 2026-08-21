@@ -2549,7 +2549,7 @@
         {
           "description": "argo/scripts/neo4j-system-architecture-store.js; tests/neo4j-sync-staleness.test.js",
           "name": "commit",
-          "value": "PENDING"
+          "value": "19d83be"
         }
       ],
       "description": "将 canonical 意图图谱 design/KG/SystemArchitecture.json 同步到 Neo4j 结构投影（ArchitectureGraph/Element/ArchitectureRelationship/View），并维护 .argo/temp/neo4j-system-architecture-sync-state.json 同步状态。通过内容指纹 canonicalDigest 检测 JSON 漂移，并在读取时自愈重同步，避免结构投影与 canonical 图谱分裂。源码：argo/scripts/neo4j-system-architecture-store.js",
