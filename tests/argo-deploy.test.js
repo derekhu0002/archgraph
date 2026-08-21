@@ -321,6 +321,10 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     assert.match(patch, /serverName: argo/, 'must use the argo server namespace');
     assert.match(patch, /transport: stdio/, 'must use stdio transport');
     assert.match(patch, /argo-mcp-server\.js/, 'must reference the deployed argo MCP server');
+    // Workspace resolution stays dynamic by default (DSH has no per-workspace
+    // MCP roots; the argo server resolves from the directory dsh is launched
+    // from), so no cwd is pinned unless -DshCwd is passed.
+    assert.doesNotMatch(patch, /cwd:/, 'must not pin cwd by default; workspace stays launch-directory dynamic');
     assert.match(patch, /id: argo-wakeup/, 'must insert the argo-wakeup row');
     assert.match(patch, /file:\/\/\//, 'must reference the generated plugin via file: URL');
     assert.match(patch, /END ArchGraph ARGO deployment/, 'managed block end marker must be present');
@@ -366,4 +370,21 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
+});
+
+test('install-argo.ps1 numbers the DeepSeek Harness conversion as deploy steps 15-19', () => {
+  // GIVEN the installer publishes 19 numbered deploy steps (14 platform steps
+  // plus 5 DeepSeek Harness conversion steps)
+  // WHEN a reader scans install-argo.ps1 for step markers
+  // THEN the five DSH steps are numbered [15/19]..[19/19] and carry the
+  // rule / skill / wakeup plugin / MCP / agent preset conversions
+  const script = fs.readFileSync(SCRIPT, 'utf8');
+  for (let i = 1; i <= 19; i++) {
+    assert.ok(script.includes(`[${i}/19]`), `step marker [${i}/19] must exist`);
+  }
+  assert.match(script, /\[15\/19\][^\n]*AGENTS\.md/, 'step 15 must convert the rule to AGENTS.md');
+  assert.match(script, /\[16\/19\][^\n]*skills\\argo-init/, 'step 16 must deploy the argo-init skill');
+  assert.match(script, /\[17\/19\][^\n]*WakeupGuideline/, 'step 17 must generate the wakeup plugin from the rule');
+  assert.match(script, /\[18\/19\][^\n]*cordis\.patch\.yml/, 'step 18 must write the MCP + wakeup rows');
+  assert.match(script, /\[19\/19\][^\n]*agent-presets/, 'step 19 must generate the agent presets');
 });

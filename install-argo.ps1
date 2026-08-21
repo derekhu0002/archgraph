@@ -18,6 +18,7 @@ param(
     [switch]$SkipMcp,
     [switch]$SkipDsh,
     [string]$DshHome = "$env:USERPROFILE\.dsh",
+    [string]$DshCwd = '',
     [string]$McpPath
 )
 
@@ -480,65 +481,112 @@ Write-Host '==> Deploying Argo toolchain'
 
 $schemaSrc = Join-Path $argoDir 'schema'
 $schemaDest = Join-Path $ArgoRoot 'schema'
-Write-Host "[1/14] argo\schema -> $schemaDest"
+Write-Host "[1/19] argo\schema -> $schemaDest"
 Copy-Tree -Source $schemaSrc -Destination $schemaDest
 
 $scriptsSrc = Join-Path $argoDir 'scripts'
 $scriptsDest = Join-Path $ArgoRoot 'scripts'
-Write-Host "[2/14] argo\scripts -> $scriptsDest"
+Write-Host "[2/19] argo\scripts -> $scriptsDest"
 Copy-Tree -Source $scriptsSrc -Destination $scriptsDest
 
 $defaultsSrc = Join-Path $argoDir 'defaults'
 $defaultsDest = Join-Path $ArgoRoot 'defaults'
-Write-Host "[3/14] argo\defaults -> $defaultsDest"
+Write-Host "[3/19] argo\defaults -> $defaultsDest"
 Copy-Tree -Source $defaultsSrc -Destination $defaultsDest
 
 $skillSrc = Join-Path (Join-Path $argoDir 'skills') 'argo-init'
 $skillDest = Join-Path $SkillsRoot 'argo-init'
-Write-Host "[4/14] argo\skills\argo-init -> $skillDest"
+Write-Host "[4/19] argo\skills\argo-init -> $skillDest"
 Copy-Tree -Source $skillSrc -Destination $skillDest
 
 $ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
 $ruleDest = Join-Path $PromptsRoot 'archgraph.instructions.md'
-Write-Host "[5/14] argo\rules\archgraph.instructions.md -> $ruleDest"
+Write-Host "[5/19] argo\rules\archgraph.instructions.md -> $ruleDest"
 New-Item -ItemType Directory -Force -Path $PromptsRoot | Out-Null
 Copy-Item -Force -Path $ruleSrc -Destination $ruleDest
 
 $depsSrc = Join-Path $argoDir 'package.json'
 $depsDest = Join-Path $ArgoRoot 'package.json'
-Write-Host "[6/14] argo\package.json -> $depsDest"
+Write-Host "[6/19] argo\package.json -> $depsDest"
 Copy-Item -Force -Path $depsSrc -Destination $depsDest
 
 $cursorSkillDest = Join-Path $CursorSkillsRoot 'argo-init'
-Write-Host "[7/14] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
+Write-Host "[7/19] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
 Copy-Tree -Source $skillSrc -Destination $cursorSkillDest
 
 $openCodeSkillDest = Join-Path $OpenCodeSkillsRoot 'argo-init'
-Write-Host "[8/14] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
+Write-Host "[8/19] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
 Copy-Tree -Source $skillSrc -Destination $openCodeSkillDest
 
-Write-Host "[9/14] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
+Write-Host "[9/19] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
 Add-AgentsRule -AgentsPath $OpenCodeAgentsPath -RulePath $ruleSrc
 
 $agentsSrc = Join-Path $argoDir 'agents'
-Write-Host "[10/14] argo\agents -> $CopilotAgentsRoot (Copilot user-level)"
+Write-Host "[10/19] argo\agents -> $CopilotAgentsRoot (Copilot user-level)"
 Copy-Agents -Source $agentsSrc -Destination $CopilotAgentsRoot
 
-Write-Host "[11/14] argo\agents -> $CursorAgentsRoot (Cursor user-level, converted to .md)"
+Write-Host "[11/19] argo\agents -> $CursorAgentsRoot (Cursor user-level, converted to .md)"
 Copy-Agents -Source $agentsSrc -Destination $CursorAgentsRoot -Target cursor
 
-Write-Host "[12/14] argo\agents -> $OpenCodeAgentsRoot (OpenCode user-level, converted to .md)"
+Write-Host "[12/19] argo\agents -> $OpenCodeAgentsRoot (OpenCode user-level, converted to .md)"
 Copy-Agents -Source $agentsSrc -Destination $OpenCodeAgentsRoot -Target opencode
 
 $pluginsSrc = Join-Path $argoDir 'plugins'
-Write-Host "[13/14] argo\plugins -> $PluginsRoot (Argo opencode plugins)"
+Write-Host "[13/19] argo\plugins -> $PluginsRoot (Argo opencode plugins)"
 Copy-Tree -Source $pluginsSrc -Destination $PluginsRoot
 
 $cursorRuleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
 $cursorRuleDest = Join-Path $CursorRulesRoot 'archgraph.mdc'
-Write-Host "[14/14] argo\rules\archgraph.instructions.md -> $cursorRuleDest (Cursor global rule, alwaysApply)"
+Write-Host "[14/19] argo\rules\archgraph.instructions.md -> $cursorRuleDest (Cursor global rule, alwaysApply)"
 New-Item -ItemType Directory -Force -Path $CursorRulesRoot | Out-Null
 Convert-RuleFile -SourceFile $cursorRuleSrc -DestinationFile $cursorRuleDest
+
+if ($SkipDsh) {
+    Write-Host 'Skipped DeepSeek Harness integration (-SkipDsh).'
+} else {
+    $ruleSrcContent = Get-Content $ruleSrc -Raw -Encoding UTF8
+    $dshSkillDest = Join-Path (Join-Path $DshHome 'skills') 'argo-init'
+    $patchPath = Join-Path $DshHome 'cordis.patch.yml'
+    $argoServer = (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js').Replace('\', '/')
+
+    Write-Host "[15/19] argo\rules\archgraph.instructions.md -> $DshHome\AGENTS.md (DeepSeek Harness user-global rule, frontmatter stripped)"
+    Write-DshAgentRule -DshHome $DshHome -RuleText $ruleSrcContent
+
+    Write-Host "[16/19] argo\skills\argo-init -> $dshSkillDest (DeepSeek Harness skill)"
+    Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $dshSkillDest
+
+    Write-Host "[17/19] argo\rules\<WakeupGuideline> -> $DshHome\plugins\dsh-argo-wakeup\index.js (DeepSeek Harness wakeup plugin)"
+    $wakeupDshPath = New-DshWakeupPlugin -DshHome $DshHome -RuleText $ruleSrcContent
+
+    Write-Host "[18/19] mcp-argo + argo-wakeup rows -> $patchPath (DeepSeek Harness MCP + wakeup plugin)"
+    # DSH's mcp-client spawns the server with the host process cwd (no
+    # per-workspace roots like VS Code), so the argo server resolves the
+    # workspace from the directory dsh was launched from. That keeps the
+    # deployment workspace-agnostic: launch `dsh web` from the repository you
+    # want the graph resolved for. Only when a fixed workspace is required
+    # (e.g. dsh is launched from a shortcut outside the repo) pass -DshCwd.
+    $rows = "  - id: mcp-argo`n    name: '@deepseek-ai/dsh-mcp-client'`n    config:`n      serverName: argo`n      transport: stdio`n      command: node`n      args:`n        - $argoServer`n"
+    if ($DshCwd) {
+        $rows += "      cwd: $($DshCwd.Replace('\', '/'))`n"
+    }
+    if ($wakeupDshPath) {
+        $pluginUrl = 'file:///' + (($wakeupDshPath -replace '\\', '/').TrimStart('/'))
+        $rows += "  - id: argo-wakeup`n    name: '$pluginUrl'`n"
+    }
+    $block = "# BEGIN ArchGraph ARGO deployment (managed by install-argo.ps1)`n- insert:`n" + $rows + "# END ArchGraph ARGO deployment"
+    Write-DshManagedBlock -Path $patchPath -Block $block -MarkerStart '# BEGIN ArchGraph ARGO deployment' -MarkerEnd '# END ArchGraph ARGO deployment'
+
+    Write-Host "[19/19] argo\agents -> $DshHome\.agent-presets\<id> (DeepSeek Harness agent presets)"
+    New-DshAgentPresets -DshHome $DshHome -AgentsSrc (Join-Path $argoDir 'agents')
+
+    Write-Host '  Restart `dsh web` to activate the MCP server and the wakeup plugin;'
+    Write-Host '  new sessions pick up the global rule and the argo-init skill automatically.'
+    if (-not $DshCwd) {
+        Write-Host '  Note: the argo server resolves the workspace from the directory dsh is launched'
+        Write-Host '  from (DSH has no per-workspace MCP roots). Launch `dsh web` from the repository'
+        Write-Host '  you want the intent graph resolved for, or pass -DshCwd to pin one workspace.'
+    }
+}
 
 if ($SkipDeps) {
     Write-Host 'Skipped dependency install (-SkipDeps).'
@@ -666,45 +714,6 @@ if (Test-Path $wakeupPluginPath) {
     Write-Host '==> Registering argo-wakeup plugin in OpenCode'
     Register-OpenCodePlugin -ConfigPath $OpenCodeConfigPath -PluginFilePath $wakeupPluginPath
     Write-Host "argo-wakeup plugin registered -> $OpenCodeConfigPath"
-}
-
-if ($SkipDsh) {
-    Write-Host 'Skipped DeepSeek Harness integration (-SkipDsh).'
-} else {
-    Write-Host '==> Deploying DeepSeek Harness integration (rule / skill / mcp / plugin / agent)'
-
-    $ruleSrcContent = Get-Content $ruleSrc -Raw -Encoding UTF8
-
-    # 1. rule -> ~/.dsh/AGENTS.md (frontmatter stripped; DSH injects verbatim)
-    Write-DshAgentRule -DshHome $DshHome -RuleText $ruleSrcContent
-
-    # 2. skill -> ~/.dsh/skills/argo-init (frontmatter is already DSH-compatible:
-    #    name / description / disable-model-invocation are parsed by dsh-skill-filesystem)
-    $dshSkillDest = Join-Path (Join-Path $DshHome 'skills') 'argo-init'
-    Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $dshSkillDest
-    Write-Host "  argo-init skill installed -> $dshSkillDest"
-
-    # 3. plugin -> ~/.dsh/plugins/dsh-argo-wakeup/index.js generated from the
-    #    rule's <WakeupGuideline> block (single source: the rule file)
-    $wakeupDshPath = New-DshWakeupPlugin -DshHome $DshHome -RuleText $ruleSrcContent
-
-    # 4. mcp + plugin rows -> ~/.dsh/cordis.patch.yml (marker-delimited managed block)
-    $argoServer = (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js').Replace('\', '/')
-    $rows = "  - id: mcp-argo`n    name: '@deepseek-ai/dsh-mcp-client'`n    config:`n      serverName: argo`n      transport: stdio`n      command: node`n      args:`n        - $argoServer`n"
-    if ($wakeupDshPath) {
-        $pluginUrl = 'file:///' + (($wakeupDshPath -replace '\\', '/').TrimStart('/'))
-        $rows += "  - id: argo-wakeup`n    name: '$pluginUrl'`n"
-    }
-    $block = "# BEGIN ArchGraph ARGO deployment (managed by install-argo.ps1)`n- insert:`n" + $rows + "# END ArchGraph ARGO deployment"
-    $patchPath = Join-Path $DshHome 'cordis.patch.yml'
-    Write-DshManagedBlock -Path $patchPath -Block $block -MarkerStart '# BEGIN ArchGraph ARGO deployment' -MarkerEnd '# END ArchGraph ARGO deployment'
-    Write-Host "  DSH MCP + wakeup rows written -> $patchPath"
-
-    # 5. agents -> ~/.dsh/.agent-presets/<id>/ generated from argo/agents/*.agent.md
-    New-DshAgentPresets -DshHome $DshHome -AgentsSrc (Join-Path $argoDir 'agents')
-
-    Write-Host '  Restart `dsh web` to activate the MCP server and the wakeup plugin;'
-    Write-Host '  new sessions pick up the global rule and the argo-init skill automatically.'
 }
 
 Write-Host ''
