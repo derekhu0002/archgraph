@@ -2669,40 +2669,52 @@
       "name": "Neo4j Cypher Query Interface",
       "parent": "1961",
       "type": "Application Component",
-      "description": "ARGO MCP 只读 Cypher 图查询接口（queryNeo4jGraph 工具）：Agent 可先请求结构投影 schema（节点标签/关系类型/属性键 + ArchiMate 元素与关系类型枚举），再自行构造只读 Cypher 查询 Neo4j 结构投影；写子句（CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS）被拒绝，以保护 canonical JSON 单一事实源。查询结果顶层返回 database 名称并校验其与本仓库对应的 Neo4j 数据库一致（不一致则 NEO4J_DATABASE_MISMATCH）。源码：argo/scripts/neo4j-system-architecture-store.js、argo/scripts/systemarchitecture-mcp-server.js、argo/scripts/argo-mcp-server.js。",
+      "description": "ARGO MCP 只读 Cypher 图查询接口（queryNeo4jGraph 工具）：Agent 可先请求结构投影 schema（节点标签/关系类型/属性键 + ArchiMate 元素与关系类型枚举），再自行构造只读 Cypher 查询 Neo4j 结构投影；写子句（CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS）被拒绝，以保护 canonical JSON 单一事实源。查询结果顶层返回 database 名称并校验其与该工作区对应的 Neo4j 数据库一致（不一致则 NEO4J_DATABASE_MISMATCH）；Neo4j 库名/同步状态/摘要由 per-call workspaceRoot（DSH 桥接注入会话工作区）推导，查询始终落在当前工作区的投影库。源码：argo/scripts/neo4j-system-architecture-store.js、argo/scripts/systemarchitecture-mcp-server.js、argo/scripts/argo-mcp-server.js。",
       "testcases": [
         {
-          "name": "AT-neo4j-cypher-query-interface-01-只读Cypher校验",
+          "Input": "node --test tests/neo4j-cypher-query.test.js",
+          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js：断言 assertReadOnlyCypher 接受 MATCH/CALL db.*/SHOW CONSTRAINTS 等只读语句，并拒绝 CREATE/MERGE/DELETE/DETACH DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS（错误类别 READ_ONLY_CYPHER_REQUIRED），且字符串与注释内的关键字被忽略。通过。",
           "description": "GIVEN queryNeo4jGraph 工具已注册且 Neo4j 结构投影存在；WHEN Agent 提交包含写子句（CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS）的 Cypher；THEN 工具在访问 Neo4j 前即以 READ_ONLY_CYPHER_REQUIRED 拒绝，canonical JSON 单一事实源不受影响。",
-          "type": "Acceptance Test",
-          "Input": "node --test tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js：断言 assertReadOnlyCypher 接受 MATCH/CALL db.*/SHOW CONSTRAINTS 等只读语句，并拒绝 CREATE/MERGE/DELETE/DETACH DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS（错误类别 READ_ONLY_CYPHER_REQUIRED），且字符串与注释内的关键字被忽略。通过。"
+          "name": "AT-neo4j-cypher-query-interface-01-只读Cypher校验",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-neo4j-cypher-query-interface-02-schema可检索",
+          "Input": "node --test tests/neo4j-cypher-query.test.js",
+          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js：断言 callTool(\"queryNeo4jGraph\",{schema:true}) 返回 status=passed 且 schema.nodeLabels/relationshipTypes 齐全，archimateElementTypes 含 \"Business Actor\"，archimateRelationshipTypes 含 \"Assignment\"。通过。",
           "description": "GIVEN queryNeo4jGraph 工具已注册；WHEN Agent 以 schema:true 请求结构投影 schema；THEN 返回节点标签（ArchitectureGraph/Element/ArchitectureRelationship/View）、关系类型（OWNS_*/ARCHIMATE_RELATES/VIEW_OF/INCLUDES_*/HAS_SUBDIAGRAM）、属性键，以及 ArchiMate 元素类型与关系类型枚举（含 Business Actor 与 Assignment），使 Agent 可据此选择要查询的元素或关系类型。",
-          "type": "Acceptance Test",
-          "Input": "node --test tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js：断言 callTool(\"queryNeo4jGraph\",{schema:true}) 返回 status=passed 且 schema.nodeLabels/relationshipTypes 齐全，archimateElementTypes 含 \"Business Actor\"，archimateRelationshipTypes 含 \"Assignment\"。通过。"
+          "name": "AT-neo4j-cypher-query-interface-02-schema可检索",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-neo4j-cypher-query-interface-03-返回database名称并校验一致",
-          "description": "GIVEN queryNeo4jGraph 执行只读 Cypher 查询且 Neo4j 结构投影就绪；WHEN 查询返回；THEN 结果顶层包含 database 字段，其值等于本仓库对应的 Neo4j 数据库名（getDefaultNeo4jDatabaseName），且当实际查询的数据库与本仓库期望不一致时以 NEO4J_DATABASE_MISMATCH 拒绝。",
-          "type": "Acceptance Test",
           "Input": "node --test tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js（用例 runNeo4jCypherQuery returns the repository database name 与 runNeo4jCypherQuery rejects a mismatched database）：断言 runNeo4jCypherQuery 返回顶层 database 等于 getDefaultNeo4jDatabaseName() 且 summary.database 一致；数据库名不一致时以 NEO4J_DATABASE_MISMATCH 拒绝（queriedDatabase/expectedDatabase 正确）。通过。"
+          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js（用例 runNeo4jCypherQuery returns the repository database name 与 runNeo4jCypherQuery rejects a mismatched database）：断言 runNeo4jCypherQuery 返回顶层 database 等于 getDefaultNeo4jDatabaseName() 且 summary.database 一致；数据库名不一致时以 NEO4J_DATABASE_MISMATCH 拒绝（queriedDatabase/expectedDatabase 正确）。通过。",
+          "description": "GIVEN queryNeo4jGraph 执行只读 Cypher 查询且 Neo4j 结构投影就绪；WHEN 查询返回；THEN 结果顶层包含 database 字段，其值等于本仓库对应的 Neo4j 数据库名（getDefaultNeo4jDatabaseName），且当实际查询的数据库与本仓库期望不一致时以 NEO4J_DATABASE_MISMATCH 拒绝。",
+          "name": "AT-neo4j-cypher-query-interface-03-返回database名称并校验一致",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "node --test tests/neo4j-cypher-query.test.js",
+          "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js（用例 getDefaultNeo4jDatabaseName honors a per-call workspaceRoot 与 runNeo4jCypherQuery derives the database from the per-call workspaceRoot）：断言 getDefaultNeo4jDatabaseName(workspaceRoot) 按该目录推导且异于启动根推导值；runNeo4jCypherQuery 传 workspaceRoot 后顶层 database 与 summary.database 均等于 workspaceRoot 推导的库名。通过。",
+          "description": "GIVEN queryNeo4jGraph 在 DeepSeek Harness 桥接下注入 per-call workspaceRoot（当前会话工作区）；WHEN Agent 构造只读 Cypher 查询 Neo4j 结构投影；THEN Neo4j 库名由该 workspaceRoot 推导（getDefaultNeo4jDatabaseName(workspaceRoot)），查询落在该工作区自己的投影库（而非服务器启动目录的库），同步状态/摘要/文档路径同样按该工作区解析。",
+          "name": "AT-neo4j-cypher-query-interface-04-per-call-workspaceRoot驱动库名",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
         {
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "4b1456f",
-          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js; design/KG/SystemArchitecture.json"
+          "value": "4b1456f"
         },
         {
+          "description": "argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js",
           "name": "commit",
-          "value": "c88deea",
-          "description": "argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js"
+          "value": "c88deea"
+        },
+        {
+          "description": "argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js",
+          "name": "commit",
+          "value": "3b53691"
         }
       ]
     },
