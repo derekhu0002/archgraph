@@ -21,12 +21,20 @@
       "type": "Grouping",
       "subdiagram_views": [
         {
-          "view_id": "178",
-          "view_name": "AML Standardization"
+          "view_id": "174",
+          "view_name": "Implementation and Migration"
         },
         {
           "view_id": "176",
           "view_name": "AgentCapabilities"
+        },
+        {
+          "view_id": "178",
+          "view_name": "AML Standardization"
+        },
+        {
+          "view_id": "179",
+          "view_name": "KGlibrary Reference Library"
         },
         {
           "view_id": "180",
@@ -37,16 +45,12 @@
           "view_name": "EA Tooling"
         },
         {
-          "view_id": "174",
-          "view_name": "Implementation and Migration"
-        },
-        {
-          "view_id": "179",
-          "view_name": "KGlibrary Reference Library"
-        },
-        {
           "view_id": "432",
           "view_name": "workpackage_ground"
+        },
+        {
+          "view_id": "434",
+          "view_name": "DSH Plugin Publishing"
         }
       ]
     },
@@ -899,7 +903,14 @@
           "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
           "type": "Acceptance Test",
           "Input": "运行 tests/architecture-view-context.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331 与 2753、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 9 个子视图（169/174/176/178/179/180/1800/298/432）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
+          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331、2753 与 2757、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 10 个子视图（169/174/176/178/179/180/1800/298/432/434）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
+        },
+        {
+          "name": "AT-1357-05-视图写入同步subdiagram_views",
+          "description": "GIVEN ARGO MCP 提供 addArchitectureView / updateArchitectureView / removeArchitectureView 视图写入口；WHEN 写入带 parent_element_id 的子视图、改挂父元素、改名或删除子视图；THEN 父元素 subdiagram_views 与视图 parent_element_id 保持双向一致（新增挂载、改挂同步、改名同步、删除清理）。",
+          "type": "Acceptance Test",
+          "Input": "运行 node --test tests/architecture-view-mutation.test.js",
+          "acceptanceCriteria": "执行 node --test tests/architecture-view-mutation.test.js：断言 addView 在父元素挂载子视图、updateView 改挂/改名同步、removeView 清理父元素条目。通过。"
         }
       ]
     },
@@ -1211,7 +1222,13 @@
       "id": "1966",
       "name": "John",
       "parent": "1962",
-      "type": "Business Actor"
+      "type": "Business Actor",
+      "subdiagram_views": [
+        {
+          "view_id": "jlm-001",
+          "view_name": "JohnLongTermMemory"
+        }
+      ]
     },
     {
       "id": "2010",
@@ -1714,6 +1731,12 @@
           "name": "sessionId",
           "value": "4080fecb-0190-488c-83d7-9bc2c9cf72ba"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "1804",
+          "view_name": "Reviewer工作记录"
+        }
       ]
     },
     {
@@ -1732,6 +1755,16 @@
         {
           "name": "sessionId",
           "value": "d2d221b2-1cc1-4e9e-9377-550aa95cb5ce"
+        }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "1805",
+          "view_name": "Developer工作记录"
+        },
+        {
+          "view_id": "435",
+          "view_name": "Xiaoming 会话记忆"
         }
       ]
     },
@@ -1752,6 +1785,12 @@
           "name": "sessionId",
           "value": "4d92f815-12ba-4c21-82a1-f823ddcad0f2"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "1803",
+          "view_name": "规划专家工作记录"
+        }
       ]
     },
     {
@@ -1770,6 +1809,12 @@
         {
           "name": "sessionId",
           "value": "7b7b6994-5cdf-4f15-9224-a7be04eccf2f"
+        }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "1802",
+          "view_name": "系统设计师工作记录"
         }
       ]
     },
@@ -1826,6 +1871,12 @@
         {
           "name": "sessionId",
           "value": "5d50ed75-0860-4ad5-af62-c9eba2efb69f"
+        }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "1801",
+          "view_name": "产品经理工作记录"
         }
       ]
     },

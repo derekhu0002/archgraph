@@ -60,7 +60,7 @@ test('architecture-view-context: resolves complete view membership by view_id', 
   const agentCapabilities = callPayload(responses, 3);
   assert.equal(agentCapabilities.status, 'passed');
   assert.equal(agentCapabilities.view.view_id, '176');
-  assert.deepEqual(agentCapabilities.elements.map(element => element.id).sort(), ['1310', '1319', '1331', '2753']);
+  assert.deepEqual(agentCapabilities.elements.map(element => element.id).sort(), ['1310', '1319', '1331', '2753', '2757']);
   assert.equal(agentCapabilities.relationships.length, 0);
   assert.equal(agentCapabilities.parentElement.id, '1249');
   assert.equal(agentCapabilities.parentElement.name, 'Implementation and Migration Viewpoint');
@@ -76,7 +76,7 @@ test('architecture-view-context: resolves complete view membership by view_id', 
   assert.equal(childViews.status, 'passed');
   assert.deepEqual(
     childViews.childViews.map(view => view.view_id).sort(),
-    ['169', '174', '176', '178', '179', '180', '1800', '298', '432']
+    ['169', '174', '176', '178', '179', '180', '1800', '298', '432', '434']
   );
 
   const missing = callPayload(responses, 6);

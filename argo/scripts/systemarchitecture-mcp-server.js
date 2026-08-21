@@ -1204,6 +1204,7 @@ function applyMutations(document, mutations) {
         throw new Error(`View '${mutation.view.view_id}' already exists`);
       }
       nextDocument.views.push(clone(mutation.view));
+      upsertSubdiagramViewIntoElement(nextDocument, mutation.view.parent_element_id, mutation.view);
       touchedViewIds.add(mutation.view.view_id);
       viewLimitCheckIds.add(mutation.view.view_id);
       mutationSummaries.push({ type: mutation.type, id: mutation.view.view_id });
@@ -1218,7 +1219,13 @@ function applyMutations(document, mutations) {
       if (!view) {
         throw new Error(`View '${viewId}' does not exist`);
       }
+      const oldParentId = view.parent_element_id;
+      const oldViewId = view.view_id;
       Object.assign(view, clone(mutation.patch));
+      if (oldParentId !== view.parent_element_id) {
+        removeSubdiagramViewFromElement(nextDocument, oldParentId, oldViewId);
+      }
+      upsertSubdiagramViewIntoElement(nextDocument, view.parent_element_id, view);
       touchedViewIds.add(view.view_id);
       if (Object.prototype.hasOwnProperty.call(mutation.patch, 'included_elements')) {
         viewLimitCheckIds.add(view.view_id);
@@ -1229,11 +1236,12 @@ function applyMutations(document, mutations) {
 
     if (mutation.type === 'removeView') {
       requireId(mutation.view_id, 'mutation.view_id');
-      const beforeCount = nextDocument.views.length;
-      nextDocument.views = nextDocument.views.filter(view => view.view_id !== mutation.view_id);
-      if (nextDocument.views.length === beforeCount) {
+      const view = findView(nextDocument.views, mutation.view_id);
+      if (!view) {
         throw new Error(`View '${mutation.view_id}' does not exist`);
       }
+      removeSubdiagramViewFromElement(nextDocument, view.parent_element_id, mutation.view_id);
+      nextDocument.views = nextDocument.views.filter(entry => entry.view_id !== mutation.view_id);
       touchedViewIds.add(mutation.view_id);
       mutationSummaries.push({ type: mutation.type, id: mutation.view_id });
       continue;
@@ -1309,6 +1317,36 @@ function findById(entries, id) {
 
 function findView(entries, viewId) {
   return Array.isArray(entries) ? entries.find(entry => entry && entry.view_id === viewId) : undefined;
+}
+
+function removeSubdiagramViewFromElement(document, elementId, viewId) {
+  if (!elementId || !viewId) {
+    return;
+  }
+  const element = findById(document.elements, elementId);
+  if (!element || !Array.isArray(element.subdiagram_views)) {
+    return;
+  }
+  element.subdiagram_views = element.subdiagram_views.filter(entry => !(entry && entry.view_id === viewId));
+}
+
+function upsertSubdiagramViewIntoElement(document, elementId, view) {
+  if (!elementId || !view || !view.view_id) {
+    return;
+  }
+  const element = findById(document.elements, elementId);
+  if (!element) {
+    return;
+  }
+  if (!Array.isArray(element.subdiagram_views)) {
+    element.subdiagram_views = [];
+  }
+  const existing = element.subdiagram_views.find(entry => entry && entry.view_id === view.view_id);
+  if (existing) {
+    existing.view_name = view.view_name;
+  } else {
+    element.subdiagram_views.push({ view_id: view.view_id, view_name: view.view_name });
+  }
 }
 
 function addUnique(existing, additions) {
