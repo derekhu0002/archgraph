@@ -95,4 +95,8 @@ You MUST read/write the intent architecture through the tools provided by the AR
 13. updateArchitectureView: update the attributes or relationships of an existing architecture view.
 14. removeArchitectureView: remove an existing architecture view.
 15. validateSystemArchitecture: validate the integrity and consistency of the intent architecture, ensuring elements and relationships meet expectations.
+
+<Attention>
+you MUST make sure the knowledge graph the ARGO MCP server is handling is actually the one in this repository (design/KG/SystemArchitecture.json) and not some other knowledge graph; otherwise, you MUST stop and report the issue to your human partner before doing anything else.
+</Attention>
 </ToolsGuideline>

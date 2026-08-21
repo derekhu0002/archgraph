@@ -184,10 +184,6 @@ function createImportPackage(parentPkg, graph) {
 function buildPackageNotes(graph) {
   var lines = [];
   lines.push(safeString(graph.description));
-  lines.push('');
-  lines.push('Imported from: ' + SYSTEM_ARCHITECTURE_JSON_PATH);
-  lines.push('Schema: .argo/schema/SystemArchitecture.schema.json');
-  lines.push('Import mode: as new elements (source ids not preserved).');
 
   if (graph.attributes && graph.attributes.length > 0) {
     lines.push('');

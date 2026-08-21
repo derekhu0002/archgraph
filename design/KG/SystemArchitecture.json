@@ -1,6 +1,6 @@
 {
   "name": "System",
-  "description": "Exported from EA package System\r\n\r\nImported from: D:\\Projects\\Argo\\design\\KG\\SystemArchitecture.json\r\nSchema: .argo/schema/SystemArchitecture.schema.json",
+  "description": "Exported from EA package System",
   "elements": [
     {
       "id": "1240",
@@ -963,132 +963,9 @@
       "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo；将 argo-init skill 部署到 Copilot（~/.copilot/skills）、Cursor（~/.cursor/skills）与 OpenCode（~/.config/opencode/skills）；将 archgraph.instructions.md 规则部署到 Copilot（%APPDATA%\\Code\\User\\prompts）与 OpenCode 全局规则（~/.config/opencode/AGENTS.md）；将 argo/agents 中的 .agent.md 部署到 Copilot（~/.copilot/agents，保持 VS Code 格式）、Cursor（~/.cursor/agents，转换为 .md，保留 name/description/model 并去除 tools 数组等 VS Code 专属字段）与 OpenCode（~/.config/opencode/agents，转换为 .md，保留 description/model、去除 tools 数组等 VS Code 专属字段并声明 mode: all）；将 argo/plugins 中的 opencode 插件部署到 ~/.argo/plugins，并在 OpenCode opencode.json 的 plugin 数组注册（file:// 绝对路径）；将 archgraph.instructions.md 规则转换为 Cursor 全局规则 ~/.cursor/rules/archgraph.mdc（description + alwaysApply: true），使启动闸门（WakeupGuideline STEP 0）对 Cursor 所有项目生效；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补；若 .env 已存在且对应变量已有非空值则跳过输入并保留原值，仅对缺失或空值的变量提示输入）；自动在 VS Code（%APPDATA%\\Code\\User\\mcp.json）、Cursor（~/.cursor/mcp.json，mcpServers）与 OpenCode（~/.config/opencode/opencode.json，mcp）注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行，多工作区时优先选择含 design/KG/SystemArchitecture.json 的根；Cursor 支持 MCP roots，OpenCode 声明 roots 并响应且默认以项目目录为 cwd 启动，故均能正确解析当前项目目录）；temp 保留在仓库目录不部署。",
       "attributes": [
         {
-          "description": "install-argo.ps1 (deploy argo/agents to Copilot/Cursor/OpenCode); package.json (argo/agents in files); tests/argo-deploy.test.js; tests/wechat-publisher-actor.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "225e21d"
-        },
-        {
-          "description": "install-argo.ps1 (remove workspaceFolder var from MCP config); tests/argo-deploy.test.js; package.json (0.4.1)",
-          "name": "commit",
-          "value": "2c54b51"
-        },
-        {
-          "description": "argo/package.json; install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "ee05a15"
-        },
-        {
-          "description": "install-argo.ps1 (preserve model in Cursor/OpenCode agent frontmatter); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "1aa3cb3"
-        },
-        {
-          "description": "argo-deploy/ (package.json; bin/argo-deploy.js; lib/deploy.js; scripts/sync-assets.js; assets/**; README.md); tests/argo-deploy.test.js; tests/argo-global-install.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "446ec0a"
-        },
-        {
-          "description": "argo/defaults/design/KG/SystemArchitecture.json; argo/defaults/EA-model-template.feap; install-argo.ps1; package.json; tests/argo-deploy.test.js; argo/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "b39acb2"
-        },
-        {
-          "description": "install-argo.ps1 (convert agent frontmatter for Cursor/OpenCode); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "491bdb7"
-        },
-        {
-          "description": "argo/scripts/argo-paths.js (MCP roots workspace resolution); argo/scripts/argo-mcp-server.js (roots.listChanged capability); install-argo.ps1 (minimal MCP config); tests/argo-deploy.test.js; tests/argo-global-install.test.js; package.json (0.5.0)",
-          "name": "commit",
-          "value": "2af92ba"
-        },
-        {
-          "description": "install-argo.ps1 (auto-register argo MCP in VS Code mcp.json); tests/argo-deploy.test.js; package.json (0.4.0)",
-          "name": "commit",
-          "value": "499d802"
-        },
-        {
-          "description": "argo/scripts/argo-mcp-server.js (roots/list request + defer workspace-dependent tool calls); argo/scripts/argo-paths.js (hasStaticWorkspace); tests/argo-global-install.test.js (roots/list handshake test)",
-          "name": "commit",
-          "value": "a4dc2f7"
-        },
-        {
-          "description": "argo/scripts/argo-paths.js (marker-based multi-root selection); tests/argo-global-install.test.js; package.json (0.5.1)",
-          "name": "commit",
-          "value": "07d2c69"
-        },
-        {
-          "description": "install-argo.ps1 (.env keep existing non-empty values and skip prompts); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "60e995e"
-        },
-        {
-          "description": "argo/rules/copilot-instructions.md (renamed from intent-architecture-global-rule.md); package.json (0.2.0)",
-          "name": "commit",
-          "value": "e982da1"
-        },
-        {
-          "description": "install-argo.ps1 (restore workspaceFolder in MCP config); tests/argo-deploy.test.js; package.json (0.4.2)",
-          "name": "commit",
-          "value": "025ceae"
-        },
-        {
-          "description": "package.json (name archgraph-argo, bin argo-deploy); bin/argo-deploy.js; install-argo.ps1; vendor/neo4j-driver-6.2.0.tgz; .gitignore",
-          "name": "commit",
-          "value": "de9e21d"
-        },
-        {
-          "description": "argo/rules/archgraph.instructions.md (renamed from copilot-instructions.md); package.json (0.3.0)",
-          "name": "commit",
-          "value": "411bf25"
-        },
-        {
-          "description": "removed eatool/default/EA-model-template.feap; removed eatool/default/design/KG/SystemArchitecture.json; argo/scripts/argo-mcp-server.js",
-          "name": "commit",
-          "value": "c315b5c"
-        },
-        {
-          "description": "install-argo.ps1 (Cursor/OpenCode skills+rule+MCP deploy); tests/argo-deploy.test.js; README.md; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "92f1123"
-        },
-        {
-          "description": "install-argo.ps1; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; removed argo-deploy/",
-          "name": "commit",
-          "value": "e5f6f3d"
-        },
-        {
-          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.6.0 (commit a892052); package.json (0.6.0); asset archgraph-argo-0.6.0.tgz",
-          "name": "commit",
-          "value": "v0.6.0"
-        },
-        {
-          "description": "install-argo.ps1 (read rule/AGENTS.md with -Encoding UTF8); tests/argo-deploy.test.js",
-          "name": "commit",
-          "value": "7aebb2e"
-        },
-        {
-          "description": "argo/rules/archgraph.instructions.md (clarify long-term memory as SUBVIEW hierarchy under Business Actor)",
-          "name": "commit",
-          "value": "74b28f1"
-        },
-        {
-          "description": "argo/rules/archgraph.instructions.md (move WakeupGuideline to top as STEP 0 gate); argo/plugins/argo-wakeup.js; install-argo.ps1 (deploy plugin + register opencode.json + Cursor global rule); package.json (argo/plugins in files); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json",
-          "name": "commit",
-          "value": "f6fe5a4"
-        },
-        {
-          "description": "release https://github.com/derekhu0002/archgraph/releases/tag/v0.9.3 (commit 40db89c); package.json (0.9.3); asset archgraph-argo-0.9.3.tgz",
-          "name": "commit",
-          "value": "v0.9.3"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
+          "value": "59e91d7",
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; install-argo.ps1 (bridge session.header?.cwd); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
@@ -2554,6 +2431,20 @@
           "description": "docs/ea-web-service-ui-insight.md; tests/ea-web-service-ui-insight.test.js; design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "id": "john-mem-001",
+      "name": "SessionRecord-GraphValidation",
+      "type": "Business Object",
+      "parent": "1966",
+      "description": "会话记录（2025-06-27）：目标——使用 ARGO MCP 验证意图图谱并返回 workspaceRoot；结果——validateSystemArchitecture 通过（exit 0，stdout: SystemArchitecture validation passed for design/KG/SystemArchitecture.json），workspaceRoot = D:\\Projects\\archgraph，无任何图谱/仓库改动。可复用经验：getSystemArchitecture 语义查询 subject=Business Actor 时可能返回 Skill 而非 Actor 列表，需结合 getIntentElementContext 核对角色职责来确认 Agent 身份。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "0cc5775",
+          "description": "design/KG/SystemArchitecture.json（John 长期记忆子视图 jlm-001 及会话记录元素）"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -3747,6 +3638,26 @@
       "parent_element_id": "2733",
       "view_id": "1804",
       "view_name": "Reviewer工作记录"
+    },
+    {
+      "description": "Developer（Business Actor Xiaoming/2735）的长期记忆子视图。切片1（commit 17dc0f4）：修复 dsh-argo-workspace 桥 tools.register 缺 output.render。切片2（commit a948515）：去掉 resolveCallWorkspaceRoot 的 ARGO_WORKSPACE_ROOTS allowlist，per-call workspaceRoot 无条件生效。切片3（commit 59e91d7）：审计发现并修复「所有 MCP 工具解析到错误工作区」——根因是桥插件读 exec.agent.session.requestHeader().cwd，而 requestHeader() 返回请求级 EpochHeader（config/system/tools，无 cwd 字段），注入永远为 undefined，所有工具回退到 server 启动目录 deepseek-harness。修复：桥改读 session.header?.cwd（SessionHeader 持久化 cwd）；服务端把已解析 workspaceRoot 贯穿语义 journey/embedding lifecycle/PlantUML diff/Neo4j 库名推导等 6 处无参 resolveWorkspaceRoot()；重启 dsh web 后无参调用全部正确解析 D:\\Projects\\archgraph（读/写/validator 20 工具全部验证通过）。验收：argo-deploy/argo-global-install/argo-workspace-bootstrap/ea-web-service-impl 35/35 通过。",
+      "included_elements": [
+        "1361"
+      ],
+      "included_relationships": [],
+      "parent_element_id": "2735",
+      "view_id": "1805",
+      "view_name": "Developer工作记录"
+    },
+    {
+      "view_id": "jlm-001",
+      "view_name": "JohnLongTermMemory",
+      "parent_element_id": "1966",
+      "description": "Business Actor John 的长期记忆子视图（挂载于 John 之下），记录其历史会话关键进展与可复用经验。",
+      "included_elements": [
+        "john-mem-001"
+      ],
+      "included_relationships": []
     }
   ]
 }

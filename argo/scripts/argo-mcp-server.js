@@ -18,6 +18,7 @@ const {
   getWorkspaceRoot,
   hasStaticWorkspace,
   resolveArgoPath,
+  resolveCallWorkspaceRoot,
   setMcpWorkspaceRoots,
 } = require('./argo-paths.js');
 const canonicalSemanticInitStorage = new AsyncLocalStorage();
@@ -304,6 +305,25 @@ const TOOLS = [
   },
 ];
 
+// Every tool accepts an optional per-call `workspaceRoot` (absolute path,
+// honored unconditionally when provided). The DeepSeek Harness bridge injects
+// the current session's workspace directory here automatically.
+// (tools/list dedupes with systemArchitectureMcp/validatorMcp tools, which
+// carry the same field; this covers the local-only rows like initializeWorkspace.)
+const WORKSPACE_ROOT_PARAM = Object.freeze({
+  type: 'string',
+  description:
+    'Optional absolute workspace root for this call. When provided it is used as-is; otherwise the server launch directory is used.',
+});
+for (const tool of TOOLS) {
+  const inputSchema = tool && tool.inputSchema;
+  if (inputSchema && inputSchema.type === 'object' && inputSchema.properties) {
+    if (!Object.prototype.hasOwnProperty.call(inputSchema.properties, 'workspaceRoot')) {
+      inputSchema.properties.workspaceRoot = WORKSPACE_ROOT_PARAM;
+    }
+  }
+}
+
 function intentElementContextInputSchema() {
   return {
     type: 'object',
@@ -374,14 +394,22 @@ function resolveWorkspaceRoot() {
   return getWorkspaceRoot();
 }
 
+function resolveWorkspaceRoot(args) {
+  // Per-call workspaceRoot override, honored unconditionally when provided;
+  // defaults to the launch-directory root.
+  return resolveCallWorkspaceRoot(args);
+}
+
 async function callTool(name, args = {}, progressToken = null, dependencies = undefined) {
-  loadRepositoryArgoEnvironment(resolveWorkspaceRoot());
+  loadRepositoryArgoEnvironment(resolveWorkspaceRoot(args));
   if (name === 'initializeWorkspace') {
-    const workspace = await initializeWorkspace(resolveWorkspaceRoot());
+    const workspace = await initializeWorkspace(resolveWorkspaceRoot(args));
     const composition = canonicalSemanticInitStorage.getStore()
-      || systemArchitectureMcp.createDefaultCanonicalSemanticInitComposition();
+      || systemArchitectureMcp.createDefaultCanonicalSemanticInitComposition({
+        repositoryRoot: resolveWorkspaceRoot(args),
+      });
     const semanticLifecycle = await runCanonicalSemanticInit(composition, {
-      repositoryRoot: resolveWorkspaceRoot(),
+      repositoryRoot: resolveWorkspaceRoot(args),
       workspace,
     });
     return toolResult({
@@ -649,7 +677,9 @@ async function handleRequest(request, dependencies = undefined) {
       ) {
         activeDependencies = {
           semanticOperatorJourney:
-            await systemArchitectureMcp.createDefaultProductionSemanticOperatorJourney(),
+            await systemArchitectureMcp.createDefaultProductionSemanticOperatorJourney({
+              repositoryRoot: resolveWorkspaceRoot(params.arguments),
+            }),
         };
       }
       const result = await callTool(

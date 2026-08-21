@@ -5,7 +5,7 @@ const crypto = require('node:crypto');
 
 const {
   getArgoRoot,
-  getWorkspaceRoot,
+  resolveCallWorkspaceRoot,
 } = require('./argo-paths.js');
 
 const DEFAULT_GRAPH_PATH = 'design/KG/SystemArchitecture.json';
@@ -381,6 +381,23 @@ const TOOLS = [
   },
 ];
 
+// Every tool accepts an optional per-call `workspaceRoot` (absolute path,
+// honored unconditionally when provided). The DeepSeek Harness bridge injects
+// the current session's workspace directory here automatically.
+const WORKSPACE_ROOT_PARAM = Object.freeze({
+  type: 'string',
+  description:
+    'Optional absolute workspace root for this call. When provided it is used as-is; otherwise the server launch directory is used.',
+});
+for (const tool of TOOLS) {
+  const inputSchema = tool && tool.inputSchema;
+  if (inputSchema && inputSchema.type === 'object' && inputSchema.properties) {
+    if (!Object.prototype.hasOwnProperty.call(inputSchema.properties, 'workspaceRoot')) {
+      inputSchema.properties.workspaceRoot = WORKSPACE_ROOT_PARAM;
+    }
+  }
+}
+
 function intentElementContextInputSchema() {
   return {
     type: 'object',
@@ -448,13 +465,15 @@ function mutationInputSchema() {
   };
 }
 
-function resolveWorkspaceRoot() {
-  return getWorkspaceRoot();
+function resolveWorkspaceRoot(args) {
+  // Per-call workspaceRoot override, honored unconditionally when provided;
+  // defaults to the launch-directory root.
+  return resolveCallWorkspaceRoot(args);
 }
 
 function initializeWorkspace(request) {
   return require('./argo-mcp-server.js').initializeWorkspace(
-    request && request.repositoryRoot ? request.repositoryRoot : resolveWorkspaceRoot(),
+    request && request.repositoryRoot ? request.repositoryRoot : resolveWorkspaceRoot(request),
   );
 }
 
@@ -508,7 +527,7 @@ function readJson(filePath, label) {
 }
 
 async function loadContext(args = {}) {
-  const workspaceRoot = resolveWorkspaceRoot();
+  const workspaceRoot = resolveWorkspaceRoot(args);
   const graphPath = resolveWorkspacePath(workspaceRoot, args.architecturePath || DEFAULT_GRAPH_PATH);
   const schemaPath = resolveSchemaPath(workspaceRoot);
   const context = {
@@ -1399,7 +1418,7 @@ async function attachMutationEmbeddingLifecycle(context, result, document) {
     const lifecycle = require(
       './graph-rag/mutationEmbeddingVectorLifecycle.js'
     ).createPersistentMutationEmbeddingLifecycle({
-      repositoryRoot: resolveWorkspaceRoot(),
+      repositoryRoot: context.workspaceRoot,
     });
     const embeddingLifecycle = await lifecycle.reconcile({
       canonicalWrite: {
@@ -1927,7 +1946,7 @@ async function callTool(name, args = {}, dependencies = undefined) {
 
   if (name === 'generateArchitectureDiffPlantuml') {
     return toolResult(architectureDiffPlantuml.generateArchitectureDiffPlantuml({
-      workspaceRoot: resolveWorkspaceRoot(),
+      workspaceRoot: resolveWorkspaceRoot(args),
       architecturePath: args.architecturePath,
       outputDir: args.outputDir,
     }));
@@ -2007,7 +2026,12 @@ async function resolveSemanticOperatorJourney(dependencies) {
 }
 
 async function executeSemanticSystemArchitectureQuery(args, dependencies) {
-  const context = await loadContext(args);
+  const context = await loadContext({
+    ...(args || {}),
+    ...(dependencies && dependencies.repositoryRoot
+      ? { workspaceRoot: dependencies.repositoryRoot }
+      : {}),
+  });
   const query = args.query;
   const contractOptions = semanticContractOptions(args, dependencies);
   const canonicalSubsetContract = isCanonicalSubsetSemanticContract(query, contractOptions);
@@ -2623,6 +2647,7 @@ async function createDefaultProductionSemanticOperatorJourney(options = {}) {
     querySystemArchitecture: request => executeSemanticSystemArchitectureQuery(request, {
       semanticRetrievalBoundary: retrieval,
       canonicalSubsetForNoAnchor: true,
+      repositoryRoot: workspaceRoot,
     }),
   });
   return Object.freeze({
@@ -2631,8 +2656,8 @@ async function createDefaultProductionSemanticOperatorJourney(options = {}) {
   });
 }
 
-function createDefaultCanonicalSemanticInitComposition() {
-  const repositoryRoot = resolveWorkspaceRoot();
+function createDefaultCanonicalSemanticInitComposition(options = {}) {
+  const repositoryRoot = options.repositoryRoot || resolveWorkspaceRoot();
   const readinessStore = createProductionSemanticReadinessStore({ repositoryRoot });
   const graphPath = resolveWorkspacePath(repositoryRoot, DEFAULT_GRAPH_PATH);
   const canonicalGraph = readJson(graphPath.absolutePath, graphPath.relativePath);
@@ -2652,7 +2677,7 @@ function createDefaultCanonicalSemanticInitComposition() {
     }),
     productionGraphRagRuntime: Object.freeze({
       async runSemanticBackfill(request) {
-        const runtime = await createDefaultProductionSemanticRuntime();
+        const runtime = await createDefaultProductionSemanticRuntime({ repositoryRoot });
         try {
           return await runtime.runSemanticBackfill(request);
         } finally {
@@ -2720,9 +2745,9 @@ function createDefaultCanonicalSemanticInitComposition() {
   });
 }
 
-async function createDefaultProductionSemanticRuntime() {
-  const workspaceRoot = resolveWorkspaceRoot();
-  const configuration = await resolveDefaultSemanticConfiguration();
+async function createDefaultProductionSemanticRuntime(options = {}) {
+  const workspaceRoot = options.repositoryRoot || resolveWorkspaceRoot();
+  const configuration = await resolveDefaultSemanticConfiguration(workspaceRoot);
   const neo4j = require('neo4j-driver');
   const driver = neo4j.driver(
     configuration.neo4jDatabaseUrl,
@@ -2835,7 +2860,7 @@ async function createDefaultProductionSemanticRuntime() {
   });
 }
 
-async function resolveDefaultSemanticConfiguration() {
+async function resolveDefaultSemanticConfiguration(repositoryRoot) {
   let external;
   try {
     external = resolveExternalProductionConfig({
@@ -2843,7 +2868,7 @@ async function resolveDefaultSemanticConfiguration() {
       neo4jUsername: process.env.ARGO_NEO4J_DATABASE_USERNAME,
       neo4jPassword: process.env.ARGO_NEO4J_DATABASE_PASSWORD,
       embeddingCredential: process.env.QWEN_KEY,
-      neo4jDatabase: process.env.ARGO_NEO4J_DATABASE || getDefaultSemanticNeo4jDatabaseName(),
+      neo4jDatabase: process.env.ARGO_NEO4J_DATABASE || getDefaultSemanticNeo4jDatabaseName(repositoryRoot),
     }, {
       operation: 'semantic-backfill',
       sourceKeys: new Map([
@@ -2877,8 +2902,8 @@ async function resolveDefaultSemanticConfiguration() {
   });
 }
 
-function getDefaultSemanticNeo4jDatabaseName() {
-  const repoName = path.basename(resolveWorkspaceRoot());
+function getDefaultSemanticNeo4jDatabaseName(repositoryRoot) {
+  const repoName = path.basename(repositoryRoot || resolveWorkspaceRoot());
   const normalized = String(repoName)
     .toLowerCase()
     .replace(/[^a-z0-9.-]+/g, '-')
@@ -2992,7 +3017,9 @@ async function handleRequest(request, dependencies = undefined) {
         && params.arguments.query.purpose !== 'graph-tidy'
       ) {
         activeDependencies = {
-          semanticOperatorJourney: await createDefaultProductionSemanticOperatorJourney(),
+          semanticOperatorJourney: await createDefaultProductionSemanticOperatorJourney({
+            repositoryRoot: resolveWorkspaceRoot(params.arguments),
+          }),
           canonicalSubsetForNoAnchor: true,
         };
       }

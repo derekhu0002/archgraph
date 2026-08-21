@@ -121,6 +121,30 @@ function normalizeRelativePath(value) {
   return String(value == null ? '' : value).replace(/\\/g, '/').replace(/^\/+/, '');
 }
 
+/**
+ * Resolve the workspace root for one tool call.
+ *
+ * Defaults to the launch-directory root (`getWorkspaceRoot()`). A per-call
+ * `workspaceRoot` argument (absolute path) is honored unconditionally when
+ * present, so the caller decides which workspace this call operates on. This
+ * powers the DeepSeek Harness bridge, which injects the current session's
+ * workspace directory into every call so one dsh instance can follow the
+ * workspace the user switched to.
+ *
+ * @param {object} [args] - tool call arguments (may carry `workspaceRoot`).
+ * @returns {string} resolved absolute workspace root.
+ */
+function resolveCallWorkspaceRoot(args = {}) {
+  const requested =
+    typeof args === 'object' && args !== null && typeof args.workspaceRoot === 'string'
+      ? String(args.workspaceRoot).trim()
+      : '';
+  if (requested === '') {
+    return getWorkspaceRoot();
+  }
+  return path.resolve(requested);
+}
+
 module.exports = {
   getArgoRoot,
   getArgoEnvPath,
@@ -128,6 +152,7 @@ module.exports = {
   hasStaticWorkspace,
   normalizeRelativePath,
   resolveArgoPath,
+  resolveCallWorkspaceRoot,
   resolveWorkspacePath,
   setMcpWorkspaceRoots,
 };

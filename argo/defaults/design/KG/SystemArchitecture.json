@@ -1,6 +1,6 @@
 {
     "name": "System",
-    "description": "Exported from EA package System\r\n\r\nImported from: D:\\Projects\\Argo\\design\\KG\\SystemArchitecture.json\r\nSchema: .argo/schema/SystemArchitecture.schema.json",
+    "description": "Exported from EA package System",
     "elements": [
         {
             "id": "1240",
