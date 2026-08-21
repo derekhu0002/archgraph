@@ -1864,6 +1864,12 @@
           "name": "sessionId",
           "value": "88bdf28a-55eb-48d8-9092-a01ecfb6a681"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "laodong-ltm-001",
+          "view_name": "laodongLongTermMemory"
+        }
       ]
     },
     {
@@ -3917,6 +3923,17 @@
       "parent_element_name": "Xiaoming",
       "description": "Developer Xiaoming 长时记忆。本会话目标：实现工作包 2767（发布 ArchGraph 为原生 dsh 插件 bundle）。完成：package.json 新增 dsh.bundle.patch=./cordis.patch.yml、exports（./dsh-argo-workspace、./dsh-argo-wakeup、./cordis.patch.yml、./package.json，不映射 .）、files 增补 cordis.patch.yml/dsh-argo-workspace/dsh-argo-wakeup；新建根 cordis.patch.yml（两行包名插入 argo-workspace/argo-wakeup，非 file://）；新建 dsh-argo-workspace/（ESM，import.meta.url 定位 serverPath，回退链 config.serverPath→ARGO_SERVER_PATH→包内默认）与 dsh-argo-wakeup/（ESM，STEP 0 唤醒门）各含 index.js + 目录级 package.json {\"type\":\"module\"}；验证 neo4j-driver 语义检索优雅降级（全部 require 懒加载且被外部凭证门控，保持 devDependencies）；gh 打 dsh-plugin 标签成功；tests/dsh-plugin-publish.test.js 5/5 通过。决策：neo4j-driver 不提升到 dependencies；用 git stash 隔离并行 Agent 的 @resvg/resvg-js 改动避免误提交。遗留：待 Reviewer 检视；公众号发布员文件（tests/wechat-article.test.js、docs/8-innovations.wechat.md、docs/diagrams/*）未动未提交。经验：沙箱 node 子进程 piped stdio EPERM 导致 argo-deploy/argo-global-install/architecture-view-context/developer-community/ea-web-service-impl 测试失败（环境限制非回归）；wechat-publisher-actor.test.js 因模型名 alibaba-cn/qwen3.7-plus≠Qwen3.7-Plus 失败（公众号发布员域）。commit：3f95448（代码）+ a6e3563（图谱回登记）。",
       "included_elements": [],
+      "included_relationships": []
+    },
+    {
+      "view_id": "laodong-ltm-001",
+      "view_name": "laodongLongTermMemory",
+      "parent_element_id": "2741",
+      "parent_element_name": "laodong",
+      "description": "系统架构师 laodong 的长期记忆子视图。会话记录（2026-08-21）：目标——为 ARGO MCP 增加只读 Neo4j Cypher 图查询接口（queryNeo4jGraph），使 Agent 可先查结构投影 schema（节点标签/关系类型/属性键 + ArchiMate 元素与关系类型枚举）再自行构造只读 Cypher 查询 Neo4j；关键决策——只读白名单（拒绝 CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS）以保护 canonical JSON 单一事实源，schema 走静态结构投影 + JSON schema 枚举（无需 Neo4j 在线即可返回），执行走 driver session.executeRead 双重只读约束；成果——commit 4b1456f（新增 queryNeo4jGraph 工具、store 只读查询与 schema 构建函数、tests/neo4j-cypher-query.test.js 10 用例全过），并登记元素 neo4j-cypher-query-interface；可复用经验——getSystemArchitecture 语义查询 subject=Business Actor 可能返回 Skill 而非 Actor 列表，需结合 getIntentElementContext 或全量快照核对角色。",
+      "included_elements": [
+        "neo4j-cypher-query-interface"
+      ],
       "included_relationships": []
     }
   ]
