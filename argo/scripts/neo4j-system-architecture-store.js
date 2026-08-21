@@ -1,3 +1,4 @@
+const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -145,6 +146,23 @@ function readArchitectureDocument(architecturePath = DEFAULT_GRAPH_PATH) {
   }
 }
 
+function digestCanonicalArchitecture(architecturePath = DEFAULT_GRAPH_PATH) {
+  const absolutePath = resolveArchitecturePath(architecturePath);
+  try {
+    return crypto.createHash('sha256').update(fs.readFileSync(absolutePath)).digest('hex');
+  } catch {
+    return null;
+  }
+}
+
+function isNeo4jGraphSyncStale(syncState, currentDigest) {
+  if (!syncState || typeof syncState !== 'object') return false;
+  if (!currentDigest || typeof currentDigest !== 'string') return false;
+  const hasDigest = typeof syncState.canonicalDigest === 'string' && syncState.canonicalDigest.length > 0;
+  if (hasDigest) return syncState.canonicalDigest !== currentDigest;
+  return typeof syncState.lastSuccessAt === 'string' && syncState.lastSuccessAt.length > 0;
+}
+
 function sanitizeProps(properties) {
   return Object.fromEntries(
     Object.entries(properties).filter(([, value]) => value !== undefined),
@@ -226,12 +244,14 @@ function markNeo4jSyncDirty(architecturePath, error) {
 
 function markNeo4jSyncClean(architecturePath, verification) {
   const current = getNeo4jGraphSyncState(architecturePath);
+  const canonicalDigest = digestCanonicalArchitecture(architecturePath);
   return updateNeo4jGraphSyncState(architecturePath, {
     dirty: false,
     lastError: undefined,
     lastRecoveredAt: current.dirty ? new Date().toISOString() : current.lastRecoveredAt,
     lastSuccessAt: new Date().toISOString(),
     lastVerifiedCounts: verification ? verification.actual : current.lastVerifiedCounts,
+    canonicalDigest,
   });
 }
 
@@ -599,11 +619,13 @@ async function recoverNeo4jSyncIfNeeded(options = {}) {
   }
 
   const syncState = getNeo4jGraphSyncState(architecturePath);
-  if (!syncState.dirty) {
+  const stale = isNeo4jGraphSyncStale(syncState, digestCanonicalArchitecture(architecturePath));
+  if (!syncState.dirty && !stale) {
     return {
       attempted: false,
       eligible: true,
       dirty: false,
+      stale: false,
     };
   }
 
@@ -613,6 +635,7 @@ async function recoverNeo4jSyncIfNeeded(options = {}) {
       attempted: true,
       eligible: true,
       dirty: false,
+      stale: false,
       status: 'passed',
       graphKey: result.graphKey,
       databaseProvision: result.databaseProvision,
@@ -624,6 +647,7 @@ async function recoverNeo4jSyncIfNeeded(options = {}) {
       attempted: true,
       eligible: true,
       dirty: true,
+      stale: false,
       status: 'failed',
       graphKey: syncState.graphKey,
       previousFailure: syncState.lastError,
@@ -761,11 +785,13 @@ module.exports = {
   DEFAULT_GRAPH_PATH,
   buildGraphKey,
   createDriver,
+  digestCanonicalArchitecture,
   ensureDatabaseExists,
   getNeo4jGraphSyncState,
   getNeo4jConfig,
   getDefaultNeo4jDatabaseName,
   isCanonicalArchitecturePath,
+  isNeo4jGraphSyncStale,
   markNeo4jSyncDirty,
   readArchitectureDocument,
   readNeo4jSyncState,

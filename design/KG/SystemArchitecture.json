@@ -2543,6 +2543,36 @@
           "value": "COMPLETED"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "argo/scripts/neo4j-system-architecture-store.js; tests/neo4j-sync-staleness.test.js",
+          "name": "commit",
+          "value": "PENDING"
+        }
+      ],
+      "description": "将 canonical 意图图谱 design/KG/SystemArchitecture.json 同步到 Neo4j 结构投影（ArchitectureGraph/Element/ArchitectureRelationship/View），并维护 .argo/temp/neo4j-system-architecture-sync-state.json 同步状态。通过内容指纹 canonicalDigest 检测 JSON 漂移，并在读取时自愈重同步，避免结构投影与 canonical 图谱分裂。源码：argo/scripts/neo4j-system-architecture-store.js",
+      "id": "neo4j-sync-store",
+      "name": "Neo4j Structural Sync Store",
+      "parent": "1961",
+      "testcases": [
+        {
+          "Input": "node --test tests/neo4j-sync-staleness.test.js",
+          "acceptanceCriteria": "tests/neo4j-sync-staleness.test.js",
+          "description": "GIVEN 同步状态已记录 canonicalDigest 且与当前 canonical 图谱内容一致；WHEN canonical 图谱 JSON 被修改（digest 改变）；THEN isNeo4jGraphSyncStale 判定为 stale，从而触发结构层重新同步，避免 JSON 与 Neo4j 图库漂移。",
+          "name": "AT-neo4j-sync-store-01-内容漂移检测",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "node --test tests/neo4j-sync-staleness.test.js",
+          "acceptanceCriteria": "tests/neo4j-sync-staleness.test.js",
+          "description": "GIVEN 同步状态存在 lastSuccessAt 但缺少 canonicalDigest（旧版本代码同步遗留）；WHEN 读取同步状态判定；THEN 判定为 stale 触发一次回填重同步，以种子 canonicalDigest 并修复历史漂移。",
+          "name": "AT-neo4j-sync-store-02-旧状态回填",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Application Component"
     }
   ],
   "relationships": [
@@ -3677,7 +3707,8 @@
       "parent_element_name": "Harness",
       "included_elements": [
         "2010",
-        "1962"
+        "1962",
+        "neo4j-sync-store"
       ],
       "included_relationships": []
     },
