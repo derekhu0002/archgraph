@@ -1,6 +1,6 @@
 {
   "name": "archgraph-argo",
-  "version": "0.10.17",
+  "version": "0.10.19",
   "description": "Deploy the ArchGraph ARGO toolchain, skills, and rules (schema, scripts, argo-init skill, global rule) with one command.",
   "license": "MIT",
   "bin": {
