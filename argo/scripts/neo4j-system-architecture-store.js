@@ -1005,13 +1005,23 @@ async function runNeo4jCypherQuery(options = {}) {
     });
 
     const summary = result.summary;
+    const queriedDatabase = summary && summary.database ? summary.database.name : null;
+    if (queriedDatabase && queriedDatabase !== config.database) {
+      const error = new Error(`Neo4j query ran against database '${queriedDatabase}', but this repository expects '${config.database}'`);
+      error.category = 'NEO4J_DATABASE_MISMATCH';
+      error.queriedDatabase = queriedDatabase;
+      error.expectedDatabase = config.database;
+      throw error;
+    }
+    const database = queriedDatabase || config.database;
     return {
       architecturePath,
       graphKey,
+      database,
       records,
       summary: {
         queryType: summary ? summary.queryType : null,
-        database: summary && summary.database ? summary.database.name : null,
+        database,
         containsUpdates: summary && summary.counters && typeof summary.counters.containsUpdates === 'function'
           ? summary.counters.containsUpdates()
           : null,

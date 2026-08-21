@@ -9,6 +9,8 @@ const neo4j = require('neo4j-driver');
 const {
   assertReadOnlyCypher,
   buildNeo4jGraphSchema,
+  getDefaultNeo4jDatabaseName,
+  runNeo4jCypherQuery,
   serializeNeo4jValue,
 } = require('../argo/scripts/neo4j-system-architecture-store.js');
 const {
@@ -175,4 +177,82 @@ test('archgraph-rules-document-queryNeo4jGraph', () => {
   assert.match(rules, /CREATE/);
   assert.match(rules, /MERGE/);
   assert.match(rules, /DELETE/);
+});
+
+function withNeo4jEnv(run) {
+  const keys = [
+    'ARGO_NEO4J_DATABASE_URL',
+    'ARGO_NEO4J_DATABASE_USERNAME',
+    'ARGO_NEO4J_DATABASE_PASSWORD',
+    'QWEN_KEY',
+  ];
+  const previous = new Map(keys.map(key => [key, process.env[key]]));
+  process.env.ARGO_NEO4J_DATABASE_URL = 'bolt://localhost:7687';
+  process.env.ARGO_NEO4J_DATABASE_USERNAME = 'neo4j';
+  process.env.ARGO_NEO4J_DATABASE_PASSWORD = 'secret';
+  process.env.QWEN_KEY = 'key';
+  try {
+    return run();
+  } finally {
+    for (const key of keys) {
+      if (previous.get(key) === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = previous.get(key);
+      }
+    }
+  }
+}
+
+function fakeDriver(databaseName) {
+  return {
+    session() {
+      return {
+        executeRead: async fn => fn({
+          run: async () => ({
+            records: [{ keys: ['n'], get: key => (key === 'n' ? 1 : undefined) }],
+            summary: {
+              queryType: 'r',
+              database: { name: databaseName },
+              counters: { containsUpdates: () => false },
+            },
+          }),
+        }),
+        close: async () => {},
+      };
+    },
+    close: async () => {},
+  };
+}
+
+test('runNeo4jCypherQuery returns the repository database name', async () => {
+  await withNeo4jEnv(async () => {
+    // GIVEN a Neo4j session that reports the repository-derived database
+    const result = await runNeo4jCypherQuery({
+      architecturePath: 'design/KG/SystemArchitecture.json',
+      cypher: 'MATCH (n) RETURN n LIMIT 1',
+      driver: fakeDriver(getDefaultNeo4jDatabaseName()),
+    });
+    // THEN the top-level database matches the repository database
+    assert.equal(result.database, getDefaultNeo4jDatabaseName());
+    assert.equal(result.summary.database, getDefaultNeo4jDatabaseName());
+  });
+});
+
+test('runNeo4jCypherQuery rejects a mismatched database', async () => {
+  await withNeo4jEnv(async () => {
+    // GIVEN a Neo4j session that reports a different database than this repository
+    // WHEN the query runs
+    // THEN it is rejected with NEO4J_DATABASE_MISMATCH
+    await assert.rejects(
+      () => runNeo4jCypherQuery({
+        architecturePath: 'design/KG/SystemArchitecture.json',
+        cypher: 'MATCH (n) RETURN n LIMIT 1',
+        driver: fakeDriver('some-other-database'),
+      }),
+      error => error.category === 'NEO4J_DATABASE_MISMATCH'
+        && error.queriedDatabase === 'some-other-database'
+        && error.expectedDatabase === getDefaultNeo4jDatabaseName(),
+    );
+  });
 });

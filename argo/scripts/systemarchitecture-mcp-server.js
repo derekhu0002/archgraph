@@ -2193,6 +2193,7 @@ async function queryNeo4jGraphTool(args = {}) {
       status: 'passed',
       architecturePath: result.architecturePath,
       graphKey: result.graphKey,
+      database: result.database,
       records: result.records,
       summary: result.summary,
     });
@@ -2204,6 +2205,8 @@ async function queryNeo4jGraphTool(args = {}) {
         architecturePath,
         graphKey: buildGraphKey(architecturePath),
         ...(error && error.clause ? { clause: error.clause } : {}),
+        ...(error && error.queriedDatabase ? { queriedDatabase: error.queriedDatabase } : {}),
+        ...(error && error.expectedDatabase ? { expectedDatabase: error.expectedDatabase } : {}),
       },
     ));
   }
