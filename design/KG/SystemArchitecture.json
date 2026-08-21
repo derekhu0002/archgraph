@@ -2675,6 +2675,13 @@
           "Input": "node --test tests/neo4j-cypher-query.test.js",
           "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js：断言 callTool(\"queryNeo4jGraph\",{schema:true}) 返回 status=passed 且 schema.nodeLabels/relationshipTypes 齐全，archimateElementTypes 含 \"Business Actor\"，archimateRelationshipTypes 含 \"Assignment\"。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "4b1456f",
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js; design/KG/SystemArchitecture.json"
+        }
       ]
     }
   ],
