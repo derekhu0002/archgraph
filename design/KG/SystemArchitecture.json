@@ -2307,6 +2307,11 @@
           "description": "scripts/ea-web-service.js; tests/ea-web-service-impl.test.js; docs/ea-web-service-test-report.md",
           "name": "commit",
           "value": "605680e"
+        },
+        {
+          "name": "todo",
+          "value": "【优先】项目发现默认扫描范围过宽：未指定 --root 时默认扫 REPO_ROOT+父级+祖父级（可达 d:\\ 根），误扫 $RECYCLE.BIN。 应改为仅扫 REPO_ROOT 直接子目录，并排除 $RECYCLE.BIN/System Volume Information/node_modules。 R-2：图形内核接入 AntV G6 v5（web/vendor/g6.min.js 本地 vendor），替换 web/app.js 基础 SVG 渲染+拖动。 其他：fs.watch 跨平台可靠性实测；NF-9 大图谱性能基准；跨进程文件锁并发压测。",
+          "description": "待完成项（2026-08-21）"
         }
       ]
     },
