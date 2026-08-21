@@ -2431,6 +2431,13 @@
           "description": "docs/ea-web-service-ui-insight.md; tests/ea-web-service-ui-insight.test.js; design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "id": "john-mem-001",
+      "name": "SessionRecord-GraphValidation",
+      "type": "Business Object",
+      "parent": "1966",
+      "description": "会话记录（2025-06-27）：目标——使用 ARGO MCP 验证意图图谱并返回 workspaceRoot；结果——validateSystemArchitecture 通过（exit 0，stdout: SystemArchitecture validation passed for design/KG/SystemArchitecture.json），workspaceRoot = D:\\Projects\\archgraph，无任何图谱/仓库改动。可复用经验：getSystemArchitecture 语义查询 subject=Business Actor 时可能返回 Skill 而非 Actor 列表，需结合 getIntentElementContext 核对角色职责来确认 Agent 身份。"
     }
   ],
   "relationships": [
@@ -3634,6 +3641,16 @@
       "parent_element_id": "2735",
       "view_id": "1805",
       "view_name": "Developer工作记录"
+    },
+    {
+      "view_id": "jlm-001",
+      "view_name": "JohnLongTermMemory",
+      "parent_element_id": "1966",
+      "description": "Business Actor John 的长期记忆子视图（挂载于 John 之下），记录其历史会话关键进展与可复用经验。",
+      "included_elements": [
+        "john-mem-001"
+      ],
+      "included_relationships": []
     }
   ]
 }
