@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#141b2d"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="900" height="500" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="450" y="40" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="18" font-weight="600" fill="#f1f5f9" text-anchor="middle">统一知识图谱：产品与 Agent 共存</text>
+
+  <!-- Legend -->
+  <g transform="translate(30, 60)">
+    <circle cx="10" cy="10" r="8" fill="#3b82f6" opacity="0.8"/>
+    <text x="25" y="14" font-family="sans-serif" font-size="11" fill="#94a3b8">产品元素</text>
+
+    <circle cx="110" cy="10" r="8" fill="#7c3aed" opacity="0.8"/>
+    <text x="125" y="14" font-family="sans-serif" font-size="11" fill="#94a3b8">Agent 元素</text>
+
+    <circle cx="210" cy="10" r="8" fill="#f59e0b" opacity="0.8"/>
+    <text x="225" y="14" font-family="sans-serif" font-size="11" fill="#94a3b8">任务/工作包</text>
+
+    <line x1="310" y1="10" x2="340" y2="10" stroke="#94a3b8" stroke-width="2"/>
+    <text x="345" y="14" font-family="sans-serif" font-size="11" fill="#94a3b8">关系</text>
+  </g>
+
+  <!-- Main graph visualization -->
+  <g transform="translate(450, 260)">
+    <!-- Background glow -->
+    <circle cx="0" cy="0" r="200" fill="#4d6bfe" opacity="0.05" filter="url(#glow2)"/>
+
+    <!-- PRODUCT ELEMENTS (blue) - left side -->
+    <!-- Application Component -->
+    <g transform="translate(-180, -80)">
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#3b82f6" opacity="0.3" filter="url(#glow)"/>
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#3b82f6" opacity="0.6"/>
+      <text x="0" y="-2" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Application</text>
+      <text x="0" y="12" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Component</text>
+    </g>
+
+    <!-- Business Process -->
+    <g transform="translate(-200, 60)">
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#3b82f6" opacity="0.3" filter="url(#glow)"/>
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#3b82f6" opacity="0.6"/>
+      <text x="0" y="-2" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Business</text>
+      <text x="0" y="12" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Process</text>
+    </g>
+
+    <!-- Application Service -->
+    <g transform="translate(-140, 140)">
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#3b82f6" opacity="0.3" filter="url(#glow)"/>
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#3b82f6" opacity="0.6"/>
+      <text x="0" y="-2" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Application</text>
+      <text x="0" y="12" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Service</text>
+    </g>
+
+    <!-- AGENT ELEMENTS (purple) - right side -->
+    <!-- Business Actor -->
+    <g transform="translate(180, -80)">
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#7c3aed" opacity="0.3" filter="url(#glow)"/>
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#7c3aed" opacity="0.6"/>
+      <text x="0" y="-2" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Business</text>
+      <text x="0" y="12" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Actor</text>
+    </g>
+
+    <!-- Business Role -->
+    <g transform="translate(200, 60)">
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#7c3aed" opacity="0.3" filter="url(#glow)"/>
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#7c3aed" opacity="0.6"/>
+      <text x="0" y="-2" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Business</text>
+      <text x="0" y="12" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Role</text>
+    </g>
+
+    <!-- Skill -->
+    <g transform="translate(140, 140)">
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#7c3aed" opacity="0.3" filter="url(#glow)"/>
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#7c3aed" opacity="0.6"/>
+      <text x="0" y="-2" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Skill</text>
+      <text x="0" y="12" font-family="sans-serif" font-size="9" fill="#fbbf24" text-anchor="middle">(AML 扩展)</text>
+    </g>
+
+    <!-- CENTER: Work Package (gold) - the hub -->
+    <g transform="translate(0, 0)">
+      <circle cx="0" cy="0" r="45" fill="#f59e0b" opacity="0.2" filter="url(#glow2)"/>
+      <circle cx="0" cy="0" r="35" fill="#f59e0b" opacity="0.4" filter="url(#glow)"/>
+      <circle cx="0" cy="0" r="25" fill="#f59e0b" opacity="0.8"/>
+      <text x="0" y="-5" font-family="sans-serif" font-size="11" font-weight="600" fill="#f1f5f9" text-anchor="middle">Work</text>
+      <text x="0" y="10" font-family="sans-serif" font-size="11" font-weight="600" fill="#f1f5f9" text-anchor="middle">Package</text>
+    </g>
+
+    <!-- Test node (green) - bottom -->
+    <g transform="translate(0, 180)">
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#10b981" opacity="0.3" filter="url(#glow)"/>
+      <rect x="-35" y="-20" width="70" height="40" rx="8" fill="#10b981" opacity="0.6"/>
+      <text x="0" y="-2" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Testcases</text>
+      <text x="0" y="12" font-family="sans-serif" font-size="9" fill="#fbbf24" text-anchor="middle">(GIVEN-WHEN-THEN)</text>
+    </g>
+
+    <!-- CONNECTIONS -->
+    <!-- Work Package to Product elements -->
+    <line x1="0" y1="0" x2="-180" y2="-80" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+    <line x1="0" y1="0" x2="-200" y2="60" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+    <line x1="0" y1="0" x2="-140" y2="140" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+
+    <!-- Work Package to Agent elements -->
+    <line x1="0" y1="0" x2="180" y2="-80" stroke="#7c3aed" stroke-width="2" opacity="0.6"/>
+    <line x1="0" y1="0" x2="200" y2="60" stroke="#7c3aed" stroke-width="2" opacity="0.6"/>
+    <line x1="0" y1="0" x2="140" y2="140" stroke="#7c3aed" stroke-width="2" opacity="0.6"/>
+
+    <!-- Work Package to Test -->
+    <line x1="0" y1="0" x2="0" y2="180" stroke="#10b981" stroke-width="2" opacity="0.6"/>
+
+    <!-- Cross connections (dashed) -->
+    <line x1="-180" y1="-80" x2="180" y2="-80" stroke="#94a3b8" stroke-width="1" opacity="0.3" stroke-dasharray="6,4"/>
+    <line x1="-200" y1="60" x2="200" y2="60" stroke="#94a3b8" stroke-width="1" opacity="0.3" stroke-dasharray="6,4"/>
+    <line x1="-140" y1="140" x2="140" y2="140" stroke="#94a3b8" stroke-width="1" opacity="0.3" stroke-dasharray="6,4"/>
+  </g>
+
+  <!-- Bottom description -->
+  <text x="450" y="470" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#64748b" text-anchor="middle">Work Package 是枢纽：通过 Association 引用 Skill/Rule，通过 Realization 关联 Application Component，通过 Assignment 绑定 Actor</text>
+</svg>

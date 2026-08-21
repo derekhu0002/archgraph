@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#141b2d"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="900" height="500" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="450" y="40" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="18" font-weight="600" fill="#f1f5f9" text-anchor="middle">AML 元语言：像搭积木一样设计 Agent 系统</text>
+
+  <!-- Left side: Standard ArchiMate blocks -->
+  <g transform="translate(60, 80)">
+    <text x="150" y="0" font-family="sans-serif" font-size="14" font-weight="600" fill="#3b82f6" text-anchor="middle">ArchiMate 3.2 标准元素</text>
+
+    <!-- Row 1 -->
+    <rect x="20" y="20" width="90" height="50" rx="6" fill="#3b82f6" opacity="0.7" filter="url(#glow)"/>
+    <text x="65" y="42" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Business</text>
+    <text x="65" y="56" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Actor</text>
+
+    <rect x="120" y="20" width="90" height="50" rx="6" fill="#3b82f6" opacity="0.7" filter="url(#glow)"/>
+    <text x="165" y="42" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Business</text>
+    <text x="165" y="56" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Role</text>
+
+    <rect x="220" y="20" width="90" height="50" rx="6" fill="#3b82f6" opacity="0.7" filter="url(#glow)"/>
+    <text x="265" y="42" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Work</text>
+    <text x="265" y="56" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Package</text>
+
+    <!-- Row 2 -->
+    <rect x="20" y="85" width="90" height="50" rx="6" fill="#3b82f6" opacity="0.7" filter="url(#glow)"/>
+    <text x="65" y="107" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Business</text>
+    <text x="65" y="121" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Process</text>
+
+    <rect x="120" y="85" width="90" height="50" rx="6" fill="#3b82f6" opacity="0.7" filter="url(#glow)"/>
+    <text x="165" y="107" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Application</text>
+    <text x="165" y="121" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Component</text>
+
+    <rect x="220" y="85" width="90" height="50" rx="6" fill="#3b82f6" opacity="0.7" filter="url(#glow)"/>
+    <text x="265" y="107" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Goal</text>
+    <text x="265" y="121" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">/ Outcome</text>
+
+    <!-- Row 3 -->
+    <rect x="70" y="150" width="90" height="50" rx="6" fill="#3b82f6" opacity="0.7" filter="url(#glow)"/>
+    <text x="115" y="172" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Constraint</text>
+    <text x="115" y="186" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">/ Principle</text>
+
+    <rect x="170" y="150" width="90" height="50" rx="6" fill="#3b82f6" opacity="0.7" filter="url(#glow)"/>
+    <text x="215" y="172" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Grouping</text>
+    <text x="215" y="186" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">(Namespace)</text>
+  </g>
+
+  <!-- Arrow pointing right -->
+  <g transform="translate(420, 180)">
+    <path d="M 0 0 L 40 0" stroke="#f59e0b" stroke-width="3" fill="none" filter="url(#glow)"/>
+    <path d="M 30 -10 L 45 0 L 30 10" stroke="#f59e0b" stroke-width="3" fill="none" filter="url(#glow)"/>
+    <text x="20" y="-15" font-family="sans-serif" font-size="11" fill="#f59e0b" text-anchor="middle">扩展</text>
+  </g>
+
+  <!-- Right side: AML extensions -->
+  <g transform="translate(480, 80)">
+    <text x="150" y="0" font-family="sans-serif" font-size="14" font-weight="600" fill="#7c3aed" text-anchor="middle">AML 扩展元素</text>
+
+    <!-- Skill block (highlighted) -->
+    <rect x="60" y="20" width="120" height="60" rx="8" fill="#7c3aed" opacity="0.4" filter="url(#glow)"/>
+    <rect x="60" y="20" width="120" height="60" rx="8" fill="#7c3aed" opacity="0.8"/>
+    <text x="120" y="45" font-family="sans-serif" font-size="14" font-weight="600" fill="#f1f5f9" text-anchor="middle">Skill</text>
+    <text x="120" y="65" font-family="sans-serif" font-size="10" fill="#fbbf24" text-anchor="middle">技能模块</text>
+
+    <!-- Rule block (highlighted) -->
+    <rect x="60" y="100" width="120" height="60" rx="8" fill="#7c3aed" opacity="0.4" filter="url(#glow)"/>
+    <rect x="60" y="100" width="120" height="60" rx="8" fill="#7c3aed" opacity="0.8"/>
+    <text x="120" y="125" font-family="sans-serif" font-size="14" font-weight="600" fill="#f1f5f9" text-anchor="middle">Rule</text>
+    <text x="120" y="145" font-family="sans-serif" font-size="10" fill="#fbbf24" text-anchor="middle">规则模块</text>
+
+    <!-- Extension note -->
+    <text x="120" y="190" font-family="sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">layer: Other</text>
+    <text x="120" y="206" font-family="sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">aspect: Agent</text>
+  </g>
+
+  <!-- Bottom: Assembled structure -->
+  <g transform="translate(200, 320)">
+    <text x="250" y="0" font-family="sans-serif" font-size="14" font-weight="600" fill="#10b981" text-anchor="middle">组装后的 Agent 工作系统</text>
+
+    <!-- Assembled blocks -->
+    <g transform="translate(100, 30)">
+      <!-- Base layer -->
+      <rect x="0" y="80" width="300" height="40" rx="6" fill="#3b82f6" opacity="0.6"/>
+      <text x="150" y="105" font-family="sans-serif" font-size="11" fill="#f1f5f9" text-anchor="middle">Business Actor + Role (谁来做)</text>
+
+      <!-- Middle layer -->
+      <rect x="30" y="40" width="240" height="35" rx="6" fill="#f59e0b" opacity="0.6"/>
+      <text x="150" y="62" font-family="sans-serif" font-size="11" fill="#f1f5f9" text-anchor="middle">Work Package (做什么任务)</text>
+
+      <!-- Top layer with extensions -->
+      <rect x="60" y="5" width="80" height="30" rx="6" fill="#7c3aed" opacity="0.8"/>
+      <text x="100" y="24" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Skill</text>
+
+      <rect x="150" y="5" width="80" height="30" rx="6" fill="#7c3aed" opacity="0.8"/>
+      <text x="190" y="24" font-family="sans-serif" font-size="10" fill="#f1f5f9" text-anchor="middle">Rule</text>
+
+      <!-- Connection lines -->
+      <line x1="100" y1="35" x2="100" y2="40" stroke="#94a3b8" stroke-width="1.5"/>
+      <line x1="190" y1="35" x2="190" y2="40" stroke="#94a3b8" stroke-width="1.5"/>
+      <line x1="150" y1="75" x2="150" y2="80" stroke="#94a3b8" stroke-width="1.5"/>
+    </g>
+
+    <!-- Result label -->
+    <text x="250" y="155" font-family="sans-serif" font-size="12" fill="#64748b" text-anchor="middle">标准元素提供结构，AML 扩展提供 Agent 特化能力</text>
+  </g>
+</svg>

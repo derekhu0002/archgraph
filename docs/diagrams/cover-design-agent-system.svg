@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#141b2d"/>
+    </linearGradient>
+    <linearGradient id="accent1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4d6bfe"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="accent2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4d6bfe;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0.3"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="900" height="500" fill="url(#bg)"/>
+
+  <!-- Background grid -->
+  <g opacity="0.04" stroke="#94a3b8" stroke-width="0.5">
+    <line x1="0" y1="50" x2="900" y2="50"/><line x1="0" y1="100" x2="900" y2="100"/>
+    <line x1="0" y1="150" x2="900" y2="150"/><line x1="0" y1="200" x2="900" y2="200"/>
+    <line x1="0" y1="250" x2="900" y2="250"/><line x1="0" y1="300" x2="900" y2="300"/>
+    <line x1="0" y1="350" x2="900" y2="350"/><line x1="0" y1="400" x2="900" y2="400"/>
+    <line x1="0" y1="450" x2="900" y2="450"/>
+    <line x1="100" y1="0" x2="100" y2="500"/><line x1="200" y1="0" x2="200" y2="500"/>
+    <line x1="300" y1="0" x2="300" y2="500"/><line x1="400" y1="0" x2="400" y2="500"/>
+    <line x1="500" y1="0" x2="500" y2="500"/><line x1="600" y1="0" x2="600" y2="500"/>
+    <line x1="700" y1="0" x2="700" y2="500"/><line x1="800" y1="0" x2="800" y2="500"/>
+  </g>
+
+  <!-- Decorative graph network (background) -->
+  <g opacity="0.12" filter="url(#glow)">
+    <circle cx="80" cy="80" r="4" fill="#4d6bfe"/><circle cx="200" cy="130" r="3" fill="#7c3aed"/>
+    <circle cx="350" cy="70" r="5" fill="#4d6bfe"/><circle cx="500" cy="120" r="3" fill="#7c3aed"/>
+    <circle cx="650" cy="60" r="4" fill="#4d6bfe"/><circle cx="800" cy="110" r="3" fill="#7c3aed"/>
+    <circle cx="130" cy="400" r="3" fill="#7c3aed"/><circle cx="280" cy="430" r="4" fill="#4d6bfe"/>
+    <circle cx="430" cy="390" r="3" fill="#7c3aed"/><circle cx="580" cy="420" r="5" fill="#4d6bfe"/>
+    <circle cx="730" cy="380" r="3" fill="#7c3aed"/><circle cx="850" cy="410" r="4" fill="#4d6bfe"/>
+    <line x1="80" y1="80" x2="200" y2="130" stroke="#4d6bfe" stroke-width="1"/>
+    <line x1="200" y1="130" x2="350" y2="70" stroke="#7c3aed" stroke-width="1"/>
+    <line x1="350" y1="70" x2="500" y2="120" stroke="#4d6bfe" stroke-width="1"/>
+    <line x1="500" y1="120" x2="650" y2="60" stroke="#7c3aed" stroke-width="1"/>
+    <line x1="650" y1="60" x2="800" y2="110" stroke="#4d6bfe" stroke-width="1"/>
+    <line x1="130" y1="400" x2="280" y2="430" stroke="#7c3aed" stroke-width="1"/>
+    <line x1="280" y1="430" x2="430" y2="390" stroke="#4d6bfe" stroke-width="1"/>
+    <line x1="430" y1="390" x2="580" y2="420" stroke="#7c3aed" stroke-width="1"/>
+    <line x1="580" y1="420" x2="730" y2="380" stroke="#4d6bfe" stroke-width="1"/>
+    <line x1="730" y1="380" x2="850" y2="410" stroke="#7c3aed" stroke-width="1"/>
+  </g>
+
+  <!-- Central glowing orb -->
+  <circle cx="450" cy="250" r="120" fill="url(#accent2)" filter="url(#glow2)" opacity="0.4"/>
+  <circle cx="450" cy="250" r="60" fill="url(#accent2)" filter="url(#glow)" opacity="0.6"/>
+
+  <!-- Tag -->
+  <rect x="330" y="100" width="240" height="30" rx="15" fill="url(#accent1)" opacity="0.2"/>
+  <text x="450" y="120" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="600" fill="#8b9cf7" text-anchor="middle" letter-spacing="3">AGENT WORK SYSTEM DESIGN</text>
+
+  <!-- Main title line 1 -->
+  <text x="450" y="195" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="700" fill="#f1f5f9" text-anchor="middle" letter-spacing="-0.5">设计 Agent 工作系统</text>
+  <!-- Main title line 2 -->
+  <text x="450" y="245" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="700" fill="#f1f5f9" text-anchor="middle" letter-spacing="-0.5">用一张图谱，同时设计</text>
+  <!-- Main title line 3 - highlighted -->
+  <text x="450" y="295" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="700" text-anchor="middle" letter-spacing="-0.5">
+    <tspan fill="#4d6bfe">工人</tspan><tspan fill="#f1f5f9"> 和 </tspan><tspan fill="#7c3aed">房子</tspan>
+  </text>
+
+  <!-- Divider -->
+  <line x1="370" y1="325" x2="530" y2="325" stroke="url(#accent1)" stroke-width="2" opacity="0.5"/>
+
+  <!-- Subtitle -->
+  <text x="450" y="355" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle">ArchiMate 3.2 元语言 · GraphRAG 记忆 · 统一抽象设计层</text>
+
+  <!-- Bottom brand -->
+  <text x="450" y="430" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="16" font-weight="700" fill="#4d6bfe" text-anchor="middle" letter-spacing="4">ArchGraph</text>
+  <text x="450" y="452" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" fill="#475569" text-anchor="middle">archgraph.org</text>
+</svg>

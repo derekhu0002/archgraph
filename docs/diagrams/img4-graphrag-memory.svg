@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#141b2d"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="900" height="500" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="450" y="40" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="18" font-weight="600" fill="#f1f5f9" text-anchor="middle">GraphRAG 记忆系统：图谱即记忆</text>
+
+  <!-- Brain/Network visualization -->
+  <g transform="translate(450, 250)">
+    <!-- Outer glow -->
+    <circle cx="0" cy="0" r="180" fill="#4d6bfe" opacity="0.05" filter="url(#glow2)"/>
+
+    <!-- Layer 1: Short-term memory (active, glowing nodes) -->
+    <g opacity="0.9">
+      <circle cx="-60" cy="-80" r="8" fill="#4d6bfe" filter="url(#glow)"/>
+      <circle cx="40" cy="-100" r="6" fill="#4d6bfe" filter="url(#glow)"/>
+      <circle cx="80" cy="-40" r="7" fill="#4d6bfe" filter="url(#glow)"/>
+      <circle cx="-80" cy="-20" r="6" fill="#4d6bfe" filter="url(#glow)"/>
+
+      <line x1="-60" y1="-80" x2="40" y2="-100" stroke="#4d6bfe" stroke-width="1.5" opacity="0.6"/>
+      <line x1="40" y1="-100" x2="80" y2="-40" stroke="#4d6bfe" stroke-width="1.5" opacity="0.6"/>
+      <line x1="-60" y1="-80" x2="-80" y2="-20" stroke="#4d6bfe" stroke-width="1.5" opacity="0.6"/>
+    </g>
+
+    <!-- Layer 2: Long-term memory (structured graph) -->
+    <g opacity="0.7">
+      <circle cx="-120" cy="20" r="10" fill="#7c3aed" filter="url(#glow)"/>
+      <circle cx="-40" cy="40" r="10" fill="#7c3aed" filter="url(#glow)"/>
+      <circle cx="40" cy="20" r="10" fill="#7c3aed" filter="url(#glow)"/>
+      <circle cx="120" cy="40" r="10" fill="#7c3aed" filter="url(#glow)"/>
+      <circle cx="-80" cy="80" r="10" fill="#7c3aed" filter="url(#glow)"/>
+      <circle cx="0" cy="100" r="10" fill="#7c3aed" filter="url(#glow)"/>
+      <circle cx="80" cy="80" r="10" fill="#7c3aed" filter="url(#glow)"/>
+
+      <line x1="-120" y1="20" x2="-40" y2="40" stroke="#7c3aed" stroke-width="2" opacity="0.5"/>
+      <line x1="-40" y1="40" x2="40" y2="20" stroke="#7c3aed" stroke-width="2" opacity="0.5"/>
+      <line x1="40" y1="20" x2="120" y2="40" stroke="#7c3aed" stroke-width="2" opacity="0.5"/>
+      <line x1="-40" y1="40" x2="-80" y2="80" stroke="#7c3aed" stroke-width="2" opacity="0.5"/>
+      <line x1="-40" y1="40" x2="0" y2="100" stroke="#7c3aed" stroke-width="2" opacity="0.5"/>
+      <line x1="40" y1="20" x2="0" y2="100" stroke="#7c3aed" stroke-width="2" opacity="0.5"/>
+      <line x1="40" y1="20" x2="80" y2="80" stroke="#7c3aed" stroke-width="2" opacity="0.5"/>
+      <line x1="-80" y1="80" x2="0" y2="100" stroke="#7c3aed" stroke-width="2" opacity="0.5"/>
+      <line x1="0" y1="100" x2="80" y2="80" stroke="#7c3aed" stroke-width="2" opacity="0.5"/>
+    </g>
+
+    <!-- Layer 3: Reasoning memory (path traces) -->
+    <g opacity="0.5">
+      <path d="M -60 -80 Q -20 -40 -40 40" stroke="#f59e0b" stroke-width="2" fill="none" stroke-dasharray="4,4"/>
+      <path d="M 80 -40 Q 60 0 40 20" stroke="#f59e0b" stroke-width="2" fill="none" stroke-dasharray="4,4"/>
+      <path d="M -80 -20 Q -60 20 -120 20" stroke="#f59e0b" stroke-width="2" fill="none" stroke-dasharray="4,4"/>
+    </g>
+
+    <!-- Center: Neo4j foundation -->
+    <circle cx="0" cy="0" r="30" fill="#10b981" opacity="0.3" filter="url(#glow2)"/>
+    <circle cx="0" cy="0" r="20" fill="#10b981" opacity="0.6"/>
+    <text x="0" y="5" font-family="sans-serif" font-size="11" font-weight="600" fill="#f1f5f9" text-anchor="middle">Neo4j</text>
+  </g>
+
+  <!-- Labels for layers -->
+  <g transform="translate(100, 100)">
+    <circle cx="10" cy="10" r="6" fill="#4d6bfe" filter="url(#glow)"/>
+    <text x="25" y="14" font-family="sans-serif" font-size="12" fill="#94a3b8">短期记忆：对话消息（活跃节点）</text>
+  </g>
+
+  <g transform="translate(100, 140)">
+    <circle cx="10" cy="10" r="6" fill="#7c3aed" filter="url(#glow)"/>
+    <text x="25" y="14" font-family="sans-serif" font-size="12" fill="#94a3b8">长期记忆：实体关系知识图谱</text>
+  </g>
+
+  <g transform="translate(100, 180)">
+    <circle cx="10" cy="10" r="6" fill="#f59e0b" filter="url(#glow)"/>
+    <text x="25" y="14" font-family="sans-serif" font-size="12" fill="#94a3b8">推理记忆：决策轨迹与工具调用</text>
+  </g>
+
+  <g transform="translate(100, 220)">
+    <circle cx="10" cy="10" r="6" fill="#10b981" filter="url(#glow)"/>
+    <text x="25" y="14" font-family="sans-serif" font-size="12" fill="#94a3b8">基础：Neo4j 图数据库</text>
+  </g>
+
+  <!-- Bottom description -->
+  <g transform="translate(450, 450)">
+    <text x="0" y="0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#64748b" text-anchor="middle">WakeupGuideline 在每次会话启动时恢复长期记忆，ArmingFirst 按需物化最小上下文</text>
+  </g>
+
+  <!-- Side annotations -->
+  <g transform="translate(720, 150)">
+    <text x="0" y="0" font-family="sans-serif" font-size="11" fill="#4d6bfe" text-anchor="middle">向量只做</text>
+    <text x="0" y="16" font-family="sans-serif" font-size="11" fill="#4d6bfe" text-anchor="middle">种子发现</text>
+    <path d="M -30 30 Q -50 60 -40 80" stroke="#4d6bfe" stroke-width="1.5" fill="none" opacity="0.6"/>
+  </g>
+
+  <g transform="translate(720, 280)">
+    <text x="0" y="0" font-family="sans-serif" font-size="11" fill="#7c3aed" text-anchor="middle">ArchiMate</text>
+    <text x="0" y="16" font-family="sans-serif" font-size="11" fill="#7c3aed" text-anchor="middle">关系语义遍历</text>
+    <path d="M -30 30 Q -50 60 -40 80" stroke="#7c3aed" stroke-width="1.5" fill="none" opacity="0.6"/>
+  </g>
+</svg>

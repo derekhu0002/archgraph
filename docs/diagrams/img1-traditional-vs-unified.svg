@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#141b2d"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="900" height="500" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="450" y="40" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="18" font-weight="600" fill="#f1f5f9" text-anchor="middle">传统方式 vs ArchGraph 统一图谱</text>
+
+  <!-- LEFT SIDE: Traditional (chaotic) -->
+  <g transform="translate(30, 70)">
+    <!-- Background panel -->
+    <rect x="0" y="0" width="400" height="400" rx="12" fill="#1e293b" opacity="0.5" stroke="#334155" stroke-width="1"/>
+
+    <!-- Scattered documents -->
+    <!-- Jira ticket -->
+    <rect x="30" y="30" width="100" height="60" rx="6" fill="#334155" stroke="#475569" stroke-width="1"/>
+    <text x="80" y="55" font-family="monospace" font-size="10" fill="#94a3b8" text-anchor="middle">Jira Ticket</text>
+    <text x="80" y="72" font-family="monospace" font-size="8" fill="#64748b" text-anchor="middle">PROJ-123</text>
+
+    <!-- YAML config -->
+    <rect x="160" y="50" width="90" height="70" rx="6" fill="#334155" stroke="#475569" stroke-width="1"/>
+    <text x="205" y="75" font-family="monospace" font-size="10" fill="#94a3b8" text-anchor="middle">agent.yaml</text>
+    <text x="205" y="92" font-family="monospace" font-size="8" fill="#64748b" text-anchor="middle">config</text>
+
+    <!-- Test script -->
+    <rect x="280" y="40" width="90" height="60" rx="6" fill="#334155" stroke="#475569" stroke-width="1"/>
+    <text x="325" y="65" font-family="monospace" font-size="10" fill="#94a3b8" text-anchor="middle">test.js</text>
+    <text x="325" y="82" font-family="monospace" font-size="8" fill="#64748b" text-anchor="middle">验收</text>
+
+    <!-- Sticky note 1 -->
+    <rect x="50" y="130" width="80" height="80" rx="4" fill="#fbbf24" opacity="0.8"/>
+    <text x="90" y="160" font-family="sans-serif" font-size="9" fill="#78350f" text-anchor="middle">需求文档</text>
+    <text x="90" y="178" font-family="sans-serif" font-size="9" fill="#78350f" text-anchor="middle">Confluence</text>
+
+    <!-- Sticky note 2 -->
+    <rect x="170" y="160" width="80" height="80" rx="4" fill="#f87171" opacity="0.8"/>
+    <text x="210" y="190" font-family="sans-serif" font-size="9" fill="#7f1d1d" text-anchor="middle">Agent 配置</text>
+    <text x="210" y="208" font-family="sans-serif" font-size="9" fill="#7f1d1d" text-anchor="middle">散落各处</text>
+
+    <!-- Sticky note 3 -->
+    <rect x="290" y="140" width="80" height="80" rx="4" fill="#34d399" opacity="0.8"/>
+    <text x="330" y="170" font-family="sans-serif" font-size="9" fill="#064e3b" text-anchor="middle">测试用例</text>
+    <text x="330" y="188" font-family="sans-serif" font-size="9" fill="#064e3b" text-anchor="middle">独立维护</text>
+
+    <!-- Chaotic arrows -->
+    <path d="M 80 90 Q 120 120 90 130" stroke="#ef4444" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <path d="M 205 120 Q 180 150 210 160" stroke="#ef4444" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <path d="M 325 100 Q 340 130 330 140" stroke="#ef4444" stroke-width="1.5" fill="none" opacity="0.6"/>
+    <path d="M 130 170 Q 160 180 170 170" stroke="#ef4444" stroke-width="1.5" fill="none" opacity="0.6"/>
+
+    <!-- Confused human icon -->
+    <g transform="translate(180, 280)">
+      <circle cx="20" cy="15" r="12" fill="#64748b"/>
+      <path d="M 5 35 Q 20 25 35 35 L 35 60 L 5 60 Z" fill="#64748b"/>
+      <!-- Question marks -->
+      <text x="50" y="20" font-family="sans-serif" font-size="20" fill="#ef4444" opacity="0.8">?</text>
+      <text x="-10" y="30" font-family="sans-serif" font-size="16" fill="#ef4444" opacity="0.6">?</text>
+    </g>
+
+    <!-- Label -->
+    <text x="200" y="370" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#ef4444" text-anchor="middle">信息孤岛 · 难以追溯 · 容易漂移</text>
+  </g>
+
+  <!-- Divider arrow -->
+  <g transform="translate(450, 250)">
+    <path d="M -30 0 L 30 0" stroke="#4d6bfe" stroke-width="3" fill="none" filter="url(#glow)"/>
+    <path d="M 20 -10 L 35 0 L 20 10" stroke="#4d6bfe" stroke-width="3" fill="none" filter="url(#glow)"/>
+  </g>
+
+  <!-- RIGHT SIDE: ArchGraph (unified) -->
+  <g transform="translate(470, 70)">
+    <!-- Background panel -->
+    <rect x="0" y="0" width="400" height="400" rx="12" fill="#1e293b" opacity="0.5" stroke="#4d6bfe" stroke-width="1"/>
+
+    <!-- Unified knowledge graph -->
+    <g transform="translate(200, 180)">
+      <!-- Central hub -->
+      <circle cx="0" cy="0" r="25" fill="#4d6bfe" opacity="0.3" filter="url(#glow)"/>
+      <circle cx="0" cy="0" r="15" fill="#4d6bfe" opacity="0.6"/>
+      <text x="0" y="5" font-family="sans-serif" font-size="9" fill="#f1f5f9" text-anchor="middle">图谱</text>
+
+      <!-- Product nodes (blue) -->
+      <circle cx="-80" cy="-60" r="18" fill="#3b82f6" opacity="0.4" filter="url(#glow)"/>
+      <circle cx="-80" cy="-60" r="12" fill="#3b82f6" opacity="0.8"/>
+      <text x="-80" y="-57" font-family="sans-serif" font-size="8" fill="#f1f5f9" text-anchor="middle">产品</text>
+
+      <circle cx="80" cy="-60" r="18" fill="#3b82f6" opacity="0.4" filter="url(#glow)"/>
+      <circle cx="80" cy="-60" r="12" fill="#3b82f6" opacity="0.8"/>
+      <text x="80" y="-57" font-family="sans-serif" font-size="8" fill="#f1f5f9" text-anchor="middle">组件</text>
+
+      <!-- Agent nodes (purple) -->
+      <circle cx="-80" cy="60" r="18" fill="#7c3aed" opacity="0.4" filter="url(#glow)"/>
+      <circle cx="-80" cy="60" r="12" fill="#7c3aed" opacity="0.8"/>
+      <text x="-80" y="63" font-family="sans-serif" font-size="8" fill="#f1f5f9" text-anchor="middle">Agent</text>
+
+      <circle cx="80" cy="60" r="18" fill="#7c3aed" opacity="0.4" filter="url(#glow)"/>
+      <circle cx="80" cy="60" r="12" fill="#7c3aed" opacity="0.8"/>
+      <text x="80" y="63" font-family="sans-serif" font-size="8" fill="#f1f5f9" text-anchor="middle">技能</text>
+
+      <!-- Task node (gold) -->
+      <circle cx="0" cy="-90" r="18" fill="#f59e0b" opacity="0.4" filter="url(#glow)"/>
+      <circle cx="0" cy="-90" r="12" fill="#f59e0b" opacity="0.8"/>
+      <text x="0" y="-87" font-family="sans-serif" font-size="8" fill="#f1f5f9" text-anchor="middle">任务</text>
+
+      <!-- Test node (green) -->
+      <circle cx="0" cy="90" r="18" fill="#10b981" opacity="0.4" filter="url(#glow)"/>
+      <circle cx="0" cy="90" r="12" fill="#10b981" opacity="0.8"/>
+      <text x="0" y="93" font-family="sans-serif" font-size="8" fill="#f1f5f9" text-anchor="middle">测试</text>
+
+      <!-- Connections -->
+      <line x1="0" y1="0" x2="-80" y2="-60" stroke="#4d6bfe" stroke-width="1.5" opacity="0.6"/>
+      <line x1="0" y1="0" x2="80" y2="-60" stroke="#4d6bfe" stroke-width="1.5" opacity="0.6"/>
+      <line x1="0" y1="0" x2="-80" y2="60" stroke="#7c3aed" stroke-width="1.5" opacity="0.6"/>
+      <line x1="0" y1="0" x2="80" y2="60" stroke="#7c3aed" stroke-width="1.5" opacity="0.6"/>
+      <line x1="0" y1="0" x2="0" y2="-90" stroke="#f59e0b" stroke-width="1.5" opacity="0.6"/>
+      <line x1="0" y1="0" x2="0" y2="90" stroke="#10b981" stroke-width="1.5" opacity="0.6"/>
+
+      <!-- Cross connections -->
+      <line x1="-80" y1="-60" x2="-80" y2="60" stroke="#94a3b8" stroke-width="1" opacity="0.3" stroke-dasharray="4,4"/>
+      <line x1="80" y1="-60" x2="80" y2="60" stroke="#94a3b8" stroke-width="1" opacity="0.3" stroke-dasharray="4,4"/>
+    </g>
+
+    <!-- Confident human icon -->
+    <g transform="translate(170, 310)">
+      <circle cx="20" cy="15" r="12" fill="#4d6bfe"/>
+      <path d="M 5 35 Q 20 25 35 35 L 35 60 L 5 60 Z" fill="#4d6bfe"/>
+      <!-- Check mark -->
+      <path d="M 45 20 L 50 28 L 60 15" stroke="#10b981" stroke-width="3" fill="none"/>
+    </g>
+
+    <!-- Label -->
+    <text x="200" y="370" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#10b981" text-anchor="middle">统一图谱 · 端到端追溯 · 自动武装</text>
+  </g>
+</svg>
