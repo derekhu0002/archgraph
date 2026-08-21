@@ -960,7 +960,7 @@
       "name": "ARGO 部署脚本",
       "parent": "1249",
       "type": "Work Package",
-      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo；将 argo-init skill 部署到 Copilot（~/.copilot/skills）、Cursor（~/.cursor/skills）与 OpenCode（~/.config/opencode/skills）；将 archgraph.instructions.md 规则部署到 Copilot（%APPDATA%\\Code\\User\\prompts）与 OpenCode 全局规则（~/.config/opencode/AGENTS.md）；将 argo/agents 中的 .agent.md 部署到 Copilot（~/.copilot/agents，保持 VS Code 格式）、Cursor（~/.cursor/agents，转换为 .md，保留 name/description/model 并去除 tools 数组等 VS Code 专属字段）与 OpenCode（~/.config/opencode/agents，转换为 .md，保留 description/model、去除 tools 数组等 VS Code 专属字段并声明 mode: all）；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补；若 .env 已存在且对应变量已有非空值则跳过输入并保留原值，仅对缺失或空值的变量提示输入）；自动在 VS Code（%APPDATA%\\Code\\User\\mcp.json）、Cursor（~/.cursor/mcp.json，mcpServers）与 OpenCode（~/.config/opencode/opencode.json，mcp）注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行，多工作区时优先选择含 design/KG/SystemArchitecture.json 的根；Cursor 支持 MCP roots，OpenCode 声明 roots 并响应且默认以项目目录为 cwd 启动，故均能正确解析当前项目目录）；temp 保留在仓库目录不部署。",
+      "description": "提供一个打包脚本 install-argo.ps1：将 argo/schema、argo/scripts、argo/package.json 部署到 ~/.argo；将 argo-init skill 部署到 Copilot（~/.copilot/skills）、Cursor（~/.cursor/skills）与 OpenCode（~/.config/opencode/skills）；将 archgraph.instructions.md 规则部署到 Copilot（%APPDATA%\\Code\\User\\prompts）与 OpenCode 全局规则（~/.config/opencode/AGENTS.md）；将 argo/agents 中的 .agent.md 部署到 Copilot（~/.copilot/agents，保持 VS Code 格式）、Cursor（~/.cursor/agents，转换为 .md，保留 name/description/model 并去除 tools 数组等 VS Code 专属字段）与 OpenCode（~/.config/opencode/agents，转换为 .md，保留 description/model、去除 tools 数组等 VS Code 专属字段并声明 mode: all）；将 argo/plugins 中的 opencode 插件部署到 ~/.argo/plugins，并在 OpenCode opencode.json 的 plugin 数组注册（file:// 绝对路径）；将 archgraph.instructions.md 规则转换为 Cursor 全局规则 ~/.cursor/rules/archgraph.mdc（description + alwaysApply: true），使启动闸门（WakeupGuideline STEP 0）对 Cursor 所有项目生效；部署后在 ~/.argo 运行 npm install 安装 neo4j-driver 依赖（-SkipDeps 跳过）；安装时交互式收集 env 参数并生成 ~/.argo/.env（可留空后补；若 .env 已存在且对应变量已有非空值则跳过输入并保留原值，仅对缺失或空值的变量提示输入）；自动在 VS Code（%APPDATA%\\Code\\User\\mcp.json）、Cursor（~/.cursor/mcp.json，mcpServers）与 OpenCode（~/.config/opencode/opencode.json，mcp）注册 argo MCP server（合并已有配置，不含 cwd/env；全局 server 通过 MCP roots/list 请求动态发现当前工作区，工作区相关工具调用等待 roots 解析后再执行，多工作区时优先选择含 design/KG/SystemArchitecture.json 的根；Cursor 支持 MCP roots，OpenCode 声明 roots 并响应且默认以项目目录为 cwd 启动，故均能正确解析当前项目目录）；temp 保留在仓库目录不部署。",
       "attributes": [
         {
           "name": "commit",
@@ -1111,11 +1111,11 @@
           "acceptanceCriteria": "tests/argo-deploy.test.js"
         },
         {
-          "name": "AT-1361-05-OpenCode规则中文不乱码",
-          "description": "GIVEN install-argo.ps1 已就绪且系统 ANSI 代码页非 UTF-8；WHEN 以 -SkipEnv -SkipDeps 与非交互方式将规则部署到 OpenCode 全局 AGENTS.md；THEN AGENTS.md 中的中文（如「全局工作流规则」「验收用例先行」「意图图谱」）以可读 UTF-8 呈现，且不含 UTF-8 被当作 GBK 解码产生的乱码（如「鍏ㄥ眬」）。",
+          "name": "AT-1361-05-OpenCode规则UTF-8不乱码",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 为英文并含非 ASCII 字符（em dash U+2014）；WHEN 以 -SkipEnv -SkipDeps 与非交互方式将规则部署到 OpenCode 全局 AGENTS.md；THEN AGENTS.md 中的 em dash（—）以可读 UTF-8 呈现，且不含 U+FFFD 替换字符（UTF-8 被按 GBK 解码产生的乱码）。",
           "type": "Acceptance Test",
           "Input": "运行 tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese）"
+          "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 non-ASCII content）"
         },
         {
           "name": "AT-1361-06-Agent随包部署到三工具",
@@ -1123,6 +1123,13 @@
           "type": "Acceptance Test",
           "Input": "运行 tests/argo-deploy.test.js",
           "acceptanceCriteria": "tests/argo-deploy.test.js"
+        },
+        {
+          "name": "AT-1361-07-启动闸门插件与Cursor规则部署",
+          "description": "GIVEN argo/plugins/argo-wakeup.js 与规则文件 argo/rules/archgraph.instructions.md 已就绪；WHEN 以 -SkipEnv -SkipDeps 部署；THEN argo-wakeup.js 被部署到 ~/.argo/plugins 并注册到 OpenCode opencode.json 的 plugin 数组（file:// 路径），且 archgraph.instructions.md 被转换为 Cursor 全局规则 ~/.cursor/rules/archgraph.mdc（description + alwaysApply: true）并包含 UNCONDITIONAL STARTUP GATE 启动闸门。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-deploy.test.js",
+          "acceptanceCriteria": "tests/argo-deploy.test.js（用例 install-argo.ps1 deploys toolchain, skill, and rules without secrets or temp：断言 argo-wakeup.js 部署、OpenCode plugin 数组注册、Cursor archgraph.mdc alwaysApply 与 UNCONDITIONAL STARTUP GATE）"
         }
       ]
     },

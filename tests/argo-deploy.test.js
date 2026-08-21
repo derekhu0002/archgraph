@@ -35,12 +35,14 @@ function buildInstallArgs(opts) {
     '-McpPath', opts.mcpPath,
     '-CursorSkillsRoot', opts.cursorSkillsRoot,
     '-CursorMcpPath', opts.cursorMcpPath,
+    '-CursorRulesRoot', opts.cursorRulesRoot,
     '-OpenCodeSkillsRoot', opts.openCodeSkillsRoot,
     '-OpenCodeAgentsPath', opts.openCodeAgentsPath,
     '-OpenCodeConfigPath', opts.openCodeConfigPath,
     '-CopilotAgentsRoot', opts.copilotAgentsRoot,
     '-CursorAgentsRoot', opts.cursorAgentsRoot,
     '-OpenCodeAgentsRoot', opts.openCodeAgentsRoot,
+    '-PluginsRoot', opts.pluginsRoot,
     '-SkipDeps',
     ...(opts.skipEnv ? ['-SkipEnv'] : []),
   ];
@@ -59,7 +61,9 @@ function hostPaths(tmp) {
     openCodeConfigPath: path.join(tmp, '.config', 'opencode', 'opencode.json'),
     copilotAgentsRoot: path.join(tmp, '.copilot', 'agents'),
     cursorAgentsRoot: path.join(tmp, '.cursor', 'agents'),
+    cursorRulesRoot: path.join(tmp, '.cursor', 'rules'),
     openCodeAgentsRoot: path.join(tmp, '.config', 'opencode', 'agents'),
+    pluginsRoot: path.join(tmp, '.argo', 'plugins'),
   };
 }
 
@@ -79,6 +83,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     cursorSkillsRoot, cursorMcpPath,
     openCodeSkillsRoot, openCodeAgentsPath, openCodeConfigPath,
     copilotAgentsRoot, cursorAgentsRoot, openCodeAgentsRoot,
+    pluginsRoot, cursorRulesRoot,
   } = paths;
   try {
     const result = runInstall({ ...paths, skipEnv: true });
@@ -132,6 +137,13 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(!cursorMcp.mcpServers.argo.cwd, 'Cursor cwd must be omitted; roots resolve the workspace');
     assert.ok(!cursorMcp.mcpServers.argo.env, 'Cursor env must be omitted; roots resolve the workspace');
 
+    // 7b) Cursor global rule: the full archgraph.instructions.md is converted to
+    // a .mdc rule with alwaysApply so it is injected into every request.
+    assert.ok(fs.existsSync(path.join(cursorRulesRoot, 'archgraph.mdc')), 'Cursor global rule must be deployed');
+    const cursorRule = fs.readFileSync(path.join(cursorRulesRoot, 'archgraph.mdc'), 'utf8');
+    assert.match(cursorRule, /alwaysApply: true/, 'Cursor rule must always apply');
+    assert.match(cursorRule, /UNCONDITIONAL STARTUP GATE/, 'Cursor rule must carry the wakeup gate');
+
     // 8) OpenCode skill + global rule.
     assert.ok(fs.existsSync(path.join(openCodeSkillsRoot, 'argo-init', 'SKILL.md')), 'OpenCode skill must be deployed');
     assert.ok(fs.existsSync(openCodeAgentsPath), 'OpenCode global AGENTS.md must be written');
@@ -146,6 +158,15 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(openCode.mcp.argo.command[1].endsWith('argo-mcp-server.js'));
     assert.equal(openCode.mcp.argo.enabled, true);
     assert.ok(!openCode.mcp.argo.cwd, 'OpenCode cwd must be omitted; default is the project directory');
+
+    // 9b) argo plugins deploy to ~/.argo/plugins and the wakeup plugin is
+    // registered in the OpenCode config plugin array.
+    assert.ok(fs.existsSync(path.join(pluginsRoot, 'argo-wakeup.js')), 'argo-wakeup plugin must be deployed');
+    assert.ok(Array.isArray(openCode.plugin), 'OpenCode config must declare a plugin array');
+    assert.ok(
+      openCode.plugin.some(entry => entry.endsWith('argo-wakeup.js')),
+      'OpenCode config must register the argo-wakeup plugin',
+    );
 
     // 10) custom agents deploy to user-level agent dirs for Copilot, Cursor, and OpenCode.
     assert.ok(
@@ -163,21 +184,21 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
 
     const openCodeAgent = fs.readFileSync(path.join(openCodeAgentsRoot, 'wechat-publisher.md'), 'utf8');
     assert.match(openCodeAgent, /description:/, 'OpenCode agent must keep a description');
-    assert.match(openCodeAgent, /model: "Qwen3.7-Plus"/, 'OpenCode agent must keep its pinned model');
+    assert.match(openCodeAgent, /model: "alibaba-cn\/qwen3\.7-plus"/, 'OpenCode agent must keep its pinned model');
     assert.match(openCodeAgent, /mode: all/, 'OpenCode agent must declare mode: all');
     assert.doesNotMatch(openCodeAgent, /^tools:\s*\[/m, 'OpenCode agent must not carry a tools array');
 
     const cursorAgent = fs.readFileSync(path.join(cursorAgentsRoot, 'wechat-publisher.md'), 'utf8');
     assert.match(cursorAgent, /name:/, 'Cursor agent must keep a name');
     assert.match(cursorAgent, /description:/, 'Cursor agent must keep a description');
-    assert.match(cursorAgent, /model: "Qwen3.7-Plus"/, 'Cursor agent must keep its pinned model');
+    assert.match(cursorAgent, /model: "alibaba-cn\/qwen3\.7-plus"/, 'Cursor agent must keep its pinned model');
     assert.doesNotMatch(cursorAgent, /^tools:\s*\[/m, 'Cursor agent must not carry a tools array');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
 
-test('install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese', () => {
+test('install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 non-ASCII content', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-utf8-'));
   const paths = hostPaths(tmp);
   try {
@@ -185,14 +206,13 @@ test('install-argo.ps1 deploys OpenCode AGENTS.md with intact UTF-8 Chinese', ()
     assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
 
     const agents = fs.readFileSync(paths.openCodeAgentsPath, 'utf8');
-    // The rule body must contain readable Chinese, not mojibake produced by
+    // The rule body is English but contains non-ASCII UTF-8 (em dashes). They
+    // must survive the deploy round-trip intact, not mojibake produced by
     // decoding UTF-8 bytes with the system ANSI code page (e.g. GBK on zh-CN).
-    assert.match(agents, /全局工作流规则/);
-    assert.match(agents, /验收用例先行/);
-    assert.match(agents, /意图图谱/);
+    assert.match(agents, /—/, 'em dash (U+2014) must survive the deploy intact');
     assert.match(agents, /GIVEN-WHEN-THEN/);
-    // Classic UTF-8-as-GBK mojibake markers must be absent.
-    assert.doesNotMatch(agents, /鍏ㄥ眬|閫氳繃|楠屾敹/);
+    // U+FFFD replacement chars (corrupted multibyte sequences) must be absent.
+    assert.doesNotMatch(agents, /\uFFFD/, 'no replacement characters may appear');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

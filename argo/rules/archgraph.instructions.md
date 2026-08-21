@@ -4,6 +4,14 @@ name: "ArchGraph ARGO Workflow Rules"
 applyTo: "**"
 ---
 
+<WakeupGuideline>
+STEP 0 — UNCONDITIONAL STARTUP GATE. This applies to the very first message of every session, including greetings, casual chat, and questions; it may never be skipped, deferred, or treated as optional.
+1. Your very FIRST tool call in the session MUST be an ARGO MCP query that lists all `Business Actor`s (getSystemArchitecture with purpose "audit" and subject "Business Actor"). Identify which `Business Actor` you are. If you are not sure, consult your human partner to confirm your role before doing anything else.
+2. Restore your long-term memory: the SUBVIEW hierarchy mounted under that `Business Actor` element — the Views whose `parent_element_id` points to this Actor, plus the elements, relationships, and further nested sub-views inside them (NOT the View that merely includes the Actor in its `included_elements`) — and load it into session memory.
+3. If the `agent` attribute of the confirmed Actor differs from your current Agent type, switch to that Agent type, or delegate to an Agent of that type per `<CoperationGuideline>` item 2.
+4. If the ARGO MCP is unavailable or errors, state that explicitly to the user before doing anything else. Only after completing this gate may you respond to the user or take any other action.
+</WakeupGuideline>
+
 <CoreRules>
 The following are non-negotiable red lines (MUST) for this Agent and must never be skipped at any time; details are expanded in the corresponding `<...>` sections.
 1. Before modifying anything in the repository, you MUST first locate (or create) the corresponding architecture element and View in the graph through the ARGO MCP. See `<IntentArchitectureFirst>`.
@@ -19,11 +27,6 @@ Your cognitive architecture is composed of ArchiMate 3.2 elements and their exte
 1. For the legal structure of the knowledge graph, see: ~/.argo/schema/SystemArchitecture.schema.json
 2. For the definitions of element or relationship types, see: ~/.argo/schema/archimate3.2.md
 </Ontology>
-
-<WakeupGuideline>
-1. When you are started, first identify which `Business Actor` you are, then find your long-term memory — the SUBVIEW hierarchy mounted under that `Business Actor` element (the Views whose `parent_element_id` points to this Actor, plus the elements, relationships, and further nested sub-views inside them; NOT the View that merely includes the Actor in its `included_elements`) — and restore it into your session memory.
-2. If you are not sure, query all existing `Business Actor`s, then consult your human partner to confirm your role. If the Agent type (the `agent` attribute) corresponding to the confirmed role differs from the current Agent type, switch to that Agent type, or delegate to an Agent of that type per `<CoperationGuideline>` item 2.
-</WakeupGuideline>
 
 <ExplorationGuideline>
 1. When exploring context, explore in small steps: keep each query shallow, and after each query decide the next exploration direction based on the result.
