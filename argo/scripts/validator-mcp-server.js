@@ -9,6 +9,7 @@ const execFileAsync = promisify(execFile);
 const {
   getArgoRoot,
   getWorkspaceRoot,
+  resolveCallWorkspaceRoot,
 } = require('./argo-paths.js');
 
 const HANDOFF_STAGES = ['intent-to-implementation', 'implementation-to-coding'];
@@ -85,8 +86,27 @@ const TOOLS = [
   },
 ];
 
-function resolveWorkspaceRoot() {
-  return getWorkspaceRoot();
+// Every tool accepts an optional per-call `workspaceRoot` (absolute path,
+// honored only when listed in ARGO_WORKSPACE_ROOTS). The DeepSeek Harness
+// bridge injects the current session's workspace directory here automatically.
+const WORKSPACE_ROOT_PARAM = Object.freeze({
+  type: 'string',
+  description:
+    'Optional absolute workspace root for this call. Honored only when listed in ARGO_WORKSPACE_ROOTS; otherwise the server launch directory is used.',
+});
+for (const tool of TOOLS) {
+  const inputSchema = tool && tool.inputSchema;
+  if (inputSchema && inputSchema.type === 'object' && inputSchema.properties) {
+    if (!Object.prototype.hasOwnProperty.call(inputSchema.properties, 'workspaceRoot')) {
+      inputSchema.properties.workspaceRoot = WORKSPACE_ROOT_PARAM;
+    }
+  }
+}
+
+function resolveWorkspaceRoot(args) {
+  // Per-call workspaceRoot override (honored only when in the
+  // ARGO_WORKSPACE_ROOTS allowlist); defaults to the launch-directory root.
+  return resolveCallWorkspaceRoot(args);
 }
 
 function resolveScriptPath(workspaceRoot, candidates) {
@@ -231,7 +251,7 @@ function toolResult(payload) {
 }
 
 async function callTool(name, args, progressToken = null) {
-  const workspaceRoot = resolveWorkspaceRoot();
+  const workspaceRoot = resolveWorkspaceRoot(args);
 
   if (name === 'validateSystemArchitecture') {
     return toolResult(await runValidatorScript(workspaceRoot, 'validateSystemArchitecture'));

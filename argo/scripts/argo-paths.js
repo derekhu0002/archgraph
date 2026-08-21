@@ -121,6 +121,48 @@ function normalizeRelativePath(value) {
   return String(value == null ? '' : value).replace(/\\/g, '/').replace(/^\/+/, '');
 }
 
+/**
+ * Resolve the workspace root for one tool call.
+ *
+ * Defaults to the launch-directory root (`getWorkspaceRoot()`). A per-call
+ * `workspaceRoot` argument (absolute path) is honored only when it appears in
+ * the `ARGO_WORKSPACE_ROOTS` allowlist (semicolon or comma separated absolute
+ * paths). Without an allowlist the override is ignored, so existing
+ * deployments keep launch-directory resolution with zero behavior change.
+ * This powers the DeepSeek Harness bridge, which injects the current session's
+ * workspace directory into every call so one dsh instance can follow the
+ * workspace the user switched to.
+ *
+ * @param {object} [args] - tool call arguments (may carry `workspaceRoot`).
+ * @returns {string} resolved absolute workspace root.
+ * @throws when the requested root is not in the allowlist.
+ */
+function resolveCallWorkspaceRoot(args = {}) {
+  const requested =
+    typeof args === 'object' && args !== null && typeof args.workspaceRoot === 'string'
+      ? String(args.workspaceRoot).trim()
+      : '';
+  if (requested === '') {
+    return getWorkspaceRoot();
+  }
+  const allowlist = (process.env.ARGO_WORKSPACE_ROOTS || '')
+    .split(/[;,]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => path.resolve(entry));
+  if (allowlist.length === 0) {
+    return getWorkspaceRoot();
+  }
+  const resolved = path.resolve(requested);
+  const allowed = allowlist.some(
+    (root) => resolved === root || resolved.startsWith(root + path.sep),
+  );
+  if (!allowed) {
+    throw new Error(`workspaceRoot not in ARGO_WORKSPACE_ROOTS allowlist: ${requested}`);
+  }
+  return resolved;
+}
+
 module.exports = {
   getArgoRoot,
   getArgoEnvPath,
@@ -128,6 +170,7 @@ module.exports = {
   hasStaticWorkspace,
   normalizeRelativePath,
   resolveArgoPath,
+  resolveCallWorkspaceRoot,
   resolveWorkspacePath,
   setMcpWorkspaceRoots,
 };

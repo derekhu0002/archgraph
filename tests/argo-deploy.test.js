@@ -299,32 +299,35 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     const result = runInstall({ ...paths, skipEnv: true });
     assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
 
-    // 1) rule -> ~/.dsh/AGENTS.md: frontmatter stripped (DSH injects verbatim),
-    //    carries the DSH adapter note, the wakeup gate, and the core rules.
+    // 1) rule -> ~/.dsh/AGENTS.md: frontmatter stripped (DSH injects verbatim);
+    //    the rule body is injected verbatim with NO adapter prose, so the
+    //    working prompt matches the Copilot / Cursor / OpenCode rules exactly.
     const agents = fs.readFileSync(path.join(dshHome, 'AGENTS.md'), 'utf8');
     assert.ok(!agents.startsWith('---'), 'DSH AGENTS.md must not start with YAML frontmatter');
-    assert.match(agents, /DeepSeek Harness edition/, 'must identify as the DSH edition');
-    assert.match(agents, /mcp__argo__getSystemArchitecture/, 'must document the mcp__argo__ tool prefix');
     assert.match(agents, /<WakeupGuideline>/, 'must carry the wakeup gate');
     assert.match(agents, /<CoreRules>/, 'must carry the core rules');
     assert.match(agents, /<ToolsGuideline>/, 'must carry the tools guideline');
+    assert.match(agents, /UNCONDITIONAL STARTUP GATE/, 'must carry the rule body verbatim');
+    assert.doesNotMatch(agents, /DSH adapter note|Multi-workspace note|DeepSeek Harness edition/,
+      'must not inject adapter/deployment prose into the working rule');
 
     // 2) skill -> ~/.dsh/skills/argo-init (same single source as the others).
     const skill = fs.readFileSync(path.join(dshHome, 'skills', 'argo-init', 'SKILL.md'), 'utf8');
     assert.match(skill, /name: argo-init/, 'skill must keep its DSH-compatible frontmatter');
 
-    // 3+4) mcp + wakeup rows -> ~/.dsh/cordis.patch.yml (managed block).
+    // 3+4) bridge + wakeup rows -> ~/.dsh/cordis.patch.yml (managed block).
+    // The dsh-argo-workspace bridge connects directly to the argo server; no
+    // dsh-mcp-client row is needed, so no internal tool names exist.
     const patch = fs.readFileSync(path.join(dshHome, 'cordis.patch.yml'), 'utf8');
     assert.match(patch, /BEGIN ArchGraph ARGO deployment/, 'managed block marker must be present');
-    assert.match(patch, /id: mcp-argo/, 'must insert the mcp-argo row');
-    assert.match(patch, /@deepseek-ai\/dsh-mcp-client/, 'must use the DSH MCP bridge plugin');
-    assert.match(patch, /serverName: argo/, 'must use the argo server namespace');
-    assert.match(patch, /transport: stdio/, 'must use stdio transport');
+    assert.match(patch, /id: argo-workspace/, 'must insert the workspace bridge row');
+    assert.match(patch, /dsh-argo-workspace\/index\.js/, 'bridge row must reference the generated bridge plugin');
+    assert.match(patch, /serverPath:/, 'bridge row must pass the deployed argo MCP server path');
     assert.match(patch, /argo-mcp-server\.js/, 'must reference the deployed argo MCP server');
-    // Workspace resolution stays dynamic by default (DSH has no per-workspace
-    // MCP roots; the argo server resolves from the directory dsh is launched
-    // from), so no cwd is pinned unless -DshCwd is passed.
-    assert.doesNotMatch(patch, /cwd:/, 'must not pin cwd by default; workspace stays launch-directory dynamic');
+    assert.doesNotMatch(patch, /dsh-mcp-client/, 'must not require a dsh-mcp-client row');
+    // No cwd is pinned by default (workspace following is per-call via the bridge).
+    assert.doesNotMatch(patch, /cwd:/, 'must not pin cwd by default');
+    assert.doesNotMatch(patch, /workspaces:/, 'must not set the allowlist unless -DshWorkspaces is passed');
     assert.match(patch, /id: argo-wakeup/, 'must insert the argo-wakeup row');
     assert.match(patch, /file:\/\/\//, 'must reference the generated plugin via file: URL');
     assert.match(patch, /END ArchGraph ARGO deployment/, 'managed block end marker must be present');
@@ -338,6 +341,20 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     assert.match(wakeup, /export const inject = \['systemPrompt'\]/, 'plugin must inject the prompt registry');
     assert.match(wakeup, /order: -90/, 'gate section must sit right after the harness identity');
     assert.match(wakeup, /WAKEUP_GATE|STARTUP GATE/, 'plugin must carry the gate text from the rule');
+
+    // 4c) workspace bridge plugin connects directly to the argo server and
+    // injects the session workspace as the per-call workspaceRoot.
+    const bridge = fs.readFileSync(
+      path.join(dshHome, 'plugins', 'dsh-argo-workspace', 'index.js'),
+      'utf8',
+    );
+    assert.match(bridge, /export const name = 'dsh-argo-workspace'/, 'bridge must export its name');
+    assert.match(bridge, /export const inject = \['tools'\]/, 'bridge must inject the tools registry');
+    assert.match(bridge, /StdioClientTransport/, 'bridge must spawn the argo server directly');
+    assert.match(bridge, /mcp__argo__/, 'bridge must register the public mcp__argo__ tool names');
+    assert.doesNotMatch(bridge, /mcp__argo-core__/, 'bridge must not create internal tool names');
+    assert.match(bridge, /workspaceRoot/, 'bridge must inject workspaceRoot into every call');
+    assert.match(bridge, /requestHeader\(\)\.cwd/, 'bridge must read the session workspace from the session header');
 
     // 5) agents -> ~/.dsh/.agent-presets/<id>/ generated from argo/agents/*.agent.md.
     const preset = path.join(dshHome, '.agent-presets', 'wechat-publisher');
@@ -363,7 +380,7 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     );
     const agents2 = fs.readFileSync(path.join(dshHome, 'AGENTS.md'), 'utf8');
     assert.equal(
-      (agents2.match(/DeepSeek Harness edition/g) || []).length,
+      (agents2.match(/<WakeupGuideline>/g) || []).length,
       1,
       'DSH rule block must not be duplicated across re-installs',
     );
@@ -385,6 +402,6 @@ test('install-argo.ps1 numbers the DeepSeek Harness conversion as deploy steps 1
   assert.match(script, /\[15\/19\][^\n]*AGENTS\.md/, 'step 15 must convert the rule to AGENTS.md');
   assert.match(script, /\[16\/19\][^\n]*skills\\argo-init/, 'step 16 must deploy the argo-init skill');
   assert.match(script, /\[17\/19\][^\n]*WakeupGuideline/, 'step 17 must generate the wakeup plugin from the rule');
-  assert.match(script, /\[18\/19\][^\n]*cordis\.patch\.yml/, 'step 18 must write the MCP + wakeup rows');
+  assert.match(script, /\[18\/19\][^\n]*argo-workspace/, 'step 18 must write the MCP bridge + wakeup rows');
   assert.match(script, /\[19\/19\][^\n]*agent-presets/, 'step 19 must generate the agent presets');
 });
