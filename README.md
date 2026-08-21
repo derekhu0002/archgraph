@@ -19,6 +19,20 @@ engineering:
 
 Editable source: [`docs/diagrams/global-architecture.excalidraw`](docs/diagrams/global-architecture.excalidraw)
 
+## Supported Harnesses
+
+ArchGraph deploys the ARGO toolchain to all major coding-agent environments:
+
+| Harness            | MCP Server | Skills | Rules / Instructions | Agents | Wakeup Gate |
+|--------------------|:----------:|:------:|:--------------------:|:------:|:-----------:|
+| GitHub Copilot     |     ✓      |   ✓    |          ✓           |   ✓    |      —      |
+| Cursor             |     ✓      |   ✓    |          ✓           |   ✓    |      —      |
+| OpenCode           |     ✓      |   ✓    |          ✓           |   ✓    |     ✓       |
+| DeepSeek Harness   |     ✓      |   ✓    |          ✓           |   ✓    |     ✓       |
+
+A single `argo-deploy` registers the `argo` MCP server and installs all artifacts into each harness
+automatically.
+
 ## Install
 
 ```powershell
