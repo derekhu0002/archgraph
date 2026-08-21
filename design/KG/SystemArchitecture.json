@@ -1753,6 +1753,11 @@
           "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-perf.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
           "value": "ffd9ed8"
+        },
+        {
+          "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-perf.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "122162b"
         }
       ],
       "testcases": [
