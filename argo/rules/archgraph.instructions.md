@@ -98,11 +98,6 @@ You MUST read/write the intent architecture through the tools provided by the AR
 15. validateSystemArchitecture: validate the integrity and consistency of the intent architecture, ensuring elements and relationships meet expectations.
 16. queryNeo4jGraph: run a read-only Cypher query against the Neo4j structural projection of the intent graph, or request the projection schema with {schema: true}. Use for structural/type-based graph queries (see <GraphQueryGuideline>).
 
-<Attention>
-you MUST make sure the knowledge graph the ARGO MCP server is handling is actually the one in this repository (design/KG/SystemArchitecture.json) and not some other knowledge graph; otherwise, you MUST stop and report the issue to your human partner before doing anything else.
-</Attention>
-</ToolsGuideline>
-
 <GraphQueryGuideline>
 For structural/type-based graph lookups, use the read-only Neo4j Cypher interface `queryNeo4jGraph` instead of reading the canonical JSON file directly. It never mutates the graph; all writes still go through the mutation tools.
 1. Ask for the projection schema first: call `queryNeo4jGraph` with {schema: true} to learn node labels (ArchitectureGraph, Element, ArchitectureRelationship, View), relationship types (OWNS_ELEMENT, OWNS_RELATIONSHIP, OWNS_VIEW, RELATIONSHIP_SOURCE, RELATIONSHIP_TARGET, ARCHIMATE_RELATES, VIEW_OF, INCLUDES_ELEMENT, INCLUDES_RELATIONSHIP, HAS_SUBDIAGRAM), property keys, and the legal ArchiMate element/relationship type enums (e.g. 'Business Actor', 'Assignment').
@@ -112,3 +107,8 @@ For structural/type-based graph lookups, use the read-only Neo4j Cypher interfac
 4. Use it for structural queries: list elements of a type, traverse ARCHIMATE_RELATES edges, count and aggregate. For semantic/context reading (subgraph context, dependency traversal, view membership), keep using getSystemArchitecture (semantic query), getIntentElementContext, and getArchitectureViewContext.
 5. The query is read-only; never attempt to mutate the graph through Cypher.
 </GraphQueryGuideline>
+
+<Attention>
+you MUST make sure the knowledge graph the ARGO MCP server is handling is actually the one in this repository (design/KG/SystemArchitecture.json) and not some other knowledge graph; otherwise, you MUST stop and report the issue to your human partner before doing anything else.
+</Attention>
+</ToolsGuideline>
