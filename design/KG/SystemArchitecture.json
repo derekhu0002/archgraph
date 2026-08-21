@@ -1727,19 +1727,19 @@
       "description": "基于 eatool/EA-jsscript/import_system_architecture_json_to_ea.js 开发新脚本 import_system_architecture_json_to_ea_new.js：不保留原 schema id，所有导入元素按新元素处理；执行时必须由用户提供导入文件路径。",
       "attributes": [
         {
+          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js",
           "name": "commit",
-          "value": "0e54ddd",
-          "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js"
+          "value": "0e54ddd"
         },
         {
+          "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "1fde5dc",
-          "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
+          "value": "1fde5dc"
         },
         {
+          "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "d989fce",
-          "description": "eatool/EA-jsscript/import_system_architecture_json_to_ea_new.js; tests/ea-import-new.test.js; design/KG/SystemArchitecture.json"
+          "value": "d989fce"
         },
         {
           "name": "deliveryStatus",
@@ -1748,6 +1748,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-perf.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "ffd9ed8"
         }
       ],
       "testcases": [
