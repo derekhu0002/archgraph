@@ -3752,6 +3752,16 @@
       "parent_element_id": "2733",
       "view_id": "1804",
       "view_name": "Reviewer工作记录"
+    },
+    {
+      "description": "Developer（Business Actor Xiaoming/2735）的长期记忆子视图：修复 DeepSeek Harness 集成 bug——install-argo.ps1 生成的 dsh-argo-workspace 桥接插件在 tools.register 时缺少 output.render（DSH 工具注册契约要求 output { schema, render, presentationMeta? }），导致 dsh 启动失败 \"tool mcp__argo__initializeWorkspace must declare output\"。修复：为 output 增加 render: (_args, value) => value.content，并把 schema 增加 structuredContent 属性以匹配 execute 返回值；同步修正 tests/argo-deploy.test.js 中过期的 StdioClientTransport 断言。验收：node --test tests/argo-deploy.test.js 6/6 通过；桥接插件对桩 MCP server 冒烟通过；注册 commit 17dc0f4（install-argo.ps1; tests/argo-deploy.test.js）。",
+      "included_elements": [
+        "1361"
+      ],
+      "included_relationships": [],
+      "parent_element_id": "2735",
+      "view_id": "1805",
+      "view_name": "Developer工作记录"
     }
   ]
 }
