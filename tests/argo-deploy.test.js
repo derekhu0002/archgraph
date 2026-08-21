@@ -355,7 +355,7 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     assert.match(bridge, /mcp__argo__/, 'bridge must register the public mcp__argo__ tool names');
     assert.doesNotMatch(bridge, /mcp__argo-core__/, 'bridge must not create internal tool names');
     assert.match(bridge, /workspaceRoot/, 'bridge must inject workspaceRoot into every call');
-    assert.match(bridge, /requestHeader\(\)\.cwd/, 'bridge must read the session workspace from the session header');
+    assert.match(bridge, /header\?\.cwd/, 'bridge must read the session workspace from the durable session header (SessionHeader.cwd, not requestHeader())');
 
     // 5) agents -> ~/.dsh/.agent-presets/<id>/ generated from argo/agents/*.agent.md.
     const preset = path.join(dshHome, '.agent-presets', 'wechat-publisher');

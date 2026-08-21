@@ -493,8 +493,11 @@ export async function apply(ctx, config) {
         render: (_args, value) => value.content,
       },
       execute: async (args, exec) => {
+        // SessionHeader.cwd (the durable session workspace), NOT
+        // requestHeader() — that returns the request EpochHeader
+        // (config/system/tools) which has no cwd field.
         const sessionCwd = exec && exec.agent && exec.agent.session
-          ? exec.agent.session.requestHeader().cwd
+          ? exec.agent.session.header?.cwd
           : undefined
         const injected = { ...(args && typeof args === 'object' ? args : {}) }
         if (typeof sessionCwd === 'string' && sessionCwd !== '') {

@@ -405,7 +405,9 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
   if (name === 'initializeWorkspace') {
     const workspace = await initializeWorkspace(resolveWorkspaceRoot(args));
     const composition = canonicalSemanticInitStorage.getStore()
-      || systemArchitectureMcp.createDefaultCanonicalSemanticInitComposition();
+      || systemArchitectureMcp.createDefaultCanonicalSemanticInitComposition({
+        repositoryRoot: resolveWorkspaceRoot(args),
+      });
     const semanticLifecycle = await runCanonicalSemanticInit(composition, {
       repositoryRoot: resolveWorkspaceRoot(args),
       workspace,
@@ -675,7 +677,9 @@ async function handleRequest(request, dependencies = undefined) {
       ) {
         activeDependencies = {
           semanticOperatorJourney:
-            await systemArchitectureMcp.createDefaultProductionSemanticOperatorJourney(),
+            await systemArchitectureMcp.createDefaultProductionSemanticOperatorJourney({
+              repositoryRoot: resolveWorkspaceRoot(params.arguments),
+            }),
         };
       }
       const result = await callTool(
