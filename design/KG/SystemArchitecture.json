@@ -2500,6 +2500,21 @@
           "Input": "node --test \"tests/*.test.js\"",
           "acceptanceCriteria": "执行 node --test \"tests/*.test.js\"：全部用例通过，无回归失败。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "85285d3",
+          "description": "docs/dsh-plugin-publish.md; tests/dsh-plugin-publish.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "IN_PROGRESS"
+        }
       ]
     }
   ],
