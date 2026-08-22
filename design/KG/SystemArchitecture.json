@@ -2813,6 +2813,11 @@
           "name": "commit",
           "value": "0c68a65",
           "description": "install-argo.ps1; tests/argo-openclaw.test.js; tests/argo-deploy.test.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "9b169f1",
+          "description": "design/KG/SystemArchitecture.json (commit attr + LTM session record)"
         }
       ],
       "testcases": [
