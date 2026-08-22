@@ -395,19 +395,24 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
   }
 });
 
-test('install-argo.ps1 numbers the DeepSeek Harness conversion as deploy steps 15-19', () => {
-  // GIVEN the installer publishes 19 numbered deploy steps (14 platform steps
-  // plus 5 DeepSeek Harness conversion steps)
+test('install-argo.ps1 numbers the deploy steps 1-22 including the OpenClaw conversion steps 20-22', () => {
+  // GIVEN the installer publishes 22 numbered deploy steps (14 platform steps
+  // plus 5 DeepSeek Harness conversion steps plus 3 OpenClaw conversion steps)
   // WHEN a reader scans install-argo.ps1 for step markers
-  // THEN the five DSH steps are numbered [15/19]..[19/19] and carry the
-  // rule / skill / wakeup plugin / MCP / agent preset conversions
+  // THEN the five DSH steps are numbered [15/22]..[19/22], the three OpenClaw
+  // steps are numbered [20/22]..[22/22], and they carry the rule / skill /
+  // wakeup plugin / MCP / agent preset / workspace / MCP-registration
+  // conversions
   const script = fs.readFileSync(SCRIPT, 'utf8');
-  for (let i = 1; i <= 19; i++) {
-    assert.ok(script.includes(`[${i}/19]`), `step marker [${i}/19] must exist`);
+  for (let i = 1; i <= 22; i++) {
+    assert.ok(script.includes(`[${i}/22]`), `step marker [${i}/22] must exist`);
   }
-  assert.match(script, /\[15\/19\][^\n]*AGENTS\.md/, 'step 15 must convert the rule to AGENTS.md');
-  assert.match(script, /\[16\/19\][^\n]*skills\\argo-init/, 'step 16 must deploy the argo-init skill');
-  assert.match(script, /\[17\/19\][^\n]*WakeupGuideline/, 'step 17 must generate the wakeup plugin from the rule');
-  assert.match(script, /\[18\/19\][^\n]*argo-workspace/, 'step 18 must write the MCP bridge + wakeup rows');
-  assert.match(script, /\[19\/19\][^\n]*agent-presets/, 'step 19 must generate the agent presets');
+  assert.match(script, /\[15\/22\][^\n]*AGENTS\.md/, 'step 15 must convert the rule to AGENTS.md');
+  assert.match(script, /\[16\/22\][^\n]*skills\\argo-init/, 'step 16 must deploy the argo-init skill');
+  assert.match(script, /\[17\/22\][^\n]*WakeupGuideline/, 'step 17 must generate the wakeup plugin from the rule');
+  assert.match(script, /\[18\/22\][^\n]*argo-workspace/, 'step 18 must write the MCP bridge + wakeup rows');
+  assert.match(script, /\[19\/22\][^\n]*agent-presets/, 'step 19 must generate the agent presets');
+  assert.match(script, /\[20\/22\][^\n]*AGENTS\.md/, 'step 20 must deploy the OpenClaw rule to the workspace AGENTS.md');
+  assert.match(script, /\[21\/22\][^\n]*skills\\argo-init/, 'step 21 must deploy the OpenClaw argo-init skill');
+  assert.match(script, /\[22\/22\][^\n]*mcp\.servers\.argo/, 'step 22 must register the OpenClaw argo MCP server');
 });
