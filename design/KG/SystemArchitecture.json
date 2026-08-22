@@ -2828,6 +2828,11 @@
           "name": "commit",
           "value": "4c0ca4a",
           "description": "install-argo.ps1 (Write-OpenClawMcpConfig: 仅真实工作区才钉 ARGO_REPO_ROOT，否则保留已有值/省略并提示；新增 -OpenClawRepoRoot); tests/argo-openclaw.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "dab0a90",
+          "description": "install-argo.ps1 (Write-OpenClawMcpConfig: 仅保留「真实工作区」的已有 ARGO_REPO_ROOT，清除陈旧非工作区值如 npm 包目录；OpenClaw 以自身 workspace 为图根时 DB=workspace 可跨重部署保留); tests/argo-openclaw.test.js"
         }
       ],
       "testcases": [
