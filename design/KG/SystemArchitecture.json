@@ -2932,18 +2932,23 @@
           "value": "2c79ca9"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
-          "name": "status",
-          "value": "BLOCKED",
-          "description": "草稿创建被 40164 IP 白名单阻断（当前公网 IP 223.74.103.74 未加入公众号后台白名单），文章已就绪待用户加白后重试 wechat:draft"
-        },
-        {
           "description": "docs/diagrams/openclaw-banner.png（重绘为主题封面：AI 助手看懂架构图）; scripts/generate-openclaw-banner.py; tests/wechat-article.test.js（AT-2781-02 wechat-openclaw-banner）; design/KG/SystemArchitecture.json",
           "name": "commit",
           "value": "6c8b410"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "name": "media_id",
+          "value": "BRZAMZ3b-CaOBH8qdG2KTdYorK99G7w44iLsglISilT3k3yioXaiUHP9S7Kzt5qi",
+          "description": "WeChat draft media_id（2026-08-23，IP 白名单已加入后创建成功）"
+        },
+        {
+          "name": "status",
+          "value": "draft_created",
+          "description": "草稿已创建（wechat:draft 成功），待公众号后台「草稿箱」手动发布；API 发布不可用（个人未认证订阅号 48001）"
         }
       ]
     },
