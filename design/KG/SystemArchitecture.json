@@ -1867,6 +1867,11 @@
         {
           "name": "sessionId",
           "value": "88bdf28a-55eb-48d8-9092-a01ecfb6a681"
+        },
+        {
+          "name": "commit",
+          "value": "b27a9eb",
+          "description": "design/KG/SystemArchitecture.json（laodong LTM 视图 laodong-ltm-001 追加 queryNeo4jGraph 只读透传行为验证结论）"
         }
       ],
       "subdiagram_views": [
