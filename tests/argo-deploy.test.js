@@ -44,6 +44,9 @@ function buildInstallArgs(opts) {
     '-OpenCodeAgentsRoot', opts.openCodeAgentsRoot,
     '-PluginsRoot', opts.pluginsRoot,
     '-DshHome', opts.dshHome,
+    '-OpenClawHome', opts.openClawHome,
+    '-OpenClawWorkspace', opts.openClawWorkspace,
+    '-SkipOpenClaw',
     '-SkipDeps',
     ...(opts.skipEnv ? ['-SkipEnv'] : []),
   ];
@@ -66,6 +69,8 @@ function hostPaths(tmp) {
     openCodeAgentsRoot: path.join(tmp, '.config', 'opencode', 'agents'),
     pluginsRoot: path.join(tmp, '.argo', 'plugins'),
     dshHome: path.join(tmp, '.dsh'),
+    openClawHome: path.join(tmp, '.openclaw'),
+    openClawWorkspace: path.join(tmp, '.openclaw', 'workspace'),
   };
 }
 

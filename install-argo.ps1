@@ -20,6 +20,9 @@ param(
     [string]$DshHome = "$env:USERPROFILE\.dsh",
     [string]$DshCwd = '',
     [string]$DshWorkspaces = '',
+    [string]$OpenClawHome = "$env:USERPROFILE\.openclaw",
+    [string]$OpenClawWorkspace = "$env:USERPROFILE\.openclaw\workspace",
+    [switch]$SkipOpenClaw,
     [string]$McpPath
 )
 
@@ -265,47 +268,112 @@ function Get-WakeupGuideline {
     return $m.Groups[1].Value.Trim()
 }
 
-function Write-DshAgentRule {
-    # Merge the frontmatter-stripped ArchGraph rule into ~/.dsh/AGENTS.md,
-    # replacing the previous ArchGraph block while preserving surrounding user
-    # content. The rule body is injected verbatim - no adapter prose, so the
-    # working prompt stays identical to the Copilot / Cursor / OpenCode rules.
+function Write-ArchGraphRuleBlock {
+    # Merge the frontmatter-stripped ArchGraph rule into a target AGENTS.md
+    # file (DSH home or OpenClaw workspace), replacing the previous ArchGraph
+    # block while preserving surrounding user content. The rule body is
+    # injected verbatim - no adapter prose - so the working prompt stays
+    # identical to the Copilot / Cursor / OpenCode rules.
     param(
-        [string]$DshHome,
-        [string]$RuleText
+        [string]$DestPath,
+        [string]$RuleText,
+        [string]$Label
     )
     $ruleContent = Get-MarkdownBody -Content $RuleText
-    $dest = Join-Path $DshHome 'AGENTS.md'
     $marker = '<WakeupGuideline>'
-    New-Item -ItemType Directory -Force -Path $DshHome | Out-Null
-    if (Test-Path $dest) {
-        $existing = Get-Content $dest -Raw -Encoding UTF8
+    New-Item -ItemType Directory -Force -Path (Split-Path $DestPath) | Out-Null
+    if (Test-Path $DestPath) {
+        $existing = Get-Content $DestPath -Raw -Encoding UTF8
         if ($existing -like "*$marker*") {
             $endTag = '</ToolsGuideline>'
             $startIdx = $existing.IndexOf($marker)
             if ($startIdx -lt 0) { $startIdx = 0 }
             $endIdx = $existing.IndexOf($endTag, $startIdx)
             $before = $existing.Substring(0, $startIdx).TrimEnd()
-            if ($endIdx -lt 0) {
-                $combined = $before
-                if ($combined.Length -gt 0) { $combined += "`n`n" }
-                $combined += $ruleContent
-            } else {
-                $after = $existing.Substring($endIdx + $endTag.Length)
-                $combined = $before
-                if ($combined.Length -gt 0) { $combined += "`n`n" }
-                $combined += $ruleContent
-                if ($after.Length -gt 0) { $combined += $after }
-            }
-            [System.IO.File]::WriteAllText($dest, $combined, (New-Object System.Text.UTF8Encoding $false))
+            $after = ''
+            if ($endIdx -ge 0) { $after = $existing.Substring($endIdx + $endTag.Length).TrimStart() }
+            $combined = $before
+            if ($combined.Length -gt 0) { $combined += "`n`n" }
+            $combined += $ruleContent
+            if ($after.Length -gt 0) { $combined += "`n`n" + $after }
+            [System.IO.File]::WriteAllText($DestPath, $combined, (New-Object System.Text.UTF8Encoding $false))
         } else {
             $combined = $existing.TrimEnd() + "`n`n" + $ruleContent
-            [System.IO.File]::WriteAllText($dest, $combined, (New-Object System.Text.UTF8Encoding $false))
+            [System.IO.File]::WriteAllText($DestPath, $combined, (New-Object System.Text.UTF8Encoding $false))
         }
     } else {
-        [System.IO.File]::WriteAllText($dest, $ruleContent, (New-Object System.Text.UTF8Encoding $false))
+        [System.IO.File]::WriteAllText($DestPath, $ruleContent, (New-Object System.Text.UTF8Encoding $false))
     }
-    Write-Host "  DSH rule installed -> $dest"
+    Write-Host "  $Label installed -> $DestPath"
+}
+
+function Write-DshAgentRule {
+    # Merge the frontmatter-stripped ArchGraph rule into ~/.dsh/AGENTS.md
+    # (DeepSeek Harness user-global rule), replacing the previous ArchGraph
+    # block while preserving surrounding user content.
+    param(
+        [string]$DshHome,
+        [string]$RuleText
+    )
+    Write-ArchGraphRuleBlock -DestPath (Join-Path $DshHome 'AGENTS.md') -RuleText $RuleText -Label 'DSH rule'
+}
+
+function Write-OpenClawAgentRule {
+    # Deploy the ArchGraph rules into the OpenClaw agent workspace AGENTS.md.
+    # OpenClaw injects AGENTS.md into Project Context on every session (the
+    # same mechanism as the DSH / OpenCode AGENTS.md rules), so the
+    # UNCONDITIONAL STARTUP GATE is always active for OpenClaw agents.
+    param(
+        [string]$OpenClawWorkspace,
+        [string]$RuleText
+    )
+    Write-ArchGraphRuleBlock -DestPath (Join-Path $OpenClawWorkspace 'AGENTS.md') -RuleText $RuleText -Label 'OpenClaw rule'
+}
+
+function Write-OpenClawMcpConfig {
+    # Register the argo MCP server under mcp.servers.argo in
+    # ~/.openclaw/openclaw.json. OpenClaw is a fixed-workspace host: its
+    # embedded MCP client does not advertise MCP roots, so the workspace is
+    # pinned explicitly via env.ARGO_REPO_ROOT to the repository root this
+    # installer runs from. Existing config keys are preserved; a JSON5 (non
+    # strict JSON) config is left untouched with a manual-registration hint.
+    param(
+        [string]$OpenClawHome,
+        [string]$RepoRoot,
+        [string]$ArgoServer
+    )
+    $configPath = Join-Path $OpenClawHome 'openclaw.json'
+    $root = [ordered]@{}
+    if (Test-Path $configPath) {
+        try {
+            $existing = Get-Content $configPath -Raw | ConvertFrom-Json
+            foreach ($p in $existing.PSObject.Properties) {
+                $root[$p.Name] = $p.Value
+            }
+        } catch {
+            Write-Warning "  $configPath is not strict JSON (JSON5 with comments?); skipping argo MCP registration."
+            Write-Warning "  Register manually: openclaw mcp add argo --command node --arg `"$ArgoServer`" --env ARGO_REPO_ROOT=$RepoRoot"
+            return
+        }
+    }
+    $mcp = [ordered]@{}
+    if ($root.Contains('mcp') -and $null -ne $root['mcp']) {
+        foreach ($p in $root['mcp'].PSObject.Properties) { $mcp[$p.Name] = $p.Value }
+    }
+    $servers = [ordered]@{}
+    if ($mcp.Contains('servers') -and $null -ne $mcp['servers']) {
+        foreach ($p in $mcp['servers'].PSObject.Properties) { $servers[$p.Name] = $p.Value }
+    }
+    $servers['argo'] = [ordered]@{
+        command = 'node'
+        args    = @($ArgoServer)
+        env     = [ordered]@{ ARGO_REPO_ROOT = $RepoRoot }
+    }
+    $mcp['servers'] = $servers
+    $root['mcp'] = $mcp
+    New-Item -ItemType Directory -Force -Path $OpenClawHome | Out-Null
+    $json = $root | ConvertTo-Json -Depth 12
+    [System.IO.File]::WriteAllText($configPath, $json, (New-Object System.Text.UTF8Encoding $false))
 }
 
 function Write-DshManagedBlock {
@@ -736,6 +804,25 @@ if ($SkipDsh) {
     Write-Host '  the injected workspaceRoot unconditionally).'
 }
 
+if ($SkipOpenClaw) {
+    Write-Host 'Skipped OpenClaw integration (-SkipOpenClaw).'
+} else {
+    $ruleSrcContent = Get-Content $ruleSrc -Raw -Encoding UTF8
+    $openClawSkillDest = Join-Path $OpenClawHome 'skills\argo-init'
+    $openClawAgentsDest = Join-Path $OpenClawWorkspace 'AGENTS.md'
+
+    Write-Host '==> Deploying OpenClaw integration'
+    Write-Host "  argo\rules\archgraph.instructions.md -> $openClawAgentsDest (OpenClaw workspace AGENTS.md, frontmatter stripped)"
+    Write-OpenClawAgentRule -OpenClawWorkspace $OpenClawWorkspace -RuleText $ruleSrcContent
+
+    Write-Host "  argo\skills\argo-init -> $openClawSkillDest (OpenClaw managed skill, all agents)"
+    Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $openClawSkillDest
+
+    Write-Host '  OpenClaw injects AGENTS.md into Project Context on every session, so the wakeup'
+    Write-Host '  gate (UNCONDITIONAL STARTUP GATE) is active on the next OpenClaw session; restart'
+    Write-Host '  the OpenClaw gateway (openclaw gateway restart) if it is already running.'
+}
+
 if ($SkipDeps) {
     Write-Host 'Skipped dependency install (-SkipDeps).'
 } elseif (Get-Command npm -ErrorAction SilentlyContinue) {
@@ -855,6 +942,12 @@ if ($SkipMcp) {
         enabled = $true
     })
     Write-Host "argo MCP config written -> $OpenCodeConfigPath"
+
+    if (-not $SkipOpenClaw) {
+        Write-Host '==> Registering argo MCP server in OpenClaw'
+        Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $repoRoot -ArgoServer $argoServer
+        Write-Host "argo MCP config written -> $(Join-Path $OpenClawHome 'openclaw.json')"
+    }
 }
 
 $wakeupPluginPath = Join-Path $PluginsRoot 'argo-wakeup.js'

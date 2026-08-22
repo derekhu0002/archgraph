@@ -55,6 +55,10 @@
         {
           "view_id": "argo-workflow-rules-view",
           "view_name": "ARGO Workflow Rules"
+        },
+        {
+          "view_id": "openclaw-adaptation",
+          "view_name": "OpenClaw Adaptation"
         }
       ]
     },
@@ -902,53 +906,53 @@
       ],
       "testcases": [
         {
-          "Input": "运行 node .argo/scripts/argo-mcp-server.js",
-          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“提供AML参考实现”Work Package 挂载于 AML 规范下并带验收用例。通过。",
-          "description": "GIVEN AML 规范已定义；WHEN 消费者或厂商需要参考实现；THEN ARGO harness 提供可运行的 MCP server、schema 校验器与 Graph RAG 生命周期实现。",
           "name": "AT-1357-01-AML参考实现",
-          "type": "Acceptance Test"
+          "description": "GIVEN AML 规范已定义；WHEN 消费者或厂商需要参考实现；THEN ARGO harness 提供可运行的 MCP server、schema 校验器与 Graph RAG 生命周期实现。",
+          "type": "Acceptance Test",
+          "Input": "运行 node .argo/scripts/argo-mcp-server.js",
+          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“提供AML参考实现”Work Package 挂载于 AML 规范下并带验收用例。通过。"
         },
         {
-          "Input": "运行 tests/argo-global-install.test.js",
-          "acceptanceCriteria": "tests/argo-global-install.test.js",
-          "description": "GIVEN .argo 工具链被复制到仓库外的全局目录（如用户目录）；WHEN 以 ARGO_REPO_ROOT 指向当前仓库并启动全局安装的 .argo/scripts/argo-mcp-server.js；THEN MCP server 能完成 initialize 与 tools/list，且 validateSystemArchitecture 与 getSystemArchitecture 工具调用均通过（脚本与 schema 从安装目录解析，workspace 从 ARGO_REPO_ROOT 解析）。",
           "name": "AT-1357-02-ARGO全局安装可运行",
-          "type": "Acceptance Test"
+          "description": "GIVEN .argo 工具链被复制到仓库外的全局目录（如用户目录）；WHEN 以 ARGO_REPO_ROOT 指向当前仓库并启动全局安装的 .argo/scripts/argo-mcp-server.js；THEN MCP server 能完成 initialize 与 tools/list，且 validateSystemArchitecture 与 getSystemArchitecture 工具调用均通过（脚本与 schema 从安装目录解析，workspace 从 ARGO_REPO_ROOT 解析）。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-global-install.test.js",
+          "acceptanceCriteria": "tests/argo-global-install.test.js"
         },
         {
-          "Input": "运行 tests/argo-workspace-bootstrap.test.js",
-          "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js",
-          "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）在非 --check-only 模式运行于缺少 design/KG/SystemArchitecture.json 与 .feap 模板的工作区；WHEN 执行初始化脚本；THEN 自动从部署的 defaults 拷贝 design/KG/SystemArchitecture.json，并以当前项目名拷贝 defaults/EA-model-template.feap 为 <项目名>.feap；--check-only 模式不修改工作区。",
           "name": "AT-1357-03-WorkspaceBootstrap拷贝默认文件",
-          "type": "Acceptance Test"
+          "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）在非 --check-only 模式运行于缺少 design/KG/SystemArchitecture.json 与 .feap 模板的工作区；WHEN 执行初始化脚本；THEN 自动从部署的 defaults 拷贝 design/KG/SystemArchitecture.json，并以当前项目名拷贝 defaults/EA-model-template.feap 为 <项目名>.feap；--check-only 模式不修改工作区。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/argo-workspace-bootstrap.test.js",
+          "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js"
         },
         {
-          "Input": "运行 tests/architecture-view-context.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331、2753 与 2757、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 11 个子视图（169/174/176/178/179/180/1800/298/432/434/argo-workflow-rules-view）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
-          "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
           "name": "AT-1357-04-按视图ID解析视图完整成员",
-          "type": "Acceptance Test"
+          "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
+          "type": "Acceptance Test",
+          "Input": "运行 tests/architecture-view-context.test.js",
+          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331、2753 与 2757、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 12 个子视图（169/174/176/178/179/180/1800/298/432/434/argo-workflow-rules-view/openclaw-adaptation）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
         },
         {
-          "Input": "运行 node --test tests/architecture-view-mutation.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-view-mutation.test.js：断言 addView 在父元素挂载子视图、updateView 改挂/改名同步、removeView 清理父元素条目。通过。",
-          "description": "GIVEN ARGO MCP 提供 addArchitectureView / updateArchitectureView / removeArchitectureView 视图写入口；WHEN 写入带 parent_element_id 的子视图、改挂父元素、改名或删除子视图；THEN 父元素 subdiagram_views 与视图 parent_element_id 保持双向一致（新增挂载、改挂同步、改名同步、删除清理）。",
           "name": "AT-1357-05-视图写入同步subdiagram_views",
-          "type": "Acceptance Test"
+          "description": "GIVEN ARGO MCP 提供 addArchitectureView / updateArchitectureView / removeArchitectureView 视图写入口；WHEN 写入带 parent_element_id 的子视图、改挂父元素、改名或删除子视图；THEN 父元素 subdiagram_views 与视图 parent_element_id 保持双向一致（新增挂载、改挂同步、改名同步、删除清理）。",
+          "type": "Acceptance Test",
+          "Input": "运行 node --test tests/architecture-view-mutation.test.js",
+          "acceptanceCriteria": "执行 node --test tests/architecture-view-mutation.test.js：断言 addView 在父元素挂载子视图、updateView 改挂/改名同步、removeView 清理父元素条目。通过。"
         },
         {
-          "Input": "运行 node --test tests/argo-subdiagram-repair.test.js",
-          "acceptanceCriteria": "执行 node --test tests/argo-subdiagram-repair.test.js：断言 repairSubdiagramViews 的 check 模式只报告不写入、fix-direct 模式回填并留 .bak、一致图谱为 no-op。通过。",
-          "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）运行于图谱存在但父元素 subdiagram_views 与视图 parent_element_id 不一致的工作区；WHEN 执行 prepare-and-check 模式；THEN 自动回填父元素 subdiagram_views（直接写文件并留 .bak）；--check-only 模式只报告差异不改写；校验失败时跳过回填。",
           "name": "AT-1357-06-init回填subdiagram_views",
-          "type": "Acceptance Test"
+          "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）运行于图谱存在但父元素 subdiagram_views 与视图 parent_element_id 不一致的工作区；WHEN 执行 prepare-and-check 模式；THEN 自动回填父元素 subdiagram_views（直接写文件并留 .bak）；--check-only 模式只报告差异不改写；校验失败时跳过回填。",
+          "type": "Acceptance Test",
+          "Input": "运行 node --test tests/argo-subdiagram-repair.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-subdiagram-repair.test.js：断言 repairSubdiagramViews 的 check 模式只报告不写入、fix-direct 模式回填并留 .bak、一致图谱为 no-op。通过。"
         },
         {
-          "Input": "运行 node --test tests/architecture-element-mutation.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-element-mutation.test.js：断言 addElement 反向挂载 subdiagram_views、updateElement 对 subdiagram_views 双向同步、removeElement 有子视图时拒绝删除、updateRelationship 改端点清旧端点、removeRelationship 清未使用端点（共享端点保留）。通过。",
-          "description": "GIVEN ARGO MCP 提供 add/update/remove element·relationship 写入口；WHEN 新增元素声明 subdiagram_views、更新元素 subdiagram_views、删除含子视图的元素、或改/删关系的端点；THEN 元素与视图的父子挂载双向一致，删除含子视图的元素被拒绝，关系端点从视图 included_elements 中同步清理（被其它关系共享的端点保留）。",
           "name": "AT-1357-07-元素关系写入同步与删除保护",
-          "type": "Acceptance Test"
+          "description": "GIVEN ARGO MCP 提供 add/update/remove element·relationship 写入口；WHEN 新增元素声明 subdiagram_views、更新元素 subdiagram_views、删除含子视图的元素、或改/删关系的端点；THEN 元素与视图的父子挂载双向一致，删除含子视图的元素被拒绝，关系端点从视图 included_elements 中同步清理（被其它关系共享的端点保留）。",
+          "type": "Acceptance Test",
+          "Input": "运行 node --test tests/architecture-element-mutation.test.js",
+          "acceptanceCriteria": "执行 node --test tests/architecture-element-mutation.test.js：断言 addElement 反向挂载 subdiagram_views、updateElement 对 subdiagram_views 双向同步、removeElement 有子视图时拒绝删除、updateRelationship 改端点清旧端点、removeRelationship 清未使用端点（共享端点保留）。通过。"
         }
       ]
     },
@@ -2789,6 +2793,53 @@
           "description": "argo/rules/archgraph.instructions.md"
         }
       ]
+    },
+    {
+      "id": "2780",
+      "name": "增加archgraph对openclaw的适配",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "为 ArchGraph 增加对 OpenClaw（开源个人 AI 助手框架，~/.openclaw）的适配：install-argo.ps1 新增 OpenClaw 部署段——(1) 将 argo/rules/archgraph.instructions.md 规则以 frontmatter 剥离 + 合并方式写入 OpenClaw agent workspace 的 AGENTS.md（OpenClaw 每会话注入 Project Context，等价于 DSH/OpenCode 的 AGENTS.md 规则机制）；(2) 将 argo-init 技能部署到 ~/.openclaw/skills/argo-init（managed/shared 技能根，所有 agent 可见）；(3) 在 ~/.openclaw/openclaw.json 的 mcp.servers.argo 注册 argo MCP server（stdio: node + argo-mcp-server.js，因 OpenClaw 为固定工作区宿主，显式设置 env.ARGO_REPO_ROOT 锚定仓库根，工具以 argo__* 暴露）。支持 -SkipOpenClaw 开关与 -OpenClawHome/-OpenClawWorkspace 参数。",
+      "attributes": [
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "PLANNED"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-2780-01-OpenClaw规则部署",
+          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 且临时 OpenClaw 目录运行（含 -OpenClawHome/-OpenClawWorkspace）；THEN <OpenClawWorkspace>/AGENTS.md 合并写入 frontmatter 剥离后的 archgraph 规则（含 <WakeupGuideline> UNCONDITIONAL STARTUP GATE 与 <CoreRules>），且既有用户内容被保留。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/argo-openclaw.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-openclaw.test.js：断言 OpenClaw workspace AGENTS.md 不以 --- 开头、含 <WakeupGuideline>/<CoreRules>/<ToolsGuideline>/UNCONDITIONAL STARTUP GATE，且不注入 adapter 散文；预置的用户内容保留。通过。"
+        },
+        {
+          "name": "AT-2780-02-OpenClaw技能部署",
+          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 部署到临时 OpenClaw 目录；THEN <OpenClawHome>/skills/argo-init/SKILL.md 存在且 frontmatter 含 name=argo-init（OpenClaw managed/shared 技能根，所有 agent 可见）。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/argo-openclaw.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-openclaw.test.js：断言 <OpenClawHome>/skills/argo-init/SKILL.md 存在且含 name: argo-init。通过。"
+        },
+        {
+          "name": "AT-2780-03-OpenClaw MCP注册",
+          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 且非 -SkipMcp 部署；THEN <OpenClawHome>/openclaw.json 的 mcp.servers.argo 注册 stdio server（command=node、args 指向 argo-mcp-server.js），并显式设置 env.ARGO_REPO_ROOT 为仓库根（OpenClaw 为固定工作区宿主，需显式锚定工作区；roots/list 不可依赖）。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/argo-openclaw.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-openclaw.test.js：断言 openclaw.json 存在 mcp.servers.argo，command=node，args[0] 以 argo-mcp-server.js 结尾，env.ARGO_REPO_ROOT 等于仓库根。通过。"
+        },
+        {
+          "name": "AT-2780-04-OpenClaw UTF-8不乱码",
+          "description": "GIVEN 规则文件含非 ASCII 字符（em dash U+2014）；WHEN 部署到临时 OpenClaw 目录；THEN OpenClaw workspace AGENTS.md 中的 em dash 以可读 UTF-8 呈现，且不含 U+FFFD 替换字符（UTF-8 被按 GBK 解码产生的乱码）。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/argo-openclaw.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-openclaw.test.js：断言 OpenClaw workspace AGENTS.md 含 —（U+2014）且不含 U+FFFD。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -4045,6 +4096,17 @@
       "included_elements": [
         "archgraph-workflow-rules"
       ]
+    },
+    {
+      "view_id": "openclaw-adaptation",
+      "view_name": "OpenClaw Adaptation",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "description": "为 ArchGraph 适配 OpenClaw 宿主的工作包视图：规则→OpenClaw workspace AGENTS.md、技能→~/.openclaw/skills、MCP→~/.openclaw/openclaw.json mcp.servers.argo。",
+      "included_elements": [
+        "2780"
+      ],
+      "included_relationships": []
     }
   ]
 }
