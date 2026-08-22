@@ -2159,6 +2159,12 @@
           "Input": "node --test tests/wechat-publisher-actor.test.js",
           "acceptanceCriteria": "执行 node --test tests/wechat-publisher-actor.test.js（用例 \"wechat-publisher-agent-file\"）：断言 argo/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus 与 tools 列表，正文含 wechat:draft 与 48001。通过。"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "wpp-ltm-001",
+          "view_name": "公众号发布员工作记录"
+        }
       ]
     },
     {
@@ -2928,6 +2934,13 @@
           "description": "草稿创建被 40164 IP 白名单阻断（当前公网 IP 223.74.103.74 未加入公众号后台白名单），文章已就绪待用户加白后重试 wechat:draft"
         }
       ]
+    },
+    {
+      "id": "wpp-mem-openclaw-001",
+      "name": "SessionRecord-OpenClawAnnouncement",
+      "parent": "2755",
+      "type": "Business Object",
+      "description": "公众号发布员会话记录（2026-08-23）：目标——对外发布 OpenClaw 支持公告（README + 主页 + 公众号文章）。完成：README.md 新增 OpenClaw 行到 Supported Harnesses 表（MCP/Skills/Rules/WakeupGate 齐全、Agents 未适配留 —）+ Install 说明提及 OpenClaw；index.html Install 区新增一句提及 OpenClaw；新建 docs/openclaw-support.wechat.md（frontmatter title/author/digest/banner_path）+ docs/diagrams/openclaw-banner.png（PIL 生成 900x383，脚本 scripts/generate-openclaw-banner.py）+ tests/wechat-article.test.js 新增 wechat-openclaw-ready。图谱：在 view 180 新增 WP 2781「发布openclaw支持介绍文章到微信公众号」+ AT-2781-01；WP 1321 增 AT-1321-03（README OpenClaw）、WP 1332 增 AT-1332-02（主页 OpenClaw）。回归：全量 190 测试 189 通过（唯一失败 wechat-publisher-agent-file 为已知既有模型串 alibaba-cn/qwen3.7-plus≠Qwen3.7-Plus，与本改动无关）。草稿：wechat:draft 被 40164 invalid ip 阻断——当前公网 IP 223.74.103.74 未加入公众号后台 IP 白名单，需用户加白后重试（WP 2781 status=BLOCKED）。commit：2c79ca9（README+主页+文章+测试+图谱）+ 093a3e8（commit attr 回登记）。决策：文章标题走「人味」路线（OpenClaw 个人 AI 助手/施工图比喻），banner 用 PIL 生成深色渐变+品牌色突出，与既有 banner 风格一致。可复用经验：updateArchitectureElement 的 attributes patch 是「整体替换」不是合并——更新 commit 属性时必须携带既有全部 attributes，否则会清掉 status/deliveryStatus/历史 commit。遗留：草稿创建 BLOCKED 待用户加 IP 白名单后重试 wechat:draft；OpenClaw agents（wechat-publisher 等）未适配（承接 WP 2780 遗留）。"
     }
   ],
   "relationships": [
@@ -4196,6 +4209,17 @@
       "description": "为 ArchGraph 适配 OpenClaw 宿主的工作包视图：规则→OpenClaw workspace AGENTS.md、技能→~/.openclaw/skills、MCP→~/.openclaw/openclaw.json mcp.servers.argo。",
       "included_elements": [
         "2780"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "wpp-ltm-001",
+      "view_name": "公众号发布员工作记录",
+      "parent_element_id": "2755",
+      "parent_element_name": "公众号发布员",
+      "description": "公众号发布员长时记忆：记录公众号文章撰写、草稿创建与发布的会话记录。",
+      "included_elements": [
+        "wpp-mem-openclaw-001"
       ],
       "included_relationships": []
     }
