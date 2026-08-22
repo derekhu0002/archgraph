@@ -180,10 +180,11 @@ test('install-argo.ps1 -SkipOpenClaw skips the OpenClaw deployment entirely', ()
   }
 });
 
-test('install-argo.ps1 preserves an existing OpenClaw ARGO_REPO_ROOT when run from a non-workspace dir', () => {
+test('install-argo.ps1 preserves a real-workspace OpenClaw ARGO_REPO_ROOT when run from a non-workspace dir', () => {
   // GIVEN openclaw.json already pins mcp.servers.argo.env.ARGO_REPO_ROOT to a
-  // correct repo, and the installer runs from a non-workspace location (the
-  // npm-global archgraph-argo package dir, simulated via -OpenClawRepoRoot)
+  // real ArchGraph workspace (contains design/KG/SystemArchitecture.json), and
+  // the installer runs from a non-workspace location (the npm-global
+  // archgraph-argo package dir, simulated via -OpenClawRepoRoot)
   // WHEN the installer re-registers the argo MCP server
   // THEN the existing ARGO_REPO_ROOT is preserved (not clobbered), so OpenClaw
   // keeps targeting the correct Neo4j database instead of deriving one from
@@ -192,8 +193,13 @@ test('install-argo.ps1 preserves an existing OpenClaw ARGO_REPO_ROOT when run fr
   const paths = hostPaths(tmp);
   const { openClawHome } = paths;
   try {
+    // Seed a real workspace dir (with the graph marker) to stand in for the
+    // OpenClaw workspace that was initialized as an ArchGraph repo.
+    const existingRoot = path.join(tmp, 'openclaw-workspace-repo');
+    fs.mkdirSync(path.join(existingRoot, 'design', 'KG'), { recursive: true });
+    fs.writeFileSync(path.join(existingRoot, 'design', 'KG', 'SystemArchitecture.json'), '{}', 'utf8');
+
     fs.mkdirSync(openClawHome, { recursive: true });
-    const existingRoot = 'D:/existing-repo';
     fs.writeFileSync(path.join(openClawHome, 'openclaw.json'), JSON.stringify({
       gateway: { port: 18789 },
       mcp: { servers: { argo: { command: 'node', args: ['stale'], env: { ARGO_REPO_ROOT: existingRoot } } } },
@@ -210,10 +216,46 @@ test('install-argo.ps1 preserves an existing OpenClaw ARGO_REPO_ROOT when run fr
     assert.equal(
       config.mcp.servers.argo.env.ARGO_REPO_ROOT,
       existingRoot,
-      'existing ARGO_REPO_ROOT must be preserved when the installer runs from a non-workspace dir',
+      'a real-workspace ARGO_REPO_ROOT must be preserved when the installer runs from a non-workspace dir',
     );
     assert.ok(config.mcp.servers.argo.args[0].endsWith('argo-mcp-server.js'),
       'the argo server path must still be refreshed');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('install-argo.ps1 clears a stale non-workspace OpenClaw ARGO_REPO_ROOT', () => {
+  // GIVEN openclaw.json carries a stale ARGO_REPO_ROOT from a previous
+  // non-workspace install (e.g. the npm-global package dir, which is not an
+  // ArchGraph workspace) and the installer runs from a non-workspace dir
+  // WHEN the installer re-registers the argo MCP server
+  // THEN the stale ARGO_REPO_ROOT is cleared (env omitted) rather than
+  // preserved, so OpenClaw does not keep resolving a bogus Neo4j database
+  // (basename-derived, e.g. archgraph-argo).
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-openclaw-clear-'));
+  const paths = hostPaths(tmp);
+  const { openClawHome } = paths;
+  try {
+    const staleRoot = path.join(tmp, 'npm-node_modules', 'archgraph-argo'); // non-workspace dir
+    fs.mkdirSync(staleRoot, { recursive: true });
+    fs.writeFileSync(path.join(staleRoot, 'package.json'), '{}', 'utf8');
+
+    fs.mkdirSync(openClawHome, { recursive: true });
+    fs.writeFileSync(path.join(openClawHome, 'openclaw.json'), JSON.stringify({
+      mcp: { servers: { argo: { command: 'node', args: ['stale'], env: { ARGO_REPO_ROOT: staleRoot } } } },
+    }, null, 2), 'utf8');
+
+    const nonWorkspace = path.join(tmp, 'non-workspace');
+    fs.mkdirSync(nonWorkspace, { recursive: true });
+
+    const result = runInstall({ ...paths, skipEnv: true, openClawRepoRoot: nonWorkspace });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+
+    const config = JSON.parse(fs.readFileSync(path.join(openClawHome, 'openclaw.json'), 'utf8'));
+    assert.ok(config.mcp.servers.argo, 'mcp.servers.argo must still be registered');
+    assert.equal(config.mcp.servers.argo.env, undefined,
+      'a stale non-workspace ARGO_REPO_ROOT must be cleared (env omitted)');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

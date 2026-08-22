@@ -371,15 +371,26 @@ function Write-OpenClawMcpConfig {
         }
     }
     $repoIsWorkspace = Test-Path (Join-Path $RepoRoot 'design\KG\SystemArchitecture.json')
+    # Only preserve an existing ARGO_REPO_ROOT that is itself a real ArchGraph
+    # workspace. A stale value from a previous non-workspace install (e.g. the
+    # npm-global archgraph-argo package dir) must NOT be preserved, otherwise
+    # OpenClaw keeps resolving the wrong Neo4j database (basename-derived).
+    $existingIsWorkspace = $false
+    if ($existingArgoRoot) {
+        $existingIsWorkspace = Test-Path (Join-Path $existingArgoRoot 'design\KG\SystemArchitecture.json')
+    }
     $envBlock = [ordered]@{}
     if ($repoIsWorkspace) {
         $envBlock.ARGO_REPO_ROOT = $RepoRoot
-    } elseif ($existingArgoRoot) {
+    } elseif ($existingIsWorkspace) {
         $envBlock.ARGO_REPO_ROOT = $existingArgoRoot
         Write-Host "  $RepoRoot is not an ArchGraph workspace; preserving existing ARGO_REPO_ROOT=$existingArgoRoot"
     } else {
+        if ($existingArgoRoot) {
+            Write-Warning "  Cleared stale non-workspace ARGO_REPO_ROOT=$existingArgoRoot from the OpenClaw MCP config."
+        }
         Write-Warning "  $RepoRoot is not an ArchGraph workspace; not pinning ARGO_REPO_ROOT for OpenClaw."
-        Write-Warning "  Run install-argo.ps1 from the repository you want OpenClaw to serve, or set mcp.servers.argo.env.ARGO_REPO_ROOT manually."
+        Write-Warning "  Run install-argo.ps1 from the repository you want OpenClaw to serve, or set mcp.servers.argo.env.ARGO_REPO_ROOT manually (e.g. -OpenClawRepoRoot <repo>)."
     }
     $mcp = [ordered]@{}
     if ($root.Contains('mcp') -and $null -ne $root['mcp']) {
