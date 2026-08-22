@@ -1877,6 +1877,11 @@
           "name": "commit",
           "value": "b27a9eb",
           "description": "design/KG/SystemArchitecture.json（laodong LTM 视图 laodong-ltm-001 追加 queryNeo4jGraph 只读透传行为验证结论）"
+        },
+        {
+          "name": "commit",
+          "value": "a7c5e74",
+          "description": "design/KG/SystemArchitecture.json（laodong LTM 视图追加 queryNeo4jGraph 投影自动恢复里程碑：commit d2542e2/2af31cf）"
         }
       ],
       "subdiagram_views": [
