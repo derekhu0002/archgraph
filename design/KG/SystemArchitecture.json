@@ -2818,6 +2818,11 @@
           "name": "commit",
           "value": "9b169f1",
           "description": "design/KG/SystemArchitecture.json (commit attr + LTM session record)"
+        },
+        {
+          "name": "commit",
+          "value": "c5aae80",
+          "description": "install-argo.ps1 (OpenClaw steps numbered [20/22]..[22/22]); tests/argo-deploy.test.js"
         }
       ],
       "testcases": [
