@@ -108,6 +108,23 @@ test('wechat-openclaw-ready: OpenClaw support article with required frontmatter'
   assert.match(md, /AGENTS\.md/, 'article body should mention the OpenClaw workspace AGENTS.md rule injection');
 });
 
+test('wechat-openclaw-banner: OpenClaw support article has a dedicated themed banner', () => {
+  // GIVEN the OpenClaw support article is about to be published
+  // WHEN the publisher prepares the title image
+  // THEN the article declares a dedicated themed banner (distinct from the generic core-model image) and the file exists
+  const md = readFileSync(OPENCLAW, 'utf8');
+  const meta = parseFrontmatter(md);
+
+  assert.ok(meta.banner_path, 'frontmatter should declare a banner_path');
+  assert.notEqual(
+    meta.banner_path,
+    'diagrams/image.png',
+    'should use a dedicated themed banner, not the generic core-model image'
+  );
+  const bannerAbs = path.join(ROOT, 'docs', meta.banner_path);
+  assert.ok(existsSync(bannerAbs), `banner image should exist: ${bannerAbs}`);
+});
+
 const INNOVATIONS = path.join(ROOT, 'docs', '8-innovations.wechat.md');
 
 test('wechat-innovations-ready: 8 innovations article with required frontmatter and content', () => {

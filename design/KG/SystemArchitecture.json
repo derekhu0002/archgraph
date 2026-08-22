@@ -2916,6 +2916,13 @@
           "type": "Acceptance Test",
           "Input": "打开 docs/openclaw-support.wechat.md",
           "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-openclaw-ready\"）：断言 docs/openclaw-support.wechat.md 存在，frontmatter 含 title/author/digest，正文含 OpenClaw 与 argo MCP。通过。"
+        },
+        {
+          "name": "AT-2781-02-openclaw文章主题封面",
+          "description": "GIVEN OpenClaw 支持文章即将发布；WHEN 发布员准备标题图；THEN 文章声明专用主题封面（banner_path 指向 diagrams/openclaw-banner.png，非通用 image.png）且文件存在，封面体现「AI 助手看懂架构图」主题。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/openclaw-support.wechat.md 与 docs/diagrams/openclaw-banner.png",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-openclaw-banner\"）：断言 frontmatter 含 banner_path 且不等于 diagrams/image.png，banner 文件存在。通过。"
         }
       ],
       "attributes": [
