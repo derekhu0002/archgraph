@@ -2807,7 +2807,12 @@
         },
         {
           "name": "status",
-          "value": "PLANNED"
+          "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "0c68a65",
+          "description": "install-argo.ps1; tests/argo-openclaw.test.js; tests/argo-deploy.test.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
@@ -2840,6 +2845,13 @@
           "acceptanceCriteria": "执行 node --test tests/argo-openclaw.test.js：断言 OpenClaw workspace AGENTS.md 含 —（U+2014）且不含 U+FFFD。通过。"
         }
       ]
+    },
+    {
+      "id": "xiaoming-mem-openclaw-001",
+      "name": "SessionRecord-OpenClawAdaptation",
+      "parent": "2735",
+      "type": "Business Object",
+      "description": "Developer Xiaoming 会话记录（2026-08-22）：目标——增加 archgraph 对 OpenClaw 的适配（WP 2780）。完成：install-argo.ps1 新增 OpenClaw 部署段——(1) 规则→OpenClaw workspace AGENTS.md（frontmatter 剥离+合并保留默认内容；OpenClaw 每会话注入 Project Context，等价 DSH/OpenCode AGENTS.md 机制）；(2) argo-init 技能→~/.openclaw/skills/argo-init（managed/shared 根）；(3) MCP→~/.openclaw/openclaw.json mcp.servers.argo（stdio node argo-mcp-server.js + env.ARGO_REPO_ROOT=<repoRoot>，工具以 argo__* 暴露）。新增 -OpenClawHome/-OpenClawWorkspace/-SkipOpenClaw 参数；tests/argo-openclaw.test.js 3/3 通过。真实 ~/.openclaw 已交付验证：openclaw mcp probe argo 返回 21 工具、openclaw skills list 显示 argo-init ready(openclaw-managed)、workspace AGENTS.md 合并正确（保留默认内容、无 YAML frontmatter、无 U+FFFD 乱码）。图谱：WP 2780 + view openclaw-adaptation（parent=1249）+ AT-2780-01..04；同步修正 AT-1357-04（view 429 子视图 11→12）与 tests/architecture-view-context.test.js。回归：argo-deploy 6/6、argo-openclaw 3/3、architecture-view-context 1/1、graph-mutation 19/19、global-install/aml/gpt-researcher 8/8（wechat-publisher-actor 模型串为已知既有失败，与本改动无关）。决策：OpenClaw 为固定工作区宿主（embedded MCP client 不保证 roots/list），故 MCP 注册显式 env.ARGO_REPO_ROOT 锚定仓库根（区别于 VS Code/Cursor/OpenCode 依赖 roots 动态发现）；规则走 workspace AGENTS.md（OpenClaw 原生注入机制）而非 skill（skill 指令默认按需读取，不注入全文）。可复用经验：openclaw.json 可能是 JSON5——Write-OpenClawMcpConfig 对非严格 JSON 跳过并提示手动 openclaw mcp add；用 openclaw --profile <name> 隔离测试 MCP 注册（避免污染真实配置）；OpenClaw 将 MCP 工具以 serverName__toolName 暴露（argo__getSystemArchitecture 等）。遗留：argo/agents（wechat-publisher 等）未适配 OpenClaw（OpenClaw agent 为隔离 agent + SOUL.md 模型，与 VS Code 自定义 agent 不同，未纳入本切片）；需 openclaw gateway restart 让新会话生效。commit：0c68a65。"
     }
   ],
   "relationships": [
@@ -4072,8 +4084,10 @@
       "view_name": "Xiaoming 会话记忆",
       "parent_element_id": "2735",
       "parent_element_name": "Xiaoming",
-      "description": "Developer Xiaoming 长时记忆。本会话目标：实现工作包 2767（发布 ArchGraph 为原生 dsh 插件 bundle）。完成：package.json 新增 dsh.bundle.patch=./cordis.patch.yml、exports（./dsh-argo-workspace、./dsh-argo-wakeup、./cordis.patch.yml、./package.json，不映射 .）、files 增补 cordis.patch.yml/dsh-argo-workspace/dsh-argo-wakeup；新建根 cordis.patch.yml（两行包名插入 argo-workspace/argo-wakeup，非 file://）；新建 dsh-argo-workspace/（ESM，import.meta.url 定位 serverPath，回退链 config.serverPath→ARGO_SERVER_PATH→包内默认）与 dsh-argo-wakeup/（ESM，STEP 0 唤醒门）各含 index.js + 目录级 package.json {\"type\":\"module\"}；验证 neo4j-driver 语义检索优雅降级（全部 require 懒加载且被外部凭证门控，保持 devDependencies）；gh 打 dsh-plugin 标签成功；tests/dsh-plugin-publish.test.js 5/5 通过。决策：neo4j-driver 不提升到 dependencies；用 git stash 隔离并行 Agent 的 @resvg/resvg-js 改动避免误提交。遗留：待 Reviewer 检视；公众号发布员文件（tests/wechat-article.test.js、docs/8-innovations.wechat.md、docs/diagrams/*）未动未提交。经验：沙箱 node 子进程 piped stdio EPERM 导致 argo-deploy/argo-global-install/architecture-view-context/developer-community/ea-web-service-impl 测试失败（环境限制非回归）；wechat-publisher-actor.test.js 因模型名 alibaba-cn/qwen3.7-plus≠Qwen3.7-Plus 失败（公众号发布员域）。commit：3f95448（代码）+ a6e3563（图谱回登记）。",
-      "included_elements": [],
+      "description": "Developer Xiaoming 长时记忆。本会话目标：实现工作包 2767（发布 ArchGraph 为原生 dsh 插件 bundle）。完成：package.json 新增 dsh.bundle.patch=./cordis.patch.yml、exports（./dsh-argo-workspace、./dsh-argo-wakeup、./cordis.patch.yml、./package.json，不映射 .）、files 增补 cordis.patch.yml/dsh-argo-workspace/dsh-argo-wakeup；新建根 cordis.patch.yml（两行包名插入 argo-workspace/argo-wakeup，非 file://）；新建 dsh-argo-workspace/（ESM，import.meta.url 定位 serverPath，回退链 config.serverPath→ARGO_SERVER_PATH→包内默认）与 dsh-argo-wakeup/（ESM，STEP 0 唤醒门）各含 index.js + 目录级 package.json {\"type\":\"module\"}；验证 neo4j-driver 语义检索优雅降级（全部 require 懒加载且被外部凭证门控，保持 devDependencies）；gh 打 dsh-plugin 标签成功；tests/dsh-plugin-publish.test.js 5/5 通过。决策：neo4j-driver 不提升到 dependencies；用 git stash 隔离并行 Agent 的 @resvg/resvg-js 改动避免误提交。遗留：待 Reviewer 检视；公众号发布员文件（tests/wechat-article.test.js、docs/8-innovations.wechat.md、docs/diagrams/*）未动未提交。经验：沙箱 node 子进程 piped stdio EPERM 导致 argo-deploy/argo-global-install/architecture-view-context/developer-community/ea-web-service-impl 测试失败（环境限制非回归）；wechat-publisher-actor.test.js 因模型名 alibaba-cn/qwen3.7-plus≠Qwen3.7-Plus 失败（公众号发布员域）。commit：3f95448（代码）+ a6e3563（图谱回登记）。\n\n切片（2026-08-22）：增加 OpenClaw 适配（WP 2780）。install-argo.ps1 新增 OpenClaw 部署段：规则→OpenClaw workspace AGENTS.md（frontmatter 剥离+合并）、argo-init 技能→~/.openclaw/skills/argo-init、MCP→~/.openclaw/openclaw.json mcp.servers.argo（env.ARGO_REPO_ROOT 锚定仓库根）。tests/argo-openclaw.test.js 3/3；真实 ~/.openclaw 交付验证通过（mcp probe 21 工具、skills list argo-init ready、AGENTS.md 无乱码）。图谱 WP 2780 + view openclaw-adaptation + AT-2780-01..04；修正 AT-1357-04（子视图 11→12）与 view-context 测试。commit：0c68a65。",
+      "included_elements": [
+        "xiaoming-mem-openclaw-001"
+      ],
       "included_relationships": []
     },
     {
