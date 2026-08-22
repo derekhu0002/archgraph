@@ -2823,6 +2823,11 @@
           "name": "commit",
           "value": "c5aae80",
           "description": "install-argo.ps1 (OpenClaw steps numbered [20/22]..[22/22]); tests/argo-deploy.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "4c0ca4a",
+          "description": "install-argo.ps1 (Write-OpenClawMcpConfig: 仅真实工作区才钉 ARGO_REPO_ROOT，否则保留已有值/省略并提示；新增 -OpenClawRepoRoot); tests/argo-openclaw.test.js"
         }
       ],
       "testcases": [
