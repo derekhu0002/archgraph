@@ -10,6 +10,7 @@ const neo4j = require('neo4j-driver');
 const {
   assertReadOnlyCypher,
   buildNeo4jGraphSchema,
+  digestCanonicalArchitecture,
   getDefaultNeo4jDatabaseName,
   runNeo4jCypherQuery,
   serializeNeo4jValue,
@@ -295,4 +296,70 @@ test('runNeo4jCypherQuery derives the database from the per-call workspaceRoot',
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   });
+});
+
+// --- Projection auto-recovery on query (same mechanism as loadContext tools) ---
+
+function setupTempWorkspace(mode) {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-cypher-recovery-'));
+  const graphRelative = 'design/KG/SystemArchitecture.json';
+  const graphTarget = path.join(tempRoot, graphRelative);
+  fs.mkdirSync(path.dirname(graphTarget), { recursive: true });
+  fs.copyFileSync(path.join(__dirname, '..', graphRelative), graphTarget);
+  const stateTarget = path.join(tempRoot, '.argo', 'temp', 'neo4j-system-architecture-sync-state.json');
+  fs.mkdirSync(path.dirname(stateTarget), { recursive: true });
+  fs.writeFileSync(stateTarget, JSON.stringify({
+    version: 1,
+    graphs: {
+      [graphRelative]: {
+        graphKey: graphRelative,
+        dirty: false,
+        canonicalDigest: mode === 'stale'
+          ? 'a'.repeat(64)
+          : digestCanonicalArchitecture(graphRelative, tempRoot),
+      },
+    },
+  }, null, 2));
+  return { tempRoot, graphRelative, stateTarget };
+}
+
+test('queryNeo4jGraph triggers projection recovery when the sync state is stale/dirty', async () => {
+  // GIVEN a workspace whose Neo4j sync state marks the projection stale
+  // (canonicalDigest no longer matches the canonical JSON)
+  const { tempRoot } = setupTempWorkspace('stale');
+  try {
+    // WHEN a read-only Cypher query runs against that workspace
+    const result = await callTool('queryNeo4jGraph', {
+      cypher: 'MATCH (n) RETURN n LIMIT 1',
+      workspaceRoot: tempRoot,
+    });
+    // THEN the tool reports the attempted automatic projection recovery
+    // (the recovery or the query itself may fail without a live Neo4j;
+    // the attempted flag is what proves the mechanism ran)
+    const recovery = result.neo4jRecovery || (result.error && result.error.neo4jRecovery);
+    assert.ok(recovery, 'expected neo4jRecovery on the query result');
+    assert.equal(recovery.attempted, true);
+    assert.equal(recovery.graphKey, 'design/KG/SystemArchitecture.json');
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('queryNeo4jGraph does not recover when the projection is clean', async () => {
+  // GIVEN a workspace whose Neo4j sync state is clean (digest matches the JSON)
+  const { tempRoot } = setupTempWorkspace('clean');
+  try {
+    // WHEN a read-only Cypher query runs against that workspace
+    const result = await callTool('queryNeo4jGraph', {
+      cypher: 'MATCH (n) RETURN n LIMIT 1',
+      workspaceRoot: tempRoot,
+    });
+    // THEN the tool reports no recovery attempt at all
+    assert.equal(result.neo4jRecovery, undefined);
+    if (result.error) {
+      assert.equal(result.error.neo4jRecovery, undefined);
+    }
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
 });

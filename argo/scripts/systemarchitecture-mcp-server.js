@@ -164,6 +164,7 @@ const {
 } = require('./graph-rag/mutationEmbeddingVectorLifecycle.js');
 const {
   DEFAULT_GRAPH_PATH: NEO4J_DEFAULT_GRAPH_PATH,
+  assertReadOnlyCypher,
   buildGraphKey,
   buildNeo4jGraphSchema,
   recoverNeo4jSyncIfNeeded,
@@ -2188,20 +2189,43 @@ async function queryNeo4jGraphTool(args = {}) {
     return queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot);
   }
 
+  let recovery = null;
   try {
+    // Reject invalid/write queries before any side effect.
+    assertReadOnlyCypher(args.cypher);
+
+    // Same projection-recovery mechanism as the loadContext-based tools
+    // (e.g. getSystemArchitecture): when the sync state is dirty or the
+    // recorded canonicalDigest no longer matches the canonical JSON, rebuild
+    // the Neo4j projection before servicing the read-only query.
+    recovery = await recoverNeo4jSyncIfNeeded({
+      architecturePath,
+      workspaceRoot,
+    });
+
     const result = await runNeo4jCypherQuery({
       architecturePath,
       cypher: args.cypher,
       workspaceRoot,
     });
-    return toolResult({
+    const payload = {
       status: 'passed',
       architecturePath: result.architecturePath,
       graphKey: result.graphKey,
       database: result.database,
       records: result.records,
       summary: result.summary,
-    });
+    };
+    if (recovery.attempted) {
+      payload.neo4jRecovery = recovery;
+      if (recovery.status === 'failed') {
+        payload.warnings = [
+          `Neo4j automatic resync failed before servicing ${architecturePath}: ${recovery.error}`,
+          'The read-only query still ran against the current projection. Neo4j will be retried on the next canonical read or write, or you can run node .argo/scripts/syncSystemArchitectureToNeo4j.js manually.',
+        ];
+      }
+    }
+    return toolResult(payload);
   } catch (error) {
     return toolResult(queryError(
       error && error.category ? error.category : 'NEO4J_QUERY_FAILED',
@@ -2212,6 +2236,7 @@ async function queryNeo4jGraphTool(args = {}) {
         ...(error && error.clause ? { clause: error.clause } : {}),
         ...(error && error.queriedDatabase ? { queriedDatabase: error.queriedDatabase } : {}),
         ...(error && error.expectedDatabase ? { expectedDatabase: error.expectedDatabase } : {}),
+        ...(recovery && recovery.attempted ? { neo4jRecovery: recovery } : {}),
       },
     ));
   }
