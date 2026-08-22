@@ -2927,9 +2927,9 @@
       ],
       "attributes": [
         {
+          "description": "docs/openclaw-support.wechat.md; docs/diagrams/openclaw-banner.png; scripts/generate-openclaw-banner.py; tests/wechat-article.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
-          "value": "2c79ca9",
-          "description": "docs/openclaw-support.wechat.md; docs/diagrams/openclaw-banner.png; scripts/generate-openclaw-banner.py; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
+          "value": "2c79ca9"
         },
         {
           "name": "deliveryStatus",
@@ -2939,6 +2939,11 @@
           "name": "status",
           "value": "BLOCKED",
           "description": "草稿创建被 40164 IP 白名单阻断（当前公网 IP 223.74.103.74 未加入公众号后台白名单），文章已就绪待用户加白后重试 wechat:draft"
+        },
+        {
+          "description": "docs/diagrams/openclaw-banner.png（重绘为主题封面：AI 助手看懂架构图）; scripts/generate-openclaw-banner.py; tests/wechat-article.test.js（AT-2781-02 wechat-openclaw-banner）; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "6c8b410"
         }
       ]
     },
