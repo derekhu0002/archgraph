@@ -49,3 +49,13 @@ test('readme: install section documents npm deployment and semantic requirements
   assert.match(section, /Neo4j/, 'should state the Neo4j requirement for semantic queries');
   assert.match(section, /vector engine/, 'should state the vector engine requirement');
 });
+
+test('readme: supported harnesses include OpenClaw', () => {
+  // GIVEN ArchGraph has been adapted for OpenClaw (WP 2780 completed)
+  // WHEN a reader opens README.md
+  // THEN the Supported Harnesses table lists OpenClaw and the Install note mentions it
+  const section = sectionAfter(README, 'Supported Harnesses');
+  assert.ok(section, 'README should have a Supported Harnesses section');
+  assert.match(section, /OpenClaw/, 'should list OpenClaw in the harness table');
+  assert.match(README, /OpenClaw/, 'README should mention OpenClaw in the install/deploy note');
+});

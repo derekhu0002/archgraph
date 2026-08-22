@@ -91,6 +91,23 @@ test('wechat-community-banner: developer community article has a dedicated theme
   assert.ok(existsSync(bannerAbs), `banner image should exist: ${bannerAbs}`);
 });
 
+const OPENCLAW = path.join(ROOT, 'docs', 'openclaw-support.wechat.md');
+
+test('wechat-openclaw-ready: OpenClaw support article with required frontmatter', () => {
+  // GIVEN ArchGraph has been adapted for OpenClaw (WP 2780 completed)
+  // WHEN the wechat-public-cli skill prepares to publish
+  // THEN a WeChat-ready markdown exists with title/author/digest frontmatter and OpenClaw support body
+  const md = readFileSync(OPENCLAW, 'utf8');
+  const meta = parseFrontmatter(md);
+
+  assert.ok(meta.title, 'frontmatter should declare a title');
+  assert.ok(meta.author, 'frontmatter should declare an author');
+  assert.ok(meta.digest, 'frontmatter should declare a digest');
+  assert.match(md, /OpenClaw/, 'article body should introduce OpenClaw');
+  assert.match(md, /argo MCP server/, 'article body should mention the argo MCP server');
+  assert.match(md, /AGENTS\.md/, 'article body should mention the OpenClaw workspace AGENTS.md rule injection');
+});
+
 const INNOVATIONS = path.join(ROOT, 'docs', '8-innovations.wechat.md');
 
 test('wechat-innovations-ready: 8 innovations article with required frontmatter and content', () => {

@@ -29,6 +29,7 @@ ArchGraph deploys the ARGO toolchain to all major coding-agent environments:
 | Cursor             |     ✓      |   ✓    |          ✓           |   ✓    |      —      |
 | OpenCode           |     ✓      |   ✓    |          ✓           |   ✓    |     ✓       |
 | DeepSeek Harness   |     ✓      |   ✓    |          ✓           |   ✓    |     ✓       |
+| OpenClaw           |     ✓      |   ✓    |          ✓           |   —    |     ✓       |
 
 A single `argo-deploy` registers the `argo` MCP server and installs all artifacts into each harness
 automatically.
@@ -40,7 +41,7 @@ npm install -g archgraph-argo
 argo-deploy
 ```
 
-Done &mdash; the ARGO toolchain, skills, and rules are deployed, and the `argo` MCP server is registered automatically in **GitHub Copilot**, **Cursor**, **OpenCode**, and **DeepSeek Harness** (dsh).
+Done &mdash; the ARGO toolchain, skills, and rules are deployed, and the `argo` MCP server is registered automatically in **GitHub Copilot**, **Cursor**, **OpenCode**, **DeepSeek Harness** (dsh), and **OpenClaw**.
 
 > Semantic (Graph RAG) queries also need **Neo4j** and a **vector engine** configured in
 > `~/.argo/.env`; everything else works out of the box.

@@ -112,6 +112,13 @@ test('kglibrary-area: lists every KGlibrary reference project', () => {
   }
 });
 
+test('openclaw-support: homepage mentions OpenClaw in install', () => {
+  // GIVEN ArchGraph has been adapted for OpenClaw (WP 2780 completed)
+  // WHEN a visitor opens the homepage
+  // THEN the Install section mentions OpenClaw support
+  assert.match(HTML, /OpenClaw/, 'homepage should mention OpenClaw');
+});
+
 test('readme-sync: home page mirrors README how-to-use', () => {
   // GIVEN the README documents how to use the framework
   // WHEN a visitor opens the homepage in a browser

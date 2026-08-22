@@ -392,6 +392,13 @@
           "type": "Acceptance Test",
           "Input": "打开 README.md",
           "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 的 Install 章节包含 npm install -g archgraph-argo、argo-deploy、MCP server、Neo4j 与 vector engine。通过。"
+        },
+        {
+          "name": "AT-1321-03-README文档化OpenClaw支持",
+          "description": "GIVEN ArchGraph 已适配 OpenClaw（WP 2780 完成）；WHEN 读者打开 README.md 的 Supported Harnesses 章节；THEN 该章节列出 OpenClaw，并在 Install 说明中提及 argo-deploy 也会注册到 OpenClaw。",
+          "type": "Acceptance Test",
+          "Input": "打开 README.md",
+          "acceptanceCriteria": "执行 node --test tests/readme.test.js：断言 README.md 的 Supported Harnesses 章节包含 OpenClaw 字符串，Install 章节提及 OpenClaw。通过。"
         }
       ]
     },
@@ -501,6 +508,13 @@
           "type": "Acceptance Test",
           "Input": "浏览器打开网站首页",
           "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"readme-sync\"）：断言 index.html 含 id=\"howto\" 区域并提及 ArchiMate 3.2、coding agent 与 single source of truth。通过。"
+        },
+        {
+          "name": "AT-1332-02-主页文档化OpenClaw支持",
+          "description": "GIVEN ArchGraph 已适配 OpenClaw（WP 2780 完成）；WHEN 访客打开网站首页；THEN 首页 Install 章节提及 OpenClaw 支持。",
+          "type": "Acceptance Test",
+          "Input": "浏览器打开网站首页",
+          "acceptanceCriteria": "执行 node --test tests/website.test.js（用例 \"openclaw-support\"）：断言 index.html 包含 OpenClaw 字符串。通过。"
         }
       ]
     },
@@ -2872,6 +2886,22 @@
       "parent": "2735",
       "type": "Business Object",
       "description": "Developer Xiaoming 会话记录（2026-08-22）：目标——增加 archgraph 对 OpenClaw 的适配（WP 2780）。完成：install-argo.ps1 新增 OpenClaw 部署段——(1) 规则→OpenClaw workspace AGENTS.md（frontmatter 剥离+合并保留默认内容；OpenClaw 每会话注入 Project Context，等价 DSH/OpenCode AGENTS.md 机制）；(2) argo-init 技能→~/.openclaw/skills/argo-init（managed/shared 根）；(3) MCP→~/.openclaw/openclaw.json mcp.servers.argo（stdio node argo-mcp-server.js + env.ARGO_REPO_ROOT=<repoRoot>，工具以 argo__* 暴露）。新增 -OpenClawHome/-OpenClawWorkspace/-SkipOpenClaw 参数；tests/argo-openclaw.test.js 3/3 通过。真实 ~/.openclaw 已交付验证：openclaw mcp probe argo 返回 21 工具、openclaw skills list 显示 argo-init ready(openclaw-managed)、workspace AGENTS.md 合并正确（保留默认内容、无 YAML frontmatter、无 U+FFFD 乱码）。图谱：WP 2780 + view openclaw-adaptation（parent=1249）+ AT-2780-01..04；同步修正 AT-1357-04（view 429 子视图 11→12）与 tests/architecture-view-context.test.js。回归：argo-deploy 6/6、argo-openclaw 3/3、architecture-view-context 1/1、graph-mutation 19/19、global-install/aml/gpt-researcher 8/8（wechat-publisher-actor 模型串为已知既有失败，与本改动无关）。决策：OpenClaw 为固定工作区宿主（embedded MCP client 不保证 roots/list），故 MCP 注册显式 env.ARGO_REPO_ROOT 锚定仓库根（区别于 VS Code/Cursor/OpenCode 依赖 roots 动态发现）；规则走 workspace AGENTS.md（OpenClaw 原生注入机制）而非 skill（skill 指令默认按需读取，不注入全文）。可复用经验：openclaw.json 可能是 JSON5——Write-OpenClawMcpConfig 对非严格 JSON 跳过并提示手动 openclaw mcp add；用 openclaw --profile <name> 隔离测试 MCP 注册（避免污染真实配置）；OpenClaw 将 MCP 工具以 serverName__toolName 暴露（argo__getSystemArchitecture 等）。遗留：argo/agents（wechat-publisher 等）未适配 OpenClaw（OpenClaw agent 为隔离 agent + SOUL.md 模型，与 VS Code 自定义 agent 不同，未纳入本切片）；需 openclaw gateway restart 让新会话生效。commit：0c68a65。\n\n跟进（2026-08-22, commit 4c0ca4a）：OpenClaw 查询报 `database archgraph-argo does not exist`——根因是 npm 全局 argo-deploy 从 node_modules\\archgraph-argo 运行 install-argo.ps1，把 OpenClaw 的 env.ARGO_REPO_ROOT 钉到包目录（basename=archgraph-argo）。已修复：Write-OpenClawMcpConfig 仅对真实 ArchGraph 工作区（含 design/KG/SystemArchitecture.json）钉定 ARGO_REPO_ROOT，否则保留已有值或省略+提示；新增 -OpenClawRepoRoot 覆盖参数。在仓库根重跑安装 + openclaw mcp reload 后，端到端验证 database=archgraph、10 个 Business Actor 可查。"
+    },
+    {
+      "id": "2781",
+      "name": "发布openclaw支持介绍文章到微信公众号",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "使用 wechat-public-cli 技能，撰写 ArchGraph 对 OpenClaw 适配支持（WP 2780）的介绍文章并发布到微信公众号。",
+      "testcases": [
+        {
+          "name": "AT-2781-01-openclaw支持文章就绪",
+          "description": "GIVEN ArchGraph 已适配 OpenClaw（WP 2780 完成）；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号 OpenClaw 支持介绍文章 Markdown，且正文介绍 OpenClaw 适配（AGENTS.md 规则、argo-init 技能、argo MCP server）。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/openclaw-support.wechat.md",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-openclaw-ready\"）：断言 docs/openclaw-support.wechat.md 存在，frontmatter 含 title/author/digest，正文含 OpenClaw 与 argo MCP。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -3635,7 +3665,8 @@
       "description": "对外内容发布与官宣类工作包：公众号文章撰写与发布、项目官宣介绍。",
       "included_elements": [
         "1363",
-        "2756"
+        "2756",
+        "2781"
       ],
       "included_relationships": []
     },
