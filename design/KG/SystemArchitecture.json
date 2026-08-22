@@ -321,48 +321,48 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "51be801",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json",
+          "value": "51be801"
         },
         {
           "name": "commit",
-          "value": "54ad8dc",
-          "description": "README.md; tests/readme.test.js"
+          "description": "README.md; tests/readme.test.js",
+          "value": "54ad8dc"
         },
         {
           "name": "commit",
-          "value": "dc84086",
-          "description": "README.md; tests/readme.test.js"
+          "description": "README.md; tests/readme.test.js",
+          "value": "dc84086"
         },
         {
           "name": "commit",
-          "value": "f98b61f",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json",
+          "value": "f98b61f"
         },
         {
           "name": "commit",
-          "value": "ca32794",
-          "description": "README.md; tests/project-name.test.js"
+          "description": "README.md; tests/project-name.test.js",
+          "value": "ca32794"
         },
         {
           "name": "commit",
-          "value": "e07c6a1",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json",
+          "value": "e07c6a1"
         },
         {
           "name": "commit",
-          "value": "f4819fd",
-          "description": "README.md; index.html; tests/readme.test.js; .github/copilot-instructions.md (removed); .github/skills/argo-init/SKILL.md (removed); .cursor/skills/argo-init/SKILL.md; .opencode/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json"
+          "description": "README.md; index.html; tests/readme.test.js; .github/copilot-instructions.md (removed); .github/skills/argo-init/SKILL.md (removed); .cursor/skills/argo-init/SKILL.md; .opencode/skills/argo-init/SKILL.md; design/KG/SystemArchitecture.json",
+          "value": "f4819fd"
         },
         {
           "name": "commit",
-          "value": "2acf056",
-          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json"
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json",
+          "value": "2acf056"
         },
         {
           "name": "commit",
-          "value": "c8f2d74",
-          "description": "restore .github/skills/argo-init/SKILL.md; README.md; index.html; design/KG/SystemArchitecture.json"
+          "description": "restore .github/skills/argo-init/SKILL.md; README.md; index.html; design/KG/SystemArchitecture.json",
+          "value": "c8f2d74"
         },
         {
           "name": "deliveryStatus",
@@ -374,8 +374,13 @@
         },
         {
           "name": "commit",
-          "value": "e0069f3",
-          "description": "README.md"
+          "description": "README.md",
+          "value": "e0069f3"
+        },
+        {
+          "name": "commit",
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json",
+          "value": "2c79ca9"
         }
       ],
       "testcases": [
@@ -469,28 +474,28 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "e9839a5",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json",
+          "value": "e9839a5"
         },
         {
           "name": "commit",
-          "value": "098be4e",
-          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "description": "index.html; docs/kglibrary.html; docs/insight-archgraph-benefits.html; tests/website.test.js; design/KG/SystemArchitecture.json",
+          "value": "098be4e"
         },
         {
           "name": "commit",
-          "value": "51be801",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json",
+          "value": "51be801"
         },
         {
           "name": "commit",
-          "value": "4027dd0",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json",
+          "value": "4027dd0"
         },
         {
           "name": "commit",
-          "value": "926aa9c",
-          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json"
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json",
+          "value": "926aa9c"
         },
         {
           "name": "deliveryStatus",
@@ -499,6 +504,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json",
+          "value": "2c79ca9"
         }
       ],
       "testcases": [
@@ -2900,6 +2910,22 @@
           "type": "Acceptance Test",
           "Input": "打开 docs/openclaw-support.wechat.md",
           "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-openclaw-ready\"）：断言 docs/openclaw-support.wechat.md 存在，frontmatter 含 title/author/digest，正文含 OpenClaw 与 argo MCP。通过。"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "2c79ca9",
+          "description": "docs/openclaw-support.wechat.md; docs/diagrams/openclaw-banner.png; scripts/generate-openclaw-banner.py; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        },
+        {
+          "name": "status",
+          "value": "BLOCKED",
+          "description": "草稿创建被 40164 IP 白名单阻断（当前公网 IP 223.74.103.74 未加入公众号后台白名单），文章已就绪待用户加白后重试 wechat:draft"
         }
       ]
     }
