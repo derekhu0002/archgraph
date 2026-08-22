@@ -40,6 +40,7 @@ function buildInstallArgs(opts) {
     '-DshHome', opts.dshHome,
     '-OpenClawHome', opts.openClawHome,
     '-OpenClawWorkspace', opts.openClawWorkspace,
+    ...(opts.openClawRepoRoot ? ['-OpenClawRepoRoot', opts.openClawRepoRoot] : []),
     '-SkipDsh',
     '-SkipDeps',
     ...(opts.skipEnv ? ['-SkipEnv'] : []),
@@ -174,6 +175,75 @@ test('install-argo.ps1 -SkipOpenClaw skips the OpenClaw deployment entirely', ()
       'OpenClaw skill must not be deployed when skipped');
     assert.ok(!fs.existsSync(path.join(openClawHome, 'openclaw.json')),
       'OpenClaw MCP config must not be written when skipped');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('install-argo.ps1 preserves an existing OpenClaw ARGO_REPO_ROOT when run from a non-workspace dir', () => {
+  // GIVEN openclaw.json already pins mcp.servers.argo.env.ARGO_REPO_ROOT to a
+  // correct repo, and the installer runs from a non-workspace location (the
+  // npm-global archgraph-argo package dir, simulated via -OpenClawRepoRoot)
+  // WHEN the installer re-registers the argo MCP server
+  // THEN the existing ARGO_REPO_ROOT is preserved (not clobbered), so OpenClaw
+  // keeps targeting the correct Neo4j database instead of deriving one from
+  // the npm package dir basename (e.g. archgraph-argo).
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-openclaw-preserve-'));
+  const paths = hostPaths(tmp);
+  const { openClawHome } = paths;
+  try {
+    fs.mkdirSync(openClawHome, { recursive: true });
+    const existingRoot = 'D:/existing-repo';
+    fs.writeFileSync(path.join(openClawHome, 'openclaw.json'), JSON.stringify({
+      gateway: { port: 18789 },
+      mcp: { servers: { argo: { command: 'node', args: ['stale'], env: { ARGO_REPO_ROOT: existingRoot } } } },
+    }, null, 2), 'utf8');
+
+    // A non-workspace dir (no design/KG/SystemArchitecture.json inside).
+    const nonWorkspace = path.join(tmp, 'non-workspace');
+    fs.mkdirSync(nonWorkspace, { recursive: true });
+
+    const result = runInstall({ ...paths, skipEnv: true, openClawRepoRoot: nonWorkspace });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+
+    const config = JSON.parse(fs.readFileSync(path.join(openClawHome, 'openclaw.json'), 'utf8'));
+    assert.equal(
+      config.mcp.servers.argo.env.ARGO_REPO_ROOT,
+      existingRoot,
+      'existing ARGO_REPO_ROOT must be preserved when the installer runs from a non-workspace dir',
+    );
+    assert.ok(config.mcp.servers.argo.args[0].endsWith('argo-mcp-server.js'),
+      'the argo server path must still be refreshed');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('install-argo.ps1 omits the OpenClaw ARGO_REPO_ROOT env when run from a non-workspace dir with no prior pin', () => {
+  // GIVEN the installer runs from a non-workspace location and openclaw.json
+  // has no argo MCP entry yet
+  // WHEN the installer registers the argo MCP server
+  // THEN mcp.servers.argo is written WITHOUT env.ARGO_REPO_ROOT (nothing to
+  // pin), and a warning is emitted instead of guessing a wrong root.
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-openclaw-omit-'));
+  const paths = hostPaths(tmp);
+  const { openClawHome } = paths;
+  try {
+    const nonWorkspace = path.join(tmp, 'non-workspace');
+    fs.mkdirSync(nonWorkspace, { recursive: true });
+
+    const result = runInstall({ ...paths, skipEnv: true, openClawRepoRoot: nonWorkspace });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+
+    const configPath = path.join(openClawHome, 'openclaw.json');
+    assert.ok(fs.existsSync(configPath), 'OpenClaw config must be written');
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.ok(config.mcp && config.mcp.servers && config.mcp.servers.argo,
+      'mcp.servers.argo must still be registered');
+    assert.equal(config.mcp.servers.argo.command, 'node');
+    assert.ok(config.mcp.servers.argo.args[0].endsWith('argo-mcp-server.js'));
+    assert.equal(config.mcp.servers.argo.env, undefined,
+      'ARGO_REPO_ROOT must not be pinned when the installer runs from a non-workspace dir');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

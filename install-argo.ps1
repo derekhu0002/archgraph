@@ -22,6 +22,7 @@ param(
     [string]$DshWorkspaces = '',
     [string]$OpenClawHome = "$env:USERPROFILE\.openclaw",
     [string]$OpenClawWorkspace = "$env:USERPROFILE\.openclaw\workspace",
+    [string]$OpenClawRepoRoot = '',
     [switch]$SkipOpenClaw,
     [string]$McpPath
 )
@@ -335,8 +336,13 @@ function Write-OpenClawMcpConfig {
     # ~/.openclaw/openclaw.json. OpenClaw is a fixed-workspace host: its
     # embedded MCP client does not advertise MCP roots, so the workspace is
     # pinned explicitly via env.ARGO_REPO_ROOT to the repository root this
-    # installer runs from. Existing config keys are preserved; a JSON5 (non
-    # strict JSON) config is left untouched with a manual-registration hint.
+    # installer runs from. Only a real ArchGraph workspace (one that contains
+    # design/KG/SystemArchitecture.json) is pinned; when the installer runs
+    # from a non-workspace location (e.g. the npm-global archgraph-argo package
+    # dir via `argo-deploy`), an existing ARGO_REPO_ROOT is preserved instead
+    # of being clobbered, and a missing one is left unpinned with a hint.
+    # Existing config keys are preserved; a JSON5 (non strict JSON) config is
+    # left untouched with a manual-registration hint.
     param(
         [string]$OpenClawHome,
         [string]$RepoRoot,
@@ -344,17 +350,36 @@ function Write-OpenClawMcpConfig {
     )
     $configPath = Join-Path $OpenClawHome 'openclaw.json'
     $root = [ordered]@{}
+    $existingArgoRoot = ''
     if (Test-Path $configPath) {
         try {
             $existing = Get-Content $configPath -Raw | ConvertFrom-Json
             foreach ($p in $existing.PSObject.Properties) {
                 $root[$p.Name] = $p.Value
             }
+            # Capture any previously pinned ARGO_REPO_ROOT so a non-workspace
+            # refresh (e.g. npm-global argo-deploy) cannot clobber a correct pin.
+            if ($null -ne $existing.mcp -and $null -ne $existing.mcp.servers `
+                -and $null -ne $existing.mcp.servers.argo -and $null -ne $existing.mcp.servers.argo.env `
+                -and $null -ne $existing.mcp.servers.argo.env.ARGO_REPO_ROOT) {
+                $existingArgoRoot = [string]$existing.mcp.servers.argo.env.ARGO_REPO_ROOT
+            }
         } catch {
             Write-Warning "  $configPath is not strict JSON (JSON5 with comments?); skipping argo MCP registration."
             Write-Warning "  Register manually: openclaw mcp add argo --command node --arg `"$ArgoServer`" --env ARGO_REPO_ROOT=$RepoRoot"
             return
         }
+    }
+    $repoIsWorkspace = Test-Path (Join-Path $RepoRoot 'design\KG\SystemArchitecture.json')
+    $envBlock = [ordered]@{}
+    if ($repoIsWorkspace) {
+        $envBlock.ARGO_REPO_ROOT = $RepoRoot
+    } elseif ($existingArgoRoot) {
+        $envBlock.ARGO_REPO_ROOT = $existingArgoRoot
+        Write-Host "  $RepoRoot is not an ArchGraph workspace; preserving existing ARGO_REPO_ROOT=$existingArgoRoot"
+    } else {
+        Write-Warning "  $RepoRoot is not an ArchGraph workspace; not pinning ARGO_REPO_ROOT for OpenClaw."
+        Write-Warning "  Run install-argo.ps1 from the repository you want OpenClaw to serve, or set mcp.servers.argo.env.ARGO_REPO_ROOT manually."
     }
     $mcp = [ordered]@{}
     if ($root.Contains('mcp') -and $null -ne $root['mcp']) {
@@ -364,11 +389,14 @@ function Write-OpenClawMcpConfig {
     if ($mcp.Contains('servers') -and $null -ne $mcp['servers']) {
         foreach ($p in $mcp['servers'].PSObject.Properties) { $servers[$p.Name] = $p.Value }
     }
-    $servers['argo'] = [ordered]@{
+    $argoServerObj = [ordered]@{
         command = 'node'
         args    = @($ArgoServer)
-        env     = [ordered]@{ ARGO_REPO_ROOT = $RepoRoot }
     }
+    if ($envBlock.Count -gt 0) {
+        $argoServerObj.env = $envBlock
+    }
+    $servers['argo'] = $argoServerObj
     $mcp['servers'] = $servers
     $root['mcp'] = $mcp
     New-Item -ItemType Directory -Force -Path $OpenClawHome | Out-Null
@@ -944,8 +972,12 @@ if ($SkipMcp) {
     Write-Host "argo MCP config written -> $OpenCodeConfigPath"
 
     if (-not $SkipOpenClaw) {
+        # The repo root to pin for OpenClaw defaults to the installer's own
+        # location; -OpenClawRepoRoot overrides it (e.g. for tests or when the
+        # installer runs from a non-workspace npm-global package dir).
+        $openClawRepoRoot = if ($OpenClawRepoRoot) { $OpenClawRepoRoot } else { $repoRoot }
         Write-Host "[22/22] argo MCP server -> $(Join-Path $OpenClawHome 'openclaw.json') (OpenClaw mcp.servers.argo, env.ARGO_REPO_ROOT pinned)"
-        Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $repoRoot -ArgoServer $argoServer
+        Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $openClawRepoRoot -ArgoServer $argoServer
     }
 }
 
