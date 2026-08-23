@@ -3162,7 +3162,7 @@
       ]
     },
     {
-      "description": "会话目标：为公众号文章《用多角色能力说明 ArchGraph 框架》生成 4 张写实效果图（多角色指挥中心 banner、角色诞生、协作流水线、媒体艺术家）。完成：全部 4 张用 DashScope 原生 text2image（qwen-image，1280*720，water_mark=false，n=1）生成并输出 PNG 到 docs/diagrams/：multi-role-banner.png、multi-role-birth.png、multi-role-pipeline.png、multi-role-media-artist.png。视觉验收用 qwen3-vl-plus（compatible-mode 端点）逐张验收：图1/图2/图4 一次通过，图3 首版验收失败（验收报告指出只有 5 人非 6 人、职业差异化不足、缺人物间光束连接），按建议强化 prompt（明确 EXACTLY SIX、逐个工位工具、光束链）重新生成后通过。可复用经验：① PowerShell 5.1 的 Invoke-RestMethod 传中文 JSON 正文会乱码导致 400，必须用 [System.Text.Encoding]::UTF8.GetBytes() 转字节并以 application/json; charset=utf-8 发送；② 传给 qwen3-vl-plus 的中文问题不能走命令行参数（控制台编码 GBK 打乱），应写入 UTF-8 文件再读入，否则模型收到乱码；③ DashScope 轮询成功在约 5-10 秒内，状态 SUCCEEDED 后取 output.results[0].url 下载；④ QWEN_KEY 只从 argo/.env 读取，不落盘不打印。待办：无。",
+      "description": "会话目标：为公众号文章《用多角色能力说明 ArchGraph 框架》生成 4 张写实效果图（多角色指挥中心 banner、角色诞生、协作流水线、媒体艺术家）。完成：全部 4 张用 DashScope 原生 text2image（qwen-image，1280*720，water_mark=false，n=1）生成并输出 PNG 到 docs/diagrams/：multi-role-banner.png、multi-role-birth.png、multi-role-pipeline.png、multi-role-media-artist.png。视觉验收用 qwen3-vl-plus（compatible-mode 端点）逐张验收：图1/图2/图4 一次通过，图3 首版验收失败（验收报告指出只有 5 人非 6 人、职业差异化不足、缺人物间光束连接），按建议强化 prompt（明确 EXACTLY SIX、逐个工位工具、光束链）重新生成后通过。可复用经验：① PowerShell 5.1 的 Invoke-RestMethod 传中文 JSON 正文会乱码导致 400，必须用 [System.Text.Encoding]::UTF8.GetBytes() 转字节并以 application/json; charset=utf-8 发送；② 传给 qwen3-vl-plus 的中文问题不能走命令行参数（控制台编码 GBK 打乱），应写入 UTF-8 文件再读入，否则模型收到乱码；③ DashScope 轮询成功在约 5-10 秒内，状态 SUCCEEDED 后取 output.results[0].url 下载；④ QWEN_KEY 只从 argo/.env 读取，不落盘不打印。会话2（同日）：为公众号文章《AI 的技能，不能拿来就用》生成 4 张写实图（skill-coevolution-banner 技能手册发光被内化、mount 墙上技能卡按需摘取、refine 失败复盘写入发光手册、export 技能包+避坑清单交接）。全部用 Node 脚本调 DashScope 原生 text2image（qwen-image，1280*720，water_mark=false，n=1；export 因 >1MB 压到 1152*648），qwen3-vl-plus 逐张验收一次通过。新增经验：⑤ 直接用 Node 写脚本调接口可完全规避 PowerShell 中文 JSON 乱码；⑥ 生成图 >1MB 时用 PIL 无损重编码（optimize=True）可压到 <1MB（1280*720 照片级 PNG 约 830-930KB），个别超限再缩长边到 1152；⑦ 验收结论写入 UTF-8 报告文件避免控制台 GBK 乱码。提交 b58f7c3。待办：无。",
       "id": "media-artist-001-ltm-note",
       "name": "媒体艺术家会话记录-2026-08-23",
       "type": "Artifact"
@@ -3363,6 +3363,43 @@
           "name": "commit",
           "value": "7cc24b9",
           "description": "design/KG/SystemArchitecture.json; tests/video-team-actor.test.js"
+        }
+      ]
+    },
+    {
+      "id": "2783",
+      "name": "发布SKILL观点推广文章到微信公众号",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "使用 wechat-public-cli 技能与媒体艺术家 Actor，撰写一篇以「AI Agent 的 SKILL 不应照搬、而应内化与个性化优化、AGENT 与人类共同进化」为核心观点的 ArchGraph 推广文章并发布到微信公众号。文章由协调者撰写 docs/skill-coevolution.wechat.md（洞察材料由规划专家/洞察视角提供，配图由媒体艺术家按稿子内容用 qwen-image 生成写实效果图），措辞减少 AI 味。",
+      "testcases": [
+        {
+          "name": "AT-2783-01-技能共同进化文章就绪",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/skill-coevolution.wechat.md",
+          "description": "GIVEN 已完成关于「SKILL 不应照搬、需内化与共同进化」的业界洞察材料；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号文章 Markdown docs/skill-coevolution.wechat.md，正文含 SKILL、内化、共同进化 等核心观点。",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-skill-coevolution-ready\"）：断言 docs/skill-coevolution.wechat.md 存在，frontmatter 含 title/author/digest，正文含 SKILL、内化、共同进化。通过。"
+        }
+      ]
+    },
+    {
+      "id": "2784",
+      "name": "SKILL内化与共同进化洞察材料",
+      "parent": "1249",
+      "type": "Business Object",
+      "description": "关于「AI Agent 的 SKILL 不应被照搬、而应内化并结合自身与环境个性化优化、失败后总结刷新、导出时附带踩坑经验」的业界洞察材料。论据：Anthropic Agent Skills 渐进披露（progressive disclosure，元数据预载+按需加载）；Anthropic 上下文工程（context 是有限资源、just-in-time、渐进披露、context rot）；Chroma 2025 研究 18 模型随输入长度退化；Skill Graphs（教得越多越笨，按需拉取 2-3 个相关节点）；AutoSkill（从交互经验提炼个性化技能、自我进化）；From History to State（把程序性上下文从 prompt 内化进权重，token 减少 2-7x）；Hermes Agent（边用边改进技能、跨会话记忆）；context rot / skill pollution（微软、MindStudio）。结论：ARCHGRAPH「挂载-参考-失败刷新-带坑导出」的 SKILL 哲学与业界主流共识同构。",
+      "attributes": []
+    },
+    {
+      "id": "media-artist-001-ltm-skill-coev",
+      "name": "SKILL共同进化文章配图产物",
+      "type": "Artifact",
+      "description": "会话（2026-08-23）：为公众号文章《AI 的技能，不能拿来就用》生成 4 张写实效果图（1 banner + 3 正文）。模型 qwen-image（DashScope 原生 text2image，1280*720，water_mark=false，n=1；export 因 >1MB 缩至 1152*648）。qwen3-vl-plus 逐张验收全部一次通过。产物：docs/diagrams/skill-coevolution-banner.png（技能手册发光、光点融入智能体）、skill-coevolution-mount.png（墙上技能卡按需摘取）、skill-coevolution-refine.png（失败复盘写入发光手册）、skill-coevolution-export.png（技能包+避坑清单交接）。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "b58f7c3",
+          "description": "docs/diagrams/skill-coevolution-banner.png; skill-coevolution-mount.png; skill-coevolution-refine.png; skill-coevolution-export.png; scripts/gen-skill-coevolution.js; scripts/inspect-skill-coevolution.js; scripts/compress-skill-coevolution.py"
         }
       ]
     }
@@ -4210,7 +4247,9 @@
         "1363",
         "2756",
         "2781",
-        "2782"
+        "2782",
+        "2783",
+        "2784"
       ],
       "included_relationships": []
     },
@@ -4758,7 +4797,8 @@
       "view_name": "媒体艺术家工作记录",
       "included_elements": [
         "media-artist-001-ltm-note",
-        "media-artist-001-ltm-artifacts"
+        "media-artist-001-ltm-artifacts",
+        "media-artist-001-ltm-skill-coev"
       ]
     },
     {
