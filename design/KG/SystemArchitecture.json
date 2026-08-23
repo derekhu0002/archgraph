@@ -3013,7 +3013,14 @@
       "id": "cdg-decision-001",
       "name": "能力委托门禁决策记录",
       "parent": "1249",
-      "type": "Requirement"
+      "type": "Requirement",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "1216d33",
+          "description": "design/KG/SystemArchitecture.json"
+        }
+      ]
     }
   ],
   "relationships": [
