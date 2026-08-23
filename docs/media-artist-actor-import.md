@@ -109,26 +109,23 @@
 
 ## 3. 附带文件（复制到目标项目）
 
-以下文件需随图谱片段一并复制到目标项目（Agent 定义与验收测试）：
+以下文件需随图谱片段一并复制到目标项目（验收测试）：
 
-- `argo/agents/media-artist.agent.md` —— Agent 定义（VS Code custom agent），frontmatter 含 `name: 媒体艺术家`、`model`、`tools`；正文含 DashScope text2image 接口、qwen-image 模型约束、qwen3-vl-plus 视觉验收与 QWEN_KEY 约束。
-- `tests/media-artist-actor.test.js` —— 验收测试（GIVEN-WHEN-THEN 可执行），覆盖：Actor 注册、Assignment 关系、Skill 关联、视图成员、Agent 文件就绪。
+- `tests/media-artist-actor.test.js` —— 验收测试（GIVEN-WHEN-THEN 可执行），覆盖：Actor 注册、Assignment 关系、Skill 关联、视图成员。
 
 > Skill 能力**不**以独立 SKILL.md 文件提供，全部内联在上述 `type=Skill` 元素的 `description` 中，与 ARCHGRAPH 的既有方式一致。
 
 ## 4. 导入步骤（目标项目内执行）
 
-1. 复制 `argo/agents/media-artist.agent.md` 与 `tests/media-artist-actor.test.js` 到目标项目对应目录。
+1. 复制 `tests/media-artist-actor.test.js` 到目标项目对应目录。
 2. 通过 ARGO MCP 依次（或 `applySystemArchitectureMutation` 原子）写入第 2 节的视图、元素、关系。
 3. 若目标项目 id 冲突（已有同名元素/视图），先删除旧项或改写 id。
-4. `updateArchitectureElement { id: "media-artist-001", patch: { attributes: [{ name: "agent", value: "media-artist" }] } }` 登记 agent 属性。
-5. 运行 `node --test tests/media-artist-actor.test.js`，执行 `validateSystemArchitecture`。
-6. 配置凭据：目标项目 `argo/.env` 需有 `QWEN_KEY`（阿里云 DashScope）。本接口文档不包含任何密钥。
+4. 运行 `node --test tests/media-artist-actor.test.js`，执行 `validateSystemArchitecture`。
+5. 配置凭据：目标项目 `argo/.env` 需有 `QWEN_KEY`（阿里云 DashScope）。本接口文档不包含任何密钥。
 
 ## 5. 验收用例（随 Actor 携带）
 
 - **AT-media-artist-01-媒体艺术家角色就绪**：GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找专门负责图片视频生成的 Business Actor；THEN 图谱中存在全局唯一 name 为「媒体艺术家」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description，并通过 Assignment 指派给「图片视频生成」Role，均包含于「媒体创作团队」视图(media-team-001)。
-- **AT-media-artist-02-媒体艺术家Agent文件就绪**：GIVEN 媒体艺术家需要以 VS Code 自定义 agent 方式被调用；WHEN 查找其 agent 定义文件；THEN 工作区 `argo/agents/media-artist.agent.md` 存在，frontmatter 含 name=媒体艺术家、model 与 tools，正文含 text2image 端点、qwen-image 模型、qwen3-vl-plus 与 QWEN_KEY 约束。
 
 ## 6. 源仓库信息
 

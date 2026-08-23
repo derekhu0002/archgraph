@@ -3106,24 +3106,13 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/media-artist-actor.test.js",
           "acceptanceCriteria": "tests/media-artist-actor.test.js"
-        },
-        {
-          "name": "AT-media-artist-02-媒体艺术家Agent文件就绪",
-          "description": "GIVEN 媒体艺术家需要以 VS Code 自定义 agent 方式被调用；WHEN 查找其 agent 定义文件；THEN 工作区 argo/agents/media-artist.agent.md 存在，frontmatter 含 name=媒体艺术家、model 与 tools 列表，正文含 text2image 端点、qwen-image 模型、qwen3-vl-plus 视觉验收与 QWEN_KEY 约束。",
-          "type": "Acceptance Test",
-          "Input": "node --test tests/media-artist-actor.test.js",
-          "acceptanceCriteria": "tests/media-artist-actor.test.js"
         }
       ],
       "attributes": [
         {
-          "name": "agent",
-          "value": "media-artist"
-        },
-        {
           "name": "commit",
           "value": "b0ae5a9",
-          "description": "design/KG/SystemArchitecture.json（新增 媒体艺术家 Actor + 图片视频生成 Role + 媒体创作团队视图 media-team-001 + 2 Skill + 3 关系）; argo/agents/media-artist.agent.md; tests/media-artist-actor.test.js"
+          "description": "design/KG/SystemArchitecture.json（新增 媒体艺术家 Actor + 图片视频生成 Role + 媒体创作团队视图 media-team-001 + 2 Skill + 3 关系）; tests/media-artist-actor.test.js"
         }
       ]
     },

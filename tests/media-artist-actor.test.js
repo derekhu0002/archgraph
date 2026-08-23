@@ -9,29 +9,6 @@ const ROOT = path.resolve(__dirname, '..');
 const GRAPH = JSON.parse(
   readFileSync(path.join(ROOT, 'design', 'KG', 'SystemArchitecture.json'), 'utf8')
 );
-const AGENT_FILE = path.join(ROOT, 'argo', 'agents', 'media-artist.agent.md');
-
-function parseAgentFrontmatter(md) {
-  const m = md.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n/);
-  if (!m) {
-    throw new Error('agent file is missing a YAML frontmatter block');
-  }
-  const meta = {};
-  for (const line of m[1].split(/\r?\n/)) {
-    const kv = line.match(/^([A-Za-z_][A-Za-z0-9_-]*):\s*(.*)$/);
-    if (kv) {
-      let value = kv[2].trim();
-      if (
-        (value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))
-      ) {
-        value = value.slice(1, -1);
-      }
-      meta[kv[1]] = value;
-    }
-  }
-  return meta;
-}
 
 test('media-artist-actor: a dedicated Business Actor is registered for media generation', () => {
   // GIVEN the intent graph models the AgentOrganization team
@@ -110,24 +87,4 @@ test('media-artist-actor: actor, role, and relationships are visible in the 媒�
   assert.ok(view.included_elements.includes(genSkill.id), 'view should include dashscope-media-generator');
   assert.ok(view.included_elements.includes(vlSkill.id), 'view should include qwen3-vl-visual-inspection');
   assert.ok(view.included_relationships.includes(assignment.id), 'view should include the assignment');
-});
-
-test('media-artist-agent-file: a VS Code custom agent defines the media artist role', () => {
-  // GIVEN the 媒体艺术家 needs to be invokable as a VS Code custom agent
-  // WHEN a caller inspects the agent definition file
-  // THEN argo/agents/media-artist.agent.md exists with name/tools frontmatter and DashScope constraints
-  const md = readFileSync(AGENT_FILE, 'utf8');
-  const meta = parseAgentFrontmatter(md);
-
-  assert.equal(meta.name, '媒体艺术家', 'frontmatter should name the agent 媒体艺术家');
-  assert.ok(meta.model, 'frontmatter should declare a model');
-  assert.ok(meta.tools, 'frontmatter should declare a tools list');
-  assert.match(meta.tools, /read/, 'tools should include read');
-  assert.match(meta.tools, /edit/, 'tools should include edit');
-  assert.match(meta.tools, /search/, 'tools should include search');
-  assert.match(meta.tools, /execute/, 'tools should include execute');
-  assert.match(md, /text2image/, 'agent body should document the text2image endpoint');
-  assert.match(md, /qwen-image/, 'agent body should document the qwen-image model');
-  assert.match(md, /qwen3-vl-plus/, 'agent body should document visual inspection');
-  assert.match(md, /QWEN_KEY/, 'agent body should reference the QWEN_KEY credential');
 });
