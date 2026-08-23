@@ -3220,6 +3220,11 @@
           "description": "docs/multi-role-capability.wechat.md（正文内嵌 4 张写实插图）; tests/wechat-article.test.js（wechat-multi-role-images）; design/KG/SystemArchitecture.json（AT-2782-03）"
         },
         {
+          "name": "commit",
+          "value": "f6ae9a5",
+          "description": "design/KG/SystemArchitecture.json（重建草稿 media_id 登记 + WP 2782 回写）"
+        },
+        {
           "name": "media_id",
           "value": "BRZAMZ3b-CaOBH8qdG2KTa3wYx_GPS87s1sC25BPs_P_OChINE48e4fD2Pom8iRS",
           "description": "WeChat draft media_id（2026-08-23，修复后含正文 4 张插图的草稿；旧草稿 BRZAMZ3b-CaOBH8qdG2KTe5O6HXnE6Yuo7R66FUVQg-wEg-p5F_BIUFS0f3z8djt 待后台删除）"
