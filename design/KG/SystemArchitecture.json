@@ -2982,7 +2982,14 @@
       "id": "ctg-decision-001",
       "name": "ChangeTierGate 决策记录",
       "type": "Requirement",
-      "description": "决策(2026-08-23, commit dd72178)：为工作流规则新增 <ChangeTierGate> 分级改动仪式，行为无关(Tier 1)改动跳过验收回归与全量校验。理由：小任务固定仪式成本高，无条件验收回归+每改必登记浪费 token/时间，对齐业界轻量 fast-path。被否方案：① 完全移除验收先行(破坏可追溯红线)；② 主观判断降档(无客观标准，易滥用)。安全网：git diff 越界自动升档、KG 触线保留完整校验、零歧义默认升档。验收用例 AT-02/AT-03 挂在 archgraph-workflow-rules 上。"
+      "description": "决策(2026-08-23, commit dd72178)：为工作流规则新增 <ChangeTierGate> 分级改动仪式，行为无关(Tier 1)改动跳过验收回归与全量校验。理由：小任务固定仪式成本高，无条件验收回归+每改必登记浪费 token/时间，对齐业界轻量 fast-path。被否方案：① 完全移除验收先行(破坏可追溯红线)；② 主观判断降档(无客观标准，易滥用)。安全网：git diff 越界自动升档、KG 触线保留完整校验、零歧义默认升档。验收用例 AT-02/AT-03 挂在 archgraph-workflow-rules 上。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "8208893",
+          "description": "design/KG/SystemArchitecture.json"
+        }
+      ]
     }
   ],
   "relationships": [
