@@ -3111,8 +3111,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "b0ae5a9",
-          "description": "design/KG/SystemArchitecture.json（新增 媒体艺术家 Actor + 图片视频生成 Role + 媒体创作团队视图 media-team-001 + 2 Skill + 3 关系）; tests/media-artist-actor.test.js"
+          "value": "43216d1",
+          "description": "design/KG/SystemArchitecture.json（移除 agent 属性与 AT-media-artist-02 用例，Skill 能力保持图谱内联）; argo/agents/media-artist.agent.md（删除）; tests/media-artist-actor.test.js; docs/media-artist-actor-import.md"
         }
       ]
     },
