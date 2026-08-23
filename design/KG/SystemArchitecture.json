@@ -2809,6 +2809,20 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/neo4j-cypher-query.test.js",
           "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js（用例 archgraph-rules-document-queryNeo4jGraph）：断言 argo/rules/archgraph.instructions.md 包含 queryNeo4jGraph、GraphQueryGuideline 与 $graphKey，并包含只读拒绝的写子句关键字 CREATE/MERGE/DELETE。通过。"
+        },
+        {
+          "name": "AT-archgraph-workflow-rules-02-规则文档登记分级改动门禁",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 阅读该规则并准备改动；THEN 规则包含 ChangeTierGate 章节，定义 Tier 1（行为无关）/Tier 2（行为变化）/Tier 3（结构性/新增）三档，Tier 1 允许跳过验收回归与全量校验，且 CoreRule 4 引用分级门禁。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/argo-rules-change-tier.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-rules-change-tier.test.js（用例 archgraph-rules-document-change-tier-gate）：断言 argo/rules/archgraph.instructions.md 包含 ChangeTierGate、Tier 1/Tier 2/Tier 3、行为无关与跳过验收回归的表述，并断言 CoreRule 4 引用分级门禁。通过。"
+        },
+        {
+          "name": "AT-archgraph-workflow-rules-03-分级门禁安全网",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 申报 Tier 1 改动；THEN 规则要求 git diff 校验（越界自动升为 Tier 2）、KG 触线保留完整校验、零歧义默认升档（fail-safe）。",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/argo-rules-change-tier.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-rules-change-tier.test.js（用例 archgraph-rules-document-change-tier-safety-net）：断言规则文档包含 git diff 越界升档、KG 触线保留校验、零歧义默认升档（fail-safe）等安全网要求。通过。"
         }
       ],
       "attributes": [

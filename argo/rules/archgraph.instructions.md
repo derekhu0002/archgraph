@@ -17,7 +17,7 @@ The following are non-negotiable red lines (MUST) for this Agent and must never 
 1. Before modifying anything in the repository, you MUST first locate (or create) the corresponding architecture element and View in the graph through the ARGO MCP. See `<IntentArchitectureFirst>`.
 2. The intent graph must only be read/written through the ARGO MCP tools; direct editing of the graph source file (design/KG/SystemArchitecture.json) is forbidden. See `<ToolsGuideline>`.
 3. Every change must be committed via git, and the "commit id + related file paths" must be registered in the `commit` attribute of the corresponding architecture element. See `<IntentArchitectureFirst>` item 4.
-4. Any change must first identify and pass the regression tests of all affected acceptance test cases; if the acceptance test cases are missing, add them first. See `<AcceptanceTestFirst>`.
+4. Any change must first identify and pass the regression tests of all affected acceptance test cases; if the acceptance test cases are missing, add them first. Tier 1 (behavior-independent) changes are exempt from acceptance regression and full validation per `<ChangeTierGate>`; all other tiers keep the full requirement. See `<AcceptanceTestFirst>` and `<ChangeTierGate>`.
 5. Before finishing work, you MUST summarize the key progress of this session and write it back to long-term memory, to prevent forgetting across long or separate sessions. See `<SessionMemorySummarization>` and `<MemoryTriggerTiming>`.
 6. Continuously comply with the red lines above throughout the process; never skip, simplify, or silently violate any of them.
 </CoreRules>
@@ -53,6 +53,21 @@ When you are about to build an element, first look up the skills and resources n
 5. Every acceptance test case in the knowledge graph must be executable, not merely descriptive; if you find an acceptance test case that cannot be executed, you MUST immediately supplement or fix it.
 6. Every acceptance test case in the knowledge graph MUST be described and implemented in GIVEN-WHEN-THEN format, so it is both human-readable and automatically executable.
 </AcceptanceTestFirst>
+
+<ChangeTierGate>
+Every repository change MUST be classified into exactly one tier BEFORE implementation; the tier is declared explicitly. Tier classification is objective and enumerable; if the Agent cannot conclusively classify the change, it MUST default to Tier 2 (fail-safe).
+1. Tier 1 — 行为无关（behavior-independent）: qualifies ONLY if ALL of the following hold:
+   - The diff touches only non-executable content: comments, documentation (including this rules file), whitespace/formatting-only hunks, or descriptive metadata text in the intent graph.
+   - No executable logic, public interface/API surface, or test logic is changed (test files untouched).
+   - No graph structure change: no element/relationship/view added, removed, renamed, or retyped.
+   - Skipped ceremony（跳过验收回归与全量校验）: acceptance test identification and regression, and full validateSystemArchitecture, are skipped (unless the graph was touched). Kept ceremony: locate the element, git commit + register commit id, and defer memory milestone writes to session end.
+2. Tier 2 — 行为变化（behavior-changing, scoped）: any change touching executable logic, interfaces, or test behavior within existing elements. Full ceremony: locate element, identify affected acceptance test cases, run regression, validateSystemArchitecture, commit + register, immediate memory writes.
+3. Tier 3 — 结构性/新增（structural/new）: new elements/relationships/views, new features, or cross-cutting changes. Full Tier 2 ceremony plus preview/apply mutation for any graph change.
+4. Safety net (MUST, non-negotiable):
+   - Declared tier is verified at commit time: the actual git diff file list is checked against the Tier 1 allowlist; if any disallowed file/hunk appears, the change automatically 升为 Tier 2 and MUST complete the acceptance regression and validation before finishing. Tier 1 is revocable, not merely declared.
+   - KG 触线规则: any diff touching design/KG/SystemArchitecture.json keeps full validation; the Tier 1 exemption never applies to graph structure changes.
+   - 零歧义默认升档（fail-safe）: any uncertain classification MUST be treated as Tier 2, never Tier 1.
+</ChangeTierGate>
 
 <CoperationGuideline>
 0. You must not do the work of another `Business Actor`; you may only work in the role you are delegated to and must strictly stay within that role's responsibilities. If you need help from another `Business Actor`, you must go through a formal delegation process.
