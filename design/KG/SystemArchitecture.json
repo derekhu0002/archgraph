@@ -3225,14 +3225,19 @@
           "description": "design/KG/SystemArchitecture.json（重建草稿 media_id 登记 + WP 2782 回写）"
         },
         {
+          "name": "commit",
+          "value": "5a0768f",
+          "description": "docs/diagrams/multi-role-*.png（压缩至 <1MB 适配微信 uploadimg 限制）"
+        },
+        {
           "name": "media_id",
-          "value": "BRZAMZ3b-CaOBH8qdG2KTa3wYx_GPS87s1sC25BPs_P_OChINE48e4fD2Pom8iRS",
-          "description": "WeChat draft media_id（2026-08-23，修复后含正文 4 张插图的草稿；旧草稿 BRZAMZ3b-CaOBH8qdG2KTe5O6HXnE6Yuo7R66FUVQg-wEg-p5F_BIUFS0f3z8djt 待后台删除）"
+          "value": "BRZAMZ3b-CaOBH8qdG2KTYS8HoWTyxXdUDr8QoodckwqCqCY97_GT5XdGc8xO5MD",
+          "description": "WeChat draft media_id（2026-08-23，最终版：正文含 4 张压缩图，draft/get 验证 errcode=0；旧无图草稿 BRZAMZ3b-CaOBH8qdG2KTe5O6HXnE6Yuo7R66FUVQg-wEg-p5F_BIUFS0f3z8djt 待后台删除）"
         },
         {
           "name": "status",
           "value": "draft_created",
-          "description": "草稿已重建（wechat:draft 成功，含正文插图），待公众号后台「草稿箱」手动发布并删除旧无图草稿；API 发布不可用（48001）"
+          "description": "草稿已创建并经 draft/get 验证（errcode=0，正文含 4 张 mmbiz.qpic.cn 图），待公众号后台「草稿箱」手动发布并删除旧无图草稿；API 发布不可用（48001）"
         },
         {
           "name": "deliveryStatus",
@@ -3259,13 +3264,18 @@
         },
         {
           "name": "media_id",
-          "value": "BRZAMZ3b-CaOBH8qdG2KTa3wYx_GPS87s1sC25BPs_P_OChINE48e4fD2Pom8iRS",
-          "description": "WeChat draft media_id（修复后含正文插图草稿，2026-08-23）"
+          "value": "BRZAMZ3b-CaOBH8qdG2KTYS8HoWTyxXdUDr8QoodckwqCqCY97_GT5XdGc8xO5MD",
+          "description": "WeChat draft media_id（最终版，正文含 4 张图，draft/get 验证 errcode=0）"
         },
         {
           "name": "status",
           "value": "draft_created",
-          "description": "草稿已重建（含正文插图），待公众号后台手动发布并删除旧无图草稿"
+          "description": "草稿已创建并验证（含正文 4 图），待后台手动发布并删除旧无图草稿"
+        },
+        {
+          "name": "pitfall",
+          "value": "微信 /media/uploadimg 拒绝 >1MB 图片（正文内嵌图上传失败导致 createDraft 抛错）。症状：命令看似成功/或执行者误报成功，但 draft/get 返回 40007 invalid media_id。解决：正文图片必须压缩 <1MB（1000px 长边、optimize PNG，0.5-0.7MB 安全），且创建后必须用 draft/get 验证 errcode=0 才可登记 media_id，禁止仅凭命令输出登记。",
+          "description": "2026-08-23 多角色文章配图发布坑：symptom + cause + workaround"
         }
       ]
     }
