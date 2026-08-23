@@ -1048,6 +1048,11 @@
           "name": "commit",
           "value": "59e91d7",
           "description": "argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; install-argo.ps1 (bridge session.header?.cwd); tests/argo-deploy.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "6013547",
+          "description": "package.json (version bump to 0.10.28); npm publish archgraph-argo@0.10.28 + global install + argo-deploy 22/22 验证通过"
         }
       ],
       "testcases": [
