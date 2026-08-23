@@ -3394,6 +3394,32 @@
           "description": "GIVEN 媒体艺术家已为 SKILL 共同进化文章生成写实插图；WHEN 文章在公众号渲染；THEN 文章正文内嵌至少一张引用真实 diagrams/*.png 文件的 markdown 图片（而非仅 banner），避免公众号文章无插图。",
           "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-skill-coevolution-images\"）：断言正文存在至少一个 markdown 图片引用（![...](diagrams/*.png)）且所引用文件均存在。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "b0cad08",
+          "description": "docs/skill-coevolution.wechat.md; docs/skill-coevolution-insight.md; tests/wechat-article.test.js (wechat-skill-coevolution-ready/banner/images); design/KG/SystemArchitecture.json (WP 2783 + AT-2783-01/02/03)"
+        },
+        {
+          "name": "commit",
+          "value": "b58f7c3",
+          "description": "docs/diagrams/skill-coevolution-banner.png; docs/diagrams/skill-coevolution-mount.png; docs/diagrams/skill-coevolution-refine.png; docs/diagrams/skill-coevolution-export.png; scripts/gen-skill-coevolution.js; scripts/inspect-skill-coevolution.js; scripts/compress-skill-coevolution.py"
+        },
+        {
+          "name": "media_id",
+          "value": "BRZAMZ3b-CaOBH8qdG2KTZM7ioNIU4UvW0-upb7B3te1K4AyTzbP-IndH7_RU1pa",
+          "description": "WeChat draft media_id（2026-08-23，draft/get 验证 errcode=0，正文含 4 图 mmbiz.qpic.cn）"
+        },
+        {
+          "name": "status",
+          "value": "draft_created",
+          "description": "草稿已创建并经 draft/get 验证（errcode=0），待公众号后台「草稿箱」手动发布；API 发布不可用（个人未认证订阅号 48001）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        }
       ]
     },
     {
@@ -3402,7 +3428,13 @@
       "parent": "1249",
       "type": "Business Object",
       "description": "关于「AI Agent 的 SKILL 不应被照搬、而应内化并结合自身与环境个性化优化、失败后总结刷新、导出时附带踩坑经验」的业界洞察材料。论据：Anthropic Agent Skills 渐进披露（progressive disclosure，元数据预载+按需加载）；Anthropic 上下文工程（context 是有限资源、just-in-time、渐进披露、context rot）；Chroma 2025 研究 18 模型随输入长度退化；Skill Graphs（教得越多越笨，按需拉取 2-3 个相关节点）；AutoSkill（从交互经验提炼个性化技能、自我进化）；From History to State（把程序性上下文从 prompt 内化进权重，token 减少 2-7x）；Hermes Agent（边用边改进技能、跨会话记忆）；context rot / skill pollution（微软、MindStudio）。结论：ARCHGRAPH「挂载-参考-失败刷新-带坑导出」的 SKILL 哲学与业界主流共识同构。",
-      "attributes": []
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "b0cad08",
+          "description": "docs/skill-coevolution-insight.md（SKILL 内化与共同进化洞察材料，规划专家产出）"
+        }
+      ]
     },
     {
       "id": "media-artist-001-ltm-skill-coev",
