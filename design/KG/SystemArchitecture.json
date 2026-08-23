@@ -3190,7 +3190,30 @@
           "name": "AT-2782-02-多角色文章真实配图",
           "type": "Acceptance Test"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "0f8ed53",
+          "description": "docs/multi-role-capability.wechat.md; tests/wechat-article.test.js (wechat-multi-role-ready/banner); design/KG/SystemArchitecture.json (WP 2782 + AT-2782-01/02)"
+        },
+        {
+          "name": "status",
+          "value": "draft_ready",
+          "description": "文章与配图就绪，待创建公众号草稿"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
+        }
       ]
+    },
+    {
+      "description": "公众号发布员会话记录（2026-08-23）：目标——发布一篇用 ArchGraph 自身多角色能力说明框架使用效果的文章。完成：撰写 docs/multi-role-capability.wechat.md（frontmatter title/author/digest/banner_path 齐全），正文讲清通过与 Agent 对话不断给 AgentOrganization 增加新角色（产品经理/系统设计师/规划专家/系统架构师/Developer/Reviewer/验证测试工程师/公众号发布员/媒体艺术家），每个角色有职责（Business Role description）、能力（Skill+Association）、协作（Assignment/Triggering），含 7 步操作清单。插图：按 CapabilityDelegationGuideline 委托媒体艺术家（media-artist-001）用 qwen-image 生成 4 张写实图（multi-role-banner/birth/pipeline/media-artist），非框图，qwen3-vl-plus 逐张验收，子代理已提交 e8d8e43 并写自身 LTM。图谱：view 180 新增 WP 2782「发布多角色能力介绍文章到微信公众号」+ AT-2782-01（文章就绪）/AT-2782-02（真实配图）。测试：tests/wechat-article.test.js 新增 wechat-multi-role-ready/banner 两用例，wechat-article 套件 9/9 通过；全量 200 测试 199 通过（唯一失败 wechat-publisher-agent-file 为已知既有模型串问题，与本改动无关）。commit：0f8ed53（文章+测试+图谱）+ 053473b/e8d8e43（媒体艺术家配图）。决策：插画走写实摄影风格（非框图）贴合公众号阅读；插图严格委托媒体艺术家不越权。可复用经验：多角色协作=职责（Role description）+能力（Skill）+协作（Assignment/Triggering）三者结构化；插图任务按 CapabilityDelegationGuideline 委派并让被委派方自验自记。遗留：文章未创建公众号草稿（status=draft_ready），待发布员后续 wechat:draft（注意 IP 白名单）；后续可写「媒体艺术家角色成长记」续篇。",
+      "id": "wpp-mem-multi-role-001",
+      "name": "SessionRecord-MultiRoleCapability",
+      "parent": "2755",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -4502,7 +4525,8 @@
       "parent_element_name": "公众号发布员",
       "description": "公众号发布员长时记忆：记录公众号文章撰写、草稿创建与发布的会话记录。",
       "included_elements": [
-        "wpp-mem-openclaw-001"
+        "wpp-mem-openclaw-001",
+        "wpp-mem-multi-role-001"
       ],
       "included_relationships": []
     },
