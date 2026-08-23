@@ -3379,6 +3379,20 @@
           "Input": "打开 docs/skill-coevolution.wechat.md",
           "description": "GIVEN 已完成关于「SKILL 不应照搬、需内化与共同进化」的业界洞察材料；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号文章 Markdown docs/skill-coevolution.wechat.md，正文含 SKILL、内化、共同进化 等核心观点。",
           "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-skill-coevolution-ready\"）：断言 docs/skill-coevolution.wechat.md 存在，frontmatter 含 title/author/digest，正文含 SKILL、内化、共同进化。通过。"
+        },
+        {
+          "name": "AT-2783-02-技能文章主题封面",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/skill-coevolution.wechat.md 与 docs/diagrams/skill-coevolution-banner.png",
+          "description": "GIVEN SKILL 共同进化文章即将发布；WHEN 媒体艺术家准备标题图；THEN 文章声明专用主题封面（banner_path 指向 diagrams/skill-coevolution-banner.png，非通用 image.png）且文件存在，封面体现「技能手册化作光点融入 AI 身体」主题。",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-skill-coevolution-banner\"）：断言 frontmatter 含 banner_path 且不等于 diagrams/image.png，banner 文件存在。通过。"
+        },
+        {
+          "name": "AT-2783-03-技能文章正文内嵌插图",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/skill-coevolution.wechat.md",
+          "description": "GIVEN 媒体艺术家已为 SKILL 共同进化文章生成写实插图；WHEN 文章在公众号渲染；THEN 文章正文内嵌至少一张引用真实 diagrams/*.png 文件的 markdown 图片（而非仅 banner），避免公众号文章无插图。",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-skill-coevolution-images\"）：断言正文存在至少一个 markdown 图片引用（![...](diagrams/*.png)）且所引用文件均存在。通过。"
         }
       ]
     },
@@ -4204,6 +4218,16 @@
       "target_id": "media-video-skill-001",
       "source_name": "图片视频生成",
       "target_name": "dashscope-video-generator"
+    },
+    {
+      "id": "skill-insight-informs-2783",
+      "name": "Association",
+      "statement": "SKILL内化与共同进化洞察材料 --(Association)--> 发布SKILL观点推广文章到微信公众号",
+      "type": "Association",
+      "source_id": "2784",
+      "target_id": "2783",
+      "source_name": "SKILL内化与共同进化洞察材料",
+      "target_name": "发布SKILL观点推广文章到微信公众号"
     }
   ],
   "views": [
@@ -4251,7 +4275,9 @@
         "2783",
         "2784"
       ],
-      "included_relationships": []
+      "included_relationships": [
+        "skill-insight-informs-2783"
+      ]
     },
     {
       "view_id": "1800",

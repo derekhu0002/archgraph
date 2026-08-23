@@ -176,6 +176,56 @@ test('wechat-multi-role-banner: multi-role article has a dedicated photorealisti
   assert.ok(existsSync(bannerAbs), `banner image should exist: ${bannerAbs}`);
 });
 
+const SKILL_COEV = path.join(ROOT, 'docs', 'skill-coevolution.wechat.md');
+
+test('wechat-skill-coevolution-ready: SKILL co-evolution article with required frontmatter and content', () => {
+  // GIVEN the industry insight material about SKILL internalization and co-evolution is complete
+  // WHEN the wechat-public-cli skill prepares to publish
+  // THEN a WeChat-ready markdown exists with title/author/digest frontmatter and SKILL co-evolution body
+  const md = readFileSync(SKILL_COEV, 'utf8');
+  const meta = parseFrontmatter(md);
+
+  assert.ok(meta.title, 'frontmatter should declare a title');
+  assert.ok(meta.author, 'frontmatter should declare an author');
+  assert.ok(meta.digest, 'frontmatter should declare a digest');
+  assert.match(md, /SKILL/, 'article body should discuss SKILL');
+  assert.match(md, /内化/, 'article body should discuss internalization');
+  assert.match(md, /共同进化/, 'article body should discuss co-evolution');
+});
+
+test('wechat-skill-coevolution-banner: SKILL co-evolution article has a dedicated themed banner', () => {
+  // GIVEN the SKILL co-evolution article is about to be published
+  // WHEN the media-artist prepares the title image
+  // THEN the article declares a dedicated themed banner (distinct from the generic core-model image) and the file exists
+  const md = readFileSync(SKILL_COEV, 'utf8');
+  const meta = parseFrontmatter(md);
+
+  assert.ok(meta.banner_path, 'frontmatter should declare a banner_path');
+  assert.notEqual(
+    meta.banner_path,
+    'diagrams/image.png',
+    'should use a dedicated themed banner, not the generic core-model image'
+  );
+  const bannerAbs = path.join(ROOT, 'docs', meta.banner_path);
+  assert.ok(existsSync(bannerAbs), `banner image should exist: ${bannerAbs}`);
+});
+
+test('wechat-skill-coevolution-images: SKILL co-evolution article embeds the illustrations inline', () => {
+  // GIVEN the media-artist has generated illustrations for the SKILL co-evolution article
+  // WHEN the article is rendered for the public account
+  // THEN the article body embeds at least one markdown image referencing a real diagrams/*.png file (not just the banner)
+  const md = readFileSync(SKILL_COEV, 'utf8');
+  const meta = parseFrontmatter(md);
+  const images = [...md.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1]);
+
+  assert.ok(images.length >= 1, 'article body should embed at least one inline image');
+  for (const rel of images) {
+    const abs = path.join(ROOT, 'docs', rel);
+    assert.ok(existsSync(abs), `embedded image should exist: ${abs}`);
+  }
+  assert.notEqual(meta.banner_path, 'diagrams/image.png', 'should use a dedicated themed banner');
+});
+
 const INNOVATIONS = path.join(ROOT, 'docs', '8-innovations.wechat.md');
 
 test('wechat-innovations-ready: 8 innovations article with required frontmatter and content', () => {
