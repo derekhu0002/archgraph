@@ -143,6 +143,22 @@ test('wechat-multi-role-ready: multi-role capability article with required front
   assert.match(md, /Triggering/, 'article body should mention Triggering collaboration');
 });
 
+test('wechat-multi-role-images: multi-role article embeds the photorealistic illustrations inline', () => {
+  // GIVEN the media-artist has generated photorealistic illustrations for the multi-role article
+  // WHEN the article is rendered for the public account
+  // THEN the article body embeds at least one markdown image referencing a real diagrams/*.png file (not just the banner)
+  const md = readFileSync(MULTI_ROLE, 'utf8');
+  const meta = parseFrontmatter(md);
+  const images = [...md.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1]);
+
+  assert.ok(images.length >= 1, 'article body should embed at least one inline image');
+  for (const rel of images) {
+    const abs = path.join(ROOT, 'docs', rel);
+    assert.ok(existsSync(abs), `embedded image should exist: ${abs}`);
+  }
+  assert.notEqual(meta.banner_path, 'diagrams/image.png', 'should use a dedicated themed banner');
+});
+
 test('wechat-multi-role-banner: multi-role article has a dedicated photorealistic banner', () => {
   // GIVEN the multi-role article is about to be published
   // WHEN the media-artist prepares the title image

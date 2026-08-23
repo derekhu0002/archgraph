@@ -3189,6 +3189,13 @@
           "Input": "打开 docs/multi-role-capability.wechat.md 与 docs/diagrams/multi-role-banner.png",
           "name": "AT-2782-02-多角色文章真实配图",
           "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-multi-role-images\"）：断言正文存在至少一个 markdown 图片引用（![...](diagrams/*.png)）且所引用文件均存在。通过。",
+          "description": "GIVEN 媒体艺术家已为多角色文章生成写实插图；WHEN 文章在公众号渲染；THEN 文章正文内嵌至少一张引用真实 diagrams/*.png 文件的 markdown 图片（而非仅 banner），避免公众号文章无插图。",
+          "Input": "打开 docs/multi-role-capability.wechat.md",
+          "name": "AT-2782-03-多角色文章正文内嵌插图",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
