@@ -1259,8 +1259,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "5ef24d4",
-          "description": "design/KG/SystemArchitecture.json（AgentOrganization 新增子视图 433 公众号发布团队）"
+          "value": "b0ae5a9",
+          "description": "design/KG/SystemArchitecture.json（AgentOrganization 新增子视图 media-team-001 媒体创作团队）"
         }
       ],
       "subdiagram_views": [
@@ -3113,6 +3113,17 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/media-artist-actor.test.js",
           "acceptanceCriteria": "tests/media-artist-actor.test.js"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "agent",
+          "value": "media-artist"
+        },
+        {
+          "name": "commit",
+          "value": "b0ae5a9",
+          "description": "design/KG/SystemArchitecture.json（新增 媒体艺术家 Actor + 图片视频生成 Role + 媒体创作团队视图 media-team-001 + 2 Skill + 3 关系）; argo/agents/media-artist.agent.md; tests/media-artist-actor.test.js"
         }
       ]
     },
