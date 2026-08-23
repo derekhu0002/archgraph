@@ -1053,6 +1053,11 @@
           "name": "commit",
           "value": "6013547",
           "description": "package.json (version bump to 0.10.28); npm publish archgraph-argo@0.10.28 + global install + argo-deploy 22/22 验证通过"
+        },
+        {
+          "name": "commit",
+          "value": "09f814e",
+          "description": "package.json (version bump to 0.10.29); npm publish archgraph-argo@0.10.29 成功 + 安装验证：安装包 argo/rules/archgraph.instructions.md 与仓库一致，含 CapabilityDelegationGuideline 新增章节（e551dd1）"
         }
       ],
       "testcases": [
