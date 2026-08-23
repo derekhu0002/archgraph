@@ -3114,6 +3114,12 @@
           "value": "43216d1",
           "description": "design/KG/SystemArchitecture.json（移除 agent 属性与 AT-media-artist-02 用例，Skill 能力保持图谱内联）; argo/agents/media-artist.agent.md（删除）; tests/media-artist-actor.test.js; docs/media-artist-actor-import.md"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "media-artist-001-ltm",
+          "view_name": "媒体艺术家工作记录"
+        }
       ]
     },
     {
@@ -3150,6 +3156,18 @@
           "description": "design/KG/SystemArchitecture.json（Skill 以图谱内联 description 提供，回退独立 SKILL.md 文件）; docs/media-artist-actor-import.md（单 MD 导出接口文档）"
         }
       ]
+    },
+    {
+      "description": "会话目标：为公众号文章《用多角色能力说明 ArchGraph 框架》生成 4 张写实效果图（多角色指挥中心 banner、角色诞生、协作流水线、媒体艺术家）。完成：全部 4 张用 DashScope 原生 text2image（qwen-image，1280*720，water_mark=false，n=1）生成并输出 PNG 到 docs/diagrams/：multi-role-banner.png、multi-role-birth.png、multi-role-pipeline.png、multi-role-media-artist.png。视觉验收用 qwen3-vl-plus（compatible-mode 端点）逐张验收：图1/图2/图4 一次通过，图3 首版验收失败（验收报告指出只有 5 人非 6 人、职业差异化不足、缺人物间光束连接），按建议强化 prompt（明确 EXACTLY SIX、逐个工位工具、光束链）重新生成后通过。可复用经验：① PowerShell 5.1 的 Invoke-RestMethod 传中文 JSON 正文会乱码导致 400，必须用 [System.Text.Encoding]::UTF8.GetBytes() 转字节并以 application/json; charset=utf-8 发送；② 传给 qwen3-vl-plus 的中文问题不能走命令行参数（控制台编码 GBK 打乱），应写入 UTF-8 文件再读入，否则模型收到乱码；③ DashScope 轮询成功在约 5-10 秒内，状态 SUCCEEDED 后取 output.results[0].url 下载；④ QWEN_KEY 只从 argo/.env 读取，不落盘不打印。待办：无。",
+      "id": "media-artist-001-ltm-note",
+      "name": "媒体艺术家会话记录-2026-08-23",
+      "type": "Artifact"
+    },
+    {
+      "description": "2026-08-23 生成：docs/diagrams/multi-role-banner.png（指挥中心，7 角色全息投影）、multi-role-birth.png（角色诞生，屏幕分裂多色全息人）、multi-role-pipeline.png（协作流水线，6 智能体发光传送线）、multi-role-media-artist.png（媒体艺术家画室）。全部 1280*720 PNG，模型 qwen-image。",
+      "id": "media-artist-001-ltm-artifacts",
+      "name": "生成图片产物登记",
+      "type": "Artifact"
     }
   ],
   "relationships": [
@@ -4480,6 +4498,16 @@
         "media-assign-001",
         "media-use-skill-001",
         "media-use-vl-001"
+      ]
+    },
+    {
+      "description": "媒体艺术家 media-artist-001 的会话长期记忆。会话（2026-08-23）：为公众号文章《用多角色能力说明 ArchGraph 框架使用效果》生成 4 张写实效果图。",
+      "parent_element_id": "media-artist-001",
+      "view_id": "media-artist-001-ltm",
+      "view_name": "媒体艺术家工作记录",
+      "included_elements": [
+        "media-artist-001-ltm-note",
+        "media-artist-001-ltm-artifacts"
       ]
     }
   ]
