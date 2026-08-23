@@ -3288,7 +3288,14 @@
       "name": "dashscope-video-generator",
       "type": "Skill",
       "parent": "1249",
-      "description": "使用阿里云 DashScope 视频生成接口生成视频的 Skill。接口：POST https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis（请求头 X-DashScope-Async: enable，Authorization: Bearer <QWEN_KEY>），新协议模型 wan2.7-t2v（prompt ≤5000 字符，resolution 720P/1080P，ratio 16:9/9:16/1:1/4:3/3:4，duration 2-15s）；旧协议兜底 wan2.6-t2v 等（用 size 参数）；异步任务轮询 GET /api/v1/tasks/{task_id}（约 15 秒间隔），SUCCEEDED 后取 output.video_url 下载 MP4（链接 24h 有效须立即下载并转存）。凭据从 argo/.env 的 QWEN_KEY 读取（禁止写入文件）。"
+      "description": "使用阿里云 DashScope 视频生成接口生成视频的 Skill。接口：POST https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis（请求头 X-DashScope-Async: enable，Authorization: Bearer <QWEN_KEY>），新协议模型 wan2.7-t2v（prompt ≤5000 字符，resolution 720P/1080P，ratio 16:9/9:16/1:1/4:3/3:4，duration 2-15s）；旧协议兜底 wan2.6-t2v 等（用 size 参数）；异步任务轮询 GET /api/v1/tasks/{task_id}（约 15 秒间隔），SUCCEEDED 后取 output.video_url 下载 MP4（链接 24h 有效须立即下载并转存）。凭据从 argo/.env 的 QWEN_KEY 读取（禁止写入文件）。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "7cc24b9",
+          "description": "design/KG/SystemArchitecture.json; tests/video-team-actor.test.js"
+        }
+      ]
     },
     {
       "id": "video-producer-001",
@@ -3303,6 +3310,13 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/video-team-actor.test.js",
           "acceptanceCriteria": "tests/video-team-actor.test.js"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "7cc24b9",
+          "description": "design/KG/SystemArchitecture.json; tests/video-team-actor.test.js"
         }
       ]
     },
@@ -3320,6 +3334,13 @@
           "Input": "node --test tests/video-team-actor.test.js",
           "acceptanceCriteria": "tests/video-team-actor.test.js"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "7cc24b9",
+          "description": "design/KG/SystemArchitecture.json; tests/video-team-actor.test.js"
+        }
       ]
     },
     {
@@ -3335,6 +3356,13 @@
           "type": "Acceptance Test",
           "Input": "node --test tests/video-team-actor.test.js",
           "acceptanceCriteria": "tests/video-team-actor.test.js"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "7cc24b9",
+          "description": "design/KG/SystemArchitecture.json; tests/video-team-actor.test.js"
         }
       ]
     }
