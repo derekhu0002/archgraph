@@ -3111,8 +3111,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "43216d1",
-          "description": "design/KG/SystemArchitecture.json（移除 agent 属性与 AT-media-artist-02 用例，Skill 能力保持图谱内联）; argo/agents/media-artist.agent.md（删除）; tests/media-artist-actor.test.js; docs/media-artist-actor-import.md"
+          "value": "e8d8e43",
+          "description": "docs/diagrams/multi-role-banner.png; docs/diagrams/multi-role-birth.png; docs/diagrams/multi-role-pipeline.png; docs/diagrams/multi-role-media-artist.png; design/KG/SystemArchitecture.json"
         }
       ],
       "subdiagram_views": [
