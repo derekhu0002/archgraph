@@ -3198,6 +3198,11 @@
           "description": "docs/multi-role-capability.wechat.md; tests/wechat-article.test.js (wechat-multi-role-ready/banner); design/KG/SystemArchitecture.json (WP 2782 + AT-2782-01/02)"
         },
         {
+          "name": "commit",
+          "value": "c6aaf7d",
+          "description": "design/KG/SystemArchitecture.json（发布员 LTM 会话记录 wpp-mem-multi-role-001 回登记）"
+        },
+        {
           "name": "status",
           "value": "draft_ready",
           "description": "文章与配图就绪，待创建公众号草稿"
@@ -3213,7 +3218,14 @@
       "id": "wpp-mem-multi-role-001",
       "name": "SessionRecord-MultiRoleCapability",
       "parent": "2755",
-      "type": "Business Object"
+      "type": "Business Object",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "c6aaf7d",
+          "description": "design/KG/SystemArchitecture.json（wpp-ltm-001 新增 SessionRecord-MultiRoleCapability，回登记 WP 2782 多角色文章会话）"
+        }
+      ]
     }
   ],
   "relationships": [
