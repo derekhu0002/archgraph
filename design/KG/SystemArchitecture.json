@@ -3203,9 +3203,14 @@
           "description": "design/KG/SystemArchitecture.json（发布员 LTM 会话记录 wpp-mem-multi-role-001 回登记）"
         },
         {
+          "name": "media_id",
+          "value": "BRZAMZ3b-CaOBH8qdG2KTe5O6HXnE6Yuo7R66FUVQg-wEg-p5F_BIUFS0f3z8djt",
+          "description": "WeChat draft media_id（2026-08-23，multi-role-capability 文章草稿创建成功）"
+        },
+        {
           "name": "status",
-          "value": "draft_ready",
-          "description": "文章与配图就绪，待创建公众号草稿"
+          "value": "draft_created",
+          "description": "草稿已创建（wechat:draft 成功），待公众号后台「草稿箱」手动发布；API 发布不可用（个人未认证订阅号 48001）"
         },
         {
           "name": "deliveryStatus",
@@ -3224,6 +3229,16 @@
           "name": "commit",
           "value": "c6aaf7d",
           "description": "design/KG/SystemArchitecture.json（wpp-ltm-001 新增 SessionRecord-MultiRoleCapability，回登记 WP 2782 多角色文章会话）"
+        },
+        {
+          "name": "media_id",
+          "value": "BRZAMZ3b-CaOBH8qdG2KTe5O6HXnE6Yuo7R66FUVQg-wEg-p5F_BIUFS0f3z8djt",
+          "description": "WeChat draft media_id（multi-role-capability 文章草稿，2026-08-23）"
+        },
+        {
+          "name": "status",
+          "value": "draft_created",
+          "description": "草稿已创建，待公众号后台手动发布（API 发布 48001 不可用）"
         }
       ]
     }
