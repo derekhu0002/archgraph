@@ -2977,6 +2977,12 @@
       "parent": "2755",
       "type": "Business Object",
       "description": "公众号发布员会话记录（2026-08-23）：目标——对外发布 OpenClaw 支持公告（README + 主页 + 公众号文章）。完成：README.md 新增 OpenClaw 行到 Supported Harnesses 表（MCP/Skills/Rules/WakeupGate 齐全、Agents 未适配留 —）+ Install 说明提及 OpenClaw；index.html Install 区新增一句提及 OpenClaw；新建 docs/openclaw-support.wechat.md（frontmatter title/author/digest/banner_path）+ docs/diagrams/openclaw-banner.png（PIL 生成 900x383，脚本 scripts/generate-openclaw-banner.py）+ tests/wechat-article.test.js 新增 wechat-openclaw-ready。图谱：在 view 180 新增 WP 2781「发布openclaw支持介绍文章到微信公众号」+ AT-2781-01；WP 1321 增 AT-1321-03（README OpenClaw）、WP 1332 增 AT-1332-02（主页 OpenClaw）。回归：全量 190 测试 189 通过（唯一失败 wechat-publisher-agent-file 为已知既有模型串 alibaba-cn/qwen3.7-plus≠Qwen3.7-Plus，与本改动无关）。草稿：wechat:draft 被 40164 invalid ip 阻断——当前公网 IP 223.74.103.74 未加入公众号后台 IP 白名单，需用户加白后重试（WP 2781 status=BLOCKED）。commit：2c79ca9（README+主页+文章+测试+图谱）+ 093a3e8（commit attr 回登记）。决策：文章标题走「人味」路线（OpenClaw 个人 AI 助手/施工图比喻），banner 用 PIL 生成深色渐变+品牌色突出，与既有 banner 风格一致。可复用经验：updateArchitectureElement 的 attributes patch 是「整体替换」不是合并——更新 commit 属性时必须携带既有全部 attributes，否则会清掉 status/deliveryStatus/历史 commit。遗留：草稿创建 BLOCKED 待用户加 IP 白名单后重试 wechat:draft；OpenClaw agents（wechat-publisher 等）未适配（承接 WP 2780 遗留）。"
+    },
+    {
+      "id": "ctg-decision-001",
+      "name": "ChangeTierGate 决策记录",
+      "type": "Requirement",
+      "description": "决策(2026-08-23, commit dd72178)：为工作流规则新增 <ChangeTierGate> 分级改动仪式，行为无关(Tier 1)改动跳过验收回归与全量校验。理由：小任务固定仪式成本高，无条件验收回归+每改必登记浪费 token/时间，对齐业界轻量 fast-path。被否方案：① 完全移除验收先行(破坏可追溯红线)；② 主观判断降档(无客观标准，易滥用)。安全网：git diff 越界自动升档、KG 触线保留完整校验、零歧义默认升档。验收用例 AT-02/AT-03 挂在 archgraph-workflow-rules 上。"
     }
   ],
   "relationships": [
@@ -4234,7 +4240,8 @@
       "parent_element_name": "Implementation and Migration Viewpoint",
       "description": "ARGO 全局工作流规则（argo/rules/archgraph.instructions.md）的管理视图，包含 Rule 元素 archgraph-workflow-rules。",
       "included_elements": [
-        "archgraph-workflow-rules"
+        "archgraph-workflow-rules",
+        "ctg-decision-001"
       ]
     },
     {
