@@ -59,6 +59,10 @@
         {
           "view_id": "openclaw-adaptation",
           "view_name": "OpenClaw Adaptation"
+        },
+        {
+          "view_id": "tb-eval-view-001",
+          "view_name": "Terminal-Bench 评测"
         }
       ]
     },
@@ -3462,6 +3466,29 @@
       "name": "SessionRecord-SkillInsight",
       "parent": "2737",
       "type": "Business Object"
+    },
+    {
+      "id": "tb-eval-guide-001",
+      "name": "编写 Terminal-Bench 评测指导",
+      "type": "Work Package",
+      "parent": "1249",
+      "description": "为 archgraph-eval 工程编写参加 Terminal-Bench 评测的指导文档：建工程、Harbor agent 适配层、用 ARCHGRAPH 框架多轮构建 harness、逐步跑完全部测试、对照实验与上榜流程。argo 框架已部署用户级，无需重新部署。",
+      "testcases": [
+        {
+          "name": "AT-tb-eval-guide-01-评测指导文档就绪",
+          "description": "GIVEN 需要指导如何用 ARCHGRAPH 框架参加 Terminal-Bench 评测；WHEN 读者打开 docs/terminal-bench-eval-guide.md；THEN 文档包含：archgraph-eval 工程结构、Harbor BaseAgent 适配接口、多轮构建 harness 的轮次循环、本地 k=5 冒烟步骤、全量评测与对照实验、上榜提交流程。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/terminal-bench-eval-guide.md",
+          "acceptanceCriteria": "执行 node --test tests/terminal-bench-eval-guide.test.js：断言文档存在并包含 工程结构、Harbor agent 适配、多轮构建、k=5 冒烟、全量评测、对照实验、上榜 等关键章节。通过。"
+        },
+        {
+          "name": "AT-tb-eval-guide-02-不重复部署argo",
+          "description": "GIVEN argo 框架已部署在用户级（~/.argo 等）；WHEN 读者按指导搭建 archgraph-eval；THEN 指导明确说明无需重新部署 argo 工具链，只依赖用户级已部署的框架。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/terminal-bench-eval-guide.md",
+          "acceptanceCriteria": "执行 node --test tests/terminal-bench-eval-guide.test.js：断言文档包含 argo 已部署用户级无需重新部署 的说明。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -4894,6 +4921,17 @@
         "video-prod-use-video-001",
         "video-review-use-vl-001"
       ]
+    },
+    {
+      "view_id": "tb-eval-view-001",
+      "view_name": "Terminal-Bench 评测",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "description": "承载 archgraph-eval 工程参加 Terminal-Bench 评测的指导工作包及其技能资产。",
+      "included_elements": [
+        "tb-eval-guide-001"
+      ],
+      "included_relationships": []
     }
   ]
 }
