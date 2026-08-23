@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" font-family="'Microsoft YaHei','SimHei',sans-serif">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1a2e"/>
+      <stop offset="0.45" stop-color="#7a2b2b"/>
+      <stop offset="0.75" stop-color="#d97b2b"/>
+      <stop offset="1" stop-color="#f5c26b"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff8d0"/>
+      <stop offset="0.6" stop-color="#ffd27a"/>
+      <stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6b4a2b"/>
+      <stop offset="1" stop-color="#2e1f10"/>
+    </linearGradient>
+    <radialGradient id="explosion" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.3" stop-color="#ffdd55"/>
+      <stop offset="0.6" stop-color="#ff8833"/>
+      <stop offset="1" stop-color="#cc3300" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="3" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+    <!-- Soldier silhouette symbol -->
+    <symbol id="soldier" viewBox="0 0 24 40">
+      <circle cx="12" cy="7" r="6" fill="currentColor"/>
+      <path d="M4 40 L4 28 Q4 22 12 22 Q20 22 20 28 L20 40 Z" fill="currentColor"/>
+      <path d="M7 16 L17 16 L19 22 L5 22 Z" fill="currentColor"/>
+      <rect x="8" y="8" width="8" height="2" fill="#000" opacity="0.4"/>
+    </symbol>
+    <!-- Helmet/flag marker -->
+    <symbol id="binoculars" viewBox="0 0 40 40">
+      <rect x="2" y="12" width="13" height="18" rx="4" fill="currentColor"/>
+      <rect x="25" y="12" width="13" height="18" rx="4" fill="currentColor"/>
+      <rect x="14" y="22" width="12" height="5" fill="currentColor"/>
+    </symbol>
+    <symbol id="radio" viewBox="0 0 40 40">
+      <rect x="4" y="10" width="32" height="20" rx="3" fill="currentColor"/>
+      <rect x="10" y="6" width="20" height="8" rx="2" fill="currentColor"/>
+      <line x1="20" y1="6" x2="20" y2="2" stroke="currentColor" stroke-width="2"/>
+      <circle cx="20" cy="2" r="2.5" fill="currentColor"/>
+    </symbol>
+    <symbol id="tank" viewBox="0 0 60 40">
+      <path d="M2 30 L2 34 Q2 36 4 36 L40 36 Q42 36 42 34 L42 30 Z" fill="currentColor"/>
+      <rect x="30" y="20" width="26" height="12" rx="3" fill="currentColor"/>
+      <path d="M44 8 L58 20 L40 20 Z" fill="currentColor"/>
+      <rect x="8" y="16" width="22" height="8" rx="3" fill="currentColor"/>
+      <circle cx="12" cy="32" r="6" fill="#000" opacity="0.5"/>
+      <circle cx="32" cy="32" r="6" fill="#000" opacity="0.5"/>
+    </symbol>
+  </defs>
+
+  <!-- ===== SKY ===== -->
+  <rect width="1600" height="520" fill="url(#sky)"/>
+  <circle cx="1250" cy="400" r="260" fill="url(#sun)" opacity="0.9"/>
+  <circle cx="1250" cy="400" r="70" fill="url(#sun)" filter="url(#glow)"/>
+
+  <!-- stars (upper sky) -->
+  <g fill="#fff" opacity="0.7">
+    <circle cx="120" cy="60" r="1.5"/><circle cx="300" cy="110" r="1.2"/>
+    <circle cx="520" cy="50" r="1.6"/><circle cx="760" cy="90" r="1.3"/>
+    <circle cx="980" cy="40" r="1.4"/><circle cx="1400" cy="80" r="1.5"/>
+    <circle cx="1520" cy="140" r="1.2"/>
+  </g>
+
+  <!-- clouds / smoke -->
+  <g fill="#3a2a22" opacity="0.55">
+    <ellipse cx="350" cy="180" rx="130" ry="30"/>
+    <ellipse cx="430" cy="160" rx="90" ry="24"/>
+    <ellipse cx="900" cy="230" rx="160" ry="34"/>
+    <ellipse cx="1020" cy="205" rx="100" ry="26"/>
+    <ellipse cx="1500" cy="170" rx="120" ry="28"/>
+  </g>
+
+  <!-- ===== DISTANT MOUNTAINS ===== -->
+  <path d="M0 520 L0 420 L120 300 L240 420 L360 320 L470 440 L600 340 L720 450 L830 330 L940 440 L1080 360 L1210 460 L1320 380 L1450 470 L1600 400 L1600 520 Z" fill="#4a2a20"/>
+  <path d="M0 520 L0 460 L150 360 L300 470 L440 390 L580 480 L700 410 L850 490 L1000 430 L1150 500 L1300 440 L1450 500 L1600 460 L1600 520 Z" fill="#37201a"/>
+
+  <!-- ===== GROUND ===== -->
+  <path d="M0 520 L1600 520 L1600 1000 L0 1000 Z" fill="url(#ground)"/>
+
+  <!-- trenches -->
+  <g fill="#1d140c">
+    <path d="M0 620 L120 600 L240 630 L380 610 L520 635 L700 615 L900 640 L1100 620 L1300 645 L1500 625 L1600 640 L1600 660 L1500 660 L1300 675 L1100 660 L900 670 L700 655 L520 670 L380 650 L240 665 L120 640 L0 650 Z"/>
+    <path d="M0 820 L200 800 L420 825 L650 805 L900 830 L1150 810 L1400 830 L1600 815 L1600 845 L1400 855 L1150 840 L900 860 L650 840 L420 855 L200 840 L0 850 Z"/>
+  </g>
+
+  <!-- ===== EXPLOSIONS & CRATERS ===== -->
+  <g>
+    <circle cx="230" cy="700" r="70" fill="url(#explosion)" opacity="0.9"/>
+    <path d="M215 690 Q230 660 250 690 Z" fill="#ff8833" opacity="0.9"/>
+    <path d="M240 680 Q245 650 255 680 Z" fill="#ffdd55"/>
+    <circle cx="1310" cy="760" r="55" fill="url(#explosion)" opacity="0.85"/>
+    <ellipse cx="860" cy="920" rx="70" ry="18" fill="#160e08"/>
+    <ellipse cx="560" cy="700" rx="45" ry="12" fill="#160e08"/>
+    <ellipse cx="1450" cy="680" rx="50" ry="13" fill="#160e08"/>
+  </g>
+
+  <!-- smoke columns -->
+  <g fill="#333" opacity="0.4">
+    <ellipse cx="250" cy="560" rx="40" ry="18"/>
+    <ellipse cx="260" cy="520" rx="30" ry="14"/>
+    <ellipse cx="255" cy="485" rx="22" ry="12"/>
+    <ellipse cx="1290" cy="610" rx="34" ry="16"/>
+    <ellipse cx="1280" cy="570" rx="26" ry="13"/>
+    <ellipse cx="1285" cy="535" rx="18" ry="11"/>
+  </g>
+
+  <!-- scattered tanks -->
+  <use href="#tank" x="150" y="760" color="#3d3426"/>
+  <use href="#tank" x="1080" y="690" color="#463a28" transform="scale(-1,1) translate(-2280,0)"/>
+
+  <!-- ===== TITLE ===== -->
+  <g text-anchor="middle">
+    <text x="800" y="72" font-size="44" font-weight="bold" fill="#f5e6c8" filter="url(#shadow)">联合突击战役 — 智能体作战编成图</text>
+    <text x="800" y="112" font-size="20" fill="#e8c88a" filter="url(#shadow)">Joint Assault Campaign · AgentOrganization 战斗序列映射（War-Team Mapping）</text>
+  </g>
+
+  <!-- ============================================================
+       ROLE UNIT CARDS (drawn as battle-map unit markers)
+       ============================================================ -->
+
+  <!-- HQ: AgentOrganization -->
+  <g filter="url(#shadow)">
+    <rect x="620" y="150" width="360" height="86" rx="10" fill="#1a2a1e" stroke="#d9b45a" stroke-width="3"/>
+    <text x="800" y="182" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffd97a">最高指挥部 AgentOrganization (1962)</text>
+    <text x="800" y="210" text-anchor="middle" font-size="15" fill="#cfe3cf">统一指挥三支作战团队 · 中央决策层</text>
+    <path d="M620 186 L980 186" stroke="#d9b45a" stroke-width="1.5" opacity="0.6"/>
+    <text x="800" y="230" text-anchor="middle" font-size="14" fill="#9fb89f">态势总览 | 资源统筹 | 指令下发 | 全局协调</text>
+  </g>
+
+  <!-- ===== TEAM 1: 图谱守护团队 (intelligence & comms) ===== -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="150" width="500" height="230" rx="10" fill="none" stroke="#7aa2c8" stroke-width="2" stroke-dasharray="8 5"/>
+    <text x="290" y="180" text-anchor="middle" font-size="17" font-weight="bold" fill="#a8ccee">情报保障梯队 — 图谱守护团队</text>
+    <!-- Derek -->
+    <rect x="60" y="195" width="220" height="80" rx="8" fill="#1c2b3a" stroke="#7aa2c8" stroke-width="2"/>
+    <use href="#binoculars" x="72" y="205" color="#7aa2c8" width="34" height="34"/>
+    <text x="118" y="222" font-size="16" font-weight="bold" fill="#a8ccee">Derek 情报参谋</text>
+    <text x="118" y="242" font-size="12.5" fill="#c8dcee">图谱语义合理性分析师</text>
+    <text x="118" y="260" font-size="11.5" fill="#8fa8c0">全局态势推演 · 语义一致性 · 查逻辑矛盾</text>
+    <!-- John -->
+    <rect x="300" y="195" width="220" height="80" rx="8" fill="#1c2b3a" stroke="#7aa2c8" stroke-width="2"/>
+    <use href="#radio" x="312" y="205" color="#7aa2c8" width="34" height="34"/>
+    <text x="358" y="222" font-size="16" font-weight="bold" fill="#a8ccee">John 通信参谋</text>
+    <text x="358" y="242" font-size="12.5" fill="#c8dcee">图谱语法正确性分析师</text>
+    <text x="358" y="260" font-size="11.5" fill="#8fa8c0">密电格式合规 · argo schema 校验</text>
+  </g>
+  <!-- link HQ <-> intel team -->
+  <path d="M620 193 L540 250" stroke="#7aa2c8" stroke-width="2.5" fill="none" marker-end="url(#arrowBlue)"/>
+  <text x="560" y="215" font-size="12" fill="#a8ccee">态势/格式守备</text>
+
+  <!-- ===== TEAM 2: 开发团队 (main assault force) ===== -->
+  <g filter="url(#shadow)">
+    <rect x="60" y="430" width="1480" height="420" rx="12" fill="none" stroke="#e0a84a" stroke-width="2.5"/>
+    <text x="800" y="462" text-anchor="middle" font-size="18" font-weight="bold" fill="#ffc873">主攻梯队 — 开发团队（DevelopmentTeam）</text>
+    <text x="800" y="486" text-anchor="middle" font-size="13" fill="#d8b888">火力流程：侦察情报 → 作战筹划 → 战术评审 → 突击攻坚 → 宪兵检视 → 靶场验收</text>
+  </g>
+
+  <!-- unit cards along the main line -->
+  <g font-family="inherit">
+    <!-- 1 产品经理 xiaoniu -->
+    <g>
+      <rect x="80" y="505" width="225" height="125" rx="9" fill="#33261a" stroke="#f5b855" stroke-width="2.5"/>
+      <text x="95" y="530" font-size="17" font-weight="bold" fill="#ffc873">侦察兵 · 产品经理</text>
+      <text x="95" y="550" font-size="13" fill="#e8d0a8">xiaoniu (Business Actor)</text>
+      <use href="#binoculars" x="92" y="560" color="#f5b855" width="30" height="30"/>
+      <text x="130" y="585" font-size="12" fill="#d8bc92">刺探敌方意图 · 采集用户场景</text>
+      <text x="130" y="604" font-size="12" fill="#d8bc92">整理作战需求 · 上报指挥层</text>
+      <text x="130" y="623" font-size="12" fill="#d8bc92">对战役成果负责</text>
+    </g>
+
+    <!-- 2 系统设计师 caoyang -->
+    <g>
+      <rect x="340" y="505" width="225" height="125" rx="9" fill="#33261a" stroke="#f5b855" stroke-width="2.5"/>
+      <text x="355" y="530" font-size="17" font-weight="bold" fill="#ffc873">作战参谋 · 系统设计师</text>
+      <text x="355" y="550" font-size="13" fill="#e8d0a8">caoyang (Business Actor)</text>
+      <path d="M365 570 L390 595 L365 620 L340 595 Z" fill="#f5b855" transform="translate(6,0)"/>
+      <text x="405" y="590" font-size="12" fill="#d8bc92">将需求转化为</text>
+      <text x="405" y="609" font-size="12" fill="#d8bc92">作战方案设计</text>
+      <text x="405" y="628" font-size="12" fill="#d8bc92">调度后续梯队</text>
+    </g>
+
+    <!-- 3 规划专家 tanwen -->
+    <g>
+      <rect x="600" y="505" width="225" height="125" rx="9" fill="#3a2a1c" stroke="#b8e07a" stroke-width="2.5"/>
+      <text x="615" y="530" font-size="17" font-weight="bold" fill="#c8f08a">战术分析师 · 规划专家</text>
+      <text x="615" y="550" font-size="13" fill="#d8e0b8">tanwen (Business Actor)</text>
+      <use href="#radio" x="612" y="562" color="#b8e07a" width="30" height="30"/>
+      <text x="650" y="588" font-size="12" fill="#c8d8a8">研判敌我技术优劣</text>
+      <text x="650" y="607" font-size="12" fill="#c8d8a8">发现更优战法</text>
+      <text x="650" y="626" font-size="12" fill="#c8d8a8">反哺参谋修订方案</text>
+    </g>
+
+    <!-- 4 系统架构师 laodong -->
+    <g>
+      <rect x="860" y="505" width="225" height="125" rx="9" fill="#3a2a1c" stroke="#b8e07a" stroke-width="2.5"/>
+      <text x="875" y="530" font-size="17" font-weight="bold" fill="#c8f08a">工兵总工 · 系统架构师</text>
+      <text x="875" y="550" font-size="13" fill="#d8e0b8">laodong (Business Actor)</text>
+      <path d="M880 590 L910 570 L940 590 L930 615 L890 615 Z" fill="#b8e07a"/>
+      <text x="950" y="588" font-size="12" fill="#c8d8a8">筑堡SOLID原则</text>
+      <text x="950" y="607" font-size="12" fill="#c8d8a8">工事安全·性能最优</text>
+      <text x="950" y="626" font-size="12" fill="#c8d8a8">协同参谋把关架构</text>
+    </g>
+
+    <!-- 5 Developer Xiaoming -->
+    <g>
+      <rect x="1120" y="505" width="225" height="125" rx="9" fill="#3d2418" stroke="#ff6a4a" stroke-width="3"/>
+      <text x="1135" y="530" font-size="17" font-weight="bold" fill="#ff9a6a">突击部队 · Developer</text>
+      <text x="1135" y="550" font-size="13" fill="#f0c8a8">Xiaoming (Business Actor)</text>
+      <use href="#soldier" x="1132" y="560" color="#ff8a5a" width="30" height="50"/>
+      <text x="1172" y="588" font-size="12" fill="#e8b898">一线攻坚 · 代码开发</text>
+      <text x="1172" y="607" font-size="12" fill="#e8b898">自我校验 · 交付攻坚</text>
+      <text x="1172" y="626" font-size="12" fill="#e8b898">召请宪兵与靶场验收</text>
+    </g>
+
+    <!-- 6 Reviewer adam -->
+    <g>
+      <rect x="1375" y="505" width="225" height="125" rx="9" fill="#2c2226" stroke="#c86aa8" stroke-width="2.5"/>
+      <text x="1390" y="530" font-size="17" font-weight="bold" fill="#e0a0c8">宪兵 · Reviewer</text>
+      <text x="1390" y="550" font-size="13" fill="#d0b0c0">adam (Business Actor)</text>
+      <use href="#soldier" x="1387" y="560" color="#c86aa8" width="30" height="50"/>
+      <text x="1427" y="588" font-size="12" fill="#d0b8c8">架构·安全·质量检视</text>
+      <text x="1427" y="607" font-size="12" fill="#d0b8c8">不合格打回重造</text>
+      <text x="1427" y="626" font-size="12" fill="#d0b8c8">合格则放行验收</text>
+    </g>
+  </g>
+
+  <!-- ===== TRIGGERING FLOW ARROWS (main assault line) ===== -->
+  <defs>
+    <marker id="arrowMain" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#f5b855"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#7aa2c8"/>
+    </marker>
+  </defs>
+
+  <!-- 产品经理 -> 系统设计师 -->
+  <line x1="305" y1="567" x2="338" y2="567" stroke="#f5b855" stroke-width="3" marker-end="url(#arrowMain)"/>
+  <!-- 系统设计师 -> 规划专家 -->
+  <line x1="565" y1="590" x2="598" y2="590" stroke="#e0a84a" stroke-width="3" marker-end="url(#arrowMain)"/>
+  <!-- 系统设计师 -> 系统架构师 -->
+  <path d="M565 610 L585 610 L585 668 L858 668 L858 600" stroke="#e0a84a" stroke-width="3" fill="none" marker-end="url(#arrowMain)"/>
+  <text x="710" y="660" font-size="11" fill="#e0a84a">提交方案</text>
+  <!-- 系统设计师 -> Developer -->
+  <line x1="565" y1="630" x2="1118" y2="630" stroke="#ff8a5a" stroke-width="3" stroke-dasharray="10 6" marker-end="url(#arrowMain)"/>
+  <text x="840" y="618" font-size="12" fill="#ff9a6a" text-anchor="middle">下达作战命令 Triggering</text>
+  <!-- Developer -> Reviewer -->
+  <line x1="1345" y1="620" x2="1373" y2="620" stroke="#c86aa8" stroke-width="3" marker-end="url(#arrowMain)"/>
+  <!-- Reviewer -> 验证测试工程师 (wrap to next row) -->
+  <path d="M1487 630 L1487 700 L1220 700 L1220 712" stroke="#c86aa8" stroke-width="3" fill="none" marker-end="url(#arrowMain)"/>
+  <!-- Developer -> 验证测试工程师 -->
+  <path d="M1232 630 L1232 700 L1200 700" stroke="#7ad0a0" stroke-width="3" fill="none" marker-end="url(#arrowMain)"/>
+  <text x="1420" y="694" font-size="11" fill="#c86aa8">检视通过</text>
+  <text x="1185" y="694" font-size="11" fill="#7ad0a0">检视通过/直联</text>
+
+  <!-- 7 验证测试工程师 chenlin -->
+  <g filter="url(#shadow)">
+    <rect x="990" y="720" width="240" height="105" rx="9" fill="#1c3328" stroke="#7ad0a0" stroke-width="3"/>
+    <text x="1005" y="748" font-size="17" font-weight="bold" fill="#9ae8b8">靶场验收官 · 验证测试工程师</text>
+    <text x="1005" y="768" font-size="13" fill="#b8e8c8">chenlin (Business Actor)</text>
+    <path d="M1008 782 L1030 782 L1045 800 L1030 812 L1012 812 Z" fill="#7ad0a0"/>
+    <text x="1055" y="796" font-size="12" fill="#b8e8c8">实弹测试 · 验收把关</text>
+    <text x="1055" y="814" font-size="12" fill="#b8e8c8">确保交付可投入实战</text>
+  </g>
+
+  <!-- ===== TEAM 3: 公众号发布团队 (broadcasting) ===== -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="880" width="620" height="95" rx="10" fill="#2a2418" stroke="#e8b060" stroke-width="2"/>
+    <text x="60" y="908" font-size="15" font-weight="bold" fill="#f0c080">战地宣传梯队 — 公众号发布团队</text>
+    <rect x="60" y="918" width="280" height="48" rx="6" fill="#332c1c" stroke="#e8b060" stroke-width="1.5"/>
+    <use href="#radio" x="66" y="924" color="#e8b060" width="26" height="26"/>
+    <text x="100" y="944" font-size="13" fill="#f0d0a0">公众号发布员 (wechat-publisher)</text>
+    <text x="100" y="960" font-size="11" fill="#d0b888">战地记者 · 采写战报</text>
+    <rect x="360" y="918" width="280" height="48" rx="6" fill="#332c1c" stroke="#e8b060" stroke-width="1.5"/>
+    <use href="#binoculars" x="366" y="924" color="#e8b060" width="26" height="26"/>
+    <text x="400" y="944" font-size="13" fill="#f0d0a0">公众号发布 (Business Role)</text>
+    <text x="400" y="960" font-size="11" fill="#d0b888">wechat-public-cli 草稿 → 后台发布</text>
+    <line x1="340" y1="942" x2="358" y2="942" stroke="#e8b060" stroke-width="2.5" marker-end="url(#arrowMain)"/>
+  </g>
+
+  <!-- ===== LEGEND ===== -->
+  <g filter="url(#shadow)">
+    <rect x="1260" y="880" width="300" height="95" rx="10" fill="#201c16" stroke="#8a8a8a" stroke-width="1.5"/>
+    <text x="1278" y="906" font-size="14" font-weight="bold" fill="#d8d8d8">图例</text>
+    <line x1="1280" y1="920" x2="1320" y2="920" stroke="#f5b855" stroke-width="3" marker-end="url(#arrowMain)"/>
+    <text x="1330" y="924" font-size="12" fill="#c8c8c8">Triggering 触发/交付</text>
+    <line x1="1280" y1="942" x2="1320" y2="942" stroke="#7aa2c8" stroke-width="3"/>
+    <text x="1330" y="946" font-size="12" fill="#c8c8c8">协作/守备关系</text>
+    <rect x="1280" y="956" width="26" height="10" rx="2" fill="none" stroke="#d9b45a" stroke-width="2"/>
+    <text x="1330" y="966" font-size="12" fill="#c8c8c8">实线=编成 虚线=梯队边界</text>
+  </g>
+
+  <!-- footer -->
+  <text x="800" y="988" text-anchor="middle" font-size="12" fill="#8a8a8a">Source: design/KG/SystemArchitecture.json · AgentOrganization(1962) / DevelopmentTeam(430) / AgentOrganization(299) / 公众号发布团队(433)</text>
+</svg>
