@@ -2852,6 +2852,11 @@
           "name": "commit",
           "value": "dd72178",
           "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-change-tier.test.js; design/KG/SystemArchitecture.json; ~/.config/opencode/AGENTS.md"
+        },
+        {
+          "name": "commit",
+          "value": "e551dd1",
+          "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-capability-delegation.test.js; design/KG/SystemArchitecture.json; ~/.config/opencode/AGENTS.md"
         }
       ]
     },
@@ -3002,6 +3007,13 @@
           "description": "design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "description": "决策(2026-08-23, commit e551dd1)：为工作流规则新增 <CapabilityDelegationGuideline> 能力委托门禁——Agent 收到需查看图片/视频等多模态内容的任务时，须先评估自身模型是否具备识别能力；不具备识别能力（或 harness 未送达内容）时，不得猜测/虚构/静默跳过，须主动在意图图谱中识别具备该能力的 Business Actor（依其 agent/model 属性或 description）并按 <CoperationGuideline> 正式委托；找不到时向人类如实报告阻塞原因与替代方案。理由：① 人类伙伴明确提出，落实跨 Actor 能力协作的主动性；② 避免无视觉能力的 Agent 假装消费图片/视频导致事实性错误，保持外部视角验收可追溯。被否方案：① 仅凭模型名（如 Vision）判断能力（本会话证实图片输入链路实际未送达，命名不可靠）；② 无条件自行处理或跳过（违反委托隔离红线，且会虚构内容）。验收用例 AT-04 挂在 archgraph-workflow-rules 上。",
+      "id": "cdg-decision-001",
+      "name": "能力委托门禁决策记录",
+      "parent": "1249",
+      "type": "Requirement"
     }
   ],
   "relationships": [
@@ -4260,7 +4272,8 @@
       "description": "ARGO 全局工作流规则（argo/rules/archgraph.instructions.md）的管理视图，包含 Rule 元素 archgraph-workflow-rules。",
       "included_elements": [
         "archgraph-workflow-rules",
-        "ctg-decision-001"
+        "ctg-decision-001",
+        "cdg-decision-001"
       ]
     },
     {
