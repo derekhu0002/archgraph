@@ -125,6 +125,41 @@ test('wechat-openclaw-banner: OpenClaw support article has a dedicated themed ba
   assert.ok(existsSync(bannerAbs), `banner image should exist: ${bannerAbs}`);
 });
 
+const MULTI_ROLE = path.join(ROOT, 'docs', 'multi-role-capability.wechat.md');
+
+test('wechat-multi-role-ready: multi-role capability article with required frontmatter and content', () => {
+  // GIVEN ArchGraph's multi-role capability has been demonstrated by its own development process
+  // WHEN the wechat-public-cli skill prepares to publish
+  // THEN a WeChat-ready markdown exists with title/author/digest frontmatter and multi-role body
+  const md = readFileSync(MULTI_ROLE, 'utf8');
+  const meta = parseFrontmatter(md);
+
+  assert.ok(meta.title, 'frontmatter should declare a title');
+  assert.ok(meta.author, 'frontmatter should declare an author');
+  assert.ok(meta.digest, 'frontmatter should declare a digest');
+  assert.match(md, /多角色/, 'article body should discuss multi-role');
+  assert.match(md, /Business Actor/, 'article body should mention Business Actor');
+  assert.match(md, /Assignment/, 'article body should mention Assignment relationships');
+  assert.match(md, /Triggering/, 'article body should mention Triggering collaboration');
+});
+
+test('wechat-multi-role-banner: multi-role article has a dedicated photorealistic banner', () => {
+  // GIVEN the multi-role article is about to be published
+  // WHEN the media-artist prepares the title image
+  // THEN the article declares a dedicated themed banner (distinct from the generic core-model image) and the file exists
+  const md = readFileSync(MULTI_ROLE, 'utf8');
+  const meta = parseFrontmatter(md);
+
+  assert.ok(meta.banner_path, 'frontmatter should declare a banner_path');
+  assert.notEqual(
+    meta.banner_path,
+    'diagrams/image.png',
+    'should use a dedicated themed banner, not the generic core-model image'
+  );
+  const bannerAbs = path.join(ROOT, 'docs', meta.banner_path);
+  assert.ok(existsSync(bannerAbs), `banner image should exist: ${bannerAbs}`);
+});
+
 const INNOVATIONS = path.join(ROOT, 'docs', '8-innovations.wechat.md');
 
 test('wechat-innovations-ready: 8 innovations article with required frontmatter and content', () => {

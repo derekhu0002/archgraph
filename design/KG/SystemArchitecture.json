@@ -3168,6 +3168,29 @@
       "id": "media-artist-001-ltm-artifacts",
       "name": "生成图片产物登记",
       "type": "Artifact"
+    },
+    {
+      "type": "Work Package",
+      "description": "使用 wechat-public-cli 技能与媒体艺术家 Actor，撰写一篇用 ArchGraph 自身的多角色能力（通过与 Agent 对话不断增加新角色、赋予职责/能力/协作关系）说明框架使用效果的文章，并发布到微信公众号。文章由协调者撰写 docs/multi-role-capability.wechat.md，配图由媒体艺术家（media-artist-001，dashscope-media-generator Skill）按稿子内容用 qwen-image 生成写实效果图（multi-role-banner/birth/pipeline/media-artist）。",
+      "id": "2782",
+      "name": "发布多角色能力介绍文章到微信公众号",
+      "parent": "1249",
+      "testcases": [
+        {
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-multi-role-ready\"）：断言 docs/multi-role-capability.wechat.md 存在，frontmatter 含 title/author/digest，正文含 多角色、Business Actor、Assignment、Triggering。通过。",
+          "description": "GIVEN ArchGraph 已具备多角色能力（AgentOrganization 下多个角色与其 Assignment/Triggering 协作）；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号多角色能力文章 Markdown docs/multi-role-capability.wechat.md，正文介绍通过与 Agent 对话增加角色、Business Actor/Business Role/Skill/Assignment/Triggering 协作关系。",
+          "Input": "打开 docs/multi-role-capability.wechat.md",
+          "name": "AT-2782-01-多角色能力文章就绪",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-multi-role-banner\"）：断言 frontmatter 含 banner_path 且不等于 diagrams/image.png，banner 文件存在。通过。",
+          "description": "GIVEN 多角色能力文章即将发布；WHEN 媒体艺术家准备配图；THEN 文章声明专用主题封面（banner_path 指向 diagrams/multi-role-banner.png，非通用 image.png）且文件存在，并由 dashscope-media-generator 按稿子内容生成至少 1 张写实效果图（非框图），生成记录登记于媒体艺术家工作记忆。",
+          "Input": "打开 docs/multi-role-capability.wechat.md 与 docs/diagrams/multi-role-banner.png",
+          "name": "AT-2782-02-多角色文章真实配图",
+          "type": "Acceptance Test"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -3962,7 +3985,8 @@
       "included_elements": [
         "1363",
         "2756",
-        "2781"
+        "2781",
+        "2782"
       ],
       "included_relationships": []
     },
