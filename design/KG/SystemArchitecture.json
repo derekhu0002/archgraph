@@ -3215,14 +3215,19 @@
           "description": "design/KG/SystemArchitecture.json（WP 2782 登记草稿 media_id + status draft_created）"
         },
         {
+          "name": "commit",
+          "value": "4ca03bf",
+          "description": "docs/multi-role-capability.wechat.md（正文内嵌 4 张写实插图）; tests/wechat-article.test.js（wechat-multi-role-images）; design/KG/SystemArchitecture.json（AT-2782-03）"
+        },
+        {
           "name": "media_id",
-          "value": "BRZAMZ3b-CaOBH8qdG2KTe5O6HXnE6Yuo7R66FUVQg-wEg-p5F_BIUFS0f3z8djt",
-          "description": "WeChat draft media_id（2026-08-23，multi-role-capability 文章草稿创建成功）"
+          "value": "BRZAMZ3b-CaOBH8qdG2KTa3wYx_GPS87s1sC25BPs_P_OChINE48e4fD2Pom8iRS",
+          "description": "WeChat draft media_id（2026-08-23，修复后含正文 4 张插图的草稿；旧草稿 BRZAMZ3b-CaOBH8qdG2KTe5O6HXnE6Yuo7R66FUVQg-wEg-p5F_BIUFS0f3z8djt 待后台删除）"
         },
         {
           "name": "status",
           "value": "draft_created",
-          "description": "草稿已创建（wechat:draft 成功），待公众号后台「草稿箱」手动发布；API 发布不可用（个人未认证订阅号 48001）"
+          "description": "草稿已重建（wechat:draft 成功，含正文插图），待公众号后台「草稿箱」手动发布并删除旧无图草稿；API 发布不可用（48001）"
         },
         {
           "name": "deliveryStatus",
@@ -3243,14 +3248,19 @@
           "description": "design/KG/SystemArchitecture.json（wpp-ltm-001 新增 SessionRecord-MultiRoleCapability，回登记 WP 2782 多角色文章会话）"
         },
         {
+          "name": "commit",
+          "value": "4ca03bf",
+          "description": "docs/multi-role-capability.wechat.md（正文内嵌 4 张写实插图）; design/KG/SystemArchitecture.json（WP 2782 AT-2782-03）"
+        },
+        {
           "name": "media_id",
-          "value": "BRZAMZ3b-CaOBH8qdG2KTe5O6HXnE6Yuo7R66FUVQg-wEg-p5F_BIUFS0f3z8djt",
-          "description": "WeChat draft media_id（multi-role-capability 文章草稿，2026-08-23）"
+          "value": "BRZAMZ3b-CaOBH8qdG2KTa3wYx_GPS87s1sC25BPs_P_OChINE48e4fD2Pom8iRS",
+          "description": "WeChat draft media_id（修复后含正文插图草稿，2026-08-23）"
         },
         {
           "name": "status",
           "value": "draft_created",
-          "description": "草稿已创建，待公众号后台手动发布（API 发布 48001 不可用）"
+          "description": "草稿已重建（含正文插图），待公众号后台手动发布并删除旧无图草稿"
         }
       ]
     }
