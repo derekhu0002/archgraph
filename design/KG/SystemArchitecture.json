@@ -3139,14 +3139,26 @@
       "name": "dashscope-media-generator",
       "type": "Skill",
       "parent": "1249",
-      "description": "使用阿里云 DashScope 原生图像生成接口生成图片的 Skill。接口：POST https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis（X-DashScope-Async: enable），模型 qwen-image / qwen-image-plus（注意：原生接口仅这两个模型名可用，其他如 qwen-image-2.0/3.0、wan2.7-image 在原生接口返回 400）；异步任务轮询 GET https://dashscope.aliyuncs.com/api/v1/tasks/<task_id>，SUCCEEDED 后取 output.results[0].url 下载图片。标准 OpenAI 兼容端点（/compatible-mode/v1/images/generations）不支持图片生成（404）。凭据从 argo/.env 的 QWEN_KEY 读取（禁止写入文件）。"
+      "description": "使用阿里云 DashScope 原生图像生成接口生成图片的 Skill。接口：POST https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis（X-DashScope-Async: enable），模型 qwen-image / qwen-image-plus（注意：原生接口仅这两个模型名可用，其他如 qwen-image-2.0/3.0、wan2.7-image 在原生接口返回 400）；异步任务轮询 GET https://dashscope.aliyuncs.com/api/v1/tasks/<task_id>，SUCCEEDED 后取 output.results[0].url 下载图片。标准 OpenAI 兼容端点（/compatible-mode/v1/images/generations）不支持图片生成（404）。凭据从 argo/.env 的 QWEN_KEY 读取（禁止写入文件）。",
+      "attributes": [
+        {
+          "name": "SKILL.md",
+          "description": "---\nname: dashscope-media-generator\ndescription: \"使用阿里云 DashScope 原生图像生成接口生成图片。Use when: 生成图片、AI 绘图、dashscope 图像生成、qwen-image。\"\nargument-hint: \"画面描述（主题/风格/尺寸）\"\ndisable-model-invocation: false\n---\n\n# DashScope Media Generator\n\n使用阿里云 DashScope 原生图像生成接口生成写实图片。\n\n## 接口\n\n创建异步任务（X-DashScope-Async: enable）：POST https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis（Authorization: Bearer <QWEN_KEY>，X-DashScope-Async: enable）。请求体：{model: qwen-image, input: {prompt: <画面描述>}, parameters: {size: 1280*720, n: 1, water_mark: false}}。\n\n轮询结果：GET https://dashscope.aliyuncs.com/api/v1/tasks/<task_id>，任务状态 SUCCEEDED 后取 output.results[0].url 下载图片。\n\n## 模型约束（实测）\n\n- 可用：qwen-image、qwen-image-plus（原生接口仅这两个模型名可用）。\n- 不可用：qwen-image-2.0 / qwen-image-3.0 / wan2.7-image / qwen-image-max 等在原生接口返回 400。\n- 禁用端点：标准 OpenAI 兼容端点 /compatible-mode/v1/images/generations 不支持图片生成（404）。\n\n## 凭据\n\n从 argo/.env 的 QWEN_KEY 读取。禁止写入文件或日志。\n\n## 输出\n\n返回输出文件路径、所用模型与尺寸、状态（已生成 / BLOCKED）。"
+        }
+      ]
     },
     {
       "id": "media-vl-skill-001",
       "name": "qwen3-vl-visual-inspection",
       "type": "Skill",
       "parent": "1249",
-      "description": "使用 qwen3-vl-plus 视觉模型查看图片并输出画面元素与百分比坐标的 Skill。接口：POST https://llm-clids9mqc5o1mbvb.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/chat/completions，model=qwen3-vl-plus，消息 content 含 image_url（data:image/png;base64）与 text 提问。用途：在无图像输入能力的 Agent 无法直接看图时，作为代理验收生成图片——检查画面元素完整性、定位角色标注坐标、确认标注无遮挡/无重叠。凭据从 argo/.env 的 QWEN_KEY 读取。"
+      "description": "使用 qwen3-vl-plus 视觉模型查看图片并输出画面元素与百分比坐标的 Skill。接口：POST https://llm-clids9mqc5o1mbvb.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/chat/completions，model=qwen3-vl-plus，消息 content 含 image_url（data:image/png;base64）与 text 提问。用途：在无图像输入能力的 Agent 无法直接看图时，作为代理验收生成图片——检查画面元素完整性、定位角色标注坐标、确认标注无遮挡/无重叠。凭据从 argo/.env 的 QWEN_KEY 读取。",
+      "attributes": [
+        {
+          "name": "SKILL.md",
+          "description": "---\nname: qwen3-vl-visual-inspection\ndescription: \"使用 qwen3-vl-plus 视觉模型查看图片并输出画面元素与百分比坐标，作为无图像输入能力 Agent 的代理验收。Use when: 查看图片、视觉验收、标注定位、图片内容检查、qwen3-vl。\"\nargument-hint: \"图片路径 + 检查问题\"\ndisable-model-invocation: false\n---\n\n# Qwen3-VL Visual Inspection\n\n使用 qwen3-vl-plus 视觉模型查看图片，报告画面元素与百分比坐标，作为无图像输入能力 Agent 的代理验收手段。\n\n## 接口\n\nPOST https://llm-clids9mqc5o1mbvb.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/chat/completions（Authorization: Bearer <QWEN_KEY>）。请求体：{model: qwen3-vl-plus, messages: [{role: user, content: [{type: image_url, image_url: {url: data:image/png;base64,<b64>}}, {type: text, text: <检查问题>}]}], max_tokens: 2000}。\n\n## 典型用法\n\n1. 画面元素完整性：让模型列出画面中出现的元素，核对与生成 prompt 的符合度。\n2. 角色/标注定位：让模型报告各人物/物体的百分比坐标 (x%, y%)，用于叠加标注框。\n3. 标注质量验收：检查标注框是否遮挡人物、是否相互重叠、文字是否可读。\n\n## 凭据\n\n从 argo/.env 的 QWEN_KEY 读取。禁止写入文件或日志。\n\n## 输出\n\n模型的文字描述（中文）与坐标列表；据此迭代修改图片或标注。"
+        }
+      ]
     }
   ],
   "relationships": [
