@@ -77,6 +77,13 @@ Every repository change MUST be classified into exactly one tier BEFORE implemen
 4. Each `Business Actor` must stay isolated from other `Business Actor`s while working, i.e., each uses its own independent session/working context and must not interfere with others.
 </CoperationGuideline>
 
+<CapabilityDelegationGuideline>
+1. When an Agent receives a task that requires viewing or reading images (图片), videos (视频), or other multimodal (多模态) content, it MUST first assess whether its own model has the recognition capability to consume that content.
+2. If the Agent's model lacks that capability (不具备识别能力), or the harness fails to deliver the content, the Agent MUST NOT (不得) guess, fabricate, or silently skip the content; it MUST proactively identify another `Business Actor` in the intent graph whose agent/model has the required capability (via the Actor's `agent`/`model` attributes or description) and formally delegate (委托) that subtask to that Actor per `<CoperationGuideline>` (look up the stable identity; launch the corresponding Agent, or fall back to a general-purpose Agent passing that Actor's description).
+3. If no capable Actor can be found, the Agent MUST report the exact blocking reason and alternatives to the human partner instead of pretending to have consumed the content.
+4. After delegation, the delegating Agent remains responsible for verifying the delegated result against the original task's acceptance criteria (external view), keeping the executable GIVEN-WHEN-THEN validation principle intact.
+</CapabilityDelegationGuideline>
+
 <SessionMemorySummarization>
 Before every session ends (before finishing work), you MUST perform a short-term memory summarization and write the summary into long-term memory — a SUBVIEW hierarchy mounted under the relevant `Business Actor` element, i.e. Views whose `parent_element_id` points to that Actor (create the first sub-view if none exists; you may mount multiple sub-views under the Actor, or expand new sub-views under the elements of an existing sub-view, forming a hierarchical long-term memory system) — refreshing long-term memory to prevent cross-session forgetting:
 1. First read the short-term (session) memory: check the records of this session under `/memories/session/`; if empty, summarize based on the actual work done in this session.
