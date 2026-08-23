@@ -3203,6 +3203,11 @@
           "description": "design/KG/SystemArchitecture.json（发布员 LTM 会话记录 wpp-mem-multi-role-001 回登记）"
         },
         {
+          "name": "commit",
+          "value": "33524a2",
+          "description": "design/KG/SystemArchitecture.json（WP 2782 登记草稿 media_id + status draft_created）"
+        },
+        {
           "name": "media_id",
           "value": "BRZAMZ3b-CaOBH8qdG2KTe5O6HXnE6Yuo7R66FUVQg-wEg-p5F_BIUFS0f3z8djt",
           "description": "WeChat draft media_id（2026-08-23，multi-role-capability 文章草稿创建成功）"
