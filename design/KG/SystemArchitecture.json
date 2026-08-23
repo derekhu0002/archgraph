@@ -3115,8 +3115,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "e8d8e43",
-          "description": "docs/diagrams/multi-role-banner.png; docs/diagrams/multi-role-birth.png; docs/diagrams/multi-role-pipeline.png; docs/diagrams/multi-role-media-artist.png; design/KG/SystemArchitecture.json"
+          "value": "e8d8e43; b58f7c3; 0db3a30",
+          "description": "docs/diagrams/multi-role-banner.png; multi-role-birth.png; multi-role-pipeline.png; multi-role-media-artist.png; docs/diagrams/skill-coevolution-banner.png; skill-coevolution-mount.png; skill-coevolution-refine.png; skill-coevolution-export.png; scripts/gen-skill-coevolution.js; scripts/inspect-skill-coevolution.js; scripts/compress-skill-coevolution.py; design/KG/SystemArchitecture.json"
         }
       ],
       "subdiagram_views": [
@@ -3398,8 +3398,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "b58f7c3",
-          "description": "docs/diagrams/skill-coevolution-banner.png; skill-coevolution-mount.png; skill-coevolution-refine.png; skill-coevolution-export.png; scripts/gen-skill-coevolution.js; scripts/inspect-skill-coevolution.js; scripts/compress-skill-coevolution.py"
+          "value": "b58f7c3; 0db3a30",
+          "description": "docs/diagrams/skill-coevolution-banner.png; skill-coevolution-mount.png; skill-coevolution-refine.png; skill-coevolution-export.png; scripts/gen-skill-coevolution.js; scripts/inspect-skill-coevolution.js; scripts/compress-skill-coevolution.py; design/KG/SystemArchitecture.json"
         }
       ]
     }
