@@ -3448,6 +3448,20 @@
           "description": "docs/diagrams/skill-coevolution-banner.png; skill-coevolution-mount.png; skill-coevolution-refine.png; skill-coevolution-export.png; scripts/gen-skill-coevolution.js; scripts/inspect-skill-coevolution.js; scripts/compress-skill-coevolution.py; design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "description": "公众号发布员会话记录（2026-08-23）：目标——发布一篇以「AI Agent 的 SKILL 不应照搬、而应内化与个性化优化、AGENT 与人类共同进化」为核心观点的 ArchGraph 推广文章。完成：洞察材料由规划专家（tanwen/2737）产出 docs/skill-coevolution-insight.md（业界证据：Anthropic 渐进披露/上下文工程、Chroma context rot、Skill Graphs、AutoSkill、From History to State、Hermes Agent、skill pollution 反面）；文章由协调者撰写 docs/skill-coevolution.wechat.md（标题《AI 的技能，不是拿来就能用》，去 AI 味：无八股连接词，讲人话，含 4 张写实配图）；插图委托媒体艺术家（media-artist-001）用 qwen-image 生成 4 张写实图（skill-coevolution-banner/mount/refine/export），qwen3-vl-plus 逐张验收全部一次通过，媒体艺术家子代理已提交 b58f7c3/0db3a30/4fb8475/9aa44df 并写自身 LTM；发布员用 wechat:draft 创建草稿并经 draft/get 验证（errcode=0，正文含 4 图 mmbiz.qpic.cn），media_id=BRZAMZ3b-CaOBH8qdG2KTZM7ioNIU4UvW0-upb7B3te1K4AyTzbP-IndH7_RU1pa。图谱：view 180 新增 WP 2783「发布SKILL观点推广文章到微信公众号」+ AT-2783-01/02/03 + 洞察材料 Business Object 2784 + Association（2784→2783）。测试：tests/wechat-article.test.js 新增 wechat-skill-coevolution-ready/banner/images，受影响回归（wechat-article+media-artist+video-team）24/24 通过；唯一既有失败 wechat-publisher-agent-file 模型串（与本改动无关）。commit：b0cad08（文章+洞察+测试+图谱）+ ab42085（commit/media_id 属性回登记）。决策：文章走「人味」路线（技能长在身上/挂载到活上/踩坑回写/带坑导出四个闭环意象），配图写实摄影风格贴合公众号阅读；多角色协作链=规划专家供料→媒体艺术家配图→发布员发布→协调者整合。可复用经验：SKILL 观点文章的四段式结构（泼冷水→技能是用出来的→挂载到活上→真实踩坑案例）比堆概念更易读；配图必须先压缩 <1MB 再传微信（复用 wpp-mem-multi-role-001 的 pitfall）。遗留：草稿已创建（status=draft_created），待公众号后台「草稿箱」手动发布（API 发布不可用 48001）；发布后可写「媒体艺术家角色成长记」续篇承接。",
+      "id": "wpp-mem-skill-coev-001",
+      "name": "SessionRecord-SkillCoEvolution",
+      "parent": "2755",
+      "type": "Business Object"
+    },
+    {
+      "description": "规划专家会话记录（2026-08-23）：目标——为公众号推广文章提供「AI Agent 的 SKILL 不应照搬、而应内化与个性化优化、AGENT 与人类共同进化」的洞察材料。完成：产出 docs/skill-coevolution-insight.md（3 小节：核心观点大白话 / 业界证据 8 条 / ArchGraph 做法对照）。业界证据：Anthropic Agent Skills 渐进披露与 Iterate with Claude；Anthropic 上下文工程（注意力预算/just-in-time/note-taking）；Chroma 2025 测 18 模型随输入退化（context rot）；Skill Graphs「越教越笨、知识留在磁盘」；AutoSkill 跨会话经验沉淀与自我进化；From History to State 把程序性上下文内化进权重（token 减 2-7x）；Hermes Agent 创建→使用中改进→跨会话记住；反面命名 skill pollution（微软）+ context rot 大文件（MindStudio）。结论：业界方向=渐进披露+内化+用中迭代；ArchGraph 把「参考式挂载+经验回流+带坑导出」做成闭环，与业界主流同构。commit：b0cad08（docs/skill-coevolution-insight.md）。决策：洞察材料定位为公众号论据底稿（供撰稿人直接引用），每条证据带来源 URL；语气走大白话路线去 AI 味。可复用经验：业界对「SKILL 不应照搬」已有广泛共识（渐进披露/内化/用中迭代），可作为后续洞察文章与对外推广的常备素材。遗留：无。",
+      "id": "planner-mem-skill-coev-001",
+      "name": "SessionRecord-SkillInsight",
+      "parent": "2737",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -4727,7 +4741,8 @@
       "parent_element_name": "tanwen",
       "description": "规划专家 tanwen 的长期记忆子视图：对「ArchGraph 本地 Web 服务」方案设计的 UI/UX 技术先进性洞察。结论=保留 AD-c「内置单页 UI + REST JSON API 并存」形态（单页应用本身够用），但图形内核从自研 SVG+力导向改为引入成熟开源图库（首选 AntV G6 v5 MIT，备选 Cytoscape.js MIT，零构建接入）；AD-g 修订为 G6 Canvas 渲染 + 内置 force/dagre 布局 + 原生拖动/命中，无需自研 fx/fy。产出 docs/ea-web-service-ui-insight.md + tests/ea-web-service-ui-insight.test.js；反馈给系统设计师 caoyang。",
       "included_elements": [
-        "2766"
+        "2766",
+        "planner-mem-skill-coev-001"
       ],
       "included_relationships": []
     },
@@ -4824,7 +4839,8 @@
       "description": "公众号发布员长时记忆：记录公众号文章撰写、草稿创建与发布的会话记录。",
       "included_elements": [
         "wpp-mem-openclaw-001",
-        "wpp-mem-multi-role-001"
+        "wpp-mem-multi-role-001",
+        "wpp-mem-skill-coev-001"
       ],
       "included_relationships": []
     },
