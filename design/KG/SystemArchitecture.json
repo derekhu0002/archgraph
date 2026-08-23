@@ -3140,13 +3140,7 @@
       "type": "Skill",
       "parent": "1249",
       "description": "使用阿里云 DashScope 原生图像生成接口生成图片的 Skill。接口：POST https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis（X-DashScope-Async: enable），模型 qwen-image / qwen-image-plus（注意：原生接口仅这两个模型名可用，其他如 qwen-image-2.0/3.0、wan2.7-image 在原生接口返回 400）；异步任务轮询 GET https://dashscope.aliyuncs.com/api/v1/tasks/<task_id>，SUCCEEDED 后取 output.results[0].url 下载图片。标准 OpenAI 兼容端点（/compatible-mode/v1/images/generations）不支持图片生成（404）。凭据从 argo/.env 的 QWEN_KEY 读取（禁止写入文件）。",
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "fb03893",
-          "description": "argo/skills/dashscope-media-generator/SKILL.md（Skill 独立 SKILL.md + 图谱登记）; export/media-artist-package/*; scripts/build-media-artist-package.js; design/KG/SystemArchitecture.json"
-        }
-      ]
+      "attributes": []
     },
     {
       "id": "media-vl-skill-001",
@@ -3154,13 +3148,7 @@
       "type": "Skill",
       "parent": "1249",
       "description": "使用 qwen3-vl-plus 视觉模型查看图片并输出画面元素与百分比坐标的 Skill。接口：POST https://llm-clids9mqc5o1mbvb.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/chat/completions，model=qwen3-vl-plus，消息 content 含 image_url（data:image/png;base64）与 text 提问。用途：在无图像输入能力的 Agent 无法直接看图时，作为代理验收生成图片——检查画面元素完整性、定位角色标注坐标、确认标注无遮挡/无重叠。凭据从 argo/.env 的 QWEN_KEY 读取。",
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "fb03893",
-          "description": "argo/skills/qwen3-vl-visual-inspection/SKILL.md（Skill 独立 SKILL.md + 图谱登记）; export/media-artist-package/*; scripts/build-media-artist-package.js; design/KG/SystemArchitecture.json"
-        }
-      ]
+      "attributes": []
     }
   ],
   "relationships": [
