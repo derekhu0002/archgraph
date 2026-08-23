@@ -42,7 +42,6 @@ archgraph-eval/                            ← 新工程（git init）
 ├── design/KG/SystemArchitecture.json      ← 评测工作区的意图图谱（唯一真相源）
 ├── harbor_agents/
 │   └── archgraph_agent.py                 ← ★薄适配层：把 Harbor 接进 ARCHGRAPH harness
-├── argo/                                  ← 复用用户级已部署工具链（软链/引用，不重装）
 ├── tasks/                                 ← harbor dataset pull 下来的任务定义（含验证器）
 ├── tests/                                 ← 本工程验收测试（GIVEN-WHEN-THEN 可执行）
 └── scripts/
