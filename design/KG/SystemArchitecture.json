@@ -2835,6 +2835,11 @@
           "name": "commit",
           "value": "539366d",
           "description": "argo/rules/archgraph.instructions.md"
+        },
+        {
+          "name": "commit",
+          "value": "dd72178",
+          "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-change-tier.test.js; design/KG/SystemArchitecture.json; ~/.config/opencode/AGENTS.md"
         }
       ]
     },
