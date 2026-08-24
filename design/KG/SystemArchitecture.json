@@ -3551,7 +3551,14 @@
       "name": "ArchiMate 在愿景中的定位",
       "type": "Principle",
       "parent": "project-overseer-001",
-      "description": "ArchiMate = 长期记忆系统的「分类编目规则」（类比图书馆的中图法+索书号体系）。元素类型=书的类目，关系类型=书间关联，分层+Viewpoint=书架分区与不同读者视角，标准化=跨工具互操作（VS Code/Cursor/OpenCode/OpenClaw）。它是手段而非目标，价值在「好找」而非「分类学精妙」；若让读写变慢则应简化。ArchGraph 意图图 + 分层 SUBVIEW 长期记忆 + ARGO MCP 工具链是其具体实现。"
+      "description": "ArchiMate = 长期记忆系统的「分类编目规则」（类比图书馆的中图法+索书号体系）。元素类型=书的类目，关系类型=书间关联，分层+Viewpoint=书架分区与不同读者视角，标准化=跨工具互操作（VS Code/Cursor/OpenCode/OpenClaw）。它是手段而非目标，价值在「好找」而非「分类学精妙」；若让读写变慢则应简化。ArchGraph 意图图 + 分层 SUBVIEW 长期记忆 + ARGO MCP 工具链是其具体实现。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "79d5676",
+          "description": "design/KG/SystemArchitecture.json（项目总管 LTM 记录 ArchiMate 定位）"
+        }
+      ]
     }
   ],
   "relationships": [
