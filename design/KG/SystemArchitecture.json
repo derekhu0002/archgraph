@@ -3528,6 +3528,11 @@
           "name": "commit",
           "value": "16cea7f",
           "description": "design/KG/SystemArchitecture.json（项目总管长期记忆子视图记录项目愿景）"
+        },
+        {
+          "name": "commit",
+          "value": "67ae3f1",
+          "description": "design/KG/SystemArchitecture.json（愿景升格总纲：打造世界级最优秀的 AGENT 长期记忆系统）"
         }
       ]
     }
