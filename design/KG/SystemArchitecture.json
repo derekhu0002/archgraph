@@ -3533,6 +3533,11 @@
           "name": "commit",
           "value": "67ae3f1",
           "description": "design/KG/SystemArchitecture.json（愿景升格总纲：打造世界级最优秀的 AGENT 长期记忆系统）"
+        },
+        {
+          "name": "commit",
+          "value": "b2324c9",
+          "description": "design/KG/SystemArchitecture.json（愿景概念校正：结构的极致是手段，读写的极致是目标）"
         }
       ]
     }
