@@ -63,6 +63,10 @@
         {
           "view_id": "tb-eval-view-001",
           "view_name": "Terminal-Bench 评测"
+        },
+        {
+          "view_id": "memory-eval-view-001",
+          "view_name": "长期记忆评测"
         }
       ]
     },
@@ -959,7 +963,7 @@
           "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
           "type": "Acceptance Test",
           "Input": "运行 tests/architecture-view-context.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331、2753 与 2757、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 12 个子视图（169/174/176/178/179/180/1800/298/432/434/argo-workflow-rules-view/openclaw-adaptation）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
+          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331、2753 与 2757、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 14 个子视图（169/174/176/178/179/180/1800/298/432/434/argo-workflow-rules-view/memory-eval-view-001/openclaw-adaptation/tb-eval-view-001）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
         },
         {
           "name": "AT-1357-05-视图写入同步subdiagram_views",
@@ -3559,6 +3563,22 @@
           "description": "design/KG/SystemArchitecture.json（项目总管 LTM 记录 ArchiMate 定位）"
         }
       ]
+    },
+    {
+      "id": "memory-eval-bench-wp-001",
+      "name": "调研 AGENT 长期记忆评测基线",
+      "type": "Work Package",
+      "parent": "1249",
+      "description": "调研并整理业界公认的 AGENT 长期记忆评测基准（LongMemEval ICLR2025 / LOCOMO / BEAM）与指标口径（准确率/记忆召回/top-k/token 成本/时延，底层 RAG 指标 Precision/Recall/MRR/Hit Rate@K），形成结论文档 docs/memory-eval-benchmarks.md，作为 ArchGraph 长期记忆系统「世界级」量化基线的依据。",
+      "testcases": [
+        {
+          "name": "AT-memory-eval-bench-01-评测基准调研结论文档就绪",
+          "description": "GIVEN 需要为长期记忆系统确立业界公认的评测基线；WHEN 读者打开 docs/memory-eval-benchmarks.md；THEN 文档包含三大基准 LongMemEval/LOCOMO/BEAM 及其能力维度与成绩、评测流水线 Ingest→Search→Evaluate、核心指标（准确率/记忆召回/top-k/token 成本/时延）与 RAG 底层指标（Precision/Recall/MRR/Hit Rate@K）、以及对 ArchGraph 的意义。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/memory-eval-benchmarks.md",
+          "acceptanceCriteria": "执行 node --test tests/memory-eval-benchmarks.test.js：断言文档存在并包含 LongMemEval/LOCOMO/BEAM、Ingest→Search→Evaluate、准确率与记忆召回、top-k、token 成本、时延、MRR、Hit Rate@K、对 ArchGraph 的意义。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -5012,6 +5032,16 @@
       "included_elements": [
         "overseer-vision-001",
         "overseer-archimate-role-001"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "memory-eval-view-001",
+      "view_name": "长期记忆评测",
+      "parent_element_id": "1249",
+      "description": "长期记忆系统评测基线相关工作：调研业界公认基准（LongMemEval/LOCOMO/BEAM）、确立指标口径、落地评测跑法。",
+      "included_elements": [
+        "memory-eval-bench-wp-001"
       ],
       "included_relationships": []
     }
