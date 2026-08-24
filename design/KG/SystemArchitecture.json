@@ -3516,6 +3516,13 @@
           "description": "design/KG/SystemArchitecture.json（新增 Business Actor 项目总管 project-overseer-001 及长期记忆子视图 overseer-ltm-001）"
         }
       ]
+    },
+    {
+      "id": "overseer-vision-001",
+      "name": "项目愿景：为 AGENT 提供长期记忆系统",
+      "type": "Goal",
+      "parent": "project-overseer-001",
+      "description": "项目愿景（2026-08-25 由人类伙伴确认）：为 AGENT 提供长期记忆系统。三要素：① 方便高效的读取；② 方便高效的写入；③ 架构化存储。载体 = ArchGraph 意图图（design/KG/SystemArchitecture.json）+ 分层 SUBVIEW 长期记忆 + ARGO MCP 读写工具链。"
     }
   ],
   "relationships": [
@@ -4966,7 +4973,9 @@
       "view_name": "项目总管工作记录",
       "parent_element_id": "project-overseer-001",
       "description": "项目总管 Business Actor 的长期记忆子视图：记录项目愿景、全局决策、关键进展与跨会话要点。",
-      "included_elements": [],
+      "included_elements": [
+        "overseer-vision-001"
+      ],
       "included_relationships": []
     }
   ]
