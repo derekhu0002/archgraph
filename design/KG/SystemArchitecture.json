@@ -3508,6 +3508,13 @@
           "view_id": "overseer-ltm-001",
           "view_name": "项目总管工作记录"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "4ae5c1a",
+          "description": "design/KG/SystemArchitecture.json（新增 Business Actor 项目总管 project-overseer-001 及长期记忆子视图 overseer-ltm-001）"
+        }
       ]
     }
   ],
