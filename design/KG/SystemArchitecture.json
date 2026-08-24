@@ -3496,6 +3496,19 @@
           "description": "docs/terminal-bench-eval-guide.md; tests/terminal-bench-eval-guide.test.js; design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "id": "project-overseer-001",
+      "name": "项目总管",
+      "type": "Business Actor",
+      "parent": "1962",
+      "description": "ArchGraph 项目的总管 Business Actor：负责项目愿景、全局方向与跨角色协作的统筹；当人类伙伴未指定具体角色时，默认以本角色进行对话与决策。",
+      "subdiagram_views": [
+        {
+          "view_id": "overseer-ltm-001",
+          "view_name": "项目总管工作记录"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -4660,7 +4673,8 @@
         "1964",
         "1965",
         "1966",
-        "1963"
+        "1963",
+        "project-overseer-001"
       ],
       "included_relationships": [
         "1521",
@@ -4938,6 +4952,14 @@
       "included_elements": [
         "tb-eval-guide-001"
       ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "overseer-ltm-001",
+      "view_name": "项目总管工作记录",
+      "parent_element_id": "project-overseer-001",
+      "description": "项目总管 Business Actor 的长期记忆子视图：记录项目愿景、全局决策、关键进展与跨会话要点。",
+      "included_elements": [],
       "included_relationships": []
     }
   ]
