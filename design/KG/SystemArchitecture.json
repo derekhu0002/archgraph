@@ -3538,6 +3538,11 @@
           "name": "commit",
           "value": "b2324c9",
           "description": "design/KG/SystemArchitecture.json（愿景概念校正：结构的极致是手段，读写的极致是目标）"
+        },
+        {
+          "name": "commit",
+          "value": "f3c5bb2",
+          "description": "design/KG/SystemArchitecture.json（愿景标准类比：图书馆按类目编号存书，结构为读取服务）"
         }
       ]
     }
