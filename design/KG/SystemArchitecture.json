@@ -3591,6 +3591,13 @@
           "description": "docs/memory-eval-benchmarks.md; tests/memory-eval-benchmarks.test.js; design/KG/SystemArchitecture.json（长期记忆评测基线调研）"
         }
       ]
+    },
+    {
+      "id": "overseer-mem-eval-001",
+      "name": "里程碑：长期记忆评测基线调研",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-08-25）：确立业界公认的长期记忆评测基线——LongMemEval(ICLR2025)/LOCOMO/BEAM + Ingest→Search→Evaluate 流水线 + 核心指标（准确率/记忆召回/top-k/token 成本/时延）+ RAG 底层指标（Precision/Recall/MRR/Hit Rate@K）。结论文档 docs/memory-eval-benchmarks.md；图谱新增视图 memory-eval-view-001「长期记忆评测」+ WP memory-eval-bench-wp-001 + AT-memory-eval-bench-01；同步修正 AT-1357-04（12→14 子视图，含既有 tb-eval-view-001）。commits 49b2366（内容）/481daef（登记）。"
     }
   ],
   "relationships": [
@@ -5043,7 +5050,8 @@
       "description": "项目总管 Business Actor 的长期记忆子视图：记录项目愿景、全局决策、关键进展与跨会话要点。",
       "included_elements": [
         "overseer-vision-001",
-        "overseer-archimate-role-001"
+        "overseer-archimate-role-001",
+        "overseer-mem-eval-001"
       ],
       "included_relationships": []
     },
