@@ -3706,6 +3706,29 @@
       "type": "Business Object",
       "parent": "project-overseer-001",
       "description": "里程碑（2026-08-25）：改进 ArchGraph 查询规则——①任何检索优先检索KG（KG-first retrieval，任何检索先查询意图图谱，不默认搜文件系统/代码/网络）；②检索KG必须优先通过语义检索（Semantic-first KG retrieval，getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径。落地：argo/rules/archgraph.instructions.md 新增 QueryPriorityGuideline 章节 + CoreRule 7 + ExplorationGuideline 第 0 条 + ToolsGuideline/GraphQueryGuideline 语义优先措辞；新增 tests/argo-rules-query.test.js（2 用例）；图谱元素 archgraph-workflow-rules 更新描述 + 新增 AT-archgraph-workflow-rules-05/06。相关测试 28/28 通过，validateSystemArchitecture 通过。commits e705807（工作）/8eaef12（commit 属性登记）。随后按人类伙伴要求将 argo/rules/archgraph.instructions.md 全英文化（去除全部中文，规则名译为 KG-first retrieval / Semantic-first KG retrieval），同步更新 tests/argo-rules-query/change-tier/capability-delegation 断言为英文、图谱 archgraph-workflow-rules 描述与 AT-02/03/04/05/06 表述对齐；相关测试 28/28 通过、validateSystemArchitecture 通过，规则已部署到 %APPDATA%\\Code\\User\\prompts\\archgraph.instructions.md。commits bdf1016（工作）/e28e719（commit 属性登记）。"
+    },
+    {
+      "id": "archgraph-content-storage-policy-001",
+      "name": "文档内容存储策略（KG-first document storage）",
+      "type": "Principle",
+      "parent": "1249",
+      "description": "Principle（2026-08-26 人类伙伴确立）：文档内容存储策略——除必须放在仓库中的内容、或无法放入 KG 的内容（如视频/二进制/可执行文件）外，其余所有文档内容一律写入意图图谱（KG）作为带描述/属性的元素；必须留在仓库的内容（视频/二进制/可执行）也需 SUMMARY 后登记入 KG（元素摘要 + 仓库路径/commit 属性）；KG 为文档内容的事实源。规则落地于 argo/rules/archgraph.instructions.md <ContentStoragePolicy> 章节 + CoreRule 8。",
+      "testcases": [
+        {
+          "name": "AT-archgraph-content-storage-policy-01-规则文档登记内容存储策略",
+          "type": "Acceptance Test",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 需要存放文档内容；THEN 规则包含 ContentStoragePolicy 章节并登记：除必须放仓库或无法放入 KG 的内容（如视频/二进制）外，所有文档内容必须写入 KG（KG-first document storage）；必须留仓库的内容也需 SUMMARY 后登记入 KG；KG 为文档内容事实源；且 CoreRule 8 将其列为红线。",
+          "Input": "node --test tests/argo-rules-content-storage.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-rules-content-storage.test.js（用例 archgraph-rules-document-content-storage-policy / -core-rule）：断言 argo/rules/archgraph.instructions.md 包含 ContentStoragePolicy 章节与 KG-first document storage、ALL document content MUST、videos/repository/summar/source of truth 等表述，且 CoreRules 引用 ContentStoragePolicy 与 KG-first。通过。"
+        }
+      ]
+    },
+    {
+      "id": "cs-policy-decision-001",
+      "name": "内容存储策略决策记录",
+      "type": "Requirement",
+      "parent": "1249",
+      "description": "决策(2026-08-26, 人类伙伴确立)：文档内容存储策略——除必须放仓库的内容或无法放入 KG 的内容（如视频/二进制）外，其余所有文档内容一律写入 KG（KG-first document storage）；必须留仓库的内容（视频/二进制/可执行）也需 SUMMARY 后登记入 KG（元素摘要 + 仓库路径/commit 属性）。理由：① 人类伙伴明确提出，落实「为 AGENT 提供长期记忆系统」愿景（目标=读写的极致，KG 为长期记忆载体）；② 文档入 KG 便于语义检索与跨会话复用，避免文档散落仓库难检索；③ 视频/二进制无法入 KG，须留仓库但以摘要登记保证可发现。被否方案：① 文档全部保留仓库仅登记索引（弱化 KG 事实源）；② 视频等也强行入 KG（不可行，需外部载体）。验收用例 AT-archgraph-content-storage-policy-01 挂在 archgraph-content-storage-policy-001 上。"
     }
   ],
   "relationships": [
@@ -5063,7 +5086,9 @@
       "included_elements": [
         "archgraph-workflow-rules",
         "ctg-decision-001",
-        "cdg-decision-001"
+        "cdg-decision-001",
+        "archgraph-content-storage-policy-001",
+        "cs-policy-decision-001"
       ],
       "included_relationships": []
     },

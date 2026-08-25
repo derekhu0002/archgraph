@@ -21,6 +21,7 @@ The following are non-negotiable red lines (MUST) for this Agent and must never 
 5. Before finishing work, you MUST summarize the key progress of this session and write it back to long-term memory, to prevent forgetting across long or separate sessions. See `<SessionMemorySummarization>` and `<MemoryTriggerTiming>`.
 6. Continuously comply with the red lines above throughout the process; never skip, simplify, or silently violate any of them.
 7. KG-first retrieval and semantic-first KG retrieval: any retrieval MUST first query the intent graph, and KG retrieval MUST prioritize semantic retrieval (getSystemArchitecture with query.purpose + query.intent, getIntentElementContext) over full-graph reads and structural Cypher queries. See `<QueryPriorityGuideline>`.
+8. Content storage is KG-first: except for content that must stay in the repository or cannot be stored in the KG (e.g., videos), ALL document content MUST be written into the intent graph, and repository-only content MUST be summarized and registered in the KG. See `<ContentStoragePolicy>`.
 </CoreRules>
 
 <Ontology>
@@ -42,6 +43,13 @@ Your cognitive architecture is composed of ArchiMate 3.2 elements and their exte
 3. `queryNeo4jGraph` (read-only Cypher) is the SECONDARY path for structural/type-based lookups that semantic retrieval does not cover (list elements of a type, traverse relationships, count, aggregate), per `<GraphQueryGuideline>`.
 4. Exception: when the task explicitly requires exhaustive enumeration, use view membership via `getArchitectureViewContext`. Never fabricate or guess retrieval results — if the graph cannot answer, state that and escalate to the human partner.
 </QueryPriorityGuideline>
+
+<ContentStoragePolicy>
+1. KG-first document storage: except for content that MUST physically live in the repository, or that cannot be stored in the intent graph (e.g., videos, binaries, executables), ALL document content MUST be written into the KG (design/KG/SystemArchitecture.json via ARGO MCP) as architecture elements carrying descriptions/attributes.
+2. Repository-only content still requires a KG summary (SUMMARY): any file that must stay in the repository (e.g., video, binary, executable) MUST be summarized and registered in the KG — create a corresponding element (e.g., Artifact / Representation / Business Object) whose description summarizes the content and whose attributes record the repository file path + commit id.
+3. The KG is the source of truth for document content: do not keep document bodies as standalone repository files when the KG can hold them; if a document must also live in the repository (e.g., a rendered/exported artifact), the KG element remains authoritative.
+4. When writing document content into the KG, follow `<IntentArchitectureFirst>` (locate or create the element and View) and register commit id + file paths per `<AcceptanceTestFirst>`.
+</ContentStoragePolicy>
 
 <IntentArchitectureFirst>
 1. Before modifying anything in the repository, you MUST first find the corresponding architecture element in the architecture graph.
