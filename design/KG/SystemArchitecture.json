@@ -3661,6 +3661,22 @@
           "description": "scripts/memory-eval-run.js; tests/memory-eval-run.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测 harness 与实测基线 23/23 100%）"
         }
       ]
+    },
+    {
+      "id": "memory-eval-article-wp-001",
+      "name": "发布长期记忆评测文章到微信公众号",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "使用 wechat-public-cli 技能，撰写 ArchGraph 长期记忆系统评测基线（23 题、整体 100%、拒答 100%、平均单题检索毫秒级）的测试过程与实测结果文章 docs/memory-eval-benchmark.wechat.md，并创建微信公众号草稿、跟进后台手动发布。",
+      "testcases": [
+        {
+          "name": "AT-memory-eval-article-01-长期记忆评测文章就绪",
+          "description": "GIVEN 已完成长期记忆评测基线（docs/memory-eval-benchmarks.md + docs/memory-eval-dataset.md + scripts/memory-eval-run.js + results/memory-eval-report.json）；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号评测文章 Markdown docs/memory-eval-benchmark.wechat.md，正文介绍评测基线调研（LongMemEval/LOCOMO/BEAM）、5 能力 23 题题集、实测结果（整体 100%、拒答 100%、平均时延毫秒级）与下一步（LLM 评判/加压/立门槛）。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/memory-eval-benchmark.wechat.md",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-memory-eval-benchmark-ready\"）：断言 docs/memory-eval-benchmark.wechat.md 存在，frontmatter 含 title/author/digest，正文含 长期记忆、23 题、100%、LongMemEval。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -4518,7 +4534,8 @@
         "2781",
         "2782",
         "2783",
-        "2784"
+        "2784",
+        "memory-eval-article-wp-001"
       ],
       "included_relationships": [
         "skill-insight-informs-2783"
