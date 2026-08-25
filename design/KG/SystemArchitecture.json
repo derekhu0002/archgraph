@@ -2957,6 +2957,11 @@
           "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-capability-delegation.test.js; design/KG/SystemArchitecture.json; ~/.config/opencode/AGENTS.md"
         },
         {
+          "name": "commit",
+          "value": "e705807",
+          "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-query.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "deliveryStatus",
           "value": "not_delivered"
         }
