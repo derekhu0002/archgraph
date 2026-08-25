@@ -18,15 +18,15 @@ test('archgraph-rules-document-capability-delegation', () => {
   const section = rules.match(/<CapabilityDelegationGuideline>([\s\S]*?)<\/CapabilityDelegationGuideline>/);
   assert.ok(section, 'CapabilityDelegationGuideline section must exist');
   // AND the section covers image and video tasks
-  assert.match(section[1], /图片/);
-  assert.match(section[1], /视频/);
+  assert.match(section[1], /images/);
+  assert.match(section[1], /videos/);
   // AND it forbids pretending to have consumed content the agent cannot see
-  assert.match(section[1], /不具备/);
-  assert.match(section[1], /识别能力/);
-  assert.match(section[1], /不得/);
+  assert.match(section[1], /lacks that capability/);
+  assert.match(section[1], /recognition capability/);
+  assert.match(section[1], /MUST NOT/);
   // AND it mandates proactive delegation to a capable Business Actor
   assert.match(section[1], /Business Actor/);
-  assert.match(section[1], /委托/);
+  assert.match(section[1], /delegat/);
   // AND it routes delegation through the existing CoperationGuideline
   assert.match(section[1], /CoperationGuideline/);
 });

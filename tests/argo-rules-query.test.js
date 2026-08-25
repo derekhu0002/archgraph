@@ -18,7 +18,7 @@ test('archgraph-rules-document-query-priority-kg-first', () => {
   const section = rules.match(/<QueryPriorityGuideline>([\s\S]*?)<\/QueryPriorityGuideline>/);
   assert.ok(section, 'QueryPriorityGuideline section must exist');
   // AND it mandates that any retrieval first queries the KG
-  assert.match(section[1], /任何检索优先检索KG/);
+  assert.match(section[1], /KG-first retrieval/);
   // AND the CoreRules section references the query priority gate as a red line
   const coreRules = rules.match(/<CoreRules>([\s\S]*?)<\/CoreRules>/);
   assert.ok(coreRules, 'CoreRules section must exist');
@@ -26,7 +26,7 @@ test('archgraph-rules-document-query-priority-kg-first', () => {
   // AND the ExplorationGuideline also carries the KG-first rule
   const exploration = rules.match(/<ExplorationGuideline>([\s\S]*?)<\/ExplorationGuideline>/);
   assert.ok(exploration, 'ExplorationGuideline section must exist');
-  assert.match(exploration[1], /任何检索优先检索KG/);
+  assert.match(exploration[1], /KG-first retrieval/);
 });
 
 test('archgraph-rules-document-query-semantic-first', () => {
@@ -35,7 +35,7 @@ test('archgraph-rules-document-query-semantic-first', () => {
   const section = rules.match(/<QueryPriorityGuideline>([\s\S]*?)<\/QueryPriorityGuideline>/);
   assert.ok(section, 'QueryPriorityGuideline section must exist');
   // THEN it mandates semantic retrieval as the priority path for KG retrieval
-  assert.match(section[1], /检索KG必须优先通过语义检索/);
+  assert.match(section[1], /Semantic-first KG retrieval/);
   assert.match(section[1], /getSystemArchitecture/);
   assert.match(section[1], /query\.purpose/);
   assert.match(section[1], /query\.intent/);

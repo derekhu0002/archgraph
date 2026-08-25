@@ -20,7 +20,7 @@ The following are non-negotiable red lines (MUST) for this Agent and must never 
 4. Any change must first identify and pass the regression tests of all affected acceptance test cases; if the acceptance test cases are missing, add them first. Tier 1 (behavior-independent) changes are exempt from acceptance regression and full validation per `<ChangeTierGate>`; all other tiers keep the full requirement. See `<AcceptanceTestFirst>` and `<ChangeTierGate>`.
 5. Before finishing work, you MUST summarize the key progress of this session and write it back to long-term memory, to prevent forgetting across long or separate sessions. See `<SessionMemorySummarization>` and `<MemoryTriggerTiming>`.
 6. Continuously comply with the red lines above throughout the process; never skip, simplify, or silently violate any of them.
-7. 任何检索优先检索KG；检索KG必须优先通过语义检索 — any retrieval MUST first query the intent graph, and KG retrieval MUST prioritize semantic retrieval (getSystemArchitecture with query.purpose + query.intent, getIntentElementContext) over full-graph reads and structural Cypher queries. See `<QueryPriorityGuideline>`.
+7. KG-first retrieval and semantic-first KG retrieval: any retrieval MUST first query the intent graph, and KG retrieval MUST prioritize semantic retrieval (getSystemArchitecture with query.purpose + query.intent, getIntentElementContext) over full-graph reads and structural Cypher queries. See `<QueryPriorityGuideline>`.
 </CoreRules>
 
 <Ontology>
@@ -30,15 +30,15 @@ Your cognitive architecture is composed of ArchiMate 3.2 elements and their exte
 </Ontology>
 
 <ExplorationGuideline>
-0. 任何检索优先检索KG：for ANY retrieval — architecture context, past decisions, files, code, knowledge — FIRST query the intent graph through ARGO MCP before searching the file system, code, or web. See `<QueryPriorityGuideline>`.
+0. KG-first retrieval: for ANY retrieval — architecture context, past decisions, files, code, knowledge — FIRST query the intent graph through ARGO MCP before searching the file system, code, or web. See `<QueryPriorityGuideline>`.
 1. When exploring context, explore in small steps: keep each query shallow, and after each query decide the next exploration direction based on the result.
 2. When you receive multiple similar or conflicting pieces of information, prefer the context closest to your current task and avoid wasting time on irrelevant context.
 3. For structural/type-based graph lookups (list elements of a type, traverse relationships, count, aggregate), use `queryNeo4jGraph` per `<GraphQueryGuideline>` instead of reading the JSON file directly.
 </ExplorationGuideline>
 
 <QueryPriorityGuideline>
-1. 任何检索优先检索KG：for ANY retrieval task (architecture context, past decisions, files, code, knowledge), the intent graph (design/KG/SystemArchitecture.json via ARGO MCP) is the FIRST hop. Do NOT default to searching the file system, code, or web before querying the graph.
-2. 检索KG必须优先通过语义检索：KG retrieval MUST go through semantic retrieval first — `getSystemArchitecture` with query.purpose + query.intent (semantic), and `getIntentElementContext` / `getArchitectureViewContext` for focused context. An omitted-query full read, or reading the graph JSON file directly, is a last resort, never the default.
+1. KG-first retrieval: for ANY retrieval task (architecture context, past decisions, files, code, knowledge), the intent graph (design/KG/SystemArchitecture.json via ARGO MCP) is the FIRST hop. Do NOT default to searching the file system, code, or web before querying the graph.
+2. Semantic-first KG retrieval: KG retrieval MUST go through semantic retrieval first — `getSystemArchitecture` with query.purpose + query.intent (semantic), and `getIntentElementContext` / `getArchitectureViewContext` for focused context. An omitted-query full read, or reading the graph JSON file directly, is a last resort, never the default.
 3. `queryNeo4jGraph` (read-only Cypher) is the SECONDARY path for structural/type-based lookups that semantic retrieval does not cover (list elements of a type, traverse relationships, count, aggregate), per `<GraphQueryGuideline>`.
 4. Exception: when the task explicitly requires exhaustive enumeration, use view membership via `getArchitectureViewContext`. Never fabricate or guess retrieval results — if the graph cannot answer, state that and escalate to the human partner.
 </QueryPriorityGuideline>
@@ -65,17 +65,17 @@ When you are about to build an element, first look up the skills and resources n
 
 <ChangeTierGate>
 Every repository change MUST be classified into exactly one tier BEFORE implementation; the tier is declared explicitly. Tier classification is objective and enumerable; if the Agent cannot conclusively classify the change, it MUST default to Tier 2 (fail-safe).
-1. Tier 1 — 行为无关（behavior-independent）: qualifies ONLY if ALL of the following hold:
+1. Tier 1 — behavior-independent: qualifies ONLY if ALL of the following hold:
    - The diff touches only non-executable content: comments, documentation (including this rules file), whitespace/formatting-only hunks, or descriptive metadata text in the intent graph.
    - No executable logic, public interface/API surface, or test logic is changed (test files untouched).
    - No graph structure change: no element/relationship/view added, removed, renamed, or retyped.
-   - Skipped ceremony（跳过验收回归与全量校验）: acceptance test identification and regression, and full validateSystemArchitecture, are skipped (unless the graph was touched). Kept ceremony: locate the element, git commit + register commit id, and defer memory milestone writes to session end.
-2. Tier 2 — 行为变化（behavior-changing, scoped）: any change touching executable logic, interfaces, or test behavior within existing elements. Full ceremony: locate element, identify affected acceptance test cases, run regression, validateSystemArchitecture, commit + register, immediate memory writes.
-3. Tier 3 — 结构性/新增（structural/new）: new elements/relationships/views, new features, or cross-cutting changes. Full Tier 2 ceremony plus preview/apply mutation for any graph change.
+   - Skipped ceremony (acceptance regression and full validation): acceptance test identification and regression, and full validateSystemArchitecture, are skipped (unless the graph was touched). Kept ceremony: locate the element, git commit + register commit id, and defer memory milestone writes to session end.
+2. Tier 2 — behavior-changing, scoped: any change touching executable logic, interfaces, or test behavior within existing elements. Full ceremony: locate element, identify affected acceptance test cases, run regression, validateSystemArchitecture, commit + register, immediate memory writes.
+3. Tier 3 — structural/new: new elements/relationships/views, new features, or cross-cutting changes. Full Tier 2 ceremony plus preview/apply mutation for any graph change.
 4. Safety net (MUST, non-negotiable):
-   - Declared tier is verified at commit time: the actual git diff file list is checked against the Tier 1 allowlist; if any disallowed file/hunk appears, the change automatically 升为 Tier 2 and MUST complete the acceptance regression and validation before finishing. Tier 1 is revocable, not merely declared.
-   - KG 触线规则: any diff touching design/KG/SystemArchitecture.json keeps full validation; the Tier 1 exemption never applies to graph structure changes.
-   - 零歧义默认升档（fail-safe）: any uncertain classification MUST be treated as Tier 2, never Tier 1.
+   - Declared tier is verified at commit time: the actual git diff file list is checked against the Tier 1 allowlist; if any disallowed file/hunk appears, the change is automatically escalated to Tier 2 and MUST complete the acceptance regression and validation before finishing. Tier 1 is revocable, not merely declared.
+   - KG touch rule: any diff touching design/KG/SystemArchitecture.json keeps full validation; the Tier 1 exemption never applies to graph structure changes.
+   - Fail-safe (zero-ambiguity default escalation): any uncertain classification MUST be treated as Tier 2, never Tier 1.
 </ChangeTierGate>
 
 <CoperationGuideline>
@@ -87,8 +87,8 @@ Every repository change MUST be classified into exactly one tier BEFORE implemen
 </CoperationGuideline>
 
 <CapabilityDelegationGuideline>
-1. When an Agent receives a task that requires viewing or reading images (图片), videos (视频), or other multimodal (多模态) content, it MUST first assess whether its own model has the recognition capability to consume that content.
-2. If the Agent's model lacks that capability (不具备识别能力), or the harness fails to deliver the content, the Agent MUST NOT (不得) guess, fabricate, or silently skip the content; it MUST proactively identify another `Business Actor` in the intent graph whose agent/model has the required capability (via the Actor's `agent`/`model` attributes or description) and formally delegate (委托) that subtask to that Actor per `<CoperationGuideline>` (look up the stable identity; launch the corresponding Agent, or fall back to a general-purpose Agent passing that Actor's description).
+1. When an Agent receives a task that requires viewing or reading images, videos, or other multimodal content, it MUST first assess whether its own model has the recognition capability to consume that content.
+2. If the Agent's model lacks that capability, or the harness fails to deliver the content, the Agent MUST NOT guess, fabricate, or silently skip the content; it MUST proactively identify another `Business Actor` in the intent graph whose agent/model has the required capability (via the Actor's `agent`/`model` attributes or description) and formally delegate that subtask to that Actor per `<CoperationGuideline>` (look up the stable identity; launch the corresponding Agent, or fall back to a general-purpose Agent passing that Actor's description).
 3. If no capable Actor can be found, the Agent MUST report the exact blocking reason and alternatives to the human partner instead of pretending to have consumed the content.
 4. After delegation, the delegating Agent remains responsible for verifying the delegated result against the original task's acceptance criteria (external view), keeping the executable GIVEN-WHEN-THEN validation principle intact.
 </CapabilityDelegationGuideline>
@@ -135,7 +135,7 @@ For structural/type-based graph lookups, use the read-only Neo4j Cypher interfac
 2. Construct a read-only Cypher statement and scope every pattern to the current graph with the server-injected `$graphKey` parameter (the value is filled by the server; the agent only writes the placeholder):
    MATCH (e:Element {graphKey: $graphKey, type: 'Business Actor'}) RETURN e.id, e.name ORDER BY e.name
 3. Never submit write clauses (CREATE, MERGE, DELETE, SET, REMOVE, DROP, LOAD CSV, FOREACH, IN TRANSACTIONS); the interface rejects them to protect the canonical JSON single source of truth.
-4. Use it as the SECONDARY path for structural/type-based lookups that semantic retrieval does not cover: list elements of a type, traverse ARCHIMATE_RELATES edges, count and aggregate. 检索KG必须优先通过语义检索 — semantic/context reading (getSystemArchitecture with query.purpose + query.intent, getIntentElementContext, getArchitectureViewContext) is the PRIORITY path per <QueryPriorityGuideline>.
+4. Use it as the SECONDARY path for structural/type-based lookups that semantic retrieval does not cover: list elements of a type, traverse ARCHIMATE_RELATES edges, count and aggregate. Semantic-first KG retrieval — semantic/context reading (getSystemArchitecture with query.purpose + query.intent, getIntentElementContext, getArchitectureViewContext) is the PRIORITY path per <QueryPriorityGuideline>.
 5. The query is read-only; never attempt to mutate the graph through Cypher.
 </GraphQueryGuideline>
 
