@@ -2974,6 +2974,11 @@
           "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-query.test.js; tests/argo-rules-change-tier.test.js; tests/argo-rules-capability-delegation.test.js; design/KG/SystemArchitecture.json"
         },
         {
+          "name": "commit",
+          "value": "ddc46c6",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/argo-semantic-scope.test.js; tests/argo-rules-query.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "deliveryStatus",
           "value": "not_delivered"
         }
@@ -3771,6 +3776,13 @@
           "description": "GIVEN ARGO MCP getSystemArchitecture 工具存在；WHEN Agent 需要限定语义检索范围；THEN 工具 schema 登记 scope 参数（view_id/element_id/depth），resolveSemanticScope 能把视图/元素子树解析为身份集合，applySemanticScopeFilter 能把返回的 canonical 文档或 business summary 裁剪到子图，未知视图/元素返回 SCOPE_VIEW_NOT_FOUND / SCOPE_ELEMENT_NOT_FOUND。",
           "Input": "node --test tests/argo-semantic-scope.test.js",
           "acceptanceCriteria": "执行 node --test tests/argo-semantic-scope.test.js（6 用例）：断言 getSystemArchitecture 工具 schema 含 scope；resolveSemanticScope 视图/元素作用域返回正确身份集合且排除外部对象；未知视图/元素返回 SCOPE_* 失败类别；applySemanticScopeFilter 对 canonical 文档与 business summary 均裁剪到作用域。通过。"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "ddc46c6",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/argo-mcp-server.js; tests/argo-semantic-scope.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     }
