@@ -3785,6 +3785,13 @@
           "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/argo-mcp-server.js; tests/argo-semantic-scope.test.js; design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "id": "overseer-subgraph-semantic-001",
+      "name": "里程碑：子图语义检索（getSystemArchitecture scope）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-08-26）：getSystemArchitecture 新增 scope 子图语义检索，避免全图语义检索范围过大返回过多内容——scope（view_id 或 element_id+depth）解析为 canonical 身份集合 → 作为 canonicalIdentities 喂给语义检索边界（VECTOR_QUERY_CYPHER_SCOPED 按身份过滤）→ 返回内容按 applySemanticScopeFilter 裁剪；未知视图/元素返回 SCOPE_VIEW_NOT_FOUND / SCOPE_ELEMENT_NOT_FOUND。落地：argo/scripts/systemarchitecture-mcp-server.js（resolveSemanticScope/applySemanticScopeFilter）、graph-rag/defaultSemanticRetrieval.js（exhaustChannel scope 过滤）、argo-mcp-server.js（schema）；新增 tests/argo-semantic-scope.test.js（6 用例）；规则层 QueryPriorityGuideline 新增 Bound-the-scope 约定（AT-archgraph-workflow-rules-07）；图谱新增 Application Service subgraph-semantic-retrieval-001（视图 1800，AT-subgraph-semantic-retrieval-01）。全量 234 通过/1 既有失败，validateSystemArchitecture 通过。commits ddc46c6（工作）/6e72f1f（commit 属性登记）。"
     }
   ],
   "relationships": [
@@ -5247,7 +5254,8 @@
         "overseer-archimate-role-001",
         "overseer-mem-eval-001",
         "overseer-query-rules-001",
-        "overseer-content-storage-001"
+        "overseer-content-storage-001",
+        "overseer-subgraph-semantic-001"
       ],
       "included_relationships": []
     },
