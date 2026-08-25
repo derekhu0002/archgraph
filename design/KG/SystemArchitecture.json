@@ -3620,6 +3620,13 @@
           "Input": "打开 docs/memory-eval-dataset.md",
           "acceptanceCriteria": "执行 node --test tests/memory-eval-dataset.test.js：断言文档存在并包含 信息抽取/多会话推理/时间推理/知识更新/拒答 五维度、GIVEN/WHEN/THEN 期望答案格式、ARGO 语义查询/queryNeo4jGraph 检索路径。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "b0a33a4",
+          "description": "docs/memory-eval-dataset.md; tests/memory-eval-dataset.test.js; design/KG/SystemArchitecture.json（ArchGraph 长期记忆评测题集 v1）"
+        }
       ]
     }
   ],
