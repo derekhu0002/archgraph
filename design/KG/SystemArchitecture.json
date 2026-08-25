@@ -3667,7 +3667,14 @@
       "name": "SessionRecord-MemEvalArticle",
       "parent": "2755",
       "type": "Business Object",
-      "description": "公众号发布员会话记录（2026-08-25，含重新建草稿）：发布长期记忆评测基线文章《说自己是世界级记忆系统，拿什么证明？》到微信公众号。2026-08-25 应人类伙伴要求用当前文章重新建草稿：wechat:draft 成功（status=draft_created），新 media_id=BRZAMZ3b-CaOBH8qdG2KTQph5BAIyA_QZ-zx8qME03F6lBGWZv8QhOtFZwgy5Pyi（旧 media_id=BRZAMZ3b-CaOBH8qdG2KTdde0xOY2U1OFdfOFu1IXYykeOfXnsdWtcaBNkG-2Zc- 废弃），draft/batchget 验证 errcode=0、target_found=true；本公众号为个人未认证订阅号，API 发布不可用（48001），需在公众号后台「草稿箱」手动发布（deliveryStatus=not_delivered）。完整首版记录见本元素原 description（commit 82dc099 + 135b29c 已登记）。\n\n【2026-08-25 全套删除】人类伙伴决定删除长期记忆评测文章全套：本地已删（docs/memory-eval-benchmark.wechat.md、封面 docs/diagrams/mem-eval-banner.png、生成脚本 scripts/generate-mem-eval-banner.py、图谱 WP memory-eval-article-wp-001、对应测试用例，commit dbe030f）。微信草稿同步删除：新 media_id=BRZAMZ3b-CaOBH8qdG2KTQph5BAIyA_QZ-zx8qME03F6lBGWZv8QhOtFZwgy5Pyi 与旧废弃 media_id=BRZAMZ3b-CaOBH8qdG2KTdde0xOY2U1OFdfOFu1IXYykeOfXnsdWtcaBNkG-2Zc- 均 draft/delete 成功（errcode=0、errmsg=ok），draft/batchget 复验草稿箱已无该文章（errcode=0），剩余 2 篇为其它历史草稿（多角色能力、AI 代码质量），未误删。本元素保留历史记录，仅标注删除。"
+      "description": "公众号发布员会话记录（2026-08-25，含重新建草稿）：发布长期记忆评测基线文章《说自己是世界级记忆系统，拿什么证明？》到微信公众号。2026-08-25 应人类伙伴要求用当前文章重新建草稿：wechat:draft 成功（status=draft_created），新 media_id=BRZAMZ3b-CaOBH8qdG2KTQph5BAIyA_QZ-zx8qME03F6lBGWZv8QhOtFZwgy5Pyi（旧 media_id=BRZAMZ3b-CaOBH8qdG2KTdde0xOY2U1OFdfOFu1IXYykeOfXnsdWtcaBNkG-2Zc- 废弃），draft/batchget 验证 errcode=0、target_found=true；本公众号为个人未认证订阅号，API 发布不可用（48001），需在公众号后台「草稿箱」手动发布（deliveryStatus=not_delivered）。完整首版记录见本元素原 description（commit 82dc099 + 135b29c 已登记）。\n\n【2026-08-25 全套删除】人类伙伴决定删除长期记忆评测文章全套：本地已删（docs/memory-eval-benchmark.wechat.md、封面 docs/diagrams/mem-eval-banner.png、生成脚本 scripts/generate-mem-eval-banner.py、图谱 WP memory-eval-article-wp-001、对应测试用例，commit dbe030f）。微信草稿同步删除：新 media_id=BRZAMZ3b-CaOBH8qdG2KTQph5BAIyA_QZ-zx8qME03F6lBGWZv8QhOtFZwgy5Pyi 与旧废弃 media_id=BRZAMZ3b-CaOBH8qdG2KTdde0xOY2U1OFdfOFu1IXYykeOfXnsdWtcaBNkG-2Zc- 均 draft/delete 成功（errcode=0、errmsg=ok），draft/batchget 复验草稿箱已无该文章（errcode=0），剩余 2 篇为其它历史草稿（多角色能力、AI 代码质量），未误删。本元素保留历史记录，仅标注删除。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "f5e478b",
+          "description": "design/KG/SystemArchitecture.json（2026-08-25 全套删除：LTM 会话记录标注文章与微信草稿已删）"
+        }
+      ]
     }
   ],
   "relationships": [
