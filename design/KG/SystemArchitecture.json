@@ -3696,6 +3696,11 @@
           "description": "docs/memory-eval-benchmark.wechat.md(banner_path); scripts/generate-mem-eval-banner.py; docs/diagrams/mem-eval-banner.png; tests/wechat-article.test.js(wechat-memory-eval-benchmark-banner); design/KG/SystemArchitecture.json(AT-02 + media_id/status 登记 + LTM 会话记录)"
         },
         {
+          "name": "commit",
+          "value": "ee2aa1c",
+          "description": "design/KG/SystemArchitecture.json（2026-08-25 重新建草稿 media_id 登记 + description + LTM 会话记录）"
+        },
+        {
           "name": "media_id",
           "value": "BRZAMZ3b-CaOBH8qdG2KTQph5BAIyA_QZ-zx8qME03F6lBGWZv8QhOtFZwgy5Pyi",
           "description": "WeChat draft media_id（2026-08-25 重新建草稿）"
