@@ -3605,6 +3605,22 @@
           "description": "design/KG/SystemArchitecture.json（项目总管 LTM 里程碑记录）"
         }
       ]
+    },
+    {
+      "id": "memory-eval-dataset-wp-001",
+      "name": "设计 ArchGraph 记忆评测题集",
+      "type": "Work Package",
+      "parent": "1249",
+      "description": "基于 LongMemEval 5 能力维度（信息抽取/多会话推理/时间推理/知识更新/拒答）裁剪适配 agent 元记忆场景，设计 ArchGraph 长期记忆评测题集 docs/memory-eval-dataset.md：每题含记忆场景(GIVEN)/问题(WHEN)/期望答案(ground truth, THEN)/检索提示，作为后续实测基线的输入。",
+      "testcases": [
+        {
+          "name": "AT-memory-eval-dataset-01-评测题集文档就绪",
+          "description": "GIVEN 需要为长期记忆系统设计可执行的评测题集；WHEN 读者打开 docs/memory-eval-dataset.md；THEN 文档包含 5 能力维度（信息抽取/多会话推理/时间推理/知识更新/拒答）、每题含 GIVEN 记忆场景/WHEN 问题/THEN 期望答案（ground truth）、并说明检索路径（ARGO 语义查询/queryNeo4jGraph）。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/memory-eval-dataset.md",
+          "acceptanceCriteria": "执行 node --test tests/memory-eval-dataset.test.js：断言文档存在并包含 信息抽取/多会话推理/时间推理/知识更新/拒答 五维度、GIVEN/WHEN/THEN 期望答案格式、ARGO 语义查询/queryNeo4jGraph 检索路径。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -5068,7 +5084,8 @@
       "parent_element_id": "1249",
       "description": "长期记忆系统评测基线相关工作：调研业界公认基准（LongMemEval/LOCOMO/BEAM）、确立指标口径、落地评测跑法。",
       "included_elements": [
-        "memory-eval-bench-wp-001"
+        "memory-eval-bench-wp-001",
+        "memory-eval-dataset-wp-001"
       ],
       "included_relationships": []
     }
