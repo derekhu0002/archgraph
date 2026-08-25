@@ -2962,6 +2962,11 @@
           "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-query.test.js; design/KG/SystemArchitecture.json"
         },
         {
+          "name": "commit",
+          "value": "bdf1016",
+          "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-query.test.js; tests/argo-rules-change-tier.test.js; tests/argo-rules-capability-delegation.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
           "name": "deliveryStatus",
           "value": "not_delivered"
         }
