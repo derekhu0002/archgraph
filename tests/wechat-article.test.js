@@ -243,37 +243,4 @@ test('wechat-innovations-ready: 8 innovations article with required frontmatter 
   assert.match(md, /创新/, 'article body should discuss innovations');
 });
 
-const MEM_EVAL = path.join(ROOT, 'docs', 'memory-eval-benchmark.wechat.md');
 
-test('wechat-memory-eval-benchmark-ready: memory evaluation baseline article with required frontmatter and content', () => {
-  // GIVEN the long-term memory evaluation baseline (benchmarks + dataset + harness + report) is complete
-  // WHEN the wechat-public-cli skill prepares to publish
-  // THEN a WeChat-ready markdown exists with title/author/digest frontmatter and evaluation baseline body
-  const md = readFileSync(MEM_EVAL, 'utf8');
-  const meta = parseFrontmatter(md);
-
-  assert.ok(meta.title, 'frontmatter should declare a title');
-  assert.ok(meta.author, 'frontmatter should declare an author');
-  assert.ok(meta.digest, 'frontmatter should declare a digest');
-  assert.match(md, /长期记忆/, 'article body should discuss long-term memory');
-  assert.match(md, /23 题/, 'article body should mention the 23-question dataset');
-  assert.match(md, /100%/, 'article body should report the measured 100% result');
-  assert.match(md, /LongMemEval/, 'article body should mention LongMemEval');
-});
-
-test('wechat-memory-eval-benchmark-banner: memory evaluation article has a dedicated themed banner', () => {
-  // GIVEN the memory evaluation article is about to be published
-  // WHEN the publisher prepares the title image
-  // THEN the article declares a dedicated themed banner (distinct from the generic core-model image) and the file exists
-  const md = readFileSync(MEM_EVAL, 'utf8');
-  const meta = parseFrontmatter(md);
-
-  assert.ok(meta.banner_path, 'frontmatter should declare a banner_path');
-  assert.notEqual(
-    meta.banner_path,
-    'diagrams/image.png',
-    'should use a dedicated themed banner, not the generic core-model image'
-  );
-  const bannerAbs = path.join(ROOT, 'docs', meta.banner_path);
-  assert.ok(existsSync(bannerAbs), `banner image should exist: ${bannerAbs}`);
-});

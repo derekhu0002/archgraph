@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T08:05:57.093Z",
+  "generatedAt": "2026-08-25T10:54:30.480Z",
   "totalQuestions": 23,
   "passed": 23,
   "failed": 0,
@@ -42,7 +42,7 @@
     "pass": 3,
     "total": 3
   },
-  "avgLatencyMs": 6.391304347826087,
+  "avgLatencyMs": 5,
   "results": [
     {
       "id": "MQ-01",
@@ -50,7 +50,7 @@
       "label": "谁是项目总管 Business Actor？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 10
+      "latencyMs": 6
     },
     {
       "id": "MQ-02",
@@ -58,7 +58,7 @@
       "label": "项目总管长期记忆子视图 id？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 7
     },
     {
       "id": "MQ-03",
@@ -66,7 +66,7 @@
       "label": "愿景三要素中「目标」是什么？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 4
+      "latencyMs": 5
     },
     {
       "id": "MQ-04",
@@ -74,7 +74,7 @@
       "label": "业界公认的三大记忆基准？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 3
     },
     {
       "id": "MQ-05",
@@ -82,7 +82,7 @@
       "label": "视频制作流程几个 Business Actor？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 5
     },
     {
       "id": "MQ-06",
@@ -90,7 +90,7 @@
       "label": "愿景固化在图内哪层记忆？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 4
     },
     {
       "id": "MQ-07",
@@ -98,7 +98,7 @@
       "label": "AgentOrganization 下有几类专项团队？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 4
     },
     {
       "id": "MQ-08",
@@ -106,7 +106,7 @@
       "label": "为什么说 ArchiMate 是手段？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 3
     },
     {
       "id": "MQ-09",
@@ -114,7 +114,7 @@
       "label": "长期记忆评测已登记元素有哪些？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 6
     },
     {
       "id": "MQ-10",
@@ -122,7 +122,7 @@
       "label": "人类角色与专项 Agent 角色各一例？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 12
+      "latencyMs": 9
     },
     {
       "id": "MQ-11",
@@ -130,7 +130,7 @@
       "label": "升格为总纲 vs 概念校正哪个先？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 4
     },
     {
       "id": "MQ-12",
@@ -138,7 +138,7 @@
       "label": "Actor 与愿景元素哪个先创建？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 11
+      "latencyMs": 10
     },
     {
       "id": "MQ-13",
@@ -146,7 +146,7 @@
       "label": "Terminal-Bench 与记忆评测哪个先完成？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 13
+      "latencyMs": 8
     },
     {
       "id": "MQ-14",
@@ -154,7 +154,7 @@
       "label": "图书馆类比在校正之前还是之后？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 5
     },
     {
       "id": "MQ-15",
@@ -162,7 +162,7 @@
       "label": "愿景描述演进 commit 顺序？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 5
+      "latencyMs": 4
     },
     {
       "id": "MQ-16",
@@ -170,7 +170,7 @@
       "label": "愿景最新表述的关键要素？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 4
+      "latencyMs": 3
     },
     {
       "id": "MQ-17",
@@ -186,7 +186,7 @@
       "label": "结构在愿景中的地位如何修正？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 5
+      "latencyMs": 6
     },
     {
       "id": "MQ-19",
@@ -194,7 +194,7 @@
       "label": "总纲是哪次 commit 加入？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 5
+      "latencyMs": 4
     },
     {
       "id": "MQ-20",
@@ -210,7 +210,7 @@
       "label": "图谱是否记录 XYZ 长期记忆系统？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 3
+      "latencyMs": 4
     },
     {
       "id": "MQ-22",
@@ -218,7 +218,7 @@
       "label": "主管 LTM 是否有 2026-07-01 细节？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 5
+      "latencyMs": 4
     },
     {
       "id": "MQ-23",
@@ -226,7 +226,7 @@
       "label": "愿景元素是否有无关配色信息？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 4
+      "latencyMs": 3
     }
   ]
 }

@@ -3663,60 +3663,6 @@
       ]
     },
     {
-      "id": "memory-eval-article-wp-001",
-      "name": "发布长期记忆评测文章到微信公众号",
-      "parent": "1249",
-      "type": "Work Package",
-      "description": "使用 wechat-public-cli 技能，撰写 ArchGraph 长期记忆系统评测基线（23 题、整体 100%、拒答 100%、平均单题检索毫秒级）的测试过程与实测结果文章 docs/memory-eval-benchmark.wechat.md，并创建微信公众号草稿、跟进后台手动发布。【2026-08-25 重新建草稿】应人类伙伴要求用当前文章重新创建草稿，media_id 已更新（原 media_id 废弃），status=draft_created，待后台手动发布。",
-      "testcases": [
-        {
-          "name": "AT-memory-eval-article-01-长期记忆评测文章就绪",
-          "description": "GIVEN 已完成长期记忆评测基线（docs/memory-eval-benchmarks.md + docs/memory-eval-dataset.md + scripts/memory-eval-run.js + results/memory-eval-report.json）；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号评测文章 Markdown docs/memory-eval-benchmark.wechat.md，正文介绍评测基线调研（LongMemEval/LOCOMO/BEAM）、5 能力 23 题题集、实测结果（整体 100%、拒答 100%、平均时延毫秒级）与下一步（LLM 评判/加压/立门槛）。",
-          "type": "Acceptance Test",
-          "Input": "打开 docs/memory-eval-benchmark.wechat.md",
-          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-memory-eval-benchmark-ready\"）：断言 docs/memory-eval-benchmark.wechat.md 存在，frontmatter 含 title/author/digest，正文含 长期记忆、23 题、100%、LongMemEval。通过。"
-        },
-        {
-          "name": "AT-memory-eval-article-02-长期记忆评测文章主题封面",
-          "description": "GIVEN 长期记忆评测文章即将发布；WHEN 发布员准备标题图；THEN 文章声明专用主题封面（banner_path 指向 diagrams/mem-eval-banner.png，非通用 image.png）且文件存在，封面体现「给长期记忆立评测尺子」主题（记忆层叠卡片 + 实测 23/23、100%）。",
-          "type": "Acceptance Test",
-          "Input": "打开 docs/memory-eval-benchmark.wechat.md 与 docs/diagrams/mem-eval-banner.png",
-          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-memory-eval-benchmark-banner\"）：断言 frontmatter 含 banner_path 且不等于 diagrams/image.png，banner 文件存在。通过。"
-        }
-      ],
-      "attributes": [
-        {
-          "name": "commit",
-          "value": "82dc099",
-          "description": "docs/memory-eval-benchmark.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "135b29c",
-          "description": "docs/memory-eval-benchmark.wechat.md(banner_path); scripts/generate-mem-eval-banner.py; docs/diagrams/mem-eval-banner.png; tests/wechat-article.test.js(wechat-memory-eval-benchmark-banner); design/KG/SystemArchitecture.json(AT-02 + media_id/status 登记 + LTM 会话记录)"
-        },
-        {
-          "name": "commit",
-          "value": "ee2aa1c",
-          "description": "design/KG/SystemArchitecture.json（2026-08-25 重新建草稿 media_id 登记 + description + LTM 会话记录）"
-        },
-        {
-          "name": "media_id",
-          "value": "BRZAMZ3b-CaOBH8qdG2KTQph5BAIyA_QZ-zx8qME03F6lBGWZv8QhOtFZwgy5Pyi",
-          "description": "WeChat draft media_id（2026-08-25 重新建草稿）"
-        },
-        {
-          "name": "status",
-          "value": "draft_created",
-          "description": "草稿已创建（wechat:draft 成功），待公众号后台「草稿箱」手动发布；API 发布不可用（个人未认证订阅号 48001）"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        }
-      ]
-    },
-    {
       "id": "wpp-mem-mem-eval-article-001",
       "name": "SessionRecord-MemEvalArticle",
       "parent": "2755",
@@ -4579,8 +4525,7 @@
         "2781",
         "2782",
         "2783",
-        "2784",
-        "memory-eval-article-wp-001"
+        "2784"
       ],
       "included_relationships": [
         "skill-insight-informs-2783"
@@ -5046,7 +4991,8 @@
       "description": "把 ArchGraph 发布为原生 DeepSeek Harness 插件（dsh.bundle）并打 dsh-plugin 标签的发布类工作包。",
       "included_elements": [
         "2767"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "435",
@@ -5080,7 +5026,8 @@
         "archgraph-workflow-rules",
         "ctg-decision-001",
         "cdg-decision-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "openclaw-adaptation",
@@ -5136,7 +5083,8 @@
         "media-artist-001-ltm-note",
         "media-artist-001-ltm-artifacts",
         "media-artist-001-ltm-skill-coev"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "video-team-001",
