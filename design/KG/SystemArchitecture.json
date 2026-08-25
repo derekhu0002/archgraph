@@ -3705,7 +3705,7 @@
       "name": "里程碑：查询规则升级（KG优先 + 语义检索优先）",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "里程碑（2026-08-25）：改进 ArchGraph 查询规则——①任何检索优先检索KG（任何检索先查询意图图谱，不默认搜文件系统/代码/网络）；②检索KG必须优先通过语义检索（getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径。落地：argo/rules/archgraph.instructions.md 新增 QueryPriorityGuideline 章节 + CoreRule 7 + ExplorationGuideline 第 0 条 + ToolsGuideline/GraphQueryGuideline 语义优先措辞；新增 tests/argo-rules-query.test.js（2 用例）；图谱元素 archgraph-workflow-rules 更新描述 + 新增 AT-archgraph-workflow-rules-05/06。相关测试 28/28 通过，validateSystemArchitecture 通过。commits e705807（工作）/8eaef12（commit 属性登记）。"
+      "description": "里程碑（2026-08-25）：改进 ArchGraph 查询规则——①任何检索优先检索KG（KG-first retrieval，任何检索先查询意图图谱，不默认搜文件系统/代码/网络）；②检索KG必须优先通过语义检索（Semantic-first KG retrieval，getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径。落地：argo/rules/archgraph.instructions.md 新增 QueryPriorityGuideline 章节 + CoreRule 7 + ExplorationGuideline 第 0 条 + ToolsGuideline/GraphQueryGuideline 语义优先措辞；新增 tests/argo-rules-query.test.js（2 用例）；图谱元素 archgraph-workflow-rules 更新描述 + 新增 AT-archgraph-workflow-rules-05/06。相关测试 28/28 通过，validateSystemArchitecture 通过。commits e705807（工作）/8eaef12（commit 属性登记）。随后按人类伙伴要求将 argo/rules/archgraph.instructions.md 全英文化（去除全部中文，规则名译为 KG-first retrieval / Semantic-first KG retrieval），同步更新 tests/argo-rules-query/change-tier/capability-delegation 断言为英文、图谱 archgraph-workflow-rules 描述与 AT-02/03/04/05/06 表述对齐；相关测试 28/28 通过、validateSystemArchitecture 通过，规则已部署到 %APPDATA%\\Code\\User\\prompts\\archgraph.instructions.md。commits bdf1016（工作）/e28e719（commit 属性登记）。"
     }
   ],
   "relationships": [
