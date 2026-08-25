@@ -2890,7 +2890,7 @@
       "name": "ArchGraph ARGO Workflow Rules",
       "parent": "1249",
       "type": "Rule",
-      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）：定位元素再改动、验收测试先行（可执行 GIVEN-WHEN-THEN）、仅通过 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径，并通过只读 queryNeo4jGraph 进行结构化图查询；查询优先级规则（QueryPriorityGuideline）：KG-first retrieval（任何检索优先检索KG）、Semantic-first KG retrieval（检索KG必须优先通过语义检索）（getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径；能力委托门禁（CapabilityDelegationGuideline）：Agent 收到需查看图片/视频的任务且自身不具备识别能力时，不得猜测或静默跳过，须主动委托具备能力的 Business Actor。",
+      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）：定位元素再改动、验收测试先行（可执行 GIVEN-WHEN-THEN）、仅通过 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径，并通过只读 queryNeo4jGraph 进行结构化图查询；查询优先级规则（QueryPriorityGuideline）：KG-first retrieval（任何检索优先检索KG）、Semantic-first KG retrieval（检索KG必须优先通过语义检索）（getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径，子图语义检索 scope（getSystemArchitecture 的 scope 参数：view_id 或 element_id+depth，用于限定语义检索范围避免返回过多内容）；能力委托门禁（CapabilityDelegationGuideline）：Agent 收到需查看图片/视频的任务且自身不具备识别能力时，不得猜测或静默跳过，须主动委托具备能力的 Business Actor。",
       "testcases": [
         {
           "name": "AT-archgraph-workflow-rules-01-规则文档登记图查询接口",
@@ -2933,6 +2933,13 @@
           "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 检索 KG；THEN 规则登记「Semantic-first KG retrieval（检索KG必须优先通过语义检索）」：优先经 getSystemArchitecture（query.purpose + query.intent）与 getIntentElementContext/getArchitectureViewContext 进行语义/上下文检索；queryNeo4jGraph（只读 Cypher）为结构类查询的次要路径。",
           "Input": "node --test tests/argo-rules-query.test.js",
           "acceptanceCriteria": "执行 node --test tests/argo-rules-query.test.js（用例 archgraph-rules-document-query-semantic-first）：断言规则文档含 Semantic-first KG retrieval、getSystemArchitecture、query.purpose、query.intent、getIntentElementContext，且 queryNeo4jGraph 被标记为 SECONDARY 次要路径、ToolsGuideline 要求 MUST 提供 query.purpose + query.intent。通过。"
+        },
+        {
+          "name": "AT-archgraph-workflow-rules-07-规则文档登记子图语义检索scope",
+          "type": "Acceptance Test",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 需要限定语义检索范围；THEN QueryPriorityGuideline 登记「Bound the scope」规则：语义查询可能返回过多内容或只需局部区域时，用 getSystemArchitecture 的 scope（view_id 或 element_id+depth）限定子图，再对返回 id 用 getIntentElementContext 深入。",
+          "Input": "node --test tests/argo-rules-query.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-rules-query.test.js（用例 archgraph-rules-document-query-scope）：断言 argo/rules/archgraph.instructions.md 的 QueryPriorityGuideline 包含 scope、view_id、element_id、too much content 等表述。通过。"
         }
       ],
       "attributes": [
@@ -3750,6 +3757,22 @@
       "type": "Business Object",
       "parent": "project-overseer-001",
       "description": "里程碑（2026-08-26 人类伙伴确立）：文档内容存储策略——除必须放在仓库中的内容或无法放入 KG 的内容（如视频/二进制）外，其余所有文档内容一律写入 KG（KG-first document storage）；必须留在仓库的内容（视频/二进制/可执行）也需 SUMMARY 后登记入 KG（元素摘要 + 仓库路径/commit 属性）；KG 为文档内容的事实源。落地：argo/rules/archgraph.instructions.md 新增 <ContentStoragePolicy> 章节 + CoreRule 8（全英文）；新增 tests/argo-rules-content-storage.test.js（2 用例）；图谱新增 Principle archgraph-content-storage-policy-001（+ AT-archgraph-content-storage-policy-01）与决策记录 cs-policy-decision-001（挂于 argo-workflow-rules-view）。相关测试 30/30 通过、validateSystemArchitecture 通过，规则已部署到 %APPDATA%\\Code\\User\\prompts\\archgraph.instructions.md。commits 91d7c07（工作）/bbee873（commit 属性登记）。后续：迁移既有 docs/*.md 文档内容入 KG。"
+    },
+    {
+      "id": "subgraph-semantic-retrieval-001",
+      "name": "子图语义检索（getSystemArchitecture scope）",
+      "type": "Application Service",
+      "parent": "1249",
+      "description": "子图语义检索能力（2026-08-26）：getSystemArchitecture 新增 scope 参数（view_id 或 element_id+depth），把语义检索限定在子图（视图成员或元素子树）内：scope 解析为 canonical 身份集合 → 作为 canonicalIdentities 喂给语义检索边界（实时向量查询按身份过滤）→ 返回内容再按 scope 裁剪，避免全图语义检索范围过大返回过多内容。落地：argo/scripts/systemarchitecture-mcp-server.js（resolveSemanticScope/applySemanticScopeFilter + 工具 schema）、argo/scripts/graph-rag/defaultSemanticRetrieval.js（VECTOR_QUERY_CYPHER_SCOPED + exhaustChannel 过滤）、argo/scripts/argo-mcp-server.js（schema）。",
+      "testcases": [
+        {
+          "name": "AT-subgraph-semantic-retrieval-01-子图语义检索scope能力",
+          "type": "Acceptance Test",
+          "description": "GIVEN ARGO MCP getSystemArchitecture 工具存在；WHEN Agent 需要限定语义检索范围；THEN 工具 schema 登记 scope 参数（view_id/element_id/depth），resolveSemanticScope 能把视图/元素子树解析为身份集合，applySemanticScopeFilter 能把返回的 canonical 文档或 business summary 裁剪到子图，未知视图/元素返回 SCOPE_VIEW_NOT_FOUND / SCOPE_ELEMENT_NOT_FOUND。",
+          "Input": "node --test tests/argo-semantic-scope.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-semantic-scope.test.js（6 用例）：断言 getSystemArchitecture 工具 schema 含 scope；resolveSemanticScope 视图/元素作用域返回正确身份集合且排除外部对象；未知视图/元素返回 SCOPE_* 失败类别；applySemanticScopeFilter 对 canonical 文档与 business summary 均裁剪到作用域。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -4628,7 +4651,8 @@
         "2763",
         "2764",
         "2765",
-        "2766"
+        "2766",
+        "subgraph-semantic-retrieval-001"
       ],
       "included_relationships": [
         "1980",

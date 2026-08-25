@@ -48,3 +48,15 @@ test('archgraph-rules-document-query-semantic-first', () => {
   assert.ok(tools, 'ToolsGuideline section must exist');
   assert.match(tools[1], /MUST supply query\.purpose \+ query\.intent/);
 });
+
+test('archgraph-rules-document-query-scope', () => {
+  // GIVEN the global ARGO workflow rules file
+  const rules = readRules();
+  const section = rules.match(/<QueryPriorityGuideline>([\s\S]*?)<\/QueryPriorityGuideline>/);
+  assert.ok(section, 'QueryPriorityGuideline section must exist');
+  // THEN it documents subgraph scoping for over-broad semantic retrieval
+  assert.match(section[1], /scope/);
+  assert.match(section[1], /view_id/);
+  assert.match(section[1], /element_id/);
+  assert.match(section[1], /too much content/);
+});

@@ -68,6 +68,13 @@ const VECTOR_QUERY_CYPHER = [
   'RETURN properties(node) AS record, score',
   'ORDER BY score DESC',
 ].join('\n');
+const VECTOR_QUERY_CYPHER_SCOPED = [
+  'CALL db.index.vector.queryNodes($indexName, $topK, $vector)',
+  'YIELD node, score',
+  'WHERE node.channel = $channel AND node.canonicalIdentity IN $canonicalIdentities',
+  'RETURN properties(node) AS record, score',
+  'ORDER BY score DESC',
+].join('\n');
 const READINESS_QUERY_CYPHER = [
   'MATCH (readiness:ArgoProductionSemanticReadiness {identity: $identity})',
   'RETURN properties(readiness) AS readiness',
@@ -159,6 +166,7 @@ async function executeWpP2Retrieval({
   readiness,
   configurationEvidence,
 }) {
+  const { canonicalIdentities, ...completeRequest } = request;
   const provider = createLiveEmbeddingProviderClient({
     configuration: configurationEvidence.configuration,
     transport: composition.transport,
@@ -171,10 +179,13 @@ async function executeWpP2Retrieval({
       channel,
       neo4jDriver: composition.neo4jDriver,
       vector,
+      ...(Array.isArray(canonicalIdentities) && canonicalIdentities.length > 0
+        ? { canonicalIdentities }
+        : {}),
     });
   }
   return completeSemanticResult({
-    request,
+    request: completeRequest,
     canonicalGraph,
     readiness,
     seedsByType,
@@ -609,7 +620,8 @@ function publicReadinessOutcome(alignment) {
   };
 }
 
-async function exhaustChannel({ channel, neo4jDriver, vector }) {
+async function exhaustChannel({ channel, neo4jDriver, vector, canonicalIdentities }) {
+  const scoped = Array.isArray(canonicalIdentities) && canonicalIdentities.length > 0;
   const accepted = [];
   const seen = new Set();
   let offset = 0;
@@ -621,12 +633,13 @@ async function exhaustChannel({ channel, neo4jDriver, vector }) {
       windowSize: INITIAL_WINDOW_SIZE,
       topK: offset + INITIAL_WINDOW_SIZE,
       vector,
+      ...(scoped ? { canonicalIdentities } : {}),
     });
     const result = await neo4jDriver.execute(Object.freeze({
       kind: 'semantic-vector-window-query',
       channel: channel.channel,
       indexName: channel.indexName,
-      cypher: VECTOR_QUERY_CYPHER,
+      cypher: scoped ? VECTOR_QUERY_CYPHER_SCOPED : VECTOR_QUERY_CYPHER,
       parameters,
     }));
     const records = Array.isArray(result && result.records) ? result.records : [];

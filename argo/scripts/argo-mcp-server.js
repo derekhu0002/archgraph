@@ -157,6 +157,16 @@ const TOOLS = [
             },
             intent: { type: 'string', description: 'Natural-language intent for semantic retrieval, for example "summarize business features for high-risk audit".' },
             subject: { type: 'string', description: 'Required for audit; optional anchor/focus id for other semantic purposes.' },
+            scope: {
+              type: 'object',
+              description: 'Optional subgraph scope to bound semantic retrieval and limit the returned content to a local region. Provide view_id to search within one view membership, or element_id (+ depth) to search within an element subtree.',
+              properties: {
+                view_id: { type: 'string', description: 'Restrict retrieval to the members of this view.' },
+                element_id: { type: 'string', description: 'Restrict retrieval to this element and its mounted sub-view subtree.' },
+                depth: { type: 'number', description: 'Default: 2. Subtree depth for element scope.' },
+              },
+              additionalProperties: false,
+            },
           },
           additionalProperties: true,
         },

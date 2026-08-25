@@ -204,6 +204,16 @@ const TOOLS = [
             },
             intent: { type: 'string', description: 'Natural-language intent for semantic retrieval, for example "summarize business features for high-risk audit".' },
             subject: { type: 'string', description: 'Required for audit; optional anchor/focus id for other semantic purposes.' },
+            scope: {
+              type: 'object',
+              description: 'Optional subgraph scope to bound semantic retrieval and limit the returned content to a local region. Provide view_id to search within one view membership, or element_id (+ depth) to search within an element subtree.',
+              properties: {
+                view_id: { type: 'string', description: 'Restrict retrieval to the members of this view.' },
+                element_id: { type: 'string', description: 'Restrict retrieval to this element and its mounted sub-view subtree.' },
+                depth: { type: 'number', description: 'Default: 2. Subtree depth for element scope.' },
+              },
+              additionalProperties: false,
+            },
           },
           additionalProperties: true,
         },
@@ -2291,6 +2301,16 @@ async function executeSemanticSystemArchitectureQuery(args, dependencies) {
       : {}),
   });
   const query = args.query;
+  const scopeResolution = resolveSemanticScope(context.document, query && query.scope);
+  if (scopeResolution.status === 'failed') {
+    return getSystemArchitectureResult(queryError(
+      scopeResolution.error.category,
+      scopeResolution.error.message,
+    ));
+  }
+  const queryForRetrieval = Array.isArray(scopeResolution.identities) && scopeResolution.identities.length > 0
+    ? { ...(query || {}), canonicalIdentities: scopeResolution.identities }
+    : query;
   const contractOptions = semanticContractOptions(args, dependencies);
   const canonicalSubsetContract = isCanonicalSubsetSemanticContract(query, contractOptions);
   if (canonicalSubsetContract) {
@@ -2310,7 +2330,7 @@ async function executeSemanticSystemArchitectureQuery(args, dependencies) {
   }
   let document;
   try {
-    const retrieved = await semanticRetrievalBoundary.retrieve(query);
+    const retrieved = await semanticRetrievalBoundary.retrieve(queryForRetrieval);
     if (canonicalSubsetContract) {
       const subset = buildCanonicalSemanticDocumentSubset(retrieved, context.document);
       if (subset.status === 'failed') {
@@ -2352,6 +2372,14 @@ async function executeSemanticSystemArchitectureQuery(args, dependencies) {
       semanticErrorEvidence,
     ));
   }
+  if (
+    Array.isArray(scopeResolution.identities)
+    && scopeResolution.identities.length > 0
+    && document
+    && typeof document === 'object'
+  ) {
+    document = applySemanticScopeFilter(document, scopeResolution.identities);
+  }
   const semanticPayload = {
     status: 'passed',
     graphPath: context.graphPath.relativePath,
@@ -2379,6 +2407,109 @@ function shouldReturnDebugSemanticResult(query) {
   return ['debug', 'full', 'evidence'].includes(String(
     query && (query.responseProfile || query.detail || query.outputMode) || '',
   ).toLowerCase());
+}
+
+function resolveSemanticScope(document, scope) {
+  if (!scope || typeof scope !== 'object') {
+    return { identities: undefined };
+  }
+  const elements = new Set();
+  const relationships = new Set();
+  const views = new Set();
+
+  if (typeof scope.view_id === 'string' && scope.view_id) {
+    const view = (document.views || []).find(item => item && item.view_id === scope.view_id);
+    if (!view) {
+      return {
+        status: 'failed',
+        error: {
+          category: 'SCOPE_VIEW_NOT_FOUND',
+          message: `Scope view '${scope.view_id}' does not exist in the canonical graph`,
+        },
+      };
+    }
+    (view.included_elements || []).forEach(id => elements.add(String(id)));
+    (view.included_relationships || []).forEach(id => relationships.add(String(id)));
+    views.add(String(scope.view_id));
+    return { identities: scopeIdentitiesOf(elements, relationships, views) };
+  }
+
+  if (typeof scope.element_id === 'string' && scope.element_id) {
+    const root = (document.elements || []).find(item => item && item.id === scope.element_id);
+    if (!root) {
+      return {
+        status: 'failed',
+        error: {
+          category: 'SCOPE_ELEMENT_NOT_FOUND',
+          message: `Scope element '${scope.element_id}' does not exist in the canonical graph`,
+        },
+      };
+    }
+    const depth = Number.isInteger(scope.depth) && scope.depth > 0 ? scope.depth : 2;
+    elements.add(String(scope.element_id));
+    const queue = [{ elementId: scope.element_id, level: 0 }];
+    const visited = new Set();
+    while (queue.length > 0) {
+      const { elementId, level } = queue.shift();
+      if (visited.has(elementId)) continue;
+      visited.add(elementId);
+      const element = (document.elements || []).find(item => item && item.id === elementId);
+      const subViews = Array.isArray(element && element.subdiagram_views)
+        ? element.subdiagram_views
+        : [];
+      for (const subView of subViews) {
+        const view = (document.views || []).find(item => item && item.view_id === subView.view_id);
+        if (!view) continue;
+        views.add(String(view.view_id));
+        (view.included_relationships || []).forEach(id => relationships.add(String(id)));
+        for (const childId of (view.included_elements || [])) {
+          elements.add(String(childId));
+          if (level < depth - 1) {
+            queue.push({ elementId: childId, level: level + 1 });
+          }
+        }
+      }
+    }
+    return { identities: scopeIdentitiesOf(elements, relationships, views) };
+  }
+
+  return { identities: undefined };
+}
+
+function scopeIdentitiesOf(elements, relationships, views) {
+  return [...elements, ...relationships, ...views];
+}
+
+function applySemanticScopeFilter(document, identities) {
+  if (!document || typeof document !== 'object' || !Array.isArray(identities)) {
+    return document;
+  }
+  const allowed = new Set(identities.map(id => String(id)));
+  if (
+    Array.isArray(document.elements)
+    || Array.isArray(document.relationships)
+    || Array.isArray(document.views)
+  ) {
+    return Object.freeze({
+      ...document,
+      elements: Object.freeze((document.elements || []).filter(item => item && allowed.has(String(item.id)))),
+      relationships: Object.freeze((document.relationships || []).filter(item => item && allowed.has(String(item.id)))),
+      views: Object.freeze((document.views || []).filter(item => item && allowed.has(String(item.view_id)))),
+    });
+  }
+  if (document.businessObjects) {
+    return Object.freeze({
+      ...document,
+      businessObjects: Object.freeze({
+        elements: Object.freeze((document.businessObjects.elements || []).filter(item => item && allowed.has(String(item.id)))),
+        relationships: Object.freeze((document.businessObjects.relationships || []).filter(item => item && allowed.has(String(item.id)))),
+        views: Object.freeze((document.businessObjects.views || []).filter(item => item && allowed.has(String(item.view_id)))),
+      }),
+      semanticSeeds: Object.freeze((document.semanticSeeds || []).filter(seed => seed && allowed.has(String(seed.objectId)))),
+      hitReasons: Object.freeze((document.hitReasons || []).filter(reason => reason && allowed.has(String(reason.objectId)))),
+    });
+  }
+  return document;
 }
 
 function buildBusinessSemanticSummary(retrieved, query = {}) {
@@ -3348,8 +3479,10 @@ module.exports = {
   compactMutationResponse,
   createDefaultCanonicalSemanticInitComposition,
   createDefaultProductionSemanticOperatorJourney,
+  applySemanticScopeFilter,
   handleRequest,
   loadContext,
   main,
+  resolveSemanticScope,
   validateDocument,
 };
