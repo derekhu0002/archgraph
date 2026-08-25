@@ -3648,6 +3648,13 @@
           "Input": "运行 node scripts/memory-eval-run.js",
           "acceptanceCriteria": "执行 node --test tests/memory-eval-run.test.js：断言 harness 退出码 0、23 题全部评估、报告含 5 维度准确率/整体/拒答/平均时延、且基础事实题（如 MQ-01 项目总管）通过。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "3bb8375",
+          "description": "scripts/memory-eval-run.js; tests/memory-eval-run.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测 harness 与实测基线 23/23 100%）"
+        }
       ]
     }
   ],
