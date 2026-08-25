@@ -3694,6 +3694,13 @@
           "description": "design/KG/SystemArchitecture.json（2026-08-25 全套删除：LTM 会话记录标注文章与微信草稿已删）"
         }
       ]
+    },
+    {
+      "id": "overseer-query-rules-001",
+      "name": "里程碑：查询规则升级（KG优先 + 语义检索优先）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-08-25）：改进 ArchGraph 查询规则——①任何检索优先检索KG（任何检索先查询意图图谱，不默认搜文件系统/代码/网络）；②检索KG必须优先通过语义检索（getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径。落地：argo/rules/archgraph.instructions.md 新增 QueryPriorityGuideline 章节 + CoreRule 7 + ExplorationGuideline 第 0 条 + ToolsGuideline/GraphQueryGuideline 语义优先措辞；新增 tests/argo-rules-query.test.js（2 用例）；图谱元素 archgraph-workflow-rules 更新描述 + 新增 AT-archgraph-workflow-rules-05/06。相关测试 28/28 通过，validateSystemArchitecture 通过。commits e705807（工作）/8eaef12（commit 属性登记）。"
     }
   ],
   "relationships": [
@@ -5151,7 +5158,8 @@
       "included_elements": [
         "overseer-vision-001",
         "overseer-archimate-role-001",
-        "overseer-mem-eval-001"
+        "overseer-mem-eval-001",
+        "overseer-query-rules-001"
       ],
       "included_relationships": []
     },
