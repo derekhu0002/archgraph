@@ -3597,12 +3597,17 @@
       "name": "里程碑：长期记忆评测基线调研",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "里程碑（2026-08-25）：确立业界公认的长期记忆评测基线——LongMemEval(ICLR2025)/LOCOMO/BEAM + Ingest→Search→Evaluate 流水线 + 核心指标（准确率/记忆召回/top-k/token 成本/时延）+ RAG 底层指标（Precision/Recall/MRR/Hit Rate@K）。结论文档 docs/memory-eval-benchmarks.md；图谱新增视图 memory-eval-view-001「长期记忆评测」+ WP memory-eval-bench-wp-001 + AT-memory-eval-bench-01；同步修正 AT-1357-04（12→14 子视图，含既有 tb-eval-view-001）。commits 49b2366（内容）/481daef（登记）。",
+      "description": "里程碑（2026-08-25）：确立业界公认的长期记忆评测基线——LongMemEval(ICLR2025)/LOCOMO/BEAM + Ingest→Search→Evaluate 流水线 + 核心指标（准确率/记忆召回/top-k/token 成本/时延）+ RAG 底层指标（Precision/Recall/MRR/Hit Rate@K）。结论文档 docs/memory-eval-benchmarks.md；图谱新增视图 memory-eval-view-001「长期记忆评测」+ WP memory-eval-bench-wp-001 + AT-memory-eval-bench-01；同步修正 AT-1357-04（12→14 子视图，含既有 tb-eval-view-001）。随后完成评测题集 v1（docs/memory-eval-dataset.md）：LongMemEval 5 能力维度×23 题（信息抽取/多会话推理/时间推理/知识更新/拒答），每题 GIVEN/WHEN/THEN 期望答案/检索提示，落地真实意图图可回放；WP memory-eval-dataset-wp-001 + AT-memory-eval-dataset-01。commits 49b2366/481daef/858db35/ae3f3ae/b0a33a4/5554119。",
       "attributes": [
         {
           "name": "commit",
           "value": "858db35",
           "description": "design/KG/SystemArchitecture.json（项目总管 LTM 里程碑记录）"
+        },
+        {
+          "name": "commit",
+          "value": "5554119",
+          "description": "design/KG/SystemArchitecture.json（评测题集 v1 里程碑补充）"
         }
       ]
     },
