@@ -2890,35 +2890,49 @@
       "name": "ArchGraph ARGO Workflow Rules",
       "parent": "1249",
       "type": "Rule",
-      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md）：定位元素再改动、验收测试先行（可执行 GIVEN-WHEN-THEN）、仅通过 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径，并通过只读 queryNeo4jGraph 进行结构化图查询；能力委托门禁（CapabilityDelegationGuideline）：Agent 收到需查看图片/视频的任务且自身不具备识别能力时，不得猜测或静默跳过，须主动委托具备能力的 Business Actor。",
+      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md）：定位元素再改动、验收测试先行（可执行 GIVEN-WHEN-THEN）、仅通过 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径，并通过只读 queryNeo4jGraph 进行结构化图查询；查询优先级规则（QueryPriorityGuideline）：任何检索优先检索KG、检索KG必须优先通过语义检索（getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径；能力委托门禁（CapabilityDelegationGuideline）：Agent 收到需查看图片/视频的任务且自身不具备识别能力时，不得猜测或静默跳过，须主动委托具备能力的 Business Actor。",
       "testcases": [
         {
           "name": "AT-archgraph-workflow-rules-01-规则文档登记图查询接口",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 阅读该规则；THEN ToolsGuideline 登记了 queryNeo4jGraph 工具，且存在 GraphQueryGuideline 章节指导 Agent 用 {schema: true} 获取投影 schema、用 $graphKey 占位符构造只读 Cypher 进行结构化图查询，并禁止写子句。",
           "type": "Acceptance Test",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 阅读该规则；THEN ToolsGuideline 登记了 queryNeo4jGraph 工具，且存在 GraphQueryGuideline 章节指导 Agent 用 {schema: true} 获取投影 schema、用 $graphKey 占位符构造只读 Cypher 进行结构化图查询，并禁止写子句。",
           "Input": "node --test tests/neo4j-cypher-query.test.js",
           "acceptanceCriteria": "执行 node --test tests/neo4j-cypher-query.test.js（用例 archgraph-rules-document-queryNeo4jGraph）：断言 argo/rules/archgraph.instructions.md 包含 queryNeo4jGraph、GraphQueryGuideline 与 $graphKey，并包含只读拒绝的写子句关键字 CREATE/MERGE/DELETE。通过。"
         },
         {
           "name": "AT-archgraph-workflow-rules-02-规则文档登记分级改动门禁",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 阅读该规则并准备改动；THEN 规则包含 ChangeTierGate 章节，定义 Tier 1（行为无关）/Tier 2（行为变化）/Tier 3（结构性/新增）三档，Tier 1 允许跳过验收回归与全量校验，且 CoreRule 4 引用分级门禁。",
           "type": "Acceptance Test",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 阅读该规则并准备改动；THEN 规则包含 ChangeTierGate 章节，定义 Tier 1（行为无关）/Tier 2（行为变化）/Tier 3（结构性/新增）三档，Tier 1 允许跳过验收回归与全量校验，且 CoreRule 4 引用分级门禁。",
           "Input": "node --test tests/argo-rules-change-tier.test.js",
           "acceptanceCriteria": "执行 node --test tests/argo-rules-change-tier.test.js（用例 archgraph-rules-document-change-tier-gate）：断言 argo/rules/archgraph.instructions.md 包含 ChangeTierGate、Tier 1/Tier 2/Tier 3、行为无关与跳过验收回归的表述，并断言 CoreRule 4 引用分级门禁。通过。"
         },
         {
           "name": "AT-archgraph-workflow-rules-03-分级门禁安全网",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 申报 Tier 1 改动；THEN 规则要求 git diff 校验（越界自动升为 Tier 2）、KG 触线保留完整校验、零歧义默认升档（fail-safe）。",
           "type": "Acceptance Test",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 申报 Tier 1 改动；THEN 规则要求 git diff 校验（越界自动升为 Tier 2）、KG 触线保留完整校验、零歧义默认升档（fail-safe）。",
           "Input": "node --test tests/argo-rules-change-tier.test.js",
           "acceptanceCriteria": "执行 node --test tests/argo-rules-change-tier.test.js（用例 archgraph-rules-document-change-tier-safety-net）：断言规则文档包含 git diff 越界升档、KG 触线保留校验、零歧义默认升档（fail-safe）等安全网要求。通过。"
         },
         {
           "name": "AT-archgraph-workflow-rules-04-规则文档登记能力委托门禁",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 收到需要查看图片/视频的任务而自身不具备识别能力；THEN 规则包含 CapabilityDelegationGuideline 章节，要求 Agent 不得猜测/虚构/静默跳过内容，须主动识别意图图谱中具备该能力的 Business Actor 并委托其处理，委托遵循 CoperationGuideline。",
           "type": "Acceptance Test",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 收到需要查看图片/视频的任务而自身不具备识别能力；THEN 规则包含 CapabilityDelegationGuideline 章节，要求 Agent 不得猜测/虚构/静默跳过内容，须主动识别意图图谱中具备该能力的 Business Actor 并委托其处理，委托遵循 CoperationGuideline。",
           "Input": "node --test tests/argo-rules-capability-delegation.test.js",
           "acceptanceCriteria": "执行 node --test tests/argo-rules-capability-delegation.test.js（用例 archgraph-rules-document-capability-delegation）：断言 argo/rules/archgraph.instructions.md 包含 CapabilityDelegationGuideline 章节，且章节覆盖图片/视频任务、不具备识别能力、不得、Business Actor、委托与 CoperationGuideline 等表述。通过。"
+        },
+        {
+          "name": "AT-archgraph-workflow-rules-05-规则文档登记查询优先级KG优先",
+          "type": "Acceptance Test",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 进行任何检索；THEN 规则包含 QueryPriorityGuideline 章节并登记「任何检索优先检索KG」：任何检索（架构上下文、历史决策、文件、代码、知识）必须先查询意图图谱（经 ARGO MCP），不得在查询图谱前默认去搜文件系统/代码/网络；且 CoreRule 7 将其列为红线、ExplorationGuideline 亦含该规则。",
+          "Input": "node --test tests/argo-rules-query.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-rules-query.test.js（用例 archgraph-rules-document-query-priority-kg-first）：断言 argo/rules/archgraph.instructions.md 包含 QueryPriorityGuideline 章节与任何检索优先检索KG，且 CoreRules 引用 QueryPriorityGuideline、ExplorationGuideline 亦含该规则。通过。"
+        },
+        {
+          "name": "AT-archgraph-workflow-rules-06-规则文档登记语义检索优先",
+          "type": "Acceptance Test",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 检索 KG；THEN 规则登记「检索KG必须优先通过语义检索」：优先经 getSystemArchitecture（query.purpose + query.intent）与 getIntentElementContext/getArchitectureViewContext 进行语义/上下文检索；queryNeo4jGraph（只读 Cypher）为结构类查询的次要路径。",
+          "Input": "node --test tests/argo-rules-query.test.js",
+          "acceptanceCriteria": "执行 node --test tests/argo-rules-query.test.js（用例 archgraph-rules-document-query-semantic-first）：断言规则文档含检索KG必须优先通过语义检索、getSystemArchitecture、query.purpose、query.intent、getIntentElementContext，且 queryNeo4jGraph 被标记为 SECONDARY 次要路径、ToolsGuideline 要求 MUST 提供 query.purpose + query.intent。通过。"
         }
       ],
       "attributes": [
