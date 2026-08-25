@@ -3633,6 +3633,22 @@
           "description": "docs/memory-eval-dataset.md; tests/memory-eval-dataset.test.js; design/KG/SystemArchitecture.json（ArchGraph 长期记忆评测题集 v1）"
         }
       ]
+    },
+    {
+      "id": "memory-eval-run-wp-001",
+      "name": "实现记忆评测 harness 并跑实测基线",
+      "type": "Work Package",
+      "parent": "1249",
+      "description": "实现可执行评测 harness scripts/memory-eval-run.js：按 docs/memory-eval-dataset.md 的 23 题逐题通过 ARGO MCP 读路径（getArchitectureViewContext/getIntentElementContext/getSystemArchitecture，零 Neo4j 运行时依赖）检索记忆并对照 ground truth 判定，输出各维度/整体准确率、拒答准确率与时延实测基线；配套可执行测试 tests/memory-eval-run.test.js 与验收用例。",
+      "testcases": [
+        {
+          "name": "AT-memory-eval-run-01-评测harness可运行并产出基线",
+          "description": "GIVEN 已具备 23 题评测题集与 ARGO MCP 读路径；WHEN 运行 scripts/memory-eval-run.js；THEN 逐题执行检索并判定 PASS/FAIL，产出按 5 维度/整体/拒答的准确率与平均时延，写入 results/memory-eval-report.json，且 23 题全部有评估结果（无 TOOL_ERROR 空判）。",
+          "type": "Acceptance Test",
+          "Input": "运行 node scripts/memory-eval-run.js",
+          "acceptanceCriteria": "执行 node --test tests/memory-eval-run.test.js：断言 harness 退出码 0、23 题全部评估、报告含 5 维度准确率/整体/拒答/平均时延、且基础事实题（如 MQ-01 项目总管）通过。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -5097,7 +5113,8 @@
       "description": "长期记忆系统评测基线相关工作：调研业界公认基准（LongMemEval/LOCOMO/BEAM）、确立指标口径、落地评测跑法。",
       "included_elements": [
         "memory-eval-bench-wp-001",
-        "memory-eval-dataset-wp-001"
+        "memory-eval-dataset-wp-001",
+        "memory-eval-run-wp-001"
       ],
       "included_relationships": []
     }
