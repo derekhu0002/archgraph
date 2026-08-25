@@ -3721,6 +3721,13 @@
           "Input": "node --test tests/argo-rules-content-storage.test.js",
           "acceptanceCriteria": "执行 node --test tests/argo-rules-content-storage.test.js（用例 archgraph-rules-document-content-storage-policy / -core-rule）：断言 argo/rules/archgraph.instructions.md 包含 ContentStoragePolicy 章节与 KG-first document storage、ALL document content MUST、videos/repository/summar/source of truth 等表述，且 CoreRules 引用 ContentStoragePolicy 与 KG-first。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "91d7c07",
+          "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-content-storage.test.js; design/KG/SystemArchitecture.json"
+        }
       ]
     },
     {
@@ -3728,7 +3735,14 @@
       "name": "内容存储策略决策记录",
       "type": "Requirement",
       "parent": "1249",
-      "description": "决策(2026-08-26, 人类伙伴确立)：文档内容存储策略——除必须放仓库的内容或无法放入 KG 的内容（如视频/二进制）外，其余所有文档内容一律写入 KG（KG-first document storage）；必须留仓库的内容（视频/二进制/可执行）也需 SUMMARY 后登记入 KG（元素摘要 + 仓库路径/commit 属性）。理由：① 人类伙伴明确提出，落实「为 AGENT 提供长期记忆系统」愿景（目标=读写的极致，KG 为长期记忆载体）；② 文档入 KG 便于语义检索与跨会话复用，避免文档散落仓库难检索；③ 视频/二进制无法入 KG，须留仓库但以摘要登记保证可发现。被否方案：① 文档全部保留仓库仅登记索引（弱化 KG 事实源）；② 视频等也强行入 KG（不可行，需外部载体）。验收用例 AT-archgraph-content-storage-policy-01 挂在 archgraph-content-storage-policy-001 上。"
+      "description": "决策(2026-08-26, 人类伙伴确立)：文档内容存储策略——除必须放仓库的内容或无法放入 KG 的内容（如视频/二进制）外，其余所有文档内容一律写入 KG（KG-first document storage）；必须留仓库的内容（视频/二进制/可执行）也需 SUMMARY 后登记入 KG（元素摘要 + 仓库路径/commit 属性）。理由：① 人类伙伴明确提出，落实「为 AGENT 提供长期记忆系统」愿景（目标=读写的极致，KG 为长期记忆载体）；② 文档入 KG 便于语义检索与跨会话复用，避免文档散落仓库难检索；③ 视频/二进制无法入 KG，须留仓库但以摘要登记保证可发现。被否方案：① 文档全部保留仓库仅登记索引（弱化 KG 事实源）；② 视频等也强行入 KG（不可行，需外部载体）。验收用例 AT-archgraph-content-storage-policy-01 挂在 archgraph-content-storage-policy-001 上。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "91d7c07",
+          "description": "design/KG/SystemArchitecture.json"
+        }
+      ]
     }
   ],
   "relationships": [
