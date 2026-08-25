@@ -2,6 +2,7 @@
 title: "说自己是世界级记忆系统，拿什么证明？"
 author: "derek"
 digest: "我们给 Agent 的长期记忆立了条评测基线：借业界 LongMemEval 的思路，裁剪出 23 道题，落到真实意图图谱上跑。实测整体 100%、拒答 100%、平均单题检索约 5.7ms。但这个 100% 得诚实看——它证明读路径可靠，还没真正加压。"
+banner_path: "diagrams/mem-eval-banner.png"
 open_comment: 1
 source_url: "https://archgraph.org"
 ---

@@ -3675,8 +3675,43 @@
           "type": "Acceptance Test",
           "Input": "打开 docs/memory-eval-benchmark.wechat.md",
           "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-memory-eval-benchmark-ready\"）：断言 docs/memory-eval-benchmark.wechat.md 存在，frontmatter 含 title/author/digest，正文含 长期记忆、23 题、100%、LongMemEval。通过。"
+        },
+        {
+          "name": "AT-memory-eval-article-02-长期记忆评测文章主题封面",
+          "description": "GIVEN 长期记忆评测文章即将发布；WHEN 发布员准备标题图；THEN 文章声明专用主题封面（banner_path 指向 diagrams/mem-eval-banner.png，非通用 image.png）且文件存在，封面体现「给长期记忆立评测尺子」主题（记忆层叠卡片 + 实测 23/23、100%）。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/memory-eval-benchmark.wechat.md 与 docs/diagrams/mem-eval-banner.png",
+          "acceptanceCriteria": "执行 node --test tests/wechat-article.test.js（用例 \"wechat-memory-eval-benchmark-banner\"）：断言 frontmatter 含 banner_path 且不等于 diagrams/image.png，banner 文件存在。通过。"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "82dc099",
+          "description": "docs/memory-eval-benchmark.wechat.md; tests/wechat-article.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "media_id",
+          "value": "BRZAMZ3b-CaOBH8qdG2KTdde0xOY2U1OFdfOFu1IXYykeOfXnsdWtcaBNkG-2Zc-",
+          "description": "WeChat draft media_id（2026-08-25）"
+        },
+        {
+          "name": "status",
+          "value": "draft_created",
+          "description": "草稿已创建（wechat:draft 成功），待公众号后台「草稿箱」手动发布；API 发布不可用（个人未认证订阅号 48001）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
+    },
+    {
+      "id": "wpp-mem-mem-eval-article-001",
+      "name": "SessionRecord-MemEvalArticle",
+      "parent": "2755",
+      "type": "Business Object",
+      "description": "公众号发布员会话记录（2026-08-25）：目标——发布长期记忆评测基线文章《说自己是世界级记忆系统，拿什么证明？》到微信公众号。完成：撰写 docs/memory-eval-benchmark.wechat.md（frontmatter title/author/digest/banner_path=diagrams/mem-eval-banner.png，按「人味」文风，取材 docs/memory-eval-benchmarks.md + docs/memory-eval-dataset.md + scripts/memory-eval-run.js + results/memory-eval-report.json，未编造数字）；PIL 生成封面 docs/diagrams/mem-eval-banner.png（scripts/generate-mem-eval-banner.py，95KB<1MB，纯装饰，数字为实测基线 23/23/100%/5.7ms）；tests/wechat-article.test.js 新增 wechat-memory-eval-benchmark-ready 与 wechat-memory-eval-benchmark-banner 两个 GIVEN-WHEN-THEN 用例。图谱：在 view 180 新增 WP memory-eval-article-wp-001「发布长期记忆评测文章到微信公众号」+ AT-memory-eval-article-01（文章就绪）+ AT-memory-eval-article-02（主题封面），全程通过 ARGO MCP callTool（preview 通过 → apply 通过），validateSystemArchitecture 通过。回归：tests/wechat-article.test.js 15/15 通过，memory-eval 系列通过。草稿：wechat:draft 成功（status=draft_created，media_id=BRZAMZ3b-CaOBH8qdG2KTdde0xOY2U1OFdfOFu1IXYykeOfXnsdWtcaBNkG-2Zc-），draft/batchget 验证 errcode=0、target_found=true；本公众号为个人未认证订阅号，API 发布不可用（48001），需在公众号后台「草稿箱」手动发布（deliveryStatus=not_delivered）。commit：82dc099（文章+测试+封面脚本+图谱 WP），图谱登记 commit 见 WP attributes（本会话回登）。决策：banner 用 PIL 程序化生成（纯装饰不虚构画面事实），CLI 强制要求 thumb；时延口径用「约 5.7ms（运行在 5–6.4ms 波动）」，与记录基线一致且诚实。可复用经验：wechat-public-cli 创建草稿必须带 banner（否则 Missing thumb_media_id）；memory-eval-run.test.js 每次运行会重写 results/memory-eval-report.json，提交前需 git checkout 还原避免噪音；updateArchitectureElement 的 attributes patch 是整体替换，须携带既有全部 attributes；CLI 无草稿列表命令，验证草稿用 draft/batchget。遗留：草稿待后台手动发布。"
     }
   ],
   "relationships": [
@@ -5057,7 +5092,8 @@
       "included_elements": [
         "wpp-mem-openclaw-001",
         "wpp-mem-multi-role-001",
-        "wpp-mem-skill-coev-001"
+        "wpp-mem-skill-coev-001",
+        "wpp-mem-mem-eval-article-001"
       ],
       "included_relationships": []
     },

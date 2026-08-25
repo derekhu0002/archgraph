@@ -260,3 +260,20 @@ test('wechat-memory-eval-benchmark-ready: memory evaluation baseline article wit
   assert.match(md, /100%/, 'article body should report the measured 100% result');
   assert.match(md, /LongMemEval/, 'article body should mention LongMemEval');
 });
+
+test('wechat-memory-eval-benchmark-banner: memory evaluation article has a dedicated themed banner', () => {
+  // GIVEN the memory evaluation article is about to be published
+  // WHEN the publisher prepares the title image
+  // THEN the article declares a dedicated themed banner (distinct from the generic core-model image) and the file exists
+  const md = readFileSync(MEM_EVAL, 'utf8');
+  const meta = parseFrontmatter(md);
+
+  assert.ok(meta.banner_path, 'frontmatter should declare a banner_path');
+  assert.notEqual(
+    meta.banner_path,
+    'diagrams/image.png',
+    'should use a dedicated themed banner, not the generic core-model image'
+  );
+  const bannerAbs = path.join(ROOT, 'docs', meta.banner_path);
+  assert.ok(existsSync(bannerAbs), `banner image should exist: ${bannerAbs}`);
+});
