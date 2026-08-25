@@ -3743,6 +3743,13 @@
           "description": "design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "id": "overseer-content-storage-001",
+      "name": "里程碑：内容存储策略（文档入KG）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-08-26 人类伙伴确立）：文档内容存储策略——除必须放在仓库中的内容或无法放入 KG 的内容（如视频/二进制）外，其余所有文档内容一律写入 KG（KG-first document storage）；必须留在仓库的内容（视频/二进制/可执行）也需 SUMMARY 后登记入 KG（元素摘要 + 仓库路径/commit 属性）；KG 为文档内容的事实源。落地：argo/rules/archgraph.instructions.md 新增 <ContentStoragePolicy> 章节 + CoreRule 8（全英文）；新增 tests/argo-rules-content-storage.test.js（2 用例）；图谱新增 Principle archgraph-content-storage-policy-001（+ AT-archgraph-content-storage-policy-01）与决策记录 cs-policy-decision-001（挂于 argo-workflow-rules-view）。相关测试 30/30 通过、validateSystemArchitecture 通过，规则已部署到 %APPDATA%\\Code\\User\\prompts\\archgraph.instructions.md。commits 91d7c07（工作）/bbee873（commit 属性登记）。后续：迁移既有 docs/*.md 文档内容入 KG。"
     }
   ],
   "relationships": [
@@ -5203,7 +5210,8 @@
         "overseer-vision-001",
         "overseer-archimate-role-001",
         "overseer-mem-eval-001",
-        "overseer-query-rules-001"
+        "overseer-query-rules-001",
+        "overseer-content-storage-001"
       ],
       "included_relationships": []
     },
