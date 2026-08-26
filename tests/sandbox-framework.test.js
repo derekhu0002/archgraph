@@ -113,6 +113,19 @@ test('sandbox-framework-leveld: lightrag MCP (container Python+LightRAG, second 
   assert.match(smoke, /d: lightrag MCP/, 'smoke should run the Level D lightrag MCP check');
 });
 
+test('sandbox-framework-levele: OpenCode Agent driven via lightrag MCP (fair-comparison B side) is wired', () => {
+  // GIVEN 对照评测「双 MCP 同 Agent」需要验证 Agent 能挂 lightrag MCP 作答（B 组）
+  // WHEN 检查 sandbox/smoke.js
+  // THEN 存在 'e: opencode agent answers via lightrag MCP' 检查：复用 configureOpenCodeModel
+  //      （lightrag MCP 已注册进 opencode.json），opencode run 驱动 Agent，断言工具名
+  //      lightrag_query 被调用且答案含 1249
+  const smoke = readFileSync(SMOKE, 'utf8');
+  assert.match(smoke, /e: opencode agent answers via lightrag MCP/, 'smoke should run the Level E OpenCode-agent-via-lightrag check');
+  assert.match(smoke, /lightrag_query/, 'smoke should assert the agent invoked the lightrag_query tool');
+  assert.match(smoke, /agent-eval-lightrag\.log/, 'smoke should persist the Level E agent eval log');
+  assert.match(smoke, /1249\|Implementation and Migration Viewpoint/, 'smoke should assert the grounded 1249 answer');
+});
+
 test('sandbox-framework-check: orchestrator --check reports docker availability', () => {
   // GIVEN 需要确认宿主能跑 Docker 沙箱
   // WHEN 运行 node scripts/sandbox-test.js --check

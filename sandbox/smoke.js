@@ -255,6 +255,43 @@ async function runMcp() {
       `exit=${r.status} tools=${toolsOk} ans=${answered} ${out.replace(/\s+/g, ' ').slice(0, 200)}`,
     );
   } catch (e) { check('d: lightrag MCP (insert+query) works', false, e.message); }
+
+  // ── Level E：全栈 Agent 评测（OpenCode CLI -> Agent -> lightrag MCP）──
+  // 与 Level C 完全对等：同一个 OpenCode Agent + DeepSeek，但记忆后端换成 lightrag
+  // MCP（LightRAG 包成 MCP，已与 argo MCP 并列注册进 opencode.json）——这是对照评测
+  // 「双 MCP 同 Agent」的 B 组冒烟：验证 Agent 能经 lightrag MCP 工具读取记忆并作答。
+  // 前置：Level D 探针已把含 1249 的探针文档摄入 /opt/lightrag/rag_storage（同一容器）。
+  // toolUsed 断言用工具名 lightrag_query（tool_use 事件会记录该名），避免问题文本
+  // 里含 "lightrag" 造成的假阳性。
+  if (process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_BASE_URL) {
+    const configured = configureOpenCodeModel();
+    const question = '请调用 lightrag 记忆查询工具读取已摄入的记忆，回答：Implementation and Migration Viewpoint 元素的 id 是多少？';
+    const t0 = Date.now();
+    let agentOut = '';
+    let agentExit = -1;
+    try {
+      const r = spawnSync('opencode', ['run', '--format', 'json', question], {
+        env: process.env,
+        cwd: WORKSPACE,
+        encoding: 'utf8',
+        timeout: 180000,
+        maxBuffer: 20 * 1024 * 1024,
+      });
+      agentExit = r.status;
+      agentOut = `${String(r.stdout || '')}\n${String(r.stderr || '')}`;
+      try { fs.writeFileSync('/results/agent-eval-lightrag.log', agentOut); } catch (_) { /* results dir may be absent */ }
+    } catch (e) { agentOut = `spawn error: ${e.message}`; }
+    const latencyMs = Date.now() - t0;
+    const toolUsed = /lightrag_query/.test(agentOut);
+    const answered = /1249|Implementation and Migration Viewpoint/.test(agentOut);
+    check(
+      'e: opencode agent answers via lightrag MCP',
+      configured && toolUsed && answered,
+      `cfg=${configured} exit=${agentExit} tool=${toolUsed} ans=${answered} ${latencyMs}ms ${agentOut.replace(/\s+/g, ' ').slice(0, 240)}`,
+    );
+  } else {
+    check('e: opencode agent answers via lightrag MCP', false, 'missing DEEPSEEK_API_KEY/BASE_URL (argo/.env not mounted)');
+  }
 }
 
 function main() {
