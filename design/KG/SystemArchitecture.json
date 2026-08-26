@@ -3906,6 +3906,13 @@
           "value": "0059aa9"
         }
       ]
+    },
+    {
+      "description": "LightRAG 对照评测基线（计划，2026-08-26）：同题、同记忆、同模型栈，对比 ArchGraph Agent（OpenCode+ARGO MCP）vs LightRAG 的准确率/多跳召回/时延/token 成本。可行性已验证（宿主 .venv，lightrag-hku 1.5.6 + QWEN embedding + DeepSeek 问答，insert+query 全链路跑通）：核心绕坑=LightRAG 硬编码 embedding 维 1536，QWEN 默认 1024 → 冲突；解法=QWEN 支持 dimensions 参数，调 openai_embed(embedding_dim=1536) 让 QWEN 输出 1536 维，并让 EmbeddingFunc(embedding_dim=1536)+vector_db_storage_cls_kwargs={'dim':1536} 三者一致（已实测 200/1536）。待调优：小语料实体抽取只抽 1 个实体（DeepSeek 抽取输出解析需调优：gleaning/prompt/语料格式），真实大语料大概率更好。剩余工作：①图谱→文档语料序列化器；②容器内集成 Python+lightrag（沙箱加 Python3+lightrag-hku，评测内存=显式加载的已积累图谱）；③对照 harness（同题喂 ArchGraph Agent 与 LightRAG，judge+报告）。实现后补可执行 AT。",
+      "id": "lightrag-baseline-wp-001",
+      "name": "LightRAG 对照评测基线",
+      "parent": "1249",
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -5404,7 +5411,8 @@
       "parent_element_id": "1249",
       "description": "自进化测试环境：Docker 容器沙箱，与本机完全隔离；npm pack 生成本地 tarball（不 npm publish），容器内模拟用户 npm install archgraph-argo + npx argo-deploy 安装部署整套框架，再以 smoke 验证已安装框架（部署产物 + MCP 注册 + MCP 读图/校验）。",
       "included_elements": [
-        "self-evolution-sandbox-wp-001"
+        "self-evolution-sandbox-wp-001",
+        "lightrag-baseline-wp-001"
       ],
       "included_relationships": []
     }
