@@ -83,6 +83,9 @@ test('sandbox-framework-levelc: full-stack OpenCode agent eval (agent -> ARGO MC
   assert.match(smoke, /openai-compatible/, 'smoke should use the openai-compatible provider adapter');
   assert.match(smoke, /DEEPSEEK_API_KEY/, 'smoke should read the DeepSeek API key from env');
   assert.match(smoke, /toolUsed.*answered|c: opencode agent/, 'smoke should assert agent tool usage and answer');
+  // 严格对照：A 组会话只挂 argo MCP，看不到 lightrag MCP
+  assert.match(smoke, /configureOpenCodeModel\('argo'\)/, 'Level C should configure an argo-only session');
+  assert.match(smoke, /delete cfg\.mcp\['lightrag'\]/, 'Level C session must not see the lightrag MCP');
 });
 
 test('sandbox-framework-leveld: lightrag MCP (container Python+LightRAG, second memory backend) is wired', () => {
@@ -121,6 +124,8 @@ test('sandbox-framework-levele: OpenCode Agent driven via lightrag MCP (fair-com
   //      lightrag_query 被调用且答案含 1249
   const smoke = readFileSync(SMOKE, 'utf8');
   assert.match(smoke, /e: opencode agent answers via lightrag MCP/, 'smoke should run the Level E OpenCode-agent-via-lightrag check');
+  assert.match(smoke, /configureOpenCodeModel\('lightrag'\)/, 'Level E should configure a lightrag-only session');
+  assert.match(smoke, /deleteMcpArgo/, 'Level E session must not see the argo MCP (strict isolation)');
   assert.match(smoke, /lightrag_query/, 'smoke should assert the agent invoked the lightrag_query tool');
   assert.match(smoke, /agent-eval-lightrag\.log/, 'smoke should persist the Level E agent eval log');
   assert.match(smoke, /1249\|Implementation and Migration Viewpoint/, 'smoke should assert the grounded 1249 answer');

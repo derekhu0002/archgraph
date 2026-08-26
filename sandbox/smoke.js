@@ -165,7 +165,10 @@ async function runMcp() {
 
   // 模型 provider：DeepSeek 写成 OpenCode 自定义 provider（@ai-sdk/openai-compatible）。
   // embedding（ARGO_EMBEDDING_*/QWEN_KEY）保持不变，只换问答模型。
-  function configureOpenCodeModel() {
+  // 严格对照（mode）：不同会话只看得到自己的记忆后端——mode='argo' 的 A 组会话只挂
+  // argo MCP（清掉 lightrag），mode='lightrag' 的 B 组会话只挂 lightrag MCP（清掉 argo）；
+  // 回读校验断言 opencode.json 里「只剩对应的那一个 MCP」，保证唯一变量=记忆后端。
+  function configureOpenCodeModel(mode) {
     const configPath = path.join(HOME, '.config/opencode/opencode.json');
     const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     const baseURL = (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/$/, '');
@@ -179,31 +182,44 @@ async function runMcp() {
       options: { baseURL, apiKey: process.env.DEEPSEEK_API_KEY },
       models: { [model]: { name: model } },
     };
-    // 注册 lightrag MCP（容器内 Python+lightrag 包成的第二记忆后端，与 argo MCP 并列）。
     cfg.mcp = cfg.mcp || {};
-    cfg.mcp['lightrag'] = {
-      type: 'local',
-      command: ['/opt/lightrag/bin/python3', '/opt/sandbox/lightrag-mcp.py'],
-      enabled: true,
-    };
+    if (mode === 'lightrag') {
+      deleteMcpArgo(cfg); // B 组会话不得看到 argo MCP
+      cfg.mcp['lightrag'] = {
+        type: 'local',
+        command: ['/opt/lightrag/bin/python3', '/opt/sandbox/lightrag-mcp.py'],
+        enabled: true,
+      };
+    } else {
+      delete cfg.mcp['lightrag']; // A 组会话不得看到 lightrag MCP（argo 已由部署写入 opencode.json）
+    }
     cfg.model = `deepseek-sandbox/${model}`;
     fs.writeFileSync(configPath, JSON.stringify(cfg, null, 2));
-    // 回读校验：断言 OpenCode 配置里 model/provider/apiKey/lightrag MCP 确为我们所设。
+    // 回读校验：断言 model/provider/apiKey/baseURL 正确，且 mcp 里只剩对应的那一个后端。
     try {
       const verify = JSON.parse(fs.readFileSync(configPath, 'utf8'));
       const prov = verify.provider && verify.provider['deepseek-sandbox'];
+      const hasArgo = !!((verify.mcp && verify.mcp.argo) || (verify.mcp && verify.mcp.servers && verify.mcp.servers.argo));
+      const hasLightrag = !!(verify.mcp && verify.mcp['lightrag']);
+      const isolated = mode === 'lightrag' ? (hasLightrag && !hasArgo) : (hasArgo && !hasLightrag);
       const ok = verify.model === `deepseek-sandbox/${model}`
         && !!prov
         && !!prov.options
         && prov.options.apiKey === process.env.DEEPSEEK_API_KEY
         && prov.options.baseURL === baseURL
-        && !!(verify.mcp && verify.mcp['lightrag']);
+        && isolated;
       return ok;
     } catch (_) { return false; }
   }
 
+  function deleteMcpArgo(cfg) {
+    if (!cfg.mcp) return;
+    delete cfg.mcp.argo;
+    if (cfg.mcp.servers) delete cfg.mcp.servers.argo;
+  }
+
   if (process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_BASE_URL) {
-    const configured = configureOpenCodeModel();
+    const configured = configureOpenCodeModel('argo');
     const question = '请用 ARGO MCP 读取初始图谱，回答：元素 Implementation and Migration Viewpoint 的 id 是什么？';
     const t0 = Date.now();
     let agentOut = '';
@@ -258,13 +274,13 @@ async function runMcp() {
 
   // ── Level E：全栈 Agent 评测（OpenCode CLI -> Agent -> lightrag MCP）──
   // 与 Level C 完全对等：同一个 OpenCode Agent + DeepSeek，但记忆后端换成 lightrag
-  // MCP（LightRAG 包成 MCP，已与 argo MCP 并列注册进 opencode.json）——这是对照评测
-  // 「双 MCP 同 Agent」的 B 组冒烟：验证 Agent 能经 lightrag MCP 工具读取记忆并作答。
+  // MCP——严格对照「双 MCP 同 Agent」的 B 组：configureOpenCodeModel('lightrag') 会
+  // 清掉 argo MCP，所以本会话只看得到 lightrag MCP（A 组会话只看得到 argo，见 Level C）。
   // 前置：Level D 探针已把含 1249 的探针文档摄入 /opt/lightrag/rag_storage（同一容器）。
   // toolUsed 断言用工具名 lightrag_query（tool_use 事件会记录该名），避免问题文本
   // 里含 "lightrag" 造成的假阳性。
   if (process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_BASE_URL) {
-    const configured = configureOpenCodeModel();
+    const configured = configureOpenCodeModel('lightrag');
     const question = '请调用 lightrag 记忆查询工具读取已摄入的记忆，回答：Implementation and Migration Viewpoint 元素的 id 是多少？';
     const t0 = Date.now();
     let agentOut = '';
