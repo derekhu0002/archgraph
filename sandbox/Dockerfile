@@ -43,6 +43,11 @@ RUN mkdir -p /opt/microsoft/powershell/7 \
     && npm --version \
     && rm -f /tmp/pwsh.tar.gz
 
+# OpenCode CLI (the agent harness that runs on top of the deployed ARGO MCP) —
+# full-stack agent evaluation: OpenCode -> agent -> in-sandbox ARGO MCP.
+RUN npm install -g opencode-ai@1.18.23 --no-audit --no-fund \
+    && opencode --version
+
 # install-argo.ps1 resolves harness dirs from $env:USERPROFILE — pin it to the
 # container HOME so no host path can leak in.
 ENV USERPROFILE=/root \

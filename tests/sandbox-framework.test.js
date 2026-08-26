@@ -70,6 +70,20 @@ test('sandbox-framework-levelb: Level B full-capability checks (Neo4j + embeddin
   assert.match(orc, /argo.*\.env/, 'orchestrator should mount argo/.env when present');
 });
 
+test('sandbox-framework-levelc: full-stack OpenCode agent eval (agent -> ARGO MCP) is wired', () => {
+  // GIVEN 测试对象应为运行在 OpenCode 上的 Agent，由 Agent 调沙箱内 ARGO MCP
+  // WHEN 检查 sandbox/smoke.js 与 Dockerfile
+  // THEN smoke 安装 opencode、配置阿里 compatible-mode provider（ali-dashscope）、
+  //      用 opencode run headless 驱动 Agent，并断言 Agent 用了 argo 工具且答对
+  const df = readFileSync(DOCKERFILE, 'utf8');
+  assert.match(df, /opencode-ai/, 'Dockerfile should install the OpenCode CLI');
+  const smoke = readFileSync(SMOKE, 'utf8');
+  assert.match(smoke, /opencode.*run/, 'smoke should drive the OpenCode agent headlessly');
+  assert.match(smoke, /ali-dashscope/, 'smoke should configure the Ali DashScope provider');
+  assert.match(smoke, /openai-compatible/, 'smoke should use the openai-compatible provider adapter');
+  assert.match(smoke, /toolUsed.*answered|c: opencode agent/, 'smoke should assert agent tool usage and answer');
+});
+
 test('sandbox-framework-check: orchestrator --check reports docker availability', () => {
   // GIVEN 需要确认宿主能跑 Docker 沙箱
   // WHEN 运行 node scripts/sandbox-test.js --check

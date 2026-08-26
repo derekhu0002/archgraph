@@ -10,3 +10,4 @@ argo/.env
 pnpm-lock.yaml
 sandbox/dist/
 results/sandbox-report.json
+results/agent-eval.log

@@ -148,6 +148,69 @@ async function runMcp() {
       `elements=${elems.length} ${blob.slice(0, 160)}`,
     );
   } catch (e) { check('b: getSystemArchitecture semantic returns hits', false, e.message); }
+
+  // ── Level C：全栈 Agent 评测（OpenCode CLI -> Agent -> 沙箱内 ARGO MCP）──
+  // 用 OpenCode 的 headless `run` 与 Agent 对话；Agent 通过 install-argo.ps1 注册进
+  // opencode.json 的 argo MCP（+ 部署的 AGENTS.md 规则/技能）读取记忆并作答。
+  // 测试对象 = Agent 行为（准确性），而非直接调 MCP 接口。
+  try {
+    const oc = spawnSync('opencode', ['--version'], { encoding: 'utf8' });
+    check('c: opencode installed', oc.status === 0, String(oc.stdout || oc.stderr).trim());
+  } catch (e) { check('c: opencode installed', false, e.message); }
+
+  // 模型 provider：阿里 DashScope compatible-mode + qwen3.7-plus（QWEN_KEY）。
+  process.env.OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || process.env.ARGO_EMBEDDING_BASE_URL;
+  process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.QWEN_KEY;
+  process.env.OPENCODE_MODEL = process.env.OPENCODE_MODEL || 'qwen3.7-plus';
+
+  // 模型 provider：把阿里 DashScope compatible-mode 写成 OpenCode 自定义 provider
+  // （@ai-sdk/openai-compatible，真实用户标准配置），并设为默认模型。
+  function configureOpenCodeModel() {
+    const configPath = path.join(HOME, '.config/opencode/opencode.json');
+    const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    const baseURL = (process.env.ARGO_EMBEDDING_BASE_URL || '').replace(/\/$/, '');
+    if (!baseURL || !process.env.QWEN_KEY) return false;
+    cfg.provider = cfg.provider || {};
+    cfg.provider['ali-dashscope'] = {
+      npm: '@ai-sdk/openai-compatible',
+      name: 'Ali DashScope',
+      options: { baseURL, apiKey: process.env.QWEN_KEY },
+      models: { 'qwen3.7-plus': { name: 'Qwen3.7 Plus' } },
+    };
+    cfg.model = 'ali-dashscope/qwen3.7-plus';
+    fs.writeFileSync(configPath, JSON.stringify(cfg, null, 2));
+    return true;
+  }
+
+  if (process.env.OPENAI_API_KEY && process.env.OPENAI_BASE_URL) {
+    const configured = configureOpenCodeModel();
+    const question = '请用 ARGO MCP 读取初始图谱，回答：元素 Implementation and Migration Viewpoint 的 id 是什么？';
+    const t0 = Date.now();
+    let agentOut = '';
+    let agentExit = -1;
+    try {
+      const r = spawnSync('opencode', ['run', '--format', 'json', question], {
+        env: process.env,
+        cwd: WORKSPACE,
+        encoding: 'utf8',
+        timeout: 120000,
+        maxBuffer: 20 * 1024 * 1024,
+      });
+      agentExit = r.status;
+      agentOut = `${String(r.stdout || '')}\n${String(r.stderr || '')}`;
+      try { fs.writeFileSync('/results/agent-eval.log', agentOut); } catch (_) { /* results dir may be absent */ }
+    } catch (e) { agentOut = `spawn error: ${e.message}`; }
+    const latencyMs = Date.now() - t0;
+    const toolUsed = /argo|getIntentElementContext|queryNeo4jGraph|getArchitectureViewContext|getSystemArchitecture/.test(agentOut);
+    const answered = /1249|Implementation and Migration Viewpoint/.test(agentOut);
+    check(
+      'c: opencode agent answers via ARGO MCP',
+      configured && toolUsed && answered,
+      `cfg=${configured} exit=${agentExit} tool=${toolUsed} ans=${answered} ${latencyMs}ms ${agentOut.replace(/\s+/g, ' ').slice(0, 240)}`,
+    );
+  } else {
+    check('c: opencode agent answers via ARGO MCP', false, 'missing OPENAI_BASE_URL/API_KEY (argo/.env not mounted)');
+  }
 }
 
 function main() {
