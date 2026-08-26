@@ -15,6 +15,8 @@ function createProductionSemanticBackfill(dependencies = {}) {
   requireBoundary(dependencies.structuralProjection, 'requireComplete', 'structuralProjection');
   requireBoundary(dependencies.embeddingProvider, 'embedBatch', 'embeddingProvider');
   requireBoundary(dependencies.projectionStore, 'upsertRecords', 'projectionStore');
+  requireBoundary(dependencies.projectionStore, 'readRecords', 'projectionStore');
+  requireBoundary(dependencies.projectionStore, 'deleteTombstones', 'projectionStore');
   requireBoundary(dependencies.checkpointStore, 'readCheckpoint', 'checkpointStore');
   requireBoundary(dependencies.checkpointStore, 'writeCheckpoint', 'checkpointStore');
   const batchSize = dependencies.batchSize;
@@ -55,6 +57,11 @@ function createProductionSemanticBackfill(dependencies = {}) {
           checkpointStore: dependencies.checkpointStore,
         });
       }
+      const reconciled = await reconcileRemovals({
+        snapshot,
+        canonicalVersion,
+        projectionStore: dependencies.projectionStore,
+      });
       const aligned = CHANNELS.every(channel => (
         channels[channel].status === 'complete'
         && channels[channel].canonicalVersion === canonicalVersion
@@ -64,6 +71,7 @@ function createProductionSemanticBackfill(dependencies = {}) {
         canonicalVersion,
         alignmentState: aligned ? 'Aligned' : 'Updating',
         channels: Object.freeze(channels),
+        reconciled,
       });
     },
   });
@@ -202,6 +210,39 @@ function mergeFailures(existing, current) {
     merged.set(failure.canonicalIdentity, failure);
   }
   return [...merged.values()];
+}
+
+// Full-reconciliation removal pass: after all channels are upserted, delete any
+// persisted semantic record whose canonical identity no longer exists in the
+// local JSON snapshot. This guarantees argo-init rebuilds a semantic projection
+// that is exactly consistent with the canonical graph (no stale vectors).
+async function reconcileRemovals({ snapshot, canonicalVersion, projectionStore }) {
+  const currentByChannel = new Map();
+  for (const channel of CHANNELS) {
+    const source = CHANNEL_SOURCES[channel];
+    const identities = new Set(
+      (snapshot[source.property] || []).map(record => `${channel}:${source.identity(record)}`),
+    );
+    currentByChannel.set(channel, identities);
+  }
+  const stored = await projectionStore.readRecords();
+  const allStored = Array.isArray(stored) ? stored : [];
+  const stale = allStored.filter(record => {
+    const identities = currentByChannel.get(record.channel);
+    return identities && !identities.has(record.canonicalIdentity);
+  });
+  const tombstones = stale.map(record => Object.freeze({
+    canonicalIdentity: record.canonicalIdentity,
+    channel: record.channel,
+    canonicalVersion: record.canonicalVersion || canonicalVersion,
+  }));
+  if (tombstones.length > 0) {
+    await projectionStore.deleteTombstones(tombstones);
+  }
+  return Object.freeze({
+    scanned: allStored.length,
+    tombstoned: tombstones.length,
+  });
 }
 
 function requireBoundary(boundary, method, name) {
