@@ -10,17 +10,17 @@
 set -euo pipefail
 
 TARBALL="${TARBALL:-/tarball/archgraph-argo.tgz}"
-FIXTURE="${FIXTURE:-/fixture/SystemArchitecture.json}"
 WORKSPACE="${ARGO_REPO_ROOT:-/workspace}"
 
 export USERPROFILE="${USERPROFILE:-/root}"
 export ARGO_REPO_ROOT="$WORKSPACE"
 export NODE_ENV=production
 
-echo "[sandbox] 1/3 准备干净工作区（容器内，可随时丢弃）"
+# 干净空工作区——初始图谱由框架自身的 argo init（initializeWorkspace）生成，
+# 绝不复制生产图（真实新用户不会拿到生产数据）。
+echo "[sandbox] 1/3 准备干净空工作区（容器内，可随时丢弃；初始图谱由 argo init 生成）"
 rm -rf "$WORKSPACE" /tmp/install
-mkdir -p "$WORKSPACE/design/KG" /tmp/install
-cp "$FIXTURE" "$WORKSPACE/design/KG/SystemArchitecture.json"
+mkdir -p "$WORKSPACE" /tmp/install
 
 echo "[sandbox] 2/3 模拟用户安装：npm install archgraph-argo.tgz（本地 tarball，无 publish）"
 cd /tmp/install

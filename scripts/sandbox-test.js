@@ -59,15 +59,21 @@ function main() {
     : ['build', '-t', 'archgraph-sandbox', SANDBOX_DIR];
   run('docker', buildArgs);
 
-  // 3) docker run — mounts tarball + fixture graph + results; nothing touches the host.
+  // 3) docker run — mounts tarball + fixture graph + (optional) argo/.env for Level B + results.
   // smoke.js always writes the report (even on failure), so the exit decision is
   // driven by the report, not by docker's exit code.
   fs.mkdirSync(RESULTS_DIR, { recursive: true });
-  spawnSync('docker', ['run', '--rm',
+  // 初始图谱由容器内 argo init（initializeWorkspace）生成，不再挂生产图。
+  const mounts = [
     '-v', `${tarball}:/tarball/archgraph-argo.tgz:ro`,
-    '-v', `${path.join(ROOT, 'design', 'KG', 'SystemArchitecture.json')}:/fixture/SystemArchitecture.json:ro`,
     '-v', `${RESULTS_DIR}:/results`,
-    'archgraph-sandbox'], { stdio: 'inherit' });
+  ];
+  // Level B（真实 Embedding + Neo4j）：把 argo/.env 挂进容器；缺失时自动跳过 Level B 检查。
+  const envFile = path.join(ROOT, 'argo', '.env');
+  if (fs.existsSync(envFile)) {
+    mounts.push('-v', `${envFile}:/env/argo.env:ro`);
+  }
+  spawnSync('docker', ['run', '--rm', ...mounts, 'archgraph-sandbox'], { stdio: 'inherit' });
 
   // 4) report
   const report = JSON.parse(fs.readFileSync(REPORT_PATH, 'utf8'));

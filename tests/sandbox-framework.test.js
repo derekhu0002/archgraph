@@ -28,6 +28,7 @@ test('sandbox-framework-artifacts: sandbox env files exist (Dockerfile/entrypoin
   assert.match(ep, /npm install --no-audit --no-fund/, 'entrypoint installs the tarball like a user');
   assert.match(ep, /npx --no-install argo-deploy/, 'entrypoint deploys via npx argo-deploy');
   assert.match(ep, /USERPROFILE=.*\/root/, 'entrypoint pins USERPROFILE to the container HOME');
+  assert.doesNotMatch(ep, /\/fixture\/|cp \$FIXTURE/, 'entrypoint must not copy a production fixture graph');
 });
 
 test('sandbox-framework-isolation: deploy targets stay inside the container HOME', () => {
@@ -51,6 +52,22 @@ test('sandbox-framework-no-publish: orchestrator uses npm pack, never npm publis
   assert.doesNotMatch(orc, /\['publish'\]/, 'orchestrator must never invoke npm publish');
   assert.match(orc, /docker.*build/, 'orchestrator should docker build');
   assert.match(orc, /docker.*run/, 'orchestrator should docker run the sandbox');
+});
+
+test('sandbox-framework-levelb: Level B full-capability checks (Neo4j + embedding) are wired', () => {
+  // GIVEN 需要验证框架全能力（语义检索 + Neo4j 投影查询）
+  // WHEN 检查 sandbox/smoke.js 与 scripts/sandbox-test.js
+  // THEN smoke 加载挂载的 argo/.env、把 Neo4j 指向 host.docker.internal、使用
+  //      queryNeo4jGraph 与 getSystemArchitecture 语义检索；编排器在有 argo/.env 时挂载之
+  const smoke = readFileSync(SMOKE, 'utf8');
+  assert.match(smoke, /\/env\/argo\.env/, 'smoke should load the mounted argo/.env');
+  assert.match(smoke, /host\.docker\.internal/, 'smoke should point Neo4j at host.docker.internal');
+  assert.match(smoke, /ARGO_NEO4J_DATABASE/, 'smoke should pin an isolated Neo4j database');
+  assert.match(smoke, /queryNeo4jGraph/, 'smoke should exercise queryNeo4jGraph');
+  assert.match(smoke, /getSystemArchitecture/, 'smoke should exercise semantic getSystemArchitecture');
+  assert.match(smoke, /initializeWorkspace/, 'smoke should generate the initial graph via argo init');
+  const orc = readFileSync(ORCH, 'utf8');
+  assert.match(orc, /argo.*\.env/, 'orchestrator should mount argo/.env when present');
 });
 
 test('sandbox-framework-check: orchestrator --check reports docker availability', () => {

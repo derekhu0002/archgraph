@@ -8,16 +8,45 @@
  *   2. MCP registration points at the installed argo server,
  *   3. the installed ARGO MCP server actually reads a graph, answers a focused
  *      context query, and validates the graph.
+ *   Level B (full capability, when /env/argo.env is mounted):
+ *   4. queryNeo4jGraph against the real Neo4j projection,
+ *   5. getSystemArchitecture semantic retrieval against the real embedding provider.
  * Writes /results/sandbox-report.json (mounted to the host results dir).
  */
 const fs = require('node:fs');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 
 process.env.ARGO_REPO_ROOT = process.env.ARGO_REPO_ROOT || '/workspace';
 const HOME = process.env.USERPROFILE || process.env.HOME || '/root';
 const WORKSPACE = process.env.ARGO_REPO_ROOT;
 const PACKAGE = '/tmp/install/node_modules/archgraph-argo';
 const REPORT = process.env.REPORT_PATH || '/results/sandbox-report.json';
+const ENV_FILE = process.env.ENV_FILE || '/env/argo.env';
+
+// Level B: 加载宿主 argo/.env（挂载于 /env/argo.env）——真实 Embedding + Neo4j 参数。
+// 容器内 127.0.0.1 是容器自身回环，Neo4j 必须经 host.docker.internal 访问；
+// 沙箱使用独立的 Neo4j 数据库（ARGO_NEO4J_DATABASE=sandbox），与生产 archgraph 库隔离。
+function loadEnvFile(file) {
+  if (!fs.existsSync(file)) return;
+  const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const eq = t.indexOf('=');
+    if (eq <= 0) continue;
+    const k = t.slice(0, eq).trim();
+    const v = t.slice(eq + 1).trim();
+    if (k) process.env[k] = v;
+  }
+}
+loadEnvFile(ENV_FILE);
+if (!process.env.ARGO_NEO4J_DATABASE) process.env.ARGO_NEO4J_DATABASE = 'sandbox';
+const neo4jUrl = (process.env.ARGO_NEO4J_DATABASE_URL || process.env.ARGO_NEO4J_URI || 'neo4j://host.docker.internal:7687')
+  .replace('127.0.0.1', 'host.docker.internal')
+  .replace('localhost', 'host.docker.internal');
+process.env.ARGO_NEO4J_DATABASE_URL = neo4jUrl;
+// 注意：ARGO_NEO4J_URI 是框架拒绝的 legacy 别名（rejectLegacyNeo4jEnvironment），只设批准键 DATABASE_URL。
 
 const checks = [];
 function check(name, pass, detail) {
@@ -27,23 +56,38 @@ function rel(p) { return path.relative(HOME, p); }
 
 async function runMcp() {
   const { callTool } = require(path.join(PACKAGE, 'argo/scripts/argo-mcp-server.js'));
+  // 0) argo init：对空工作区调用 initializeWorkspace，从部署的 defaults/ 生成初始图谱
+  //    （2 元素 / 1 关系 / 4 视图的初始模板）——验证真实新用户的初始化流程。
   try {
-    const r1 = await callTool('getArchitectureViewContext', { view_id: 'overseer-ltm-001' }, null, undefined);
+    const init = await callTool('initializeWorkspace', { workspaceRoot: WORKSPACE }, null, undefined);
+    const text = (init && init.content && init.content[0] && init.content[0].text) || JSON.stringify(init);
+    let payload = init;
+    try { payload = JSON.parse(text); } catch (_) { /* keep raw */ }
+    const created = ((payload && payload.createdFiles) || []).join(',');
     check(
-      'mcp: getArchitectureViewContext(overseer-ltm-001)',
-      r1 && r1.status === 'passed' && r1.view && r1.view.view_id === 'overseer-ltm-001',
-      (r1 && r1.status) || 'no status',
+      'init: initializeWorkspace generates initial graph',
+      created.includes('SystemArchitecture.json'),
+      text.replace(/\s+/g, ' ').slice(0, 200),
     );
-  } catch (e) { check('mcp: getArchitectureViewContext(overseer-ltm-001)', false, e.message); }
+  } catch (e) { check('init: initializeWorkspace generates initial graph', false, e.message); }
 
   try {
-    const r2 = await callTool('getIntentElementContext', { elementId: 'project-overseer-001' }, null, undefined);
+    const r1 = await callTool('getArchitectureViewContext', { view_id: '174' }, null, undefined);
     check(
-      'mcp: getIntentElementContext(project-overseer-001)',
-      r2 && r2.status === 'passed' && r2.focusElementId === 'project-overseer-001',
+      'mcp: getArchitectureViewContext(174)',
+      r1 && r1.status === 'passed' && r1.view && r1.view.view_id === '174',
+      (r1 && r1.status) || 'no status',
+    );
+  } catch (e) { check('mcp: getArchitectureViewContext(174)', false, e.message); }
+
+  try {
+    const r2 = await callTool('getIntentElementContext', { elementId: '1249' }, null, undefined);
+    check(
+      'mcp: getIntentElementContext(1249)',
+      r2 && r2.status === 'passed' && r2.focusElementId === '1249',
       (r2 && r2.status) || 'no status',
     );
-  } catch (e) { check('mcp: getIntentElementContext(project-overseer-001)', false, e.message); }
+  } catch (e) { check('mcp: getIntentElementContext(1249)', false, e.message); }
 
   // validator 工具返回 { content: [{ type:'text', text: JSON }], isError } — status 在 text 里。
   try {
@@ -55,6 +99,55 @@ async function runMcp() {
       `${payload.status || 'no-status'} ${(payload.stderr || '').trim()}`.trim(),
     );
   } catch (e) { check('mcp: validateSystemArchitecture', false, e.message); }
+
+  // ── Level B：全能力（真实 Neo4j 投影查询 + 真实 Embedding 语义检索）──
+  // 框架的 recoverNeo4jSyncIfNeeded 靠 canonical digest 判定是否重建投影，不会自动建库；
+  // 沙箱用独立库（ARGO_NEO4J_DATABASE=sandbox），须先显式跑一次框架自带 sync 建库+投影。
+  let syncOk = false;
+  let syncDetail = 'no sync';
+  try {
+    const syncScript = path.join(HOME, '.argo/scripts/syncSystemArchitectureToNeo4j.js');
+    if (fs.existsSync(syncScript)) {
+      const s = spawnSync(process.execPath, [syncScript, '--database', process.env.ARGO_NEO4J_DATABASE || 'sandbox'], {
+        env: { ...process.env, ARGO_REPO_ROOT: WORKSPACE },
+        encoding: 'utf8',
+        maxBuffer: 10 * 1024 * 1024,
+      });
+      const out = String(s.stdout || '');
+      const err = String(s.stderr || '').replace(/\s+/g, ' ').slice(0, 200);
+      syncOk = s.status === 0 && out.includes('"matches": true');
+      syncDetail = `exit=${s.status} ${err || out.replace(/\s+/g, ' ').slice(0, 140)}`;
+    } else {
+      syncDetail = 'sync script not found under ~/.argo/scripts';
+    }
+  } catch (e) { syncDetail = e.message; }
+  check('b: syncSystemArchitectureToNeo4j (sandbox db)', syncOk, syncDetail);
+
+  // 初始图谱 = 2 元素（1240 Application Cooperation Viewpoint / 1249 Implementation
+  // and Migration Viewpoint），无 Business Actor——Level B 断言按初始图谱内容设计。
+  try {
+    const q = await callTool('queryNeo4jGraph', {
+      cypher: "MATCH (e:Element {graphKey: $graphKey}) RETURN e.id, e.name ORDER BY e.id",
+      workspaceRoot: WORKSPACE,
+    }, null, undefined);
+    const recs = (q && q.records) || [];
+    const blob = JSON.stringify(recs);
+    check('b: queryNeo4jGraph lists initial-graph elements', blob.includes('1249') && blob.includes('1240'), `records=${recs.length} ${blob.slice(0, 160)}`);
+  } catch (e) { check('b: queryNeo4jGraph lists initial-graph elements', false, e.message); }
+
+  try {
+    const s = await callTool('getSystemArchitecture', {
+      query: { purpose: 'audit', intent: 'Implementation and Migration Viewpoint 与 Application Cooperation Viewpoint', subject: '1249' },
+      workspaceRoot: WORKSPACE,
+    }, null, undefined);
+    const elems = (s && s.document && s.document.elements) || [];
+    const blob = JSON.stringify(elems);
+    check(
+      'b: getSystemArchitecture semantic returns hits',
+      elems.some(el => el && el.id === '1249'),
+      `elements=${elems.length} ${blob.slice(0, 160)}`,
+    );
+  } catch (e) { check('b: getSystemArchitecture semantic returns hits', false, e.message); }
 }
 
 function main() {
