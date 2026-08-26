@@ -48,6 +48,20 @@ RUN mkdir -p /opt/microsoft/powershell/7 \
 RUN npm install -g opencode-ai@1.18.23 --no-audit --no-fund \
     && opencode --version
 
+# Python venv with LightRAG (graph RAG) + MCP SDK — packaged as a `lightrag` MCP
+# server so the same OpenCode agent can use LightRAG as an alternative memory
+# backend (fair A/B: argo MCP vs lightrag MCP, same agent + DeepSeek).
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip python3-venv \
+    && python3 -m venv /opt/lightrag \
+    && /opt/lightrag/bin/pip install --no-cache-dir --upgrade pip \
+    # pin mcp<2: FastMCP was renamed to MCPServer in mcp 2.x; we use the v1 FastMCP
+    # server API in lightrag-mcp.py and the v1 client API in test-lightrag-mcp.py.
+    # openai is pre-installed so pipmaster (LightRAG's lazy dep) never triggers a
+    # runtime "Updating package" spinner on stdout that would corrupt MCP frames.
+    && /opt/lightrag/bin/pip install --no-cache-dir "lightrag-hku" "mcp<2" openai \
+    && /opt/lightrag/bin/python3 -c "import lightrag, mcp; from mcp.server.fastmcp import FastMCP; print('lightrag', lightrag.__version__, '| mcp', mcp.__version__ if hasattr(mcp,'__version__') else 'v1', 'ok')" \
+    && rm -rf /var/lib/apt/lists/*
+
 # install-argo.ps1 resolves harness dirs from $env:USERPROFILE — pin it to the
 # container HOME so no host path can leak in.
 ENV USERPROFILE=/root \
@@ -55,7 +69,7 @@ ENV USERPROFILE=/root \
     ARGO_REPO_ROOT=/workspace
 
 WORKDIR /opt/sandbox
-COPY entrypoint.sh smoke.js ./
+COPY entrypoint.sh smoke.js lightrag-mcp.py test-lightrag-mcp.py ./
 RUN chmod +x entrypoint.sh
 
 ENTRYPOINT ["/opt/sandbox/entrypoint.sh"]

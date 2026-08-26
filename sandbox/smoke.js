@@ -179,9 +179,16 @@ async function runMcp() {
       options: { baseURL, apiKey: process.env.DEEPSEEK_API_KEY },
       models: { [model]: { name: model } },
     };
+    // 注册 lightrag MCP（容器内 Python+lightrag 包成的第二记忆后端，与 argo MCP 并列）。
+    cfg.mcp = cfg.mcp || {};
+    cfg.mcp['lightrag'] = {
+      type: 'local',
+      command: ['/opt/lightrag/bin/python3', '/opt/sandbox/lightrag-mcp.py'],
+      enabled: true,
+    };
     cfg.model = `deepseek-sandbox/${model}`;
     fs.writeFileSync(configPath, JSON.stringify(cfg, null, 2));
-    // 回读校验：断言 OpenCode 配置里 model/provider/apiKey 确为我们所设（显式保证当前模型）。
+    // 回读校验：断言 OpenCode 配置里 model/provider/apiKey/lightrag MCP 确为我们所设。
     try {
       const verify = JSON.parse(fs.readFileSync(configPath, 'utf8'));
       const prov = verify.provider && verify.provider['deepseek-sandbox'];
@@ -189,7 +196,8 @@ async function runMcp() {
         && !!prov
         && !!prov.options
         && prov.options.apiKey === process.env.DEEPSEEK_API_KEY
-        && prov.options.baseURL === baseURL;
+        && prov.options.baseURL === baseURL
+        && !!(verify.mcp && verify.mcp['lightrag']);
       return ok;
     } catch (_) { return false; }
   }
@@ -223,6 +231,30 @@ async function runMcp() {
   } else {
     check('c: opencode agent answers via ARGO MCP', false, 'missing OPENAI_BASE_URL/API_KEY (argo/.env not mounted)');
   }
+
+  // ── Level D：lightrag MCP（容器内 Python + lightrag 包成 MCP，第二记忆后端）──
+  // 用 MCP 客户端直连 lightrag-mcp.py，验证 insert + query 全链路可用（可作对照后端）。
+  try {
+    const r = spawnSync('/opt/lightrag/bin/python3', ['/opt/sandbox/test-lightrag-mcp.py'], {
+      env: process.env,
+      encoding: 'utf8',
+      timeout: 180000,
+      maxBuffer: 20 * 1024 * 1024,
+    });
+    const out = String(r.stdout || '') + '\n' + String(r.stderr || '');
+    let parsed = null;
+    const jsonLine = String(r.stdout || '').split('\n').filter(l => l.trim().startsWith('{')).pop();
+    try { parsed = JSON.parse(jsonLine); } catch (_) { /* keep null */ }
+    const toolsOk = parsed && Array.isArray(parsed.tools)
+      && parsed.tools.includes('lightrag_query')
+      && parsed.tools.includes('lightrag_insert');
+    const answered = parsed && parsed.has_answer === true;
+    check(
+      'd: lightrag MCP (insert+query) works',
+      r.status === 0 && toolsOk && answered,
+      `exit=${r.status} tools=${toolsOk} ans=${answered} ${out.replace(/\s+/g, ' ').slice(0, 200)}`,
+    );
+  } catch (e) { check('d: lightrag MCP (insert+query) works', false, e.message); }
 }
 
 function main() {

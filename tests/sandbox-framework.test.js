@@ -85,6 +85,34 @@ test('sandbox-framework-levelc: full-stack OpenCode agent eval (agent -> ARGO MC
   assert.match(smoke, /toolUsed.*answered|c: opencode agent/, 'smoke should assert agent tool usage and answer');
 });
 
+test('sandbox-framework-leveld: lightrag MCP (container Python+LightRAG, second memory backend) is wired', () => {
+  // GIVEN 对照基线需要把容器内 Python + LightRAG 包成 lightrag MCP，作为第二记忆后端
+  // WHEN 检查 sandbox/Dockerfile、lightrag-mcp.py、test-lightrag-mcp.py、smoke.js
+  // THEN Dockerfile 建 Python venv 并安装 lightrag-hku + mcp；MCP 服务端暴露
+  //      lightrag_insert/lightrag_query；探针做 insert+query 全链路并断言答案含 1249；
+  //      smoke 注册 cfg.mcp.lightrag 并执行 'd: lightrag MCP' 检查
+  const df = readFileSync(DOCKERFILE, 'utf8');
+  assert.match(df, /python3.*venv/, 'Dockerfile should create a Python venv');
+  assert.match(df, /lightrag-hku/, 'Dockerfile should install lightrag-hku');
+  assert.match(df, /"mcp<2"/, 'Dockerfile should pin mcp<2 (FastMCP v1 API)');
+  assert.match(df, /openai/, 'Dockerfile should pre-install openai so pipmaster never spins on stdout');
+  assert.ok(existsSync(path.join(SANDBOX, 'lightrag-mcp.py')), 'lightrag MCP server should exist');
+  assert.ok(existsSync(path.join(SANDBOX, 'test-lightrag-mcp.py')), 'lightrag MCP probe should exist');
+  const server = readFileSync(path.join(SANDBOX, 'lightrag-mcp.py'), 'utf8');
+  assert.match(server, /FastMCP\('lightrag'\)/, 'server should create the lightrag FastMCP instance');
+  assert.match(server, /lightrag_insert/, 'server should expose lightrag_insert');
+  assert.match(server, /lightrag_query/, 'server should expose lightrag_query');
+  assert.match(server, /entity_extraction_use_json/, 'server should use JSON entity extraction for DeepSeek');
+  assert.match(server, /ainsert\(content, ids=doc_id\)/, 'server must pass content first, ids second to ainsert');
+  assert.match(server, /env=dict\(os\.environ\)|LIGHTRAG_ENV_FILE/, 'server/probe must forward env (mcp SDK filters env)');
+  const probe = readFileSync(path.join(SANDBOX, 'test-lightrag-mcp.py'), 'utf8');
+  assert.match(probe, /env=dict\(os\.environ\)/, 'probe should pass the full env to the spawned MCP server');
+  assert.match(probe, /'1249' in q_text/, 'probe should assert the grounded id 1249 in the answer');
+  const smoke = readFileSync(SMOKE, 'utf8');
+  assert.match(smoke, /mcp\['lightrag'\]/, 'smoke should register the lightrag MCP for the OpenCode agent');
+  assert.match(smoke, /d: lightrag MCP/, 'smoke should run the Level D lightrag MCP check');
+});
+
 test('sandbox-framework-check: orchestrator --check reports docker availability', () => {
   // GIVEN 需要确认宿主能跑 Docker 沙箱
   // WHEN 运行 node scripts/sandbox-test.js --check
