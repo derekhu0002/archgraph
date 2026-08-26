@@ -3867,7 +3867,13 @@
           "type": "Acceptance Test"
         }
       ],
-      "attributes": []
+      "attributes": [
+        {
+          "description": "sandbox/Dockerfile; sandbox/entrypoint.sh; sandbox/smoke.js; scripts/sandbox-test.js; tests/sandbox-framework.test.js; tests/architecture-view-context.test.js; scripts/memory-eval-run.js; docs/memory-eval-dataset.md; .gitignore; design/KG/SystemArchitecture.json（Docker 隔离沙箱测试整套框架，smoke 21/21）",
+          "name": "commit",
+          "value": "2767770"
+        }
+      ]
     }
   ],
   "relationships": [
