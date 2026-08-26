@@ -3679,6 +3679,11 @@
           "description": "docs/memory-eval-dataset.md; tests/memory-eval-dataset.test.js; design/KG/SystemArchitecture.json（ArchGraph 长期记忆评测题集 v1）",
           "name": "commit",
           "value": "b0a33a4"
+        },
+        {
+          "description": "scripts/memory-eval-run.js; docs/memory-eval-dataset.md; tests/memory-eval-run.test.js; tests/memory-eval-dataset.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测题集 v2：多跳召回维度 + 成本/压缩率口径）",
+          "name": "commit",
+          "value": "75d0e53"
         }
       ]
     },
@@ -3709,6 +3714,11 @@
           "description": "scripts/memory-eval-run.js; tests/memory-eval-run.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测 harness 与实测基线 23/23 100%）",
           "name": "commit",
           "value": "3bb8375"
+        },
+        {
+          "description": "scripts/memory-eval-run.js; docs/memory-eval-dataset.md; tests/memory-eval-run.test.js; tests/memory-eval-dataset.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测题集 v2：多跳召回维度 + 成本/压缩率口径）",
+          "name": "commit",
+          "value": "75d0e53"
         }
       ]
     },
