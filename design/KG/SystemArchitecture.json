@@ -3850,7 +3850,7 @@
       "name": "构建 Docker 隔离沙箱测试整套框架",
       "type": "Work Package",
       "parent": "1249",
-      "description": "构建自进化测试环境（用户确认 2026-08-26）：测试对象=整套 ARCHGRAPH 框架（用户 npm install archgraph-argo 安装）；不自动 npm publish，改用 npm pack 生成本地 tarball 在沙箱内安装；沙箱=Docker 容器，与本机完全隔离（绝不改宿主配置/文件）。交付：sandbox/Dockerfile（node 20 + pwsh + opencode-ai，基础镜像可配置）、sandbox/entrypoint.sh（空工作区 npm install tarball + npx argo-deploy + smoke）、sandbox/smoke.js（argo init 生成初始图谱 + 验证部署产物/MCP注册/已安装MCP读图+校验 + Level B 全能力 + Level C 全栈 Agent 评测 + Level D lightrag MCP + Level E Agent 挂 lightrag MCP）、scripts/sandbox-test.js（宿主编排器）、tests/sandbox-framework.test.js。Level A 实测：22 步部署 Linux 容器全成功，smoke 21/21。Level B（2026-08-26）：挂载 argo/.env 真实参数，独立 sandbox Neo4j 库 + 真实 queryNeo4jGraph + 真实 Embedding 语义检索，25/25。Level C（2026-08-26）：安装 opencode-ai，配置阿里 DashScope compatible-mode provider（ali-dashscope/qwen3.7-plus，@ai-sdk/openai-compatible），用 opencode run headless 驱动 Agent 回答记忆题——Agent 通过注册进 opencode.json 的 argo MCP（argo_<tool>）读图作答，输出 JSON 事件流（工具调用 + token/cost 计量），实测 27/27；问答模型切换 DeepSeek（embedding 保持 QWEN）。v2 修正：沙箱不拷生产图，改由 argo init 生成初始图谱（2 元素/4 视图）。Level D（2026-08-26）：容器内 Python + LightRAG 包成 lightrag MCP（第二记忆后端）——sandbox/lightrag-mcp.py（FastMCP，暴露 lightrag_insert/lightrag_query；JSON 实体抽取适配 DeepSeek；ainsert(content, ids=doc_id) 参数修正；mcp SDK env 白名单过滤→显式 env 透传 + /env/argo.env 回退；pipmaster/ascii_colors stdout 污染修复）+ sandbox/test-lightrag-mcp.py（MCP 客户端探针，insert+query 全链路断言答案含 1249，退出码 0），smoke 28/28。Level E（2026-08-26）：OpenCode Agent 挂 lightrag MCP 作答（对照「双 MCP 同 Agent」的 B 组冒烟）——与 Level C 同一 Agent+DeepSeek，记忆后端换 lightrag MCP，opencode run --format json 驱动 Agent 调 lightrag_query 读已摄入记忆（Level D 探针预先摄入含 1249 文档）答对 1249（tool_use 事件含工具名 + 答案校验，agent-eval-lightrag.log），smoke 29/29。已知发现：install-argo.ps1 的 DSH/OpenClaw 步骤反斜杠字面量路径在 Linux 不兼容（MVP 以 -SkipDsh -SkipOpenClaw 跳过，留待修复）。",
+      "description": "构建自进化测试环境（用户确认 2026-08-26）：测试对象=整套 ARCHGRAPH 框架（用户 npm install archgraph-argo 安装）；不自动 npm publish，改用 npm pack 生成本地 tarball 在沙箱内安装；沙箱=Docker 容器，与本机完全隔离（绝不改宿主配置/文件）。交付：sandbox/Dockerfile（node 20 + pwsh + opencode-ai，基础镜像可配置）、sandbox/entrypoint.sh（空工作区 npm install tarball + npx argo-deploy + smoke）、sandbox/smoke.js（argo init 生成初始图谱 + 验证部署产物/MCP注册/已安装MCP读图+校验 + Level B 全能力 + Level C 全栈 Agent 评测 + Level D lightrag MCP + Level E Agent 挂 lightrag MCP）、scripts/sandbox-test.js（宿主编排器）、tests/sandbox-framework.test.js。Level A 实测：22 步部署 Linux 容器全成功，smoke 21/21。Level B（2026-08-26）：挂载 argo/.env 真实参数，独立 sandbox Neo4j 库 + 真实 queryNeo4jGraph + 真实 Embedding 语义检索，25/25。Level C（2026-08-26）：安装 opencode-ai，配置阿里 DashScope compatible-mode provider（ali-dashscope/qwen3.7-plus，@ai-sdk/openai-compatible），用 opencode run headless 驱动 Agent 回答记忆题——Agent 通过注册进 opencode.json 的 argo MCP（argo_<tool>）读图作答，输出 JSON 事件流（工具调用 + token/cost 计量），实测 27/27；问答模型切换 DeepSeek（embedding 保持 QWEN）。v2 修正：沙箱不拷生产图，改由 argo init 生成初始图谱（2 元素/4 视图）。Level D（2026-08-26）：容器内 Python + LightRAG 包成 lightrag MCP（第二记忆后端）——sandbox/lightrag-mcp.py（FastMCP，暴露 lightrag_insert/lightrag_query；JSON 实体抽取适配 DeepSeek；ainsert(content, ids=doc_id) 参数修正；mcp SDK env 白名单过滤→显式 env 透传 + /env/argo.env 回退；pipmaster/ascii_colors stdout 污染修复）+ sandbox/test-lightrag-mcp.py（MCP 客户端探针，insert+query 全链路断言答案含 1249，退出码 0），smoke 28/28。Level E（2026-08-26）：OpenCode Agent 挂 lightrag MCP 作答（对照「双 MCP 同 Agent」的 B 组冒烟）——与 Level C 同一 Agent+DeepSeek，记忆后端换 lightrag MCP，opencode run --format json 驱动 Agent 调 lightrag_query 读已摄入记忆（Level D 探针预先摄入含 1249 文档）答对 1249（tool_use 事件含工具名 + 答案校验，agent-eval-lightrag.log）。**严格隔离（2026-08-26 用户要求）**：configureOpenCodeModel(mode) 按会话只挂一个记忆后端——A 组（Level C）会话只挂 argo MCP（清掉 lightrag）、B 组（Level E）会话只挂 lightrag MCP（清掉 argo，deleteMcpArgo 兼容 mcp.argo/mcp.servers.argo），回读校验断言 opencode.json「只剩对应的那一个 MCP」，不同会话看不到对方的 MCP，唯一变量=记忆后端，smoke 29/29。已知发现：install-argo.ps1 的 DSH/OpenClaw 步骤反斜杠字面量路径在 Linux 不兼容（MVP 以 -SkipDsh -SkipOpenClaw 跳过，留待修复）。",
       "testcases": [
         {
           "acceptanceCriteria": "执行 node --test tests/sandbox-framework.test.js：断言 sandbox/Dockerfile、entrypoint.sh、smoke.js、scripts/sandbox-test.js 存在且含关键能力（FROM BASE_IMAGE/pwsh、npm install tarball、npx argo-deploy、容器 HOME 隔离、npm pack 无 publish、不拷生产图 fixture、initializeWorkspace）。通过。",
@@ -3868,7 +3868,7 @@
         },
         {
           "acceptanceCriteria": "运行 node scripts/sandbox-test.js 退出码 0 且 results/sandbox-report.json allPassed=true（含 c: 检查：opencode 已装、Agent 通过 argo_<tool> 调沙箱内 ARGO MCP 且答对 1249）；tests/sandbox-framework.test.js 全过。",
-          "description": "GIVEN 测试对象应为运行在 OpenCode 上的 Agent（Agent 再调沙箱内 ARGO MCP），而非直接测 MCP 接口；WHEN 容器内安装 opencode-ai、配置阿里 compatible-mode provider（ali-dashscope/qwen3.7-plus）、用 opencode run headless 驱动 Agent 回答记忆题；THEN Agent 通过注册进 opencode.json 的 argo MCP 读图并准确作答，JSON 事件流含工具调用与 token/cost 计量。",
+          "description": "GIVEN 测试对象应为运行在 OpenCode 上的 Agent（Agent 再调沙箱内 ARGO MCP），而非直接测 MCP 接口；WHEN 容器内安装 opencode-ai、配置阿里 compatible-mode provider（ali-dashscope/qwen3.7-plus）、用 opencode run headless 驱动 Agent 回答记忆题；THEN Agent 通过注册进 opencode.json 的 argo MCP 读图并准确作答，JSON 事件流含工具调用与 token/cost 计量；**严格隔离：A 组会话只挂 argo MCP（configureOpenCodeModel('argo') 清掉 lightrag），会话看不到 lightrag MCP**。",
           "Input": "运行 node scripts/sandbox-test.js（含 Level C）",
           "name": "AT-self-evolution-sandbox-03-OpenCode Agent全栈评测",
           "type": "Acceptance Test"
@@ -3882,7 +3882,7 @@
         },
         {
           "acceptanceCriteria": "运行 node scripts/sandbox-test.js 退出码 0 且 results/sandbox-report.json allPassed=true（含 e: 检查：opencode Agent 经 lightrag MCP 答对 1249，tool=true ans=true）；tests/sandbox-framework.test.js 全过（含 sandbox-framework-levele 断言）。",
-          "description": "GIVEN 对照评测「双 MCP 同 Agent」需要验证 Agent 能挂 lightrag MCP（B 组）作答；WHEN 运行 node scripts/sandbox-test.js（含 Level E：smoke 用 opencode run --format json 驱动同一 Agent 提问让其调用 lightrag 记忆查询工具回答已摄入记忆题，LightRAG 记忆由 Level D 探针预先摄入含 1249 的文档）；THEN Agent 实际调用了 lightrag_query 工具（tool_use 事件含工具名，而非仅问题文本含 lightrag）且答案含 1249，退出码 0，smoke 全部检查通过（29/29）。",
+          "description": "GIVEN 对照评测「双 MCP 同 Agent」需要验证 Agent 能挂 lightrag MCP（B 组）作答；WHEN 运行 node scripts/sandbox-test.js（含 Level E：smoke 用 opencode run --format json 驱动 Agent 提问让其调用 lightrag 记忆查询工具回答已摄入记忆题，LightRAG 记忆由 Level D 探针预先摄入含 1249 的文档）；THEN Agent 实际调用了 lightrag_query 工具（tool_use 事件含工具名，而非仅问题文本含 lightrag）且答案含 1249，退出码 0；**严格隔离：B 组会话只挂 lightrag MCP（configureOpenCodeModel('lightrag') 清掉 argo，deleteMcpArgo），会话看不到 argo MCP**，smoke 全部检查通过（29/29）。",
           "Input": "运行 node scripts/sandbox-test.js（含 Level E）",
           "name": "AT-self-evolution-sandbox-05-OpenCode Agent经lightrag MCP作答",
           "type": "Acceptance Test"
@@ -3928,11 +3928,16 @@
           "description": "sandbox/smoke.js; tests/sandbox-framework.test.js（Level E：OpenCode Agent 挂 lightrag MCP 作答，对照 B 组冒烟，smoke 29/29）",
           "name": "commit",
           "value": "29a5150"
+        },
+        {
+          "description": "sandbox/smoke.js; tests/sandbox-framework.test.js（严格 A/B 隔离：A 组会话只挂 argo MCP、B 组会话只挂 lightrag MCP，不同会话看不到对方 MCP，唯一变量=记忆后端，smoke 29/29）",
+          "name": "commit",
+          "value": "6374f5b"
         }
       ]
     },
     {
-      "description": "LightRAG 对照评测基线（计划，2026-08-26）：同题、同模型栈，对比 ArchGraph vs LightRAG 的准确率/多跳召回/时延/token 成本。**公平对照设计（2026-08-26 人类伙伴校正）**：LightRAG 是 RAG 流水线库（非 Agent），直接比不等价；必须**双 MCP 同 Agent**——同一 OpenCode Agent + DeepSeek + 同一工作流规则，A 组挂 argo MCP（意图图记忆）、B 组挂 lightrag MCP（LightRAG 包成 MCP server），同题同问法，**唯一变量=记忆后端**。**评测语料（2026-08-26 人类伙伴校正）**：**不得用 ArchGraph 自有/生产图谱做语料**（自我基准有偏）；用标准评测数据集 LongMemEval（ICLR2025，调研见 docs/memory-eval-benchmarks.md）。**数据集已获取（2026-08-26）**：`data/benchmarks/longmemeval/longmemeval_oracle.json`（500 题，14.7MB）+ `longmemeval_s_cleaned.json`（264MB）；每题含 question/answer/question_type/question_date/haystack_sessions（多段聊天历史=共享源记忆，消息{role,content,has_answer}）；能力分布 temporal-reasoning 133/multi-session 133/knowledge-update 78/single-session-user 70/single-session-assistant 56/single-session-preference 30；经 hf-mirror.com 镜像获取（huggingface.co 被墙）。可行性已验证（宿主 .venv，lightrag-hku 1.5.6 + QWEN embedding + DeepSeek，insert+query 跑通）：核心绕坑=LightRAG 硬编码 embedding 维 1536，QWEN 默认 1024→冲突；解法=QWEN 支持 dimensions，openai_embed(embedding_dim=1536) 输出 1536 维 + EmbeddingFunc/向量库三者一致（已实测 200/1536）。**实体抽取已调通（2026-08-26）**：LightRAG 1.5.6 默认记录行抽取格式对 DeepSeek 解析差（只抽 1 实体/空描述），改用 entity_extraction_use_json=True（response_format=json_object）后稳定抽取多实体+关系，hybrid 查询返回 grounded 答案。剩余工作：①基于标准数据集的语料序列化器（haystack_sessions→双端各自摄取）；③对照 harness（同 OpenCode Agent 挂 argo MCP vs lightrag MCP 同题，judge+报告）。**②已交付（2026-08-26）**：容器内 Python+LightRAG 包成 lightrag MCP（sandbox/lightrag-mcp.py + sandbox/test-lightrag-mcp.py，smoke Level D 28/28，详见自进化沙箱 WP）。实现后补可执行 AT。",
+      "description": "LightRAG 对照评测基线（计划，2026-08-26）：同题、同模型栈，对比 ArchGraph vs LightRAG 的准确率/多跳召回/时延/token 成本。**公平对照设计（2026-08-26 人类伙伴校正）**：LightRAG 是 RAG 流水线库（非 Agent），直接比不等价；必须**双 MCP 同 Agent**——同一 OpenCode Agent + DeepSeek + 同一工作流规则，A 组挂 argo MCP（意图图记忆）、B 组挂 lightrag MCP（LightRAG 包成 MCP server），同题同问法，**唯一变量=记忆后端**。**严格隔离已落地（2026-08-26）**：沙箱 smoke 的 Level C（A 组）会话只挂 argo MCP、Level E（B 组）会话只挂 lightrag MCP——configureOpenCodeModel(mode) 按会话清掉对方 MCP（deleteMcpArgo 兼容 mcp.argo/mcp.servers.argo）并回读校验 opencode.json「只剩对应那一个 MCP」，**不同会话看不到对方的记忆后端**（commit 6374f5b，smoke 29/29）。**评测语料（2026-08-26 人类伙伴校正）**：**不得用 ArchGraph 自有/生产图谱做语料**（自我基准有偏）；用标准评测数据集 LongMemEval（ICLR2025，调研见 docs/memory-eval-benchmarks.md）。**数据集已获取（2026-08-26）**：`data/benchmarks/longmemeval/longmemeval_oracle.json`（500 题，14.7MB）+ `longmemeval_s_cleaned.json`（264MB）；每题含 question/answer/question_type/question_date/haystack_sessions（多段聊天历史=共享源记忆，消息{role,content,has_answer}）；能力分布 temporal-reasoning 133/multi-session 133/knowledge-update 78/single-session-user 70/single-session-assistant 56/single-session-preference 30；经 hf-mirror.com 镜像获取（huggingface.co 被墙）。可行性已验证（宿主 .venv，lightrag-hku 1.5.6 + QWEN embedding + DeepSeek，insert+query 跑通）：核心绕坑=LightRAG 硬编码 embedding 维 1536，QWEN 默认 1024→冲突；解法=QWEN 支持 dimensions，openai_embed(embedding_dim=1536) 输出 1536 维 + EmbeddingFunc/向量库三者一致（已实测 200/1536）。**实体抽取已调通（2026-08-26）**：LightRAG 1.5.6 默认记录行抽取格式对 DeepSeek 解析差（只抽 1 实体/空描述），改用 entity_extraction_use_json=True（response_format=json_object）后稳定抽取多实体+关系，hybrid 查询返回 grounded 答案。剩余工作：①基于标准数据集的语料序列化器（haystack_sessions→双端各自摄取）；③对照 harness（同 OpenCode Agent 挂 argo MCP vs lightrag MCP 同题，judge+报告）。**②已交付（2026-08-26）**：容器内 Python+LightRAG 包成 lightrag MCP（sandbox/lightrag-mcp.py + sandbox/test-lightrag-mcp.py，smoke Level D 28/28，详见自进化沙箱 WP）。实现后补可执行 AT。",
       "id": "lightrag-baseline-wp-001",
       "name": "LightRAG 对照评测基线",
       "parent": "1249",
@@ -3962,6 +3967,11 @@
           "description": "sandbox/lightrag-mcp.py; sandbox/test-lightrag-mcp.py; sandbox/Dockerfile; sandbox/smoke.js; tests/sandbox-framework.test.js（②容器内 LightRAG 包成 lightrag MCP 已交付，smoke Level D 28/28；实体抽取改用 JSON 模式）",
           "name": "commit",
           "value": "3b6e0b1"
+        },
+        {
+          "description": "sandbox/smoke.js; tests/sandbox-framework.test.js（严格 A/B 隔离落地：A 组只挂 argo、B 组只挂 lightrag，不同会话看不到对方 MCP，smoke 29/29）",
+          "name": "commit",
+          "value": "6374f5b"
         }
       ]
     }
