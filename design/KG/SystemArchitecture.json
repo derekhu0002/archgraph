@@ -3850,18 +3850,18 @@
       "name": "构建 Docker 隔离沙箱测试整套框架",
       "type": "Work Package",
       "parent": "1249",
-      "description": "构建自进化测试环境（用户确认 2026-08-26）：测试对象=整套 ARCHGRAPH 框架（用户 npm install archgraph-argo 安装）；不自动 npm publish，改用 npm pack 生成本地 tarball 在沙箱内安装；沙箱=Docker 容器，与本机完全隔离（绝不改宿主配置）。交付：sandbox/Dockerfile（node 20 + pwsh，基础镜像可配置）、sandbox/entrypoint.sh（npm install tarball + npx argo-deploy -SkipDsh -SkipOpenClaw -SkipEnv + smoke）、sandbox/smoke.js（验证部署产物/MCP 注册/已安装 MCP 读图+校验）、scripts/sandbox-test.js（宿主编排器：npm pack→docker build→docker run→读报告）、tests/sandbox-framework.test.js。实测：22 步部署在 Linux 容器内全部成功（含离线依赖安装、MCP 注册），smoke 21/21 通过（archgraph-argo@0.10.31）。已知发现：install-argo.ps1 的 DSH/OpenClaw 步骤用反斜杠字面量路径（如 'skills\\argo-init'）在 Linux 不兼容，MVP 以 -SkipDsh -SkipOpenClaw 跳过（留作后续修复项）。",
+      "description": "构建自进化测试环境（用户确认 2026-08-26）：测试对象=整套 ARCHGRAPH 框架（用户 npm install archgraph-argo 安装）；不自动 npm publish，改用 npm pack 生成本地 tarball 在沙箱内安装；沙箱=Docker 容器，与本机完全隔离（绝不改宿主配置/文件）。交付：sandbox/Dockerfile（node 20 + pwsh，基础镜像可配置）、sandbox/entrypoint.sh（空工作区 npm install tarball + npx argo-deploy + smoke）、sandbox/smoke.js（argo init 生成初始图谱 + 验证部署产物/MCP注册/已安装MCP读图+校验 + Level B 全能力）、scripts/sandbox-test.js（宿主编排器：npm pack→docker build→docker run→读报告）、tests/sandbox-framework.test.js。Level A 实测：22 步部署 Linux 容器全成功，smoke 21/21（archgraph-argo@0.10.31）。Level B（2026-08-26）：挂载 argo/.env 真实参数，沙箱内跑框架自带 sync 建独立 sandbox Neo4j 库（宿主导 Enterprise 多库），真实 queryNeo4jGraph 投影查询 + 真实 Embedding 语义检索，实测 25/25。v2 修正（2026-08-26）：沙箱不再拷生产图，改由容器内 argo init（initializeWorkspace）从部署的 defaults/ 生成初始图谱（2 元素/1 关系/4 视图）——忠实还原真实新用户流程。已知发现：install-argo.ps1 的 DSH/OpenClaw 步骤用反斜杠字面量路径（如 'skills\\\\argo-init'）在 Linux 不兼容，MVP 以 -SkipDsh -SkipOpenClaw 跳过（留作后续修复项）。",
       "testcases": [
         {
-          "acceptanceCriteria": "执行 node --test tests/sandbox-framework.test.js：断言 sandbox/Dockerfile、entrypoint.sh、smoke.js、scripts/sandbox-test.js 存在且含关键能力（FROM BASE_IMAGE/pwsh、npm install tarball、npx argo-deploy、容器 HOME 隔离、npm pack 无 publish）。通过。",
-          "description": "GIVEN 需要为自进化建一个隔离的测试环境；WHEN 检查 sandbox/ 与 scripts/sandbox-test.js；THEN 存在 Dockerfile（node+pwsh，基础镜像可配置）、entrypoint.sh（模拟用户 npm install tarball + npx argo-deploy）、smoke.js、宿主编排器，且不 npm publish。",
+          "acceptanceCriteria": "执行 node --test tests/sandbox-framework.test.js：断言 sandbox/Dockerfile、entrypoint.sh、smoke.js、scripts/sandbox-test.js 存在且含关键能力（FROM BASE_IMAGE/pwsh、npm install tarball、npx argo-deploy、容器 HOME 隔离、npm pack 无 publish、不拷生产图 fixture、initializeWorkspace）。通过。",
+          "description": "GIVEN 需要为自进化建一个隔离的测试环境；WHEN 检查 sandbox/ 与 scripts/sandbox-test.js；THEN 存在 Dockerfile（node+pwsh，基础镜像可配置）、entrypoint.sh（空工作区模拟用户 npm install tarball + npx argo-deploy）、smoke.js（含 argo init 生成初始图谱）、宿主编排器，且不 npm publish、不复制生产图。",
           "Input": "检查 sandbox/ 与 scripts/sandbox-test.js",
           "name": "AT-self-evolution-sandbox-01-沙箱测试环境就绪（不发布）",
           "type": "Acceptance Test"
         },
         {
-          "acceptanceCriteria": "运行 node scripts/sandbox-test.js（Docker 可用时）退出码 0，且 results/sandbox-report.json allPassed=true；tests/sandbox-framework.test.js 全过。",
-          "description": "GIVEN 需要整套框架按用户安装方式端到端验证且不碰宿主；WHEN 容器内 npm install 本地 tarball + npx argo-deploy + smoke；THEN 部署产物/依赖/MCP 注册全部就绪，smoke 检查（部署产物 + MCP 注册 + 已安装 MCP 读图/校验）全部通过，部署根均在容器 HOME 下。",
+          "acceptanceCriteria": "运行 node scripts/sandbox-test.js（Docker 可用时；argo/.env 存在时含 Level B 真实 Neo4j+Embedding）退出码 0，且 results/sandbox-report.json allPassed=true；tests/sandbox-framework.test.js 全过。",
+          "description": "GIVEN 需要整套框架按用户安装方式端到端验证且不碰宿主；WHEN 容器内空工作区 npm install 本地 tarball + npx argo-deploy + smoke（smoke 先调 initializeWorkspace 生成初始图谱，再跑 MCP 读图/校验，并在挂载 argo/.env 时跑 Level B：独立 sandbox Neo4j 库投影查询 + 真实 Embedding 语义检索）；THEN 部署产物/依赖/MCP 注册全部就绪，初始图谱生成成功，smoke 检查全部通过，部署根均在容器 HOME 下。",
           "Input": "运行 node scripts/sandbox-test.js",
           "name": "AT-self-evolution-sandbox-02-Docker端到端框架安装验证",
           "type": "Acceptance Test"
