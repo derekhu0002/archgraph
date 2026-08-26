@@ -3894,6 +3894,11 @@
           "description": "sandbox/Dockerfile; sandbox/smoke.js; tests/sandbox-framework.test.js; .gitignore; design/KG/SystemArchitecture.json（Level C：OpenCode Agent 全栈评测 27/27，Agent 经 argo_queryNeo4jGraph 命中 sandbox 库答对 1249）",
           "name": "commit",
           "value": "aa00ff6"
+        },
+        {
+          "description": "sandbox/smoke.js; tests/sandbox-framework.test.js; argo/.env(gitignored)（Level C 问答模型切换 DeepSeek：embedding 保持 QWEN，provider deepseek-sandbox/deepseek-chat，27/27）",
+          "name": "commit",
+          "value": "241b7ef"
         }
       ]
     }
