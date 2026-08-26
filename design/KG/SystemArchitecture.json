@@ -3928,6 +3928,11 @@
           "description": "design/KG/SystemArchitecture.json（评测语料校正：用标准数据集不用自有图谱）",
           "name": "commit",
           "value": "dc4d4c9"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json（数据集已获取：LongMemEval oracle 500 题，data/benchmarks/longmemeval，gitignored）",
+          "name": "commit",
+          "value": "fa3c6da"
         }
       ]
     }
