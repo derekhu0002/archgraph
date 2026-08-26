@@ -3899,6 +3899,11 @@
           "description": "sandbox/smoke.js; tests/sandbox-framework.test.js; argo/.env(gitignored)（Level C 问答模型切换 DeepSeek：embedding 保持 QWEN，provider deepseek-sandbox/deepseek-chat，27/27）",
           "name": "commit",
           "value": "241b7ef"
+        },
+        {
+          "description": "sandbox/smoke.js（Level C 配置回读断言：model/provider/apiKey/baseURL 显式校验）",
+          "name": "commit",
+          "value": "0059aa9"
         }
       ]
     }
