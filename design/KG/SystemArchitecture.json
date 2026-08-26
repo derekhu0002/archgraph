@@ -3918,6 +3918,11 @@
           "description": "design/KG/SystemArchitecture.json（LightRAG 对照评测基线 WP 登记：可行性结论 + 1536 维绕坑方案 + 剩余工作；实现后补可执行 AT）",
           "name": "commit",
           "value": "9b9d4f5"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json（公平对照设计：双 MCP 同 Agent，唯一变量=记忆后端）",
+          "name": "commit",
+          "value": "f5e6a05"
         }
       ]
     }
