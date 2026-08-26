@@ -3889,6 +3889,11 @@
           "description": "design/KG/SystemArchitecture.json（WP 描述/AT 更新：argo init 初始图谱 + Level B）",
           "name": "commit",
           "value": "98c3bfe"
+        },
+        {
+          "description": "sandbox/Dockerfile; sandbox/smoke.js; tests/sandbox-framework.test.js; .gitignore; design/KG/SystemArchitecture.json（Level C：OpenCode Agent 全栈评测 27/27，Agent 经 argo_queryNeo4jGraph 命中 sandbox 库答对 1249）",
+          "name": "commit",
+          "value": "aa00ff6"
         }
       ]
     }
