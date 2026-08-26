@@ -3798,7 +3798,14 @@
       "id": "overseer-wiki-eval-001",
       "name": "评测口径：LLM-Wiki 双层面指标（查询层+写入层）",
       "parent": "project-overseer-001",
-      "type": "Business Object"
+      "type": "Business Object",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "7c088e6",
+          "description": "design/KG/SystemArchitecture.json（新增评测口径 LTM 元素 overseer-wiki-eval-001 + 关系 overseer-wiki-eval-rel-001 关联项目愿景）"
+        }
+      ]
     }
   ],
   "relationships": [
