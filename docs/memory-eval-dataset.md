@@ -1,7 +1,9 @@
-# ArchGraph 长期记忆评测题集（v1）
+# ArchGraph 长期记忆评测题集（v2）
 
 > 依据：`docs/memory-eval-benchmarks.md` 调研结论——以 LongMemEval（ICLR 2025）5 能力维度为骨架，裁剪适配「agent 元记忆」场景。
 > 目的：作为 ArchGraph 长期记忆系统「读写的极致」的**可执行评测输入**。后续评测跑法见「评测运行约定」。
+>
+> v2 新增（2026-08-26，对齐 LLM-Wiki 双层面评测口径）：**维度 6 多跳召回**（MH-01~05，沿拓扑内链逐跳检索找全）+ **成本/压缩率评测**（Query Cost：检索上下文 token 成本与 context 压缩率，目标减 70~90%）。
 
 ---
 
@@ -23,6 +25,7 @@
 | 时间推理 | 依据 commit 顺序/时间戳判断先后、演进 |
 | 知识更新 | 识别旧表述已被新表述取代，取最新 |
 | 拒答 | 记忆里没有的内容，正确行为是拒绝回答 |
+| 多跳召回（LLM-Wiki 找得全） | 顺着拓扑内链（视图/父元素/关系）逐跳检索，把深层复杂关联找全 |
 
 ---
 
@@ -176,22 +179,58 @@
   - THEN：没有——应拒答
   - 检索提示：读 `overseer-vision-001` 描述，无关即拒答
 
+### 维度 6：多跳召回（multi-hop recall / 找得全）
+
+> 对齐 LLM-Wiki「找得全」：不仅查单点事实，还能顺着拓扑内链（视图成员 / `parent_element_id` / 关系）做多跳推理，把深层复杂关联找全。harness 的 **pick 机制**让下一步检索参数（如 elementId）由上一步结果动态派生，实现真实逐跳检索。
+
+- **MH-01**
+  - GIVEN：项目总管 LTM 视图（overseer-ltm-001）
+  - WHEN：项目愿景元素挂在哪个 LTM 子视图下？该视图又挂在哪位 Business Actor 下？（两跳）
+  - THEN：愿景在 `overseer-ltm-001` → 该视图挂载于 `project-overseer-001`「项目总管」（第一跳取视图 parentElement，第二跳取元素 parent）
+  - 检索提示：`getArchitectureViewContext(overseer-ltm-001)` 的 parentElement → `getIntentElementContext(parentElement.id)`
+
+- **MH-02**
+  - GIVEN：项目总管 LTM 视图
+  - WHEN：沿「视图→Actor→组织元素」三跳追踪，该组织元素下还有哪些团队视图？
+  - THEN：1962 `AgentOrganization` 下含 299/430/433/media-team-001/video-team-001（开发/公众号发布/媒体创作/视频创作团队）
+  - 检索提示：第一跳取 parentElement.id（project-overseer-001）→ 第二跳取元素 parent（1962）→ 第三跳 `getIntentElementContext(1962)` 枚举 subdiagram_views
+
+- **MH-03**
+  - GIVEN：长期记忆评测视图（memory-eval-view-001）
+  - WHEN：评测工作包挂在哪个视图下？该视图又挂在哪个组织元素下？（两跳）
+  - THEN：`memory-eval-view-001` 含 memory-eval-bench/dataset/run-wp-001 → 挂载于 1249「Implementation and Migration Viewpoint」
+  - 检索提示：`getArchitectureViewContext(memory-eval-view-001)` → `getIntentElementContext(parentElement.id)`
+
+- **MH-04**
+  - GIVEN：公众号发布团队视图（433）
+  - WHEN：公众号发布员挂在哪位组织元素下？该组织元素下还有哪些团队视图？（两跳）
+  - THEN：2755「公众号发布员」在 433 → 视图父元素 1962 AgentOrganization → 同组织下还有 299/430/media-team-001/video-team-001
+  - 检索提示：`getArchitectureViewContext(433)` → `getIntentElementContext(1962)`
+
+- **MH-05**
+  - GIVEN：项目总管 LTM 视图
+  - WHEN：项目总管长期记忆当前包含哪些元素（找全）？其中「评测口径」是否已登记？
+  - THEN：7 个——vision / archimate-role / mem-eval / query-rules / content-storage / subgraph-semantic / wiki-eval（2026-08-26 新增评测口径 `overseer-wiki-eval-001`）
+  - 检索提示：`getArchitectureViewContext(overseer-ltm-001)` 枚举 included_elements，全部命中即找全
+
 ---
 
 ## 3. 评测运行约定
 
 - **检索路径**：评测 harness 用 ARGO 语义查询（`getSystemArchitecture` / `getIntentElementContext`）与 `queryNeo4jGraph`（按类型/关系结构查询）作为记忆读取入口。
+- **多跳检索**：多跳召回题（MH-*）的检索参数（如 elementId）由上一步检索结果动态派生（harness 的 pick 机制），真实沿拓扑内链逐跳检索，验证「找得全」。
 - **评分流程**（对齐 Ingest→Search→Evaluate）：
   1. **Search**：对每题按其「检索提示」读取记忆；
   2. **Answer**：judge LLM 基于取回的记忆生成答案；
   3. **Judge**：judge LLM 对照 `THEN 期望答案` 判定 正确 / 错误 / 正确拒答；
 - **指标**：各维度准确率、整体准确率、拒答准确率（MQ-21~23 判「正确拒答」）、单题检索时延与 token 成本。
+- **成本与压缩率（Query Cost）**：对齐 LLM-Wiki「回得快且省」——统计每次检索序列化上下文的估计 token 成本（`avgRetrievedTokens`）；以全量意图图 `design/KG/SystemArchitecture.json` 的估计 token 数为「原始语料」（`rawCorpusTokens`），压缩率 = 1 − 平均检索 token / 原始语料 token，目标 ≥ 70%（context 减 70~90%）。token 估算为确定性启发式：CJK 字符按 1 token/字、其它按 1 token/4 字符（无 tokenizer 依赖，可复现）。
 - **基线回放**：`THEN` 答案均可从当前意图图重放验证，保证题集长期有效。
 
 ---
 
 ## 4. 后续
 
-1. 接评测 harness，跑出**当前实测基线**（各维度准确率 + 时延 + token）。
+1. 接评测 harness，跑出**当前实测基线**（各维度准确率 + 时延 + token + 压缩率）。
 2. 以 LongMemEval 头部成绩（~94%）为「世界级」量化门槛参照，定 ArchGraph 目标。
-3. 题集按需扩充（当前 v1 = 23 题：信息抽取 5 / 多会话推理 5 / 时间推理 5 / 知识更新 5 / 拒答 3）。
+3. 题集按需扩充（当前 v2 = 28 题：信息抽取 5 / 多会话推理 5 / 时间推理 5 / 知识更新 5 / 拒答 3 / 多跳召回 5；另附成本与压缩率评测）。

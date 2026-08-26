@@ -2,14 +2,17 @@
 /**
  * ArchGraph 长期记忆评测 harness v1
  *
- * 依据 docs/memory-eval-dataset.md 的 23 题，逐题通过 ARGO MCP 读路径
- * （getArchitectureViewContext / getIntentElementContext / getSystemArchitecture）
- * 检索记忆并对照 ground truth 判定 PASS/FAIL，输出按 5 维度/整体/拒答的
- * 准确率与平均时延，写入 results/memory-eval-report.json。
+ * 依据 docs/memory-eval-dataset.md 的 28 题（23 基础 + 5 多跳召回），逐题通过
+ * ARGO MCP 读路径（getArchitectureViewContext / getIntentElementContext /
+ * getSystemArchitecture）检索记忆并对照 ground truth 判定 PASS/FAIL，输出按
+ * 6 维度/整体/拒答的准确率、平均时延，以及成本统计（token 成本 + 压缩率），
+ * 写入 results/memory-eval-report.json。
  *
  * 设计要点：
  *  - 全部使用 JSON 读取工具，零 Neo4j 运行时依赖，稳健可复现。
  *  - 判定为确定性字符串/结构检查（含顺序、子视图数、拒答=不应出现）。
+ *  - 多跳召回（MH-*）：检索参数可经 pick 由上一步结果动态派生（沿拓扑内链逐跳）。
+ *  - 成本统计：估计每次检索上下文 token 数，对比全量意图图 token（原始语料）得压缩率。
  *
  * 用法：
  *   node scripts/memory-eval-run.js            # 打印表格 + 写报告
@@ -26,7 +29,7 @@ process.env.ARGO_REPO_ROOT = process.env.ARGO_REPO_ROOT || ROOT;
 const RESULTS_DIR = path.join(ROOT, 'results');
 const REPORT_PATH = path.join(RESULTS_DIR, 'memory-eval-report.json');
 
-const DIMENSIONS = ['信息抽取', '多会话推理', '时间推理', '知识更新', '拒答'];
+const DIMENSIONS = ['信息抽取', '多会话推理', '时间推理', '知识更新', '拒答', '多跳召回'];
 
 /**
  * 23 题评测规格：retrieval = 一次或多次 MCP 读调用；requirements = 判定条件，
@@ -178,6 +181,63 @@ const QUESTIONS = [
     retrieval: [{ tool: 'getIntentElementContext', args: { elementId: 'overseer-vision-001' } }],
     requirements: [{ step: 0, type: 'expectAbsent', values: ['配色', '界面偏好'] }],
   },
+  // ── 维度 6：多跳召回（Query Recall——顺着拓扑内链找全深层关联）──
+  // pick 机制：某一步的检索参数可从更早步骤的结果动态派生，实现真实逐跳检索。
+  {
+    id: 'MH-01', dimension: '多跳召回', label: '愿景→LTM视图→Actor 两跳追踪？',
+    retrieval: [
+      { tool: 'getArchitectureViewContext', args: { view_id: 'overseer-ltm-001' } },
+      { tool: 'getIntentElementContext', args: { elementId: { pick: { step: 0, path: 'parentElement.id' } } } },
+    ],
+    requirements: [
+      { step: 0, type: 'contains', values: ['overseer-vision-001', 'project-overseer-001'] },
+      { step: 1, type: 'contains', values: ['项目总管', '1962'] },
+    ],
+  },
+  {
+    id: 'MH-02', dimension: '多跳召回', label: '视图→Actor→组织 三跳，组织下还有哪些团队视图？',
+    retrieval: [
+      { tool: 'getArchitectureViewContext', args: { view_id: 'overseer-ltm-001' } },
+      { tool: 'getIntentElementContext', args: { elementId: { pick: { step: 0, path: 'parentElement.id' } } } },
+      { tool: 'getIntentElementContext', args: { elementId: { pick: { step: 1, find: { id: 'project-overseer-001' }, get: 'parent' } } } },
+    ],
+    requirements: [
+      { step: 0, type: 'contains', values: ['project-overseer-001'] },
+      { step: 1, type: 'contains', values: ['1962'] },
+      { step: 2, type: 'contains', values: ['DevelopmentTeam', '媒体创作团队', '视频创作团队', '公众号发布团队'] },
+    ],
+  },
+  {
+    id: 'MH-03', dimension: '多跳召回', label: '评测工作包→视图→组织元素 两跳？',
+    retrieval: [
+      { tool: 'getArchitectureViewContext', args: { view_id: 'memory-eval-view-001' } },
+      { tool: 'getIntentElementContext', args: { elementId: { pick: { step: 0, path: 'parentElement.id' } } } },
+    ],
+    requirements: [
+      { step: 0, type: 'contains', values: ['memory-eval-dataset-wp-001', 'memory-eval-run-wp-001'] },
+      { step: 1, type: 'contains', values: ['Implementation and Migration Viewpoint'] },
+    ],
+  },
+  {
+    id: 'MH-04', dimension: '多跳召回', label: '公众号发布员→组织元素 两跳？',
+    retrieval: [
+      { tool: 'getArchitectureViewContext', args: { view_id: '433' } },
+      { tool: 'getIntentElementContext', args: { elementId: { pick: { step: 0, path: 'parentElement.id' } } } },
+    ],
+    requirements: [
+      { step: 0, type: 'contains', values: ['公众号发布员', '2755', 'AgentOrganization'] },
+      { step: 1, type: 'contains', values: ['视频创作团队', '媒体创作团队'] },
+    ],
+  },
+  {
+    id: 'MH-05', dimension: '多跳召回', label: '项目总管 LTM 全部元素找全（含评测口径）？',
+    retrieval: [
+      { tool: 'getArchitectureViewContext', args: { view_id: 'overseer-ltm-001' } },
+    ],
+    requirements: [
+      { step: 0, type: 'contains', values: ['overseer-vision-001', 'overseer-archimate-role-001', 'overseer-mem-eval-001', 'overseer-query-rules-001', 'overseer-content-storage-001', 'overseer-subgraph-semantic-001', 'overseer-wiki-eval-001'] },
+    ],
+  },
 ];
 
 // 序列化检索结果（剔除 raw_json 噪音）
@@ -185,13 +245,76 @@ function serialize(result) {
   return JSON.stringify(result, (key, value) => (key === 'raw_json' ? undefined : value));
 }
 
+// 粗略 token 估计（无 tokenizer 依赖，确定性启发式）：CJK 字符按 1 token/字，其它按 1 token/4 字符。
+function estimateTokens(text) {
+  if (!text) return 0;
+  const cjk = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf\u3000-\u303f\uff00-\uffef]/g) || []).length;
+  const rest = text.length - cjk;
+  return cjk + Math.ceil(rest / 4);
+}
+
+// 解析 pick 引用：从更早步骤的检索结果（parsed JSON）中派生本步参数值。
+//   path 模式：如 { step: 0, path: 'parentElement.id' } 取结果点路径；
+//   find 模式：如 { step: 1, find: { id: 'x' }, get: 'parent' } 在 elements 中按 id 定位取字段。
+function resolveArg(value, texts) {
+  if (value && typeof value === 'object' && value.pick) {
+    const pick = value.pick;
+    let parsed = null;
+    try { parsed = JSON.parse(texts[pick.step] || 'null'); } catch (_) { /* null */ }
+    if (!parsed) return undefined;
+    if (pick.path) {
+      let node = parsed;
+      for (const seg of pick.path.split('.')) {
+        if (node == null) return undefined;
+        node = node[seg];
+      }
+      return node;
+    }
+    if (pick.find) {
+      const arr = (parsed.subgraph && parsed.subgraph.elements) || parsed.elements || [];
+      const el = arr.find(e => e[pick.find.by || 'id'] === pick.find.id);
+      return el ? el[pick.get] : undefined;
+    }
+  }
+  return value;
+}
+
+function resolveArgs(args, texts) {
+  if (!args) return args;
+  const out = {};
+  for (const [key, value] of Object.entries(args)) out[key] = resolveArg(value, texts);
+  return out;
+}
+
+// 成本统计（LLM-Wiki 口径：Query Latency & Cost）：每次检索序列化上下文 token 成本；
+// 以全量意图图 JSON 为「原始语料」，压缩率 = 1 − 平均检索 token / 原始语料 token（目标 ≥ 0.7）。
+function measureCost(results) {
+  const probes = results.filter(r => Array.isArray(r.texts) && r.texts.length);
+  const retrieved = probes.map(r => estimateTokens(r.texts.join(' ')));
+  const avg = retrieved.length ? retrieved.reduce((a, b) => a + b, 0) / retrieved.length : 0;
+  let rawCorpusTokens = 0;
+  try {
+    rawCorpusTokens = estimateTokens(fs.readFileSync(path.join(ROOT, 'design/KG/SystemArchitecture.json'), 'utf8'));
+  } catch (_) { /* keep 0 */ }
+  return {
+    rawCorpusTokens,
+    probeCount: retrieved.length,
+    avgRetrievedTokens: Math.round(avg),
+    minRetrievedTokens: retrieved.length ? Math.min(...retrieved) : 0,
+    maxRetrievedTokens: retrieved.length ? Math.max(...retrieved) : 0,
+    avgCompressionRatio: rawCorpusTokens ? Math.round((1 - avg / rawCorpusTokens) * 1000) / 1000 : 0,
+  };
+}
+
 async function evaluateQuestion(question) {
   const texts = [];
   let error = null;
   const t0 = Date.now();
   try {
-    for (const retrieval of question.retrieval) {
-      const result = await callTool(retrieval.tool, retrieval.args || {}, null, undefined);
+    for (let i = 0; i < question.retrieval.length; i++) {
+      const retrieval = question.retrieval[i];
+      const args = resolveArgs(retrieval.args, texts);
+      const result = await callTool(retrieval.tool, args || {}, null, undefined);
       texts.push(serialize(result));
     }
   } catch (e) {
@@ -252,6 +375,7 @@ function aggregate(results) {
     dimStats,
     abstention: abstention ? { dimension: abstention.dimension, accuracy: abstention.accuracy, pass: abstention.pass, total: abstention.total } : null,
     avgLatencyMs: results.length ? results.reduce((sum, result) => sum + result.latencyMs, 0) / results.length : 0,
+    costStats: measureCost(results),
   };
 }
 
@@ -287,6 +411,7 @@ async function main() {
   console.log(`整体: ${summary.passed}/${summary.totalQuestions} (${(summary.overallAccuracy * 100).toFixed(1)}%)`);
   console.log(`拒答: ${summary.abstention ? summary.abstention.pass + '/' + summary.abstention.total : 'n/a'}`);
   console.log(`平均时延: ${summary.avgLatencyMs.toFixed(1)}ms`);
+  console.log(`成本: 平均检索 ${summary.costStats.avgRetrievedTokens} tokens / 原始语料 ${summary.costStats.rawCorpusTokens} tokens / 压缩率 ${(summary.costStats.avgCompressionRatio * 100).toFixed(1)}%`);
   console.log(`报告: ${REPORT_PATH}`);
 }
 

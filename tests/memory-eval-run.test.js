@@ -20,25 +20,25 @@ function runRunner() {
   return JSON.parse(result.stdout);
 }
 
-test('memory-eval-run-baseline: harness evaluates all 23 questions and reports metrics', () => {
-  // GIVEN 已具备 23 题评测题集与 ARGO MCP 读路径
+test('memory-eval-run-baseline: harness evaluates all 28 questions and reports metrics', () => {
+  // GIVEN 已具备 28 题评测题集（23 基础 + 5 多跳召回）与 ARGO MCP 读路径
   // WHEN 运行 scripts/memory-eval-run.js --json
-  // THEN 23 题全部评估（无 TOOL_ERROR 空判），报告含 5 维度/整体/拒答准确率与平均时延
+  // THEN 28 题全部评估（无 TOOL_ERROR 空判），报告含 6 维度/整体/拒答准确率、平均时延与成本统计
   const summary = runRunner();
 
-  assert.equal(summary.totalQuestions, 23, 'should evaluate exactly 23 questions');
+  assert.equal(summary.totalQuestions, 28, 'should evaluate exactly 28 questions');
   assert.equal(summary.failed, 0, 'no question should fail with a TOOL_ERROR');
-  assert.equal(summary.dimStats.length, 5, 'should report 5 dimensions');
+  assert.equal(summary.dimStats.length, 6, 'should report 6 dimensions');
   assert.deepEqual(
     summary.dimStats.map(stat => stat.dimension),
-    ['信息抽取', '多会话推理', '时间推理', '知识更新', '拒答'],
+    ['信息抽取', '多会话推理', '时间推理', '知识更新', '拒答', '多跳召回'],
   );
   assert.equal(typeof summary.overallAccuracy, 'number');
   assert.ok(summary.avgLatencyMs >= 0, 'avg latency should be non-negative');
   assert.ok(summary.abstention, 'should report abstention accuracy');
   assert.ok(existsSync(REPORT), 'runner should write the report file');
   const report = JSON.parse(readFileSync(REPORT, 'utf8'));
-  assert.equal(report.results.length, 23, 'report should contain 23 evaluated results');
+  assert.equal(report.results.length, 28, 'report should contain 28 evaluated results');
 });
 
 test('memory-eval-run-fact: base fact question MQ-01 (项目总管) passes', () => {
@@ -52,12 +52,41 @@ test('memory-eval-run-fact: base fact question MQ-01 (项目总管) passes', () 
 });
 
 test('memory-eval-run-baseline-floor: overall accuracy meets the recorded baseline floor', () => {
-  // GIVEN 2026-08-25 实测基线 = 23/23（100%），平均时延 5.7ms
+  // GIVEN 2026-08-26 实测基线 = 28/28（100%），平均时延 ~6.8ms
   // WHEN 运行评测 harness
   // THEN 整体准确率不低于 0.85（基线回归阈值；跌破即提示记忆读取退化）
   const summary = runRunner();
   assert.ok(
     summary.overallAccuracy >= 0.85,
     `overall accuracy ${summary.overallAccuracy} dropped below the 0.85 baseline floor`,
+  );
+});
+
+test('memory-eval-run-multihop: multi-hop recall questions traverse topology links and pass', () => {
+  // GIVEN 多跳召回题（MH-01..05）需沿图谱拓扑内链逐跳检索（pick 由上一步结果派生参数）
+  // WHEN 运行评测 harness
+  // THEN MH-01..05 全部判定通过（无 TOOL_ERROR / 无缺失）
+  const report = JSON.parse(readFileSync(REPORT, 'utf8'));
+  const mh = report.results.filter(result => result.id.startsWith('MH-'));
+  assert.equal(mh.length, 5, 'should contain 5 multi-hop recall questions');
+  for (const result of mh) {
+    assert.equal(result.pass, true, `${result.id} should pass: ${result.reason}`);
+  }
+});
+
+test('memory-eval-run-cost: cost stats report context compression and token cost', () => {
+  // GIVEN LLM-Wiki 口径：高语义密度预压缩让下游 context 减 70~90%、token 成本极低
+  // WHEN 运行评测 harness（--json）
+  // THEN 报告含 costStats：压缩率 >= 0.7，平均检索 token 成本远低于原始语料（低成本）
+  const summary = runRunner();
+  assert.ok(summary.costStats, 'report should include costStats');
+  assert.ok(summary.costStats.rawCorpusTokens > 0, 'raw corpus tokens should be measurable');
+  assert.ok(
+    summary.costStats.avgCompressionRatio >= 0.7,
+    `compression ${summary.costStats.avgCompressionRatio} should be >= 0.7`,
+  );
+  assert.ok(
+    summary.costStats.avgRetrievedTokens < 15000,
+    `avg retrieved tokens ${summary.costStats.avgRetrievedTokens} should be < 15000`,
   );
 });

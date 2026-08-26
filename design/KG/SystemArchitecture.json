@@ -3657,21 +3657,28 @@
       "name": "设计 ArchGraph 记忆评测题集",
       "type": "Work Package",
       "parent": "1249",
-      "description": "基于 LongMemEval 5 能力维度（信息抽取/多会话推理/时间推理/知识更新/拒答）裁剪适配 agent 元记忆场景，设计 ArchGraph 长期记忆评测题集 docs/memory-eval-dataset.md：每题含记忆场景(GIVEN)/问题(WHEN)/期望答案(ground truth, THEN)/检索提示，作为后续实测基线的输入。",
+      "description": "基于 LongMemEval 5 能力维度（信息抽取/多会话推理/时间推理/知识更新/拒答）裁剪适配 agent 元记忆场景，设计 ArchGraph 长期记忆评测题集 docs/memory-eval-dataset.md：每题含记忆场景(GIVEN)/问题(WHEN)/期望答案(ground truth, THEN)/检索提示，作为后续实测基线的输入。v2（2026-08-26）：新增第 6 维度多跳召回（MH-01~05，沿拓扑内链逐跳检索找全）与成本/压缩率评测口径（Query Cost：检索上下文 token 成本 + context 压缩率≥70%）。",
       "testcases": [
         {
-          "name": "AT-memory-eval-dataset-01-评测题集文档就绪",
+          "acceptanceCriteria": "执行 node --test tests/memory-eval-dataset.test.js：断言文档存在并包含 信息抽取/多会话推理/时间推理/知识更新/拒答 五维度、GIVEN/WHEN/THEN 期望答案格式、ARGO 语义查询/queryNeo4jGraph 检索路径。通过。",
           "description": "GIVEN 需要为长期记忆系统设计可执行的评测题集；WHEN 读者打开 docs/memory-eval-dataset.md；THEN 文档包含 5 能力维度（信息抽取/多会话推理/时间推理/知识更新/拒答）、每题含 GIVEN 记忆场景/WHEN 问题/THEN 期望答案（ground truth）、并说明检索路径（ARGO 语义查询/queryNeo4jGraph）。",
-          "type": "Acceptance Test",
           "Input": "打开 docs/memory-eval-dataset.md",
-          "acceptanceCriteria": "执行 node --test tests/memory-eval-dataset.test.js：断言文档存在并包含 信息抽取/多会话推理/时间推理/知识更新/拒答 五维度、GIVEN/WHEN/THEN 期望答案格式、ARGO 语义查询/queryNeo4jGraph 检索路径。通过。"
+          "name": "AT-memory-eval-dataset-01-评测题集文档就绪",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "执行 node --test tests/memory-eval-dataset.test.js：断言文档含 维度 6：多跳召回、MH-01~05、压缩率、28 题 与 多跳。通过。",
+          "description": "GIVEN 需要按 LLM-Wiki 双层面指标补齐评测输入；WHEN 读者打开 docs/memory-eval-dataset.md；THEN 文档包含第 6 维度多跳召回（MH-01~05，沿拓扑内链多跳检索找全）与成本/压缩率评测口径（检索上下文 token 成本、压缩率≥70%），总题数 28。",
+          "Input": "打开 docs/memory-eval-dataset.md",
+          "name": "AT-memory-eval-dataset-02-评测题集含多跳召回与成本口径",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
         {
+          "description": "docs/memory-eval-dataset.md; tests/memory-eval-dataset.test.js; design/KG/SystemArchitecture.json（ArchGraph 长期记忆评测题集 v1）",
           "name": "commit",
-          "value": "b0a33a4",
-          "description": "docs/memory-eval-dataset.md; tests/memory-eval-dataset.test.js; design/KG/SystemArchitecture.json（ArchGraph 长期记忆评测题集 v1）"
+          "value": "b0a33a4"
         }
       ]
     },
@@ -3680,21 +3687,28 @@
       "name": "实现记忆评测 harness 并跑实测基线",
       "type": "Work Package",
       "parent": "1249",
-      "description": "实现可执行评测 harness scripts/memory-eval-run.js：按 docs/memory-eval-dataset.md 的 23 题逐题通过 ARGO MCP 读路径（getArchitectureViewContext/getIntentElementContext/getSystemArchitecture，零 Neo4j 运行时依赖）检索记忆并对照 ground truth 判定，输出各维度/整体准确率、拒答准确率与时延实测基线；配套可执行测试 tests/memory-eval-run.test.js 与验收用例。",
+      "description": "实现可执行评测 harness scripts/memory-eval-run.js：按 docs/memory-eval-dataset.md 的 28 题逐题通过 ARGO MCP 读路径（getArchitectureViewContext/getIntentElementContext/getSystemArchitecture，零 Neo4j 运行时依赖）检索记忆并对照 ground truth 判定，输出 6 维度/整体准确率、拒答准确率、平均时延与成本统计（token 成本 + 压缩率），配套可执行测试与验收用例。v2（2026-08-26）：新增多跳 pick 检索（上一步结果派生下一步参数）与 measureCost 成本统计。",
       "testcases": [
         {
-          "name": "AT-memory-eval-run-01-评测harness可运行并产出基线",
-          "description": "GIVEN 已具备 23 题评测题集与 ARGO MCP 读路径；WHEN 运行 scripts/memory-eval-run.js；THEN 逐题执行检索并判定 PASS/FAIL，产出按 5 维度/整体/拒答的准确率与平均时延，写入 results/memory-eval-report.json，且 23 题全部有评估结果（无 TOOL_ERROR 空判）。",
-          "type": "Acceptance Test",
+          "acceptanceCriteria": "执行 node --test tests/memory-eval-run.test.js：断言 harness 退出码 0、28 题全部评估、报告含 6 维度准确率/整体/拒答/平均时延/costStats、且基础事实题（如 MQ-01 项目总管）通过。通过。",
+          "description": "GIVEN 已具备 28 题评测题集与 ARGO MCP 读路径；WHEN 运行 scripts/memory-eval-run.js；THEN 逐题执行检索并判定 PASS/FAIL，产出按 6 维度/整体/拒答的准确率、平均时延与成本统计（costStats），写入 results/memory-eval-report.json，且 28 题全部有评估结果（无 TOOL_ERROR 空判）。",
           "Input": "运行 node scripts/memory-eval-run.js",
-          "acceptanceCriteria": "执行 node --test tests/memory-eval-run.test.js：断言 harness 退出码 0、23 题全部评估、报告含 5 维度准确率/整体/拒答/平均时延、且基础事实题（如 MQ-01 项目总管）通过。通过。"
+          "name": "AT-memory-eval-run-01-评测harness可运行并产出基线",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "执行 node --test tests/memory-eval-run.test.js：断言 28 题全部评估、6 维度、MH-01~05 通过、costStats.avgCompressionRatio≥0.7 且 avgRetrievedTokens<15000。通过。",
+          "description": "GIVEN 已具备含多跳召回题的 28 题题集；WHEN 运行 scripts/memory-eval-run.js；THEN 逐题执行（含沿上一步结果派生参数的多跳 pick 检索），产出 6 维度准确率与 costStats（rawCorpusTokens/avgRetrievedTokens/avgCompressionRatio），MH-01~05 全部通过且压缩率≥0.7。",
+          "Input": "运行 node scripts/memory-eval-run.js",
+          "name": "AT-memory-eval-run-02-harness支持多跳检索与成本统计",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
         {
+          "description": "scripts/memory-eval-run.js; tests/memory-eval-run.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测 harness 与实测基线 23/23 100%）",
           "name": "commit",
-          "value": "3bb8375",
-          "description": "scripts/memory-eval-run.js; tests/memory-eval-run.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测 harness 与实测基线 23/23 100%）"
+          "value": "3bb8375"
         }
       ]
     },
