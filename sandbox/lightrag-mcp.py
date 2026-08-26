@@ -83,9 +83,22 @@ QWEN_MODEL = os.environ.get('ARGO_EMBEDDING_MODEL', 'qwen3.7-text-embedding')
 os.environ.setdefault('OPENAI_API_KEY', DEEPSEEK_KEY)
 os.environ.setdefault('OPENAI_BASE_URL', DEEPSEEK_URL)
 
+# Neo4j 作为 LightRAG 的图存储（Neo4JStorage）：复用宿主 Neo4j 实例，但用独立库
+# 'lightrag'（与 archgraph/sandbox 库隔离，存的是 LightRAG 自己抽取的实体/关系图）。
+# 容器内经 host.docker.internal 访问宿主；Neo4JStorage 会自动 CREATE DATABASE IF NOT EXISTS
+# （宿主为 Enterprise，支持多库）。
+_N4J_RAW_URL = os.environ.get('ARGO_NEO4J_DATABASE_URL', 'neo4j://127.0.0.1:7687') \
+    .replace('127.0.0.1', 'host.docker.internal') \
+    .replace('localhost', 'host.docker.internal')
+os.environ.setdefault('NEO4J_URI', _N4J_RAW_URL)
+os.environ.setdefault('NEO4J_USERNAME', os.environ.get('ARGO_NEO4J_DATABASE_USERNAME', 'neo4j'))
+os.environ.setdefault('NEO4J_PASSWORD', os.environ.get('ARGO_NEO4J_DATABASE_PASSWORD', ''))
+os.environ.setdefault('NEO4J_DATABASE', 'lightrag')
+
 print(f'[LIGHTRAG-MCP-START] DEEPSEEK_KEY={len(DEEPSEEK_KEY)} '
       f'OPENAI_API_KEY={bool(os.environ.get("OPENAI_API_KEY"))} '
-      f'QWEN_KEY={bool(QWEN_KEY)}', file=sys.stderr, flush=True)
+      f'QWEN_KEY={bool(QWEN_KEY)} NEO4J_URI={os.environ.get("NEO4J_URI", "")} '
+      f'NEO4J_DATABASE={os.environ.get("NEO4J_DATABASE", "")}', file=sys.stderr, flush=True)
 
 mcp = FastMCP('lightrag')
 
@@ -114,6 +127,11 @@ def get_rag():
             llm_model_func=llm,
             embedding_func=EmbeddingFunc(embedding_dim=1536, max_token_size=8192, func=embed),
             vector_db_storage_cls_kwargs={'dim': 1536},
+            # 图存储用 Neo4j（Neo4JStorage）：实体/关系存到宿主 Neo4j 独立库 'lightrag'，
+            # 而非默认的 GraphML 文件（graph_chunk_entity_relation.graphml）。
+            # 1.5.6 的字段名是 graph_storage（字符串，经 get_storage_class 解析），
+            # 不是 graph_storage_cls（那在 __init__ 里派生，不接受构造参数）。
+            graph_storage='Neo4JStorage',
             llm_model_name=DEEPSEEK_MODEL,
             # JSON extraction: DeepSeek outputs clean JSON, which the row-based
             # default extraction format parses poorly (observed: 1 stray entity,

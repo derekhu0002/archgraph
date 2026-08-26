@@ -56,9 +56,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 python3
     && /opt/lightrag/bin/pip install --no-cache-dir --upgrade pip \
     # pin mcp<2: FastMCP was renamed to MCPServer in mcp 2.x; we use the v1 FastMCP
     # server API in lightrag-mcp.py and the v1 client API in test-lightrag-mcp.py.
-    # openai is pre-installed so pipmaster (LightRAG's lazy dep) never triggers a
-    # runtime "Updating package" spinner on stdout that would corrupt MCP frames.
-    && /opt/lightrag/bin/pip install --no-cache-dir "lightrag-hku" "mcp<2" openai \
+    # openai + neo4j are pre-installed so pipmaster (LightRAG's lazy deps) never
+    # triggers a runtime "Updating package" spinner on stdout that would corrupt
+    # MCP frames; neo4j is the python driver for LightRAG's Neo4JStorage graph backend.
+    && /opt/lightrag/bin/pip install --no-cache-dir "lightrag-hku" "mcp<2" openai neo4j \
     && /opt/lightrag/bin/python3 -c "import lightrag, mcp; from mcp.server.fastmcp import FastMCP; print('lightrag', lightrag.__version__, '| mcp', mcp.__version__ if hasattr(mcp,'__version__') else 'v1', 'ok')" \
     && rm -rf /var/lib/apt/lists/*
 
