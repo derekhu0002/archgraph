@@ -3994,6 +3994,47 @@
           "value": "7504c68"
         }
       ]
+    },
+    {
+      "id": "neo4j-semantic-projection-store",
+      "name": "Neo4j Semantic Projection Reconciliation",
+      "parent": "1961",
+      "type": "Application Component",
+      "description": "将 canonical 意图图谱同步到 Neo4j 语义投影（ArgoProductionSemanticRecord + 向量索引），由 argo-init 的语义生命周期触发全量回填。全量回填在 upsert 之后执行 reconcileRemovals：读取已持久化的语义记录，对本地 JSON 快照中已不存在的 canonicalIdentity 执行 deleteTombstones，确保 argo init 后语义投影与 canonical 图谱完全一致（不留陈旧向量）。源码：argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "70157c7",
+          "description": "argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js; tests/semantic-backfill-reconcile.test.js"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-neo4j-semantic-projection-store-01-陈旧语义记录被清除",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/semantic-backfill-reconcile.test.js",
+          "acceptanceCriteria": "tests/semantic-backfill-reconcile.test.js",
+          "description": "GIVEN canonical 快照仅含元素 e1，而投影存储中仍残留 Element:stale1；WHEN 语义 backfill 全量运行至完成；THEN stale1 被 tombstone 删除，存储与快照一致（仅剩 Element:e1）。"
+        },
+        {
+          "name": "AT-neo4j-semantic-projection-store-02-一致存储不误删",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/semantic-backfill-reconcile.test.js",
+          "acceptanceCriteria": "tests/semantic-backfill-reconcile.test.js",
+          "description": "GIVEN 存储中所有记录在快照中仍存在；WHEN backfill 运行；THEN 不产生任何 tombstone，全部记录保留。"
+        },
+        {
+          "name": "AT-neo4j-semantic-projection-store-03-仅删除陈旧记录",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/semantic-backfill-reconcile.test.js",
+          "acceptanceCriteria": "tests/semantic-backfill-reconcile.test.js",
+          "description": "GIVEN 混合存储含两条当前记录与一条陈旧记录；WHEN backfill 运行；THEN 仅陈旧记录被删除，当前记录保留。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -5238,7 +5279,8 @@
         "2010",
         "1962",
         "neo4j-sync-store",
-        "neo4j-cypher-query-interface"
+        "neo4j-cypher-query-interface",
+        "neo4j-semantic-projection-store"
       ],
       "included_relationships": []
     },
