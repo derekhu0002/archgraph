@@ -218,9 +218,37 @@ async function runMcp() {
     if (cfg.mcp.servers) delete cfg.mcp.servers.argo;
   }
 
+  // ── 口径 A：对照会话用中性指令（真正隔离记忆后端）──────────────────────────
+  // 部署注入的 ArchGraph 规则（AGENTS.md）是 argo 中心的（WakeupGuideline STEP 0 硬门
+  // 要求先查 ARGO MCP、QueryPriorityGuideline 要求任何检索先查意图图等）。若 A/B 会话
+  // 都带着这套规则，B 组（只挂 lightrag MCP、无 argo）会收到无法满足的指令——系统性
+  // 偏向，破坏「唯一变量=记忆后端」。因此对照会话（Level C/E）统一替换为中性指令：
+  // 规则与提问完全相同、不含任何 MCP 名；唯一差异 = 会话里挂载的记忆后端。
+  const NEUTRAL_AGENTS_MD = `# ArchGraph memory-eval session instructions (neutral)
+You are an evaluation agent. Answer the question by reading the memory that is
+available to you in this session.
+
+1. Before answering, use the memory/retrieval tools present in this session to
+   look up relevant information. Prefer grounding your answer in retrieved
+   memory over prior knowledge.
+2. Answer strictly from what you find. If the memory does not contain the
+   answer, say so explicitly — never invent or guess.
+3. Keep the answer concise and factual. If the memory contains an identifier,
+   report it.
+4. Use only the tools that actually exist in this session; do not expect tools
+   that are not mounted here.`;
+  function writeNeutralInstructions() {
+    try {
+      fs.writeFileSync(path.join(HOME, '.config/opencode/AGENTS.md'), NEUTRAL_AGENTS_MD);
+      return true;
+    } catch (_) { return false; }
+  }
+
   if (process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_BASE_URL) {
+    const neutral = writeNeutralInstructions();
     const configured = configureOpenCodeModel('argo');
-    const question = '请用 ARGO MCP 读取初始图谱，回答：元素 Implementation and Migration Viewpoint 的 id 是什么？';
+    // 中性提问：与 B 组（Level E）完全相同，不点名任何 MCP，只验证会话确实用了所挂后端。
+    const question = '请用你可用的记忆工具查询，回答：元素 Implementation and Migration Viewpoint 的 id 是多少？';
     const t0 = Date.now();
     let agentOut = '';
     let agentExit = -1;
@@ -242,7 +270,7 @@ async function runMcp() {
     check(
       'c: opencode agent answers via ARGO MCP',
       configured && toolUsed && answered,
-      `cfg=${configured} exit=${agentExit} tool=${toolUsed} ans=${answered} ${latencyMs}ms ${agentOut.replace(/\s+/g, ' ').slice(0, 240)}`,
+      `cfg=${configured} neu=${neutral} exit=${agentExit} tool=${toolUsed} ans=${answered} ${latencyMs}ms ${agentOut.replace(/\s+/g, ' ').slice(0, 240)}`,
     );
   } else {
     check('c: opencode agent answers via ARGO MCP', false, 'missing OPENAI_BASE_URL/API_KEY (argo/.env not mounted)');
@@ -280,8 +308,10 @@ async function runMcp() {
   // toolUsed 断言用工具名 lightrag_query（tool_use 事件会记录该名），避免问题文本
   // 里含 "lightrag" 造成的假阳性。
   if (process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_BASE_URL) {
+    const neutral = writeNeutralInstructions();
     const configured = configureOpenCodeModel('lightrag');
-    const question = '请调用 lightrag 记忆查询工具读取已摄入的记忆，回答：Implementation and Migration Viewpoint 元素的 id 是多少？';
+    // 中性提问：与 A 组（Level C）完全相同；验证 B 组会话确实调用了 lightrag_query。
+    const question = '请用你可用的记忆工具查询，回答：元素 Implementation and Migration Viewpoint 的 id 是多少？';
     const t0 = Date.now();
     let agentOut = '';
     let agentExit = -1;
@@ -303,7 +333,7 @@ async function runMcp() {
     check(
       'e: opencode agent answers via lightrag MCP',
       configured && toolUsed && answered,
-      `cfg=${configured} exit=${agentExit} tool=${toolUsed} ans=${answered} ${latencyMs}ms ${agentOut.replace(/\s+/g, ' ').slice(0, 240)}`,
+      `cfg=${configured} neu=${neutral} exit=${agentExit} tool=${toolUsed} ans=${answered} ${latencyMs}ms ${agentOut.replace(/\s+/g, ' ').slice(0, 240)}`,
     );
   } else {
     check('e: opencode agent answers via lightrag MCP', false, 'missing DEEPSEEK_API_KEY/BASE_URL (argo/.env not mounted)');
