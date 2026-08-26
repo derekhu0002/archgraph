@@ -342,13 +342,15 @@ function preflightFile({ canonicalFilePath, configuredFilePath, filesystem, adap
     const insideRepository = adapters.systemMetadata.isSecretFileInsideGitRepository().status === 0;
     ignored = insideRepository ? adapters.systemMetadata.isSecretFileIgnored() : true;
     tracked = insideRepository ? adapters.systemMetadata.isSecretFileTracked() : false;
-    const identityResult = adapters.systemMetadata.readCurrentIdentity();
-    const aclResult = adapters.systemMetadata.readSecretFileAcl();
-    aclEvidence = {
-      status: aclResult.status,
-      stdout: aclResult.stdout,
-      identity: identityResult.status === 0 ? identityResult.stdout.trim() : '',
-    };
+    if (process.platform === 'win32') {
+      const identityResult = adapters.systemMetadata.readCurrentIdentity();
+      const aclResult = adapters.systemMetadata.readSecretFileAcl();
+      aclEvidence = {
+        status: aclResult.status,
+        stdout: aclResult.stdout,
+        identity: identityResult.status === 0 ? identityResult.stdout.trim() : '',
+      };
+    }
   } else {
     ignored = adapters.git.isIgnored(configuredFilePath);
     tracked = adapters.git.isTracked(configuredFilePath);
@@ -356,7 +358,11 @@ function preflightFile({ canonicalFilePath, configuredFilePath, filesystem, adap
   }
   if (tracked) throw safeError('SECRET_FILE_TRACKED');
   if (!ignored) throw safeError('SECRET_FILE_NOT_IGNORED');
-  validateAcl(aclEvidence);
+  if (process.platform === 'win32') {
+    validateAcl(aclEvidence);
+  } else {
+    validatePosixSecretFileAcl(configuredFilePath, filesystem);
+  }
 }
 
 function validateAcl(result) {
@@ -387,6 +393,20 @@ function parseAcl(output) {
     result.set(key, entry);
   }
   return result;
+}
+
+function posixModeIsSecretSafe(mode) {
+  return (mode & 0o077) === 0 && (mode & 0o600) === 0o600;
+}
+
+function validatePosixSecretFileAcl(configuredFilePath, filesystem) {
+  const stat = filesystem.lstatSync(configuredFilePath);
+  if (!posixModeIsSecretSafe(stat.mode)) {
+    throw safeError('SECRET_FILE_ACL_UNSAFE');
+  }
+  if (typeof process.getuid === 'function' && stat.uid !== process.getuid()) {
+    throw safeError('SECRET_FILE_ACL_UNSAFE');
+  }
 }
 
 function productionSourceBehavior(repositoryRoot) {
@@ -478,4 +498,5 @@ function safeError(category) {
 module.exports = {
   resolveApprovedLiveConfiguration,
   withApprovedLiveConfigurationTestComposition,
+  posixModeIsSecretSafe,
 };
