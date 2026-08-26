@@ -137,8 +137,8 @@
 
 - **MQ-17**
   - GIVEN：view 429 子视图
-  - WHEN：SystemArchitecture 顶层视图（429）当前有多少个子视图？比早期多了哪两个？
-  - THEN：14 个；新增 tb-eval-view-001 与 memory-eval-view-001
+  - WHEN：SystemArchitecture 顶层视图（429）当前有多少个子视图？
+  - THEN：15 个；早期 12 → 新增 tb-eval-view-001、memory-eval-view-001、self-evolution-sandbox-view-001
   - 检索提示：`getArchitectureViewContext view_id=429 includeChildViews=true`
 
 - **MQ-18**

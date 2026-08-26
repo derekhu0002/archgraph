@@ -8,3 +8,5 @@ wechat-public.config.json
 argo/.env
 .obsidian/
 pnpm-lock.yaml
+sandbox/dist/
+results/sandbox-report.json

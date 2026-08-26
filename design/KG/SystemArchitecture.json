@@ -67,6 +67,10 @@
         {
           "view_id": "memory-eval-view-001",
           "view_name": "长期记忆评测"
+        },
+        {
+          "view_id": "self-evolution-sandbox-view-001",
+          "view_name": "自进化测试环境（Docker 沙箱）"
         }
       ]
     },
@@ -943,53 +947,53 @@
       ],
       "testcases": [
         {
-          "name": "AT-1357-01-AML参考实现",
+          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“提供AML参考实现”Work Package 挂载于 AML 规范下并带验收用例。通过。",
           "description": "GIVEN AML 规范已定义；WHEN 消费者或厂商需要参考实现；THEN ARGO harness 提供可运行的 MCP server、schema 校验器与 Graph RAG 生命周期实现。",
-          "type": "Acceptance Test",
           "Input": "运行 node .argo/scripts/argo-mcp-server.js",
-          "acceptanceCriteria": "执行 node --test tests/aml-standard.test.js：断言“提供AML参考实现”Work Package 挂载于 AML 规范下并带验收用例。通过。"
+          "name": "AT-1357-01-AML参考实现",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1357-02-ARGO全局安装可运行",
+          "acceptanceCriteria": "tests/argo-global-install.test.js",
           "description": "GIVEN .argo 工具链被复制到仓库外的全局目录（如用户目录）；WHEN 以 ARGO_REPO_ROOT 指向当前仓库并启动全局安装的 .argo/scripts/argo-mcp-server.js；THEN MCP server 能完成 initialize 与 tools/list，且 validateSystemArchitecture 与 getSystemArchitecture 工具调用均通过（脚本与 schema 从安装目录解析，workspace 从 ARGO_REPO_ROOT 解析）。",
-          "type": "Acceptance Test",
           "Input": "运行 tests/argo-global-install.test.js",
-          "acceptanceCriteria": "tests/argo-global-install.test.js"
+          "name": "AT-1357-02-ARGO全局安装可运行",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1357-03-WorkspaceBootstrap拷贝默认文件",
+          "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js",
           "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）在非 --check-only 模式运行于缺少 design/KG/SystemArchitecture.json 与 .feap 模板的工作区；WHEN 执行初始化脚本；THEN 自动从部署的 defaults 拷贝 design/KG/SystemArchitecture.json，并以当前项目名拷贝 defaults/EA-model-template.feap 为 <项目名>.feap；--check-only 模式不修改工作区。",
-          "type": "Acceptance Test",
           "Input": "运行 tests/argo-workspace-bootstrap.test.js",
-          "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js"
+          "name": "AT-1357-03-WorkspaceBootstrap拷贝默认文件",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1357-04-按视图ID解析视图完整成员",
+          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331、2753 与 2757、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 15 个子视图（169/174/176/178/179/180/1800/298/432/434/argo-workflow-rules-view/memory-eval-view-001/openclaw-adaptation/self-evolution-sandbox-view-001/tb-eval-view-001）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。",
           "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
-          "type": "Acceptance Test",
           "Input": "运行 tests/architecture-view-context.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-view-context.test.js：断言 tools/list 包含 getArchitectureViewContext；view 176 解析出元素 1310、1319、1331、2753 与 2757、父元素 Implementation and Migration Viewpoint；view 174 解析出 15 个元素与 9 条关系；view 429 在 includeChildViews 时解析出 14 个子视图（169/174/176/178/179/180/1800/298/432/434/argo-workflow-rules-view/memory-eval-view-001/openclaw-adaptation/tb-eval-view-001）；不存在的 view_id 返回 VIEW_NOT_FOUND。通过。"
+          "name": "AT-1357-04-按视图ID解析视图完整成员",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1357-05-视图写入同步subdiagram_views",
+          "acceptanceCriteria": "执行 node --test tests/architecture-view-mutation.test.js：断言 addView 在父元素挂载子视图、updateView 改挂/改名同步、removeView 清理父元素条目。通过。",
           "description": "GIVEN ARGO MCP 提供 addArchitectureView / updateArchitectureView / removeArchitectureView 视图写入口；WHEN 写入带 parent_element_id 的子视图、改挂父元素、改名或删除子视图；THEN 父元素 subdiagram_views 与视图 parent_element_id 保持双向一致（新增挂载、改挂同步、改名同步、删除清理）。",
-          "type": "Acceptance Test",
           "Input": "运行 node --test tests/architecture-view-mutation.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-view-mutation.test.js：断言 addView 在父元素挂载子视图、updateView 改挂/改名同步、removeView 清理父元素条目。通过。"
+          "name": "AT-1357-05-视图写入同步subdiagram_views",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1357-06-init回填subdiagram_views",
+          "acceptanceCriteria": "执行 node --test tests/argo-subdiagram-repair.test.js：断言 repairSubdiagramViews 的 check 模式只报告不写入、fix-direct 模式回填并留 .bak、一致图谱为 no-op。通过。",
           "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）运行于图谱存在但父元素 subdiagram_views 与视图 parent_element_id 不一致的工作区；WHEN 执行 prepare-and-check 模式；THEN 自动回填父元素 subdiagram_views（直接写文件并留 .bak）；--check-only 模式只报告差异不改写；校验失败时跳过回填。",
-          "type": "Acceptance Test",
           "Input": "运行 node --test tests/argo-subdiagram-repair.test.js",
-          "acceptanceCriteria": "执行 node --test tests/argo-subdiagram-repair.test.js：断言 repairSubdiagramViews 的 check 模式只报告不写入、fix-direct 模式回填并留 .bak、一致图谱为 no-op。通过。"
+          "name": "AT-1357-06-init回填subdiagram_views",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-1357-07-元素关系写入同步与删除保护",
+          "acceptanceCriteria": "执行 node --test tests/architecture-element-mutation.test.js：断言 addElement 反向挂载 subdiagram_views、updateElement 对 subdiagram_views 双向同步、removeElement 有子视图时拒绝删除、updateRelationship 改端点清旧端点、removeRelationship 清未使用端点（共享端点保留）。通过。",
           "description": "GIVEN ARGO MCP 提供 add/update/remove element·relationship 写入口；WHEN 新增元素声明 subdiagram_views、更新元素 subdiagram_views、删除含子视图的元素、或改/删关系的端点；THEN 元素与视图的父子挂载双向一致，删除含子视图的元素被拒绝，关系端点从视图 included_elements 中同步清理（被其它关系共享的端点保留）。",
-          "type": "Acceptance Test",
           "Input": "运行 node --test tests/architecture-element-mutation.test.js",
-          "acceptanceCriteria": "执行 node --test tests/architecture-element-mutation.test.js：断言 addElement 反向挂载 subdiagram_views、updateElement 对 subdiagram_views 双向同步、removeElement 有子视图时拒绝删除、updateRelationship 改端点清旧端点、removeRelationship 清未使用端点（共享端点保留）。通过。"
+          "name": "AT-1357-07-元素关系写入同步与删除保护",
+          "type": "Acceptance Test"
         }
       ]
     },
@@ -3840,6 +3844,30 @@
           "description": "design/KG/SystemArchitecture.json（新增评测口径 LTM 元素 overseer-wiki-eval-001 + 关系 overseer-wiki-eval-rel-001 关联项目愿景）"
         }
       ]
+    },
+    {
+      "id": "self-evolution-sandbox-wp-001",
+      "name": "构建 Docker 隔离沙箱测试整套框架",
+      "type": "Work Package",
+      "parent": "1249",
+      "description": "构建自进化测试环境（用户确认 2026-08-26）：测试对象=整套 ARCHGRAPH 框架（用户 npm install archgraph-argo 安装）；不自动 npm publish，改用 npm pack 生成本地 tarball 在沙箱内安装；沙箱=Docker 容器，与本机完全隔离（绝不改宿主配置）。交付：sandbox/Dockerfile（node 20 + pwsh，基础镜像可配置）、sandbox/entrypoint.sh（npm install tarball + npx argo-deploy -SkipDsh -SkipOpenClaw -SkipEnv + smoke）、sandbox/smoke.js（验证部署产物/MCP 注册/已安装 MCP 读图+校验）、scripts/sandbox-test.js（宿主编排器：npm pack→docker build→docker run→读报告）、tests/sandbox-framework.test.js。实测：22 步部署在 Linux 容器内全部成功（含离线依赖安装、MCP 注册），smoke 21/21 通过（archgraph-argo@0.10.31）。已知发现：install-argo.ps1 的 DSH/OpenClaw 步骤用反斜杠字面量路径（如 'skills\\argo-init'）在 Linux 不兼容，MVP 以 -SkipDsh -SkipOpenClaw 跳过（留作后续修复项）。",
+      "testcases": [
+        {
+          "acceptanceCriteria": "执行 node --test tests/sandbox-framework.test.js：断言 sandbox/Dockerfile、entrypoint.sh、smoke.js、scripts/sandbox-test.js 存在且含关键能力（FROM BASE_IMAGE/pwsh、npm install tarball、npx argo-deploy、容器 HOME 隔离、npm pack 无 publish）。通过。",
+          "description": "GIVEN 需要为自进化建一个隔离的测试环境；WHEN 检查 sandbox/ 与 scripts/sandbox-test.js；THEN 存在 Dockerfile（node+pwsh，基础镜像可配置）、entrypoint.sh（模拟用户 npm install tarball + npx argo-deploy）、smoke.js、宿主编排器，且不 npm publish。",
+          "Input": "检查 sandbox/ 与 scripts/sandbox-test.js",
+          "name": "AT-self-evolution-sandbox-01-沙箱测试环境就绪（不发布）",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "运行 node scripts/sandbox-test.js（Docker 可用时）退出码 0，且 results/sandbox-report.json allPassed=true；tests/sandbox-framework.test.js 全过。",
+          "description": "GIVEN 需要整套框架按用户安装方式端到端验证且不碰宿主；WHEN 容器内 npm install 本地 tarball + npx argo-deploy + smoke；THEN 部署产物/依赖/MCP 注册全部就绪，smoke 检查（部署产物 + MCP 注册 + 已安装 MCP 读图/校验）全部通过，部署根均在容器 HOME 下。",
+          "Input": "运行 node scripts/sandbox-test.js",
+          "name": "AT-self-evolution-sandbox-02-Docker端到端框架安装验证",
+          "type": "Acceptance Test"
+        }
+      ],
+      "attributes": []
     }
   ],
   "relationships": [
@@ -5329,6 +5357,16 @@
         "memory-eval-bench-wp-001",
         "memory-eval-dataset-wp-001",
         "memory-eval-run-wp-001"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "self-evolution-sandbox-view-001",
+      "view_name": "自进化测试环境（Docker 沙箱）",
+      "parent_element_id": "1249",
+      "description": "自进化测试环境：Docker 容器沙箱，与本机完全隔离；npm pack 生成本地 tarball（不 npm publish），容器内模拟用户 npm install archgraph-argo + npx argo-deploy 安装部署整套框架，再以 smoke 验证已安装框架（部署产物 + MCP 注册 + MCP 读图/校验）。",
+      "included_elements": [
+        "self-evolution-sandbox-wp-001"
       ],
       "included_relationships": []
     }
