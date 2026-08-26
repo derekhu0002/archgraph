@@ -3872,6 +3872,16 @@
           "description": "sandbox/Dockerfile; sandbox/entrypoint.sh; sandbox/smoke.js; scripts/sandbox-test.js; tests/sandbox-framework.test.js; tests/architecture-view-context.test.js; scripts/memory-eval-run.js; docs/memory-eval-dataset.md; .gitignore; design/KG/SystemArchitecture.json（Docker 隔离沙箱测试整套框架，smoke 21/21）",
           "name": "commit",
           "value": "2767770"
+        },
+        {
+          "description": "sandbox/entrypoint.sh; sandbox/smoke.js; scripts/sandbox-test.js; tests/sandbox-framework.test.js（Level B：真实 Neo4j 投影查询 + 真实 Embedding 语义检索，25/25；不拷生产图，改 argo init 生成初始图谱）",
+          "name": "commit",
+          "value": "e1391bf"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json（WP 描述/AT 更新：argo init 初始图谱 + Level B）",
+          "name": "commit",
+          "value": "98c3bfe"
         }
       ]
     }
