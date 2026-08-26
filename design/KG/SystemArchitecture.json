@@ -3654,6 +3654,11 @@
           "description": "design/KG/SystemArchitecture.json; scripts/memory-eval-run.js; docs/memory-eval-dataset.md; tests/memory-eval-run.test.js; tests/memory-eval-dataset.test.js; results/memory-eval-report.json（评测题集 v2：多跳召回维度 + 成本/压缩率口径）",
           "name": "commit",
           "value": "3d2e2df"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素 v2 描述更新）",
+          "name": "commit",
+          "value": "8c32d0b"
         }
       ]
     },
