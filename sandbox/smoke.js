@@ -181,7 +181,17 @@ async function runMcp() {
     };
     cfg.model = `deepseek-sandbox/${model}`;
     fs.writeFileSync(configPath, JSON.stringify(cfg, null, 2));
-    return true;
+    // 回读校验：断言 OpenCode 配置里 model/provider/apiKey 确为我们所设（显式保证当前模型）。
+    try {
+      const verify = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      const prov = verify.provider && verify.provider['deepseek-sandbox'];
+      const ok = verify.model === `deepseek-sandbox/${model}`
+        && !!prov
+        && !!prov.options
+        && prov.options.apiKey === process.env.DEEPSEEK_API_KEY
+        && prov.options.baseURL === baseURL;
+      return ok;
+    } catch (_) { return false; }
   }
 
   if (process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_BASE_URL) {
