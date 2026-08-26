@@ -3792,6 +3792,13 @@
       "type": "Business Object",
       "parent": "project-overseer-001",
       "description": "里程碑（2026-08-26）：getSystemArchitecture 新增 scope 子图语义检索，避免全图语义检索范围过大返回过多内容——scope（view_id 或 element_id+depth）解析为 canonical 身份集合 → 作为 canonicalIdentities 喂给语义检索边界（VECTOR_QUERY_CYPHER_SCOPED 按身份过滤）→ 返回内容按 applySemanticScopeFilter 裁剪；未知视图/元素返回 SCOPE_VIEW_NOT_FOUND / SCOPE_ELEMENT_NOT_FOUND。落地：argo/scripts/systemarchitecture-mcp-server.js（resolveSemanticScope/applySemanticScopeFilter）、graph-rag/defaultSemanticRetrieval.js（exhaustChannel scope 过滤）、argo-mcp-server.js（schema）；新增 tests/argo-semantic-scope.test.js（6 用例）；规则层 QueryPriorityGuideline 新增 Bound-the-scope 约定（AT-archgraph-workflow-rules-07）；图谱新增 Application Service subgraph-semantic-retrieval-001（视图 1800，AT-subgraph-semantic-retrieval-01）。全量 234 通过/1 既有失败，validateSystemArchitecture 通过。commits ddc46c6（工作）/6e72f1f（commit 属性登记）。"
+    },
+    {
+      "description": "项目评测口径（2026-08-26 人类伙伴确立）：今后围绕 LLM-Wiki 两层指标研究。查询层（终极用户指标，读取的极致）：①查得准 Query Precision——无事实冲突/无幻觉生成、回答精准且行行有出处；②找得全 Query Recall——不仅能查单点事实，还能顺着拓扑内链把深层复杂关联（多跳推理）找全；③回得快且省 Query Latency & Cost——高语义密度预压缩让下游 context 减 70~90%、毫秒级响应、极低 token 成本；白盒补充：人类可读性（排版清晰、无 AI 废话）+ 精确行内溯源（一键反查源头证据）。写入层（底层机制，写入的极致，1:1 兑现为查询价值）：①逻辑与时效冲突识别消歧→查询准确率；②实体归一去重+知识图谱/内链拓扑→多跳查询召回率；③长文本提炼/去噪/事实保真压缩→查询速度+token 成本节约；④局部增量热更新 Delta Ingestion→系统生命周期与工程维护 ROI。定位：与项目愿景对齐——查询层=读取的极致、写入层=写入的极致、架构化存储（意图图+SUBVIEW+ARGO MCP）是兑现手段；把『世界级最优秀的 AGENT 长期记忆系统』从口号变成可评测的指标集。现状差距：memory-eval 已实测准确率 100%/拒答 100%/时延 5.7ms（覆盖 Precision 部分+Latency）；未覆盖 Query Cost（context 压缩率/token 成本）、多跳 Recall 深度、行内溯源 provenance、写入层四能力、白盒人类可读性。",
+      "id": "overseer-wiki-eval-001",
+      "name": "评测口径：LLM-Wiki 双层面指标（查询层+写入层）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -4604,6 +4611,16 @@
       "target_id": "2783",
       "source_name": "SKILL内化与共同进化洞察材料",
       "target_name": "发布SKILL观点推广文章到微信公众号"
+    },
+    {
+      "id": "overseer-wiki-eval-rel-001",
+      "name": "评测口径",
+      "source_id": "overseer-wiki-eval-001",
+      "source_name": "评测口径：LLM-Wiki 双层面指标（查询层+写入层）",
+      "statement": "评测口径：LLM-Wiki 双层面指标（查询层+写入层） --(Association)--> 项目愿景：为 AGENT 提供长期记忆系统",
+      "target_id": "overseer-vision-001",
+      "target_name": "项目愿景：为 AGENT 提供长期记忆系统",
+      "type": "Association"
     }
   ],
   "views": [
@@ -5255,9 +5272,12 @@
         "overseer-mem-eval-001",
         "overseer-query-rules-001",
         "overseer-content-storage-001",
-        "overseer-subgraph-semantic-001"
+        "overseer-subgraph-semantic-001",
+        "overseer-wiki-eval-001"
       ],
-      "included_relationships": []
+      "included_relationships": [
+        "overseer-wiki-eval-rel-001"
+      ]
     },
     {
       "view_id": "memory-eval-view-001",
