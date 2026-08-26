@@ -79,8 +79,9 @@ test('sandbox-framework-levelc: full-stack OpenCode agent eval (agent -> ARGO MC
   assert.match(df, /opencode-ai/, 'Dockerfile should install the OpenCode CLI');
   const smoke = readFileSync(SMOKE, 'utf8');
   assert.match(smoke, /opencode.*run/, 'smoke should drive the OpenCode agent headlessly');
-  assert.match(smoke, /ali-dashscope/, 'smoke should configure the Ali DashScope provider');
+  assert.match(smoke, /deepseek/, 'smoke should configure the DeepSeek provider');
   assert.match(smoke, /openai-compatible/, 'smoke should use the openai-compatible provider adapter');
+  assert.match(smoke, /DEEPSEEK_API_KEY/, 'smoke should read the DeepSeek API key from env');
   assert.match(smoke, /toolUsed.*answered|c: opencode agent/, 'smoke should assert agent tool usage and answer');
 });
 

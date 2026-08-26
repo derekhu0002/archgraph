@@ -158,31 +158,33 @@ async function runMcp() {
     check('c: opencode installed', oc.status === 0, String(oc.stdout || oc.stderr).trim());
   } catch (e) { check('c: opencode installed', false, e.message); }
 
-  // 模型 provider：阿里 DashScope compatible-mode + qwen3.7-plus（QWEN_KEY）。
-  process.env.OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || process.env.ARGO_EMBEDDING_BASE_URL;
-  process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.QWEN_KEY;
-  process.env.OPENCODE_MODEL = process.env.OPENCODE_MODEL || 'qwen3.7-plus';
+  // 模型 provider：问答用 DeepSeek（embedding 仍用 QWEN 的 ARGO_EMBEDDING_*，互不影响）。
+  process.env.OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
+  process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.DEEPSEEK_API_KEY;
+  process.env.OPENCODE_MODEL = process.env.OPENCODE_MODEL || `deepseek-sandbox/${process.env.DEEPSEEK_MODEL || 'deepseek-chat'}`;
 
-  // 模型 provider：把阿里 DashScope compatible-mode 写成 OpenCode 自定义 provider
-  // （@ai-sdk/openai-compatible，真实用户标准配置），并设为默认模型。
+  // 模型 provider：DeepSeek 写成 OpenCode 自定义 provider（@ai-sdk/openai-compatible）。
+  // embedding（ARGO_EMBEDDING_*/QWEN_KEY）保持不变，只换问答模型。
   function configureOpenCodeModel() {
     const configPath = path.join(HOME, '.config/opencode/opencode.json');
     const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    const baseURL = (process.env.ARGO_EMBEDDING_BASE_URL || '').replace(/\/$/, '');
-    if (!baseURL || !process.env.QWEN_KEY) return false;
+    const baseURL = (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/$/, '');
+    const model = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
+    if (!baseURL || !process.env.DEEPSEEK_API_KEY) return false;
     cfg.provider = cfg.provider || {};
-    cfg.provider['ali-dashscope'] = {
+    // 自定义 provider 命名为 deepseek-sandbox，避免与 OpenCode 内置 deepseek provider 冲突。
+    cfg.provider['deepseek-sandbox'] = {
       npm: '@ai-sdk/openai-compatible',
-      name: 'Ali DashScope',
-      options: { baseURL, apiKey: process.env.QWEN_KEY },
-      models: { 'qwen3.7-plus': { name: 'Qwen3.7 Plus' } },
+      name: 'DeepSeek (sandbox)',
+      options: { baseURL, apiKey: process.env.DEEPSEEK_API_KEY },
+      models: { [model]: { name: model } },
     };
-    cfg.model = 'ali-dashscope/qwen3.7-plus';
+    cfg.model = `deepseek-sandbox/${model}`;
     fs.writeFileSync(configPath, JSON.stringify(cfg, null, 2));
     return true;
   }
 
-  if (process.env.OPENAI_API_KEY && process.env.OPENAI_BASE_URL) {
+  if (process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_BASE_URL) {
     const configured = configureOpenCodeModel();
     const question = '请用 ARGO MCP 读取初始图谱，回答：元素 Implementation and Migration Viewpoint 的 id 是什么？';
     const t0 = Date.now();
