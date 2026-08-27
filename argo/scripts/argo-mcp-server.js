@@ -66,6 +66,7 @@ const SYSTEM_ARCHITECTURE_TOOL_NAMES = new Set([
   'removeArchitectureView',
   'generateArchitectureDiffPlantuml',
   'queryNeo4jGraph',
+  'memory_search',
 ]);
 
 const TOOLS = [

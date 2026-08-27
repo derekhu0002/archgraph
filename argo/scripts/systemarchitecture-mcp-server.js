@@ -406,6 +406,19 @@ const TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: 'memory_search',
+    description: 'Semantic memory search: retrieve the user\'s memory by natural-language query. Runs embedding-based semantic retrieval (memory-retrieval purpose) over the intent graph and returns the top-k relevant memory items (id, name, type, description/content, similarity score). Agents SHOULD call this tool to look up the user\'s memory before answering a question about the user.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Natural-language query describing the user memory to retrieve.' },
+        top_k: { type: 'integer', description: 'Optional max number of hits to return (default 8).' },
+        architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
+      },
+      additionalProperties: false,
+    },
+  },
 ];
 
 // Every tool accepts an optional per-call `workspaceRoot` (absolute path,
@@ -2188,7 +2201,60 @@ async function callTool(name, args = {}, dependencies = undefined) {
     return queryNeo4jGraphTool(args);
   }
 
+  if (name === 'memory_search') {
+    return memorySearchTool(args, dependencies);
+  }
+
   throw new Error(`Unknown tool: ${name}`);
+}
+
+// memory_search: natural-language semantic memory retrieval. Reuses the
+// memory-retrieval purpose (implementation-design) of the semantic journey
+// (same path as getSystemArchitecture, so readiness/closure behave identically)
+// and reshapes the retrieved elements into a memory-oriented hit list with
+// content + similarity score, so an agent can look up the user's memory in one
+// call.
+async function memorySearchTool(args = {}, dependencies = undefined) {
+  const query = typeof args.query === 'string' ? args.query.trim() : '';
+  if (!query) {
+    return { status: 'failed', error: { category: 'MEMORY_QUERY_REQUIRED', message: 'query is required' } };
+  }
+  const topK = Number.isInteger(args.top_k) && args.top_k > 0 ? args.top_k : 8;
+  const context = await loadContext(args);
+  let retrieved;
+  try {
+    const journey = await resolveSemanticOperatorJourney(dependencies);
+    retrieved = await journey.query({ purpose: 'implementation-design', intent: query });
+  } catch (error) {
+    return {
+      status: 'failed',
+      error: {
+        category: error && error.category ? error.category : 'MEMORY_RETRIEVAL_FAILED',
+        message: error && error.message ? error.message : 'Memory retrieval failed',
+      },
+    };
+  }
+  const source = retrieved && (retrieved.result || retrieved.document) || retrieved;
+  const subset = buildCanonicalSemanticDocumentSubset(source, context.document);
+  if (subset.status !== 'passed') {
+    return { status: 'failed', error: subset.error || { category: 'MEMORY_RETRIEVAL_FAILED' } };
+  }
+  const hits = (Array.isArray(subset.document && subset.document.elements) ? subset.document.elements : [])
+    .filter(element => element && typeof element.semanticScore === 'number')
+    .sort((left, right) => right.semanticScore - left.semanticScore)
+    .slice(0, topK)
+    .map(element => Object.freeze({
+      id: element.id,
+      name: element.name,
+      type: element.type,
+      score: element.semanticScore,
+      description: typeof element.description === 'string' ? element.description : '',
+    }));
+  return {
+    status: 'passed',
+    query,
+    hits: Object.freeze(hits),
+  };
 }
 
 async function queryNeo4jGraphTool(args = {}) {
