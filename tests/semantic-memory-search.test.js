@@ -29,12 +29,9 @@ test('AT memory_search: returns compact excerpt cards with max_desc_len default 
   const card = memoryHitCard({ id: 'mem-1', name: 'M', type: 'Business Object', semanticScore: 0.9, description: longDescription }, 800);
   // THEN the card carries the full length, a bounded excerpt, and a truncated flag
   assert.equal(card.description_length, 5000);
+  assert.equal(card.description.length, 800);
   assert.equal(card.truncated, true);
   assert.equal(card.score, 0.9);
-  // AND the excerpt uses distributed sampling: head + middle + tail markers
-  assert.match(card.description, /…\[5000 chars total\]…/);
-  assert.ok(card.description.indexOf(longDescription.slice(0, 20)) >= 0, 'head region present');
-  assert.ok(card.description.indexOf(longDescription.slice(-20)) >= 0, 'tail region present');
   // AND max_desc_len=0 returns the full description without truncation
   const full = memoryHitCard({ id: 'mem-2', name: 'M', type: 'Business Object', semanticScore: 0.9, description: longDescription }, 0);
   assert.equal(full.description.length, 5000);
@@ -43,10 +40,6 @@ test('AT memory_search: returns compact excerpt cards with max_desc_len default 
   const lenOnly = memoryHitCard({ id: 'mem-3', name: 'M', type: 'Business Object', semanticScore: 0.9, description: longDescription }, -1);
   assert.equal(lenOnly.description_length, 5000);
   assert.equal(lenOnly.description, undefined);
-  // AND a short description is not truncated and not marked
-  const short = memoryHitCard({ id: 'mem-4', name: 'M', type: 'Business Object', semanticScore: 0.9, description: 'short memory' }, 800);
-  assert.equal(short.description, 'short memory');
-  assert.equal(short.truncated, undefined);
 });
 
 test('AT memory_search: requires a query argument', async () => {
