@@ -166,6 +166,9 @@ const ARGO_ENV_SUPPORTED_KEYS = [
   'ARGO_NEO4J_DATABASE',
   'ARGO_LIVE_PROVIDER_E2E',
   'ARGO_W31_LIVE_MUTATION_VECTOR_E2E',
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD',
+  'ARGO_SEMANTIC_AUDIT_THRESHOLD',
+  'ARGO_SEMANTIC_TOP_K',
 ];
 
 // The mounted /env/argo.env is a Windows-host bind mount that appears as mode

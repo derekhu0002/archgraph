@@ -80,7 +80,37 @@ const READINESS_QUERY_CYPHER = [
   'RETURN properties(readiness) AS readiness',
 ].join('\n');
 const INITIAL_WINDOW_SIZE = 2;
+// Purpose-aware, env-configurable similarity thresholds + bounded top-K recall.
+// Audit keeps the strict threshold (precision); memory-retrieval purposes use a
+// looser threshold so relevant-but-paraphrased memory is recalled, while results
+// are bounded to ARGO_SEMANTIC_TOP_K so noise stays bounded. Thresholds are
+// overridable per channel via ARGO_SEMANTIC_{MEMORY|AUDIT}_THRESHOLD_<CHANNEL>.
+const AUDIT_PURPOSES = new Set(['audit']);
+const DEFAULT_MEMORY_THRESHOLD = 0.55;
+const DEFAULT_AUDIT_THRESHOLD = 0.8;
+const DEFAULT_TOP_K = 8;
 const SELECTED_VIEW_ID = 'semprod-wp2-default-retrieval-readiness';
+
+function envNumber(key, fallback) {
+  const value = Number(process.env[key]);
+  return Number.isFinite(value) ? value : fallback;
+}
+function memoryThresholdFor(channel) {
+  return envNumber(
+    `ARGO_SEMANTIC_MEMORY_THRESHOLD_${channel.channel.toUpperCase()}`,
+    envNumber('ARGO_SEMANTIC_MEMORY_THRESHOLD', DEFAULT_MEMORY_THRESHOLD),
+  );
+}
+function auditThresholdFor(channel) {
+  return envNumber(
+    `ARGO_SEMANTIC_AUDIT_THRESHOLD_${channel.channel.toUpperCase()}`,
+    envNumber('ARGO_SEMANTIC_AUDIT_THRESHOLD', DEFAULT_AUDIT_THRESHOLD),
+  );
+}
+function resolveTopK() {
+  const k = envNumber('ARGO_SEMANTIC_TOP_K', DEFAULT_TOP_K);
+  return Number.isInteger(k) && k > 0 ? k : DEFAULT_TOP_K;
+}
 const testCompositionStorage = new AsyncLocalStorage();
 
 function createDefaultSemanticRetrieval(dependencies = {}) {
@@ -173,12 +203,17 @@ async function executeWpP2Retrieval({
   });
   const vector = await provider.embed(request.intent);
   requireQualifiedVector(vector);
+  const purpose = request && typeof request.purpose === 'string' ? request.purpose : '';
+  const strict = AUDIT_PURPOSES.has(purpose);
+  const topK = resolveTopK();
   const seedsByType = {};
   for (const channel of CHANNELS) {
     seedsByType[channel.key] = await exhaustChannel({
       channel,
       neo4jDriver: composition.neo4jDriver,
       vector,
+      threshold: strict ? auditThresholdFor(channel) : memoryThresholdFor(channel),
+      maxSeeds: topK,
       ...(Array.isArray(canonicalIdentities) && canonicalIdentities.length > 0
         ? { canonicalIdentities }
         : {}),
@@ -620,12 +655,21 @@ function publicReadinessOutcome(alignment) {
   };
 }
 
-async function exhaustChannel({ channel, neo4jDriver, vector, canonicalIdentities }) {
+async function exhaustChannel({
+  channel,
+  neo4jDriver,
+  vector,
+  canonicalIdentities,
+  threshold,
+  maxSeeds,
+}) {
   const scoped = Array.isArray(canonicalIdentities) && canonicalIdentities.length > 0;
   const accepted = [];
   const seen = new Set();
+  const effectiveThreshold = typeof threshold === 'number' ? threshold : channel.threshold;
+  const effectiveMax = Number.isInteger(maxSeeds) && maxSeeds > 0 ? maxSeeds : Number.POSITIVE_INFINITY;
   let offset = 0;
-  while (true) {
+  while (accepted.length < effectiveMax) {
     const parameters = Object.freeze({
       indexName: channel.indexName,
       channel: channel.channel,
@@ -645,8 +689,9 @@ async function exhaustChannel({ channel, neo4jDriver, vector, canonicalIdentitie
     const records = Array.isArray(result && result.records) ? result.records : [];
     const newlyVisible = records.slice(offset);
     for (const raw of newlyVisible) {
+      if (accepted.length >= effectiveMax) break;
       const record = normalizeVectorRecord(raw, channel);
-      if (record && record.score >= channel.threshold && !seen.has(record.id)) {
+      if (record && record.score >= effectiveThreshold && !seen.has(record.id)) {
         seen.add(record.id);
         accepted.push(Object.freeze(record));
       }
@@ -979,4 +1024,8 @@ function safeError(category) {
 module.exports = {
   createDefaultSemanticRetrieval,
   withDefaultSemanticRetrievalTestComposition,
+  memoryThresholdFor,
+  auditThresholdFor,
+  resolveTopK,
+  AUDIT_PURPOSES,
 };

@@ -2780,15 +2780,52 @@ function buildCanonicalSemanticDocumentSubset(source, canonicalDocument = undefi
     }
   }
 
+  // Attach the semantic similarity score to each retrieved object so callers can
+  // judge relevance (top-K bounded recall may include borderline neighbours).
+  const semanticScoreById = new Map();
+  const seedsByType = evidence.seedsByType || {};
+  for (const channelSeeds of Object.values(seedsByType)) {
+    for (const seed of Array.isArray(channelSeeds) ? channelSeeds : []) {
+      if (!seed || !seed.id) continue;
+      const numericScore = Number(seed.score);
+      if (!Number.isFinite(numericScore)) continue;
+      const bareId = String(seed.id).replace(/^[^:]*:/, '');
+      if (bareId && (!semanticScoreById.has(bareId) || numericScore > semanticScoreById.get(bareId))) {
+        semanticScoreById.set(bareId, numericScore);
+      }
+    }
+  }
+  // buildCanonicalSemanticDocumentSubset may run a second time over a prior
+  // subset document (which no longer carries seedsByType); carry scores forward
+  // from evidence elements that already expose semanticScore.
+  for (const item of evidenceElements) {
+    if (!item) continue;
+    const numericScore = Number(item.semanticScore);
+    if (!Number.isFinite(numericScore)) continue;
+    const key = String(item.id !== undefined ? item.id : item.view_id);
+    if (key && (!semanticScoreById.has(key) || numericScore > semanticScoreById.get(key))) {
+      semanticScoreById.set(key, numericScore);
+    }
+  }
+  const withSemanticScore = item => {
+    if (!item) return item;
+    const score = item.id !== undefined
+      ? semanticScoreById.get(String(item.id))
+      : semanticScoreById.get(String(item.view_id));
+    return typeof score === 'number' ? Object.freeze({ ...item, semanticScore: score }) : item;
+  };
   const elements = [...elementIds]
     .map(id => canonicalElementById.get(id))
-    .filter(Boolean);
+    .filter(Boolean)
+    .map(withSemanticScore);
   const relationships = [...relationshipIds]
     .map(id => canonicalRelationshipById.get(id))
-    .filter(Boolean);
+    .filter(Boolean)
+    .map(withSemanticScore);
   const views = [...viewIds]
     .map(id => canonicalViewById.get(id))
-    .filter(Boolean);
+    .filter(Boolean)
+    .map(withSemanticScore);
 
   return {
     status: 'passed',

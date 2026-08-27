@@ -21,6 +21,20 @@ const CONFIG_KEYS = Object.freeze([
 const OPTIONAL_CONFIG_KEYS = Object.freeze([
   'ARGO_NEO4J_DATABASE',
 ]);
+// Semantic-retrieval tuning knobs (purpose-aware thresholds + bounded top-K).
+// They are read by defaultSemanticRetrieval from process.env and whitelisted here
+// so an approved env file may carry them without tripping SECRET_FILE_UNKNOWN_KEY.
+const RETRIEVAL_TUNING_KEYS = Object.freeze([
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD',
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD_ELEMENT',
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD_RELATIONSHIP',
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD_VIEW',
+  'ARGO_SEMANTIC_AUDIT_THRESHOLD',
+  'ARGO_SEMANTIC_AUDIT_THRESHOLD_ELEMENT',
+  'ARGO_SEMANTIC_AUDIT_THRESHOLD_RELATIONSHIP',
+  'ARGO_SEMANTIC_AUDIT_THRESHOLD_VIEW',
+  'ARGO_SEMANTIC_TOP_K',
+]);
 const OPT_IN_KEYS = Object.freeze({
   ARGO_LIVE_PROVIDER_E2E: 'LIVE_PROVIDER_E2E_OPT_IN_REQUIRED',
   ARGO_W31_LIVE_MUTATION_VECTOR_E2E: 'W31_MUTATION_VECTOR_E2E_OPT_IN_REQUIRED',
@@ -28,6 +42,7 @@ const OPT_IN_KEYS = Object.freeze({
 const READABLE_KEYS = Object.freeze([
   ...CONFIG_KEYS,
   ...OPTIONAL_CONFIG_KEYS,
+  ...RETRIEVAL_TUNING_KEYS,
   ...Object.keys(OPT_IN_KEYS),
 ]);
 const LEGACY_KEYS = Object.freeze(['ARGO_NEO4J_URI', 'ARGO_NEO4J_USERNAME', 'ARGO_NEO4J_PASSWORD']);

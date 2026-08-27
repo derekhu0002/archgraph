@@ -42,6 +42,9 @@ const SUPPORTED_KEYS = new Set([
   'ARGO_NEO4J_DATABASE',
   'ARGO_LIVE_PROVIDER_E2E',
   'ARGO_W31_LIVE_MUTATION_VECTOR_E2E',
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD',
+  'ARGO_SEMANTIC_AUDIT_THRESHOLD',
+  'ARGO_SEMANTIC_TOP_K',
 ]);
 
 // Split an env file into lines whose key is ARGO-supported vs the rest.
