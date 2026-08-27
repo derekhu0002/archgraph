@@ -283,8 +283,8 @@ async function ingestA() {
   const out = { view: false, elements: 0, errors: [] };
   try {
     const r = await callTool('addArchitectureView', {
-      view: { view_id: viewId, view_name: 'LongMemEval 对照语料', parent_element_id: '1249',
-              description: 'LongMemEval 10 题对照记忆（A 组 argo 意图图摄入）',
+      view: { view_id: viewId, view_name: '用户会话记忆', parent_element_id: '1249',
+              description: '用户的跨会话对话记忆（A 组记忆后端摄入）',
               included_elements: [], included_relationships: [] },
       workspaceRoot: WORKSPACE,
     }, null, undefined);
@@ -295,7 +295,7 @@ async function ingestA() {
     const id = `lmem-a-${q.qid}`;
     try {
       const r = await callTool('addArchitectureElement', {
-        element: { id, name: `LongMemEval Memory ${q.qid}`, type: 'Business Object', description: q.haystack },
+        element: { id, name: `用户会话记忆 ${q.qid}`, type: 'Business Object', description: q.haystack },
         view_ids: [viewId], workspaceRoot: WORKSPACE,
       }, null, undefined);
       out.elements += 1;
