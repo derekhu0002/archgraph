@@ -45,5 +45,10 @@ npx --no-install argo-deploy \
   -OpenCodeAgentsRoot /root/.config/opencode/agents \
   -PluginsRoot /root/.argo/plugins
 
-echo "[sandbox] smoke 验证已安装框架"
-node /opt/sandbox/smoke.js
+if [ "${RUN_COMPARISON:-0}" = "1" ]; then
+    echo "[sandbox] 对照评测模式：node /opt/sandbox/lmem-comparison.js（LongMemEval A/B，挂载 /opt/lmem-selection.json）"
+    node /opt/sandbox/lmem-comparison.js
+else
+    echo "[sandbox] smoke 验证已安装框架"
+    node /opt/sandbox/smoke.js
+fi

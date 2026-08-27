@@ -4000,12 +4000,27 @@
       "name": "Neo4j Semantic Projection Reconciliation",
       "parent": "1961",
       "type": "Application Component",
-      "description": "将 canonical 意图图谱同步到 Neo4j 语义投影（ArgoProductionSemanticRecord + 向量索引），由 argo-init 的语义生命周期触发全量回填。全量回填在 upsert 之后执行 reconcileRemovals：读取已持久化的语义记录，对本地 JSON 快照中已不存在的 canonicalIdentity 执行 deleteTombstones，确保 argo init 后语义投影与 canonical 图谱完全一致（不留陈旧向量）。源码：argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js",
+      "description": "将 canonical 意图图谱同步到 Neo4j 语义投影（ArgoProductionSemanticRecord + 向量索引），由 argo-init 的语义生命周期触发全量回填。① 全量回填在 upsert 之后执行 reconcileRemovals：读取已持久化的语义记录，对本地 JSON 快照中已不存在的 canonicalIdentity 执行 deleteTombstones，确保 argo init 后语义投影与 canonical 图谱完全一致（不留陈旧向量）。② approved embedding 配置跨平台 ACL 预检（win32 icacls / POSIX fs mode+uid）。③ embedding 维度 1536（与 LightRAG 对照基线一致，ARGO_EMBEDDING_DIMENSIONS 驱动；向量索引维度感知重建）。宿主已验证 argo-init Aligned @1536。源码：argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js 等",
       "attributes": [
         {
           "name": "commit",
           "value": "70157c7",
           "description": "argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js; tests/semantic-backfill-reconcile.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "fcb5050",
+          "description": "argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; tests/semantic-acl-posix.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "efebf65",
+          "description": "design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "6437a02",
+          "description": "embedding dimension 1536 对齐 LightRAG: argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; liveEmbeddingIndexGate.js; defaultSemanticRetrieval.js; productionSemanticNeo4jAdapter.js; systemarchitecture-mcp-server.js; argo/.env (ARGO_EMBEDDING_DIMENSIONS)"
         },
         {
           "name": "deliveryStatus",
