@@ -2256,7 +2256,7 @@ async function memorySearchTool(args = {}, dependencies = undefined) {
     status: 'passed',
     query,
     max_desc_len: maxDescLen,
-    fullTextHint: 'To read the full text of a hit, call getIntentElementContext with its id (elementId).',
+    fullTextHint: 'Cards are excerpts (head/middle/tail samples). If a hit has truncated=true and the excerpt does not contain the answer, the full text is available: call getIntentElementContext with that hit\'s id (elementId) to read the complete memory before concluding the memory lacks the information.',
     hits: Object.freeze(hits),
   };
 }
@@ -2264,12 +2264,18 @@ async function memorySearchTool(args = {}, dependencies = undefined) {
 // Build one compact memory hit: id/name/type/score + an excerpt of the
 // description bounded by maxDescLen, plus the full text length so the caller
 // knows how much content exists and can decide whether to expand.
+//
+// The excerpt uses distributed sampling (head/middle/tail) instead of a plain
+// head slice: a long memory's answer may live deep in the session, so showing
+// only the first N characters hides it. Sampling three regions gives the agent
+// a panoramic sense of the memory so it knows to expand when the answer is not
+// in the excerpt.
 function memoryHitCard(element, maxDescLen) {
   const description = typeof element.description === 'string' ? element.description : '';
   const descriptionLength = description.length;
   let excerpt = '';
   if (maxDescLen !== -1) {
-    excerpt = maxDescLen === 0 ? description : description.slice(0, maxDescLen);
+    excerpt = maxDescLen === 0 ? description : distributedExcerpt(description, maxDescLen);
   }
   const card = {
     id: element.id,
@@ -2285,6 +2291,23 @@ function memoryHitCard(element, maxDescLen) {
     }
   }
   return card;
+}
+
+// Distributed excerpt: when text exceeds limit, sample the head, middle, and
+// tail regions (approx 40/30/30 of the budget) joined by ellipsis markers, so
+// a long memory is represented by content from across its span.
+function distributedExcerpt(text, limit) {
+  const n = text.length;
+  if (n <= limit) return text;
+  if (limit < 24) return text.slice(0, limit);
+  const headBudget = Math.max(1, Math.floor(limit * 0.4));
+  const midBudget = Math.max(1, Math.floor(limit * 0.3));
+  const tailBudget = Math.max(1, limit - headBudget - midBudget);
+  const head = text.slice(0, headBudget);
+  const middleStart = Math.floor(n * 0.45);
+  const middle = text.slice(middleStart, middleStart + midBudget);
+  const tail = text.slice(n - tailBudget);
+  return `${head}\n…[${n} chars total]…\n${middle}\n…\n${tail}`;
 }
 
 async function queryNeo4jGraphTool(args = {}) {
