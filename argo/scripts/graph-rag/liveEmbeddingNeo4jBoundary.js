@@ -64,11 +64,11 @@ async function createApprovedNeo4jBoundary({ configuration, neo4j, logger }) {
       return result.records.map(record => normalizeNeo4jValue(record.get('evidence')));
     },
     async queryVectorEvidence(runId, vector, canonicalIdentities) {
-      if (!Array.isArray(vector) || vector.length !== 1024 || !Array.isArray(canonicalIdentities)) {
+      if (!Array.isArray(vector) || vector.length !== 1536 || !Array.isArray(canonicalIdentities)) {
         throw safeError('LIVE_PROVIDER_OPERATION_FAILED');
       }
       await query(
-        'CREATE VECTOR INDEX argo_live_embedding_vector IF NOT EXISTS FOR (e:ArgoLiveEmbeddingEvidence) ON (e.vector) OPTIONS { indexConfig: { `vector.dimensions`: 1024, `vector.similarity_function`: "cosine" } }',
+        'CREATE VECTOR INDEX argo_live_embedding_vector IF NOT EXISTS FOR (e:ArgoLiveEmbeddingEvidence) ON (e.vector) OPTIONS { indexConfig: { `vector.dimensions`: 1536, `vector.similarity_function`: "cosine" } }',
         {},
       );
       const result = await query(

@@ -128,7 +128,7 @@ const W31_APPROVED_PROFILE = Object.freeze({
   baseUrl: 'https://llm-clids9mqc5o1mbvb.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
   model: 'qwen3.7-text-embedding',
   version: 'qualification-2026-07-25',
-  dimensions: 1024,
+  dimensions: 1536,
   source: 'explicit-human-approval',
 });
 

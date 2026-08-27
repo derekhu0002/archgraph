@@ -1143,7 +1143,7 @@ function createSyntheticVectorTransport() {
           return {
             data: [
               {
-                embedding: Array.from({ length: 1024 }, (_, index) => index / 2048),
+                embedding: Array.from({ length: 1536 }, (_, index) => index / 2048),
               },
             ],
           };

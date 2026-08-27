@@ -90,14 +90,31 @@ function createProductionSemanticNeo4jAdapter(dependencies = {}) {
   });
 }
 
+const EMBEDDING_DIMENSIONS = 1536;
+
 async function ensureVectorIndexes(session) {
   for (const definition of Object.values(CHANNEL_INDEXES)) {
+    // CREATE ... IF NOT EXISTS cannot change an existing index's dimensions, so
+    // when the approved embedding dimension changes (e.g. 1024 -> 1536) drop the
+    // stale index first and recreate it at the approved dimension.
+    const existing = await executeRead(
+      session,
+      'SHOW INDEXES YIELD name, type, options WHERE type = \'VECTOR\' AND name = $name RETURN name, options',
+      { name: definition.indexName },
+    );
+    if (existing.records.length > 0) {
+      const options = existing.records[0].get('options');
+      const dim = options && options.indexConfig && options.indexConfig['vector.dimensions'];
+      if (dim !== EMBEDDING_DIMENSIONS) {
+        await executeWrite(session, `DROP INDEX ${definition.indexName} IF EXISTS`, {});
+      }
+    }
     await executeWrite(
       session,
       [
         `CREATE VECTOR INDEX ${definition.indexName} IF NOT EXISTS`,
         `FOR (semantic:${definition.label}) ON (semantic.vector)`,
-        'OPTIONS { indexConfig: { `vector.dimensions`: 1024, `vector.similarity_function`: "cosine" } }',
+        `OPTIONS { indexConfig: { \`vector.dimensions\`: ${EMBEDDING_DIMENSIONS}, \`vector.similarity_function\`: "cosine" } }`,
       ].join('\n'),
       {},
     );

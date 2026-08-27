@@ -36,7 +36,7 @@ const APPROVED_PROFILE = Object.freeze({
   model: 'qwen3.7-text-embedding',
   provider: 'alibaba-cloud-model-studio-openai-compatible-cn-beijing',
   version: 'qualification-2026-07-25',
-  dimensions: 1024,
+  dimensions: 1536,
 });
 const CHANNELS = Object.freeze([
   Object.freeze({

@@ -38,7 +38,7 @@ const APPROVED = Object.freeze({
   ARGO_EMBEDDING_MODEL: 'qwen3.7-text-embedding',
   ARGO_EMBEDDING_PROVIDER: 'alibaba-cloud-model-studio-openai-compatible-cn-beijing',
   ARGO_EMBEDDING_MODEL_VERSION: 'qualification-2026-07-25',
-  ARGO_EMBEDDING_DIMENSIONS: '1024',
+  ARGO_EMBEDDING_DIMENSIONS: '1536',
 });
 const issuedAdapters = new WeakSet();
 const issuedTraces = new WeakSet();
@@ -167,7 +167,7 @@ async function resolveTrusted({
     embeddingModel: normalized.ARGO_EMBEDDING_MODEL,
     embeddingProvider: normalized.ARGO_EMBEDDING_PROVIDER,
     embeddingModelVersion: normalized.ARGO_EMBEDDING_MODEL_VERSION,
-    embeddingDimensions: 1024,
+    embeddingDimensions: 1536,
     neo4jDatabaseUrl: normalized.ARGO_NEO4J_DATABASE_URL,
     neo4jDatabaseUsername: normalized.ARGO_NEO4J_DATABASE_USERNAME,
     neo4jDatabasePassword: normalized.ARGO_NEO4J_DATABASE_PASSWORD,
