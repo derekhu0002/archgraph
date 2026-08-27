@@ -408,12 +408,13 @@ const TOOLS = [
   },
   {
     name: 'memory_search',
-    description: 'Semantic memory search: retrieve the user\'s memory by natural-language query. Runs embedding-based semantic retrieval (memory-retrieval purpose) over the intent graph and returns the top-k relevant memory items (id, name, type, description/content, similarity score). Agents SHOULD call this tool to look up the user\'s memory before answering a question about the user.',
+    description: 'Semantic memory search: retrieve the user\'s memory by natural-language query. Runs embedding-based semantic retrieval (memory-retrieval purpose) over the intent graph and returns the top-k relevant memory items (id, name, type, similarity score, and a description excerpt with its full length). Each hit is a lightweight card: to keep the tool result compact, description is truncated to max_desc_len characters (default 800) and the full text length is reported as description_length. To read the full text of a hit, call getIntentElementContext with its id. Agents SHOULD call this tool to look up the user\'s memory before answering a question about the user.',
     inputSchema: {
       type: 'object',
       properties: {
         query: { type: 'string', description: 'Natural-language query describing the user memory to retrieve.' },
         top_k: { type: 'integer', description: 'Optional max number of hits to return (default 8).' },
+        max_desc_len: { type: 'integer', description: 'Optional max characters of description to return per hit. Default 800. Use 0 for the full description, or -1 to omit description and return only the length.' },
         architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
       },
       additionalProperties: false,
@@ -2220,6 +2221,13 @@ async function memorySearchTool(args = {}, dependencies = undefined) {
     return { status: 'failed', error: { category: 'MEMORY_QUERY_REQUIRED', message: 'query is required' } };
   }
   const topK = Number.isInteger(args.top_k) && args.top_k > 0 ? args.top_k : 8;
+  // max_desc_len: default 800 (compact excerpt). 0 = full description;
+  // -1 = omit description entirely and return only the length. Keeps the tool
+  // result compact (production memory cards, not full session dumps).
+  let maxDescLen = 800;
+  if (Number.isInteger(args.max_desc_len) && args.max_desc_len !== 800) {
+    maxDescLen = args.max_desc_len;
+  }
   const context = await loadContext(args);
   let retrieved;
   try {
@@ -2243,18 +2251,40 @@ async function memorySearchTool(args = {}, dependencies = undefined) {
     .filter(element => element && typeof element.semanticScore === 'number')
     .sort((left, right) => right.semanticScore - left.semanticScore)
     .slice(0, topK)
-    .map(element => Object.freeze({
-      id: element.id,
-      name: element.name,
-      type: element.type,
-      score: element.semanticScore,
-      description: typeof element.description === 'string' ? element.description : '',
-    }));
+    .map(element => Object.freeze(memoryHitCard(element, maxDescLen)));
   return {
     status: 'passed',
     query,
+    max_desc_len: maxDescLen,
+    fullTextHint: 'To read the full text of a hit, call getIntentElementContext with its id (elementId).',
     hits: Object.freeze(hits),
   };
+}
+
+// Build one compact memory hit: id/name/type/score + an excerpt of the
+// description bounded by maxDescLen, plus the full text length so the caller
+// knows how much content exists and can decide whether to expand.
+function memoryHitCard(element, maxDescLen) {
+  const description = typeof element.description === 'string' ? element.description : '';
+  const descriptionLength = description.length;
+  let excerpt = '';
+  if (maxDescLen !== -1) {
+    excerpt = maxDescLen === 0 ? description : description.slice(0, maxDescLen);
+  }
+  const card = {
+    id: element.id,
+    name: element.name,
+    type: element.type,
+    score: element.semanticScore,
+    description_length: descriptionLength,
+  };
+  if (maxDescLen !== -1) {
+    card.description = excerpt;
+    if (maxDescLen > 0 && descriptionLength > maxDescLen) {
+      card.truncated = true;
+    }
+  }
+  return card;
 }
 
 async function queryNeo4jGraphTool(args = {}) {
@@ -3586,6 +3616,7 @@ module.exports = {
   handleRequest,
   loadContext,
   main,
+  memoryHitCard,
   resolveSemanticScope,
   validateDocument,
 };

@@ -45,7 +45,10 @@ npx --no-install argo-deploy \
   -OpenCodeAgentsRoot /root/.config/opencode/agents \
   -PluginsRoot /root/.argo/plugins
 
-if [ "${RUN_COMPARISON:-0}" = "1" ]; then
+if [ "${RUN_MEMSEARCH_PROBE:-0}" = "1" ]; then
+    echo "[sandbox] memory_search 探针模式：node /opt/sandbox/probe-memory-search.js"
+    node /opt/sandbox/probe-memory-search.js
+elif [ "${RUN_COMPARISON:-0}" = "1" ]; then
     echo "[sandbox] 对照评测模式：node /opt/sandbox/lmem-comparison.js（LongMemEval A/B，挂载 /opt/lmem-selection.json）"
     node /opt/sandbox/lmem-comparison.js
 else

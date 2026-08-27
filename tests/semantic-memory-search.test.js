@@ -18,7 +18,28 @@ test('AT memory_search: is registered as an agent-facing tool with a query schem
   assert.ok(tool.description && /memory/i.test(tool.description), 'description should signal memory retrieval');
   const props = tool.inputSchema && tool.inputSchema.properties;
   assert.ok(props && props.query, 'schema must require a query');
+  assert.ok(props && props.max_desc_len, 'schema must expose max_desc_len to bound the excerpt size');
   assert.equal(tool.inputSchema.type, 'object');
+});
+
+test('AT memory_search: returns compact excerpt cards with max_desc_len default 800', () => {
+  // GIVEN the memory card builder and a long memory description
+  const { memoryHitCard } = systemArchitectureMcp;
+  const longDescription = 'x'.repeat(5000);
+  const card = memoryHitCard({ id: 'mem-1', name: 'M', type: 'Business Object', semanticScore: 0.9, description: longDescription }, 800);
+  // THEN the card carries the full length, a bounded excerpt, and a truncated flag
+  assert.equal(card.description_length, 5000);
+  assert.equal(card.description.length, 800);
+  assert.equal(card.truncated, true);
+  assert.equal(card.score, 0.9);
+  // AND max_desc_len=0 returns the full description without truncation
+  const full = memoryHitCard({ id: 'mem-2', name: 'M', type: 'Business Object', semanticScore: 0.9, description: longDescription }, 0);
+  assert.equal(full.description.length, 5000);
+  assert.equal(full.truncated, undefined);
+  // AND max_desc_len=-1 omits the description body but keeps the length
+  const lenOnly = memoryHitCard({ id: 'mem-3', name: 'M', type: 'Business Object', semanticScore: 0.9, description: longDescription }, -1);
+  assert.equal(lenOnly.description_length, 5000);
+  assert.equal(lenOnly.description, undefined);
 });
 
 test('AT memory_search: requires a query argument', async () => {
