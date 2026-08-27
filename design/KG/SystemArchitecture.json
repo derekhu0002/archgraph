@@ -4020,7 +4020,12 @@
         {
           "name": "commit",
           "value": "6437a02",
-          "description": "embedding dimension 1536 对齐 LightRAG: argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; liveEmbeddingIndexGate.js; defaultSemanticRetrieval.js; productionSemanticNeo4jAdapter.js; systemarchitecture-mcp-server.js; argo/.env (ARGO_EMBEDDING_DIMENSIONS)"
+          "description": "embedding dimension 1536 对齐 LightRAG"
+        },
+        {
+          "name": "commit",
+          "value": "9051427",
+          "description": "purpose-aware env 阈值 (ARGO_SEMANTIC_*) + top-K 有界 + semanticScore 可见: defaultSemanticRetrieval.js; liveEmbeddingProviderConfig.js; systemarchitecture-mcp-server.js; tests/semantic-threshold-tuning.test.js"
         },
         {
           "name": "deliveryStatus",

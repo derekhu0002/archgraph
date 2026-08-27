@@ -54,21 +54,29 @@ process.env.OPENCODE_MODEL = process.env.OPENCODE_MODEL || `deepseek-sandbox/${p
 const questions = JSON.parse(fs.readFileSync(SEL, 'utf8'));
 
 // ── neutral rules (口径 A) ──────────────────────────────────────────────────
+// Neutral = identical for BOTH backends. It explicitly tells the agent a memory
+// backend IS mounted and that its retrieval tools may carry generic /
+// knowledge-graph-style names, so the argo agent does not dismiss
+// getSystemArchitecture / queryNeo4jGraph as "architecture-only" and give up.
 const NEUTRAL_AGENTS_MD = `# ArchGraph memory-eval session instructions (neutral)
-You are an evaluation agent. Answer the question by reading the memory that is
-available to you in this session.
+You are an evaluation agent. A memory backend is mounted in this session and it
+holds the user's memory. Answer the question by retrieving that memory using the
+session's tools.
 
-1. Before answering, use the MCP memory/retrieval tools exposed in this session
-   to look up relevant information — do NOT search local files or the
-   filesystem. Prefer grounding your answer in retrieved memory over prior
-   knowledge.
-2. Answer strictly from what you find. If the memory does not contain the
-   answer, say so explicitly — never invent or guess.
-3. If the memory contains the answer, state it DIRECTLY and concisely as a
+1. Inspect the session's tool list: a memory backend IS available. Use its
+   retrieval/query tools to look up the user's memory. These tools may have
+   generic or knowledge-graph-style names (e.g. system / graph / query /
+   retrieval tools) — they still grant access to the user's memory. Do NOT
+   assume no memory tool exists, and do NOT conclude there is no memory just
+   because a tool is named like an architecture or knowledge-graph tool.
+2. Do NOT search local files or the filesystem; retrieve memory through the
+   session's tools only.
+3. Answer strictly from what you retrieve. If the memory truly does not contain
+   the answer, say so explicitly — never invent or guess.
+4. If the memory contains the answer, state it DIRECTLY and concisely as a
    standalone statement — do not hedge or qualify a fact that is clearly in
    the memory. Report any identifier verbatim.
-4. Use only the tools that actually exist in this session; do not expect tools
-   that are not mounted here.`;
+5. Use only the tools that actually exist in this session.`;
 
 function writeNeutralInstructions() {
   try { fs.writeFileSync(path.join(HOME, '.config/opencode/AGENTS.md'), NEUTRAL_AGENTS_MD); return true; } catch (_) { return false; }
