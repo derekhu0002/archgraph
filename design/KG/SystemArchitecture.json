@@ -4025,7 +4025,12 @@
         {
           "name": "commit",
           "value": "9051427",
-          "description": "purpose-aware env 阈值 (ARGO_SEMANTIC_*) + top-K 有界 + semanticScore 可见: defaultSemanticRetrieval.js; liveEmbeddingProviderConfig.js; systemarchitecture-mcp-server.js; tests/semantic-threshold-tuning.test.js"
+          "description": "purpose-aware env 阈值 + top-K 有界 + semanticScore 可见"
+        },
+        {
+          "name": "commit",
+          "value": "00b8e54",
+          "description": "memory_search 语义记忆检索工具: systemarchitecture-mcp-server.js; argo-mcp-server.js; tests/semantic-memory-search.test.js"
         },
         {
           "name": "deliveryStatus",
