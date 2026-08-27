@@ -19,7 +19,7 @@ const db = process.argv[3] || 'sandbox';
   const resp = await fetch(base + '/embeddings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + env.QWEN_KEY },
-    body: JSON.stringify({ model: env.ARGO_EMBEDDING_MODEL, input: question, dimensions: 1024 }),
+    body: JSON.stringify({ model: env.ARGO_EMBEDDING_MODEL, input: question, dimensions: Number(env.ARGO_EMBEDDING_DIMENSIONS || 1536) }),
   });
   const j = await resp.json();
   const vec = j.data[0].embedding;
