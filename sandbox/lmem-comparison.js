@@ -98,6 +98,14 @@ function configureMcp(mode) {
     cfg.mcp['lightrag'] = { type: 'local', command: ['/opt/lightrag/bin/python3', '/opt/sandbox/lightrag-mcp.py'], enabled: true };
   } else {
     delete cfg.mcp['lightrag'];
+    // configureMcp('lightrag') deletes mcp.argo, so 'argo' mode MUST re-add it —
+    // otherwise every A session after the first B session has no MCP at all
+    // (observed: A agent reported "no MCP tools available").
+    cfg.mcp['argo'] = {
+      type: 'local',
+      command: ['node', path.join(HOME, '.argo/scripts/argo-mcp-server.js')],
+      enabled: true,
+    };
   }
   cfg.model = `deepseek-sandbox/${model}`;
   fs.writeFileSync(configPath, JSON.stringify(cfg, null, 2));
@@ -143,16 +151,39 @@ function dropDbs() {
 // 对齐）。生产 mutation 生命周期会校验 touched-record queryability 与 global
 // coherence（依赖 Neo4j 语义向量投影 + 生命周期 readiness）——仅做结构同步不够，
 // 必须走 argo-init 让语义生命周期就绪。
+// Keys the ARGO semantic lifecycle accepts in an env file (READABLE_KEYS in
+// argo/scripts/graph-rag/liveEmbeddingProviderConfig.js).
+const ARGO_ENV_SUPPORTED_KEYS = [
+  'ARGO_EMBEDDING_BASE_URL',
+  'ARGO_EMBEDDING_MODEL',
+  'ARGO_EMBEDDING_PROVIDER',
+  'ARGO_EMBEDDING_MODEL_VERSION',
+  'ARGO_EMBEDDING_DIMENSIONS',
+  'ARGO_NEO4J_DATABASE_URL',
+  'ARGO_NEO4J_DATABASE_USERNAME',
+  'ARGO_NEO4J_DATABASE_PASSWORD',
+  'QWEN_KEY',
+  'ARGO_NEO4J_DATABASE',
+  'ARGO_LIVE_PROVIDER_E2E',
+  'ARGO_W31_LIVE_MUTATION_VECTOR_E2E',
+];
+
 // The mounted /env/argo.env is a Windows-host bind mount that appears as mode
 // 0644 inside the Linux container, which fails the semantic lifecycle's POSIX
-// secret-file ACL preflight (no group/other access). Copy it to a container-local
-// path with 0600 perms and point ARGO_ENV_FILE at the copy so the approved-config
-// preflight passes on Linux.
+// secret-file ACL preflight (no group/other access). Write a container-local
+// 0600 copy and point ARGO_ENV_FILE at it so the approved-config preflight
+// passes on Linux. The copy uses the CURRENT process.env values (after the
+// 127.0.0.1 -> host.docker.internal rewrite and ARGO_NEO4J_DATABASE default) so
+// the resolved file and process.env agree and resolveTrusted sees no
+// LIVE_PROVIDER_CONFIGURATION_CONFLICT.
 function prepareEnvFileForPosix() {
   const dest = path.join(WORKSPACE, '.argo', 'env.argo.env');
   try {
     fs.mkdirSync(path.dirname(dest), { recursive: true, mode: 0o700 });
-    fs.writeFileSync(dest, fs.readFileSync(ENV_FILE), { mode: 0o600 });
+    const lines = ARGO_ENV_SUPPORTED_KEYS
+      .filter(k => process.env[k] !== undefined)
+      .map(k => `${k}=${process.env[k]}`);
+    fs.writeFileSync(dest, lines.join('\n') + '\n', { mode: 0o600 });
     process.env.ARGO_ENV_FILE = dest;
     return dest;
   } catch (error) {
@@ -181,6 +212,29 @@ function argoInit() {
   return { ok: s.status === 0 && report.status === 'ok', status: report.status || 'unknown', failStage };
 }
 
+// Unwrap the semantic getSystemArchitecture result into the object ids that the
+// query actually retrieved. The in-process callTool returns the MCP toolResult
+// wrapper ({content:[{type:'text',text}]}); the payload is either the
+// business-summary profile (hits under result.businessObjects.elements /
+// result.semanticSeeds / result.hitReasons) or the canonical-subset contract
+// (hits under document.elements).
+function extractSemanticHits(s) {
+  let payload = s;
+  if (s && s.content && Array.isArray(s.content) && s.content[0] && typeof s.content[0].text === 'string') {
+    try { payload = JSON.parse(s.content[0].text); } catch (_) { return []; }
+  }
+  const result = payload && payload.result;
+  const doc = payload && payload.document;
+  const elements = (result && result.businessObjects && result.businessObjects.elements)
+    || (Array.isArray(doc && doc.elements) ? doc.elements : []);
+  const seeds = (result && result.semanticSeeds) || [];
+  const reasons = (result && result.hitReasons) || [];
+  return elements.map(e => e && e.id)
+    .concat(seeds.map(x => x && x.objectId))
+    .concat(reasons.map(x => x && x.objectId))
+    .filter(Boolean);
+}
+
 // Verify the A-side memory is actually reachable via the argo MCP (queryNeo4jGraph
 // element list + getSystemArchitecture semantic hits) — isolates backend-retrieval
 // from agent behaviour.
@@ -190,10 +244,16 @@ async function verifyA(q0) {
       cypher: 'MATCH (e:Element {graphKey: $graphKey}) RETURN e.id, e.name ORDER BY e.id',
       workspaceRoot: WORKSPACE,
     }, null, undefined);
+    // purpose='audit' is a special proof-closure anchored on the audit policy
+    // node, NOT a general memory retrieval — use implementation-design so the
+    // query actually runs semantic seed retrieval over the graph.
     const s = await callTool('getSystemArchitecture', {
-      query: { purpose: 'audit', intent: q0.question, subject: q0.qid }, workspaceRoot: WORKSPACE,
+      query: { purpose: 'implementation-design', intent: q0.question }, workspaceRoot: WORKSPACE,
     }, null, undefined);
-    const hits = ((s && s.document && s.document.elements) || []).map(e => e.id);
+    const rawText = s && s.content && Array.isArray(s.content) && s.content[0] && s.content[0].text
+      ? s.content[0].text
+      : JSON.stringify(s);
+    const hits = extractSemanticHits(s);
     // which canonical files contain the injected BO?
     const probe = `lmem-a-${q0.qid}`;
     const foundIn = [];
@@ -203,7 +263,7 @@ async function verifyA(q0) {
     }
     const sizes = {};
     for (const cand of canons) { try { sizes[cand] = fs.readFileSync(cand, 'utf8').length; } catch (_) { sizes[cand] = 'missing'; } }
-    return { records: JSON.stringify(q && q.records), semanticHits: hits, foundIn, sizes, sRaw: JSON.stringify(s).slice(0, 200) };
+    return { records: JSON.stringify(q && q.records), semanticHits: hits, foundIn, sizes, sRaw: rawText.slice(0, 1500) };
   } catch (e) { return { error: e.message }; }
 }
 
@@ -383,7 +443,7 @@ async function main() {
       steps: a.steps, toolCalls: a.toolNames.length,
       toolUsed: /argo|getIntentElementContext|queryNeo4jGraph|getArchitectureViewContext|getSystemArchitecture/.test(a.out),
     };
-    console.log(`[lmem] A ${q.qid} (${q.type}) correct=${aLLM} non=${aNon} steps=${a.steps} tools=${a.toolNames.length} ${a.latencyMs}ms`);
+    console.log(`[lmem] A ${q.qid} (${q.type}) correct=${aLLM} non=${aNon} steps=${a.steps} tools=${a.toolNames.length} ${a.latencyMs}ms tools=[${a.toolNames.join(',')}]`);
 
     configureMcp('lightrag');
     const b = runAgent(q.question);
@@ -396,7 +456,7 @@ async function main() {
       steps: b.steps, toolCalls: b.toolNames.length,
       toolUsed: /lightrag_query/.test(b.out),
     };
-    console.log(`[lmem] B ${q.qid} (${q.type}) correct=${bLLM} non=${bNon} steps=${b.steps} tools=${b.toolNames.length} ${b.latencyMs}ms`);
+    console.log(`[lmem] B ${q.qid} (${q.type}) correct=${bLLM} non=${bNon} steps=${b.steps} tools=${b.toolNames.length} ${b.latencyMs}ms tools=[${b.toolNames.join(',')}]`);
 
     report.perQuestion.push(row);
   }
