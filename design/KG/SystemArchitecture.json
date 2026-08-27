@@ -4030,7 +4030,12 @@
         {
           "name": "commit",
           "value": "00b8e54",
-          "description": "memory_search 语义记忆检索工具: systemarchitecture-mcp-server.js; argo-mcp-server.js; tests/semantic-memory-search.test.js"
+          "description": "memory_search 语义记忆检索工具"
+        },
+        {
+          "name": "commit",
+          "value": "df9fb01",
+          "description": "memory_search 紧凑卡片 + max_desc_len 截断: systemarchitecture-mcp-server.js; tests/semantic-memory-search.test.js; sandbox/probe-memory-search.js"
         },
         {
           "name": "deliveryStatus",
