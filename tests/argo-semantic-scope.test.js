@@ -8,6 +8,43 @@ const {
   applySemanticScopeFilter,
   resolveSemanticScope,
 } = require('../argo/scripts/systemarchitecture-mcp-server.js');
+const {
+  scopeCanonicalIdentitiesForChannel,
+} = require('../argo/scripts/graph-rag/defaultSemanticRetrieval.js');
+
+// Scope identities come from the canonical graph as bare ids, but the semantic
+// vector records store canonicalIdentity with a channel prefix. The scoped
+// Cypher matches node.canonicalIdentity IN $canonicalIdentities, so bare scope
+// ids must be normalised to the channel-prefixed form or scoped semantic
+// retrieval silently returns empty (observed: scope view_id -> 0 elements while
+// the unscoped query returned the same elements with sufficient scores).
+test('scopeCanonicalIdentitiesForChannel: bare ids get the channel prefix', () => {
+  // GIVEN bare element ids (as resolveSemanticScope returns) and the Element channel
+  const elementChannel = { objectType: 'Element' };
+  const ids = ['memory-eval-bench-wp-001', 'memory-eval-dataset-wp-001'];
+  // WHEN normalising for the Element channel
+  const normalised = scopeCanonicalIdentitiesForChannel(ids, elementChannel);
+  // THEN each bare id gains the Element: prefix so it matches the vector records
+  assert.deepEqual(normalised, ['Element:memory-eval-bench-wp-001', 'Element:memory-eval-dataset-wp-001']);
+});
+
+test('scopeCanonicalIdentitiesForChannel: prefixed ids pass through untouched', () => {
+  // GIVEN ids that already carry a channel prefix (this or another channel)
+  const elementChannel = { objectType: 'Element' };
+  const ids = ['Element:e1', 'ArchitectureRelationship:r1', 'View:v1'];
+  // WHEN normalising for the Element channel
+  const normalised = scopeCanonicalIdentitiesForChannel(ids, elementChannel);
+  // THEN prefixed ids are preserved (a non-Element prefix is a correct no-op)
+  assert.deepEqual(normalised, ['Element:e1', 'ArchitectureRelationship:r1', 'View:v1']);
+});
+
+test('scopeCanonicalIdentitiesForChannel: non-array or empty returns as-is', () => {
+  // GIVEN an undefined / empty scope
+  // WHEN normalising
+  // THEN it is passed through unchanged (no scoping applied)
+  assert.equal(scopeCanonicalIdentitiesForChannel(undefined, { objectType: 'Element' }), undefined);
+  assert.deepEqual(scopeCanonicalIdentitiesForChannel([], { objectType: 'Element' }), []);
+});
 
 const FIXTURE = {
   elements: [

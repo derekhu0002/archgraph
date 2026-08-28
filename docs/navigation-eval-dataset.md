@@ -131,8 +131,8 @@
 - **NV-16**
   - GIVEN：长期记忆评测视图（memory-eval-view-001）是评测工作包的边界
   - WHEN：在该视图边界内找全全部成员元素
-  - THEN：恰好包含 `memory-eval-bench-wp-001`、`memory-eval-dataset-wp-001`、`memory-eval-run-wp-001`（且不包含评测之外的其它元素）
-  - 检索提示：`getArchitectureViewContext` view_id=`memory-eval-view-001` → included_elements 恰好 3 个
+  - THEN：包含 `memory-eval-bench-wp-001`、`memory-eval-dataset-wp-001`、`memory-eval-run-wp-001`、`navigation-eval-wp-001`（且不包含评测之外的其它元素）
+  - 检索提示：`getArchitectureViewContext` view_id=`memory-eval-view-001` → included_elements 全部为评测工作包
 
 - **NV-17**
   - GIVEN：`overseer-ltm-001` 是项目总管长期记忆子视图的边界

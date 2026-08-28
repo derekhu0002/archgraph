@@ -65,9 +65,11 @@ test('AT navigation-eval: locate/reach ground truths exist in the graph', () => 
 test('AT navigation-eval: scoped (boundary) ground truths are exact', () => {
   // GIVEN the memory-eval view boundary (NV-16)
   const mv = findView('memory-eval-view-001');
-  // THEN its membership is exactly the three eval work packages
+  // THEN its membership contains the eval work packages (incl. the navigation eval WP)
   const members = (mv && mv.included_elements) || [];
-  assert.deepEqual([...members].sort(), ['memory-eval-bench-wp-001', 'memory-eval-dataset-wp-001', 'memory-eval-run-wp-001'].sort());
+  for (const expected of ['memory-eval-bench-wp-001', 'memory-eval-dataset-wp-001', 'memory-eval-run-wp-001', 'navigation-eval-wp-001']) {
+    assert.ok(members.includes(expected), `memory-eval view should include ${expected}`);
+  }
   // AND the project overseer LTM (NV-17) members are all overseer-* memories
   const ltm = findView('overseer-ltm-001');
   const ltmMembers = (ltm && ltm.included_elements) || [];

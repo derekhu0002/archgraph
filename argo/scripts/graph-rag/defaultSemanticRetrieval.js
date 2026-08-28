@@ -664,6 +664,9 @@ async function exhaustChannel({
   maxSeeds,
 }) {
   const scoped = Array.isArray(canonicalIdentities) && canonicalIdentities.length > 0;
+  const scopedCanonicalIdentities = scoped
+    ? scopeCanonicalIdentitiesForChannel(canonicalIdentities, channel)
+    : canonicalIdentities;
   const accepted = [];
   const seen = new Set();
   const effectiveThreshold = typeof threshold === 'number' ? threshold : channel.threshold;
@@ -677,7 +680,7 @@ async function exhaustChannel({
       windowSize: INITIAL_WINDOW_SIZE,
       topK: offset + INITIAL_WINDOW_SIZE,
       vector,
-      ...(scoped ? { canonicalIdentities } : {}),
+      ...(scoped ? { canonicalIdentities: scopedCanonicalIdentities } : {}),
     });
     const result = await neo4jDriver.execute(Object.freeze({
       kind: 'semantic-vector-window-query',
@@ -704,6 +707,22 @@ async function exhaustChannel({
     offset = window.nextOffset;
   }
   return Object.freeze(accepted);
+}
+
+// Scope identities come from the canonical graph as BARE ids (e.g.
+// "memory-eval-bench-wp-001"), but the semantic vector records store their
+// canonicalIdentity with a channel prefix (e.g. "Element:memory-eval-bench-wp-001").
+// Normalise the scope to the channel-prefixed form so the scoped Cypher
+// `node.canonicalIdentity IN $canonicalIdentities` actually matches. A bare id
+// that already carries a prefix (this or another channel's) is left as-is: it
+// simply won't match records of this channel, which is the correct no-op.
+function scopeCanonicalIdentitiesForChannel(identities, channel) {
+  if (!Array.isArray(identities)) return identities;
+  const prefix = `${channel.objectType}:`;
+  return identities.map(id => {
+    const text = String(id);
+    return text.includes(':') ? text : `${prefix}${text}`;
+  });
 }
 
 function normalizeVectorRecord(raw, channel) {
@@ -1027,5 +1046,6 @@ module.exports = {
   memoryThresholdFor,
   auditThresholdFor,
   resolveTopK,
+  scopeCanonicalIdentitiesForChannel,
   AUDIT_PURPOSES,
 };
