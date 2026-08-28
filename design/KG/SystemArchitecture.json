@@ -3819,8 +3819,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "ddc46c6",
-          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/argo-mcp-server.js; tests/argo-semantic-scope.test.js; design/KG/SystemArchitecture.json"
+          "value": "ccb976d",
+          "description": "scope 语义检索修复: argo/scripts/graph-rag/defaultSemanticRetrieval.js; tests/argo-semantic-scope.test.js; tests/navigation-eval-dataset.test.js; docs/navigation-eval-dataset.md"
         }
       ]
     },
@@ -4066,7 +4066,33 @@
           "Input": "运行 node scripts/navigation-eval-run.js",
           "acceptanceCriteria": "执行 node --test tests/navigation-eval-run.test.js：断言 harness 退出码 0、整体 20/20、4 维度各 5/5、报告文件已写入且含 20 题结果。通过。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "65488fa",
+          "description": "docs/navigation-eval-dataset.md; scripts/navigation-eval-run.js; tests/navigation-eval-dataset.test.js; tests/navigation-eval-run.test.js; results/navigation-eval-report.json; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
       ]
+    },
+    {
+      "description": "在导航题集（navigation-eval-wp-001）之上落地「完整 ArchGraph AGENT 导航评测」：容器沙箱内以 opencode run --format json 驱动 OpenCode Agent（DeepSeek + 完整 argo MCP 工具链，生产意图图 165 元素/40 视图挂载）逐题导航 NV-01..20，按最终答案是否到达目标 id/name 判定；每次运行把每题原始 AGENT 会话记录（opencode run NDJSON 事件流）打包进结果包 results/navigation-agent-raw/<NV-xx>.ndjson，并在 results/navigation-agent-report.json 的 rawSessions 元数据登记文件路径。交付：sandbox/navigation-agent-eval.js（懒加载 argo 包可宿主导入；saveRawSession 写原始会话）、tests/navigation-agent-eval.test.js（验收）、results/navigation-agent-report.json + results/navigation-agent-raw/。区别于 memory-eval-dataset（事实提取问答）与 navigation-eval-wp-001 的直接 harness（不驱动 Agent）：本 WP 测「真实 Agent 用完整 ARGO 工具链能否按图导航」，且结果可审计（原始会话可回放）。",
+      "id": "navigation-agent-eval-wp-001",
+      "name": "完整 ArchGraph AGENT 导航评测（opencode run，原始会话入结果包）",
+      "testcases": [
+        {
+          "acceptanceCriteria": "执行 node --test tests/navigation-agent-eval.test.js 全过：4 断言（题集/判定/原始会话打包/报告 rawSessions 元数据）。通过。",
+          "description": "GIVEN 需要验证真实 Agent 用完整 ARGO 工具链在意图图上导航、且结果可审计；WHEN 运行 node --test tests/navigation-agent-eval.test.js（宿主导入 sandbox/navigation-agent-eval.js）；THEN 断言：题集含 20 题 NV-01..20 覆盖 4 导航维度且每题带 ground truth、judgeAnswer 按目标 id/name 判定、saveRawSession 把每题原始 NDJSON 会话逐字写入结果包 <reportDir>/navigation-agent-raw/<qid>.ndjson、且已生成的结果包报告含 rawSessions（20 条原始会话文件路径）。",
+          "Input": "运行 node --test tests/navigation-agent-eval.test.js",
+          "name": "AT-navigation-agent-eval-01-AGENT导航评测可执行且原始会话入结果包",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -5557,7 +5583,8 @@
         "memory-eval-bench-wp-001",
         "memory-eval-dataset-wp-001",
         "memory-eval-run-wp-001",
-        "navigation-eval-wp-001"
+        "navigation-eval-wp-001",
+        "navigation-agent-eval-wp-001"
       ],
       "included_relationships": []
     },
