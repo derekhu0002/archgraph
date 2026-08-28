@@ -4092,7 +4092,18 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Work Package"
+      "type": "Work Package",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "0170f95",
+          "description": "sandbox/navigation-agent-eval.js; tests/navigation-agent-eval.test.js; results/navigation-agent-report.json; results/navigation-agent-raw/（20 条原始 AGENT 会话 NDJSON）; design/KG/SystemArchitecture.json（完整 ArchGraph AGENT 导航评测 20/20，原始会话入结果包，生产图 165 元素/40 视图）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ]
     }
   ],
   "relationships": [
