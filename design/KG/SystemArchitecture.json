@@ -4045,6 +4045,28 @@
           "description": "GIVEN 混合存储含两条当前记录与一条陈旧记录；WHEN backfill 运行；THEN 仅陈旧记录被删除，当前记录保留。"
         }
       ]
+    },
+    {
+      "id": "navigation-eval-wp-001",
+      "name": "设计导航能力评测集",
+      "type": "Work Package",
+      "description": "从「给 AGENT 一张以 ArchiMate 为 schema 的导航地图」愿景出发，设计 ArchGraph 导航能力评测题集 docs/navigation-eval-dataset.md：4 维度（定位/可达/视角切换/边界内导航）×5 题 = 20 题（NV-01..20），每题含 GIVEN 地图现状/WHEN 导航问题/THEN 到达目标（ground truth）/检索提示；配套可执行 harness scripts/navigation-eval-run.js 与测试 tests/navigation-eval-dataset.test.js + tests/navigation-eval-run.test.js。实测 20/20 通过（4 维度各 5/5，平均 14ms），报告 results/navigation-eval-report.json。区别于 memory-eval-dataset（事实提取问答）：导航评测测「AGENT 能否在图谱上按图索骥（定位/可达/视角/边界）」，不要求生成答案，只要求正确到达图谱中的目标位置。",
+      "testcases": [
+        {
+          "name": "AT-navigation-eval-01-导航评测题集文档就绪",
+          "description": "GIVEN 需要为「导航地图」愿景设计可执行的评测输入；WHEN 读者打开 docs/navigation-eval-dataset.md；THEN 文档包含 4 导航维度（定位 Locate/可达 Reachability/视角切换 Viewpoint/边界内导航 Scoped Navigation）、20 题（NV-01..20）含 GIVEN/WHEN/THEN 期望目标与检索提示、并说明与 memory-eval-dataset（事实提取）的区别。",
+          "type": "Acceptance Test",
+          "Input": "打开 docs/navigation-eval-dataset.md",
+          "acceptanceCriteria": "执行 node --test tests/navigation-eval-dataset.test.js：断言文档含 4 维度、NV-01..20 共 20 题、GIVEN/WHEN/THEN/检索提示格式、且定位/可达/边界 ground truth 与意图图一致。通过。"
+        },
+        {
+          "name": "AT-navigation-eval-02-导航评测harness可运行并达基线",
+          "description": "GIVEN 已具备 20 题导航题集与 ARGO MCP 读路径；WHEN 运行 scripts/navigation-eval-run.js；THEN 逐题在意图图上导航并判定 PASS/FAIL，产出 4 维度/整体准确率与平均时延，写入 results/navigation-eval-report.json，且 20 题全部通过（整体 20/20，各维度 5/5）。",
+          "type": "Acceptance Test",
+          "Input": "运行 node scripts/navigation-eval-run.js",
+          "acceptanceCriteria": "执行 node --test tests/navigation-eval-run.test.js：断言 harness 退出码 0、整体 20/20、4 维度各 5/5、报告文件已写入且含 20 题结果。通过。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -5534,7 +5556,8 @@
       "included_elements": [
         "memory-eval-bench-wp-001",
         "memory-eval-dataset-wp-001",
-        "memory-eval-run-wp-001"
+        "memory-eval-run-wp-001",
+        "navigation-eval-wp-001"
       ],
       "included_relationships": []
     },
