@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "seedId": "archgraph-navigation-seed",
+  "name": "ArchGraph 导航能力评测集",
+  "version": "1.0.0",
+  "status": "archived",
+  "source": "docs/navigation-eval-dataset.md",
+  "description": "「给 AGENT 一张以 ArchiMate 为 schema 的导航地图」愿景下的导航能力可执行评测集 SEED v1：4 维度（定位/可达/视角切换/边界内导航）×5 = 20 题（NV-01..20）。每题含 GIVEN/WHEN/THEN 三件套、检索提示、判定目标（id/names）、可执行检索序列（含 pick 多跳）与判定要求。作为后续持续维护/扩展的单一事实源：加题/改题只改本 SEED 并升版本，harness 与测试统一消费。",
+  "dimensions": [
+    { "key": "locate", "name": "定位", "en": "Locate", "description": "语义/结构检索能否命中正确的地图位置（元素/视图）——「我现在在哪幅图」" },
+    { "key": "reachability", "name": "可达", "en": "Reachability", "description": "能否沿 ArchiMate 语义关系多跳导航到目标——「按路标走不迷路」" },
+    { "key": "viewpoint", "name": "视角切换", "en": "Viewpoint", "description": "能否按不同 Viewpoint/分层找到正确的一幅图——「换一本图册看」" },
+    { "key": "scoped", "name": "边界内导航", "en": "Scoped Navigation", "description": "能否在给定 scope 内找全且不越界——「只在这片区域找，不跑到别区」" }
+  ],
+  "questions": [
+    {
+      "id": "NV-01",
+      "dimension": "定位",
+      "dimensionKey": "locate",
+      "label": "定位 AgentOrganization 组织元素？",
+      "question": "In the ArchGraph intent graph, locate the organization element named \"AgentOrganization\". Report its id and type.",
+      "given": "意图图中有一个组织 Grouping 管理所有 Business Actor",
+      "when": "通过结构查询找到「AgentOrganization」这个组织元素",
+      "then": "1962「AgentOrganization」(type=Grouping, parent=1961)",
+      "retrievalHint": "queryNeo4jGraph: MATCH (e:Element {graphKey:$graphKey, name:'AgentOrganization'}) RETURN e.id, e.name, e.type",
+      "target": { "kind": "element", "id": "1962", "names": ["AgentOrganization"] },
+      "retrieval": [{ "tool": "queryNeo4jGraph", "args": { "cypher": "MATCH (e:Element {graphKey:$graphKey, name:'AgentOrganization'}) RETURN e.id, e.name, e.type, e.parent" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["1962", "AgentOrganization"] }]
+    },
+    {
+      "id": "NV-02",
+      "dimension": "定位",
+      "dimensionKey": "locate",
+      "label": "语义定位项目愿景元素？",
+      "question": "In the ArchGraph intent graph, locate the element representing the project vision (项目愿景, \"project vision: providing agents with a long-term memory system\"). Report its id.",
+      "given": "项目愿景元素是长期记忆系统的北极星",
+      "when": "语义检索「项目愿景 为 AGENT 提供长期记忆系统」",
+      "then": "命中元素 overseer-vision-001「项目愿景：为 AGENT 提供长期记忆系统」",
+      "retrievalHint": "getSystemArchitecture purpose=intent-decision intent=「项目愿景为 AGENT 提供长期记忆系统」",
+      "target": { "kind": "element", "id": "overseer-vision-001", "names": ["项目愿景"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "overseer-vision-001" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["overseer-vision-001", "项目愿景：为 AGENT 提供长期记忆系统"] }]
+    },
+    {
+      "id": "NV-03",
+      "dimension": "定位",
+      "dimensionKey": "locate",
+      "label": "定位长期记忆评测视图？",
+      "question": "In the ArchGraph intent graph, locate the view named \"长期记忆评测\" (long-term memory evaluation). Report its view id.",
+      "given": "长期记忆评测相关视图聚合了评测工作包",
+      "when": "定位「长期记忆评测」这一视图（按视图名）",
+      "then": "视图 memory-eval-view-001「长期记忆评测」(parent_element_id=1249)",
+      "retrievalHint": "queryNeo4jGraph: MATCH (v:View {graphKey:$graphKey}) WHERE v.view_name='长期记忆评测' RETURN v.view_id, v.parent_element_id",
+      "target": { "kind": "view", "id": "memory-eval-view-001", "names": ["长期记忆评测"] },
+      "retrieval": [{ "tool": "queryNeo4jGraph", "args": { "cypher": "MATCH (v:View {graphKey:$graphKey}) WHERE v.view_name='长期记忆评测' RETURN v.view_id, v.parent_element_id" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["memory-eval-view-001"] }]
+    },
+    {
+      "id": "NV-04",
+      "dimension": "定位",
+      "dimensionKey": "locate",
+      "label": "在组织视图(299)定位项目总管？",
+      "question": "In the view \"AgentOrganization\" (view id 299), find the Business Actor named \"项目总管\" (project overseer). Report its element id.",
+      "given": "项目总管是默认对话身份 Business Actor",
+      "when": "在 AgentOrganization 视图（299）中定位「项目总管」元素",
+      "then": "project-overseer-001「项目总管」(type=Business Actor)",
+      "retrievalHint": "getArchitectureViewContext view_id=299，找 type=Business Actor 且 name=项目总管",
+      "target": { "kind": "element", "id": "project-overseer-001", "names": ["项目总管"] },
+      "retrieval": [{ "tool": "getArchitectureViewContext", "args": { "view_id": "299" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["project-overseer-001", "项目总管"] }]
+    },
+    {
+      "id": "NV-05",
+      "dimension": "定位",
+      "dimensionKey": "locate",
+      "label": "定位 ArchiMate 定位元素？",
+      "question": "In the ArchGraph intent graph, locate the element representing the role of ArchiMate in the vision (分类编目规则 / \"cataloguing rules\"). Report its id.",
+      "given": "愿景三要素被 ArchiMate 定位为「分类编目规则」",
+      "when": "语义检索「ArchiMate 在长期记忆中的定位」",
+      "then": "命中元素 overseer-archimate-role-001",
+      "retrievalHint": "getSystemArchitecture purpose=intent-decision intent=「ArchiMate 在长期记忆系统愿景中的定位」",
+      "target": { "kind": "element", "id": "overseer-archimate-role-001", "names": ["overseer-archimate-role-001"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "overseer-archimate-role-001" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["overseer-archimate-role-001"] }]
+    },
+    {
+      "id": "NV-06",
+      "dimension": "可达",
+      "dimensionKey": "reachability",
+      "label": "项目总管→组织 两跳？",
+      "question": "Starting from the element \"project-overseer-001\" (项目总管), follow its parent chain upward to the organization it belongs to. Report that organization's id and name.",
+      "given": "project-overseer-001 是 Business Actor，1962 是其组织父元素",
+      "when": "从项目总管出发，沿父链上溯到所属组织",
+      "then": "到达 1962「AgentOrganization」(parent=1961)",
+      "retrievalHint": "getIntentElementContext elementId=project-overseer-001 → 读 parent；再从该 parent 上溯",
+      "target": { "kind": "element", "id": "1962", "names": ["AgentOrganization"] },
+      "retrieval": [
+        { "tool": "getIntentElementContext", "args": { "elementId": "project-overseer-001" } },
+        { "tool": "getIntentElementContext", "args": { "elementId": { "pick": { "step": 0, "find": { "id": "project-overseer-001" }, "get": "parent" } } } }
+      ],
+      "requirements": [
+        { "step": 0, "type": "contains", "values": ["project-overseer-001"] },
+        { "step": 1, "type": "contains", "values": ["1962", "AgentOrganization"] }
+      ]
+    },
+    {
+      "id": "NV-07",
+      "dimension": "可达",
+      "dimensionKey": "reachability",
+      "label": "评测工作包→视图→顶层Grouping 两跳？",
+      "question": "Starting from the view \"memory-eval-view-001\" (长期记忆评测), follow its parent_element_id to the top-level Grouping it is mounted under. Report that grouping's id and name.",
+      "given": "memory-eval-run-wp-001 是挂在 memory-eval-view-001 视图下的评测工作包",
+      "when": "从评测工作包出发，沿视图父链上溯到视图所属的顶层 Grouping",
+      "then": "到达 1249「Implementation and Migration Viewpoint」(顶层，parent 为空)",
+      "retrievalHint": "getArchitectureViewContext view_id=memory-eval-view-001 → parentElement.id；再 getIntentElementContext 该 id 看其父链",
+      "target": { "kind": "element", "id": "1249", "names": ["Implementation and Migration Viewpoint"] },
+      "retrieval": [
+        { "tool": "getArchitectureViewContext", "args": { "view_id": "memory-eval-view-001" } },
+        { "tool": "getIntentElementContext", "args": { "elementId": { "pick": { "step": 0, "path": "parentElement.id" } } } }
+      ],
+      "requirements": [
+        { "step": 0, "type": "contains", "values": ["1249"] },
+        { "step": 1, "type": "contains", "values": ["Implementation and Migration Viewpoint"] }
+      ]
+    },
+    {
+      "id": "NV-08",
+      "dimension": "可达",
+      "dimensionKey": "reachability",
+      "label": "组织(1962)→公众号发布团队视图？",
+      "question": "Starting from the organization element \"AgentOrganization\" (1962), find the team view for 公众号发布 (WeChat publishing team). Report its view id.",
+      "given": "AgentOrganization（1962）下挂多个专项团队视图（subdiagram_views）",
+      "when": "从 1962 出发，沿 subdiagram_views 找到公众号发布团队视图",
+      "then": "到达视图 433「公众号发布团队」",
+      "retrievalHint": "getIntentElementContext elementId=1962 → 读 subdiagram_views 中 view_name 含「公众号」",
+      "target": { "kind": "view", "id": "433", "names": ["公众号发布团队"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "1962" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["433", "公众号发布团队"] }]
+    },
+    {
+      "id": "NV-09",
+      "dimension": "可达",
+      "dimensionKey": "reachability",
+      "label": "评测视图→1249→EA Tooling 两跳？",
+      "question": "From the view \"memory-eval-view-001\", go up to its parent (1249), then find the sub-view \"EA Tooling\" among 1249's subdiagram_views. Report its view id.",
+      "given": "长期记忆评测视图（memory-eval-view-001）挂于 1249",
+      "when": "从该视图出发，先取其 parent（1249），再从 1249 的 subdiagram_views 找「EA Tooling」视图",
+      "then": "到达视图 1800「EA Tooling」",
+      "retrievalHint": "getArchitectureViewContext view_id=memory-eval-view-001 → parentElement.id；getIntentElementContext 该 id → subdiagram_views 含 EA Tooling",
+      "target": { "kind": "view", "id": "1800", "names": ["EA Tooling"] },
+      "retrieval": [
+        { "tool": "getArchitectureViewContext", "args": { "view_id": "memory-eval-view-001" } },
+        { "tool": "getIntentElementContext", "args": { "elementId": { "pick": { "step": 0, "path": "parentElement.id" } } } }
+      ],
+      "requirements": [
+        { "step": 0, "type": "contains", "values": ["1249"] },
+        { "step": 1, "type": "contains", "values": ["1800", "EA Tooling"] }
+      ]
+    },
+    {
+      "id": "NV-10",
+      "dimension": "可达",
+      "dimensionKey": "reachability",
+      "label": "评测视图→1249→自进化沙箱视图 两跳？",
+      "question": "From the view \"memory-eval-view-001\", go up to its parent (1249), then find the self-evolution Docker sandbox view among 1249's subdiagram_views. Report its view id.",
+      "given": "自进化测试环境视图与长期记忆评测视图同属 1249 的分幅",
+      "when": "从 memory-eval-view-001 上溯到 1249，再从 1249 的 subdiagram_views 找到自进化测试环境视图",
+      "then": "到达视图 self-evolution-sandbox-view-001「自进化测试环境（Docker 沙箱）」",
+      "retrievalHint": "同上两跳",
+      "target": { "kind": "view", "id": "self-evolution-sandbox-view-001", "names": ["自进化测试环境"] },
+      "retrieval": [
+        { "tool": "getArchitectureViewContext", "args": { "view_id": "memory-eval-view-001" } },
+        { "tool": "getIntentElementContext", "args": { "elementId": { "pick": { "step": 0, "path": "parentElement.id" } } } }
+      ],
+      "requirements": [
+        { "step": 0, "type": "contains", "values": ["1249"] },
+        { "step": 1, "type": "contains", "values": ["self-evolution-sandbox-view-001"] }
+      ]
+    },
+    {
+      "id": "NV-11",
+      "dimension": "视角切换",
+      "dimensionKey": "viewpoint",
+      "label": "按业务组织视角找到 AgentOrganization 视图？",
+      "question": "Find the view that shows the AgentOrganization (1962) from the business/organization viewpoint. Report its view id.",
+      "given": "意图图有多个顶层 Grouping（Viewpoint）",
+      "when": "找到管理「业务/组织」分幅的视图（含 AgentOrganization 1962 的视图）",
+      "then": "到达视图 299（AgentOrganization 视图）",
+      "retrievalHint": "getArchitectureViewContext 遍历 1249 的 subdiagram_views，找包含 1962 的视图",
+      "target": { "kind": "view", "id": "299", "names": ["AgentOrganization"] },
+      "retrieval": [{ "tool": "getArchitectureViewContext", "args": { "view_id": "299" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["AgentOrganization", "1962"] }]
+    },
+    {
+      "id": "NV-12",
+      "dimension": "视角切换",
+      "dimensionKey": "viewpoint",
+      "label": "按媒体创作视角找到视频团队视图？",
+      "question": "From the media-creation viewpoint, find the \"video-team-001\" (视频创作团队) view. Report its view id.",
+      "given": "视频创作团队是媒体创作体系的分幅",
+      "when": "按「媒体创作」视角找到视频创作团队视图",
+      "then": "到达视图 video-team-001「视频创作团队」",
+      "retrievalHint": "getIntentElementContext elementId=1962 → subdiagram_views 含 video-team-001",
+      "target": { "kind": "view", "id": "video-team-001", "names": ["视频创作团队"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "1962" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["video-team-001", "视频创作团队"] }]
+    },
+    {
+      "id": "NV-13",
+      "dimension": "视角切换",
+      "dimensionKey": "viewpoint",
+      "label": "按EA工具视角定位 EA Tooling 视图？",
+      "question": "From the EA-tooling viewpoint, locate the \"EA Tooling\" view. Report its view id.",
+      "given": "EA 工具链是独立工作区（1800 视图）",
+      "when": "按「EA 工具」视角定位 EA 工具链视图",
+      "then": "到达视图 1800「EA Tooling」",
+      "retrievalHint": "getArchitectureViewContext view_id=1249 的 subdiagram_views（或遍历 1249 子视图找 view_name 含 EA）",
+      "target": { "kind": "view", "id": "1800", "names": ["EA Tooling"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "1249" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["1800", "EA Tooling"] }]
+    },
+    {
+      "id": "NV-14",
+      "dimension": "视角切换",
+      "dimensionKey": "viewpoint",
+      "label": "按内容发布视角找到 180 视图？",
+      "question": "From the content-publication viewpoint, locate the view \"Content Publication and Announcement\". Report its view id.",
+      "given": "公众号发布是内容发布分幅（180 视图）下的工作包",
+      "when": "按「内容发布」视角，在 180 视图内找到公众号发布团队相关视图/元素",
+      "then": "180 视图（Content Publication and Announcement）或其成员（含公众号发布员 2755 相关 WP）",
+      "retrievalHint": "getArchitectureViewContext view_id=180",
+      "target": { "kind": "view", "id": "180", "names": ["Content Publication and Announcement"] },
+      "retrieval": [{ "tool": "getArchitectureViewContext", "args": { "view_id": "180" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["Content Publication and Announcement"] }]
+    },
+    {
+      "id": "NV-15",
+      "dimension": "视角切换",
+      "dimensionKey": "viewpoint",
+      "label": "按工程验证视角找到 Docker 沙箱视图？",
+      "question": "From the engineering/verification viewpoint, find the self-evolution Docker sandbox view. Report its view id.",
+      "given": "自进化测试是工程/验证视角的工作",
+      "when": "按「工程验证」视角，从 1249 的 subdiagram_views 找到 Docker 沙箱视图",
+      "then": "到达视图 self-evolution-sandbox-view-001",
+      "retrievalHint": "getIntentElementContext elementId=1249 → subdiagram_views 含 self-evolution-sandbox-view-001",
+      "target": { "kind": "view", "id": "self-evolution-sandbox-view-001", "names": ["自进化测试环境"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "1249" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["self-evolution-sandbox-view-001", "自进化测试环境"] }]
+    },
+    {
+      "id": "NV-16",
+      "dimension": "边界内导航",
+      "dimensionKey": "scoped",
+      "label": "记忆评测视图边界内找全？",
+      "question": "List the members of the view \"memory-eval-view-001\" (长期记忆评测). Report the element ids that belong to it.",
+      "given": "长期记忆评测视图（memory-eval-view-001）是评测工作包的边界",
+      "when": "在该视图边界内找全全部成员元素",
+      "then": "包含 memory-eval-bench-wp-001、memory-eval-dataset-wp-001、memory-eval-run-wp-001、navigation-eval-wp-001（且不包含评测之外的其它元素）",
+      "retrievalHint": "getArchitectureViewContext view_id=memory-eval-view-001 → included_elements 全部为评测工作包",
+      "target": { "kind": "view-members", "id": "memory-eval-view-001", "names": ["memory-eval-bench-wp-001", "memory-eval-dataset-wp-001", "memory-eval-run-wp-001"] },
+      "retrieval": [{ "tool": "getArchitectureViewContext", "args": { "view_id": "memory-eval-view-001" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["memory-eval-bench-wp-001", "memory-eval-dataset-wp-001", "memory-eval-run-wp-001"] }]
+    },
+    {
+      "id": "NV-17",
+      "dimension": "边界内导航",
+      "dimensionKey": "scoped",
+      "label": "项目总管 LTM 边界内找全？",
+      "question": "List the members of the view \"overseer-ltm-001\" (项目总管工作记录). Report one member element id (they all start with overseer-).",
+      "given": "overseer-ltm-001 是项目总管长期记忆子视图的边界",
+      "when": "在该边界内找全项目总管的历史记忆元素",
+      "then": "包含 overseer-vision-001（至少），全部在 LTM 视图内（不越界到其它 Actor 的 LTM）",
+      "retrievalHint": "getArchitectureViewContext view_id=overseer-ltm-001 → 成员全部以 overseer- 前缀开头",
+      "target": { "kind": "view-members", "id": "overseer-ltm-001", "names": ["overseer-vision-001", "overseer-wiki-eval-001"] },
+      "retrieval": [{ "tool": "getArchitectureViewContext", "args": { "view_id": "overseer-ltm-001" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["overseer-vision-001", "overseer-wiki-eval-001"] }]
+    },
+    {
+      "id": "NV-18",
+      "dimension": "边界内导航",
+      "dimensionKey": "scoped",
+      "label": "组织(1962)边界内直属团队视图找全？",
+      "question": "List the subdiagram_views (team views) directly owned by element \"AgentOrganization\" (1962). Report one of the team view ids.",
+      "given": "AgentOrganization（1962）是组织边界",
+      "when": "在该边界内找全其直属子视图（subdiagram_views）",
+      "then": "包含 430/433/media-team-001/video-team-001 等（组织下全部团队视图，且不含 1249 直属的评测/工具视图）",
+      "retrievalHint": "getIntentElementContext elementId=1962 → subdiagram_views（应与 1249 的直属子视图区分）",
+      "target": { "kind": "element-subviews", "id": "1962", "names": ["430", "433", "media-team-001", "video-team-001"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "1962" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["430", "433", "media-team-001", "video-team-001"] }]
+    },
+    {
+      "id": "NV-19",
+      "dimension": "边界内导航",
+      "dimensionKey": "scoped",
+      "label": "以记忆评测视图为边界找全且不含视图外元素？",
+      "question": "Confirm the view \"memory-eval-view-001\" contains the work package \"memory-eval-run-wp-001\" (and does not contain \"EA Tooling\"). Report whether memory-eval-run-wp-001 is a member.",
+      "given": "长期记忆评测视图（memory-eval-view-001）是评测工作包的边界",
+      "when": "在该视图边界内找全成员，且确认不含视图外元素（结构验证）",
+      "then": "恰好包含 memory-eval-bench/dataset/run-wp 三个 WP，且不含 2760/EA Tooling/video-team-001 等越界元素",
+      "retrievalHint": "getArchitectureViewContext view_id=memory-eval-view-001（只检查 members，见判定口径）",
+      "target": { "kind": "view-members", "id": "memory-eval-view-001", "names": ["memory-eval-run-wp-001"] },
+      "retrieval": [{ "tool": "getArchitectureViewContext", "args": { "view_id": "memory-eval-view-001" }, "scope": "members" }],
+      "requirements": [
+        { "step": 0, "type": "contains", "values": ["memory-eval-bench-wp-001", "memory-eval-dataset-wp-001", "memory-eval-run-wp-001"] },
+        { "step": 0, "type": "expectAbsent", "values": ["2760", "EA Tooling", "video-team-001"] }
+      ]
+    },
+    {
+      "id": "NV-20",
+      "dimension": "边界内导航",
+      "dimensionKey": "scoped",
+      "label": "以 EA Tooling 视图为边界找全且不含越界元素？",
+      "question": "Confirm the view \"EA Tooling\" (1800) contains the element \"ArchGraph 本地 Web 服务\" (2760). Report whether 2760 is a member.",
+      "given": "EA 工具链边界是 1800 视图",
+      "when": "在该视图边界内找全成员，且确认不含评测/记忆视图元素（结构验证）",
+      "then": "包含 2758/2760 等 EA 工具链元素，且不含 memory-eval-view-001/overseer-ltm-001",
+      "retrievalHint": "getArchitectureViewContext view_id=1800（只检查 members）",
+      "target": { "kind": "view-members", "id": "1800", "names": ["2760"] },
+      "retrieval": [{ "tool": "getArchitectureViewContext", "args": { "view_id": "1800" }, "scope": "members" }],
+      "requirements": [
+        { "step": 0, "type": "contains", "values": ["2758", "2760"] },
+        { "step": 0, "type": "expectAbsent", "values": ["memory-eval-view-001", "overseer-ltm-001"] }
+      ]
+    }
+  ]
+}

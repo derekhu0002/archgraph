@@ -55,35 +55,31 @@ process.env.OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || process.env.DEEPSEE
 process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.DEEPSEEK_API_KEY;
 process.env.OPENCODE_MODEL = process.env.OPENCODE_MODEL || `deepseek-sandbox/${process.env.DEEPSEEK_MODEL || 'deepseek-chat'}`;
 
-// ── navigation questions (NV-01..20 from docs/navigation-eval-dataset.md) ──
-// Each question is a NAVIGATION task on the intent graph; ground truth is the
-// target id/name the agent must REACH (not a fact to extract).
-const QUESTIONS = [
-  // ── 定位 Locate ──
-  { id: 'NV-01', dimension: '定位', question: 'In the ArchGraph intent graph, locate the organization element named "AgentOrganization". Report its id and type.', answer: '1962', answerAlt: ['AgentOrganization', '1962'] },
-  { id: 'NV-02', dimension: '定位', question: 'In the ArchGraph intent graph, locate the element representing the project vision (项目愿景, "project vision: providing agents with a long-term memory system"). Report its id.', answer: 'overseer-vision-001', answerAlt: ['overseer-vision-001', '项目愿景'] },
-  { id: 'NV-03', dimension: '定位', question: 'In the ArchGraph intent graph, locate the view named "长期记忆评测" (long-term memory evaluation). Report its view id.', answer: 'memory-eval-view-001', answerAlt: ['memory-eval-view-001'] },
-  { id: 'NV-04', dimension: '定位', question: 'In the view "AgentOrganization" (view id 299), find the Business Actor named "项目总管" (project overseer). Report its element id.', answer: 'project-overseer-001', answerAlt: ['project-overseer-001', '项目总管'] },
-  { id: 'NV-05', dimension: '定位', question: 'In the ArchGraph intent graph, locate the element representing the role of ArchiMate in the vision (分类编目规则 / "cataloguing rules"). Report its id.', answer: 'overseer-archimate-role-001', answerAlt: ['overseer-archimate-role-001'] },
-  // ── 可达 Reachability ──
-  { id: 'NV-06', dimension: '可达', question: 'Starting from the element "project-overseer-001" (项目总管), follow its parent chain upward to the organization it belongs to. Report that organization\'s id and name.', answer: '1962', answerAlt: ['1962', 'AgentOrganization'] },
-  { id: 'NV-07', dimension: '可达', question: 'Starting from the view "memory-eval-view-001" (长期记忆评测), follow its parent_element_id to the top-level Grouping it is mounted under. Report that grouping\'s id and name.', answer: '1249', answerAlt: ['1249', 'Implementation and Migration Viewpoint'] },
-  { id: 'NV-08', dimension: '可达', question: 'Starting from the organization element "AgentOrganization" (1962), find the team view for 公众号发布 (WeChat publishing team). Report its view id.', answer: '433', answerAlt: ['433', '公众号发布团队'] },
-  { id: 'NV-09', dimension: '可达', question: 'From the view "memory-eval-view-001", go up to its parent (1249), then find the sub-view "EA Tooling" among 1249\'s subdiagram_views. Report its view id.', answer: '1800', answerAlt: ['1800', 'EA Tooling'] },
-  { id: 'NV-10', dimension: '可达', question: 'From the view "memory-eval-view-001", go up to its parent (1249), then find the self-evolution Docker sandbox view among 1249\'s subdiagram_views. Report its view id.', answer: 'self-evolution-sandbox-view-001', answerAlt: ['self-evolution-sandbox-view-001', '自进化测试环境'] },
-  // ── 视角切换 Viewpoint ──
-  { id: 'NV-11', dimension: '视角切换', question: 'Find the view that shows the AgentOrganization (1962) from the business/organization viewpoint. Report its view id.', answer: '299', answerAlt: ['299', 'AgentOrganization'] },
-  { id: 'NV-12', dimension: '视角切换', question: 'From the media-creation viewpoint, find the "video-team-001" (视频创作团队) view. Report its view id.', answer: 'video-team-001', answerAlt: ['video-team-001', '视频创作团队'] },
-  { id: 'NV-13', dimension: '视角切换', question: 'From the EA-tooling viewpoint, locate the "EA Tooling" view. Report its view id.', answer: '1800', answerAlt: ['1800', 'EA Tooling'] },
-  { id: 'NV-14', dimension: '视角切换', question: 'From the content-publication viewpoint, locate the view "Content Publication and Announcement". Report its view id.', answer: '180', answerAlt: ['180', 'Content Publication and Announcement'] },
-  { id: 'NV-15', dimension: '视角切换', question: 'From the engineering/verification viewpoint, find the self-evolution Docker sandbox view. Report its view id.', answer: 'self-evolution-sandbox-view-001', answerAlt: ['self-evolution-sandbox-view-001', '自进化测试环境'] },
-  // ── 边界内导航 Scoped ──
-  { id: 'NV-16', dimension: '边界内导航', question: 'List the members of the view "memory-eval-view-001" (长期记忆评测). Report the element ids that belong to it.', answer: 'memory-eval-bench-wp-001', answerAlt: ['memory-eval-bench-wp-001', 'memory-eval-dataset-wp-001', 'memory-eval-run-wp-001', 'navigation-eval-wp-001'] },
-  { id: 'NV-17', dimension: '边界内导航', question: 'List the members of the view "overseer-ltm-001" (项目总管工作记录). Report one member element id (they all start with overseer-).', answer: 'overseer-vision-001', answerAlt: ['overseer-vision-001', 'overseer-wiki-eval-001', 'overseer-archimate-role-001'] },
-  { id: 'NV-18', dimension: '边界内导航', question: 'List the subdiagram_views (team views) directly owned by element "AgentOrganization" (1962). Report one of the team view ids.', answer: '433', answerAlt: ['299', '430', '433', 'media-team-001', 'video-team-001'] },
-  { id: 'NV-19', dimension: '边界内导航', question: 'Confirm the view "memory-eval-view-001" contains the work package "memory-eval-run-wp-001" (and does not contain "EA Tooling"). Report whether memory-eval-run-wp-001 is a member.', answer: 'memory-eval-run-wp-001', answerAlt: ['memory-eval-run-wp-001', 'memory-eval-bench-wp-001', 'memory-eval-dataset-wp-001'] },
-  { id: 'NV-20', dimension: '边界内导航', question: 'Confirm the view "EA Tooling" (1800) contains the element "ArchGraph 本地 Web 服务" (2760). Report whether 2760 is a member.', answer: '2760', answerAlt: ['2760', '2758', '2761'] },
-];
+// ── navigation questions (NV-01..20) ─────────────────────────────────────────
+// Questions come from the canonical evaluation SEED (data/eval-seeds/
+// navigation-seed.json) — the single source of truth for the dataset; add/edit
+// questions there and bump the seed version. Resolves the seed path for host
+// tests (repo), container runs (/opt/sandbox/navigation-seed.json mount), or an
+// explicit NAV_SEED_PATH override.
+function resolveSeedPath() {
+  if (process.env.NAV_SEED_PATH && fs.existsSync(process.env.NAV_SEED_PATH)) return process.env.NAV_SEED_PATH;
+  const candidates = [
+    '/opt/sandbox/navigation-seed.json',
+    path.join(__dirname, '..', 'data', 'eval-seeds', 'navigation-seed.json'),
+    path.join(WORKSPACE, 'data', 'eval-seeds', 'navigation-seed.json'),
+  ];
+  return candidates.find(p => fs.existsSync(p)) || candidates[1];
+}
+function loadSeedQuestions() {
+  const file = resolveSeedPath();
+  const seed = JSON.parse(fs.readFileSync(file, 'utf8'));
+  if (!Array.isArray(seed.questions)) throw new Error(`navigation-seed: missing questions in ${file}`);
+  return seed.questions.map(q => ({
+    id: q.id, dimension: q.dimension, question: q.question,
+    answer: q.target && q.target.id, answerAlt: [...((q.target && q.target.names) || [])],
+  }));
+}
+const QUESTIONS = loadSeedQuestions();
 
 // ── full ARGO instructions (NOT neutral — this eval runs the complete ARGO) ─
 const ARGO_AGENTS_MD = `# Full-ArchGraph navigation session

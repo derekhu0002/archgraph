@@ -1,7 +1,7 @@
 .argo/.env
 node_modules/
 .argo/temp
-data/
+data/benchmarks/
 package-lock.json
 wechat-public.config.json
 /*.tgz
