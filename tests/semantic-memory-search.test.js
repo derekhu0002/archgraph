@@ -49,3 +49,18 @@ test('AT memory_search: requires a query argument', async () => {
   assert.equal(result.status, 'failed');
   assert.equal(result.error && result.error.category, 'MEMORY_QUERY_REQUIRED');
 });
+
+test('AT memory_search: returns an MCP-compliant result (content array) so agents can render it', async () => {
+  // GIVEN a memory_search call (no query -> deterministic error path, no live backend)
+  const result = await systemArchitectureMcp.callTool('memory_search', {}, undefined);
+  // THEN the result carries the MCP content array (like every other argo tool)…
+  assert.ok(Array.isArray(result.content), 'result.content must be an array (MCP contract)');
+  assert.ok(result.content[0] && result.content[0].type === 'text', 'content[0] must be a text block');
+  // …whose text is the JSON payload with the status still readable at the top level
+  const text = result.content[0].text;
+  const payload = JSON.parse(text);
+  assert.equal(payload.status, 'failed');
+  assert.equal(payload.error.category, 'MEMORY_QUERY_REQUIRED');
+  assert.equal(result.status, 'failed', 'payload fields stay accessible at top level');
+  assert.equal(result.isError, true);
+});

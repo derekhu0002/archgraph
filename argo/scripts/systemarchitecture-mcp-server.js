@@ -2203,7 +2203,7 @@ async function callTool(name, args = {}, dependencies = undefined) {
   }
 
   if (name === 'memory_search') {
-    return memorySearchTool(args, dependencies);
+    return toolResult(await memorySearchTool(args, dependencies));
   }
 
   throw new Error(`Unknown tool: ${name}`);
