@@ -4004,38 +4004,18 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "70157c7",
-          "description": "argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js; tests/semantic-backfill-reconcile.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "fcb5050",
-          "description": "argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; tests/semantic-acl-posix.test.js"
-        },
-        {
-          "name": "commit",
-          "value": "efebf65",
-          "description": "design/KG/SystemArchitecture.json"
-        },
-        {
-          "name": "commit",
-          "value": "6437a02",
-          "description": "embedding dimension 1536 对齐 LightRAG"
-        },
-        {
-          "name": "commit",
-          "value": "9051427",
-          "description": "purpose-aware env 阈值 + top-K 有界 + semanticScore 可见"
-        },
-        {
-          "name": "commit",
-          "value": "00b8e54",
-          "description": "memory_search 语义记忆检索工具"
-        },
-        {
-          "name": "commit",
           "value": "df9fb01",
-          "description": "memory_search 紧凑卡片 + max_desc_len 截断: systemarchitecture-mcp-server.js; tests/semantic-memory-search.test.js; sandbox/probe-memory-search.js"
+          "description": "memory_search 紧凑卡片 max_desc_len"
+        },
+        {
+          "name": "commit",
+          "value": "d81cd1d",
+          "description": "memory_search 分布式采样摘要（已回退 147acb9，负优化）"
+        },
+        {
+          "name": "commit",
+          "value": "147acb9",
+          "description": "revert d81cd1d: memory_search 摘要回退到连续开头 800（第 8 轮 A=0/10 证明分布式采样负优化）"
         },
         {
           "name": "deliveryStatus",
