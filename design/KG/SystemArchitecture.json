@@ -4020,6 +4020,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "50988ef",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; tests/semantic-memory-search.test.js; design/KG/SystemArchitecture.json（memory_search MCP 契约修复：toolResult 包装 content 数组，客户端可渲染；顶层 status/hits 兼容；AT-04）"
         }
       ],
       "testcases": [
@@ -4043,6 +4048,13 @@
           "Input": "node --test tests/semantic-backfill-reconcile.test.js",
           "acceptanceCriteria": "tests/semantic-backfill-reconcile.test.js",
           "description": "GIVEN 混合存储含两条当前记录与一条陈旧记录；WHEN backfill 运行；THEN 仅陈旧记录被删除，当前记录保留。"
+        },
+        {
+          "name": "AT-neo4j-semantic-projection-store-04-memory_search MCP 契约（content 数组）",
+          "type": "Acceptance Test",
+          "Input": "node --test tests/semantic-memory-search.test.js",
+          "acceptanceCriteria": "执行 node --test tests/semantic-memory-search.test.js 全过（含新增 AT memory_search returns an MCP-compliant result）：callTool('memory_search',...) 返回含 MCP content 数组（content[0].text 为 JSON payload）且顶层 status/error 仍可读。通过。",
+          "description": "GIVEN memory_search 是生产语义记忆检索工具（读 ArgoProductionSemanticRecord）；WHEN 通过 argo MCP callTool 调用；THEN 返回结果与其他 argo 工具一致携带 MCP content 数组（content[0].text 为 JSON payload），同时顶层 status/hits 仍可读——修复前返回裸对象导致客户端 'r.content is not iterable'。commit 50988ef。"
         }
       ]
     },
