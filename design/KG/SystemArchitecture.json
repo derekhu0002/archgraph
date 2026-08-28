@@ -4062,7 +4062,7 @@
       "id": "navigation-eval-wp-001",
       "name": "设计导航能力评测集",
       "type": "Work Package",
-      "description": "从「给 AGENT 一张以 ArchiMate 为 schema 的导航地图」愿景出发，设计 ArchGraph 导航能力评测题集 docs/navigation-eval-dataset.md：4 维度（定位/可达/视角切换/边界内导航）×5 题 = 20 题（NV-01..20），每题含 GIVEN 地图现状/WHEN 导航问题/THEN 到达目标（ground truth）/检索提示；配套可执行 harness scripts/navigation-eval-run.js 与测试 tests/navigation-eval-dataset.test.js + tests/navigation-eval-run.test.js。实测 20/20 通过（4 维度各 5/5，平均 14ms），报告 results/navigation-eval-report.json。区别于 memory-eval-dataset（事实提取问答）：导航评测测「AGENT 能否在图谱上按图索骥（定位/可达/视角/边界）」，不要求生成答案，只要求正确到达图谱中的目标位置。",
+      "description": "从「给 AGENT 一张以 ArchiMate 为 schema 的导航地图」愿景出发，设计 ArchGraph 导航能力评测题集 docs/navigation-eval-dataset.md：4 维度（定位/可达/视角切换/边界内导航）×5 题 = 20 题（NV-01..20），每题含 GIVEN 地图现状/WHEN 导航问题/THEN 到达目标（ground truth）/检索提示；配套可执行 harness scripts/navigation-eval-run.js 与测试 tests/navigation-eval-dataset.test.js + tests/navigation-eval-run.test.js。实测 20/20 通过（4 维度各 5/5，平均 14ms），报告 results/navigation-eval-report.json。区别于 memory-eval-dataset（事实提取问答）：导航评测测「AGENT 能否在图谱上按图索骥（定位/可达/视角/边界）」，不要求生成答案，只要求正确到达图谱中的目标位置。已归档为可维护扩展的评测集 SEED（data/eval-seeds/navigation-seed.json，v1.0.0，单一事实源，加载器 scripts/eval-seed.js，直接 harness 与完整 AGENT 评测均从 SEED 取题；配套 tests/eval-seed.test.js）。",
       "testcases": [
         {
           "name": "AT-navigation-eval-01-导航评测题集文档就绪",
@@ -4088,6 +4088,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "be47829",
+          "description": "data/eval-seeds/navigation-seed.json; scripts/eval-seed.js; scripts/navigation-eval-run.js; sandbox/navigation-agent-eval.js; tests/eval-seed.test.js; results/navigation-agent-report.json; results/navigation-agent-raw/（评测集归档为 SEED v1.0.0 单一事实源；直接 harness 与 AGENT 评测统一从 SEED 取题；AGENT 评测容器内 20/20）"
         }
       ]
     },
