@@ -45,7 +45,27 @@ npx --no-install argo-deploy \
   -OpenCodeAgentsRoot /root/.config/opencode/agents \
   -PluginsRoot /root/.argo/plugins
 
-if [ "${RUN_MEMSEARCH_PROBE:-0}" = "1" ]; then
+if [ "${RUN_SERVE:-0}" = "1" ]; then
+    echo "[sandbox] opencode serve 长驻模式（Web 观察）：opencode serve --port 3456 --hostname 0.0.0.0"
+    # 预写 opencode.json（deepseek provider + argo mcp），再启动 serve
+    node -e "
+      const fs=require('node:fs');const path=require('node:path');
+      const HOME=process.env.USERPROFILE||process.env.HOME||'/root';
+      const cfg=(()=>{try{return JSON.parse(fs.readFileSync(path.join(HOME,'.config/opencode/opencode.json'),'utf8'))}catch(_){return {}}})();
+      cfg.provider=cfg.provider||{};
+      cfg.provider['deepseek-sandbox']={npm:'@ai-sdk/openai-compatible',name:'DeepSeek (sandbox)',options:{baseURL:process.env.DEEPSEEK_BASE_URL||'https://api.deepseek.com',apiKey:process.env.DEEPSEEK_API_KEY},models:{[process.env.DEEPSEEK_MODEL||'deepseek-chat']:{name:process.env.DEEPSEEK_MODEL||'deepseek-chat'}}};
+      cfg.mcp={argo:{type:'local',command:['node',path.join(HOME,'.argo/scripts/argo-mcp-server.js')],enabled:true}};
+      cfg.model='deepseek-sandbox/'+(process.env.DEEPSEEK_MODEL||'deepseek-chat');
+      fs.writeFileSync(path.join(HOME,'.config/opencode/opencode.json'),JSON.stringify(cfg,null,2));
+    "
+    exec opencode serve --port 3456 --hostname 0.0.0.0 --print-logs
+elif [ "${RUN_SERVE_PROBE:-0}" = "1" ]; then
+    echo "[sandbox] opencode serve API 探针：node /opt/sandbox/probe-serve-api.js"
+    node /opt/sandbox/probe-serve-api.js
+elif [ "${RUN_NAV_AGENT:-0}" = "1" ]; then
+    echo "[sandbox] 完整 ARGO 导航 Agent 评测：node /opt/sandbox/navigation-agent-eval.js"
+    node /opt/sandbox/navigation-agent-eval.js
+elif [ "${RUN_MEMSEARCH_PROBE:-0}" = "1" ]; then
     echo "[sandbox] memory_search 探针模式：node /opt/sandbox/probe-memory-search.js"
     node /opt/sandbox/probe-memory-search.js
 elif [ "${RUN_COMPARISON:-0}" = "1" ]; then

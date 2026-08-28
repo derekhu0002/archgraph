@@ -70,7 +70,7 @@ ENV USERPROFILE=/root \
     ARGO_REPO_ROOT=/workspace
 
 WORKDIR /opt/sandbox
-COPY entrypoint.sh smoke.js lightrag-mcp.py test-lightrag-mcp.py lmem-comparison.js lmem-ingest-lightrag.py probe-memory-search.js ./
+COPY entrypoint.sh smoke.js lightrag-mcp.py test-lightrag-mcp.py lmem-comparison.js lmem-ingest-lightrag.py probe-memory-search.js navigation-agent-eval.js probe-serve-api.js ./
 RUN chmod +x entrypoint.sh
 
 ENTRYPOINT ["/opt/sandbox/entrypoint.sh"]

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-08-28T15:01:43.150Z",
+  "generatedAt": "2026-08-28T19:31:31.436Z",
   "dataset": "ArchGraph navigation-capability eval (NV-01..20)",
   "overall": {
     "correct": 20,
     "total": 20
   },
-  "avgLatencyMs": 31,
+  "avgLatencyMs": 18,
   "byDimension": {
     "定位": {
       "correct": 5,
@@ -29,28 +29,28 @@
       "id": "NV-01",
       "dimension": "定位",
       "pass": true,
-      "latencyMs": 439,
+      "latencyMs": 215,
       "reason": "PASS"
     },
     {
       "id": "NV-02",
       "dimension": "定位",
       "pass": true,
-      "latencyMs": 10,
+      "latencyMs": 6,
       "reason": "PASS"
     },
     {
       "id": "NV-03",
       "dimension": "定位",
       "pass": true,
-      "latencyMs": 25,
+      "latencyMs": 15,
       "reason": "PASS"
     },
     {
       "id": "NV-04",
       "dimension": "定位",
       "pass": true,
-      "latencyMs": 7,
+      "latencyMs": 5,
       "reason": "PASS"
     },
     {
@@ -64,77 +64,77 @@
       "id": "NV-06",
       "dimension": "可达",
       "pass": true,
-      "latencyMs": 12,
+      "latencyMs": 11,
       "reason": "PASS"
     },
     {
       "id": "NV-07",
       "dimension": "可达",
       "pass": true,
-      "latencyMs": 13,
+      "latencyMs": 11,
       "reason": "PASS"
     },
     {
       "id": "NV-08",
       "dimension": "可达",
       "pass": true,
-      "latencyMs": 7,
+      "latencyMs": 4,
       "reason": "PASS"
     },
     {
       "id": "NV-09",
       "dimension": "可达",
       "pass": true,
-      "latencyMs": 15,
+      "latencyMs": 13,
       "reason": "PASS"
     },
     {
       "id": "NV-10",
       "dimension": "可达",
       "pass": true,
-      "latencyMs": 14,
+      "latencyMs": 17,
       "reason": "PASS"
     },
     {
       "id": "NV-11",
       "dimension": "视角切换",
       "pass": true,
-      "latencyMs": 8,
+      "latencyMs": 9,
       "reason": "PASS"
     },
     {
       "id": "NV-12",
       "dimension": "视角切换",
       "pass": true,
-      "latencyMs": 7,
+      "latencyMs": 10,
       "reason": "PASS"
     },
     {
       "id": "NV-13",
       "dimension": "视角切换",
       "pass": true,
-      "latencyMs": 7,
+      "latencyMs": 8,
       "reason": "PASS"
     },
     {
       "id": "NV-14",
       "dimension": "视角切换",
       "pass": true,
-      "latencyMs": 9,
+      "latencyMs": 5,
       "reason": "PASS"
     },
     {
       "id": "NV-15",
       "dimension": "视角切换",
       "pass": true,
-      "latencyMs": 7,
+      "latencyMs": 5,
       "reason": "PASS"
     },
     {
       "id": "NV-16",
       "dimension": "边界内导航",
       "pass": true,
-      "latencyMs": 8,
+      "latencyMs": 6,
       "reason": "PASS"
     },
     {
@@ -148,21 +148,21 @@
       "id": "NV-18",
       "dimension": "边界内导航",
       "pass": true,
-      "latencyMs": 8,
+      "latencyMs": 4,
       "reason": "PASS"
     },
     {
       "id": "NV-19",
       "dimension": "边界内导航",
       "pass": true,
-      "latencyMs": 9,
+      "latencyMs": 7,
       "reason": "PASS"
     },
     {
       "id": "NV-20",
       "dimension": "边界内导航",
       "pass": true,
-      "latencyMs": 8,
+      "latencyMs": 5,
       "reason": "PASS"
     }
   ]
