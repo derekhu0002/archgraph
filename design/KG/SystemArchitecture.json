@@ -115,7 +115,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -156,7 +156,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -268,7 +268,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -392,7 +392,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -442,7 +442,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -520,7 +520,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -578,7 +578,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -681,7 +681,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -740,7 +740,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -776,7 +776,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -816,7 +816,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -851,7 +851,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -936,13 +936,13 @@
           "description": "tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "commit",
           "value": "49b2366",
           "description": "docs/memory-eval-benchmarks.md; tests/memory-eval-benchmarks.test.js; tests/architecture-view-context.test.js; design/KG/SystemArchitecture.json（AT-1357-04 同步 14 子视图）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -1010,7 +1010,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -1041,7 +1041,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -1077,13 +1077,13 @@
           "description": "package.json (version bump to 0.10.29); npm publish archgraph-argo@0.10.29 成功 + 安装验证：安装包 argo/rules/archgraph.instructions.md 与仓库一致，含 CapabilityDelegationGuideline 新增章节（e551dd1）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "commit",
           "value": "9997cd6",
           "description": "argo/scripts/ensureArgoHarnessEnvironment.js; argo/scripts/argo-mcp-server.js; argo/skills/argo-init/SKILL.md; tests/argo-init-interface.test.js; design/KG/SystemArchitecture.json（argo-init 确定性初始化收进 initializeWorkspace MCP 接口：skill 不再执行 WORKSPACE 外脚本；initializeWorkspace 进程内构建完整 harness 报告（mcp/systemArchitecture/subdiagramViews/neo4j/semanticLifecycle））"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -1171,7 +1171,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -1218,7 +1218,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -1249,7 +1249,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -2213,7 +2213,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -2401,7 +2401,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ]
     },
@@ -2626,7 +2626,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ]
     },
@@ -2726,7 +2726,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ]
     },
@@ -2847,7 +2847,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ]
     },
@@ -2945,10 +2945,6 @@
           "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/argo-semantic-scope.test.js; tests/argo-rules-query.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "commit",
           "value": "ea4a80d",
           "description": "argo/scripts/argo-mcp-server.js; argo/scripts/validator-mcp-server.js; tests/argo-mcp-tools.test.js; design/KG/SystemArchitecture.json（工具面精简第 1 步：移除 validateStageHandoff/validateTraceProposal 两个校验工具）"
@@ -2967,6 +2963,10 @@
           "name": "commit",
           "value": "b3ebd0d",
           "description": "argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/productionGraphRagRuntime.js; sandbox/lmem-comparison.js; sandbox/probe-memory-search.js; scripts/ea-web-service.js; tests/argo-mcp-tools.test.js; tests/argo-semantic-scope.test.js; argo/scripts/ARCHITECTURE.md（getSystemArchitecture purpose 收拢为 general+audit：intent-decision/implementation-design/coding-repair 移出工具面保留为内部 W5 闭包类别；general 内部映射 implementation-design）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3094,7 +3094,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ]
     },
@@ -3152,6 +3152,10 @@
           "name": "commit",
           "value": "e8d8e43; b58f7c3; 0db3a30; 4fb8475",
           "description": "docs/diagrams/multi-role-banner.png; multi-role-birth.png; multi-role-pipeline.png; multi-role-media-artist.png; docs/diagrams/skill-coevolution-banner.png; skill-coevolution-mount.png; skill-coevolution-refine.png; skill-coevolution-export.png; scripts/gen-skill-coevolution.js; scripts/inspect-skill-coevolution.js; scripts/compress-skill-coevolution.py; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "subdiagram_views": [
@@ -3280,7 +3284,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ]
     },
@@ -3352,6 +3356,10 @@
           "name": "commit",
           "value": "7cc24b9",
           "description": "design/KG/SystemArchitecture.json; tests/video-team-actor.test.js"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3375,6 +3383,10 @@
           "name": "commit",
           "value": "7cc24b9",
           "description": "design/KG/SystemArchitecture.json; tests/video-team-actor.test.js"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3398,6 +3410,10 @@
           "name": "commit",
           "value": "7cc24b9",
           "description": "design/KG/SystemArchitecture.json; tests/video-team-actor.test.js"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3453,7 +3469,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ]
     },
@@ -3525,6 +3541,10 @@
           "name": "commit",
           "value": "8ae5cee",
           "description": "docs/terminal-bench-eval-guide.md; tests/terminal-bench-eval-guide.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3615,6 +3635,10 @@
           "name": "commit",
           "value": "49b2366",
           "description": "docs/memory-eval-benchmarks.md; tests/memory-eval-benchmarks.test.js; design/KG/SystemArchitecture.json（长期记忆评测基线调研）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3684,6 +3708,10 @@
           "description": "scripts/memory-eval-run.js; docs/memory-eval-dataset.md; tests/memory-eval-run.test.js; tests/memory-eval-dataset.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测题集 v2：多跳召回维度 + 成本/压缩率口径）",
           "name": "commit",
           "value": "75d0e53"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3719,6 +3747,10 @@
           "description": "scripts/memory-eval-run.js; docs/memory-eval-dataset.md; tests/memory-eval-run.test.js; tests/memory-eval-dataset.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测题集 v2：多跳召回维度 + 成本/压缩率口径）",
           "name": "commit",
           "value": "75d0e53"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3763,6 +3795,10 @@
           "name": "commit",
           "value": "91d7c07",
           "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-content-storage.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3807,6 +3843,10 @@
           "name": "commit",
           "value": "ccb976d",
           "description": "scope 语义检索修复: argo/scripts/graph-rag/defaultSemanticRetrieval.js; tests/argo-semantic-scope.test.js; tests/navigation-eval-dataset.test.js; docs/navigation-eval-dataset.md"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3929,6 +3969,10 @@
           "description": "sandbox/smoke.js; tests/sandbox-framework.test.js（口径 A：对照会话替换为中性指令+中性提问，消除 argo 中心规则 confound，唯一变量=记忆后端，smoke 29/29）",
           "name": "commit",
           "value": "7504c68"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     },
@@ -4004,13 +4048,13 @@
           "description": "revert d81cd1d: memory_search 摘要回退到连续开头 800（第 8 轮 A=0/10 证明分布式采样负优化）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "50988ef",
           "description": "argo/scripts/systemarchitecture-mcp-server.js; tests/semantic-memory-search.test.js; design/KG/SystemArchitecture.json（memory_search MCP 契约修复：toolResult 包装 content 数组，客户端可渲染；顶层 status/hits 兼容；AT-04）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -4072,13 +4116,13 @@
           "description": "docs/navigation-eval-dataset.md; scripts/navigation-eval-run.js; tests/navigation-eval-dataset.test.js; tests/navigation-eval-run.test.js; results/navigation-eval-report.json; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "be47829",
           "description": "data/eval-seeds/navigation-seed.json; scripts/eval-seed.js; scripts/navigation-eval-run.js; sandbox/navigation-agent-eval.js; tests/eval-seed.test.js; results/navigation-agent-report.json; results/navigation-agent-raw/（评测集归档为 SEED v1.0.0 单一事实源；直接 harness 与 AGENT 评测统一从 SEED 取题；AGENT 评测容器内 20/20）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -4156,6 +4200,10 @@
           "name": "commit",
           "value": "cc1911b",
           "description": "design/KG/SystemArchitecture.json（全量刷新挂载 AT：54 元素 112 描述性 acceptanceCriteria → 裸可执行路径；移除 6 个内部视角/冗余 AT（AT-2100-01..05 EA 导入白盒 + AT-2767-06）；挂载 AT 137/137 可执行）+ scripts/at-inventory|at-refresh-plan|at-refresh-apply + tests/* 断言同步"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
