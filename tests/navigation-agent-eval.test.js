@@ -17,18 +17,18 @@ const NAV_AGENT = path.join(ROOT, 'sandbox', 'navigation-agent-eval.js');
 // argo package), so `node --test tests/navigation-agent-eval.test.js` runs
 // without Docker.
 
-test('AT navigation-agent-eval: agent eval defines 20 NV questions in 4 dimensions', () => {
+test('AT navigation-agent-eval: agent eval defines the SEED questions across all dimensions', () => {
   // GIVEN the full-ArchGraph agent navigation eval script
   assert.ok(fs.existsSync(NAV_AGENT), 'navigation-agent-eval.js must exist');
   const mod = require(NAV_AGENT);
-  // THEN it covers exactly the 20 navigation questions (NV-01..NV-20)…
-  assert.equal(mod.QUESTIONS.length, 20, 'must cover NV-01..NV-20');
-  // …across the four navigation dimensions…
+  // THEN it covers exactly the SEED questions (NV/CA/CR/CI)
+  assert.equal(mod.QUESTIONS.length, 28, 'must cover all 28 SEED questions');
+  // …across all navigation dimensions…
   const dims = [...new Set(mod.QUESTIONS.map(q => q.dimension))].sort();
-  assert.deepEqual(dims, ['定位', '可达', '视角切换', '边界内导航'].sort());
+  assert.deepEqual(dims, ['定位', '可达', '视角切换', '边界内导航', '验收用例定位', '提交登记', '变更影响'].sort());
   // …each with a ground-truth id/name to REACH (not a fact to extract)
   for (const q of mod.QUESTIONS) {
-    assert.ok(q.id && /^NV-\d{2}$/.test(q.id), `question ${q.id} needs a valid NV id`);
+    assert.ok(q.id && /^[A-Z]{2}-\d{2}$/.test(q.id), `question ${q.id} needs a valid XX-nn id`);
     assert.ok(q.answer, `question ${q.id} needs a ground-truth answer`);
     assert.ok(Array.isArray(q.answerAlt) && q.answerAlt.length >= 1, `question ${q.id} needs answerAlt`);
   }

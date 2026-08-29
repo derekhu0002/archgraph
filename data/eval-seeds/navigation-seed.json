@@ -2,15 +2,18 @@
   "schemaVersion": 1,
   "seedId": "archgraph-navigation-seed",
   "name": "ArchGraph 导航能力评测集",
-  "version": "1.0.1",
-  "status": "archived",
+  "version": "1.1.0",
+  "status": "active",
   "source": "docs/navigation-eval-dataset.md",
   "description": "「给 AGENT 一张以 ArchiMate 为 schema 的导航地图」愿景下的导航能力可执行评测集 SEED v1：4 维度（定位/可达/视角切换/边界内导航）×5 = 20 题（NV-01..20）。每题含 GIVEN/WHEN/THEN 三件套、检索提示、判定目标（id/names）、可执行检索序列（含 pick 多跳）与判定要求。作为后续持续维护/扩展的单一事实源：加题/改题只改本 SEED 并升版本，harness 与测试统一消费。",
   "dimensions": [
     { "key": "locate", "name": "定位", "en": "Locate", "description": "语义/结构检索能否命中正确的地图位置（元素/视图）——「我现在在哪幅图」" },
     { "key": "reachability", "name": "可达", "en": "Reachability", "description": "能否沿 ArchiMate 语义关系多跳导航到目标——「按路标走不迷路」" },
     { "key": "viewpoint", "name": "视角切换", "en": "Viewpoint", "description": "能否按不同 Viewpoint/分层找到正确的一幅图——「换一本图册看」" },
-    { "key": "scoped", "name": "边界内导航", "en": "Scoped Navigation", "description": "能否在给定 scope 内找全且不越界——「只在这片区域找，不跑到别区」" }
+    { "key": "scoped", "name": "边界内导航", "en": "Scoped Navigation", "description": "能否在给定 scope 内找全且不越界——「只在这片区域找，不跑到别区」" },
+    { "key": "acceptance", "name": "验收用例定位", "en": "Acceptance Testcase", "description": "编码工作流：改代码前能否从受影响元素定位其挂载的验收用例（AcceptanceTestFirst）——「先找这改动的验收门在哪」" },
+    { "key": "register", "name": "提交登记", "en": "Commit Registration", "description": "编码工作流：改完代码后能否回到对应元素登记 commit id + 文件路径（IntentArchitectureFirst 第 4 条）——「改完把账记回图上」" },
+    { "key": "impact", "name": "变更影响", "en": "Change Impact", "description": "编码工作流：评估变更的归属/挂载层级与交付状态——「这一改动落在谁的资产上、交付基线如何」" }
   ],
   "questions": [
     {
@@ -322,6 +325,118 @@
         { "step": 0, "type": "contains", "values": ["2758", "2760"] },
         { "step": 0, "type": "expectAbsent", "values": ["memory-eval-view-001", "overseer-ltm-001"] }
       ]
+    },
+    {
+      "id": "CA-01",
+      "dimension": "验收用例定位",
+      "dimensionKey": "acceptance",
+      "label": "定位 archgraph-workflow-rules 的验收用例？",
+      "question": "In the ArchGraph intent graph, the coding workflow requires identifying the acceptance test cases of affected elements BEFORE modifying code. From the element \"archgraph-workflow-rules\", read its mounted acceptance testcase. Report the testcase name and its acceptanceCriteria (test file path).",
+      "given": "archgraph-workflow-rules 挂载了验收用例（AcceptanceTestFirst）",
+      "when": "改代码前从该元素读取挂载的验收用例",
+      "then": "用例 AT-rules-01，acceptanceCriteria = tests/argo-rules-query.test.js",
+      "retrievalHint": "getIntentElementContext elementId=archgraph-workflow-rules → testcases[0]（name + acceptanceCriteria）",
+      "target": { "kind": "element-testcase", "id": "archgraph-workflow-rules", "names": ["AT-rules-01", "tests/argo-rules-query.test.js"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "archgraph-workflow-rules" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["AT-rules-01", "tests/argo-rules-query.test.js"] }]
+    },
+    {
+      "id": "CA-02",
+      "dimension": "验收用例定位",
+      "dimensionKey": "acceptance",
+      "label": "定位验收看护服务的 MCP 看护用例？",
+      "question": "From the element \"acceptance-guardian-001\" (验收看护服务), read one of its mounted MCP-interface guardian acceptance testcases. Report the testcase name and its acceptanceCriteria (test file path).",
+      "given": "acceptance-guardian-001 挂载了 ARGO MCP 接口看护验收用例",
+      "when": "从该服务读取挂载的看护用例",
+      "then": "含 AT-acceptance-guardian-01，acceptanceCriteria = tests/acceptance-guardian.test.js",
+      "retrievalHint": "getIntentElementContext elementId=acceptance-guardian-001 → testcases",
+      "target": { "kind": "element-testcase", "id": "acceptance-guardian-001", "names": ["AT-acceptance-guardian-01", "tests/acceptance-guardian.test.js"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "acceptance-guardian-001" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["AT-acceptance-guardian-01", "tests/acceptance-guardian.test.js"] }]
+    },
+    {
+      "id": "CA-03",
+      "dimension": "验收用例定位",
+      "dimensionKey": "acceptance",
+      "label": "枚举验收看护服务挂载的全部用例？",
+      "question": "Enumerate ALL mounted acceptance testcases on \"acceptance-guardian-001\" (验收看护服务). Report the first and the last testcase names (proving the full list).",
+      "given": "acceptance-guardian-001 挂载 10 个 MCP 接口看护验收用例",
+      "when": "在该元素边界内枚举全部挂载用例",
+      "then": "含 AT-acceptance-guardian-01（首）与 AT-acceptance-guardian-10（末）",
+      "retrievalHint": "getIntentElementContext elementId=acceptance-guardian-001 → testcases 数组全部元素",
+      "target": { "kind": "element-testcases", "id": "acceptance-guardian-001", "names": ["AT-acceptance-guardian-01", "AT-acceptance-guardian-10"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "acceptance-guardian-001" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["AT-acceptance-guardian-01", "AT-acceptance-guardian-10"] }]
+    },
+    {
+      "id": "CR-01",
+      "dimension": "提交登记",
+      "dimensionKey": "register",
+      "label": "确认 archgraph-workflow-rules 的 commit 台账与交付状态？",
+      "question": "After a code change, the workflow requires registering the commit id + file paths back onto the corresponding element. Read the commit ledger (attributes) of \"archgraph-workflow-rules\" and confirm the latest registered commit and the delivery status.",
+      "given": "编码工作流要求改完后把 commit id 回登到对应元素并保留交付状态",
+      "when": "从该元素读取 commit 属性台账与 deliveryStatus",
+      "then": "台账含 f904aa2（合并语义修复），deliveryStatus=delivered",
+      "retrievalHint": "getIntentElementContext elementId=archgraph-workflow-rules → attributes（name=commit / deliveryStatus）",
+      "target": { "kind": "element-attributes", "id": "archgraph-workflow-rules", "names": ["f904aa2", "delivered"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "archgraph-workflow-rules" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["f904aa2", "delivered"] }]
+    },
+    {
+      "id": "CR-02",
+      "dimension": "提交登记",
+      "dimensionKey": "register",
+      "label": "确认导航评测工作包的 commit 台账？",
+      "question": "Read the commit ledger (attributes) of \"navigation-eval-wp-001\". Confirm the SEED archival commit and the hint-fix commit are both registered.",
+      "given": "navigation-eval-wp-001 登记了 SEED 归档与后续修复的 commit",
+      "when": "从该工作包读取 commit 属性台账",
+      "then": "台账含 be47829（SEED 归档）与 c726508（hint 修复）",
+      "retrievalHint": "getIntentElementContext elementId=navigation-eval-wp-001 → attributes",
+      "target": { "kind": "element-attributes", "id": "navigation-eval-wp-001", "names": ["be47829", "c726508"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "navigation-eval-wp-001" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["be47829", "c726508"] }]
+    },
+    {
+      "id": "CI-01",
+      "dimension": "变更影响",
+      "dimensionKey": "impact",
+      "label": "确认验收看护服务的交付状态？",
+      "question": "Before changing a deliverable, the coding workflow evaluates the delivery baseline. Read the deliveryStatus of \"acceptance-guardian-001\" (验收看护服务) and report it.",
+      "given": "变更前需确认目标资产的交付基线（runArchitectureTests 权威判定）",
+      "when": "从验收看护服务读取 deliveryStatus",
+      "then": "deliveryStatus=delivered",
+      "retrievalHint": "getIntentElementContext elementId=acceptance-guardian-001 → attributes",
+      "target": { "kind": "element-attributes", "id": "acceptance-guardian-001", "names": ["delivered"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "acceptance-guardian-001" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["delivered"] }]
+    },
+    {
+      "id": "CI-02",
+      "dimension": "变更影响",
+      "dimensionKey": "impact",
+      "label": "定位验收看护服务挂在哪个 Actor 名下？",
+      "question": "Assess the ownership of \"acceptance-guardian-001\": which Business Actor is this service mounted under (its parent)? Report that actor's id.",
+      "given": "验收看护服务挂在项目总管名下",
+      "when": "从该服务上溯其父元素（parent）",
+      "then": "到达 project-overseer-001「项目总管」",
+      "retrievalHint": "getIntentElementContext elementId=acceptance-guardian-001 → parent",
+      "target": { "kind": "element-parent", "id": "project-overseer-001", "names": ["项目总管"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "acceptance-guardian-001" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["project-overseer-001"] }]
+    },
+    {
+      "id": "CI-03",
+      "dimension": "变更影响",
+      "dimensionKey": "impact",
+      "label": "定位项目总管的长期记忆写入子视图？",
+      "question": "At session end the coding workflow writes a session summary into the Business Actor's long-term memory subview. From \"project-overseer-001\" (项目总管), find its LTM subview id.",
+      "given": "SessionMemorySummarization 要求把会话摘要写入该 Actor 的 LTM 子视图",
+      "when": "从项目总管读取其挂载的子视图（subdiagram_views）",
+      "then": "到达 overseer-ltm-001「项目总管工作记录」",
+      "retrievalHint": "getIntentElementContext elementId=project-overseer-001 → subdiagram_views 含 overseer-ltm-001",
+      "target": { "kind": "element-subview", "id": "overseer-ltm-001", "names": ["项目总管工作记录"] },
+      "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "project-overseer-001" } }],
+      "requirements": [{ "step": 0, "type": "contains", "values": ["overseer-ltm-001"] }]
     }
   ]
 }

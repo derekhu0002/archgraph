@@ -22,7 +22,7 @@ const path = require('node:path');
 
 const SEED_FILE_NAME = 'navigation-seed.json';
 const DEFAULT_SEED_PATH = path.join(__dirname, '..', 'data', 'eval-seeds', SEED_FILE_NAME);
-const KNOWN_DIMENSIONS = ['定位', '可达', '视角切换', '边界内导航'];
+const KNOWN_DIMENSIONS = ['定位', '可达', '视角切换', '边界内导航', '验收用例定位', '提交登记', '变更影响'];
 
 function resolveSeedPath(explicit) {
   if (explicit && fs.existsSync(explicit)) return path.resolve(explicit);
@@ -39,7 +39,7 @@ function validateSeed(seed) {
   if (typeof seed.seedId !== 'string' || !seed.seedId) errors.push('seedId required');
   if (typeof seed.version !== 'string' || !seed.version) errors.push('version required');
   if (typeof seed.status !== 'string' || !seed.status) errors.push('status required');
-  if (!Array.isArray(seed.dimensions) || seed.dimensions.length !== 4) errors.push('4 dimensions required');
+  if (!Array.isArray(seed.dimensions) || seed.dimensions.length !== KNOWN_DIMENSIONS.length) errors.push(`${KNOWN_DIMENSIONS.length} dimensions required`);
   if (!Array.isArray(seed.questions)) errors.push('questions array required');
   for (const dim of seed.dimensions || []) {
     if (!dim || typeof dim.key !== 'string' || typeof dim.name !== 'string' || typeof dim.en !== 'string') {
@@ -49,7 +49,7 @@ function validateSeed(seed) {
   const seen = new Set();
   const dimCount = {};
   for (const q of seed.questions || []) {
-    if (!q || typeof q.id !== 'string' || !/^NV-\d{2}$/.test(q.id)) { errors.push('question id must be NV-xx'); continue; }
+    if (!q || typeof q.id !== 'string' || !/^[A-Z]{2}-\d{2}$/.test(q.id)) { errors.push('question id must be XX-nn (e.g. NV-01, CA-01)'); continue; }
     if (seen.has(q.id)) errors.push(`duplicate id ${q.id}`);
     seen.add(q.id);
     for (const field of ['dimension', 'dimensionKey', 'label', 'question', 'given', 'when', 'then', 'retrievalHint']) {
@@ -61,9 +61,8 @@ function validateSeed(seed) {
     if (!Array.isArray(q.requirements) || q.requirements.length === 0) errors.push(`${q.id} missing requirements`);
     dimCount[q.dimension] = (dimCount[q.dimension] || 0) + 1;
   }
-  if (seen.size !== 20) errors.push(`expected 20 questions, got ${seen.size}`);
   for (const dim of KNOWN_DIMENSIONS) {
-    if (dimCount[dim] !== 5) errors.push(`dimension ${dim} should have 5 questions, got ${dimCount[dim] || 0}`);
+    if (!dimCount[dim] || dimCount[dim] < 1) errors.push(`dimension ${dim} must have at least 1 question`);
   }
   return { ok: errors.length === 0, errors };
 }
