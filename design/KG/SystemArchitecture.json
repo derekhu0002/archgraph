@@ -1079,6 +1079,11 @@
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "commit",
+          "value": "9997cd6",
+          "description": "argo/scripts/ensureArgoHarnessEnvironment.js; argo/scripts/argo-mcp-server.js; argo/skills/argo-init/SKILL.md; tests/argo-init-interface.test.js; design/KG/SystemArchitecture.json（argo-init 确定性初始化收进 initializeWorkspace MCP 接口：skill 不再执行 WORKSPACE 外脚本；initializeWorkspace 进程内构建完整 harness 报告（mcp/systemArchitecture/subdiagramViews/neo4j/semanticLifecycle））"
         }
       ],
       "testcases": [
