@@ -3359,7 +3359,12 @@
         {
           "name": "commit",
           "value": "e7d5dc5",
-          "description": "精简挂载 AT 至用户视角/每控制点合并：137→22 AT（13 元素）；guardian 增强为全图扫描所有挂载 AT 可执行；tests/at-simplify-plan|apply 维护脚本"
+          "description": "精简挂载 AT 至用户视角/每控制点合并：137→22 AT（13 元素）"
+        },
+        {
+          "name": "commit",
+          "value": "9fa6105",
+          "description": "docs/acceptance-testcases.md（挂载 AT 清单文档：22 用例控制点+观察点；分组 A MCP 接口看护 10 + 分组 B 用户面交付件 12）"
         }
       ],
       "testcases": [
