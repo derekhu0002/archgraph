@@ -2995,6 +2995,11 @@
           "name": "commit",
           "value": "ea4a80d",
           "description": "argo/scripts/argo-mcp-server.js; argo/scripts/validator-mcp-server.js; tests/argo-mcp-tools.test.js; design/KG/SystemArchitecture.json（工具面精简第 1 步：移除 validateStageHandoff/validateTraceProposal 两个校验工具，保留 validateSystemArchitecture/runArchitectureTests）"
+        },
+        {
+          "name": "commit",
+          "value": "b0aaf9d",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-global-install.test.js; argo/scripts/ARCHITECTURE.md（getSystemArchitecture 全量图谱获取移除：graph-tidy purpose + 无 query 快照 → QUERY_REQUIRED；query 必填；输出契约去掉 full-snapshot mode；harness 进程内读图）"
         }
       ]
     },
@@ -4129,6 +4134,20 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        }
+      ]
+    },
+    {
+      "id": "overseer-mcp-tool-surface-001",
+      "name": "里程碑：ARGO MCP 工具面精简（全量图谱移除）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-08-26）：按人类伙伴要求精简/收敛 ARGO MCP 工具面。①工具收敛第 1 步：移除 validateStageHandoff/validateTraceProposal 两个校验工具（保留 validateSystemArchitecture/runArchitectureTests）（ea4a80d）；②argo-init 确定性初始化收进 initializeWorkspace MCP 接口，skill 不再执行 WORKSPACE 外脚本（9997cd6）；③getSystemArchitecture 移除全量图谱获取：graph-tidy purpose（LEGAL_QUERY_PURPOSES/工具 enum/语义旅程守卫）与省略 query 全量快照全部移除，query 改为必填、无 query 返回 QUERY_REQUIRED；输出契约 GET_SYSTEM_ARCHITECTURE_OUTPUT_SCHEMA 去掉 full-snapshot mode（仅 semantic-query/error）；harness verifyCanonicalSystemArchitecture 改为进程内读 canonical 图（不再走无 query 工具路径）；tests/argo-global-install 断言更新为新契约。运行时引擎 graph-tidy 策略 / journey readFullSnapshot / CLI snapshot 保留为内部（仅 CLI/测试可达，不对 agent 暴露）。全量 282/283 通过（唯一失败 wechat-publisher-agent-file 为既有无关模型名断言），validateSystemArchitecture 通过。commits ea4a80d/9997cd6/b0aaf9d。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "b0aaf9d",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-global-install.test.js; argo/scripts/ARCHITECTURE.md; design/KG/SystemArchitecture.json（项目总管 LTM 里程碑：getSystemArchitecture 全量图谱移除）"
         }
       ]
     }
@@ -5606,7 +5625,8 @@
         "overseer-query-rules-001",
         "overseer-content-storage-001",
         "overseer-subgraph-semantic-001",
-        "overseer-wiki-eval-001"
+        "overseer-wiki-eval-001",
+        "overseer-mcp-tool-surface-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001"
