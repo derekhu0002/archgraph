@@ -3581,6 +3581,10 @@
         {
           "view_id": "overseer-ltm-001",
           "view_name": "项目总管工作记录"
+        },
+        {
+          "view_id": "acceptance-guard-view-001",
+          "view_name": "验收看护（Acceptance Guardianship）"
         }
       ],
       "attributes": [
@@ -4163,6 +4167,95 @@
           "name": "commit",
           "value": "b3ebd0d",
           "description": "argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/productionGraphRagRuntime.js; sandbox/*; scripts/ea-web-service.js; tests/*; argo/scripts/ARCHITECTURE.md; design/KG/SystemArchitecture.json（purpose 收拢 general+audit）"
+        }
+      ]
+    },
+    {
+      "id": "acceptance-guardian-001",
+      "name": "验收看护服务（Acceptance Guardianship）",
+      "type": "Application Service",
+      "parent": "project-overseer-001",
+      "description": "从 ARCHGRAPH HARNESS 使用场景出发，按功能视角对 ARGO MCP 接口层与框架交付件进行持续验收看护。看护驱动器 = tests/acceptance-guardian.test.js（功能注册表单一事实源）：①覆盖完整性——每个 MCP 接口与交付件映射到可执行功能测试文件；②挂载可执行性——本元素挂载的 AT 均为裸 workspace-relative 可执行 acceptanceCriteria（runArchitectureTests 可跑，杜绝 invalid-criteria 回归）；③管道看护——runArchitectureTests 执行器保持处理裸路径。测试文件与 registry：tests/acceptance-guardian.test.js + tests/mcp-interface-behavior.test.js（补 getIntentElementContext / generateArchitectureDiffPlantuml 功能覆盖）+ 各接口既有功能测试。",
+      "attributes": [
+        {
+          "name": "verification_focus",
+          "value": "ARGO MCP 接口功能看护 + 框架交付件功能看护（功能视角，非静态文件）"
+        },
+        {
+          "name": "external_scope",
+          "value": "每个 ARGO MCP 工具接口 + RULE/SKILL/schema/Neo4j 投影/语义生命周期/评测 harness 的外部可观察行为"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-acceptance-guardian-01",
+          "description": "GIVEN ARCHGRAPH HARNESS 验收看护注册表为单一事实源；WHEN 运行看护驱动器 tests/acceptance-guardian.test.js；THEN 每个 ARGO MCP 接口与框架交付件都被可执行功能测试覆盖、图谱挂载 AT 均为裸可执行路径、runArchitectureTests 执行器可处理裸测试路径。",
+          "type": "Acceptance Test",
+          "Input": "tests/acceptance-guardian.test.js",
+          "acceptanceCriteria": "tests/acceptance-guardian.test.js"
+        },
+        {
+          "name": "AT-acceptance-guardian-02",
+          "description": "GIVEN getIntentElementContext 与 generateArchitectureDiffPlantuml 两个曾仅注册未功能覆盖的接口；WHEN 进程内真实调用；THEN getIntentElementContext 对稳定元素返回焦点语义子图、未知元素明确失败，diff 生成器产出时间戳 PlantUML 树文件。",
+          "type": "Acceptance Test",
+          "Input": "tests/mcp-interface-behavior.test.js",
+          "acceptanceCriteria": "tests/mcp-interface-behavior.test.js"
+        },
+        {
+          "name": "AT-acceptance-guardian-03",
+          "description": "GIVEN getSystemArchitecture 工具面契约（query 必填、purpose 收拢 general/audit、全量图谱移除）；WHEN 以外部视角调用工具；THEN 无 query 返回 QUERY_REQUIRED、graph-tidy 与旧内部类别返回 QUERY_PURPOSE_INVALID、保留工具仍在 tools/list。",
+          "type": "Acceptance Test",
+          "Input": "tests/argo-mcp-tools.test.js",
+          "acceptanceCriteria": "tests/argo-mcp-tools.test.js"
+        },
+        {
+          "name": "AT-acceptance-guardian-04",
+          "description": "GIVEN queryNeo4jGraph 只读 Cypher 接口；WHEN 以 schema 模式、写查询、空查询、脏投影恢复等场景调用；THEN schema 模式返回投影 schema、写查询被拒绝、空查询被拒绝、脏投影触发恢复。",
+          "type": "Acceptance Test",
+          "Input": "tests/neo4j-cypher-query.test.js",
+          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js"
+        },
+        {
+          "name": "AT-acceptance-guardian-05",
+          "description": "GIVEN memory_search 语义记忆检索工具；WHEN 以外部视角调用；THEN 工具在工具列表注册、返回紧凑摘要卡片（max_desc_len 默认 800）、无 query 明确失败、结果符合 MCP content 数组契约。",
+          "type": "Acceptance Test",
+          "Input": "tests/semantic-memory-search.test.js",
+          "acceptanceCriteria": "tests/semantic-memory-search.test.js"
+        },
+        {
+          "name": "AT-acceptance-guardian-06",
+          "description": "GIVEN argo-init SKILL 作为框架交付件；WHEN 以功能视角检查其行为；THEN skill 通过 initializeWorkspace MCP 接口驱动确定性初始化且不执行 WORKSPACE 外脚本，buildHarnessReport 供进程内复用。",
+          "type": "Acceptance Test",
+          "Input": "tests/argo-init-interface.test.js",
+          "acceptanceCriteria": "tests/argo-init-interface.test.js"
+        },
+        {
+          "name": "AT-acceptance-guardian-07",
+          "description": "GIVEN RULE 交付件（KG-first/语义优先检索、变更分级、能力委派、内容入 KG）；WHEN 以功能视角验证规则行为语义；THEN 规则文档与测试断言保持既定功能语义。",
+          "type": "Acceptance Test",
+          "Input": "tests/argo-rules-query.test.js",
+          "acceptanceCriteria": "tests/argo-rules-query.test.js"
+        },
+        {
+          "name": "AT-acceptance-guardian-08",
+          "description": "GIVEN getArchitectureViewContext 视图解析接口；WHEN 以已知/未知/含子视图场景调用；THEN 返回视图成员、未知视图明确失败、子视图可按需展开。",
+          "type": "Acceptance Test",
+          "Input": "tests/architecture-view-context.test.js",
+          "acceptanceCriteria": "tests/architecture-view-context.test.js"
+        },
+        {
+          "name": "AT-acceptance-guardian-09",
+          "description": "GIVEN ARGO MCP 写接口族（add/update/remove + preview/apply）；WHEN 以真实图状态执行写与撤销重做；THEN 写入生效、undo/redo 回退到真实文件状态、embedding 生命周期一致。",
+          "type": "Acceptance Test",
+          "Input": "tests/ea-web-service-impl.test.js",
+          "acceptanceCriteria": "tests/ea-web-service-impl.test.js"
+        },
+        {
+          "name": "AT-acceptance-guardian-10",
+          "description": "GIVEN 全局安装的 ARGO MCP 服务器与 validateSystemArchitecture 校验器；WHEN 从仓库外全局安装调用；THEN tools/list 暴露核心工具、getSystemArchitecture 无 query 返回 QUERY_REQUIRED、validateSystemArchitecture 通过。",
+          "type": "Acceptance Test",
+          "Input": "tests/argo-global-install.test.js",
+          "acceptanceCriteria": "tests/argo-global-install.test.js"
         }
       ]
     }
@@ -5669,6 +5762,16 @@
       "included_elements": [
         "self-evolution-sandbox-wp-001",
         "lightrag-baseline-wp-001"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "acceptance-guard-view-001",
+      "view_name": "验收看护（Acceptance Guardianship）",
+      "parent_element_id": "project-overseer-001",
+      "description": "验收看护子视图：从 ARCHGRAPH HARNESS 使用场景出发，按功能视角（非静态文件）对每个 ARGO MCP 接口与框架交付件（RULE/SKILL/schema/Neo4j 投影/语义生命周期/评测 harness）进行持续看护。看护驱动器 tests/acceptance-guardian.test.js 为注册表单一事实源：覆盖完整性 + 挂载 AT 可执行性 + runArchitectureTests 管道。",
+      "included_elements": [
+        "acceptance-guardian-001"
       ],
       "included_relationships": []
     }
