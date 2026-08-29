@@ -4184,6 +4184,11 @@
         {
           "name": "external_scope",
           "value": "每个 ARGO MCP 工具接口 + RULE/SKILL/schema/Neo4j 投影/语义生命周期/评测 harness 的外部可观察行为"
+        },
+        {
+          "name": "commit",
+          "value": "599b9ff",
+          "description": "tests/acceptance-guardian.test.js; tests/mcp-interface-behavior.test.js; design/KG/SystemArchitecture.json（验收看护体系：功能注册表看护驱动器 + 补 getIntentElementContext/generateArchitectureDiffPlantuml 功能覆盖 + 本元素挂载 10 个可执行 AT）"
         }
       ],
       "testcases": [
