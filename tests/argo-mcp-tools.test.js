@@ -39,6 +39,13 @@ test('AT argo-mcp-tools: removed handoff/trace-proposal validators are gone from
   assert.ok(!toolNames.includes('validateTraceProposal'), 'validateTraceProposal must be removed');
 });
 
+test('AT argo-mcp-tools: generateArchitectureDiffPlantuml is removed from tools/list', () => {
+  // GIVEN generateArchitectureDiffPlantuml was removed from the tool surface
+  const toolNames = listTools();
+  // THEN it is no longer advertised to agents (internal module stays, not exposed)
+  assert.ok(!toolNames.includes('generateArchitectureDiffPlantuml'), 'generateArchitectureDiffPlantuml must be removed');
+});
+
 test('AT argo-mcp-tools: kept validators and architecture tools are still advertised', () => {
   const toolNames = listTools();
   // THEN the remaining validators and the full architecture surface are present
@@ -62,7 +69,6 @@ test('AT argo-mcp-tools: kept validators and architecture tools are still advert
     'addArchitectureView',
     'updateArchitectureView',
     'removeArchitectureView',
-    'generateArchitectureDiffPlantuml',
   ]) {
     assert.ok(toolNames.includes(kept), `tool ${kept} must still be advertised`);
   }

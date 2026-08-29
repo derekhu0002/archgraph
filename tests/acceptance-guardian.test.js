@@ -53,7 +53,6 @@ const MCP_INTERFACE_GUARDS = [
   ['applySystemArchitectureMutation', 'tests/ea-web-service-impl.test.js'],
   ['validateSystemArchitecture', 'tests/argo-global-install.test.js'],
   ['runArchitectureTests', 'tests/acceptance-guardian.test.js'],
-  ['generateArchitectureDiffPlantuml', 'tests/mcp-interface-behavior.test.js'],
 ];
 
 // [deliverableLabel, testFile] — core framework deliverable guards.
@@ -108,7 +107,6 @@ test('AT acceptance-guardian: every ARGO MCP interface has a functional guard', 
     'applySystemArchitectureMutation',
     'validateSystemArchitecture',
     'runArchitectureTests',
-    'generateArchitectureDiffPlantuml',
   ];
   const covered = new Set(MCP_INTERFACE_GUARDS.map(([name]) => name));
   // THEN every interface appears in the registry (coverage cannot silently regress)

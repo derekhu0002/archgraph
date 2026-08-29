@@ -59,7 +59,6 @@ const SYSTEM_ARCHITECTURE_TOOL_NAMES = new Set([
   'addArchitectureView',
   'updateArchitectureView',
   'removeArchitectureView',
-  'generateArchitectureDiffPlantuml',
   'queryNeo4jGraph',
   'memory_search',
 ]);
@@ -83,24 +82,6 @@ const TOOLS = [
         architecturePath: {
           type: 'string',
           description: 'Optional architecture graph path relative to workspace root. Default: design/KG/SystemArchitecture.json',
-        },
-      },
-      additionalProperties: false,
-    },
-  },
-  {
-    name: 'generateArchitectureDiffPlantuml',
-    description: 'Generate a timestamped PlantUML Markdown tree for current git diff changes in SystemArchitecture.json. The tool compares HEAD and working tree, extracts changed elements/relationships, and writes to .argo/temp/architecture_analysis/.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        architecturePath: {
-          type: 'string',
-          description: 'Optional architecture graph path relative to workspace root. Default: design/KG/SystemArchitecture.json',
-        },
-        outputDir: {
-          type: 'string',
-          description: 'Optional output directory relative to workspace root. Default: .argo/temp/architecture_analysis',
         },
       },
       additionalProperties: false,

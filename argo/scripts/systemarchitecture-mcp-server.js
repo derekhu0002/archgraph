@@ -126,7 +126,6 @@ const {
   validateArchiMateEndpointMatrix,
   validateViewElementLimits,
 } = require('./graph-semantics.js');
-const architectureDiffPlantuml = require('./generateArchitectureDiffPlantuml.js');
 const {
   createProductionGraphRagRuntime,
 } = require('./graph-rag/productionGraphRagRuntime.js');
@@ -221,24 +220,6 @@ const TOOLS = [
     name: 'getArchitectureViewContext',
     description: 'read-only query that resolves one view by view_id into its complete membership: the view object, every member element (from included_elements), every member relationship (from included_relationships), the parent element, and optionally child sub-views declared by member elements. Resolves ids into full canonical objects instead of returning raw id lists.',
     inputSchema: viewContextInputSchema(),
-  },
-  {
-    name: 'generateArchitectureDiffPlantuml',
-    description: 'Generate a timestamped PlantUML Markdown tree for current git diff changes in SystemArchitecture.json. The tool compares HEAD and working tree, extracts changed elements/relationships, and writes to .argo/temp/architecture_analysis/.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        architecturePath: {
-          type: 'string',
-          description: `Optional architecture graph path relative to workspace root. Default: ${DEFAULT_GRAPH_PATH}`,
-        },
-        outputDir: {
-          type: 'string',
-          description: 'Optional output directory relative to workspace root. Default: .argo/temp/architecture_analysis',
-        },
-      },
-      additionalProperties: false,
-    },
   },
   {
     name: 'previewSystemArchitectureMutation',
@@ -2090,14 +2071,6 @@ async function callTool(name, args = {}, dependencies = undefined) {
   if (name === 'getArchitectureViewContext') {
     const context = await loadContext(args);
     return toolResult(attachContextWarnings(buildViewContext(context, args), context));
-  }
-
-  if (name === 'generateArchitectureDiffPlantuml') {
-    return toolResult(architectureDiffPlantuml.generateArchitectureDiffPlantuml({
-      workspaceRoot: resolveWorkspaceRoot(args),
-      architecturePath: args.architecturePath,
-      outputDir: args.outputDir,
-    }));
   }
 
   if (name === 'previewSystemArchitectureMutation') {
