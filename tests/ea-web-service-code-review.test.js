@@ -52,7 +52,7 @@ test('图谱登记：组件 2760 携带 AT-2760-04（GIVEN-WHEN-THEN、可执行
   assert.match(tc.description, /WHEN/);
   assert.match(tc.description, /THEN/);
   assert.equal(tc.type, 'Acceptance Test');
-  assert.ok(tc.Input && tc.Input.includes('node --test tests/ea-web-service-code-review.test.js'),
+  assert.ok(tc.Input && tc.Input.includes('tests/ea-web-service-code-review.test.js'),
     'AT-2760-04 的 Input 应指向本测试文件');
   assert.ok(tc.acceptanceCriteria && tc.acceptanceCriteria.length > 0, 'acceptanceCriteria 应非空');
 });

@@ -212,9 +212,9 @@ test('ea-web-service-design: new elements carry executable GIVEN-WHEN-THEN testc
       assert.equal(tc.type, 'Acceptance Test', `${id} testcase type should be Acceptance Test`);
       assert.ok(
         tc.Input && (
-          tc.Input.includes('node --test tests/ea-web-service-design.test.js')
-          || tc.Input.includes('node --test tests/ea-web-service-impl.test.js')
-          || tc.Input.includes('node --test tests/ea-web-service-code-review.test.js')
+          tc.Input.includes('tests/ea-web-service-design.test.js')
+          || tc.Input.includes('tests/ea-web-service-impl.test.js')
+          || tc.Input.includes('tests/ea-web-service-code-review.test.js')
         ),
         `${id} testcase Input should be executable`
       );
@@ -237,7 +237,7 @@ test('ea-web-service-design: component carries a testcase asserting the open-sou
   assert.match(tc.description, /THEN/, 'testcase should contain THEN');
   assert.match(tc.description, /G6|Cytoscape/, 'testcase should name G6/Cytoscape');
   assert.equal(tc.type, 'Acceptance Test', 'testcase type should be Acceptance Test');
-  assert.ok(tc.Input && tc.Input.includes('node --test tests/ea-web-service-design.test.js'), 'testcase Input should be executable');
+  assert.ok(tc.Input && tc.Input.includes('tests/ea-web-service-design.test.js'), 'testcase Input should be executable');
 });
 
 test('ea-web-service-design: design doc includes design-stage GIVEN-WHEN-THEN acceptance criteria', () => {

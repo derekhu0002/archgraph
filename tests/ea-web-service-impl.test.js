@@ -361,7 +361,7 @@ test('图谱登记：组件 2760 携带实现验收用例 AT-2760-03', () => {
   assert.match(tc.description, /WHEN/);
   assert.match(tc.description, /THEN/);
   assert.equal(tc.type, 'Acceptance Test');
-  assert.ok(tc.Input && tc.Input.includes('node --test tests/ea-web-service-impl.test.js'), 'AT-2760-03 的 Input 应指向实现测试');
+  assert.ok(tc.Input && tc.Input.includes('tests/ea-web-service-impl.test.js'), 'AT-2760-03 的 Input 应指向实现测试');
 });
 
 test('导入校验：视图 parent_element_id 引用断裂不改动文件', async () => {

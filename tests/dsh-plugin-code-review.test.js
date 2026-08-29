@@ -53,7 +53,7 @@ test('图谱登记：工作包 2767 携带 AT-2767-07（GIVEN-WHEN-THEN、可执
   assert.match(tc.description, /WHEN/);
   assert.match(tc.description, /THEN/);
   assert.equal(tc.type, 'Acceptance Test');
-  assert.ok(tc.Input && tc.Input.includes('node tests/dsh-plugin-code-review.test.js'),
+  assert.ok(tc.Input && tc.Input.includes('tests/dsh-plugin-code-review.test.js'),
     'AT-2767-07 的 Input 应指向本测试文件');
   assert.ok(tc.acceptanceCriteria && tc.acceptanceCriteria.length > 0, 'acceptanceCriteria 应非空');
 });

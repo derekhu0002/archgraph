@@ -12,3 +12,7 @@ sandbox/dist/
 results/sandbox-report.json
 results/agent-eval.log
 results/agent-eval-lightrag.log
+
+# AT refresh generated artifacts
+scripts/at-inventory-report.txt
+scripts/at-refresh-plan.json

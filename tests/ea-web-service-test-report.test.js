@@ -49,5 +49,5 @@ test('图谱登记：Work Package 2758 携带验收用例 AT-2758-13', () => {
   assert.match(tc.description, /WHEN/);
   assert.match(tc.description, /THEN/);
   assert.equal(tc.type, 'Acceptance Test');
-  assert.ok(tc.Input && tc.Input.includes('node --test tests/ea-web-service-test-report.test.js'), 'AT-2758-13 的 Input 应指向本测试');
+  assert.ok(tc.Input && tc.Input.includes('tests/ea-web-service-test-report.test.js'), 'AT-2758-13 的 Input 应指向本测试');
 });
