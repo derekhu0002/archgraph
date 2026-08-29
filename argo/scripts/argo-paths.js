@@ -1,4 +1,5 @@
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const { fileURLToPath } = require('node:url');
 
@@ -107,6 +108,15 @@ function resolveWorkspacePath(...segments) {
 function getArgoEnvPath() {
   if (process.env.ARGO_ENV_FILE && String(process.env.ARGO_ENV_FILE).trim() !== '') {
     return path.resolve(process.env.ARGO_ENV_FILE);
+  }
+
+  // Prefer the global clean env (<user-home>/.argo/.env) when present, so a
+  // workspace-local env file (which may carry non-whitelisted keys, e.g.
+  // repo argo/.env with DEEPSEEK_* that fails the secret-ACL) never shadows the
+  // sanctioned global configuration for semantic/embedding lifecycle.
+  const homeEnvPath = path.join(os.homedir(), '.argo', '.env');
+  if (fs.existsSync(homeEnvPath)) {
+    return homeEnvPath;
   }
 
   const globalPath = path.join(getArgoRoot(), '.env');
