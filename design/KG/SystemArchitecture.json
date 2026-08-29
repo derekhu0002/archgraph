@@ -3308,8 +3308,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "0170f95",
-          "description": "sandbox/navigation-agent-eval.js; tests/navigation-agent-eval.test.js; results/navigation-agent-report.json; results/navigation-agent-raw/（20 条原始 AGENT 会话 NDJSON）; design/KG/SystemArchitecture.json（完整 ArchGraph AGENT 导航评测 20/20，原始会话入结果包，生产图 165 元素/40 视图）"
+          "value": "a90abcf",
+          "description": "sandbox/navigation-agent-eval.js（修复：callTool 未定义 bug / byDimension 7 维 / purpose general / dataset 文案）; tests/navigation-agent-eval.test.js; results/navigation-agent-report.json + results/navigation-agent-raw/（完整 AGENT 导航评测 28/28，7 维度：定位 5/5 可达 5/5 视角切换 5/5 边界 5/5 验收 3/3 登记 2/2 影响 3/3，生产图 168 元素/41 视图，原始会话 28 条入包可回放）"
         },
         {
           "name": "deliveryStatus",
