@@ -2985,6 +2985,11 @@
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "commit",
+          "value": "ea4a80d",
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/validator-mcp-server.js; tests/argo-mcp-tools.test.js; design/KG/SystemArchitecture.json（工具面精简第 1 步：移除 validateStageHandoff/validateTraceProposal 两个校验工具，保留 validateSystemArchitecture/runArchitectureTests）"
         }
       ]
     },
