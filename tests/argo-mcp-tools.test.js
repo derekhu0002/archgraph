@@ -67,3 +67,41 @@ test('AT argo-mcp-tools: kept validators and architecture tools are still advert
     assert.ok(toolNames.includes(kept), `tool ${kept} must still be advertised`);
   }
 });
+
+function callToolOnce(name, callArguments) {
+  const input = [
+    { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'argo-mcp-tools-test', version: '1' } } },
+    { jsonrpc: '2.0', method: 'notifications/initialized', params: {} },
+    { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name, arguments: callArguments } },
+  ].map(r => JSON.stringify(r)).join('\n') + '\n';
+  const result = spawnSync(process.execPath, [SERVER], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    env: { ...process.env, ARGO_REPO_ROOT: ROOT },
+    input,
+    maxBuffer: 20 * 1024 * 1024,
+  });
+  assert.equal(result.status, 0, `server exited ${result.status}: ${String(result.stderr || '').slice(0, 500)}`);
+  const responses = String(result.stdout || '').split(/\r?\n/).filter(Boolean).map(line => JSON.parse(line));
+  const call = responses.find(r => r && r.id === 2);
+  assert.ok(call && call.result, 'tools/call must respond');
+  return JSON.parse(call.result.content[0].text);
+}
+
+test('AT argo-mcp-tools: getSystemArchitecture requires a query (no full-graph snapshot)', () => {
+  // GIVEN the getSystemArchitecture tool no longer exposes an omitted-query full snapshot
+  // WHEN called with no query
+  const payload = callToolOnce('getSystemArchitecture', {});
+  // THEN it is rejected with QUERY_REQUIRED instead of returning the whole document
+  assert.equal(payload.status, 'failed');
+  assert.equal(payload.error && payload.error.category, 'QUERY_REQUIRED');
+});
+
+test('AT argo-mcp-tools: graph-tidy purpose is rejected (no full-snapshot bypass)', () => {
+  // GIVEN graph-tidy was removed from the legal purpose enum
+  // WHEN a graph-tidy query is submitted
+  const payload = callToolOnce('getSystemArchitecture', { query: { purpose: 'graph-tidy', intent: 'x' } });
+  // THEN it is rejected as an invalid purpose
+  assert.equal(payload.status, 'failed');
+  assert.equal(payload.error && payload.error.category, 'QUERY_PURPOSE_INVALID');
+});
