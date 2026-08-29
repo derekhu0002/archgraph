@@ -45,8 +45,6 @@ const WINDOWS_RESERVED_NAMES = new Set([
 
 const VALIDATOR_TOOL_NAMES = new Set([
   'validateSystemArchitecture',
-  'validateStageHandoff',
-  'validateTraceProposal',
   'runArchitectureTests',
 ]);
 const SYSTEM_ARCHITECTURE_TOOL_NAMES = new Set([
@@ -76,35 +74,6 @@ const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {},
-      additionalProperties: false,
-    },
-  },
-  {
-    name: 'validateStageHandoff',
-    description: 'Validate Argo stage handoff JSON. Use stage intent-to-implementation or implementation-to-coding, or omit to validate all supported stages.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        stage: {
-          type: 'string',
-          enum: ['intent-to-implementation', 'implementation-to-coding'],
-          description: 'Optional handoff stage to validate.',
-        },
-      },
-      additionalProperties: false,
-    },
-  },
-  {
-    name: 'validateTraceProposal',
-    description: 'Validate ImplementationToIntentTraceProposal JSON against .argo/schema/ImplementationToIntentTraceProposal.schema.json and repository path references.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        proposalPath: {
-          type: 'string',
-          description: 'Optional proposal path relative to workspace root. Default: design/KG/ImplementationToIntentTraceProposal.json',
-        },
-      },
       additionalProperties: false,
     },
   },

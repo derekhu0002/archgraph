@@ -12,19 +12,11 @@ const {
   resolveCallWorkspaceRoot,
 } = require('./argo-paths.js');
 
-const HANDOFF_STAGES = ['intent-to-implementation', 'implementation-to-coding'];
-const DEFAULT_TRACE_PROPOSAL_PATH = 'design/KG/ImplementationToIntentTraceProposal.json';
 const DEFAULT_ARCHITECTURE_GRAPH_PATH = 'design/KG/SystemArchitecture.json';
 
 const SCRIPT_CANDIDATES = {
   validateSystemArchitecture: [
     'scripts/validateSystemArchitecture.js',
-  ],
-  validateStageHandoff: [
-    'scripts/validateStageHandoff.js',
-  ],
-  validateTraceProposal: [
-    'scripts/validateTraceProposal.js',
   ],
   runArchitectureTests: [
     'scripts/runArchitectureTests.js',
@@ -38,35 +30,6 @@ const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {},
-      additionalProperties: false,
-    },
-  },
-  {
-    name: 'validateStageHandoff',
-    description: 'Validate Argo stage handoff JSON. Use stage intent-to-implementation or implementation-to-coding, or omit to validate all supported stages.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        stage: {
-          type: 'string',
-          enum: HANDOFF_STAGES,
-          description: 'Optional handoff stage to validate.',
-        },
-      },
-      additionalProperties: false,
-    },
-  },
-  {
-    name: 'validateTraceProposal',
-    description: 'Validate ImplementationToIntentTraceProposal JSON against .argo/schema/ImplementationToIntentTraceProposal.schema.json and repository path references.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        proposalPath: {
-          type: 'string',
-          description: `Optional proposal path relative to workspace root. Default: ${DEFAULT_TRACE_PROPOSAL_PATH}`,
-        },
-      },
       additionalProperties: false,
     },
   },
@@ -255,19 +218,6 @@ async function callTool(name, args, progressToken = null) {
 
   if (name === 'validateSystemArchitecture') {
     return toolResult(await runValidatorScript(workspaceRoot, 'validateSystemArchitecture'));
-  }
-
-  if (name === 'validateStageHandoff') {
-    const stage = args && args.stage;
-    if (stage && !HANDOFF_STAGES.includes(stage)) {
-      throw new Error(`Unsupported handoff stage '${stage}'. Expected one of: ${HANDOFF_STAGES.join(', ')}`);
-    }
-    return toolResult(await runValidatorScript(workspaceRoot, 'validateStageHandoff', stage ? [stage] : []));
-  }
-
-  if (name === 'validateTraceProposal') {
-    const proposalPath = (args && args.proposalPath) || DEFAULT_TRACE_PROPOSAL_PATH;
-    return toolResult(await runValidatorScript(workspaceRoot, 'validateTraceProposal', [proposalPath]));
   }
 
   if (name === 'runArchitectureTests') {
