@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "seedId": "archgraph-navigation-seed",
   "name": "ArchGraph 导航能力评测集",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "archived",
   "source": "docs/navigation-eval-dataset.md",
   "description": "「给 AGENT 一张以 ArchiMate 为 schema 的导航地图」愿景下的导航能力可执行评测集 SEED v1：4 维度（定位/可达/视角切换/边界内导航）×5 = 20 题（NV-01..20）。每题含 GIVEN/WHEN/THEN 三件套、检索提示、判定目标（id/names）、可执行检索序列（含 pick 多跳）与判定要求。作为后续持续维护/扩展的单一事实源：加题/改题只改本 SEED 并升版本，harness 与测试统一消费。",
@@ -36,7 +36,7 @@
       "given": "项目愿景元素是长期记忆系统的北极星",
       "when": "语义检索「项目愿景 为 AGENT 提供长期记忆系统」",
       "then": "命中元素 overseer-vision-001「项目愿景：为 AGENT 提供长期记忆系统」",
-      "retrievalHint": "getSystemArchitecture purpose=intent-decision intent=「项目愿景为 AGENT 提供长期记忆系统」",
+      "retrievalHint": "getSystemArchitecture purpose=general intent=「项目愿景为 AGENT 提供长期记忆系统」",
       "target": { "kind": "element", "id": "overseer-vision-001", "names": ["项目愿景"] },
       "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "overseer-vision-001" } }],
       "requirements": [{ "step": 0, "type": "contains", "values": ["overseer-vision-001", "项目愿景：为 AGENT 提供长期记忆系统"] }]
@@ -78,7 +78,7 @@
       "given": "愿景三要素被 ArchiMate 定位为「分类编目规则」",
       "when": "语义检索「ArchiMate 在长期记忆中的定位」",
       "then": "命中元素 overseer-archimate-role-001",
-      "retrievalHint": "getSystemArchitecture purpose=intent-decision intent=「ArchiMate 在长期记忆系统愿景中的定位」",
+      "retrievalHint": "getSystemArchitecture purpose=general intent=「ArchiMate 在长期记忆系统愿景中的定位」",
       "target": { "kind": "element", "id": "overseer-archimate-role-001", "names": ["overseer-archimate-role-001"] },
       "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "overseer-archimate-role-001" } }],
       "requirements": [{ "step": 0, "type": "contains", "values": ["overseer-archimate-role-001"] }]
