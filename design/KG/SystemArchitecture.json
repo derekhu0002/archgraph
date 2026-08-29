@@ -4145,12 +4145,17 @@
         {
           "name": "commit",
           "value": "599b9ff",
-          "description": "tests/acceptance-guardian.test.js; tests/mcp-interface-behavior.test.js; design/KG/SystemArchitecture.json（验收看护体系建立：功能注册表看护驱动器 + 补弱覆盖接口功能测试 + 本元素挂载 10 个可执行 AT）"
+          "description": "tests/acceptance-guardian.test.js; tests/mcp-interface-behavior.test.js; design/KG/SystemArchitecture.json（验收看护体系建立）"
         },
         {
           "name": "commit",
           "value": "1e97304",
-          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; tests/argo-mcp-tools.test.js; tests/acceptance-guardian.test.js; tests/mcp-interface-behavior.test.js; design/KG/SystemArchitecture.json（工具面精简：移除 generateArchitectureDiffPlantuml，内部模块保留不暴露；看护注册表与 AT-02 同步更新）"
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; tests/*; design/KG/SystemArchitecture.json（移除 generateArchitectureDiffPlantuml 工具面）"
+        },
+        {
+          "name": "commit",
+          "value": "cc1911b",
+          "description": "design/KG/SystemArchitecture.json（全量刷新挂载 AT：54 元素 112 描述性 acceptanceCriteria → 裸可执行路径；移除 6 个内部视角/冗余 AT（AT-2100-01..05 EA 导入白盒 + AT-2767-06）；挂载 AT 137/137 可执行）+ scripts/at-inventory|at-refresh-plan|at-refresh-apply + tests/* 断言同步"
         }
       ],
       "testcases": [
