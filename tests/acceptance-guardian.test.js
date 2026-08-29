@@ -115,19 +115,23 @@ test('AT acceptance-guardian: every ARGO MCP interface has a functional guard', 
   }
 });
 
-test('AT acceptance-guardian: graph-mounted guardian ATs are executable bare paths', () => {
-  // GIVEN the acceptance-guardian element is mounted in the intent graph
+test('AT acceptance-guardian: every graph-mounted AT is an executable bare path', () => {
+  // GIVEN the intent graph carries mounted acceptance testcases (user-view, merged per control point)
   const graph = JSON.parse(fs.readFileSync(GRAPH_PATH, 'utf8'));
+  const mounted = (graph.elements || []).filter(el => Array.isArray(el.testcases) && el.testcases.length > 0);
+  assert.ok(mounted.length > 0, 'intent graph must carry mounted AT testcases');
+  // THEN the acceptance-guardian element is mounted and every mounted AT has a bare
+  //     workspace-relative acceptanceCriteria that resolves to an existing file
   const guardian = (graph.elements || []).find(el => el.id === GUARDIAN_ELEMENT_ID);
-  assert.ok(guardian, `guardian element ${GUARDIAN_ELEMENT_ID} must be mounted in the intent graph`);
-  const testcases = Array.isArray(guardian.testcases) ? guardian.testcases : [];
-  assert.ok(testcases.length > 0, 'guardian element must carry executable AT testcases');
-  // THEN each mounted AT has a bare workspace-relative acceptanceCriteria that exists
-  for (const tc of testcases) {
-    assert.ok(typeof tc.acceptanceCriteria === 'string' && tc.acceptanceCriteria.trim() !== '',
-      `${tc.id || tc.name}: acceptanceCriteria must be a bare test path`);
-    const resolved = path.join(ROOT, ...tc.acceptanceCriteria.split('/'));
-    assert.ok(fs.existsSync(resolved), `${tc.id || tc.name}: mounted criteria ${tc.acceptanceCriteria} must exist`);
+  assert.ok(guardian && Array.isArray(guardian.testcases) && guardian.testcases.length > 0,
+    `guardian element ${GUARDIAN_ELEMENT_ID} must be mounted with executable ATs`);
+  for (const el of mounted) {
+    for (const tc of el.testcases) {
+      assert.ok(typeof tc.acceptanceCriteria === 'string' && tc.acceptanceCriteria.trim() !== '',
+        `${el.id} ${tc.name}: acceptanceCriteria must be a bare test path`);
+      const resolved = path.join(ROOT, ...tc.acceptanceCriteria.split('/'));
+      assert.ok(fs.existsSync(resolved), `${el.id} ${tc.name}: mounted criteria ${tc.acceptanceCriteria} must exist`);
+    }
   }
 });
 

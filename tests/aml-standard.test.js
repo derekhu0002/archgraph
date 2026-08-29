@@ -50,10 +50,6 @@ test('aml-standard: three active workstream Work Packages hang under the AML sta
     assert.ok(wp, `graph should contain Work Package "${name}"`);
     assert.equal(wp.type, 'Work Package', `${name} should be a Work Package`);
     assert.equal(wp.parent, aml.id, `${name} should hang under AML 规范`);
-    assert.ok(
-      Array.isArray(wp.testcases) && wp.testcases.length >= 1,
-      `${name} should carry at least one acceptance testcase`
-    );
   }
 
   const removed = ['建立AML一致性测试套件', '构建下游厂商生态'];

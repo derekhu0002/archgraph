@@ -120,8 +120,8 @@
       ],
       "testcases": [
         {
-          "name": "AT-1311-01-网站首页可浏览",
-          "description": "GIVEN 项目首页已创建并发布；WHEN 访客在浏览器打开网站首页；THEN 页面完整呈现项目定位与内容（含导航栏、Hero 区与项目名）。",
+          "name": "AT-website-01",
+          "description": "GIVEN 网站已创建并发布；WHEN 用户在浏览器打开首页；THEN 页面完整呈现项目定位与内容（导航/Hero/section），且 KGlibrary 参考库、安装部署、OpenClaw 支持、洞察报告子页等用户可见区块齐备。",
           "type": "Acceptance Test",
           "Input": "tests/website.test.js",
           "acceptanceCriteria": "tests/website.test.js"
@@ -159,22 +159,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1317-01-科技简洁布局风格",
-          "description": "GIVEN 网站已发布；WHEN 访客在浏览器打开网站首页；THEN 页面以科技简洁布局呈现：顶部导航栏、首屏 Hero（项目名+标语+行动按钮）、正文分节卡片化、浅色科技主题。",
-          "type": "Acceptance Test",
-          "Input": "tests/website.test.js",
-          "acceptanceCriteria": "tests/website.test.js"
-        },
-        {
-          "name": "AT-1317-02-KGlibrary参考库区域",
-          "description": "GIVEN KGlibrary 目录下存在参考项目（当前为 XKG-TEST 与 GPT-Research）；WHEN 访客打开 Reference Library 页面 docs/kglibrary.html；THEN 页面存在 KGlibrary 区域，列出每个参考项目的名称、简介与仓库链接。",
-          "type": "Acceptance Test",
-          "Input": "tests/website.test.js",
-          "acceptanceCriteria": "tests/website.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1318",
@@ -273,18 +258,11 @@
       ],
       "testcases": [
         {
-          "name": "AT-1318-01-自定义域名访问",
-          "description": "GIVEN 已在 DNS 提供商为 archgraph.org 配置指向 GitHub Pages 的 A 记录（185.199.108.153 / 185.199.109.153 / 185.199.110.153 / 185.199.111.153），且仓库发布源根目录含 CNAME 文件（内容 archgraph.org）；WHEN 访客通过 https://archgraph.org/ 访问网站；THEN 返回与 https://derekhu0002.github.io/archgraph/ 相同的 ArchGraph 项目主页内容。",
+          "name": "AT-custom-domain-01",
+          "description": "GIVEN DNS 与 CNAME 已配置；WHEN 用户访问自定义域名；THEN 返回与 GitHub Pages 相同的 ArchGraph 主页。",
           "type": "Acceptance Test",
           "Input": "tests/custom-domain.test.js",
           "acceptanceCriteria": "tests/custom-domain.test.js"
-        },
-        {
-          "name": "AT-1318-04-主页顶部展示安装部署",
-          "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 访客打开主页；THEN What is this 之后紧跟 Install 部署小节：仅含 npm install -g archgraph-argo 与 argo-deploy 两条命令，并一句话说明语义查询需要 Neo4j 与向量引擎。",
-          "type": "Acceptance Test",
-          "Input": "tests/website.test.js",
-          "acceptanceCriteria": "tests/website.test.js"
         }
       ]
     },
@@ -397,22 +375,8 @@
       ],
       "testcases": [
         {
-          "name": "AT-1321-01-README精简对外形态",
-          "description": "GIVEN README 已精简为对外简洁形态；WHEN 读者打开 README.md；THEN What is this? 章节以主页一致的口径说明统一语言目标（unified language / one model / single view），How to use 章节以用户视角说明编码代理工作流，Install 章节文档化 npm 部署方式，且已移除内部细节章节（Core principles、Repository map、ARGO MCP harness、KGlibrary reference library、Tests、Requirements）。",
-          "type": "Acceptance Test",
-          "Input": "tests/readme.test.js",
-          "acceptanceCriteria": "tests/readme.test.js"
-        },
-        {
-          "name": "AT-1321-02-README文档化npm安装部署",
-          "description": "GIVEN ARGO 工具链已发布为 npm 包（archgraph-argo）；WHEN 读者打开 README.md 的 Install 章节；THEN 以最简方式文档化 npm install -g archgraph-argo 与 argo-deploy 的部署方式，并一句话说明语义查询需要 Neo4j 与向量引擎。",
-          "type": "Acceptance Test",
-          "Input": "tests/readme.test.js",
-          "acceptanceCriteria": "tests/readme.test.js"
-        },
-        {
-          "name": "AT-1321-03-README文档化OpenClaw支持",
-          "description": "GIVEN ArchGraph 已适配 OpenClaw（WP 2780 完成）；WHEN 读者打开 README.md 的 Supported Harnesses 章节；THEN 该章节列出 OpenClaw，并在 Install 说明中提及 argo-deploy 也会注册到 OpenClaw。",
+          "name": "AT-readme-01",
+          "description": "GIVEN README 已维护；WHEN 用户阅读 README；THEN 能看到项目定位（unified language/one model/single view）、How to use、Install（npm install -g archgraph-argo/argo-deploy/Neo4j/vector engine）与 Supported Harnesses（OpenClaw）。",
           "type": "Acceptance Test",
           "Input": "tests/readme.test.js",
           "acceptanceCriteria": "tests/readme.test.js"
@@ -447,8 +411,8 @@
       ],
       "testcases": [
         {
-          "name": "AT-1330-01-全局架构图插入README",
-          "description": "GIVEN 项目 README 需要呈现 graph-driven agentic engineering 的全局架构；WHEN 读者打开 README 的 Architecture 章节；THEN README 内嵌一张 Layered Viewpoint 架构图，图中表达 人类(Human)、AGENT、ARGO MCP、graph、ArchiMate 3.2、EA(Enterprise Architect)、Neo4j 之间的关系。",
+          "name": "AT-arch-diagram-01",
+          "description": "GIVEN 架构图已绘制；WHEN 用户查看 README 与主页；THEN 全局架构图与核心模型图被引用且文件存在。",
           "type": "Acceptance Test",
           "Input": "tests/architecture-diagram.test.js",
           "acceptanceCriteria": "tests/architecture-diagram.test.js"
@@ -523,22 +487,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1332-01-主页与README同步",
-          "description": "GIVEN README 已包含 How to use（用户工作流）章节；WHEN 访客在浏览器打开网站首页；THEN 首页同步展示 How to use 内容（ArchiMate 3.2、coding agent 工作流与 single source of truth），且页面顺序为 What is this → Install → How to use。",
-          "type": "Acceptance Test",
-          "Input": "tests/website.test.js",
-          "acceptanceCriteria": "tests/website.test.js"
-        },
-        {
-          "name": "AT-1332-02-主页文档化OpenClaw支持",
-          "description": "GIVEN ArchGraph 已适配 OpenClaw（WP 2780 完成）；WHEN 访客打开网站首页；THEN 首页 Install 章节提及 OpenClaw 支持。",
-          "type": "Acceptance Test",
-          "Input": "tests/website.test.js",
-          "acceptanceCriteria": "tests/website.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1333",
@@ -583,15 +532,8 @@
       ],
       "testcases": [
         {
-          "name": "AT-1333-01-编程语言规范文档",
-          "description": "GIVEN 仓库已建立基于知识图谱的记忆系统（schema 见 .argo/schema/SystemArchitecture.schema.json）；WHEN 读者打开 docs/agent-programming-language.md；THEN 文档以技术规范形式定义 Agent 编程词汇表（元素类型→编程语义）与语法（关系类型→语法语义），并包含验收断言（testcases GIVEN-WHEN-THEN）与持久化元素/运行时实例边界。",
-          "type": "Acceptance Test",
-          "Input": "tests/agent-programming-language.test.js",
-          "acceptanceCriteria": "tests/agent-programming-language.test.js"
-        },
-        {
-          "name": "AT-1333-02-规范HTML正式版",
-          "description": "GIVEN 技术规范文档 docs/agent-programming-language.md 已存在；WHEN 读者打开英文正式 HTML 页面 docs/agent-programming-language.html；THEN 页面以正式规范风格（英文）呈现：声明版本/状态、摘要、目录，并包含 Scope and Extensions、Extended Elements、Extended Structures、Compliance and Extension Process 等章节。",
+          "name": "AT-apl-01",
+          "description": "GIVEN APL 规范已编写；WHEN 用户阅读规范文档或 HTML 正式版；THEN 文档与 HTML 均存在且包含词汇/语法/验收/持久化等关键内容。",
           "type": "Acceptance Test",
           "Input": "tests/agent-programming-language.test.js",
           "acceptanceCriteria": "tests/agent-programming-language.test.js"
@@ -684,22 +626,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1351-01-洞察报告归档docs",
-          "description": "GIVEN 业界洞察报告已完成；WHEN 读者访问 docs/ 目录；THEN 报告以 Markdown 归档于 docs/industry-insight-graph-driven-agent.md，包含研究背景、核心技术、主流框架、实证数据与引用来源。",
-          "type": "Acceptance Test",
-          "Input": "tests/website.test.js",
-          "acceptanceCriteria": "tests/website.test.js"
-        },
-        {
-          "name": "AT-1351-02-洞察报告网站子页",
-          "description": "GIVEN 洞察报告已归档；WHEN 访客从网站首页导航点击 Insights 链接；THEN 打开独立洞察列表页 docs/insights.html，列表页链接到洞察报告子页 docs/industry-insight-graph-driven-agent.html（呈现报告全文）。",
-          "type": "Acceptance Test",
-          "Input": "tests/website.test.js",
-          "acceptanceCriteria": "tests/website.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1352",
@@ -745,8 +672,8 @@
       ],
       "testcases": [
         {
-          "name": "AT-1352-01-公众号文章就绪",
-          "description": "GIVEN 洞察报告已归档；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号文章 Markdown，且正文包含报告内容。",
+          "name": "AT-wechat-article-01",
+          "description": "GIVEN 公众号文章已撰写；WHEN 用户在公众号阅读；THEN 文章 Markdown 就绪（frontmatter title/author/digest + 主题封面），可进入发布流程。",
           "type": "Acceptance Test",
           "Input": "tests/wechat-article.test.js",
           "acceptanceCriteria": "tests/wechat-article.test.js"
@@ -781,8 +708,8 @@
       ],
       "testcases": [
         {
-          "name": "AT-1353-01-项目品牌名统一为ArchGraph",
-          "description": "GIVEN 项目品牌名确定为 ArchGraph；WHEN 读者访问 README、网站首页与 docs 洞察报告文档；THEN 对外文案统一使用新名字 ArchGraph（完整名 ArchGraph Framework），不再出现旧名 open_knowledge_graph_engineering，且主页 GitHub 链接指向 archgraph 仓库。",
+          "name": "AT-project-name-01",
+          "description": "GIVEN 项目已改名 ArchGraph；WHEN 用户浏览 README/主页/文档；THEN 品牌名统一为 ArchGraph 且不含旧名。",
           "type": "Acceptance Test",
           "Input": "tests/project-name.test.js",
           "acceptanceCriteria": "tests/project-name.test.js"
@@ -821,8 +748,8 @@
       ],
       "testcases": [
         {
-          "name": "AT-1354-01-AML规范已建模",
-          "description": "GIVEN 仓库已有 AML 规范文档（docs/agent-programming-language.md，v0.1）并将 AML 标准化为一等架构元素；WHEN 读者查看意图图谱；THEN 图谱包含 AML 规范（Contract）元素，其下挂载三条标准化工作主线 Work Package（语言规范、参考实现、上游消费者体验），每个 Work Package 均带 GIVEN-WHEN-THEN 验收用例。",
+          "name": "AT-aml-01",
+          "description": "GIVEN AML 规范已制定；WHEN 用户阅读规范并查看图谱；THEN 规范文档声明 v0.1 与 ArchiMate 3.2 扩展，且图谱已建模 AML 规范 Contract。",
           "type": "Acceptance Test",
           "Input": "tests/aml-standard.test.js",
           "acceptanceCriteria": "tests/aml-standard.test.js"
@@ -854,15 +781,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1355-01-AML语言规范正式化",
-          "description": "GIVEN AML v0.1 草案已存在；WHEN 完成语言规范正式化；THEN 存在带版本号的 AML 规范文档，定义词汇、语法、语义与交换格式，并声明与 ArchiMate 3.2 的扩展关系。",
-          "type": "Acceptance Test",
-          "Input": "tests/aml-standard.test.js",
-          "acceptanceCriteria": "tests/aml-standard.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1357",
@@ -945,57 +864,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1357-01-AML参考实现",
-          "description": "GIVEN AML 规范已定义；WHEN 消费者或厂商需要参考实现；THEN ARGO harness 提供可运行的 MCP server、schema 校验器与 Graph RAG 生命周期实现。",
-          "type": "Acceptance Test",
-          "Input": "tests/aml-standard.test.js",
-          "acceptanceCriteria": "tests/aml-standard.test.js"
-        },
-        {
-          "name": "AT-1357-02-ARGO全局安装可运行",
-          "description": "GIVEN .argo 工具链被复制到仓库外的全局目录（如用户目录）；WHEN 以 ARGO_REPO_ROOT 指向当前仓库并启动全局安装的 .argo/scripts/argo-mcp-server.js；THEN MCP server 能完成 initialize 与 tools/list，且 validateSystemArchitecture 与 getSystemArchitecture 工具调用均通过（脚本与 schema 从安装目录解析，workspace 从 ARGO_REPO_ROOT 解析）。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-global-install.test.js",
-          "acceptanceCriteria": "tests/argo-global-install.test.js"
-        },
-        {
-          "name": "AT-1357-03-WorkspaceBootstrap拷贝默认文件",
-          "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）在非 --check-only 模式运行于缺少 design/KG/SystemArchitecture.json 与 .feap 模板的工作区；WHEN 执行初始化脚本；THEN 自动从部署的 defaults 拷贝 design/KG/SystemArchitecture.json，并以当前项目名拷贝 defaults/EA-model-template.feap 为 <项目名>.feap；--check-only 模式不修改工作区。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-workspace-bootstrap.test.js",
-          "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js"
-        },
-        {
-          "name": "AT-1357-04-按视图ID解析视图完整成员",
-          "description": "GIVEN ARGO MCP 提供只读意图架构查询工具；WHEN 调用 getArchitectureViewContext 并传入 view_id；THEN 返回该视图对象、其 included_elements 解析出的完整元素、included_relationships 解析出的完整关系、父元素与可选子视图；传入不存在的 view_id 时返回失败。",
-          "type": "Acceptance Test",
-          "Input": "tests/architecture-view-context.test.js",
-          "acceptanceCriteria": "tests/architecture-view-context.test.js"
-        },
-        {
-          "name": "AT-1357-05-视图写入同步subdiagram_views",
-          "description": "GIVEN ARGO MCP 提供 addArchitectureView / updateArchitectureView / removeArchitectureView 视图写入口；WHEN 写入带 parent_element_id 的子视图、改挂父元素、改名或删除子视图；THEN 父元素 subdiagram_views 与视图 parent_element_id 保持双向一致（新增挂载、改挂同步、改名同步、删除清理）。",
-          "type": "Acceptance Test",
-          "Input": "tests/architecture-view-mutation.test.js",
-          "acceptanceCriteria": "tests/architecture-view-mutation.test.js"
-        },
-        {
-          "name": "AT-1357-06-init回填subdiagram_views",
-          "description": "GIVEN argo init（ensureArgoHarnessEnvironment.js）运行于图谱存在但父元素 subdiagram_views 与视图 parent_element_id 不一致的工作区；WHEN 执行 prepare-and-check 模式；THEN 自动回填父元素 subdiagram_views（直接写文件并留 .bak）；--check-only 模式只报告差异不改写；校验失败时跳过回填。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-subdiagram-repair.test.js",
-          "acceptanceCriteria": "tests/argo-subdiagram-repair.test.js"
-        },
-        {
-          "name": "AT-1357-07-元素关系写入同步与删除保护",
-          "description": "GIVEN ARGO MCP 提供 add/update/remove element·relationship 写入口；WHEN 新增元素声明 subdiagram_views、更新元素 subdiagram_views、删除含子视图的元素、或改/删关系的端点；THEN 元素与视图的父子挂载双向一致，删除含子视图的元素被拒绝，关系端点从视图 included_elements 中同步清理（被其它关系共享的端点保留）。",
-          "type": "Acceptance Test",
-          "Input": "tests/architecture-element-mutation.test.js",
-          "acceptanceCriteria": "tests/architecture-element-mutation.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1358",
@@ -1013,15 +882,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1358-01-上游消费者一次建模多处运行",
-          "description": "GIVEN 消费者已用 AML 描述其 harness；WHEN 需要切换或同时使用多个 agent 宿主；THEN 从同一份 AML 生成各宿主配置，无需重写意图与规则。",
-          "type": "Acceptance Test",
-          "Input": "tests/aml-standard.test.js",
-          "acceptanceCriteria": "tests/aml-standard.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1360",
@@ -1044,15 +905,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1360-01-GPTResearch信息归档并同步主页",
-          "description": "GIVEN KGlibrary/GPT-Research 目录下存在 GPT-Researcher 多 Agent 研究流程模型；WHEN 补充 info.md 并同步网站主页；THEN 存在 KGlibrary/GPT-Research/info.md（YAML frontmatter 含 name/description/repo），且 index.html 的 #kglibrary 区域列出该项目的 name、repo 与 description。",
-          "type": "Acceptance Test",
-          "Input": "tests/website.test.js",
-          "acceptanceCriteria": "tests/website.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1361",
@@ -1086,57 +939,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1361-01-部署脚本可运行",
-          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 与非交互方式运行到临时目录；THEN 生成 schema/SystemArchitecture.schema.json、scripts/argo-mcp-server.js、defaults/design/KG/SystemArchitecture.json、defaults/EA-model-template.feap、skills/argo-init/SKILL.md、prompts/archgraph.instructions.md 与 package.json（含 neo4j-driver 依赖），并写入 VS Code mcp.json、Cursor mcp.json 与 OpenCode opencode.json 注册 argo MCP server，且不部署 temp 与 .env。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
-        },
-        {
-          "name": "AT-1361-02-全局server动态发现工作区",
-          "description": "GIVEN argo MCP server 已部署到 ~/.argo 且 mcp.json/opencode.json 不含 cwd/env；WHEN VS Code、Cursor 或 OpenCode 启动 server、完成 initialize/initialized 后 server 发送 roots/list 请求，客户端返回当前工作区 roots（Cursor 支持 MCP roots；OpenCode 声明 roots 并响应，且默认以项目目录为 cwd 启动）；THEN 工作区相关的 tools/call 以该工作区为 workspaceRoot 解析 design/KG/SystemArchitecture.json 并通过验证（而非 home 目录）。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-global-install.test.js",
-          "acceptanceCriteria": "tests/argo-global-install.test.js"
-        },
-        {
-          "name": "AT-1361-03-默认模板随包部署",
-          "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署到 ~/.argo；THEN 部署目录包含 defaults/design/KG/SystemArchitecture.json 与 defaults/EA-model-template.feap，且 package.json files 包含 argo/defaults。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
-        },
-        {
-          "name": "AT-1361-04-已存在的env值跳过输入",
-          "description": "GIVEN ~/.argo/.env 已存在且包含 ARGO_* 等已知变量的非空值；WHEN 以非交互方式运行 install-argo.ps1 且不传 -SkipEnv；THEN 脚本不提示输入（不调用 Read-Host），重写 .env 时保留这些已有非空值；仅当某变量缺失或为空时才提示输入。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
-        },
-        {
-          "name": "AT-1361-05-OpenCode规则UTF-8不乱码",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 为英文并含非 ASCII 字符（em dash U+2014）；WHEN 以 -SkipEnv -SkipDeps 与非交互方式将规则部署到 OpenCode 全局 AGENTS.md；THEN AGENTS.md 中的 em dash（—）以可读 UTF-8 呈现，且不含 U+FFFD 替换字符（UTF-8 被按 GBK 解码产生的乱码）。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
-        },
-        {
-          "name": "AT-1361-06-Agent随包部署到三工具",
-          "description": "GIVEN npm 包与 install-argo.ps1 打包部署；WHEN 打包并部署；THEN package.json files 包含 argo/agents，且 argo/agents 中的 .agent.md 被部署到 Copilot（~/.copilot/agents，保持 VS Code 格式）、Cursor（~/.cursor/agents，转换为 .md，保留 name/description/model 且无 tools 数组）与 OpenCode（~/.config/opencode/agents，转换为 .md，含 description、model 与 mode: all 且无 tools 数组）。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
-        },
-        {
-          "name": "AT-1361-07-启动闸门插件与Cursor规则部署",
-          "description": "GIVEN argo/plugins/argo-wakeup.js 与规则文件 argo/rules/archgraph.instructions.md 已就绪；WHEN 以 -SkipEnv -SkipDeps 部署；THEN argo-wakeup.js 被部署到 ~/.argo/plugins 并注册到 OpenCode opencode.json 的 plugin 数组（file:// 路径），且 archgraph.instructions.md 被转换为 Cursor 全局规则 ~/.cursor/rules/archgraph.mdc（description + alwaysApply: true）并包含 UNCONDITIONAL STARTUP GATE 启动闸门。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-deploy.test.js",
-          "acceptanceCriteria": "tests/argo-deploy.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1362",
@@ -1174,15 +977,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1362-01-核心模型图插入README与主页",
-          "description": "GIVEN 项目定位为统一语言（harness 设计与目标产品设计放同一模型）；WHEN 读者打开 README 或主页的 What is this? 章节；THEN 下方嵌入核心模型图 docs/diagrams/image.png（README 与主页均引用）。",
-          "type": "Acceptance Test",
-          "Input": "tests/architecture-diagram.test.js",
-          "acceptanceCriteria": "tests/architecture-diagram.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1363",
@@ -1221,15 +1016,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1363-01-官宣文章就绪",
-          "description": "GIVEN 项目已具备对外官宣条件；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号官宣文章 Markdown，且正文介绍 ArchGraph（架构图驱动的 Agentic Engineering）。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-article.test.js",
-          "acceptanceCriteria": "tests/wechat-article.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1364",
@@ -1252,15 +1039,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-1364-01-归档两个参考项目并同步主页",
-          "description": "GIVEN deepresearch 仓库 design/KG 下存在 gpt-researcher_Agent_探索方法.json 与 麦肯锡结构化战略分析新5步法.json；WHEN 归档到 KGlibrary 并刷新 Reference Library 页面 docs/kglibrary.html；THEN KGlibrary 下存在两个新项目目录（各含 info.md 与模型 JSON），docs/kglibrary.html 列出两者的 name、repo 与 description。",
-          "type": "Acceptance Test",
-          "Input": "tests/website.test.js",
-          "acceptanceCriteria": "tests/website.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1961",
@@ -2043,43 +1822,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-2751-01-需求分析文档就绪",
-          "description": "GIVEN 产品经理对开发者社区进行需求分析；WHEN 读者打开 docs/developer-community-requirements.md；THEN 文档包含用户场景与用户故事（以「作为一个开发者」表述）。",
-          "type": "Acceptance Test",
-          "Input": "tests/developer-community.test.js",
-          "acceptanceCriteria": "tests/developer-community.test.js"
-        },
-        {
-          "name": "AT-2751-02-验收标准GIVEN-WHEN-THEN",
-          "description": "GIVEN 开发者社区需要可外部验证的验收；WHEN 读者查看需求文档；THEN 以 GIVEN-WHEN-THEN 格式给出覆盖浏览、发布、详情、下载、讨论的验收标准。",
-          "type": "Acceptance Test",
-          "Input": "tests/developer-community.test.js",
-          "acceptanceCriteria": "tests/developer-community.test.js"
-        },
-        {
-          "name": "AT-2751-03-采用GitHubDiscussions",
-          "description": "GIVEN 社区需低成本交付与维护；WHEN 读者查看非功能需求；THEN 文档要求采用 GitHub Discussions（零成本、零运维），不自研社区系统。",
-          "type": "Acceptance Test",
-          "Input": "tests/developer-community.test.js",
-          "acceptanceCriteria": "tests/developer-community.test.js"
-        },
-        {
-          "name": "AT-2751-04-发布前脱敏",
-          "description": "GIVEN 待发布的子图 JSON 含敏感信息（密钥/token、内部绝对路径、commit 详情、个人信息）；WHEN 开发者按发布流程发布；THEN 敏感信息被脱敏或发布被拦截（命中即告警）。",
-          "type": "Acceptance Test",
-          "Input": "tests/developer-community.test.js",
-          "acceptanceCriteria": "tests/developer-community.test.js"
-        },
-        {
-          "name": "AT-2751-05-下载导入格式校验",
-          "description": "GIVEN 工作包帖子包含子图 JSON 链接；WHEN 开发者获取并准备导入；THEN 子图 JSON 通过 export-to-kg.js 导出格式校验与大小上限校验，不符合则被拒绝导入。",
-          "type": "Acceptance Test",
-          "Input": "tests/developer-community.test.js",
-          "acceptanceCriteria": "tests/developer-community.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "2752",
@@ -2156,22 +1899,7 @@
           "value": "not_delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-2755-01-公众号发布员角色就绪",
-          "description": "GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找专门发布微信公众号的 Business Actor；THEN 图谱中存在全局唯一 name 为「公众号发布员」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description 作为其 system prompt，并通过 Assignment 关系指派给「公众号发布」Business Role，三者均包含于「公众号发布团队」视图(433)。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-publisher-actor.test.js",
-          "acceptanceCriteria": "tests/wechat-publisher-actor.test.js"
-        },
-        {
-          "name": "AT-2755-02-公众号发布员Agent文件就绪",
-          "description": "GIVEN 公众号发布员需要以 VS Code 自定义 agent 方式被调用；WHEN 查找其 agent 定义文件；THEN 工作区 argo/agents/wechat-publisher.agent.md 存在，frontmatter 含 name=公众号发布员、model=Qwen3.7-Plus、tools 包含 read/edit/search/execute，正文含 wechat:draft 与 48001 约束。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-publisher-actor.test.js",
-          "acceptanceCriteria": "tests/wechat-publisher-actor.test.js"
-        }
-      ],
+      "testcases": [],
       "subdiagram_views": [
         {
           "view_id": "wpp-ltm-001",
@@ -2216,15 +1944,7 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-2756-01-社区介绍文章就绪",
-          "description": "GIVEN ArchGraph 开发者社区（GitHub Discussions）已设计；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号社区介绍文章 Markdown，且正文介绍 GitHub Discussions 与工作包分享。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-article.test.js",
-          "acceptanceCriteria": "tests/wechat-article.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "attributes": [
@@ -2250,99 +1970,7 @@
       "parent": "1249",
       "type": "Work Package",
       "description": "将目前依赖 Sparx Enterprise Architect (EA) JScript 脚本（eatool/EA-jsscript/）导入/导出知识图谱（design/KG/SystemArchitecture.json）的能力，迁移到一个本地 Web 服务（多项目管理 + 查看/编辑 + 搜索 + 图形化 + 导入导出）：后台自动实时读取「多项目」的 SystemArchitecture.json 并展示各项目图谱状态；用户选择项目后可查看/编辑——搜索（语义检索 getSystemArchitecture、上下文检索 getIntentElementContext/getArchitectureViewContext）、图形化查看（视图列表选择→图形化展开→自动布局→节点拖动）、编辑（新增视图/新增元素/编辑元素属性/删除元素/编辑关系属性/删除关系，支持撤销/重做）、导入导出（导入外部 JSON、导出当前项目 JSON）；所有写图操作统一通过 ARGO MCP 提供的接口，与 Agent 保持一致。本地运行、零配置、零 EA 依赖、格式与大小校验。",
-      "testcases": [
-        {
-          "name": "AT-2758-01-本地Web服务导入",
-          "description": "GIVEN 本地 Web 服务已启动且用户持有一个符合 schema 的 SystemArchitecture.json 文件；WHEN 用户在浏览器上传该文件并执行导入；THEN 文件通过校验并成功写入本地图谱 design/KG/SystemArchitecture.json，返回成功结果。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-02-导出",
-          "description": "GIVEN 本地 Web 服务已启动且 design/KG/SystemArchitecture.json 存在；WHEN 用户点击导出；THEN 浏览器下载该 JSON 文件，内容与本地文件一致（UTF-8 无 BOM）。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-03-零EA依赖",
-          "description": "GIVEN 一台未安装 Sparx EA 的机器；WHEN 用户启动本地 Web 服务并执行导入/导出；THEN 功能正常工作，全程不调用任何 EA COM/JScript 组件。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-04-格式校验",
-          "description": "GIVEN 用户上传一个非法/损坏的 JSON（缺少 elements 或结构不符合 schema）；WHEN 执行导入；THEN 服务返回明确的校验错误信息，且本地图谱 SystemArchitecture.json 不被修改。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-05-大小校验",
-          "description": "GIVEN 用户上传超大文件或非 JSON 文件；WHEN 执行导入；THEN 服务拒绝该文件并给出可读提示，不写入本地图谱。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-06-多项目状态展示",
-          "description": "GIVEN 存在多个项目且各自拥有 SystemArchitecture.json；WHEN 用户打开前端页面；THEN 后台自动读取并展示各项目的图谱状态（有效性、元素/关系/视图数量等），用户可从中选择某个项目。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-07-搜索语义与上下文检索",
-          "description": "GIVEN 用户已选中某项目；WHEN 用户输入查询并选用语义检索或上下文检索；THEN 返回与 ARGO MCP 检索方法（getSystemArchitecture 语义查询 / getIntentElementContext 上下文检索）一致的结果，可定位到元素/关系/视图。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-08-图形化查看自动布局拖动",
-          "description": "GIVEN 用户已选中某项目并打开视图列表；WHEN 用户选择某视图；THEN 该视图以图形化方式展开并自动布局，节点可拖动调整位置。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-09-编辑写图一致性",
-          "description": "GIVEN 用户已选中某项目并进入编辑；WHEN 用户执行新增视图/新增元素/编辑元素属性/删除元素/编辑关系属性/删除关系；THEN 操作通过 ARGO MCP 提供的接口写入图谱，与 Agent 写图保持一致，且写后图谱通过 schema 校验。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-10-撤销重做",
-          "description": "GIVEN 用户已执行若干编辑操作；WHEN 用户点击撤销或重做；THEN 图谱状态分别回退或前进到对应历史状态。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-11-导入到当前项目",
-          "description": "GIVEN 用户已选中某项目并持有外部知识图谱 JSON；WHEN 用户执行导入；THEN 文件通过校验后写入当前项目图谱，返回成功结果。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-12-导出当前项目",
-          "description": "GIVEN 用户已选中某项目且该项目图谱 JSON 存在；WHEN 用户点击导出；THEN 下载当前项目知识图谱 JSON 文件（UTF-8 无 BOM）。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service.test.js",
-          "acceptanceCriteria": "tests/ea-web-service.test.js"
-        },
-        {
-          "name": "AT-2758-13-验证测试通过",
-          "description": "GIVEN 本地 Web 服务实现已通过代码检视且 Critical 项 R-1 已处置；WHEN 验证测试工程师执行全量回归与端到端冒烟；THEN 全部验收测试通过，图谱结构校验通过，测试报告（docs/ea-web-service-test-report.md）给出 PASS 结论并覆盖 AC-1..AC-12。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-test-report.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-test-report.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "description": "docs/ea-web-service-requirements.md; tests/ea-web-service.test.js; design/KG/SystemArchitecture.json",
@@ -2410,36 +2038,7 @@
       "id": "2760",
       "name": "ArchGraph 本地 Web 服务",
       "parent": "1249",
-      "testcases": [
-        {
-          "name": "AT-2760-01-解决方案架构登记",
-          "description": "GIVEN 系统设计师已登记解决方案架构；WHEN 查询意图图谱；THEN 存在 Application Component「ArchGraph 本地 Web 服务」（parent=1249），位于 EA Tooling 视图（1800），并由 Work Package 2758 通过 Realization 实现，且带 GIVEN-WHEN-THEN testcases。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-design.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-design.test.js"
-        },
-        {
-          "name": "AT-2760-02-开源图库内核",
-          "description": "GIVEN 规划专家已反馈图形内核应改用成熟开源图库；WHEN 检查系统设计师修订后的设计文档；THEN UI 采用开源图库内核（AntV G6 v5 首选 / Cytoscape.js 备选，均 MIT）而非全自研 SVG，并保持零构建静态单页 UI（不引入 React/Vite 构建链）。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-design.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-design.test.js"
-        },
-        {
-          "name": "AT-2760-03-本地Web服务实现",
-          "description": "GIVEN 需求与设计已冻结；WHEN Developer 实现本地 Web 服务 MVP；THEN scripts/ea-web-service.js 与 web/（index.html/app.js/style.css）存在，提供项目发现/状态/视图图数据/搜索/导入/导出/编辑（走 ARGO MCP）/撤销重做 API，且 tests/ea-web-service-impl.test.js 全部通过。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-impl.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-impl.test.js"
-        },
-        {
-          "name": "AT-2760-04-代码检视通过",
-          "description": "GIVEN Reviewer 已完成对本地 Web 服务 MVP 的代码检视（架构与安全性）；WHEN 检查检视报告与意图图谱登记；THEN docs/ea-web-service-code-review.md 存在且包含总体结论与问题清单（编号/级别/位置/建议），组件 2760 携带 AT-2760-04（GIVEN-WHEN-THEN、可执行）。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-code-review.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-code-review.test.js"
-        }
-      ],
+      "testcases": [],
       "type": "Application Component",
       "attributes": [
         {
@@ -2498,15 +2097,7 @@
       "id": "2761",
       "name": "知识图谱导入服务",
       "parent": "2760",
-      "testcases": [
-        {
-          "name": "AT-2761-01-导入服务设计",
-          "description": "GIVEN 设计文档已定义导入服务；WHEN 检查导入服务设计；THEN 文档给出导入语义 AD-a（整体替换+备份）、/api/projects/:id/import 端点与映射到 ARGO MCP 的写图路径，且不绕过 MCP。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-design.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-design.test.js"
-        }
-      ],
+      "testcases": [],
       "type": "Application Service",
       "attributes": [
         {
@@ -2520,15 +2111,7 @@
       "id": "2762",
       "name": "知识图谱导出服务",
       "parent": "2760",
-      "testcases": [
-        {
-          "name": "AT-2762-01-导出服务设计",
-          "description": "GIVEN 设计文档已定义导出服务；WHEN 检查导出服务设计；THEN 文档给出 /api/projects/:id/export 端点，明确 UTF-8 无 BOM 与零 EA 依赖。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-design.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-design.test.js"
-        }
-      ],
+      "testcases": [],
       "type": "Application Service",
       "attributes": [
         {
@@ -2542,15 +2125,7 @@
       "id": "2763",
       "name": "知识图谱搜索服务",
       "parent": "2760",
-      "testcases": [
-        {
-          "name": "AT-2763-01-搜索服务设计",
-          "description": "GIVEN 设计文档已定义搜索服务；WHEN 检查搜索服务设计；THEN 文档映射语义检索到 getSystemArchitecture、上下文检索到 getIntentElementContext/getArchitectureViewContext，并提供 /api/projects/:id/search 端点。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-design.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-design.test.js"
-        }
-      ],
+      "testcases": [],
       "type": "Application Service",
       "attributes": [
         {
@@ -2564,15 +2139,7 @@
       "id": "2764",
       "name": "知识图谱图形化查看服务",
       "parent": "2760",
-      "testcases": [
-        {
-          "name": "AT-2764-01-图形化查看服务设计",
-          "description": "GIVEN 设计文档已定义图形化查看服务；WHEN 检查该服务设计；THEN 文档给出 SVG 渲染 + 力导向/分层布局选型（AD-g）、/api/projects/:id/views/:viewId/graph 端点与前端图数据形态（nodes/edges/坐标）。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-design.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-design.test.js"
-        }
-      ],
+      "testcases": [],
       "type": "Application Service",
       "attributes": [
         {
@@ -2586,15 +2153,7 @@
       "id": "2765",
       "name": "知识图谱编辑服务",
       "parent": "2760",
-      "testcases": [
-        {
-          "name": "AT-2765-01-编辑服务设计",
-          "description": "GIVEN 设计文档已定义编辑服务；WHEN 检查编辑操作映射；THEN 每个编辑操作一一映射到 ARGO MCP 写图接口，且文档给出撤销/重做（AD-h）与编辑前备份/文件锁（AD-i）。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-design.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-design.test.js"
-        }
-      ],
+      "testcases": [],
       "type": "Application Service",
       "attributes": [
         {
@@ -2609,15 +2168,7 @@
       "parent": "1249",
       "type": "Skill",
       "description": "对「ArchGraph 本地 Web 服务」方案设计（docs/ea-web-service-design.md）的 UI/UX 技术先进性洞察：结论=保留 AD-c「内置单页 UI + REST JSON API 并存」形态（单页应用本身够用），但图形内核从「自研 SVG + 自研力导向」改为引入成熟开源图库（首选 AntV G6 v5 MIT，备选 Cytoscape.js MIT，均可零构建接入），AD-g 修订为 G6 Canvas 渲染 + 内置 force/dagre 布局 + 原生拖动/命中，无需自研 fx/fy。产出 docs/ea-web-service-ui-insight.md + tests/ea-web-service-ui-insight.test.js，反馈给系统设计师 caoyang。",
-      "testcases": [
-        {
-          "name": "AT-2766-01-UI洞察报告与图谱登记",
-          "description": "GIVEN 规划专家已完成本地 Web 服务 UI/UX 技术先进性洞察；WHEN 检查洞察报告与意图图谱；THEN docs/ea-web-service-ui-insight.md 存在并含候选对比表与 AD-c/AD-g 修订建议，图谱存在 Skill「本地Web服务 UI/UX 技术洞察」（parent=1249）且位于 EA Tooling 视图 1800，其 testcase 为 GIVEN-WHEN-THEN 且 Input 指向测试文件。",
-          "type": "Acceptance Test",
-          "Input": "tests/ea-web-service-ui-insight.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-ui-insight.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -2650,50 +2201,7 @@
       "parent": "1249",
       "type": "Work Package",
       "description": "将 ArchGraph 发布为原生 DeepSeek Harness（dsh）插件：把目前由 install-argo.ps1 生成并写入 ~/.dsh/cordis.patch.yml 的两个 Cordis 插件（dsh-argo-workspace MCP 桥、dsh-argo-wakeup 唤醒门）封装为可 `dsh plugin add github:derekhu0002/archgraph` 安装的 bundle（package.json dsh.bundle + cordis.patch.yml + 入口模块），并给 GitHub 仓库 derekhu0002/archgraph 打上 dsh-plugin 标签使其出现在 github.com/topics/dsh-plugin。参考 deepseek-harness docs/user/develop/basic（index.md / publish.md）。",
-      "testcases": [
-        {
-          "name": "AT-2767-01-需求文档就绪",
-          "description": "GIVEN 产品经理已对发布为 dsh 插件做需求分析；WHEN 打开 docs/dsh-plugin-publish.md；THEN 文档包含用户场景与 GIVEN-WHEN-THEN 验收准则，并引用 dsh.bundle 与 dsh-plugin 主题。",
-          "type": "Acceptance Test",
-          "Input": "tests/dsh-plugin-publish.test.js",
-          "acceptanceCriteria": "tests/dsh-plugin-publish.test.js"
-        },
-        {
-          "name": "AT-2767-02-bundle清单",
-          "description": "GIVEN 仓库已封装为可安装 dsh bundle；WHEN 读取 package.json 的 dsh 键；THEN 存在 dsh.bundle.patch 且指向 ./cordis.patch.yml。",
-          "type": "Acceptance Test",
-          "Input": "tests/dsh-plugin-publish.test.js",
-          "acceptanceCriteria": "tests/dsh-plugin-publish.test.js"
-        },
-        {
-          "name": "AT-2767-03-行插入",
-          "description": "GIVEN bundle 贡献其配置层；WHEN 某 profile 列出该 bundle；THEN cordis.patch.yml 以包名插入 argo-workspace 与 argo-wakeup 两行（非 file://）。",
-          "type": "Acceptance Test",
-          "Input": "tests/dsh-plugin-publish.test.js",
-          "acceptanceCriteria": "tests/dsh-plugin-publish.test.js"
-        },
-        {
-          "name": "AT-2767-04-入口模块",
-          "description": "GIVEN bundle 随包发布插件模块；WHEN Node 按包名解析 patch 行；THEN dsh-argo-workspace/index.js 与 dsh-argo-wakeup/index.js 存在且导出 apply。",
-          "type": "Acceptance Test",
-          "Input": "tests/dsh-plugin-publish.test.js",
-          "acceptanceCriteria": "tests/dsh-plugin-publish.test.js"
-        },
-        {
-          "name": "AT-2767-05-话题标签",
-          "description": "GIVEN 仓库为 public 且已打标签；WHEN 查询 gh api repos/derekhu0002/archgraph/topics；THEN names 含 dsh-plugin。",
-          "type": "Acceptance Test",
-          "Input": "tests/dsh-plugin-publish.test.js",
-          "acceptanceCriteria": "tests/dsh-plugin-publish.test.js"
-        },
-        {
-          "name": "AT-2767-07-代码检视通过",
-          "description": "GIVEN Reviewer 已对 dsh-plugin bundle（commit 3f95448）完成架构与安全性检视；WHEN 执行 node tests/dsh-plugin-code-review.test.js；THEN 检视报告存在且含总体结论与问题清单（R-1..R-n）结构，图谱工作包 2767 携带 AT-2767-07。",
-          "type": "Acceptance Test",
-          "Input": "tests/dsh-plugin-code-review.test.js",
-          "acceptanceCriteria": "tests/dsh-plugin-code-review.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "description": "docs/dsh-plugin-publish.md; tests/dsh-plugin-publish.test.js; design/KG/SystemArchitecture.json",
@@ -2746,22 +2254,7 @@
       "id": "neo4j-sync-store",
       "name": "Neo4j Structural Sync Store",
       "parent": "1961",
-      "testcases": [
-        {
-          "name": "AT-neo4j-sync-store-01-内容漂移检测",
-          "description": "GIVEN 同步状态已记录 canonicalDigest 且与当前 canonical 图谱内容一致；WHEN canonical 图谱 JSON 被修改（digest 改变）；THEN isNeo4jGraphSyncStale 判定为 stale，从而触发结构层重新同步，避免 JSON 与 Neo4j 图库漂移。",
-          "type": "Acceptance Test",
-          "Input": "tests/neo4j-sync-staleness.test.js",
-          "acceptanceCriteria": "tests/neo4j-sync-staleness.test.js"
-        },
-        {
-          "name": "AT-neo4j-sync-store-02-旧状态回填",
-          "description": "GIVEN 同步状态存在 lastSuccessAt 但缺少 canonicalDigest（旧版本代码同步遗留）；WHEN 读取同步状态判定；THEN 判定为 stale 触发一次回填重同步，以种子 canonicalDigest 并修复历史漂移。",
-          "type": "Acceptance Test",
-          "Input": "tests/neo4j-sync-staleness.test.js",
-          "acceptanceCriteria": "tests/neo4j-sync-staleness.test.js"
-        }
-      ],
+      "testcases": [],
       "type": "Application Component"
     },
     {
@@ -2770,50 +2263,7 @@
       "parent": "1961",
       "type": "Application Component",
       "description": "ARGO MCP 只读 Cypher 图查询接口（queryNeo4jGraph 工具）：Agent 可先请求结构投影 schema（节点标签/关系类型/属性键 + ArchiMate 元素与关系类型枚举），再自行构造只读 Cypher 查询 Neo4j 结构投影；写子句（CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS）被拒绝，以保护 canonical JSON 单一事实源。查询结果顶层返回 database 名称并校验其与该工作区对应的 Neo4j 数据库一致（不一致则 NEO4J_DATABASE_MISMATCH）；Neo4j 库名/同步状态/摘要由 per-call workspaceRoot（DSH 桥接注入会话工作区）推导，查询始终落在当前工作区的投影库。服务查询前会检测投影是否陈旧（同步状态 dirty 或 canonicalDigest 与 JSON 不一致），陈旧时自动重建投影（recoverNeo4jSyncIfNeeded），重建信息经 neo4jRecovery 字段返回。源码：argo/scripts/neo4j-system-architecture-store.js、argo/scripts/systemarchitecture-mcp-server.js、argo/scripts/argo-mcp-server.js。",
-      "testcases": [
-        {
-          "name": "AT-neo4j-cypher-query-interface-01-只读Cypher校验",
-          "description": "GIVEN queryNeo4jGraph 工具已注册且 Neo4j 结构投影存在；WHEN Agent 提交包含写子句（CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS）的 Cypher；THEN 工具在访问 Neo4j 前即以 READ_ONLY_CYPHER_REQUIRED 拒绝，canonical JSON 单一事实源不受影响。",
-          "type": "Acceptance Test",
-          "Input": "tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js"
-        },
-        {
-          "name": "AT-neo4j-cypher-query-interface-02-schema可检索",
-          "description": "GIVEN queryNeo4jGraph 工具已注册；WHEN Agent 以 schema:true 请求结构投影 schema；THEN 返回节点标签（ArchitectureGraph/Element/ArchitectureRelationship/View）、关系类型（OWNS_*/ARCHIMATE_RELATES/VIEW_OF/INCLUDES_*/HAS_SUBDIAGRAM）、属性键，以及 ArchiMate 元素类型与关系类型枚举（含 Business Actor 与 Assignment），使 Agent 可据此选择要查询的元素或关系类型。",
-          "type": "Acceptance Test",
-          "Input": "tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js"
-        },
-        {
-          "name": "AT-neo4j-cypher-query-interface-03-返回database名称并校验一致",
-          "description": "GIVEN queryNeo4jGraph 执行只读 Cypher 查询且 Neo4j 结构投影就绪；WHEN 查询返回；THEN 结果顶层包含 database 字段，其值等于本仓库对应的 Neo4j 数据库名（getDefaultNeo4jDatabaseName），且当实际查询的数据库与本仓库期望不一致时以 NEO4J_DATABASE_MISMATCH 拒绝。",
-          "type": "Acceptance Test",
-          "Input": "tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js"
-        },
-        {
-          "name": "AT-neo4j-cypher-query-interface-04-per-call-workspaceRoot驱动库名",
-          "description": "GIVEN queryNeo4jGraph 在 DeepSeek Harness 桥接下注入 per-call workspaceRoot（当前会话工作区）；WHEN Agent 构造只读 Cypher 查询 Neo4j 结构投影；THEN Neo4j 库名由该 workspaceRoot 推导（getDefaultNeo4jDatabaseName(workspaceRoot)），查询落在该工作区自己的投影库（而非服务器启动目录的库），同步状态/摘要/文档路径同样按该工作区解析。",
-          "type": "Acceptance Test",
-          "Input": "tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js"
-        },
-        {
-          "name": "AT-neo4j-cypher-query-interface-05-投影陈旧自动重建",
-          "description": "GIVEN queryNeo4jGraph 已注册且当前工作区 Neo4j 投影同步状态为 dirty 或 canonicalDigest 与 canonical JSON 不一致（投影陈旧）；WHEN Agent 提交只读 Cypher 查询；THEN 工具在服务查询前自动调用 recoverNeo4jSyncIfNeeded 尝试重建投影，返回结果携带 neo4jRecovery 字段（attempted=true）。",
-          "type": "Acceptance Test",
-          "Input": "tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js"
-        },
-        {
-          "name": "AT-neo4j-cypher-query-interface-06-投影干净不触发重建",
-          "description": "GIVEN queryNeo4jGraph 已注册且当前工作区 Neo4j 投影同步状态干净（dirty=false 且 canonicalDigest 与 JSON 一致）；WHEN Agent 提交只读 Cypher 查询；THEN 工具不触发任何投影重建，返回结果不携带 neo4jRecovery 字段。",
-          "type": "Acceptance Test",
-          "Input": "tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "description": "argo/scripts/argo-mcp-server.js; argo/scripts/neo4j-system-architecture-store.js; argo/scripts/systemarchitecture-mcp-server.js; tests/neo4j-cypher-query.test.js; design/KG/SystemArchitecture.json",
@@ -2859,50 +2309,8 @@
       "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）：定位元素再改动、验收测试先行（可执行 GIVEN-WHEN-THEN）、仅通过 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径，并通过只读 queryNeo4jGraph 进行结构化图查询；查询优先级规则（QueryPriorityGuideline）：KG-first retrieval（任何检索优先检索KG）、Semantic-first KG retrieval（检索KG必须优先通过语义检索）（getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径，子图语义检索 scope（getSystemArchitecture 的 scope 参数：view_id 或 element_id+depth，用于限定语义检索范围避免返回过多内容）；能力委托门禁（CapabilityDelegationGuideline）：Agent 收到需查看图片/视频的任务且自身不具备识别能力时，不得猜测或静默跳过，须主动委托具备能力的 Business Actor。",
       "testcases": [
         {
-          "name": "AT-archgraph-workflow-rules-01-规则文档登记图查询接口",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 阅读该规则；THEN ToolsGuideline 登记了 queryNeo4jGraph 工具，且存在 GraphQueryGuideline 章节指导 Agent 用 {schema: true} 获取投影 schema、用 $graphKey 占位符构造只读 Cypher 进行结构化图查询，并禁止写子句。",
-          "type": "Acceptance Test",
-          "Input": "tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js"
-        },
-        {
-          "name": "AT-archgraph-workflow-rules-02-规则文档登记分级改动门禁",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 阅读该规则并准备改动；THEN 规则包含 ChangeTierGate 章节，定义 Tier 1（behavior-independent）/Tier 2（behavior-changing）/Tier 3（structural/new）三档，Tier 1 允许跳过验收回归与全量校验，且 CoreRule 4 引用分级门禁。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-rules-change-tier.test.js",
-          "acceptanceCriteria": "tests/argo-rules-change-tier.test.js"
-        },
-        {
-          "name": "AT-archgraph-workflow-rules-03-分级门禁安全网",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 申报 Tier 1 改动；THEN 规则要求 git diff 校验（越界自动升为 Tier 2）、KG touch rule 保留完整校验、Fail-safe（zero-ambiguity default escalation）默认升档。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-rules-change-tier.test.js",
-          "acceptanceCriteria": "tests/argo-rules-change-tier.test.js"
-        },
-        {
-          "name": "AT-archgraph-workflow-rules-04-规则文档登记能力委托门禁",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 收到需要查看图片/视频的任务而自身不具备识别能力；THEN 规则包含 CapabilityDelegationGuideline 章节，要求 Agent 不得猜测/虚构/静默跳过内容，须主动识别意图图谱中具备该能力的 Business Actor 并委托其处理，委托遵循 CoperationGuideline。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-rules-capability-delegation.test.js",
-          "acceptanceCriteria": "tests/argo-rules-capability-delegation.test.js"
-        },
-        {
-          "name": "AT-archgraph-workflow-rules-05-规则文档登记查询优先级KG优先",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 进行任何检索；THEN 规则包含 QueryPriorityGuideline 章节并登记「KG-first retrieval（任何检索优先检索KG）」：任何检索（架构上下文、历史决策、文件、代码、知识）必须先查询意图图谱（经 ARGO MCP），不得在查询图谱前默认去搜文件系统/代码/网络；且 CoreRule 7 将其列为红线、ExplorationGuideline 亦含该规则。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-rules-query.test.js",
-          "acceptanceCriteria": "tests/argo-rules-query.test.js"
-        },
-        {
-          "name": "AT-archgraph-workflow-rules-06-规则文档登记语义检索优先",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 检索 KG；THEN 规则登记「Semantic-first KG retrieval（检索KG必须优先通过语义检索）」：优先经 getSystemArchitecture（query.purpose + query.intent）与 getIntentElementContext/getArchitectureViewContext 进行语义/上下文检索；queryNeo4jGraph（只读 Cypher）为结构类查询的次要路径。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-rules-query.test.js",
-          "acceptanceCriteria": "tests/argo-rules-query.test.js"
-        },
-        {
-          "name": "AT-archgraph-workflow-rules-07-规则文档登记子图语义检索scope",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 需要限定语义检索范围；THEN QueryPriorityGuideline 登记「Bound the scope」规则：语义查询可能返回过多内容或只需局部区域时，用 getSystemArchitecture 的 scope（view_id 或 element_id+depth）限定子图，再对返回 id 用 getIntentElementContext 深入。",
+          "name": "AT-rules-01",
+          "description": "GIVEN ARGO 工作流规则已维护；WHEN Agent 阅读规则文件；THEN 规则文档登记 KG-first/语义优先检索与查询接口，Agent 可据此正确检索图谱。",
           "type": "Acceptance Test",
           "Input": "tests/argo-rules-query.test.js",
           "acceptanceCriteria": "tests/argo-rules-query.test.js"
@@ -3011,36 +2419,7 @@
           "value": "not_delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-2780-01-OpenClaw规则部署",
-          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 且临时 OpenClaw 目录运行（含 -OpenClawHome/-OpenClawWorkspace）；THEN <OpenClawWorkspace>/AGENTS.md 合并写入 frontmatter 剥离后的 archgraph 规则（含 <WakeupGuideline> UNCONDITIONAL STARTUP GATE 与 <CoreRules>），且既有用户内容被保留。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-openclaw.test.js",
-          "acceptanceCriteria": "tests/argo-openclaw.test.js"
-        },
-        {
-          "name": "AT-2780-02-OpenClaw技能部署",
-          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 部署到临时 OpenClaw 目录；THEN <OpenClawHome>/skills/argo-init/SKILL.md 存在且 frontmatter 含 name=argo-init（OpenClaw managed/shared 技能根，所有 agent 可见）。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-openclaw.test.js",
-          "acceptanceCriteria": "tests/argo-openclaw.test.js"
-        },
-        {
-          "name": "AT-2780-03-OpenClaw MCP注册",
-          "description": "GIVEN install-argo.ps1 已就绪；WHEN 以 -SkipEnv -SkipDeps 且非 -SkipMcp 部署；THEN <OpenClawHome>/openclaw.json 的 mcp.servers.argo 注册 stdio server（command=node、args 指向 argo-mcp-server.js），并显式设置 env.ARGO_REPO_ROOT 为仓库根（OpenClaw 为固定工作区宿主，需显式锚定工作区；roots/list 不可依赖）。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-openclaw.test.js",
-          "acceptanceCriteria": "tests/argo-openclaw.test.js"
-        },
-        {
-          "name": "AT-2780-04-OpenClaw UTF-8不乱码",
-          "description": "GIVEN 规则文件含非 ASCII 字符（em dash U+2014）；WHEN 部署到临时 OpenClaw 目录；THEN OpenClaw workspace AGENTS.md 中的 em dash 以可读 UTF-8 呈现，且不含 U+FFFD 替换字符（UTF-8 被按 GBK 解码产生的乱码）。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-openclaw.test.js",
-          "acceptanceCriteria": "tests/argo-openclaw.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "xiaoming-mem-openclaw-001",
@@ -3055,22 +2434,7 @@
       "parent": "1249",
       "type": "Work Package",
       "description": "使用 wechat-public-cli 技能，撰写 ArchGraph 对 OpenClaw 适配支持（WP 2780）的介绍文章并发布到微信公众号。",
-      "testcases": [
-        {
-          "name": "AT-2781-01-openclaw支持文章就绪",
-          "description": "GIVEN ArchGraph 已适配 OpenClaw（WP 2780 完成）；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号 OpenClaw 支持介绍文章 Markdown，且正文介绍 OpenClaw 适配（AGENTS.md 规则、argo-init 技能、argo MCP server）。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-article.test.js",
-          "acceptanceCriteria": "tests/wechat-article.test.js"
-        },
-        {
-          "name": "AT-2781-02-openclaw文章主题封面",
-          "description": "GIVEN OpenClaw 支持文章即将发布；WHEN 发布员准备标题图；THEN 文章声明专用主题封面（banner_path 指向 diagrams/openclaw-banner.png，非通用 image.png）且文件存在，封面体现「AI 助手看懂架构图」主题。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-article.test.js",
-          "acceptanceCriteria": "tests/wechat-article.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "description": "docs/openclaw-support.wechat.md; docs/diagrams/openclaw-banner.png; scripts/generate-openclaw-banner.py; tests/wechat-article.test.js; design/KG/SystemArchitecture.json",
@@ -3138,15 +2502,7 @@
       "type": "Business Actor",
       "parent": "1962",
       "description": "负责 ArchGraph 项目的图片与视频生成任务的 Business Actor。接收创作需求（描述图片/视频主题、风格、用途），通过 dashscope-media-generator Skill 调用阿里云 DashScope 图像生成接口（qwen-image / qwen-image-plus，原生 text2image API）生成写实图片，并根据需要调用视觉模型（qwen3-vl-plus）验收画面内容与角色标注定位；视频生成类任务按项目当前可用能力（DashScope 视频生成接口）执行或说明限制。对最终图片/视频交付的可视质量负责。创作须符合仓库文档上下文，不得凭空捏造画面事实。",
-      "testcases": [
-        {
-          "name": "AT-media-artist-01-媒体艺术家角色就绪",
-          "description": "GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找专门负责图片视频生成的 Business Actor；THEN 图谱中存在全局唯一 name 为「媒体艺术家」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description 作为其 system prompt（含图片与 DashScope），并通过 Assignment 关系指派给「图片视频生成」Business Role，三者均包含于「媒体创作团队」视图(media-team-001)。",
-          "type": "Acceptance Test",
-          "Input": "tests/media-artist-actor.test.js",
-          "acceptanceCriteria": "tests/media-artist-actor.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -3218,29 +2574,7 @@
       "id": "2782",
       "name": "发布多角色能力介绍文章到微信公众号",
       "parent": "1249",
-      "testcases": [
-        {
-          "name": "AT-2782-01-多角色能力文章就绪",
-          "description": "GIVEN ArchGraph 已具备多角色能力（AgentOrganization 下多个角色与其 Assignment/Triggering 协作）；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号多角色能力文章 Markdown docs/multi-role-capability.wechat.md，正文介绍通过与 Agent 对话增加角色、Business Actor/Business Role/Skill/Assignment/Triggering 协作关系。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-article.test.js",
-          "acceptanceCriteria": "tests/wechat-article.test.js"
-        },
-        {
-          "name": "AT-2782-02-多角色文章真实配图",
-          "description": "GIVEN 多角色能力文章即将发布；WHEN 媒体艺术家准备配图；THEN 文章声明专用主题封面（banner_path 指向 diagrams/multi-role-banner.png，非通用 image.png）且文件存在，并由 dashscope-media-generator 按稿子内容生成至少 1 张写实效果图（非框图），生成记录登记于媒体艺术家工作记忆。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-article.test.js",
-          "acceptanceCriteria": "tests/wechat-article.test.js"
-        },
-        {
-          "name": "AT-2782-03-多角色文章正文内嵌插图",
-          "description": "GIVEN 媒体艺术家已为多角色文章生成写实插图；WHEN 文章在公众号渲染；THEN 文章正文内嵌至少一张引用真实 diagrams/*.png 文件的 markdown 图片（而非仅 banner），避免公众号文章无插图。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-article.test.js",
-          "acceptanceCriteria": "tests/wechat-article.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -3342,15 +2676,7 @@
       "type": "Business Actor",
       "parent": "1962",
       "description": "负责解析视频需求（主题/时长/分辨率/宽高比/风格）→ 提交异步合成任务 → 轮询 → 下载 MP4 转存的 Business Actor。通过 dashscope-video-generator Skill 调用阿里云 DashScope 视频生成接口（wan2.7-t2v 等）产出视频，对视频生成的可用性与配额限制如实说明。",
-      "testcases": [
-        {
-          "name": "AT-video-producer-01-视频制作角色就绪",
-          "description": "GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找专门负责视频生成的 Business Actor；THEN 图谱中存在全局唯一 name 为「视频制作」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description，并通过直连关系关联 dashscope-video-generator Skill，且与「视频制作Leader」「视频审核」共同包含于「视频创作团队」视图(video-team-001)。",
-          "type": "Acceptance Test",
-          "Input": "tests/video-team-actor.test.js",
-          "acceptanceCriteria": "tests/video-team-actor.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -3369,15 +2695,7 @@
       "type": "Business Actor",
       "parent": "1962",
       "description": "负责验收生成视频的 Business Actor：抽取生成视频关键帧 → 用 qwen3-vl-visual-inspection Skill（qwen3-vl-plus 视觉模型）核对画面元素、主题符合度、时长/分辨率、文字标注是否遮挡，输出逐条核对结论。无自身图像输入能力时以视觉模型代理验收。",
-      "testcases": [
-        {
-          "name": "AT-video-reviewer-01-视频审核角色就绪",
-          "description": "GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找专门负责视频验收的 Business Actor；THEN 图谱中存在全局唯一 name 为「视频审核」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description，并通过直连关系关联 qwen3-vl-visual-inspection Skill，且包含于「视频创作团队」视图(video-team-001)。",
-          "type": "Acceptance Test",
-          "Input": "tests/video-team-actor.test.js",
-          "acceptanceCriteria": "tests/video-team-actor.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -3396,15 +2714,7 @@
       "type": "Business Actor",
       "parent": "1962",
       "description": "负责视频制作流程编排的 Business Actor：本身无直接多模态能力，将制作派给「视频制作」、验收派给「视频审核」，最终交付 MP4。对视频任务的整体交付负责。",
-      "testcases": [
-        {
-          "name": "AT-video-leader-01-视频制作Leader编排就绪",
-          "description": "GIVEN 意图图谱已登记 AgentOrganization 团队；WHEN 查找负责视频流程编排的 Business Actor；THEN 图谱中存在全局唯一 name 为「视频制作Leader」的 Business Actor，挂载于 AgentOrganization(1962)，有非空 description，并分别关联「视频制作」与「视频审核」，三者共同包含于「视频创作团队」视图(video-team-001)。",
-          "type": "Acceptance Test",
-          "Input": "tests/video-team-actor.test.js",
-          "acceptanceCriteria": "tests/video-team-actor.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -3423,29 +2733,7 @@
       "parent": "1249",
       "type": "Work Package",
       "description": "使用 wechat-public-cli 技能与媒体艺术家 Actor，撰写一篇以「AI Agent 的 SKILL 不应照搬、而应内化与个性化优化、AGENT 与人类共同进化」为核心观点的 ArchGraph 推广文章并发布到微信公众号。文章由协调者撰写 docs/skill-coevolution.wechat.md（洞察材料由规划专家/洞察视角提供，配图由媒体艺术家按稿子内容用 qwen-image 生成写实效果图），措辞减少 AI 味。",
-      "testcases": [
-        {
-          "name": "AT-2783-01-技能共同进化文章就绪",
-          "description": "GIVEN 已完成关于「SKILL 不应照搬、需内化与共同进化」的业界洞察材料；WHEN 使用 wechat-public-cli 技能发布前；THEN 存在带 YAML frontmatter（title/author/digest）的公众号文章 Markdown docs/skill-coevolution.wechat.md，正文含 SKILL、内化、共同进化 等核心观点。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-article.test.js",
-          "acceptanceCriteria": "tests/wechat-article.test.js"
-        },
-        {
-          "name": "AT-2783-02-技能文章主题封面",
-          "description": "GIVEN SKILL 共同进化文章即将发布；WHEN 媒体艺术家准备标题图；THEN 文章声明专用主题封面（banner_path 指向 diagrams/skill-coevolution-banner.png，非通用 image.png）且文件存在，封面体现「技能手册化作光点融入 AI 身体」主题。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-article.test.js",
-          "acceptanceCriteria": "tests/wechat-article.test.js"
-        },
-        {
-          "name": "AT-2783-03-技能文章正文内嵌插图",
-          "description": "GIVEN 媒体艺术家已为 SKILL 共同进化文章生成写实插图；WHEN 文章在公众号渲染；THEN 文章正文内嵌至少一张引用真实 diagrams/*.png 文件的 markdown 图片（而非仅 banner），避免公众号文章无插图。",
-          "type": "Acceptance Test",
-          "Input": "tests/wechat-article.test.js",
-          "acceptanceCriteria": "tests/wechat-article.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -3520,22 +2808,7 @@
       "type": "Work Package",
       "parent": "1249",
       "description": "为 archgraph-eval 工程编写参加 Terminal-Bench 评测的指导文档：建工程、Harbor agent 适配层、用 ARCHGRAPH 框架多轮构建 harness、逐步跑完全部测试、对照实验与上榜流程。argo 框架已部署用户级，无需重新部署。",
-      "testcases": [
-        {
-          "name": "AT-tb-eval-guide-01-评测指导文档就绪",
-          "description": "GIVEN 需要指导如何用 ARCHGRAPH 框架参加 Terminal-Bench 评测；WHEN 读者打开 docs/terminal-bench-eval-guide.md；THEN 文档包含：archgraph-eval 工程结构、Harbor BaseAgent 适配接口、多轮构建 harness 的轮次循环、本地 k=5 冒烟步骤、全量评测与对照实验、上榜提交流程。",
-          "type": "Acceptance Test",
-          "Input": "tests/terminal-bench-eval-guide.test.js",
-          "acceptanceCriteria": "tests/terminal-bench-eval-guide.test.js"
-        },
-        {
-          "name": "AT-tb-eval-guide-02-不重复部署argo",
-          "description": "GIVEN argo 框架已部署在用户级（~/.argo 等）；WHEN 读者按指导搭建 archgraph-eval；THEN 指导明确说明无需重新部署 argo 工具链，只依赖用户级已部署的框架。",
-          "type": "Acceptance Test",
-          "Input": "tests/terminal-bench-eval-guide.test.js",
-          "acceptanceCriteria": "tests/terminal-bench-eval-guide.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -3621,15 +2894,7 @@
       "type": "Work Package",
       "parent": "1249",
       "description": "调研并整理业界公认的 AGENT 长期记忆评测基准（LongMemEval ICLR2025 / LOCOMO / BEAM）与指标口径（准确率/记忆召回/top-k/token 成本/时延，底层 RAG 指标 Precision/Recall/MRR/Hit Rate@K），形成结论文档 docs/memory-eval-benchmarks.md，作为 ArchGraph 长期记忆系统「世界级」量化基线的依据。",
-      "testcases": [
-        {
-          "name": "AT-memory-eval-bench-01-评测基准调研结论文档就绪",
-          "description": "GIVEN 需要为长期记忆系统确立业界公认的评测基线；WHEN 读者打开 docs/memory-eval-benchmarks.md；THEN 文档包含三大基准 LongMemEval/LOCOMO/BEAM 及其能力维度与成绩、评测流水线 Ingest→Search→Evaluate、核心指标（准确率/记忆召回/top-k/token 成本/时延）与 RAG 底层指标（Precision/Recall/MRR/Hit Rate@K）、以及对 ArchGraph 的意义。",
-          "type": "Acceptance Test",
-          "Input": "tests/memory-eval-benchmarks.test.js",
-          "acceptanceCriteria": "tests/memory-eval-benchmarks.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -3684,18 +2949,11 @@
       "description": "基于 LongMemEval 5 能力维度（信息抽取/多会话推理/时间推理/知识更新/拒答）裁剪适配 agent 元记忆场景，设计 ArchGraph 长期记忆评测题集 docs/memory-eval-dataset.md：每题含记忆场景(GIVEN)/问题(WHEN)/期望答案(ground truth, THEN)/检索提示，作为后续实测基线的输入。v2（2026-08-26）：新增第 6 维度多跳召回（MH-01~05，沿拓扑内链逐跳检索找全）与成本/压缩率评测口径（Query Cost：检索上下文 token 成本 + context 压缩率≥70%）。",
       "testcases": [
         {
-          "name": "AT-memory-eval-dataset-01-评测题集文档就绪",
-          "description": "GIVEN 需要为长期记忆系统设计可执行的评测题集；WHEN 读者打开 docs/memory-eval-dataset.md；THEN 文档包含 5 能力维度（信息抽取/多会话推理/时间推理/知识更新/拒答）、每题含 GIVEN 记忆场景/WHEN 问题/THEN 期望答案（ground truth）、并说明检索路径（ARGO 语义查询/queryNeo4jGraph）。",
+          "name": "AT-eval-seed-01",
+          "description": "GIVEN 评测集 SEED 已归档；WHEN 用户/评测 harness 加载；THEN SEED 结构有效（schema/版本/维度×题数），ground-truth 目标均在图谱中存在，harness 统一消费。",
           "type": "Acceptance Test",
-          "Input": "tests/memory-eval-dataset.test.js",
-          "acceptanceCriteria": "tests/memory-eval-dataset.test.js"
-        },
-        {
-          "name": "AT-memory-eval-dataset-02-评测题集含多跳召回与成本口径",
-          "description": "GIVEN 需要按 LLM-Wiki 双层面指标补齐评测输入；WHEN 读者打开 docs/memory-eval-dataset.md；THEN 文档包含第 6 维度多跳召回（MH-01~05，沿拓扑内链多跳检索找全）与成本/压缩率评测口径（检索上下文 token 成本、压缩率≥70%），总题数 28。",
-          "type": "Acceptance Test",
-          "Input": "tests/memory-eval-dataset.test.js",
-          "acceptanceCriteria": "tests/memory-eval-dataset.test.js"
+          "Input": "tests/eval-seed.test.js",
+          "acceptanceCriteria": "tests/eval-seed.test.js"
         }
       ],
       "attributes": [
@@ -3721,22 +2979,7 @@
       "type": "Work Package",
       "parent": "1249",
       "description": "实现可执行评测 harness scripts/memory-eval-run.js：按 docs/memory-eval-dataset.md 的 28 题逐题通过 ARGO MCP 读路径（getArchitectureViewContext/getIntentElementContext/getSystemArchitecture，零 Neo4j 运行时依赖）检索记忆并对照 ground truth 判定，输出 6 维度/整体准确率、拒答准确率、平均时延与成本统计（token 成本 + 压缩率），配套可执行测试与验收用例。v2（2026-08-26）：新增多跳 pick 检索（上一步结果派生下一步参数）与 measureCost 成本统计。",
-      "testcases": [
-        {
-          "name": "AT-memory-eval-run-01-评测harness可运行并产出基线",
-          "description": "GIVEN 已具备 28 题评测题集与 ARGO MCP 读路径；WHEN 运行 scripts/memory-eval-run.js；THEN 逐题执行检索并判定 PASS/FAIL，产出按 6 维度/整体/拒答的准确率、平均时延与成本统计（costStats），写入 results/memory-eval-report.json，且 28 题全部有评估结果（无 TOOL_ERROR 空判）。",
-          "type": "Acceptance Test",
-          "Input": "tests/memory-eval-run.test.js",
-          "acceptanceCriteria": "tests/memory-eval-run.test.js"
-        },
-        {
-          "name": "AT-memory-eval-run-02-harness支持多跳检索与成本统计",
-          "description": "GIVEN 已具备含多跳召回题的 28 题题集；WHEN 运行 scripts/memory-eval-run.js；THEN 逐题执行（含沿上一步结果派生参数的多跳 pick 检索），产出 6 维度准确率与 costStats（rawCorpusTokens/avgRetrievedTokens/avgCompressionRatio），MH-01~05 全部通过且压缩率≥0.7。",
-          "type": "Acceptance Test",
-          "Input": "tests/memory-eval-run.test.js",
-          "acceptanceCriteria": "tests/memory-eval-run.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "description": "scripts/memory-eval-run.js; tests/memory-eval-run.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测 harness 与实测基线 23/23 100%）",
@@ -3781,15 +3024,7 @@
       "type": "Principle",
       "parent": "1249",
       "description": "Principle（2026-08-26 人类伙伴确立）：文档内容存储策略——除必须放在仓库中的内容、或无法放入 KG 的内容（如视频/二进制/可执行文件）外，其余所有文档内容一律写入意图图谱（KG）作为带描述/属性的元素；必须留在仓库的内容（视频/二进制/可执行）也需 SUMMARY 后登记入 KG（元素摘要 + 仓库路径/commit 属性）；KG 为文档内容的事实源。规则落地于 argo/rules/archgraph.instructions.md <ContentStoragePolicy> 章节 + CoreRule 8。",
-      "testcases": [
-        {
-          "name": "AT-archgraph-content-storage-policy-01-规则文档登记内容存储策略",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md 存在；WHEN Agent 需要存放文档内容；THEN 规则包含 ContentStoragePolicy 章节并登记：除必须放仓库或无法放入 KG 的内容（如视频/二进制）外，所有文档内容必须写入 KG（KG-first document storage）；必须留仓库的内容也需 SUMMARY 后登记入 KG；KG 为文档内容事实源；且 CoreRule 8 将其列为红线。",
-          "type": "Acceptance Test",
-          "Input": "tests/argo-rules-content-storage.test.js",
-          "acceptanceCriteria": "tests/argo-rules-content-storage.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -3831,8 +3066,8 @@
       "description": "子图语义检索能力（2026-08-26）：getSystemArchitecture 新增 scope 参数（view_id 或 element_id+depth），把语义检索限定在子图（视图成员或元素子树）内：scope 解析为 canonical 身份集合 → 作为 canonicalIdentities 喂给语义检索边界（实时向量查询按身份过滤）→ 返回内容再按 scope 裁剪，避免全图语义检索范围过大返回过多内容。落地：argo/scripts/systemarchitecture-mcp-server.js（resolveSemanticScope/applySemanticScopeFilter + 工具 schema）、argo/scripts/graph-rag/defaultSemanticRetrieval.js（VECTOR_QUERY_CYPHER_SCOPED + exhaustChannel 过滤）、argo/scripts/argo-mcp-server.js（schema）。",
       "testcases": [
         {
-          "name": "AT-subgraph-semantic-retrieval-01-子图语义检索scope能力",
-          "description": "GIVEN ARGO MCP getSystemArchitecture 工具存在；WHEN Agent 需要限定语义检索范围；THEN 工具 schema 登记 scope 参数（view_id/element_id/depth），resolveSemanticScope 能把视图/元素子树解析为身份集合，applySemanticScopeFilter 能把返回的 canonical 文档或 business summary 裁剪到子图，未知视图/元素返回 SCOPE_VIEW_NOT_FOUND / SCOPE_ELEMENT_NOT_FOUND。",
+          "name": "AT-subgraph-semantic-01",
+          "description": "GIVEN getSystemArchitecture 支持 scope 子图语义检索；WHEN 用户以视图/元素作用域查询；THEN 返回被限定在作用域内的语义结果，未知作用域明确失败。",
           "type": "Acceptance Test",
           "Input": "tests/argo-semantic-scope.test.js",
           "acceptanceCriteria": "tests/argo-semantic-scope.test.js"
@@ -3879,39 +3114,11 @@
       "description": "构建自进化测试环境（用户确认 2026-08-26）：测试对象=整套 ARCHGRAPH 框架（用户 npm install archgraph-argo 安装）；不自动 npm publish，改用 npm pack 生成本地 tarball 在沙箱内安装；沙箱=Docker 容器，与本机完全隔离（绝不改宿主配置/文件）。交付：sandbox/Dockerfile（node 20 + pwsh + opencode-ai，基础镜像可配置）、sandbox/entrypoint.sh（空工作区 npm install tarball + npx argo-deploy + smoke）、sandbox/smoke.js（argo init 生成初始图谱 + 验证部署产物/MCP注册/已安装MCP读图+校验 + Level B 全能力 + Level C 全栈 Agent 评测 + Level D lightrag MCP + Level E Agent 挂 lightrag MCP）、scripts/sandbox-test.js（宿主编排器）、tests/sandbox-framework.test.js。Level A 实测：22 步部署 Linux 容器全成功，smoke 21/21。Level B（2026-08-26）：挂载 argo/.env 真实参数，独立 sandbox Neo4j 库 + 真实 queryNeo4jGraph + 真实 Embedding 语义检索，25/25。Level C（2026-08-26）：安装 opencode-ai，配置阿里 DashScope compatible-mode provider（ali-dashscope/qwen3.7-plus，@ai-sdk/openai-compatible），用 opencode run headless 驱动 Agent 回答记忆题——Agent 通过注册进 opencode.json 的 argo MCP（argo_<tool>）读图作答，输出 JSON 事件流（工具调用 + token/cost 计量），实测 27/27；问答模型切换 DeepSeek（embedding 保持 QWEN）。v2 修正：沙箱不拷生产图，改由 argo init 生成初始图谱（2 元素/4 视图）。Level D（2026-08-26）：容器内 Python + LightRAG 包成 lightrag MCP（第二记忆后端）——sandbox/lightrag-mcp.py（FastMCP，暴露 lightrag_insert/lightrag_query；JSON 实体抽取适配 DeepSeek；ainsert(content, ids=doc_id) 参数修正；mcp SDK env 白名单过滤→显式 env 透传 + /env/argo.env 回退；pipmaster/ascii_colors stdout 污染修复；**图存储用 Neo4j（Neo4JStorage，独立库 lightrag，实体/关系落宿主 Neo4j 而非 GraphML，commit 3a0efae）**）+ sandbox/test-lightrag-mcp.py（MCP 客户端探针，insert+query 全链路断言答案含 1249，退出码 0），smoke 28/28。Level E（2026-08-26）：OpenCode Agent 挂 lightrag MCP 作答（对照「双 MCP 同 Agent」的 B 组冒烟）——与 Level C 同一 Agent+DeepSeek，记忆后端换 lightrag MCP，opencode run --format json 驱动 Agent 调 lightrag_query 读已摄入记忆（Level D 探针预先摄入含 1249 文档）答对 1249（tool_use 事件含工具名 + 答案校验，agent-eval-lightrag.log）。**严格隔离（2026-08-26 用户要求）**：configureOpenCodeModel(mode) 按会话只挂一个记忆后端——A 组（Level C）会话只挂 argo MCP（清掉 lightrag）、B 组（Level E）会话只挂 lightrag MCP（清掉 argo，deleteMcpArgo 兼容 mcp.argo/mcp.servers.argo），回读校验断言 opencode.json「只剩对应的那一个 MCP」，不同会话看不到对方的 MCP，唯一变量=记忆后端。**口径 A 规则中性化（2026-08-26 用户拍板）**：部署注入的 ArchGraph 规则是 argo 中心的（WakeupGuideline STEP 0 硬门等），若 A/B 都带着会系统性偏向 B 组（无 argo 收到无法满足的指令）——对照会话（Level C/E）统一替换为**中性指令（NEUTRAL_AGENTS_MD）+ 中性提问**（不含任何 MCP 名、完全相同），唯一差异=挂载的记忆后端，toolUsed 仍断言会话实际用了所挂后端，smoke 29/29（c:/e: neu=true tool=true ans=true）。已知发现：install-argo.ps1 的 DSH/OpenClaw 步骤反斜杠字面量路径在 Linux 不兼容（MVP 以 -SkipDsh -SkipOpenClaw 跳过，留待修复）。",
       "testcases": [
         {
-          "name": "AT-self-evolution-sandbox-01-沙箱测试环境就绪（不发布）",
-          "description": "GIVEN 需要为自进化建一个隔离的测试环境；WHEN 检查 sandbox/ 与 scripts/sandbox-test.js；THEN 存在 Dockerfile（node+pwsh，基础镜像可配置）、entrypoint.sh（空工作区模拟用户 npm install tarball + npx argo-deploy）、smoke.js（含 argo init 生成初始图谱）、宿主编排器，且不 npm publish、不复制生产图。",
+          "name": "AT-sandbox-01",
+          "description": "GIVEN Docker 隔离沙箱框架已构建；WHEN 用户运行沙箱框架检查；THEN 沙箱环境文件齐备、不发布、支持 Level B/C/D/E 能力（Docker 运行不修改宿主配置）。",
           "type": "Acceptance Test",
           "Input": "tests/sandbox-framework.test.js",
           "acceptanceCriteria": "tests/sandbox-framework.test.js"
-        },
-        {
-          "name": "AT-self-evolution-sandbox-02-Docker端到端框架安装验证",
-          "description": "GIVEN 需要整套框架按用户安装方式端到端验证且不碰宿主；WHEN 容器内空工作区 npm install 本地 tarball + npx argo-deploy + smoke（smoke 先调 initializeWorkspace 生成初始图谱，再跑 MCP 读图/校验，并在挂载 argo/.env 时跑 Level B：独立 sandbox Neo4j 库投影查询 + 真实 Embedding 语义检索）；THEN 部署产物/依赖/MCP 注册全部就绪，初始图谱生成成功，smoke 检查全部通过，部署根均在容器 HOME 下。",
-          "type": "Acceptance Test",
-          "Input": "scripts/sandbox-test.js",
-          "acceptanceCriteria": "scripts/sandbox-test.js"
-        },
-        {
-          "name": "AT-self-evolution-sandbox-03-OpenCode Agent全栈评测",
-          "description": "GIVEN 测试对象应为运行在 OpenCode 上的 Agent（Agent 再调沙箱内 ARGO MCP），而非直接测 MCP 接口；WHEN 容器内安装 opencode-ai、配置阿里 compatible-mode provider（ali-dashscope/qwen3.7-plus）、用 opencode run headless 驱动 Agent 回答记忆题；THEN Agent 通过注册进 opencode.json 的 argo MCP 读图并准确作答，JSON 事件流含工具调用与 token/cost 计量；**严格隔离：A 组会话只挂 argo MCP（configureOpenCodeModel('argo') 清掉 lightrag）；口径 A：会话用中性指令+中性提问（NEUTRAL_AGENTS_MD，不点名 MCP）**。",
-          "type": "Acceptance Test",
-          "Input": "scripts/sandbox-test.js",
-          "acceptanceCriteria": "scripts/sandbox-test.js"
-        },
-        {
-          "name": "AT-self-evolution-sandbox-04-lightrag MCP第二记忆后端就绪",
-          "description": "GIVEN 对照评测需要容器内 LightRAG 包成 MCP 作为第二记忆后端；WHEN 运行 node scripts/sandbox-test.js（含 Level D，smoke 用 MCP 客户端经 test-lightrag-mcp.py 连 lightrag-mcp.py：列出 lightrag_insert/lightrag_query 工具、insert 探针文档、hybrid 查询，LightRAG 图存储=Neo4j Neo4JStorage 独立库 lightrag）；THEN insert 成功、查询返回含 1249 的 grounded 答案且探针退出码 0，smoke 全部检查通过（28/28）。",
-          "type": "Acceptance Test",
-          "Input": "scripts/sandbox-test.js",
-          "acceptanceCriteria": "scripts/sandbox-test.js"
-        },
-        {
-          "name": "AT-self-evolution-sandbox-05-OpenCode Agent经lightrag MCP作答",
-          "description": "GIVEN 对照评测「双 MCP 同 Agent」需要验证 Agent 能挂 lightrag MCP（B 组）作答；WHEN 运行 node scripts/sandbox-test.js（含 Level E：smoke 用 opencode run --format json 驱动 Agent 提问让其用可用记忆工具回答已摄入记忆题，LightRAG 记忆由 Level D 探针预先摄入含 1249 的文档）；THEN Agent 实际调用了 lightrag_query 工具（tool_use 事件含工具名）且答案含 1249，退出码 0；**严格隔离：B 组会话只挂 lightrag MCP（configureOpenCodeModel('lightrag') 清掉 argo，deleteMcpArgo）；口径 A：与 A 组同一中性指令+中性提问**，smoke 全部检查通过（29/29）。",
-          "type": "Acceptance Test",
-          "Input": "scripts/sandbox-test.js",
-          "acceptanceCriteria": "scripts/sandbox-test.js"
         }
       ],
       "attributes": [
@@ -4057,58 +3264,14 @@
           "value": "delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-neo4j-semantic-projection-store-01-陈旧语义记录被清除",
-          "description": "GIVEN canonical 快照仅含元素 e1，而投影存储中仍残留 Element:stale1；WHEN 语义 backfill 全量运行至完成；THEN stale1 被 tombstone 删除，存储与快照一致（仅剩 Element:e1）。",
-          "type": "Acceptance Test",
-          "Input": "tests/semantic-backfill-reconcile.test.js",
-          "acceptanceCriteria": "tests/semantic-backfill-reconcile.test.js"
-        },
-        {
-          "name": "AT-neo4j-semantic-projection-store-02-一致存储不误删",
-          "description": "GIVEN 存储中所有记录在快照中仍存在；WHEN backfill 运行；THEN 不产生任何 tombstone，全部记录保留。",
-          "type": "Acceptance Test",
-          "Input": "tests/semantic-backfill-reconcile.test.js",
-          "acceptanceCriteria": "tests/semantic-backfill-reconcile.test.js"
-        },
-        {
-          "name": "AT-neo4j-semantic-projection-store-03-仅删除陈旧记录",
-          "description": "GIVEN 混合存储含两条当前记录与一条陈旧记录；WHEN backfill 运行；THEN 仅陈旧记录被删除，当前记录保留。",
-          "type": "Acceptance Test",
-          "Input": "tests/semantic-backfill-reconcile.test.js",
-          "acceptanceCriteria": "tests/semantic-backfill-reconcile.test.js"
-        },
-        {
-          "name": "AT-neo4j-semantic-projection-store-04-memory_search MCP 契约（content 数组）",
-          "description": "GIVEN memory_search 是生产语义记忆检索工具（读 ArgoProductionSemanticRecord）；WHEN 通过 argo MCP callTool 调用；THEN 返回结果与其他 argo 工具一致携带 MCP content 数组（content[0].text 为 JSON payload），同时顶层 status/hits 仍可读——修复前返回裸对象导致客户端 'r.content is not iterable'。commit 50988ef。",
-          "type": "Acceptance Test",
-          "Input": "tests/semantic-memory-search.test.js",
-          "acceptanceCriteria": "tests/semantic-memory-search.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "navigation-eval-wp-001",
       "name": "设计导航能力评测集",
       "type": "Work Package",
       "description": "从「给 AGENT 一张以 ArchiMate 为 schema 的导航地图」愿景出发，设计 ArchGraph 导航能力评测题集 docs/navigation-eval-dataset.md：4 维度（定位/可达/视角切换/边界内导航）×5 题 = 20 题（NV-01..20），每题含 GIVEN 地图现状/WHEN 导航问题/THEN 到达目标（ground truth）/检索提示；配套可执行 harness scripts/navigation-eval-run.js 与测试 tests/navigation-eval-dataset.test.js + tests/navigation-eval-run.test.js。实测 20/20 通过（4 维度各 5/5，平均 14ms），报告 results/navigation-eval-report.json。区别于 memory-eval-dataset（事实提取问答）：导航评测测「AGENT 能否在图谱上按图索骥（定位/可达/视角/边界）」，不要求生成答案，只要求正确到达图谱中的目标位置。已归档为可维护扩展的评测集 SEED（data/eval-seeds/navigation-seed.json，v1.0.0，单一事实源，加载器 scripts/eval-seed.js，直接 harness 与完整 AGENT 评测均从 SEED 取题；配套 tests/eval-seed.test.js）。",
-      "testcases": [
-        {
-          "name": "AT-navigation-eval-01-导航评测题集文档就绪",
-          "description": "GIVEN 需要为「导航地图」愿景设计可执行的评测输入；WHEN 读者打开 docs/navigation-eval-dataset.md；THEN 文档包含 4 导航维度（定位 Locate/可达 Reachability/视角切换 Viewpoint/边界内导航 Scoped Navigation）、20 题（NV-01..20）含 GIVEN/WHEN/THEN 期望目标与检索提示、并说明与 memory-eval-dataset（事实提取）的区别。",
-          "type": "Acceptance Test",
-          "Input": "tests/navigation-eval-dataset.test.js",
-          "acceptanceCriteria": "tests/navigation-eval-dataset.test.js"
-        },
-        {
-          "name": "AT-navigation-eval-02-导航评测harness可运行并达基线",
-          "description": "GIVEN 已具备 20 题导航题集与 ARGO MCP 读路径；WHEN 运行 scripts/navigation-eval-run.js；THEN 逐题在意图图上导航并判定 PASS/FAIL，产出 4 维度/整体准确率与平均时延，写入 results/navigation-eval-report.json，且 20 题全部通过（整体 20/20，各维度 5/5）。",
-          "type": "Acceptance Test",
-          "Input": "tests/navigation-eval-run.test.js",
-          "acceptanceCriteria": "tests/navigation-eval-run.test.js"
-        }
-      ],
+      "testcases": [],
       "attributes": [
         {
           "name": "commit",
@@ -4130,15 +3293,7 @@
       "description": "在导航题集（navigation-eval-wp-001）之上落地「完整 ArchGraph AGENT 导航评测」：容器沙箱内以 opencode run --format json 驱动 OpenCode Agent（DeepSeek + 完整 argo MCP 工具链，生产意图图 165 元素/40 视图挂载）逐题导航 NV-01..20，按最终答案是否到达目标 id/name 判定；每次运行把每题原始 AGENT 会话记录（opencode run NDJSON 事件流）打包进结果包 results/navigation-agent-raw/<NV-xx>.ndjson，并在 results/navigation-agent-report.json 的 rawSessions 元数据登记文件路径。交付：sandbox/navigation-agent-eval.js（懒加载 argo 包可宿主导入；saveRawSession 写原始会话）、tests/navigation-agent-eval.test.js（验收）、results/navigation-agent-report.json + results/navigation-agent-raw/。区别于 memory-eval-dataset（事实提取问答）与 navigation-eval-wp-001 的直接 harness（不驱动 Agent）：本 WP 测「真实 Agent 用完整 ARGO 工具链能否按图导航」，且结果可审计（原始会话可回放）。",
       "id": "navigation-agent-eval-wp-001",
       "name": "完整 ArchGraph AGENT 导航评测（opencode run，原始会话入结果包）",
-      "testcases": [
-        {
-          "name": "AT-navigation-agent-eval-01-AGENT导航评测可执行且原始会话入结果包",
-          "description": "GIVEN 需要验证真实 Agent 用完整 ARGO 工具链在意图图上导航、且结果可审计；WHEN 运行 node --test tests/navigation-agent-eval.test.js（宿主导入 sandbox/navigation-agent-eval.js）；THEN 断言：题集含 20 题 NV-01..20 覆盖 4 导航维度且每题带 ground truth、judgeAnswer 按目标 id/name 判定、saveRawSession 把每题原始 NDJSON 会话逐字写入结果包 <reportDir>/navigation-agent-raw/<qid>.ndjson、且已生成的结果包报告含 rawSessions（20 条原始会话文件路径）。",
-          "type": "Acceptance Test",
-          "Input": "tests/navigation-agent-eval.test.js",
-          "acceptanceCriteria": "tests/navigation-agent-eval.test.js"
-        }
-      ],
+      "testcases": [],
       "type": "Work Package",
       "attributes": [
         {

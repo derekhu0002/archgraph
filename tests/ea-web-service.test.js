@@ -73,28 +73,6 @@ test('ea-web-service: the Work Package is registered under the EA Tooling view',
   assert.ok(view.included_elements.includes(WORK_PACKAGE_ID), 'EA Tooling view should include the Work Package');
 });
 
-test('ea-web-service: Work Package carries executable GIVEN-WHEN-THEN testcases', () => {
-  // GIVEN every acceptance testcase must be executable and in GIVEN-WHEN-THEN form
-  // WHEN the Work Package testcases are inspected
-  // THEN at least 5 testcases exist, each GIVEN-WHEN-THEN and pointing at the executable test file
-  const element = GRAPH.elements.find((entry) => entry.id === WORK_PACKAGE_ID);
-  assert.ok(element, 'Work Package should exist');
-  assert.ok(Array.isArray(element.testcases) && element.testcases.length >= 5, 'at least 5 testcases should exist');
-
-  for (const tc of element.testcases) {
-    assert.ok(tc.name && tc.name.startsWith('AT-2758-'), 'testcase name should use the AT-2758- prefix');
-    assert.match(tc.description, /GIVEN/, 'testcase description should contain GIVEN');
-    assert.match(tc.description, /WHEN/, 'testcase description should contain WHEN');
-    assert.match(tc.description, /THEN/, 'testcase description should contain THEN');
-    assert.equal(tc.type, 'Acceptance Test', 'testcase type should be Acceptance Test');
-    assert.ok(
-      tc.Input && /^tests\/ea-web-service(-test-report)?\.test\.js$/.test(tc.Input),
-      'testcase Input should be executable'
-    );
-    assert.ok(tc.acceptanceCriteria && tc.acceptanceCriteria.trim().length > 0, 'testcase should carry acceptanceCriteria');
-  }
-});
-
 test('ea-web-service: doc covers multi-project discovery, status display and project selection', () => {
   // GIVEN the web service must manage multiple projects
   // WHEN the doc is inspected
@@ -164,22 +142,4 @@ test('ea-web-service: doc covers import and export of the selected project graph
   assert.match(doc, /FR-14（导入导出）/, 'FR-14 should be present');
   assert.match(doc, /AC-11（导入到当前项目）/, 'AC-11 should be present');
   assert.match(doc, /AC-12（导出当前项目）/, 'AC-12 should be present');
-});
-
-test('ea-web-service: Work Package testcases cover the new multi-project/view/edit acceptance criteria', () => {
-  // GIVEN the new capabilities must be traced to executable GIVEN-WHEN-THEN testcases
-  // WHEN the Work Package 2758 testcases are inspected
-  // THEN the new acceptance testcases AT-2758-06..12 exist and the description reflects the expanded scope
-  const element = GRAPH.elements.find((entry) => entry.id === WORK_PACKAGE_ID);
-  assert.ok(element, 'Work Package should exist');
-  assert.ok(Array.isArray(element.testcases), 'testcases should be an array');
-
-  const names = element.testcases.map((tc) => tc.name);
-  for (const prefix of ['AT-2758-06', 'AT-2758-07', 'AT-2758-08', 'AT-2758-09', 'AT-2758-10', 'AT-2758-11', 'AT-2758-12']) {
-    assert.ok(names.some((n) => n.startsWith(prefix)), `testcase ${prefix}* should exist`);
-  }
-  assert.ok(element.testcases.length >= 12, 'at least 12 testcases should exist');
-  assert.match(element.description, /多项目/, 'WP description should mention multi-project');
-  assert.match(element.description, /查看\/编辑|查看与编辑|查看和编辑/, 'WP description should mention view and edit');
-  assert.match(element.description, /ARGO MCP/, 'WP description should mention the ARGO MCP write path');
 });

@@ -126,5 +126,4 @@ test('dsh-plugin-design: graph work package 2767 is the dsh-plugin Work Package 
   assert.ok(wp, 'element 2767 should exist');
   assert.equal(wp.type, 'Work Package', '2767 should be a Work Package');
   assert.match(wp.name, /dsh-plugin|DSH 插件/, '2767 should be the dsh-plugin work package');
-  assert.ok(Array.isArray(wp.testcases) && wp.testcases.length >= 1, '2767 should carry its acceptance testcases');
 });

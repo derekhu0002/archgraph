@@ -38,22 +38,3 @@ test('检视报告包含问题清单结构（R-1..R-n + 级别）', () => {
   assert.match(text, /\| R-2 \|/, '问题清单应包含 R-2 条目');
   assert.match(text, /Major|Critical|Minor/, '问题清单应包含级别取值');
 });
-
-test('图谱登记：工作包 2767 携带 AT-2767-07（GIVEN-WHEN-THEN、可执行）', () => {
-  // GIVEN Reviewer 已在意图图谱登记检视验收用例
-  // WHEN 检查工作包 2767 的 testcases
-  // THEN 存在 AT-2767-07，描述为 GIVEN-WHEN-THEN，type 为 Acceptance Test，
-  //      Input 指向本测试文件（node tests/dsh-plugin-code-review.test.js），acceptanceCriteria 非空
-  const graph = readGraph();
-  const wp = (graph.elements || []).find((el) => el.id === '2767');
-  assert.ok(wp, '工作包 2767 应存在');
-  const tc = (wp.testcases || []).find((entry) => entry.name && entry.name.includes('AT-2767-07'));
-  assert.ok(tc, '工作包 2767 应携带 AT-2767-07');
-  assert.match(tc.description, /GIVEN/);
-  assert.match(tc.description, /WHEN/);
-  assert.match(tc.description, /THEN/);
-  assert.equal(tc.type, 'Acceptance Test');
-  assert.ok(tc.Input && tc.Input.includes('tests/dsh-plugin-code-review.test.js'),
-    'AT-2767-07 的 Input 应指向本测试文件');
-  assert.ok(tc.acceptanceCriteria && tc.acceptanceCriteria.length > 0, 'acceptanceCriteria 应非空');
-});

@@ -36,18 +36,3 @@ test('测试报告：覆盖 AC-1..AC-12 追踪表', () => {
     assert.ok(text.includes(`AC-${i} `) || text.includes(`AC-${i}\n`), `报告应包含 AC-${i}`);
   }
 });
-
-test('图谱登记：Work Package 2758 携带验收用例 AT-2758-13', () => {
-  // GIVEN 验证测试通过并已登记图谱
-  // WHEN 检查 WP 2758 的 testcases
-  // THEN 存在 AT-2758-13（GIVEN-WHEN-THEN、可执行，Input 指向本测试文件）
-  const wp = GRAPH.elements.find((el) => el.id === '2758');
-  assert.ok(wp, 'WP 2758 应存在');
-  const tc = (wp.testcases || []).find((entry) => entry.name && entry.name.includes('AT-2758-13'));
-  assert.ok(tc, 'WP 2758 应携带 AT-2758-13');
-  assert.match(tc.description, /GIVEN/);
-  assert.match(tc.description, /WHEN/);
-  assert.match(tc.description, /THEN/);
-  assert.equal(tc.type, 'Acceptance Test');
-  assert.ok(tc.Input && tc.Input.includes('tests/ea-web-service-test-report.test.js'), 'AT-2758-13 的 Input 应指向本测试');
-});

@@ -348,22 +348,6 @@ test('服务启动冒烟：临时端口启动，GET /api/projects 与 /export �
   }
 });
 
-test('图谱登记：组件 2760 携带实现验收用例 AT-2760-03', () => {
-  // GIVEN Developer 已完成实现并在意图图谱登记
-  // WHEN 检查组件 2760 的 testcases
-  // THEN 存在 AT-2760-03（GIVEN-WHEN-THEN、可执行，Input 指向实现测试文件）
-  const graph = readGraph(REAL_GRAPH);
-  const component = (graph.elements || []).find((el) => el.id === '2760');
-  assert.ok(component, '组件 2760 应存在');
-  const tc = (component.testcases || []).find((entry) => entry.name && entry.name.includes('AT-2760-03'));
-  assert.ok(tc, '组件 2760 应携带 AT-2760-03 实现验收用例');
-  assert.match(tc.description, /GIVEN/);
-  assert.match(tc.description, /WHEN/);
-  assert.match(tc.description, /THEN/);
-  assert.equal(tc.type, 'Acceptance Test');
-  assert.ok(tc.Input && tc.Input.includes('tests/ea-web-service-impl.test.js'), 'AT-2760-03 的 Input 应指向实现测试');
-});
-
 test('导入校验：视图 parent_element_id 引用断裂不改动文件', async () => {
   // GIVEN 一个视图引用不存在元素的 JSON
   // WHEN 执行 importProject

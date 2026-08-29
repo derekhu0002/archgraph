@@ -69,20 +69,15 @@ test('ea-web-service-ui-insight: report gives concrete AD-c / AD-g revision advi
   assert.match(doc, /被否方案/, 'revision advice should include rejected alternatives');
 });
 
-test('ea-web-service-ui-insight: graph contains a Skill insight element with a GIVEN-WHEN-THEN testcase', () => {
+test('ea-web-service-ui-insight: graph contains a Skill insight element', () => {
   // GIVEN the planning expert has registered the insight in the intent graph
   // WHEN a caller looks up the element
-  // THEN a Skill element exists with parent 1249 and a GIVEN-WHEN-THEN testcase
+  // THEN a Skill element exists with parent 1249 and a description
   const el = insightElement();
   assert.equal(el.id, INSIGHT_ID, 'insight element id should be 2766');
   assert.equal(el.type, 'Skill', 'insight element should be a Skill');
   assert.equal(el.parent, '1249', 'insight element should hang under Implementation and Migration Viewpoint (1249)');
   assert.ok(el.description && el.description.trim().length > 0, 'insight element should carry a description');
-
-  assert.ok(Array.isArray(el.testcases) && el.testcases.length >= 1, 'insight element should have at least one testcase');
-  const tc = el.testcases[0];
-  assert.ok(isGivenWhenThen(tc.description), 'testcase description should be GIVEN-WHEN-THEN');
-  assert.ok(tc.Input && tc.Input.includes('ea-web-service-ui-insight.test.js'), 'testcase Input should point to this test file');
 });
 
 test('ea-web-service-ui-insight: insight element is in the EA Tooling view and under the actor long-term memory sub-view', () => {

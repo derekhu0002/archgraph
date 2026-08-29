@@ -196,50 +196,6 @@ test('ea-web-service-design: graph contains Realization relationships wiring WP 
   }
 });
 
-test('ea-web-service-design: new elements carry executable GIVEN-WHEN-THEN testcases', () => {
-  // GIVEN every acceptance testcase must be executable and GIVEN-WHEN-THEN
-  // WHEN the new element testcases are inspected
-  // THEN the component and each service carry GIVEN-WHEN-THEN testcases pointing at the design test file
-  const ids = [COMPONENT_ID, ...SERVICE_IDS];
-  for (const id of ids) {
-    const element = elementById(id);
-    assert.ok(element, `element ${id} should exist`);
-    assert.ok(Array.isArray(element.testcases) && element.testcases.length >= 1, `element ${id} should carry testcases`);
-    for (const tc of element.testcases) {
-      assert.match(tc.description, /GIVEN/, `${id} testcase description should contain GIVEN`);
-      assert.match(tc.description, /WHEN/, `${id} testcase description should contain WHEN`);
-      assert.match(tc.description, /THEN/, `${id} testcase description should contain THEN`);
-      assert.equal(tc.type, 'Acceptance Test', `${id} testcase type should be Acceptance Test`);
-      assert.ok(
-        tc.Input && (
-          tc.Input.includes('tests/ea-web-service-design.test.js')
-          || tc.Input.includes('tests/ea-web-service-impl.test.js')
-          || tc.Input.includes('tests/ea-web-service-code-review.test.js')
-        ),
-        `${id} testcase Input should be executable`
-      );
-      assert.ok(tc.acceptanceCriteria && tc.acceptanceCriteria.trim().length > 0, `${id} testcase should carry acceptanceCriteria`);
-    }
-  }
-});
-
-test('ea-web-service-design: component carries a testcase asserting the open-source graph core (not hand-rolled SVG)', () => {
-  // GIVEN the planner feedback introduced an open-source graph core
-  // WHEN the component testcases are inspected
-  // THEN 2760 carries a GIVEN-WHEN-THEN testcase asserting the UI uses G6/Cytoscape, not all-hand-rolled SVG
-  const component = elementById(COMPONENT_ID);
-  assert.ok(component, 'component 2760 should exist');
-  assert.ok(Array.isArray(component.testcases) && component.testcases.length >= 2, 'component should carry at least 2 testcases');
-  const tc = component.testcases.find((entry) => /2760-02|开源图库|G6/.test(entry.name || ''));
-  assert.ok(tc, 'component should carry a testcase asserting the open-source graph core');
-  assert.match(tc.description, /GIVEN/, 'testcase should contain GIVEN');
-  assert.match(tc.description, /WHEN/, 'testcase should contain WHEN');
-  assert.match(tc.description, /THEN/, 'testcase should contain THEN');
-  assert.match(tc.description, /G6|Cytoscape/, 'testcase should name G6/Cytoscape');
-  assert.equal(tc.type, 'Acceptance Test', 'testcase type should be Acceptance Test');
-  assert.ok(tc.Input && tc.Input.includes('tests/ea-web-service-design.test.js'), 'testcase Input should be executable');
-});
-
 test('ea-web-service-design: design doc includes design-stage GIVEN-WHEN-THEN acceptance criteria', () => {
   // GIVEN the design stage itself must be verifiable
   // WHEN the design doc is inspected

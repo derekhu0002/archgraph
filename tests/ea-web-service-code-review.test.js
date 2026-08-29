@@ -37,22 +37,3 @@ test('检视报告包含问题清单格式（编号/级别/位置/建议）', ()
   assert.match(text, /Critical/, '问题清单应包含 Critical 级别项');
   assert.match(text, /Major/, '问题清单应包含 Major 级别项');
 });
-
-test('图谱登记：组件 2760 携带 AT-2760-04（GIVEN-WHEN-THEN、可执行）', () => {
-  // GIVEN Reviewer 已在意图图谱登记检视验收用例
-  // WHEN 检查组件 2760 的 testcases
-  // THEN 存在 AT-2760-04，描述为 GIVEN-WHEN-THEN，type 为 Acceptance Test，
-  //      Input/acceptanceCriteria 指向本测试文件（可执行）
-  const graph = readGraph();
-  const component = (graph.elements || []).find((el) => el.id === '2760');
-  assert.ok(component, '组件 2760 应存在');
-  const tc = (component.testcases || []).find((entry) => entry.name && entry.name.includes('AT-2760-04'));
-  assert.ok(tc, '组件 2760 应携带 AT-2760-04');
-  assert.match(tc.description, /GIVEN/);
-  assert.match(tc.description, /WHEN/);
-  assert.match(tc.description, /THEN/);
-  assert.equal(tc.type, 'Acceptance Test');
-  assert.ok(tc.Input && tc.Input.includes('tests/ea-web-service-code-review.test.js'),
-    'AT-2760-04 的 Input 应指向本测试文件');
-  assert.ok(tc.acceptanceCriteria && tc.acceptanceCriteria.length > 0, 'acceptanceCriteria 应非空');
-});
