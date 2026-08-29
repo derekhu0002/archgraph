@@ -3335,30 +3335,31 @@
       "attributes": [
         {
           "name": "verification_focus",
-          "value": "ARGO MCP 接口功能看护 + 框架交付件功能看护（功能视角，非静态文件）"
+          "value": "ARGO MCP 接口功能看护 + 框架交付件功能看护（用户视角、每控制点合并、不影响宿主配置）"
         },
         {
           "name": "external_scope",
-          "value": "每个 ARGO MCP 工具接口 + RULE/SKILL/schema/Neo4j 投影/语义生命周期/评测 harness 的外部可观察行为"
+          "value": "用户可观察的 ARGO MCP 工具接口行为 + 用户面交付件（网站/README/公众号/规范/图）+ 沙箱框架（Docker 非宿主影响）"
         },
         {
           "name": "commit",
           "value": "599b9ff",
-          "description": "tests/acceptance-guardian.test.js; tests/mcp-interface-behavior.test.js; design/KG/SystemArchitecture.json（验收看护体系建立）"
+          "description": "验收看护体系建立"
         },
         {
           "name": "commit",
           "value": "1e97304",
-          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; tests/*; design/KG/SystemArchitecture.json（移除 generateArchitectureDiffPlantuml 工具面）"
+          "description": "移除 generateArchitectureDiffPlantuml 工具面"
         },
         {
           "name": "commit",
           "value": "cc1911b",
-          "description": "design/KG/SystemArchitecture.json（全量刷新挂载 AT：54 元素 112 描述性 acceptanceCriteria → 裸可执行路径；移除 6 个内部视角/冗余 AT（AT-2100-01..05 EA 导入白盒 + AT-2767-06）；挂载 AT 137/137 可执行）+ scripts/at-inventory|at-refresh-plan|at-refresh-apply + tests/* 断言同步"
+          "description": "全量刷新挂载 AT 为裸可执行路径 + 移除内部视角"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
+          "name": "commit",
+          "value": "e7d5dc5",
+          "description": "精简挂载 AT 至用户视角/每控制点合并：137→22 AT（13 元素）；guardian 增强为全图扫描所有挂载 AT 可执行；tests/at-simplify-plan|apply 维护脚本"
         }
       ],
       "testcases": [
