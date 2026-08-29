@@ -120,8 +120,8 @@ const TOOLS = [
           properties: {
             purpose: {
               type: 'string',
-              enum: ['intent-decision', 'implementation-design', 'coding-repair', 'audit'],
-              description: 'Declared reading purpose: intent-decision, implementation-design, coding-repair, or audit, all resolved through semantic retrieval.',
+              enum: ['general', 'audit'],
+              description: 'Declared reading purpose: general for generic semantic/memory retrieval, or audit for strict proof-closure reads (subject required).',
             },
             intent: { type: 'string', description: 'Natural-language intent for semantic retrieval, for example "summarize business features for high-risk audit".' },
             subject: { type: 'string', description: 'Required for audit; optional anchor/focus id for other semantic purposes.' },

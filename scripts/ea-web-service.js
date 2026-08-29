@@ -668,7 +668,7 @@ async function searchSemantic(adapter, project, query) {
   const timeoutMs = 15000;
   const args = {
     architecturePath: GRAPH_MARKER.join('/'),
-    query: { purpose: 'implementation-design', intent: query },
+    query: { purpose: 'general', intent: query },
   };
   const attempt = adapter.callTool('getSystemArchitecture', args, project.root);
   const result = await withTimeout(attempt, timeoutMs, { timedOut: true });

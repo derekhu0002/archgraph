@@ -10,9 +10,7 @@ const {
 
 const DEFAULT_GRAPH_PATH = 'design/KG/SystemArchitecture.json';
 const LEGAL_QUERY_PURPOSES = new Set([
-  'intent-decision',
-  'implementation-design',
-  'coding-repair',
+  'general',
   'audit',
 ]);
 const FORBIDDEN_RESPONSE_SHAPE_CONTROL_FIELDS = Object.freeze([
@@ -192,7 +190,7 @@ const TOOLS = [
             purpose: {
               type: 'string',
               enum: Array.from(LEGAL_QUERY_PURPOSES),
-              description: 'Declared reading purpose: intent-decision, implementation-design, coding-repair, or audit, all resolved through semantic retrieval.',
+              description: 'Declared reading purpose: general for generic semantic/memory retrieval, or audit for strict proof-closure reads (subject required).',
             },
             intent: { type: 'string', description: 'Natural-language intent for semantic retrieval, for example "summarize business features for high-risk audit".' },
             subject: { type: 'string', description: 'Required for audit; optional anchor/focus id for other semantic purposes.' },
@@ -2177,12 +2175,11 @@ async function callTool(name, args = {}, dependencies = undefined) {
   throw new Error(`Unknown tool: ${name}`);
 }
 
-// memory_search: natural-language semantic memory retrieval. Reuses the
-// memory-retrieval purpose (implementation-design) of the semantic journey
-// (same path as getSystemArchitecture, so readiness/closure behave identically)
-// and reshapes the retrieved elements into a memory-oriented hit list with
-// content + similarity score, so an agent can look up the user's memory in one
-// call.
+// memory_search: natural-language semantic memory retrieval. Uses the
+// agent-facing 'general' purpose of the semantic journey (same path as
+// getSystemArchitecture, so readiness/closure behave identically) and reshapes
+// the retrieved elements into a memory-oriented hit list with content +
+// similarity score, so an agent can look up the user's memory in one call.
 async function memorySearchTool(args = {}, dependencies = undefined) {
   const query = typeof args.query === 'string' ? args.query.trim() : '';
   if (!query) {
@@ -2200,7 +2197,7 @@ async function memorySearchTool(args = {}, dependencies = undefined) {
   let retrieved;
   try {
     const journey = await resolveSemanticOperatorJourney(dependencies);
-    retrieved = await journey.query({ purpose: 'implementation-design', intent: query });
+    retrieved = await journey.query({ purpose: 'general', intent: query });
   } catch (error) {
     return {
       status: 'failed',

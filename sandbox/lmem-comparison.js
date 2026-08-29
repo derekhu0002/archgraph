@@ -256,10 +256,10 @@ async function verifyA(q0) {
       workspaceRoot: WORKSPACE,
     }, null, undefined);
     // purpose='audit' is a special proof-closure anchored on the audit policy
-    // node, NOT a general memory retrieval — use implementation-design so the
+    // node, NOT a general memory retrieval — use purpose 'general' so the
     // query actually runs semantic seed retrieval over the graph.
     const s = await callTool('getSystemArchitecture', {
-      query: { purpose: 'implementation-design', intent: q0.question }, workspaceRoot: WORKSPACE,
+      query: { purpose: 'general', intent: q0.question }, workspaceRoot: WORKSPACE,
     }, null, undefined);
     const rawText = s && s.content && Array.isArray(s.content) && s.content[0] && s.content[0].text
       ? s.content[0].text

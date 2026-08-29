@@ -105,3 +105,12 @@ test('AT argo-mcp-tools: graph-tidy purpose is rejected (no full-snapshot bypass
   assert.equal(payload.status, 'failed');
   assert.equal(payload.error && payload.error.category, 'QUERY_PURPOSE_INVALID');
 });
+
+test('AT argo-mcp-tools: purpose enum is general + audit (internal categories rejected)', () => {
+  // GIVEN the agent-facing purpose enum is collapsed to general/audit
+  // WHEN a former internal category is submitted as an agent-facing purpose
+  const payload = callToolOnce('getSystemArchitecture', { query: { purpose: 'implementation-design', intent: 'x' } });
+  // THEN it is rejected as an invalid purpose (internal categories are not agent-facing)
+  assert.equal(payload.status, 'failed');
+  assert.equal(payload.error && payload.error.category, 'QUERY_PURPOSE_INVALID');
+});

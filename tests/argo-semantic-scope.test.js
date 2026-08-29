@@ -127,7 +127,7 @@ test('applySemanticScopeFilter: business summary is bounded to the scope', () =>
   // GIVEN a business-summary-shaped document and a scope identity set
   const document = {
     responseProfile: 'business-summary',
-    purpose: 'implementation-design',
+    purpose: 'general',
     businessObjects: {
       elements: FIXTURE.elements.map(e => ({ id: e.id, name: e.name })),
       relationships: FIXTURE.relationships.map(r => ({ id: r.id, name: r.name })),

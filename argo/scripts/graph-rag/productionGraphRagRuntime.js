@@ -50,6 +50,14 @@ const PURPOSE_CATEGORIES = Object.freeze([
   'graph-tidy',
 ]);
 
+// Agent-facing purpose alias: the generic memory/context read is exposed to
+// agents as `general`; internally it binds to the implementation-design closure
+// category (same loose-threshold retrieval, generic closure shape). The other
+// categories stay internal-only (exercised by the W5 purpose-closure runners).
+const AGENT_PURPOSE_TO_CATEGORY = Object.freeze({
+  general: 'implementation-design',
+});
+
 const PURPOSE_POLICY_ANCHORS = Object.freeze({
   'intent-decision': 'grag-intent-decision-policy',
   'implementation-design': 'grag-implementation-policy',
@@ -617,7 +625,7 @@ function average(values) {
 
 async function closePurposePolicyScope(options) {
   const request = options.request || {};
-  const category = request.purpose;
+  const category = AGENT_PURPOSE_TO_CATEGORY[request.purpose] || request.purpose;
   const template = PURPOSE_POLICY_TEMPLATES[category];
   const policyAnchorId = PURPOSE_POLICY_ANCHORS[category];
   if (!template || !policyAnchorId) {
@@ -1582,7 +1590,8 @@ function isLifecycleRequest(request = {}) {
 }
 
 function isPurposePolicyClosureRequest(request = {}) {
-  return PURPOSE_CATEGORIES.includes(request.purpose);
+  const category = AGENT_PURPOSE_TO_CATEGORY[request.purpose] || request.purpose;
+  return PURPOSE_CATEGORIES.includes(category);
 }
 
 function semanticIndexNotAligned(alignment) {

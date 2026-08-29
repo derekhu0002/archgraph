@@ -16,12 +16,12 @@ This local contract refines `OVERALL_ARCHITECTURE.md`.
 `getSystemArchitecture` accepts:
 
 - `query`: REQUIRED. An omitted-query call is rejected with `QUERY_REQUIRED`; the legacy full-graph snapshot envelope is no longer exposed to agents.
-- `query.purpose`: one of `intent-decision`, `implementation-design`, `coding-repair`, or `audit` (`graph-tidy` was removed from the agent-facing purpose enum; the runtime engine retains an internal graph-tidy full-snapshot policy reachable only via the private journey/CLI, never the public tool);
+- `query.purpose`: one of `general` or `audit` (`intent-decision`, `implementation-design`, `coding-repair`, and `graph-tidy` were removed from the agent-facing purpose enum; the runtime engine retains all of them as internal closure categories reachable only via the private journey/CLI, never the public tool — `general` binds to the internal `implementation-design` closure category);
 - `query.intent`: required non-empty natural-language intent for an explicit query;
 - `query.subject`: required non-empty audit subject when `purpose` is `audit`;
 - optional deterministic anchors may be added without changing no-argument behavior.
 
-All four purpose values remain legal agent-facing contract inputs. `intent-decision`, `implementation-design`, `coding-repair`, and valid `audit` requests invoke the semantic retrieval boundary. No agent-facing path reports `mode: "full-snapshot"` or `semanticRetrieval: "bypassed"`; the output contract mode is `semantic-query` or `error` only.
+Both purpose values remain legal agent-facing contract inputs. `general` (generic semantic/memory retrieval, loose threshold) and valid `audit` requests (strict proof-closure, subject required) invoke the semantic retrieval boundary. No agent-facing path reports `mode: "full-snapshot"` or `semanticRetrieval: "bypassed"`; the output contract mode is `semantic-query` or `error` only.
 
 For W6, semantic query results must remain traceable to the canonical graph version used by the same no-argument legacy read. Endpoint, View, and provenance completion are delegated inward to the Graph RAG boundary, but the query service must surface their evidence without silently dropping or rewriting `canonicalVersion`, policy, index, or alignment fields.
 

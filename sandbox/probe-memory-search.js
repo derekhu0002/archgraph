@@ -119,7 +119,7 @@ async function main() {
   // Compare with getSystemArchitecture (same purpose path) for question 0
   const q0 = questions[0];
   const g = await callTool('getSystemArchitecture', {
-    query: { purpose: 'implementation-design', intent: q0.question }, workspaceRoot: WORKSPACE,
+    query: { purpose: 'general', intent: q0.question }, workspaceRoot: WORKSPACE,
   }, null, undefined);
   const gText = (g && g.content && g.content[0] && g.content[0].text) || JSON.stringify(g);
   log.push(`[probe] getSystemArchitecture q=${q0.qid} raw=${gText.slice(0, 400)}`);
@@ -144,7 +144,7 @@ async function main() {
       JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'probe', version: '1' } } }),
       JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }),
       JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'memory_search', arguments: { query: q0.question, top_k: 8, workspaceRoot: WORKSPACE } } }),
-      JSON.stringify({ jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'getSystemArchitecture', arguments: { query: { purpose: 'implementation-design', intent: q0.question }, workspaceRoot: WORKSPACE } } }),
+      JSON.stringify({ jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'getSystemArchitecture', arguments: { query: { purpose: 'general', intent: q0.question }, workspaceRoot: WORKSPACE } } }),
     ].join('\n') + '\n',
     maxBuffer: 120 * 1024 * 1024,
   });
