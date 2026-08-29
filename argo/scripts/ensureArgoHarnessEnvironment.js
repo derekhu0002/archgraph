@@ -54,7 +54,7 @@ async function buildHarnessReport({ checkOnly = false, workspaceRoot, includeBoo
       report.workspaceBootstrap = await ensureWorkspaceBootstrap({ checkOnly, workspaceRoot });
     }
     report.mcp = verifyArgoMcpServer({ workspaceRoot });
-    report.systemArchitecture = await verifyCanonicalSystemArchitecture();
+    report.systemArchitecture = await verifyCanonicalSystemArchitecture({ workspaceRoot });
     report.subdiagramViews = report.systemArchitecture.status === 'ok'
       ? await ensureSubdiagramViewsConsistency({ checkOnly, workspaceRoot })
       : {
@@ -245,16 +245,16 @@ function verifyArgoMcpServer({ workspaceRoot }) {
   };
 }
 
-async function verifyCanonicalSystemArchitecture() {
-  const getResponse = await argoMcp.callTool('getSystemArchitecture', {
-    architecturePath: DEFAULT_GRAPH_PATH,
-  });
-  const getPayload = parseToolPayload(getResponse);
-  if (getPayload.status !== 'passed') {
+async function verifyCanonicalSystemArchitecture({ workspaceRoot } = {}) {
+  const graphPath = DEFAULT_GRAPH_PATH;
+  let document = null;
+  try {
+    const raw = fs.readFileSync(path.resolve(workspaceRoot, graphPath), 'utf8');
+    document = JSON.parse(raw);
+  } catch (error) {
     return {
       status: 'failed',
-      error: `getSystemArchitecture failed for ${DEFAULT_GRAPH_PATH}`,
-      payload: getPayload,
+      error: `failed to read canonical graph ${graphPath}: ${error.message}`,
     };
   }
 
@@ -263,7 +263,7 @@ async function verifyCanonicalSystemArchitecture() {
   if (validatePayload.status !== 'passed') {
     return {
       status: 'failed',
-      graphPath: getPayload.graphPath,
+      graphPath,
       error: 'validateSystemArchitecture reported errors.',
       errors: validatePayload.errors || [],
     };
@@ -271,11 +271,11 @@ async function verifyCanonicalSystemArchitecture() {
 
   return {
     status: 'ok',
-    graphPath: getPayload.graphPath,
-    elementCount: Array.isArray(getPayload.document && getPayload.document.elements) ? getPayload.document.elements.length : 0,
-    relationshipCount: Array.isArray(getPayload.document && getPayload.document.relationships) ? getPayload.document.relationships.length : 0,
-    viewCount: Array.isArray(getPayload.document && getPayload.document.views) ? getPayload.document.views.length : 0,
-    neo4jRecovery: getPayload.neo4jRecovery || null,
+    graphPath,
+    elementCount: Array.isArray(document.elements) ? document.elements.length : 0,
+    relationshipCount: Array.isArray(document.relationships) ? document.relationships.length : 0,
+    viewCount: Array.isArray(document.views) ? document.views.length : 0,
+    neo4jRecovery: null,
   };
 }
 

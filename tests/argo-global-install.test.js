@@ -147,8 +147,8 @@ test('argo MCP works from a repository-external global installation', () => {
     assert.equal(validationPayload.status, 'passed');
 
     const snapshotPayload = JSON.parse(snapshot.result.content[0].text);
-    assert.equal(snapshotPayload.status, 'passed');
-    assert.equal(snapshotPayload.graphPath, 'design/KG/SystemArchitecture.json');
+    assert.equal(snapshotPayload.status, 'failed');
+    assert.equal(snapshotPayload.error && snapshotPayload.error.category, 'QUERY_REQUIRED');
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }
@@ -182,8 +182,8 @@ test('argo MCP discovers the workspace from MCP roots without any env var', () =
     );
 
     const snapshotPayload = JSON.parse(snapshot.result.content[0].text);
-    assert.equal(snapshotPayload.status, 'passed');
-    assert.equal(snapshotPayload.graphPath, 'design/KG/SystemArchitecture.json');
+    assert.equal(snapshotPayload.status, 'failed');
+    assert.equal(snapshotPayload.error && snapshotPayload.error.category, 'QUERY_REQUIRED');
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }
@@ -258,8 +258,8 @@ test('argo MCP resolves the workspace through a roots/list request/response hand
 
       assert.equal(initialize.result.capabilities.roots.listChanged, true);
       const payload = JSON.parse(call.result.content[0].text);
-      assert.equal(payload.status, 'passed');
-      assert.equal(payload.graphPath, 'design/KG/SystemArchitecture.json');
+      assert.equal(payload.status, 'failed');
+      assert.equal(payload.error && payload.error.category, 'QUERY_REQUIRED');
     } finally {
       child.kill();
     }
@@ -307,8 +307,8 @@ test('argo MCP selects the ArchGraph workspace among multiple roots', () => {
     const responses = parseResponses(result.stdout);
     const snapshot = responses.find(response => response.id === 3);
     const payload = JSON.parse(snapshot.result.content[0].text);
-    assert.equal(payload.status, 'passed');
-    assert.equal(payload.graphPath, 'design/KG/SystemArchitecture.json');
+    assert.equal(payload.status, 'failed');
+    assert.equal(payload.error && payload.error.category, 'QUERY_REQUIRED');
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }

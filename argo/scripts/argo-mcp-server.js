@@ -111,16 +111,17 @@ const TOOLS = [
     description: 'Start here, but prefer an explicit semantic query instead of an omitted-query full graph read. Provide query.purpose and query.intent to get a compact business/architecture result, then use returned element ids with getIntentElementContext for focused dependency context. Omit query only when an exact full canonical snapshot is explicitly required.',
     inputSchema: {
       type: 'object',
+      required: ['query'],
       properties: {
         architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
         query: {
           type: 'object',
-          description: 'Preferred for ordinary agent reading. Use semantic query instead of full graph reads; combine the returned element ids with getIntentElementContext when deeper local context is needed.',
+          description: 'Required semantic query. Provide query.purpose + query.intent; combine the returned element ids with getIntentElementContext when deeper local context is needed.',
           properties: {
             purpose: {
               type: 'string',
-              enum: ['intent-decision', 'implementation-design', 'coding-repair', 'audit', 'graph-tidy'],
-              description: 'Declared reading purpose. Use intent-decision, implementation-design, coding-repair, or audit for semantic retrieval; graph-tidy intentionally bypasses semantic retrieval and may return a full snapshot.',
+              enum: ['intent-decision', 'implementation-design', 'coding-repair', 'audit'],
+              description: 'Declared reading purpose: intent-decision, implementation-design, coding-repair, or audit, all resolved through semantic retrieval.',
             },
             intent: { type: 'string', description: 'Natural-language intent for semantic retrieval, for example "summarize business features for high-risk audit".' },
             subject: { type: 'string', description: 'Required for audit; optional anchor/focus id for other semantic purposes.' },
@@ -674,7 +675,6 @@ async function handleRequest(request, dependencies = undefined) {
         && params.arguments
         && Object.prototype.hasOwnProperty.call(params.arguments, 'query')
         && params.arguments.query
-        && params.arguments.query.purpose !== 'graph-tidy'
       ) {
         activeDependencies = {
           semanticOperatorJourney:

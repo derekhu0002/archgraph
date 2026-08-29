@@ -15,13 +15,13 @@ This local contract refines `OVERALL_ARCHITECTURE.md`.
 
 `getSystemArchitecture` accepts:
 
-- no `query`: return exactly the legacy public envelope `{ status, graphPath, document }` with the complete canonical `document` and no query-mode metadata;
-- `query.purpose`: one of `intent-decision`, `implementation-design`, `coding-repair`, `audit`, or `graph-tidy`;
+- `query`: REQUIRED. An omitted-query call is rejected with `QUERY_REQUIRED`; the legacy full-graph snapshot envelope is no longer exposed to agents.
+- `query.purpose`: one of `intent-decision`, `implementation-design`, `coding-repair`, or `audit` (`graph-tidy` was removed from the agent-facing purpose enum; the runtime engine retains an internal graph-tidy full-snapshot policy reachable only via the private journey/CLI, never the public tool);
 - `query.intent`: required non-empty natural-language intent for an explicit query;
 - `query.subject`: required non-empty audit subject when `purpose` is `audit`;
 - optional deterministic anchors may be added without changing no-argument behavior.
 
-All five purpose values remain legal contract inputs. `intent-decision`, `implementation-design`, `coding-repair`, and valid `audit` requests invoke the semantic retrieval boundary; `graph-tidy` never invokes it and reports `mode: "full-snapshot"` plus `semanticRetrieval: "bypassed"`.
+All four purpose values remain legal agent-facing contract inputs. `intent-decision`, `implementation-design`, `coding-repair`, and valid `audit` requests invoke the semantic retrieval boundary. No agent-facing path reports `mode: "full-snapshot"` or `semanticRetrieval: "bypassed"`; the output contract mode is `semantic-query` or `error` only.
 
 For W6, semantic query results must remain traceable to the canonical graph version used by the same no-argument legacy read. Endpoint, View, and provenance completion are delegated inward to the Graph RAG boundary, but the query service must surface their evidence without silently dropping or rewriting `canonicalVersion`, policy, index, or alignment fields.
 
@@ -29,6 +29,7 @@ For BP-MCP-SEM-PAYLOAD and BP-MCP-SEM-ELEMENT, semantic result mapping is object
 
 Validation occurs before retrieval and returns these stable categories:
 
+- missing `query`: `QUERY_REQUIRED`;
 - missing purpose: `QUERY_PURPOSE_REQUIRED`;
 - purpose outside the legal enum: `QUERY_PURPOSE_INVALID`;
 - missing or blank intent: `QUERY_INTENT_REQUIRED`;

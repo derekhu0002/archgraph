@@ -14,7 +14,6 @@ const LEGAL_QUERY_PURPOSES = new Set([
   'implementation-design',
   'coding-repair',
   'audit',
-  'graph-tidy',
 ]);
 const FORBIDDEN_RESPONSE_SHAPE_CONTROL_FIELDS = Object.freeze([
   'responseProfile',
@@ -42,12 +41,12 @@ const GET_SYSTEM_ARCHITECTURE_OUTPUT_SCHEMA = {
     },
     mode: {
       type: 'string',
-      enum: ['full-snapshot', 'semantic-query', 'error'],
+      enum: ['semantic-query', 'error'],
       description: 'Discriminator for the response variant.',
     },
     document: {
       type: ['object', 'null'],
-      description: 'Canonical graph snapshot for full-snapshot responses; semantic business-summary responses may use result in the text payload and set this to null; null for errors.',
+      description: 'Canonical graph snapshot for semantic responses; semantic business-summary responses may use result in the text payload and set this to null; null for errors.',
     },
     query: {
       type: ['object', 'null'],
@@ -55,11 +54,11 @@ const GET_SYSTEM_ARCHITECTURE_OUTPUT_SCHEMA = {
         purpose: { type: 'string', enum: Array.from(LEGAL_QUERY_PURPOSES) },
         intent: { type: 'string' },
         subject: { type: 'string' },
-        mode: { type: 'string', enum: ['full-snapshot', 'semantic-query'] },
-        semanticRetrieval: { type: 'string', enum: ['bypassed', 'invoked'] },
+        mode: { type: 'string', enum: ['semantic-query'] },
+        semanticRetrieval: { type: 'string', enum: ['invoked'] },
       },
       additionalProperties: true,
-      description: 'Normalized explicit query metadata; null for no-argument snapshots and errors.',
+      description: 'Normalized explicit query metadata; null for errors.',
     },
     error: {
       oneOf: [
@@ -87,14 +86,6 @@ const GET_SYSTEM_ARCHITECTURE_OUTPUT_SCHEMA = {
     },
   },
   oneOf: [
-    {
-      properties: {
-        mode: { const: 'full-snapshot' },
-        document: { type: 'object' },
-        query: { type: ['object', 'null'] },
-        error: { type: 'null' },
-      },
-    },
     {
       properties: {
         mode: { const: 'semantic-query' },
@@ -188,19 +179,20 @@ const HANDLED_MUTATION_TYPES = new Set([
 const TOOLS = [
   {
     name: 'getSystemArchitecture',
-    description: 'Start here for read-only intent architecture access, but prefer an explicit semantic query instead of an omitted-query full graph read. Provide query.purpose and query.intent to get a compact business/architecture result, then use returned element ids with getIntentElementContext for focused dependency context. Omit query only when an exact full canonical snapshot is explicitly required.',
+    description: 'Read-only intent architecture access via explicit semantic query. Always provide query.purpose and query.intent to get a compact business/architecture result, then use returned element ids with getIntentElementContext for focused dependency context. Full-graph snapshot access is not exposed; query is required.',
     inputSchema: {
       type: 'object',
+      required: ['query'],
       properties: {
         architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
         query: {
           type: 'object',
-          description: 'Preferred for ordinary agent reading. Use semantic query instead of full graph reads; combine the returned element ids with getIntentElementContext when deeper local context is needed.',
+          description: 'Required semantic query. Provide query.purpose + query.intent; combine the returned element ids with getIntentElementContext when deeper local context is needed.',
           properties: {
             purpose: {
               type: 'string',
               enum: Array.from(LEGAL_QUERY_PURPOSES),
-              description: 'Declared reading purpose. Use intent-decision, implementation-design, coding-repair, or audit for semantic retrieval; graph-tidy intentionally bypasses semantic retrieval and may return a full snapshot.',
+              description: 'Declared reading purpose: intent-decision, implementation-design, coding-repair, or audit, all resolved through semantic retrieval.',
             },
             intent: { type: 'string', description: 'Natural-language intent for semantic retrieval, for example "summarize business features for high-risk audit".' },
             subject: { type: 'string', description: 'Required for audit; optional anchor/focus id for other semantic purposes.' },
@@ -1965,15 +1957,10 @@ function validateSemanticQueryResponseShapeControls(query) {
   return { status: 'passed' };
 }
 
-function isPurposeClosureProbe(query) {
-  return Array.isArray(query && query.anchors) && query.anchors.length > 0;
-}
-
 function isOrdinarySemanticQuery(query) {
   return !!query
     && typeof query === 'object'
-    && !Array.isArray(query)
-    && query.purpose !== 'graph-tidy';
+    && !Array.isArray(query);
 }
 
 function isCanonicalSubsetSemanticContract(query, options = {}) {
@@ -2059,7 +2046,7 @@ function getSystemArchitectureResult(payload) {
   const failed = payload.status === 'failed';
   return toolResult(payload, {
     version: '1.0',
-    mode: failed ? 'error' : ((payload.query && payload.query.mode) || 'full-snapshot'),
+    mode: failed ? 'error' : 'semantic-query',
     document: failed ? null : (payload.document === undefined ? null : payload.document),
     query: failed ? null : (payload.query || null),
     error: failed ? payload.error : null,
@@ -2075,23 +2062,6 @@ async function callTool(name, args = {}, dependencies = undefined) {
       }
 
       const query = validation.query;
-      if (query.purpose === 'graph-tidy') {
-        const context = await loadContext(args);
-        const payload = {
-          status: 'passed',
-          graphPath: context.graphPath.relativePath,
-          document: context.document,
-        };
-        if (isPurposeClosureProbe(query) && !dependencies) {
-          return attachContextWarnings(payload, context);
-        }
-        payload.query = {
-          ...query,
-          mode: 'full-snapshot',
-          semanticRetrieval: 'bypassed',
-        };
-        return getSystemArchitectureResult(attachContextWarnings(payload, context));
-      }
       const context = await loadContext(args);
       const contractOptions = semanticContractOptions({
         ...args,
@@ -2108,12 +2078,10 @@ async function callTool(name, args = {}, dependencies = undefined) {
       return applySemanticResponseProfile(await journey.query(query), query, contractOptions);
     }
 
-    const context = await loadContext(args);
-    return getSystemArchitectureResult(attachContextWarnings({
-      status: 'passed',
-      graphPath: context.graphPath.relativePath,
-      document: context.document,
-    }, context));
+    return getSystemArchitectureResult(queryError(
+      'QUERY_REQUIRED',
+      'getSystemArchitecture requires an explicit query (query.purpose + query.intent); full-graph snapshot access has been removed.',
+    ));
   }
 
   if (name === 'getIntentElementContext') {
@@ -3536,7 +3504,6 @@ async function handleRequest(request, dependencies = undefined) {
         && params.arguments
         && Object.prototype.hasOwnProperty.call(params.arguments, 'query')
         && params.arguments.query
-        && params.arguments.query.purpose !== 'graph-tidy'
       ) {
         activeDependencies = {
           semanticOperatorJourney: await createDefaultProductionSemanticOperatorJourney({
