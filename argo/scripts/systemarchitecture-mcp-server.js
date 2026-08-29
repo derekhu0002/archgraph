@@ -248,7 +248,7 @@ const TOOLS = [
   },
   {
     name: 'updateArchitectureElement',
-    description: 'Use for one global element metadata patch. Does not change view membership. Element id and type are immutable; remove and re-add to change them. Set dryRun to preview without writing.',
+    description: 'Use for one global element metadata patch. Does not change view membership. Element id and type are immutable; remove and re-add to change them. patch.attributes is a targeted merge by attribute name: each entry {name, value?, description?} upserts that attribute, {name, op:"remove"} deletes it, and attributes NOT mentioned are preserved — updating one attribute never wipes out the others. Set dryRun to preview without writing.',
     inputSchema: {
       type: 'object',
       required: ['id', 'patch'],
@@ -1031,6 +1031,50 @@ function buildNativeSubgraph(document, includedElementIds, includedRelationshipI
   return { elements, relationships, views };
 }
 
+/**
+ * Merge a targeted attribute patch into the element's existing attributes.
+ *
+ * Each patch entry is an object with a non-empty `name`:
+ *   - `{ name, op: 'remove' }`                    -> remove that attribute;
+ *   - `{ name, value }` / `{ name, value, description }` -> upsert (add or update in place).
+ *
+ * Attributes NOT mentioned in the patch are preserved. This avoids the
+ * full-array replacement footgun where updating one attribute would wipe out the
+ * rest (e.g. a stale deliveryStatus being re-written when registering a commit
+ * attribute).
+ */
+function mergeAttributesPatch(existing, patchEntries) {
+  const result = Array.isArray(existing)
+    ? existing.map(attr => ({ ...attr }))
+    : [];
+  if (!Array.isArray(patchEntries)) {
+    throw new Error('patch.attributes must be an array of { name, ... } entries');
+  }
+  for (const entry of patchEntries) {
+    if (!entry || typeof entry !== 'object' || typeof entry.name !== 'string' || entry.name.trim() === '') {
+      throw new Error('patch.attributes entries must have a non-empty string name');
+    }
+    if (entry.op === 'remove') {
+      const index = result.findIndex(attr => attr.name === entry.name);
+      if (index >= 0) {
+        result.splice(index, 1);
+      }
+      continue;
+    }
+    const index = result.findIndex(attr => attr.name === entry.name);
+    if (index >= 0) {
+      if (Object.prototype.hasOwnProperty.call(entry, 'value')) result[index].value = entry.value;
+      if (Object.prototype.hasOwnProperty.call(entry, 'description')) result[index].description = entry.description;
+    } else {
+      const newAttribute = { name: entry.name };
+      if (Object.prototype.hasOwnProperty.call(entry, 'value')) newAttribute.value = entry.value;
+      if (Object.prototype.hasOwnProperty.call(entry, 'description')) newAttribute.description = entry.description;
+      result.push(newAttribute);
+    }
+  }
+  return result;
+}
+
 function applyMutations(document, mutations) {
   const nextDocument = clone(document);
   const touchedElementIds = new Set();
@@ -1082,7 +1126,17 @@ function applyMutations(document, mutations) {
       requirePatchDoesNotChangeElementIdentityOrType(mutation.id, mutation.patch);
       const patchesSubdiagramViews = Object.prototype.hasOwnProperty.call(mutation.patch, 'subdiagram_views');
       const patchesName = Object.prototype.hasOwnProperty.call(mutation.patch, 'name');
-      Object.assign(element, clone(mutation.patch));
+      const patch = clone(mutation.patch);
+      if (Object.prototype.hasOwnProperty.call(patch, 'attributes')) {
+        // Targeted attribute merge by name (upsert / op:'remove'), preserving every
+        // attribute not mentioned in the patch — never a full-array replacement,
+        // so updating one attribute cannot wipe out the others.
+        patch.attributes = mergeAttributesPatch(
+          Array.isArray(element.attributes) ? element.attributes : [],
+          patch.attributes,
+        );
+      }
+      Object.assign(element, patch);
       if (patchesSubdiagramViews || patchesName) {
         reconcileSubdiagramViewsForElement(nextDocument, element);
       }

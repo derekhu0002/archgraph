@@ -155,7 +155,7 @@ const TOOLS = [
   },
   {
     name: 'updateArchitectureElement',
-    description: 'Use for one global element metadata patch. Does not change view membership. Element id and type are immutable; remove and re-add to change them.',
+    description: 'Use for one global element metadata patch. Does not change view membership. Element id and type are immutable; remove and re-add to change them. patch.attributes is a targeted merge by attribute name: each entry {name, value?, description?} upserts that attribute, {name, op:"remove"} deletes it, and attributes NOT mentioned are preserved — updating one attribute never wipes out the others.',
     inputSchema: {
       type: 'object',
       required: ['id', 'patch'],

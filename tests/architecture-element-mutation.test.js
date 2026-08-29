@@ -150,3 +150,36 @@ test('removeRelationship: keeps an endpoint still used by another relationship',
   assert.ok(view.included_elements.includes('b'), 'b must remain');
   assert.deepEqual(view.included_relationships, ['r2']);
 });
+
+test('updateElement: patch.attributes merges by name (unmentioned attributes preserved)', () => {
+  // GIVEN an element carrying multiple attributes
+  const graph = baseDocument();
+  graph.elements[1].attributes = [
+    { name: 'commit', value: 'aaa' },
+    { name: 'deliveryStatus', value: 'delivered' },
+  ];
+  // WHEN updating only one attribute by name (targeted merge, not full replace)
+  const document = applyMutations(graph, [
+    { type: 'updateElement', id: 'a', patch: { attributes: [{ name: 'deliveryStatus', value: 'not_delivered' }] } },
+  ]).document;
+  // THEN the unmentioned attribute is preserved and the targeted one is updated
+  assert.deepEqual(elementById(document, 'a').attributes, [
+    { name: 'commit', value: 'aaa' },
+    { name: 'deliveryStatus', value: 'not_delivered' },
+  ]);
+});
+
+test('updateElement: patch.attributes upserts a new attribute and op:remove deletes by name', () => {
+  // GIVEN an element with one attribute
+  const graph = baseDocument();
+  graph.elements[1].attributes = [{ name: 'commit', value: 'aaa' }];
+  // WHEN a new attribute is added and an existing one is removed
+  const document = applyMutations(graph, [
+    { type: 'updateElement', id: 'a', patch: { attributes: [
+      { name: 'status', value: 'COMPLETED' },
+      { name: 'commit', op: 'remove' },
+    ] } },
+  ]).document;
+  // THEN the new attribute is added and only the explicitly removed one is gone
+  assert.deepEqual(elementById(document, 'a').attributes, [{ name: 'status', value: 'COMPLETED' }]);
+});
