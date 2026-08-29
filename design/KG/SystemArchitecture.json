@@ -2378,6 +2378,11 @@
           "description": "argo/scripts/argo-paths.js（getArgoEnvPath 优先全局干净 ~/.argo/.env：修复无 ARGO_ENV_FILE 时解析到仓库 argo/.env 非白名单键导致语义检索失败；AT-acceptance-guardian-09 通过，runArchitectureTests 22/22 全绿）；design/KG/SystemArchitecture.json + test-failure-records.json"
         },
         {
+          "name": "commit",
+          "value": "f904aa2",
+          "description": "updateArchitectureElement patch.attributes 改为按 name 定向合并（upsert + {name,op:'remove'} 删除，未提及属性保留），修复单属性更新清空其它属性的 footgun；argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-element-mutation.test.js"
+        },
+        {
           "name": "deliveryStatus",
           "value": "delivered"
         }

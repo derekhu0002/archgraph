@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-28T15:13:21.688Z",
+  "generatedAt": "2026-08-29T11:59:28.040Z",
   "totalQuestions": 28,
   "passed": 28,
   "failed": 0,
@@ -48,14 +48,14 @@
     "pass": 3,
     "total": 3
   },
-  "avgLatencyMs": 9.035714285714286,
+  "avgLatencyMs": 18.392857142857142,
   "costStats": {
-    "rawCorpusTokens": 97738,
+    "rawCorpusTokens": 75635,
     "probeCount": 28,
-    "avgRetrievedTokens": 5230,
+    "avgRetrievedTokens": 5220,
     "minRetrievedTokens": 1015,
-    "maxRetrievedTokens": 10207,
-    "avgCompressionRatio": 0.946
+    "maxRetrievedTokens": 11537,
+    "avgCompressionRatio": 0.931
   },
   "results": [
     {
@@ -64,7 +64,7 @@
       "label": "谁是项目总管 Business Actor？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 10
+      "latencyMs": 21
     },
     {
       "id": "MQ-02",
@@ -72,7 +72,7 @@
       "label": "项目总管长期记忆子视图 id？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 10
+      "latencyMs": 17
     },
     {
       "id": "MQ-03",
@@ -80,7 +80,7 @@
       "label": "愿景三要素中「目标」是什么？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 8
+      "latencyMs": 14
     },
     {
       "id": "MQ-04",
@@ -88,7 +88,7 @@
       "label": "业界公认的三大记忆基准？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 9
+      "latencyMs": 14
     },
     {
       "id": "MQ-05",
@@ -96,7 +96,7 @@
       "label": "视频制作流程几个 Business Actor？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 8
+      "latencyMs": 14
     },
     {
       "id": "MQ-06",
@@ -104,7 +104,7 @@
       "label": "愿景固化在图内哪层记忆？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 8
+      "latencyMs": 12
     },
     {
       "id": "MQ-07",
@@ -112,7 +112,7 @@
       "label": "AgentOrganization 下有几类专项团队？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 5
+      "latencyMs": 17
     },
     {
       "id": "MQ-08",
@@ -120,7 +120,7 @@
       "label": "为什么说 ArchiMate 是手段？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 16
     },
     {
       "id": "MQ-09",
@@ -128,7 +128,7 @@
       "label": "长期记忆评测已登记元素有哪些？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 13
     },
     {
       "id": "MQ-10",
@@ -136,7 +136,7 @@
       "label": "人类角色与专项 Agent 角色各一例？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 13
+      "latencyMs": 32
     },
     {
       "id": "MQ-11",
@@ -144,7 +144,7 @@
       "label": "升格为总纲 vs 概念校正哪个先？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 10
     },
     {
       "id": "MQ-12",
@@ -152,7 +152,7 @@
       "label": "Actor 与愿景元素哪个先创建？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 20
+      "latencyMs": 27
     },
     {
       "id": "MQ-13",
@@ -160,7 +160,7 @@
       "label": "Terminal-Bench 与记忆评测哪个先完成？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 17
+      "latencyMs": 31
     },
     {
       "id": "MQ-14",
@@ -168,7 +168,7 @@
       "label": "图书馆类比在校正之前还是之后？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 9
+      "latencyMs": 17
     },
     {
       "id": "MQ-15",
@@ -176,7 +176,7 @@
       "label": "愿景描述演进 commit 顺序？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 16
     },
     {
       "id": "MQ-16",
@@ -184,7 +184,7 @@
       "label": "愿景最新表述的关键要素？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 9
+      "latencyMs": 15
     },
     {
       "id": "MQ-17",
@@ -192,7 +192,7 @@
       "label": "view 429 当前多少子视图？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 11
     },
     {
       "id": "MQ-18",
@@ -200,7 +200,7 @@
       "label": "结构在愿景中的地位如何修正？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 11
     },
     {
       "id": "MQ-19",
@@ -208,7 +208,7 @@
       "label": "总纲是哪次 commit 加入？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 9
+      "latencyMs": 14
     },
     {
       "id": "MQ-20",
@@ -216,7 +216,7 @@
       "label": "愿景最新描述以哪个 commit 为准？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 14
     },
     {
       "id": "MQ-21",
@@ -224,7 +224,7 @@
       "label": "图谱是否记录 XYZ 长期记忆系统？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 15
     },
     {
       "id": "MQ-22",
@@ -232,7 +232,7 @@
       "label": "主管 LTM 是否有 2026-07-01 细节？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 16
     },
     {
       "id": "MQ-23",
@@ -240,7 +240,7 @@
       "label": "愿景元素是否有无关配色信息？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 11
     },
     {
       "id": "MH-01",
@@ -248,7 +248,7 @@
       "label": "愿景→LTM视图→Actor 两跳追踪？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 11
+      "latencyMs": 43
     },
     {
       "id": "MH-02",
@@ -256,7 +256,7 @@
       "label": "视图→Actor→组织 三跳，组织下还有哪些团队视图？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 15
+      "latencyMs": 37
     },
     {
       "id": "MH-03",
@@ -264,7 +264,7 @@
       "label": "评测工作包→视图→组织元素 两跳？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 10
+      "latencyMs": 22
     },
     {
       "id": "MH-04",
@@ -272,7 +272,7 @@
       "label": "公众号发布员→组织元素 两跳？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 13
+      "latencyMs": 24
     },
     {
       "id": "MH-05",
@@ -280,7 +280,7 @@
       "label": "项目总管 LTM 全部元素找全（含评测口径）？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 5
+      "latencyMs": 11
     }
   ]
 }
