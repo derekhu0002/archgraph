@@ -33,40 +33,38 @@ const REQUIRED_TOOL_NAMES = [
   'validateSystemArchitecture',
 ];
 
-async function main() {
-  const options = parseArgs(process.argv.slice(2));
-  const workspaceRoot = resolveWorkspaceRoot();
+// Build the deterministic argo-init harness report (Neo4j structural sync,
+// semantic lifecycle, canonical validation, subdiagram_views consistency).
+// `includeBootstrap` is true for the standalone CLI (it calls initializeWorkspace
+// to bootstrap the workspace); the initializeWorkspace MCP tool passes false
+// because it already bootstrapped — avoids re-entrancy through ensureWorkspaceBootstrap.
+async function buildHarnessReport({ checkOnly = false, workspaceRoot, includeBootstrap = true }) {
   const reportPath = path.join(workspaceRoot, '.argo', 'temp', 'argo-harness-init-report.json');
-  const harnessEnvironment = loadRepositoryArgoEnvironment(workspaceRoot);
   const report = {
     status: 'ok',
     workspaceRoot,
     generatedAt: new Date().toISOString(),
-    mode: options.checkOnly ? 'check-only' : 'prepare-and-check',
+    mode: checkOnly ? 'check-only' : 'prepare-and-check',
     reportPath: normalizeRelativePath(path.relative(workspaceRoot, reportPath)),
-    harnessEnvironment,
   };
 
   try {
-    report.workspaceBootstrap = await ensureWorkspaceBootstrap({
-      checkOnly: options.checkOnly,
-      workspaceRoot,
-    });
+    report.harnessEnvironment = loadRepositoryArgoEnvironment(workspaceRoot);
+    if (includeBootstrap) {
+      report.workspaceBootstrap = await ensureWorkspaceBootstrap({ checkOnly, workspaceRoot });
+    }
     report.mcp = verifyArgoMcpServer({ workspaceRoot });
     report.systemArchitecture = await verifyCanonicalSystemArchitecture();
     report.subdiagramViews = report.systemArchitecture.status === 'ok'
-      ? await ensureSubdiagramViewsConsistency({
-          checkOnly: options.checkOnly,
-          workspaceRoot,
-        })
+      ? await ensureSubdiagramViewsConsistency({ checkOnly, workspaceRoot })
       : {
           status: 'skipped',
-          mode: options.checkOnly ? 'check' : 'fix-direct',
+          mode: checkOnly ? 'check' : 'fix-direct',
           reason: 'system architecture invalid; subdiagram_views repair skipped',
         };
-    report.neo4j = await ensureNeo4jProjection({ checkOnly: options.checkOnly });
+    report.neo4j = await ensureNeo4jProjection({ checkOnly });
     report.semanticLifecycle = await ensureCanonicalSemanticLifecycle({
-      checkOnly: options.checkOnly,
+      checkOnly,
       workspaceRoot,
       neo4j: report.neo4j,
     });
@@ -75,25 +73,24 @@ async function main() {
     report.error = formatErrorForReport(error);
   }
 
-  if (report.workspaceBootstrap && report.workspaceBootstrap.status === 'failed') {
-    report.status = 'failed';
-  }
-  if (report.mcp && report.mcp.status === 'failed') {
-    report.status = 'failed';
-  }
-  if (report.systemArchitecture && report.systemArchitecture.status === 'failed') {
-    report.status = 'failed';
-  }
-  if (report.neo4j && report.neo4j.status === 'failed') {
-    report.status = 'failed';
-  }
-  if (report.semanticLifecycle && report.semanticLifecycle.status === 'failed') {
-    report.status = 'failed';
-  }
-  if (report.subdiagramViews && report.subdiagramViews.status === 'failed') {
-    report.status = 'failed';
+  for (const section of ['workspaceBootstrap', 'mcp', 'systemArchitecture', 'neo4j', 'semanticLifecycle', 'subdiagramViews']) {
+    if (report[section] && report[section].status === 'failed') {
+      report.status = 'failed';
+    }
   }
 
+  return report;
+}
+
+async function main() {
+  const options = parseArgs(process.argv.slice(2));
+  const workspaceRoot = resolveWorkspaceRoot();
+  const report = await buildHarnessReport({
+    checkOnly: options.checkOnly,
+    workspaceRoot,
+    includeBootstrap: true,
+  });
+  const reportPath = path.join(workspaceRoot, '.argo', 'temp', 'argo-harness-init-report.json');
   writeJson(reportPath, report);
   console.log(JSON.stringify(report, null, 2));
 
@@ -101,6 +98,8 @@ async function main() {
     process.exit(1);
   }
 }
+
+module.exports = { buildHarnessReport, main };
 
 function parseArgs(argv) {
   const options = {
@@ -412,7 +411,9 @@ function formatErrorForReport(error) {
   return message;
 }
 
-main().catch(error => {
-  console.error(formatErrorForReport(error));
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch(error => {
+    console.error(formatErrorForReport(error));
+    process.exit(1);
+  });
+}

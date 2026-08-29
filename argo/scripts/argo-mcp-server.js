@@ -9,9 +9,6 @@ const {
   semanticOperatorErrorResult,
 } = require('./graph-rag/semanticOperatorError.js');
 const {
-  runCanonicalSemanticInit,
-} = require('./graph-rag/semanticOperatorJourney.js');
-const {
   loadRepositoryArgoEnvironment,
 } = require('./repositoryArgoEnvironment.js');
 const {
@@ -385,19 +382,42 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
   loadRepositoryArgoEnvironment(resolveWorkspaceRoot(args));
   if (name === 'initializeWorkspace') {
     const workspace = await initializeWorkspace(resolveWorkspaceRoot(args));
-    const composition = canonicalSemanticInitStorage.getStore()
-      || systemArchitectureMcp.createDefaultCanonicalSemanticInitComposition({
-        repositoryRoot: resolveWorkspaceRoot(args),
-      });
-    const semanticLifecycle = await runCanonicalSemanticInit(composition, {
-      repositoryRoot: resolveWorkspaceRoot(args),
-      workspace,
+    // Deterministic argo-init harness report (Neo4j structural sync, semantic
+    // lifecycle, canonical validation, subdiagram_views consistency), built
+    // in-process so the argo-init skill needs no workspace-external script.
+    // Lazy require avoids a circular dependency (ensureArgoHarnessEnvironment
+    // requires this module at its top).
+    const { buildHarnessReport } = require('./ensureArgoHarnessEnvironment.js');
+    const report = await buildHarnessReport({
+      checkOnly: false,
+      workspaceRoot: workspace.workspaceRoot,
+      includeBootstrap: false,
     });
     return toolResult({
-      ...workspace,
-      semanticState: semanticLifecycle.state,
-      semanticLifecycle,
-      alignment: semanticLifecycle.alignment,
+      status: report.status,
+      workspaceRoot: workspace.workspaceRoot,
+      targetFeapName: workspace.targetFeapName,
+      createdFiles: workspace.createdFiles,
+      updatedFiles: workspace.updatedFiles,
+      removedFiles: workspace.removedFiles,
+      skippedSteps: workspace.skippedSteps,
+      workspaceBootstrap: {
+        status: 'ok',
+        workspaceRoot: workspace.workspaceRoot,
+        targetFeapName: workspace.targetFeapName,
+        createdFiles: workspace.createdFiles,
+        updatedFiles: workspace.updatedFiles,
+        removedFiles: workspace.removedFiles,
+        skippedSteps: workspace.skippedSteps,
+      },
+      mcp: report.mcp,
+      systemArchitecture: report.systemArchitecture,
+      subdiagramViews: report.subdiagramViews,
+      neo4j: report.neo4j,
+      semanticLifecycle: report.semanticLifecycle,
+      semanticState: report.semanticLifecycle && report.semanticLifecycle.state,
+      alignment: report.semanticLifecycle && report.semanticLifecycle.alignment,
+      reportPath: report.reportPath,
     });
   }
   if (VALIDATOR_TOOL_NAMES.has(name)) {

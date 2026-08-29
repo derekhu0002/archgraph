@@ -1,65 +1,46 @@
 ---
 name: argo-init
-description: "检查全局 ARGO MCP 是否正常，并完成 NEO4J 初始同步与语义生命周期初始化。Use when the user asks to verify Argo MCP readiness and perform or verify the canonical JSON-to-Neo4j initial sync plus semantic lifecycle init. Keywords: ARGO INIT, harness init, MCP health check, Neo4j initial sync, semantic lifecycle."
+description: "通过 ARGO MCP 的 initializeWorkspace 接口完成工作区确定性的初始化（NEO4J 初始同步 + 语义生命周期 + canonical 校验 + subdiagram_views 一致性），无需执行 WORKSPACE 外脚本。Use when the user asks to verify Argo MCP readiness and perform or verify the canonical JSON-to-Neo4j initial sync plus semantic lifecycle init. Keywords: ARGO INIT, harness init, initializeWorkspace, Neo4j initial sync, semantic lifecycle."
 argument-hint: scope-or-mode
 disable-model-invocation: true
 ---
 
 # ARGO INIT
 
-`argo-init` 负责检查全局安装的 `argo` MCP 是否正常、完成或验证 canonical intent graph 的 Neo4j 初始同步，并在非 `--check-only` 模式下执行 canonical semantic lifecycle init。它不再负责调用旧的工作区 bootstrap / `initializeWorkspace` 工具。
+`argo-init` 通过 ARGO MCP 的 `initializeWorkspace` 接口完成确定性初始化：工作区 bootstrap（缺 `SystemArchitecture.json` / `.feap` 自动生成）+ Neo4j 结构投影同步 + 语义生命周期初始化 + canonical 校验 + subdiagram_views 一致性，并返回完整报告。**不需要也不应执行任何 WORKSPACE 外脚本**——所有确定性步骤都在 MCP 进程内完成，避免扩大访问面。
 
-- `argo` MCP 服务器（全局 `.argo` 安装）能正常初始化、列出关键工具并响应 `ping`。
-- `design/KG/SystemArchitecture.json` 可通过 `argo` MCP 正常读取和校验。
-- 工作区缺少 `design/KG/SystemArchitecture.json` 时，非 `--check-only` 模式会自动从部署的 `defaults` 拷贝默认模板；工作区没有 `.feap` 时，自动以当前项目名拷贝默认 `EA-model-template.feap`。
-- 本机 Neo4j 连接可用。
-- canonical intent graph 至少完成一次 JSON -> Neo4j 初始同步，并通过一致性校验。
-- 非 `--check-only` 模式会在结构同步后执行语义生命周期：双 gate 未开启时记录 pending/disabled；双 gate 开启时执行全量 embedding backfill 与 readiness 对齐。
+- 工作区缺少 `design/KG/SystemArchitecture.json` 时自动从部署的 `defaults` 拷贝默认模板；缺 `.feap` 时以当前项目名拷贝默认模板。
+- 本机 Neo4j 连接可用，canonical 意图图完成至少一次 JSON -> Neo4j 初始同步并通过一致性校验。
+- 语义生命周期：双 gate 未开启时记录 skipped/disabled；开启时执行全量 embedding backfill 与 readiness 对齐。
 
 ## Rules
 
-- **MUST** 优先运行全局 harness 原生命令（当前工作目录须为目标仓库根）：`node "$env:USERPROFILE\.argo\scripts\ensureArgoHarnessEnvironment.js"`。
-- **MUST** 将该命令返回的 JSON 结果作为最终判断依据，而不是凭主观描述报告环境状态。
-- **MUST** 报告 `argo` MCP 是否通过、Neo4j 是否通过、初始同步是否完成、以及 `semanticLifecycle` 当前状态。
-- **MUST** 在脚本失败时直接转述失败阶段、错误摘要和报告路径，不要改用含糊描述。
-- **MUST NOT** 读取、打印或复述 `.env` 中的 secret 值；排查时只允许报告 key 是否存在、文件是否位于 git 仓库内、以及 ACL 主体。
-- **MUST NOT** 绕开脚本分别手工执行一堆无关命令来替代初始化工作流，除非你是在排查脚本自身失败。
+- **MUST** 调用 ARGO MCP 工具 `initializeWorkspace`（传当前工作区根）执行确定性初始化，并以其返回报告为最终判断依据。
+- **MUST** 报告 `mcp` / `systemArchitecture` / `neo4j` / `semanticLifecycle` / `subdiagramViews` 与整体 `status`。
+- **MUST NOT** 读取、打印或复述 `.env` 中的 secret 值；排查时只允许报告 key 是否存在、ACL 主体。
+- **MUST NOT** 通过 shell 手工执行 WORKSPACE 外的初始化脚本或一组无关命令来替代 `initializeWorkspace`（除非报告显示底层脚本自身失败需要排查）。
 
 ## Workflow
 
-### 1. Run ARGO HARNESS Init
+### 1. Run Deterministic Init via initializeWorkspace
 
-在目标仓库根目录执行（harness 通过 `ARGO_REPO_ROOT` / `WORKSPACE_FOLDER` / `cwd` 解析工作区）：
+调用 ARGO MCP 工具 `initializeWorkspace`（传入当前工作区根 `workspaceRoot`）。该接口在 MCP 进程内完成全部确定性步骤并返回报告：
 
-```powershell
-$env:ARGO_REPO_ROOT = (Get-Location).Path
-node "$env:USERPROFILE\.argo\scripts\ensureArgoHarnessEnvironment.js"
-```
-
-只读检查（不修改工作区、不执行初始同步）：
-
-```powershell
-$env:ARGO_REPO_ROOT = (Get-Location).Path
-node "$env:USERPROFILE\.argo\scripts\ensureArgoHarnessEnvironment.js" --check-only
-```
-
-若通过 `ARGO_ENV_FILE` 指定了秘密文件，请先设置该变量再运行。
+- `workspaceBootstrap`：缺 `SystemArchitecture.json` / `.feap` 时自动生成（createdFiles / skippedSteps）
+- `mcp`：ARGO MCP 健康（协议 / tools-list / ping）
+- `systemArchitecture`：canonical 校验（元素/关系/视图计数）
+- `subdiagramViews`：subdiagram_views 一致性检查/修复
+- `neo4j`：Neo4j 连通 + 结构投影初始同步 + 一致性校验（initialSync / verification）
+- `semanticLifecycle`：语义生命周期初始化（state / alignment / readiness；未开 gate 时 skipped/disabled）
 
 ### 2. Interpret The Report
 
-读取脚本输出的 JSON，并关注 `mcp`、`systemArchitecture`、`neo4j`、`semanticLifecycle`、`reportPath`。
+- 整体 `status=ok`：环境就绪。
+- 任一 section `status=failed` → 整体 `status=failed`，指出失败阶段：`mcp` / `systemArchitecture` / `neo4j` / `semanticLifecycle` / `subdiagramViews`。
 
-- `status=ok`：环境已就绪或已确认健康。
-- `status=failed`：指出失败阶段：
-  - Argo MCP protocol health
-  - canonical SystemArchitecture validation
-  - Neo4j connectivity
-  - Neo4j initial sync / verification
-  - semantic lifecycle init / readiness alignment
+### 3. Handle Secret File Blockers（仅当报告含 secret 相关失败）
 
-### 3. Handle Secret File Blockers
-
-全局 `.env` 默认位于 `$env:USERPROFILE\.argo\.env`（可用 `ARGO_ENV_FILE` 覆盖）。安全诊断（不打印 secret 值）：
+`semanticLifecycle` 或 `systemArchitecture` 失败可能源于 `.env` 安全预检。诊断（不打印 secret 值）：
 
 ```powershell
 icacls "$env:USERPROFILE\.argo\.env"
@@ -67,30 +48,16 @@ icacls "$env:USERPROFILE\.argo\.env"
 
 处理规则：
 
-- `SECRET_FILE_ACL_UNSAFE`: 收紧 Windows ACL，只保留当前用户、Administrators、SYSTEM。
-- `SECRET_FILE_REPARSE_PROHIBITED`: 将 `.env` 替换为普通文件（去掉符号链接/重解析点）。
-- `SECRET_FILE_PATH_PROHIBITED`: 修正 `ARGO_ENV_FILE` 与安装根 `.env` 不一致的路径。
+- `SECRET_FILE_ACL_UNSAFE`：收紧 Windows ACL，只保留当前用户、Administrators、SYSTEM。
+- `SECRET_FILE_REPARSE_PROHIBITED`：将 `.env` 替换为普通文件（去掉符号链接/重解析点）。
+- `SECRET_FILE_PATH_PROHIBITED`：修正 `ARGO_ENV_FILE` 与安装根 `.env` 不一致的路径。
 - git 跟踪/忽略类错误（`SECRET_FILE_TRACKED` / `SECRET_FILE_NOT_IGNORED`）只在 `.env` 位于 git 仓库内时出现；全局 `.env` 位于仓库外时天然不适用。
 
-Windows ACL 修复：
-
-```powershell
-$identity = whoami
-icacls "$env:USERPROFILE\.argo\.env" /inheritance:r /grant:r "${identity}:F" "BUILTIN\Administrators:F" "NT AUTHORITY\SYSTEM:F" /remove:g "BUILTIN\Users" "Everyone" "Authenticated Users" "NT AUTHORITY\Authenticated Users"
-```
-
-修复后必须重跑 init。
+修复后重跑 `initializeWorkspace`。
 
 ### 4. Report Concisely
 
-输出应直接说明：
-
-- `argo` MCP 是否正常
-- `SystemArchitecture.json` 是否正常
-- Neo4j 是否连通
-- 是否完成了一次初始同步
-- 语义生命周期状态、alignment、是否因 `--check-only` 跳过
-- 报告文件位置
+输出应直接说明：`mcp` 是否正常、`SystemArchitecture.json` 是否正常、Neo4j 是否连通、是否完成一次初始同步、语义生命周期状态与 alignment、报告路径（`.argo/temp/argo-harness-init-report.json`）。
 
 ## Output
 
@@ -98,8 +65,8 @@ icacls "$env:USERPROFILE\.argo\.env" /inheritance:r /grant:r "${identity}:F" "BU
 
 ### 1. Environment Status
 - overall status: ok / failed
-- whether Argo MCP health passed
-- whether Neo4j health passed
+- whether mcp health passed
+- whether neo4j health passed
 
 ### 2. Sync Status
 - whether initial sync was executed
