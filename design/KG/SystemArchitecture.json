@@ -4175,7 +4175,7 @@
       "name": "验收看护服务（Acceptance Guardianship）",
       "type": "Application Service",
       "parent": "project-overseer-001",
-      "description": "从 ARCHGRAPH HARNESS 使用场景出发，按功能视角对 ARGO MCP 接口层与框架交付件进行持续验收看护。看护驱动器 = tests/acceptance-guardian.test.js（功能注册表单一事实源）：①覆盖完整性——每个 MCP 接口与交付件映射到可执行功能测试文件；②挂载可执行性——本元素挂载的 AT 均为裸 workspace-relative 可执行 acceptanceCriteria（runArchitectureTests 可跑，杜绝 invalid-criteria 回归）；③管道看护——runArchitectureTests 执行器保持处理裸路径。测试文件与 registry：tests/acceptance-guardian.test.js + tests/mcp-interface-behavior.test.js（补 getIntentElementContext / generateArchitectureDiffPlantuml 功能覆盖）+ 各接口既有功能测试。",
+      "description": "从 ARCHGRAPH HARNESS 使用场景出发，按功能视角对 ARGO MCP 接口层与框架交付件进行持续验收看护。看护驱动器 = tests/acceptance-guardian.test.js（功能注册表单一事实源）：①覆盖完整性——每个 MCP 接口与交付件映射到可执行功能测试文件；②挂载可执行性——本元素挂载的 AT 均为裸 workspace-relative 可执行 acceptanceCriteria（runArchitectureTests 可跑，杜绝 invalid-criteria 回归）；③管道看护——runArchitectureTests 执行器保持处理裸路径。测试文件与 registry：tests/acceptance-guardian.test.js + tests/mcp-interface-behavior.test.js（补 getIntentElementContext 功能覆盖）+ 各接口既有功能测试。",
       "attributes": [
         {
           "name": "verification_focus",
@@ -4188,7 +4188,12 @@
         {
           "name": "commit",
           "value": "599b9ff",
-          "description": "tests/acceptance-guardian.test.js; tests/mcp-interface-behavior.test.js; design/KG/SystemArchitecture.json（验收看护体系：功能注册表看护驱动器 + 补 getIntentElementContext/generateArchitectureDiffPlantuml 功能覆盖 + 本元素挂载 10 个可执行 AT）"
+          "description": "tests/acceptance-guardian.test.js; tests/mcp-interface-behavior.test.js; design/KG/SystemArchitecture.json（验收看护体系建立：功能注册表看护驱动器 + 补弱覆盖接口功能测试 + 本元素挂载 10 个可执行 AT）"
+        },
+        {
+          "name": "commit",
+          "value": "1e97304",
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; tests/argo-mcp-tools.test.js; tests/acceptance-guardian.test.js; tests/mcp-interface-behavior.test.js; design/KG/SystemArchitecture.json（工具面精简：移除 generateArchitectureDiffPlantuml，内部模块保留不暴露；看护注册表与 AT-02 同步更新）"
         }
       ],
       "testcases": [
@@ -4201,7 +4206,7 @@
         },
         {
           "name": "AT-acceptance-guardian-02",
-          "description": "GIVEN getIntentElementContext 与 generateArchitectureDiffPlantuml 两个曾仅注册未功能覆盖的接口；WHEN 进程内真实调用；THEN getIntentElementContext 对稳定元素返回焦点语义子图、未知元素明确失败，diff 生成器产出时间戳 PlantUML 树文件。",
+          "description": "GIVEN getIntentElementContext 曾仅注册未功能覆盖；WHEN 进程内真实调用；THEN 对稳定元素返回焦点语义子图（含 subgraph/boundary）、未知元素明确失败。",
           "type": "Acceptance Test",
           "Input": "tests/mcp-interface-behavior.test.js",
           "acceptanceCriteria": "tests/mcp-interface-behavior.test.js"
