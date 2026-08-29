@@ -61,8 +61,8 @@ test('AT navigation-agent-eval: result package report records raw session files'
   const report = JSON.parse(fs.readFileSync(path.join(ROOT, 'results', 'navigation-agent-report.json'), 'utf8'));
   // THEN it declares the raw-session bundle with one record per question
   assert.ok(report.rawSessions && typeof report.rawSessions.count === 'number', 'report must declare rawSessions bundle');
-  assert.equal(report.rawSessions.count, 20, '20 raw session records expected');
-  assert.equal(report.rawSessions.files.length, 20);
+  assert.equal(report.rawSessions.count, 28, '28 raw session records expected');
+  assert.equal(report.rawSessions.files.length, 28);
   for (const f of report.rawSessions.files) {
     assert.ok(f && f.includes('.ndjson'), `raw session file listed: ${f}`);
     // paths in the report are container-absolute (/results/...); on the host

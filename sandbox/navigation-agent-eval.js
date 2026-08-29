@@ -89,7 +89,7 @@ backend, which IS mounted in this session.
 
 Available argo tools (use them to navigate the map):
 - argo_getSystemArchitecture: semantic retrieval; pass query.purpose + query.intent
-  (e.g. purpose "intent-decision" or "implementation-design") to locate relevant
+  (e.g. purpose "general") to locate relevant
   elements/views by meaning.
 - argo_queryNeo4jGraph: structural Cypher over the graph; e.g.
   MATCH (e:Element {graphKey:$graphKey}) RETURN e.id, e.name, e.type
@@ -159,7 +159,7 @@ async function initGraph() {
       return (d.elements || []).length > 2;
     }
   } catch (_) { /* fall through */ }
-  const init = await callTool('initializeWorkspace', { workspaceRoot: WORKSPACE }, null, undefined);
+  const init = await loadCallTool()('initializeWorkspace', { workspaceRoot: WORKSPACE }, null, undefined);
   const text = (init && init.content && init.content[0] && init.content[0].text) || JSON.stringify(init);
   return String(text).includes('SystemArchitecture.json');
 }
@@ -299,7 +299,7 @@ async function main() {
 
   const report = {
     generatedAt: new Date().toISOString(),
-    dataset: 'Full-ArchGraph navigation capability via OpenCode Agent (NV-01..20)',
+    dataset: `Full-ArchGraph navigation capability via OpenCode Agent (SEED v1.1.0, ${QUESTIONS.length} questions)`,
     mode: 'complete-argo-no-comparison',
     questions: QUESTIONS,
     groups: { A: { backend: 'argo MCP (full ArchGraph toolchain)' } },
@@ -324,7 +324,7 @@ async function main() {
   }
 
   const byDimension = {};
-  for (const dim of ['定位', '可达', '视角切换', '边界内导航']) {
+  for (const dim of [...new Set(QUESTIONS.map(q => q.dimension))]) {
     const items = report.perQuestion.filter(r => r.type === dim);
     byDimension[dim] = { correct: items.filter(r => r.A.correct).length, total: items.length };
   }

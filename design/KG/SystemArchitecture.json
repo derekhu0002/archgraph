@@ -3285,8 +3285,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "c726508",
-          "description": "data/eval-seeds/navigation-seed.json（v1.0.1：NV-02/NV-05 retrievalHint 弃用 purpose=intent-decision 对齐为 general，描述性元数据修复）"
+          "value": "12a1114",
+          "description": "data/eval-seeds/navigation-seed.json（v1.1.0：新增 3 个编码 Agent 工作流维度——验收用例定位 CA-01..03 / 提交登记 CR-01..02 / 变更影响 CI-01..03，共 28 题，直接 harness 28/28 全绿）；scripts/eval-seed.js（加载器泛化：7 维/XX-nn id/每维≥1）；tests/eval-seed.test.js; tests/navigation-eval-run.test.js; tests/navigation-agent-eval.test.js; results/navigation-eval-report.json"
         },
         {
           "name": "commit",

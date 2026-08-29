@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-28T20:17:26.157Z",
-  "dataset": "Full-ArchGraph navigation capability via OpenCode Agent (NV-01..20)",
+  "generatedAt": "2026-08-29T15:42:14.097Z",
+  "dataset": "Full-ArchGraph navigation capability via OpenCode Agent (SEED v1.1.0, 28 questions)",
   "mode": "complete-argo-no-comparison",
   "questions": [
     {
@@ -188,6 +188,83 @@
       "answerAlt": [
         "2760"
       ]
+    },
+    {
+      "id": "CA-01",
+      "dimension": "验收用例定位",
+      "question": "In the ArchGraph intent graph, the coding workflow requires identifying the acceptance test cases of affected elements BEFORE modifying code. From the element \"archgraph-workflow-rules\", read its mounted acceptance testcase. Report the testcase name and its acceptanceCriteria (test file path).",
+      "answer": "archgraph-workflow-rules",
+      "answerAlt": [
+        "AT-rules-01",
+        "tests/argo-rules-query.test.js"
+      ]
+    },
+    {
+      "id": "CA-02",
+      "dimension": "验收用例定位",
+      "question": "From the element \"acceptance-guardian-001\" (验收看护服务), read one of its mounted MCP-interface guardian acceptance testcases. Report the testcase name and its acceptanceCriteria (test file path).",
+      "answer": "acceptance-guardian-001",
+      "answerAlt": [
+        "AT-acceptance-guardian-01",
+        "tests/acceptance-guardian.test.js"
+      ]
+    },
+    {
+      "id": "CA-03",
+      "dimension": "验收用例定位",
+      "question": "Enumerate ALL mounted acceptance testcases on \"acceptance-guardian-001\" (验收看护服务). Report the first and the last testcase names (proving the full list).",
+      "answer": "acceptance-guardian-001",
+      "answerAlt": [
+        "AT-acceptance-guardian-01",
+        "AT-acceptance-guardian-10"
+      ]
+    },
+    {
+      "id": "CR-01",
+      "dimension": "提交登记",
+      "question": "After a code change, the workflow requires registering the commit id + file paths back onto the corresponding element. Read the commit ledger (attributes) of \"archgraph-workflow-rules\" and confirm the latest registered commit and the delivery status.",
+      "answer": "archgraph-workflow-rules",
+      "answerAlt": [
+        "f904aa2",
+        "delivered"
+      ]
+    },
+    {
+      "id": "CR-02",
+      "dimension": "提交登记",
+      "question": "Read the commit ledger (attributes) of \"navigation-eval-wp-001\". Confirm the SEED archival commit and the hint-fix commit are both registered.",
+      "answer": "navigation-eval-wp-001",
+      "answerAlt": [
+        "be47829",
+        "c726508"
+      ]
+    },
+    {
+      "id": "CI-01",
+      "dimension": "变更影响",
+      "question": "Before changing a deliverable, the coding workflow evaluates the delivery baseline. Read the deliveryStatus of \"acceptance-guardian-001\" (验收看护服务) and report it.",
+      "answer": "acceptance-guardian-001",
+      "answerAlt": [
+        "delivered"
+      ]
+    },
+    {
+      "id": "CI-02",
+      "dimension": "变更影响",
+      "question": "Assess the ownership of \"acceptance-guardian-001\": which Business Actor is this service mounted under (its parent)? Report that actor's id.",
+      "answer": "project-overseer-001",
+      "answerAlt": [
+        "项目总管"
+      ]
+    },
+    {
+      "id": "CI-03",
+      "dimension": "变更影响",
+      "question": "At session end the coding workflow writes a session summary into the Business Actor's long-term memory subview. From \"project-overseer-001\" (项目总管), find its LTM subview id.",
+      "answer": "overseer-ltm-001",
+      "answerAlt": [
+        "项目总管工作记录"
+      ]
     }
   ],
   "groups": {
@@ -203,11 +280,11 @@
       "answer": "1962",
       "A": {
         "correct": true,
-        "answer": "id: `1962`, type: `Grouping` (name: AgentOrganization)",
-        "fullText": "id: `1962`, type: `Grouping` (name: AgentOrganization)",
+        "answer": "element \"AgentOrganization\" — id: `1962`, type: `Grouping`.",
+        "fullText": "element \"AgentOrganization\" — id: `1962`, type: `Grouping`.",
         "exit": 0,
-        "latencyMs": 14440,
-        "tokensIn": 142,
+        "latencyMs": 604582,
+        "tokensIn": 176,
         "tokensOut": 96,
         "cost": 0,
         "steps": 2,
@@ -216,7 +293,7 @@
           "argo_queryNeo4jGraph"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-01.ndjson",
-        "rawSessionBytes": 2607
+        "rawSessionBytes": 2615
       }
     },
     {
@@ -226,20 +303,20 @@
       "answer": "overseer-vision-001",
       "A": {
         "correct": true,
-        "answer": "The project vision element is **`overseer-vision-001`** (name: \"项目愿景：为 AGENT 提供长期记忆系统\", type: Goal).",
-        "fullText": "I'll navigate the ArchGraph intent map to locate the project vision element.\nThe project vision element is **`overseer-vision-001`** (name: \"项目愿景：为 AGENT 提供长期记忆系统\", type: Goal).",
+        "answer": "The element representing the project vision is:\n\n**`overseer-vision-001`** (name: \"项目愿景：为 AGENT 提供长期记忆系统\", type: Goal, parent: `project-overseer-001`).",
+        "fullText": "The element representing the project vision is:\n\n**`overseer-vision-001`** (name: \"项目愿景：为 AGENT 提供长期记忆系统\", type: Goal, parent: `project-overseer-001`).",
         "exit": 0,
-        "latencyMs": 5171,
-        "tokensIn": 379,
-        "tokensOut": 139,
+        "latencyMs": 16025,
+        "tokensIn": 3446,
+        "tokensOut": 122,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
         "toolNames": [
-          "argo_queryNeo4jGraph"
+          "argo_getSystemArchitecture"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-02.ndjson",
-        "rawSessionBytes": 3288
+        "rawSessionBytes": 15906
       }
     },
     {
@@ -249,23 +326,26 @@
       "answer": "memory-eval-view-001",
       "A": {
         "correct": true,
-        "answer": "The view named \"长期记忆评测\" has view id `memory-eval-view-001`.",
-        "fullText": "I'll locate the view named \"长期记忆评测\" in the ArchGraph intent graph.\nThe View node query returned no results. Let me check the schema and search more broadly.\nThe View node uses properties `view_id` and `view_name`, not `id`/`name`. Let me query for views by view_name.\nThe view named \"长期记忆评测\" has view id `memory-eval-view-001`.",
+        "answer": "The view \"长期记忆评测\" has view id: **memory-eval-view-001**.",
+        "fullText": "I'll locate the view named \"长期记忆评测\" in the ArchGraph intent graph.\nNo view matched. Let me check the schema and try alternate queries.\nNo element with exact name \"长期记忆评测\" exists as a View. I found elements related to \"长期记忆\" but no View named \"长期记忆评测\". Let me check views and search for exact name matches across all nodes.\nThe `:View` label may not be how views are stored. Views may be stored differently. Let me check the schema.\nViews use `view_id` and `view_name` properties, not `id`/`name`. Let me query correctly.\nThe view \"长期记忆评测\" has view id: **memory-eval-view-001**.",
         "exit": 0,
-        "latencyMs": 7760,
-        "tokensIn": 2070,
-        "tokensOut": 380,
+        "latencyMs": 14440,
+        "tokensIn": 3372,
+        "tokensOut": 650,
         "cost": 0,
-        "steps": 4,
-        "toolCalls": 4,
+        "steps": 6,
+        "toolCalls": 7,
         "toolNames": [
+          "argo_queryNeo4jGraph",
+          "argo_queryNeo4jGraph",
+          "argo_queryNeo4jGraph",
           "argo_queryNeo4jGraph",
           "argo_queryNeo4jGraph",
           "argo_queryNeo4jGraph",
           "argo_queryNeo4jGraph"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-03.ndjson",
-        "rawSessionBytes": 14345
+        "rawSessionBytes": 22696
       }
     },
     {
@@ -275,20 +355,20 @@
       "answer": "project-overseer-001",
       "A": {
         "correct": true,
-        "answer": "The element id is `project-overseer-001`.",
-        "fullText": "I'll find the Business Actor \"项目总管\" in the AgentOrganization view.\nThe element id is `project-overseer-001`.",
+        "answer": "The Business Actor \"项目总管\" is element `project-overseer-001`.",
+        "fullText": "The Business Actor \"项目总管\" is element `project-overseer-001`.",
         "exit": 0,
-        "latencyMs": 6594,
-        "tokensIn": 301,
-        "tokensOut": 99,
+        "latencyMs": 7471,
+        "tokensIn": 63,
+        "tokensOut": 66,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
         "toolNames": [
-          "argo_queryNeo4jGraph"
+          "argo_getArchitectureViewContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-04.ndjson",
-        "rawSessionBytes": 2960
+        "rawSessionBytes": 6426
       }
     },
     {
@@ -298,22 +378,20 @@
       "answer": "overseer-archimate-role-001",
       "A": {
         "correct": true,
-        "answer": "The element representing the role of ArchiMate in the vision (分类编目规则 / \"cataloguing rules\") is:\n\n**`overseer-archimate-role-001`** — \"ArchiMate 在愿景中的定位\" (type: Principle). Its description explicitly states ArchiMate = the long-term memory system's \"分类编目规则\" (cataloguing/classification rules, analogous to a library's classification system).",
-        "fullText": "No direct match. Let me search semantically.\nThe element representing the role of ArchiMate in the vision (分类编目规则 / \"cataloguing rules\") is:\n\n**`overseer-archimate-role-001`** — \"ArchiMate 在愿景中的定位\" (type: Principle). Its description explicitly states ArchiMate = the long-term memory system's \"分类编目规则\" (cataloguing/classification rules, analogous to a library's classification system).",
+        "answer": "The element representing the role of ArchiMate in the vision (\"分类编目规则\") is found.\n\n**Element id: `overseer-archimate-role-001`**\n- **Name:** \"ArchiMate 在愿景中的定位\" (ArchiMate's position in the vision)\n- **Type:** Principle\n- **Parent:** `project-overseer-001`\n- **Semantic score:** 0.884",
+        "fullText": "The element representing the role of ArchiMate in the vision (\"分类编目规则\") is found.\n\n**Element id: `overseer-archimate-role-001`**\n- **Name:** \"ArchiMate 在愿景中的定位\" (ArchiMate's position in the vision)\n- **Type:** Principle\n- **Parent:** `project-overseer-001`\n- **Semantic score:** 0.884",
         "exit": 0,
-        "latencyMs": 8337,
-        "tokensIn": 6130,
-        "tokensOut": 350,
+        "latencyMs": 9348,
+        "tokensIn": 3941,
+        "tokensOut": 172,
         "cost": 0,
-        "steps": 3,
-        "toolCalls": 3,
+        "steps": 2,
+        "toolCalls": 1,
         "toolNames": [
-          "argo_queryNeo4jGraph",
-          "argo_getSystemArchitecture",
-          "argo_queryNeo4jGraph"
+          "argo_getSystemArchitecture"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-05.ndjson",
-        "rawSessionBytes": 29501
+        "rawSessionBytes": 19203
       }
     },
     {
@@ -323,22 +401,20 @@
       "answer": "1962",
       "A": {
         "correct": true,
-        "answer": "The element `project-overseer-001` (项目总管) belongs to org `AgentOrganization` (id `1962`).\n\n**Organization: id `1962`, name `AgentOrganization`** (子视图 view `299`).",
-        "fullText": "I'll follow the parent chain from the element \"project-overseer-001\".\nLet me search for this element.\nThe element exists with id \"project-overseer-001\". Let me get its context to follow the parent chain.\nThe element `project-overseer-001` (项目总管) belongs to org `AgentOrganization` (id `1962`).\n\n**Organization: id `1962`, name `AgentOrganization`** (子视图 view `299`).",
+        "answer": "\"project-overseer-001\" (项目总管) has parent \"1962\" (AgentOrganization).\n\n- Organization id: **1962**\n- Organization name: **AgentOrganization**",
+        "fullText": "\"project-overseer-001\" (项目总管) has parent \"1962\" (AgentOrganization).\n\n- Organization id: **1962**\n- Organization name: **AgentOrganization**",
         "exit": 0,
-        "latencyMs": 7959,
-        "tokensIn": 1327,
-        "tokensOut": 309,
+        "latencyMs": 6084,
+        "tokensIn": 989,
+        "tokensOut": 126,
         "cost": 0,
-        "steps": 4,
-        "toolCalls": 3,
+        "steps": 2,
+        "toolCalls": 1,
         "toolNames": [
-          "argo_getIntentElementContext",
-          "argo_queryNeo4jGraph",
           "argo_getIntentElementContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-06.ndjson",
-        "rawSessionBytes": 10011
+        "rawSessionBytes": 6148
       }
     },
     {
@@ -348,12 +424,12 @@
       "answer": "1249",
       "A": {
         "correct": true,
-        "answer": "The view's `parent_element_id` is `1249`, whose resolved parent element is the top-level Grouping.\n\nThe view `memory-eval-view-001` (长期记忆评测) has parent_element_id `1249`, which resolves to the top-level Grouping:\n\n- **id**: `1249`\n- **name**: Implementation and Migration Viewpoint (alias `1211`)",
-        "fullText": "I'll inspect the tool list first, then navigate the intent map starting from the view's parent element.\nThe view's `parent_element_id` is `1249`, whose resolved parent element is the top-level Grouping.\n\nThe view `memory-eval-view-001` (长期记忆评测) has parent_element_id `1249`, which resolves to the top-level Grouping:\n\n- **id**: `1249`\n- **name**: Implementation and Migration Viewpoint (alias `1211`)",
+        "answer": "The view \"memory-eval-view-001\" (长期记忆评测) has `parent_element_id: \"1249\"`. The resolved parent element is:\n\n- **id**: `1249`\n- **name**: Implementation and Migration Viewpoint\n- **type**: Grouping\n\nThe parent_element_id directly points to this Grouping — it's the grouping the view is mounted under.",
+        "fullText": "I'll help you follow the parent chain from view \"memory-eval-view-001\". Let me first inspect the tools available and then get the view context.\nThe view \"memory-eval-view-001\" (长期记忆评测) has `parent_element_id: \"1249\"`. The resolved parent element is:\n\n- **id**: `1249`\n- **name**: Implementation and Migration Viewpoint\n- **type**: Grouping\n\nThe parent_element_id directly points to this Grouping — it's the grouping the view is mounted under.",
         "exit": 0,
-        "latencyMs": 6974,
-        "tokensIn": 4436,
-        "tokensOut": 152,
+        "latencyMs": 8557,
+        "tokensIn": 2979,
+        "tokensOut": 162,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
@@ -361,7 +437,7 @@
           "argo_getArchitectureViewContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-07.ndjson",
-        "rawSessionBytes": 19359
+        "rawSessionBytes": 14141
       }
     },
     {
@@ -371,12 +447,12 @@
       "answer": "433",
       "A": {
         "correct": true,
-        "answer": "The AgentOrganization (1962) element has a subdiagram view for 公众号发布团队 with view_id **433**.",
-        "fullText": "I'll start by examining the organization element and finding the 公众号发布 team view.\nThe AgentOrganization (1962) element has a subdiagram view for 公众号发布团队 with view_id **433**.",
+        "answer": "Found it. AgentOrganization (1962) has a sub view `公众号发布团队` (WeChat Publishing Team) with view_id **433**.",
+        "fullText": "I'll navigate the ArchGraph to find the team view for the WeChat publishing team under AgentOrganization.\nFound it. AgentOrganization (1962) has a sub view `公众号发布团队` (WeChat Publishing Team) with view_id **433**.",
         "exit": 0,
-        "latencyMs": 6880,
-        "tokensIn": 740,
-        "tokensOut": 89,
+        "latencyMs": 5665,
+        "tokensIn": 650,
+        "tokensOut": 98,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
@@ -384,7 +460,7 @@
           "argo_getIntentElementContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-08.ndjson",
-        "rawSessionBytes": 5058
+        "rawSessionBytes": 5085
       }
     },
     {
@@ -394,12 +470,12 @@
       "answer": "1800",
       "A": {
         "correct": true,
-        "answer": "The view `memory-eval-view-001` has parent element `1249` (Implementation and Migration Viewpoint). Among its `subdiagram_views`, the \"EA Tooling\" sub-view has id `1800`.",
-        "fullText": "The view `memory-eval-view-001` has parent element `1249` (Implementation and Migration Viewpoint). Among its `subdiagram_views`, the \"EA Tooling\" sub-view has id `1800`.",
+        "answer": "The parent element 1249 (\"Implementation and Migration Viewpoint\") lists \"EA Tooling\" among its subdiagram_views.\n\nEA Tooling view id: **1800**",
+        "fullText": "The parent element 1249 (\"Implementation and Migration Viewpoint\") lists \"EA Tooling\" among its subdiagram_views.\n\nEA Tooling view id: **1800**",
         "exit": 0,
-        "latencyMs": 5436,
-        "tokensIn": 4426,
-        "tokensOut": 100,
+        "latencyMs": 5918,
+        "tokensIn": 142,
+        "tokensOut": 90,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
@@ -407,7 +483,7 @@
           "argo_getArchitectureViewContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-09.ndjson",
-        "rawSessionBytes": 18816
+        "rawSessionBytes": 13522
       }
     },
     {
@@ -417,12 +493,12 @@
       "answer": "self-evolution-sandbox-view-001",
       "A": {
         "correct": true,
-        "answer": "The parent element of \"memory-eval-view-001\" is element `1249`, and among its subdiagram_views is the self-evolution Docker sandbox view.\n\nThe view id is `self-evolution-sandbox-view-001`.",
-        "fullText": "I'll navigate this ArchGraph intent map. Let me start by getting the context of the \"memory-eval-view-001\" view and its parent.\nThe parent element of \"memory-eval-view-001\" is element `1249`, and among its subdiagram_views is the self-evolution Docker sandbox view.\n\nThe view id is `self-evolution-sandbox-view-001`.",
+        "answer": "The self-evolution Docker sandbox view is identified. Its id is `self-evolution-sandbox-view-001`.",
+        "fullText": "I'll navigate through the graph structure. Let me start by getting the context of the view \"memory-eval-view-001\" to find its parent.\nThe self-evolution Docker sandbox view is identified. Its id is `self-evolution-sandbox-view-001`.",
         "exit": 0,
-        "latencyMs": 5101,
-        "tokensIn": 4456,
-        "tokensOut": 134,
+        "latencyMs": 7456,
+        "tokensIn": 2988,
+        "tokensOut": 108,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
@@ -430,7 +506,7 @@
           "argo_getArchitectureViewContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-10.ndjson",
-        "rawSessionBytes": 19264
+        "rawSessionBytes": 13907
       }
     },
     {
@@ -440,23 +516,22 @@
       "answer": "299",
       "A": {
         "correct": true,
-        "answer": "AgentOrganization (1962) is a Grouping whose membership is displayed in view **299** (named \"AgentOrganization\"), which resolves the element's members (Business Roles/Actor and Assignment relationships). This is the primary view exposing the AgentOrganization grouping from the business/actor-role organization viewpoint.\n\n**Reached: view id `299` (view_name \"AgentOrganization\")**",
-        "fullText": "I'll navigate the ArchGraph to find the view showing AgentOrganization (1962). Let me start by exploring the graph.\nFound AgentOrganization (1962), a Grouping. Let me find its view membership, checking for a business/organization viewpoint.\nAgentOrganization (1962) is a Grouping with a sub-diagram view `299` named \"AgentOrganization\". Let me query the views to understand which represents the business/organization viewpoint and which directly contains element 1962.\nAgentOrganization (1962) is a Grouping whose membership is displayed in view **299** (named \"AgentOrganization\"), which resolves the element's members (Business Roles/Actor and Assignment relationships). This is the primary view exposing the AgentOrganization grouping from the business/actor-role organization viewpoint.\n\n**Reached: view id `299` (view_name \"AgentOrganization\")**",
+        "answer": "The AgentOrganization (1962) appears in the \"Harness\" view (view_id `298`) as included_elements. The spec asks about the \"business/organization viewpoint.\" The user's query phrasing (\"the view that shows the...\") with the element belonging to the Harness view.\n\nThe view showing AgentOrganization is the Harness view with view id `298`.",
+        "fullText": "I'll look up the AgentOrganization element and find its view.\nNow let me find which view contains this element.\nThe relationship structure may differ. Let me check the schema to understand view membership.\nThe AgentOrganization (1962) appears in the \"Harness\" view (view_id `298`) as included_elements. The spec asks about the \"business/organization viewpoint.\" The user's query phrasing (\"the view that shows the...\") with the element belonging to the Harness view.\n\nThe view showing AgentOrganization is the Harness view with view id `298`.",
         "exit": 0,
-        "latencyMs": 8838,
-        "tokensIn": 2000,
-        "tokensOut": 415,
+        "latencyMs": 15699,
+        "tokensIn": 1092,
+        "tokensOut": 314,
         "cost": 0,
         "steps": 4,
-        "toolCalls": 4,
+        "toolCalls": 3,
         "toolNames": [
           "argo_queryNeo4jGraph",
-          "argo_getIntentElementContext",
           "argo_queryNeo4jGraph",
-          "argo_getArchitectureViewContext"
+          "argo_getIntentElementContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-11.ndjson",
-        "rawSessionBytes": 14106
+        "rawSessionBytes": 9101
       }
     },
     {
@@ -466,12 +541,12 @@
       "answer": "video-team-001",
       "A": {
         "correct": true,
-        "answer": "The video-team-001 view is confirmed as a subdiagram view of the AgentOrganization element (1962).\n\nThe view id is: **video-team-001** (\"视频创作团队\").",
-        "fullText": "I'll find the \"video-team-001\" view using the argo tools.\nThe video-team-001 view is confirmed as a subdiagram view of the AgentOrganization element (1962).\n\nThe view id is: **video-team-001** (\"视频创作团队\").",
+        "answer": "The view \"video-team-001\" is found. Its view id is **`video-team-001`** (view_name: 视频创作团队), attached to parent element AgentOrganization (`1962`).",
+        "fullText": "I'll search for the \"video-team-001\" view from the media-creation viewpoint.\nThe view \"video-team-001\" is found. Its view id is **`video-team-001`** (view_name: 视频创作团队), attached to parent element AgentOrganization (`1962`).",
         "exit": 0,
-        "latencyMs": 7950,
-        "tokensIn": 3335,
-        "tokensOut": 207,
+        "latencyMs": 12473,
+        "tokensIn": 2278,
+        "tokensOut": 210,
         "cost": 0,
         "steps": 2,
         "toolCalls": 2,
@@ -480,7 +555,7 @@
           "argo_getSystemArchitecture"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-12.ndjson",
-        "rawSessionBytes": 17194
+        "rawSessionBytes": 12062
       }
     },
     {
@@ -490,20 +565,22 @@
       "answer": "1800",
       "A": {
         "correct": true,
-        "answer": "The \"EA Tooling\" view is located under the \"Implementation and Migration Viewpoint\" element (id 1249), listed in its subdiagram_views with view_id **1800**.\n\nReached id: `1800` (view_name \"EA Tooling\").",
-        "fullText": "The \"EA Tooling\" view is located under the \"Implementation and Migration Viewpoint\" element (id 1249), listed in its subdiagram_views with view_id **1800**.\n\nReached id: `1800` (view_name \"EA Tooling\").",
+        "answer": "The \"EA Tooling\" view has view_id `1800`.",
+        "fullText": "The View label isn't mapping. Let me check the schema and query for views differently.\nViews use `view_id` and `view_name`. Let me query them.\nThe \"EA Tooling\" view has view_id `1800`.",
         "exit": 0,
-        "latencyMs": 8104,
-        "tokensIn": 8192,
-        "tokensOut": 124,
+        "latencyMs": 9631,
+        "tokensIn": 3776,
+        "tokensOut": 232,
         "cost": 0,
-        "steps": 2,
-        "toolCalls": 1,
+        "steps": 4,
+        "toolCalls": 3,
         "toolNames": [
-          "argo_getSystemArchitecture"
+          "argo_queryNeo4jGraph",
+          "argo_queryNeo4jGraph",
+          "argo_queryNeo4jGraph"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-13.ndjson",
-        "rawSessionBytes": 36589
+        "rawSessionBytes": 18828
       }
     },
     {
@@ -513,23 +590,24 @@
       "answer": "180",
       "A": {
         "correct": true,
-        "answer": "View id: **180** — \"Content Publication and Announcement\".",
-        "fullText": "The view projection follows a different label convention. Let me check the schema.\nThe View label uses `view_id` and `view_name` properties. Let me query correctly.\nView id: **180** — \"Content Publication and Announcement\".",
+        "answer": "Found it.\n\nThe view \"Content Publication and Announcement\" has view id **180**.",
+        "fullText": "The semantic query returned elements but I need to locate the view specifically. Let me query the Neo4j graph for a view with that name.\nNo direct name match on views. Let me check the schema and search more broadly for view names.\nLet me check how views are stored in the schema.\nViews use `view_name`. Let me query correctly.\nFound it.\n\nThe view \"Content Publication and Announcement\" has view id **180**.",
         "exit": 0,
-        "latencyMs": 10102,
-        "tokensIn": 2705,
-        "tokensOut": 331,
+        "latencyMs": 20371,
+        "tokensIn": 6698,
+        "tokensOut": 504,
         "cost": 0,
-        "steps": 5,
-        "toolCalls": 4,
+        "steps": 6,
+        "toolCalls": 5,
         "toolNames": [
+          "argo_getSystemArchitecture",
           "argo_queryNeo4jGraph",
           "argo_queryNeo4jGraph",
           "argo_queryNeo4jGraph",
           "argo_queryNeo4jGraph"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-14.ndjson",
-        "rawSessionBytes": 16298
+        "rawSessionBytes": 34436
       }
     },
     {
@@ -539,24 +617,21 @@
       "answer": "self-evolution-sandbox-view-001",
       "A": {
         "correct": true,
-        "answer": "The semantic view context confirms the view. The self-evolution Docker sandbox view is identified.\n\nFrom the engineering/verification viewpoint, the self-evolution Docker sandbox view reached is:\n\n**view_id: `self-evolution-sandbox-view-001`** — \"自进化测试环境（Docker 沙箱）\", mounted on parent element `1249` (Implementation and Migration Viewpoint), containing the work package element `self-evolution-sandbox-wp-001` (构建 Docker 隔离沙箱测试整套框架).",
-        "fullText": "I'll find the self-evolution Docker sandbox view from an engineering/verification viewpoint.\nThe semantic query returned the work package element but not the specific view. Let me look for the self-evolution sandbox view directly.\nNo direct view match by name. Let me check the parent element of the work package and find associated views.\nThe parent chain relationship syntax returned no records. Let me use the semantic context tool to get the element's parent and sub-diagram views.\nThe semantic view context confirms the view. The self-evolution Docker sandbox view is identified.\n\nFrom the engineering/verification viewpoint, the self-evolution Docker sandbox view reached is:\n\n**view_id: `self-evolution-sandbox-view-001`** — \"自进化测试环境（Docker 沙箱）\", mounted on parent element `1249` (Implementation and Migration Viewpoint), containing the work package element `self-evolution-sandbox-wp-001` (构建 Docker 隔离沙箱测试整套框架).",
+        "answer": "The self-evolution Docker sandbox view (self-evolution workspace, intended for engineering/verification) is confirmed:\n\n**`self-evolution-sandbox-view-001`** — \"自进化测试环境（Docker 沙箱）\", parent element `1249` (Implementation and Migration Viewpoint), members `self-evolution-sandbox-wp-001` and `lightrag-baseline-wp-001`.",
+        "fullText": "I found the element `self-evolution-sandbox-wp-001` (\"构建 Docker 隔离沙箱测试整套框架\"). Its subgraph shows it's in the `1249` grouping which has a subdiagram view `self-evolution-sandbox-view-001` named \"自进化测试环境（Docker 沙箱）\". Let me confirm this is the sandbox view and check it.\nThe self-evolution Docker sandbox view (self-evolution workspace, intended for engineering/verification) is confirmed:\n\n**`self-evolution-sandbox-view-001`** — \"自进化测试环境（Docker 沙箱）\", parent element `1249` (Implementation and Migration Viewpoint), members `self-evolution-sandbox-wp-001` and `lightrag-baseline-wp-001`.",
         "exit": 0,
-        "latencyMs": 26913,
-        "tokensIn": 8746,
-        "tokensOut": 617,
+        "latencyMs": 15160,
+        "tokensIn": 9922,
+        "tokensOut": 298,
         "cost": 0,
-        "steps": 5,
-        "toolCalls": 5,
+        "steps": 3,
+        "toolCalls": 2,
         "toolNames": [
           "argo_getSystemArchitecture",
-          "argo_queryNeo4jGraph",
-          "argo_queryNeo4jGraph",
-          "argo_queryNeo4jGraph",
-          "argo_getIntentElementContext"
+          "argo_getArchitectureViewContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-15.ndjson",
-        "rawSessionBytes": 39696
+        "rawSessionBytes": 41116
       }
     },
     {
@@ -566,12 +641,12 @@
       "answer": "memory-eval-view-001",
       "A": {
         "correct": true,
-        "answer": "The view \"memory-eval-view-001\" (长期记忆评测) contains 5 member elements:\n\n- **memory-eval-bench-wp-001** — 调研 AGENT 长期记忆评测基线\n- **memory-eval-dataset-wp-001** — 设计 ArchGraph 记忆评测题集\n- **memory-eval-run-wp-001** — 实现记忆评测 harness 并跑实测基线\n- **navigation-eval-wp-001** — 设计导航能力评测集\n- **navigation-agent-eval-wp-001** — 完整 ArchGraph AGENT 导航评测\n\nNo relationships or child views belong to it.",
-        "fullText": "I'll look up the view membership for \"memory-eval-view-001\".\nThe view \"memory-eval-view-001\" (长期记忆评测) contains 5 member elements:\n\n- **memory-eval-bench-wp-001** — 调研 AGENT 长期记忆评测基线\n- **memory-eval-dataset-wp-001** — 设计 ArchGraph 记忆评测题集\n- **memory-eval-run-wp-001** — 实现记忆评测 harness 并跑实测基线\n- **navigation-eval-wp-001** — 设计导航能力评测集\n- **navigation-agent-eval-wp-001** — 完整 ArchGraph AGENT 导航评测\n\nNo relationships or child views belong to it.",
+        "answer": "View \"memory-eval-view-001\" (长期记忆评测) has 5 members, all Work Packages:\n\n- `memory-eval-bench-wp-001` (调研 AGENT 长期记忆评测基线)\n- `memory-eval-dataset-wp-001` (设计 ArchGraph 记忆评测题集)\n- `memory-eval-run-wp-001` (实现记忆评测 harness 并跑实测基线)\n- `navigation-eval-wp-001` (设计导航能力评测集)\n- `navigation-agent-eval-wp-001` (完整 ArchGraph AGENT 导航评测)\n\nNo relationships belong to this view (included_relationships is empty).",
+        "fullText": "View \"memory-eval-view-001\" (长期记忆评测) has 5 members, all Work Packages:\n\n- `memory-eval-bench-wp-001` (调研 AGENT 长期记忆评测基线)\n- `memory-eval-dataset-wp-001` (设计 ArchGraph 记忆评测题集)\n- `memory-eval-run-wp-001` (实现记忆评测 harness 并跑实测基线)\n- `navigation-eval-wp-001` (设计导航能力评测集)\n- `navigation-agent-eval-wp-001` (完整 ArchGraph AGENT 导航评测)\n\nNo relationships belong to this view (included_relationships is empty).",
         "exit": 0,
-        "latencyMs": 6497,
-        "tokensIn": 4405,
-        "tokensOut": 207,
+        "latencyMs": 9850,
+        "tokensIn": 3050,
+        "tokensOut": 194,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
@@ -579,7 +654,7 @@
           "argo_getArchitectureViewContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-16.ndjson",
-        "rawSessionBytes": 19505
+        "rawSessionBytes": 13883
       }
     },
     {
@@ -589,12 +664,12 @@
       "answer": "overseer-ltm-001",
       "A": {
         "correct": true,
-        "answer": "Member elements of view `overseer-ltm-001`:\n- `overseer-vision-001`\n- `overseer-archimate-role-001`\n- `overseer-mem-eval-001`\n- `overseer-query-rules-001`\n- `overseer-content-storage-001`\n- `overseer-subgraph-semantic-001`\n- `overseer-wiki-eval-001`\n\nOne example id: **`overseer-vision-001`**",
-        "fullText": "I'll list the members of view \"overseer-ltm-001\".\nMember elements of view `overseer-ltm-001`:\n- `overseer-vision-001`\n- `overseer-archimate-role-001`\n- `overseer-mem-eval-001`\n- `overseer-query-rules-001`\n- `overseer-content-storage-001`\n- `overseer-subgraph-semantic-001`\n- `overseer-wiki-eval-001`\n\nOne example id: **`overseer-vision-001`**",
+        "answer": "The view **overseer-ltm-001** (项目总管工作记录) has 8 member elements:\n\n- overseer-vision-001\n- overseer-archimate-role-001\n- overseer-mem-eval-001\n- overseer-query-rules-001\n- overseer-content-storage-001\n- overseer-subgraph-semantic-001\n- overseer-wiki-eval-001\n- overseer-mcp-tool-surface-001\n\nOne member element id: **overseer-vision-001**",
+        "fullText": "I'll look up the view \"overseer-ltm-001\" and list its members.\nThe view **overseer-ltm-001** (项目总管工作记录) has 8 member elements:\n\n- overseer-vision-001\n- overseer-archimate-role-001\n- overseer-mem-eval-001\n- overseer-query-rules-001\n- overseer-content-storage-001\n- overseer-subgraph-semantic-001\n- overseer-wiki-eval-001\n- overseer-mcp-tool-surface-001\n\nOne member element id: **overseer-vision-001**",
         "exit": 0,
-        "latencyMs": 6125,
-        "tokensIn": 3861,
-        "tokensOut": 180,
+        "latencyMs": 9580,
+        "tokensIn": 4417,
+        "tokensOut": 189,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
@@ -602,7 +677,7 @@
           "argo_getArchitectureViewContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-17.ndjson",
-        "rawSessionBytes": 17031
+        "rawSessionBytes": 19559
       }
     },
     {
@@ -612,12 +687,12 @@
       "answer": "1962",
       "A": {
         "correct": true,
-        "answer": "Element \"AgentOrganization\" (1962) owns 5 subdiagram_views:\n\n- 299 (AgentOrganization)\n- 430 (DevelopmentTeam)\n- 433 (公众号发布团队)\n- media-team-001 (媒体创作团队)\n- video-team-001 (视频创作团队)\n\nOne team view id: `430`.",
-        "fullText": "Element \"AgentOrganization\" (1962) owns 5 subdiagram_views:\n\n- 299 (AgentOrganization)\n- 430 (DevelopmentTeam)\n- 433 (公众号发布团队)\n- media-team-001 (媒体创作团队)\n- video-team-001 (视频创作团队)\n\nOne team view id: `430`.",
+        "answer": "AgentOrganization (1962) directly owns 5 team views: `299`, `430`, `433`, `media-team-001`, `video-team-001`.\n\nOne team view id: **`media-team-001`**",
+        "fullText": "AgentOrganization (1962) directly owns 5 team views: `299`, `430`, `433`, `media-team-001`, `video-team-001`.\n\nOne team view id: **`media-team-001`**",
         "exit": 0,
-        "latencyMs": 7151,
-        "tokensIn": 210,
-        "tokensOut": 116,
+        "latencyMs": 6017,
+        "tokensIn": 756,
+        "tokensOut": 95,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
@@ -625,7 +700,7 @@
           "argo_getIntentElementContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-18.ndjson",
-        "rawSessionBytes": 4814
+        "rawSessionBytes": 4712
       }
     },
     {
@@ -635,12 +710,12 @@
       "answer": "memory-eval-view-001",
       "A": {
         "correct": true,
-        "answer": "Confirmed. The view `memory-eval-view-001` (\"长期记忆评测\") contains the work package `memory-eval-run-wp-001` (\"实现记忆评测 harness 并跑实测基线\") as a member. It does **not** contain any element named \"EA Tooling\" — the \"EA Tooling\" reference appears only as a child view (`1800`) of the parent element 1249, not as a member element of this view.",
-        "fullText": "Confirmed. The view `memory-eval-view-001` (\"长期记忆评测\") contains the work package `memory-eval-run-wp-001` (\"实现记忆评测 harness 并跑实测基线\") as a member. It does **not** contain any element named \"EA Tooling\" — the \"EA Tooling\" reference appears only as a child view (`1800`) of the parent element 1249, not as a member element of this view.",
+        "answer": "`memory-eval-run-wp-001` IS a member of `memory-eval-view-001` (in `included_elements`). \"EA Tooling\" is not among the 5 included elements.",
+        "fullText": "I'll check the view membership for \"memory-eval-view-001\".\n`memory-eval-run-wp-001` IS a member of `memory-eval-view-001` (in `included_elements`). \"EA Tooling\" is not among the 5 included elements.",
         "exit": 0,
-        "latencyMs": 6770,
-        "tokensIn": 4434,
-        "tokensOut": 148,
+        "latencyMs": 8848,
+        "tokensIn": 2980,
+        "tokensOut": 112,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
@@ -648,7 +723,7 @@
           "argo_getArchitectureViewContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-19.ndjson",
-        "rawSessionBytes": 19021
+        "rawSessionBytes": 13875
       }
     },
     {
@@ -658,12 +733,12 @@
       "answer": "1800",
       "A": {
         "correct": true,
-        "answer": "Confirmed. Element **2760 \"ArchGraph 本地 Web 服务\"** is a member of view **1800 \"EA Tooling\"** — it appears in both `included_elements: [..., 2760, ...]` and the resolved `elements` list (as an Application Component, parent 1249).",
-        "fullText": "Confirmed. Element **2760 \"ArchGraph 本地 Web 服务\"** is a member of view **1800 \"EA Tooling\"** — it appears in both `included_elements: [..., 2760, ...]` and the resolved `elements` list (as an Application Component, parent 1249).",
+        "answer": "Yes, confirmed. Element 2760 \"ArchGraph 本地 Web 服务\" is a member of view 1800 \"EA Tooling\" — it appears in `included_elements: [\"2100\", \"2758\", \"2760\", ...]`, with no missing ids.",
+        "fullText": "Yes, confirmed. Element 2760 \"ArchGraph 本地 Web 服务\" is a member of view 1800 \"EA Tooling\" — it appears in `included_elements: [\"2100\", \"2758\", \"2760\", ...]`, with no missing ids.",
         "exit": 0,
-        "latencyMs": 6265,
-        "tokensIn": 10136,
-        "tokensOut": 155,
+        "latencyMs": 6556,
+        "tokensIn": 115,
+        "tokensOut": 109,
         "cost": 0,
         "steps": 2,
         "toolCalls": 1,
@@ -671,16 +746,211 @@
           "argo_getArchitectureViewContext"
         ],
         "rawSessionFile": "/results/navigation-agent-raw/NV-20.ndjson",
-        "rawSessionBytes": 43234
+        "rawSessionBytes": 22617
+      }
+    },
+    {
+      "qid": "CA-01",
+      "type": "验收用例定位",
+      "question": "In the ArchGraph intent graph, the coding workflow requires identifying the acceptance test cases of affected elements BEFORE modifying code. From the element \"archgraph-workflow-rules\", read its mounted acceptance testcase. Report the testcase name and its acceptanceCriteria (test file path).",
+      "answer": "archgraph-workflow-rules",
+      "A": {
+        "correct": true,
+        "answer": "Found the element. From the semantic retrieval, the element `archgraph-workflow-rules` (name: \"ArchGraph ARGO Workflow Rules\", type: Rule) has mounted testcases. The mounted acceptance testcase (from the first `testcases` entry, matching the confirmed id) is:\n\n- **Testcase name:** `AT-rules-01`\n- **acceptanceCriteria (test file path):** `tests/argo-rules-query.test.js`\n\nThe element id reached: `archgraph-workflow-rules`.",
+        "fullText": "I'll navigate the ArchGraph intent graph to find this information. Let me start by locating the element.\nThe element name doesn't exist exactly. Let me search for it by name/type.\nFound the element. From the semantic retrieval, the element `archgraph-workflow-rules` (name: \"ArchGraph ARGO Workflow Rules\", type: Rule) has mounted testcases. The mounted acceptance testcase (from the first `testcases` entry, matching the confirmed id) is:\n\n- **Testcase name:** `AT-rules-01`\n- **acceptanceCriteria (test file path):** `tests/argo-rules-query.test.js`\n\nThe element id reached: `archgraph-workflow-rules`.",
+        "exit": 0,
+        "latencyMs": 12942,
+        "tokensIn": 3623,
+        "tokensOut": 346,
+        "cost": 0,
+        "steps": 3,
+        "toolCalls": 3,
+        "toolNames": [
+          "argo_getIntentElementContext",
+          "argo_queryNeo4jGraph",
+          "argo_getSystemArchitecture"
+        ],
+        "rawSessionFile": "/results/navigation-agent-raw/CA-01.ndjson",
+        "rawSessionBytes": 19228
+      }
+    },
+    {
+      "qid": "CA-02",
+      "type": "验收用例定位",
+      "question": "From the element \"acceptance-guardian-001\" (验收看护服务), read one of its mounted MCP-interface guardian acceptance testcases. Report the testcase name and its acceptanceCriteria (test file path).",
+      "answer": "acceptance-guardian-001",
+      "A": {
+        "correct": true,
+        "answer": "The element `acceptance-guardian-001` mounts 10 testcases. The first one is:\n\n**Testcase name:** `AT-acceptance-guardian-01`\n**acceptanceCriteria (test file path):** `tests/acceptance-guardian.test.js`",
+        "fullText": "I'll read the acceptance-guardian-001 element's context to find its mounted testscope.\nThe element `acceptance-guardian-001` mounts 10 testcases. The first one is:\n\n**Testcase name:** `AT-acceptance-guardian-01`\n**acceptanceCriteria (test file path):** `tests/acceptance-guardian.test.js`",
+        "exit": 0,
+        "latencyMs": 7688,
+        "tokensIn": 3066,
+        "tokensOut": 131,
+        "cost": 0,
+        "steps": 2,
+        "toolCalls": 1,
+        "toolNames": [
+          "argo_getIntentElementContext"
+        ],
+        "rawSessionFile": "/results/navigation-agent-raw/CA-02.ndjson",
+        "rawSessionBytes": 15344
+      }
+    },
+    {
+      "qid": "CA-03",
+      "type": "验收用例定位",
+      "question": "Enumerate ALL mounted acceptance testcases on \"acceptance-guardian-001\" (验收看护服务). Report the first and the last testcase names (proving the full list).",
+      "answer": "acceptance-guardian-001",
+      "A": {
+        "correct": true,
+        "answer": "The element `acceptance-guardian-001` (验收看护服务) mounts exactly 10 acceptance testcases, confirmed identically across both `getSystemArchitecture`, `getArchitectureViewContext`, and `getIntentElementContext`.\n\nFirst testcase: **AT-acceptance-guardian-01**\nLast testcase: **AT-acceptance-guardian-10**\n\nAll 10 (AT-acceptance-guardian-01 through AT-acceptance-guardian-10) are mounted on `acceptance-guardian-001`.",
+        "fullText": "I'll enumerate all mounted acceptance testcases on \"acceptance-guardian-001\". Let me start by locating this element in the architecture graph.\nThe element \"acceptance-guardian-001\" is found. Its `testcases` array contains the mounted acceptance testcases. Let me check if there's a sub-diagram view that might mount additional testcases, to ensure I catch ALL mounted testcases.\n\nThe element has `subdiagram_views` at `project-overseer-001` including `acceptance-guard-view-001` (验收看护). Let me check that view to confirm full membership and ensure no missed testcases.\nThe element `acceptance-guardian-001` (验收看护服务) mounts exactly 10 acceptance testcases, confirmed identically across both `getSystemArchitecture`, `getArchitectureViewContext`, and `getIntentElementContext`.\n\nFirst testcase: **AT-acceptance-guardian-01**\nLast testcase: **AT-acceptance-guardian-10**\n\nAll 10 (AT-acceptance-guardian-01 through AT-acceptance-guardian-10) are mounted on `acceptance-guardian-001`.",
+        "exit": 0,
+        "latencyMs": 16124,
+        "tokensIn": 10055,
+        "tokensOut": 416,
+        "cost": 0,
+        "steps": 3,
+        "toolCalls": 3,
+        "toolNames": [
+          "argo_getSystemArchitecture",
+          "argo_getArchitectureViewContext",
+          "argo_getIntentElementContext"
+        ],
+        "rawSessionFile": "/results/navigation-agent-raw/CA-03.ndjson",
+        "rawSessionBytes": 46515
+      }
+    },
+    {
+      "qid": "CR-01",
+      "type": "提交登记",
+      "question": "After a code change, the workflow requires registering the commit id + file paths back onto the corresponding element. Read the commit ledger (attributes) of \"archgraph-workflow-rules\" and confirm the latest registered commit and the delivery status.",
+      "answer": "archgraph-workflow-rules",
+      "A": {
+        "correct": true,
+        "answer": "The element exists with id **archgraph-workflow-rules** (name \"ArchGraph ARGO Workflow Rules\").\n\n**Latest registered commit:** `f904aa2` (description: `updateArchitectureElement patch.attributes 改为按 name 定向合并...` covering `argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-element-mutation.test.js`).\n\n**Delivery status:** `delivered` (attribute `deliveryStatus: delivered`).\n\nNote: the \"latest\" is the last-serialized `commit` attribute; `f904aa2` is the newest on the element.",
+        "fullText": "The element exists with id **archgraph-workflow-rules** (name \"ArchGraph ARGO Workflow Rules\").\n\n**Latest registered commit:** `f904aa2` (description: `updateArchitectureElement patch.attributes 改为按 name 定向合并...` covering `argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-element-mutation.test.js`).\n\n**Delivery status:** `delivered` (attribute `deliveryStatus: delivered`).\n\nNote: the \"latest\" is the last-serialized `commit` attribute; `f904aa2` is the newest on the element.",
+        "exit": 0,
+        "latencyMs": 17804,
+        "tokensIn": 3794,
+        "tokensOut": 253,
+        "cost": 0,
+        "steps": 3,
+        "toolCalls": 2,
+        "toolNames": [
+          "argo_getIntentElementContext",
+          "argo_getSystemArchitecture"
+        ],
+        "rawSessionFile": "/results/navigation-agent-raw/CR-01.ndjson",
+        "rawSessionBytes": 18908
+      }
+    },
+    {
+      "qid": "CR-02",
+      "type": "提交登记",
+      "question": "Read the commit ledger (attributes) of \"navigation-eval-wp-001\". Confirm the SEED archival commit and the hint-fix commit are both registered.",
+      "answer": "navigation-eval-wp-001",
+      "A": {
+        "correct": true,
+        "answer": "The commit ledger (attributes) of `navigation-eval-wp-001` contains two `commit` attribute entries:\n\n1. **`12a1114`** — the hint-fix commit (v1.1.0, added 3 encoding agent workflow dimensions, 28 questions, all green)\n2. **`be47829`** — the SEED archival commit (archive as SEED v1.0.0 single source of truth, 20/20 agent eval)\n\nConfirmed: The **SEED archival commit** (`be47829`) and the **hint-fix commit** (`12a1114`) are both registered in the commit ledger.",
+        "fullText": "The element exists but attributes are null in the projection. Let me get the intent element context to read its attributes directly.\nThe commit ledger (attributes) of `navigation-eval-wp-001` contains two `commit` attribute entries:\n\n1. **`12a1114`** — the hint-fix commit (v1.1.0, added 3 encoding agent workflow dimensions, 28 questions, all green)\n2. **`be47829`** — the SEED archival commit (archive as SEED v1.0.0 single source of truth, 20/20 agent eval)\n\nConfirmed: The **SEED archival commit** (`be47829`) and the **hint-fix commit** (`12a1114`) are both registered in the commit ledger.",
+        "exit": 0,
+        "latencyMs": 8394,
+        "tokensIn": 1634,
+        "tokensOut": 319,
+        "cost": 0,
+        "steps": 3,
+        "toolCalls": 2,
+        "toolNames": [
+          "argo_queryNeo4jGraph",
+          "argo_getIntentElementContext"
+        ],
+        "rawSessionFile": "/results/navigation-agent-raw/CR-02.ndjson",
+        "rawSessionBytes": 10452
+      }
+    },
+    {
+      "qid": "CI-01",
+      "type": "变更影响",
+      "question": "Before changing a deliverable, the coding workflow evaluates the delivery baseline. Read the deliveryStatus of \"acceptance-guardian-001\" (验收看护服务) and report it.",
+      "answer": "acceptance-guardian-001",
+      "A": {
+        "correct": true,
+        "answer": "The delivery baseline of **acceptance-guardian-001** (验收看护服务 / Acceptance Guardianship):\n\n**deliveryStatus = `delivered`**",
+        "fullText": "I'll check the delivery status of the acceptance-guardian-001 element.\nNo exact name match. Let me search for the element.\nThe element exists. Now let me read its deliveryStatus attribute.\nThe delivery baseline of **acceptance-guardian-001** (验收看护服务 / Acceptance Guardianship):\n\n**deliveryStatus = `delivered`**",
+        "exit": 0,
+        "latencyMs": 15857,
+        "tokensIn": 4647,
+        "tokensOut": 320,
+        "cost": 0,
+        "steps": 4,
+        "toolCalls": 4,
+        "toolNames": [
+          "argo_getIntentElementContext",
+          "argo_queryNeo4jGraph",
+          "argo_memory_search",
+          "argo_getIntentElementContext"
+        ],
+        "rawSessionFile": "/results/navigation-agent-raw/CI-01.ndjson",
+        "rawSessionBytes": 24480
+      }
+    },
+    {
+      "qid": "CI-02",
+      "type": "变更影响",
+      "question": "Assess the ownership of \"acceptance-guardian-001\": which Business Actor is this service mounted under (its parent)? Report that actor's id.",
+      "answer": "project-overseer-001",
+      "A": {
+        "correct": true,
+        "answer": "The context confirms the parent chain. `acceptance-guardian-001` has `\"parent\": \"project-overseer-001\"`, which is a Business Actor named \"项目总管\".\n\nThe parent Business Actor is `project-overseer-001` (项目总管, Project Overseer).",
+        "fullText": "I'll investigate the ownership of \"acceptance-guardian-001\".\nThe element is an Application Service with no direct `parent_element_id`. I need to find its parent via the graph relationships. Let me look for composition/aggregation relationships pointing to it.\nThe context confirms the parent chain. `acceptance-guardian-001` has `\"parent\": \"project-overseer-001\"`, which is a Business Actor named \"项目总管\".\n\nThe parent Business Actor is `project-overseer-001` (项目总管, Project Overseer).",
+        "exit": 0,
+        "latencyMs": 11639,
+        "tokensIn": 3400,
+        "tokensOut": 336,
+        "cost": 0,
+        "steps": 3,
+        "toolCalls": 3,
+        "toolNames": [
+          "argo_queryNeo4jGraph",
+          "argo_queryNeo4jGraph",
+          "argo_getIntentElementContext"
+        ],
+        "rawSessionFile": "/results/navigation-agent-raw/CI-02.ndjson",
+        "rawSessionBytes": 18551
+      }
+    },
+    {
+      "qid": "CI-03",
+      "type": "变更影响",
+      "question": "At session end the coding workflow writes a session summary into the Business Actor's long-term memory subview. From \"project-overseer-001\" (项目总管), find its LTM subview id.",
+      "answer": "overseer-ltm-001",
+      "A": {
+        "correct": true,
+        "answer": "The element \"项目总管\" (project-overseer-001) has subdiagram_views including:\n\n- `overseer-ltm-001` (\"项目总管工作记录\") — this is the long-term memory (LTM) subview\n- `acceptance-guard-view-001`\n\nThe LTM subview id is **`overseer-ltm-001`**.",
+        "fullText": "The element \"项目总管\" (project-overseer-001) has subdiagram_views including:\n\n- `overseer-ltm-001` (\"项目总管工作记录\") — this is the long-term memory (LTM) subview\n- `acceptance-guard-view-001`\n\nThe LTM subview id is **`overseer-ltm-001`**.",
+        "exit": 0,
+        "latencyMs": 5441,
+        "tokensIn": 1090,
+        "tokensOut": 129,
+        "cost": 0,
+        "steps": 2,
+        "toolCalls": 1,
+        "toolNames": [
+          "argo_getIntentElementContext"
+        ],
+        "rawSessionFile": "/results/navigation-agent-raw/CI-03.ndjson",
+        "rawSessionBytes": 6214
       }
     }
   ],
   "summary": {
     "A": {
-      "correct": 20,
-      "total": 20,
-      "avgLatencyMs": 8468,
-      "totalTokens": 76779
+      "correct": 28,
+      "total": 28,
+      "avgLatencyMs": 31986,
+      "totalTokens": 91336
     },
     "byDimension": {
       "定位": {
@@ -698,12 +968,24 @@
       "边界内导航": {
         "correct": 5,
         "total": 5
+      },
+      "验收用例定位": {
+        "correct": 3,
+        "total": 3
+      },
+      "提交登记": {
+        "correct": 2,
+        "total": 2
+      },
+      "变更影响": {
+        "correct": 3,
+        "total": 3
       }
     }
   },
   "rawSessions": {
     "dir": "/results/navigation-agent-raw",
-    "count": 20,
+    "count": 28,
     "files": [
       "/results/navigation-agent-raw/NV-01.ndjson",
       "/results/navigation-agent-raw/NV-02.ndjson",
@@ -724,7 +1006,15 @@
       "/results/navigation-agent-raw/NV-17.ndjson",
       "/results/navigation-agent-raw/NV-18.ndjson",
       "/results/navigation-agent-raw/NV-19.ndjson",
-      "/results/navigation-agent-raw/NV-20.ndjson"
+      "/results/navigation-agent-raw/NV-20.ndjson",
+      "/results/navigation-agent-raw/CA-01.ndjson",
+      "/results/navigation-agent-raw/CA-02.ndjson",
+      "/results/navigation-agent-raw/CA-03.ndjson",
+      "/results/navigation-agent-raw/CR-01.ndjson",
+      "/results/navigation-agent-raw/CR-02.ndjson",
+      "/results/navigation-agent-raw/CI-01.ndjson",
+      "/results/navigation-agent-raw/CI-02.ndjson",
+      "/results/navigation-agent-raw/CI-03.ndjson"
     ]
   }
 }
