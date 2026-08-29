@@ -3000,6 +3000,11 @@
           "name": "commit",
           "value": "b0aaf9d",
           "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; tests/argo-global-install.test.js; argo/scripts/ARCHITECTURE.md（getSystemArchitecture 全量图谱获取移除：graph-tidy purpose + 无 query 快照 → QUERY_REQUIRED；query 必填；输出契约去掉 full-snapshot mode；harness 进程内读图）"
+        },
+        {
+          "name": "commit",
+          "value": "b26dc36",
+          "description": "tests/argo-mcp-tools.test.js（新增验收：getSystemArchitecture 无 query → QUERY_REQUIRED；graph-tidy purpose → QUERY_PURPOSE_INVALID）"
         }
       ]
     },
