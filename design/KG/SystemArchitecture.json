@@ -3285,8 +3285,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "65488fa",
-          "description": "docs/navigation-eval-dataset.md; scripts/navigation-eval-run.js; tests/navigation-eval-dataset.test.js; tests/navigation-eval-run.test.js; results/navigation-eval-report.json; design/KG/SystemArchitecture.json"
+          "value": "c726508",
+          "description": "data/eval-seeds/navigation-seed.json（v1.0.1：NV-02/NV-05 retrievalHint 弃用 purpose=intent-decision 对齐为 general，描述性元数据修复）"
         },
         {
           "name": "commit",
