@@ -2353,10 +2353,6 @@
           "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/argo-semantic-scope.test.js; tests/argo-rules-query.test.js; design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "commit",
           "value": "ea4a80d",
           "description": "工具面精简第 1 步：移除 validateStageHandoff/validateTraceProposal"
@@ -2380,6 +2376,10 @@
           "name": "commit",
           "value": "50bd45b",
           "description": "argo/scripts/argo-paths.js（getArgoEnvPath 优先全局干净 ~/.argo/.env：修复无 ARGO_ENV_FILE 时解析到仓库 argo/.env 非白名单键导致语义检索失败；AT-acceptance-guardian-09 通过，runArchitectureTests 22/22 全绿）；design/KG/SystemArchitecture.json + test-failure-records.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
