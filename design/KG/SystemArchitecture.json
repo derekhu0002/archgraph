@@ -3567,7 +3567,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "T1 工作记忆摘要元素（<actor>-wm-001 视图）：会话开始时加载进上下文的紧凑摘要，幂等覆盖不追加。内容：身份（项目总管/项目总管）、当前任务、最近记忆卡片、会话钩子（上次未完成项/关键指针）。memoryTier 约定：T1=工作记忆（必进上下文）/T2=长期记忆（按需回忆）/T3=档案（显式检索）。",
+      "description": "# 项目总管 工作记忆（2026-08-30 会话摘要）\n- 身份：项目总管（ArchGraph 项目 overseer），人类伙伴未指定角色时默认对话身份\n- 当前任务：ACTOR 三层记忆模型（T1/T2/T3）已全 Phase 落地（0-6），操作机制已进 RULE（MemoryTierConventions）自动生效\n- 本次进展：\n  - updateArchitectureElement attributes 合并语义：name+value 追加（修多值 commit 台账回归 de1f9e8）\n  - 导航评测 SEED v1.2.0（7 维 28 题 + hostScenarios 宿主视角场景 + 文档），AGENT 评测 28/28（新方法论：真实 RULE 在场、指引仅会话内容）\n  - 三层记忆全 Phase：设计文档 + 规则（S1.1/S1.2/RecallGuideline/TierConventions）+ 视图（wm/ltm/archive）+ T1 读写脚本 + 归档脚本 + memory-eval 维度 7 两步回忆（31/31）\n  - 部署核查：规则 4 harness + 全局脚本全绿\n- 关键决策：\n  - 同名多值属性（commit 台账）merge 必须 name+value 匹配（新值追加），不得 name-only 就地覆盖\n  - 框架操作机制优先进 RULE（自动注入），SKILL 仅用于需主动调用的专业能力\n  - 会话收尾不靠 LLM 判断：里程碑即写兜底 + 摘要机会式幂等覆盖（不追加，写放大有界）\n- 未完成/TODO：\n  - 三层记忆后续可选项：如需主动调用可做 memory-tiers skill；对外/公众号文章；T2 回忆 AGENT 评测（容器）\n  - 老记忆元素无日期属性，归档需先补日期属性才可自动归档\n- 经验教训：\n  - merge 逻辑改动必加多值台账回归测试\n  - 评测不得改框架文件（RULE 保持 deploy 原样），指引仅作为会话内容注入\n  - results/ 已 gitignore；语义检索真实后端有瞬态 flake（并发下）\n- 会话钩子：上次收尾于三层记忆全 Phase 完成 + 部署核查通过；下次优先可选项：对外文章或 T2 回忆 AGENT 评测",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3586,6 +3586,10 @@
           "name": "commit",
           "value": "c593c5a",
           "description": "scripts/actor-working-memory.js（T1 摘要读写：loadWorkingMemoryDigest + writeWorkingMemory 幂等覆盖）；tests/actor-working-memory.test.js; design/KG/SystemArchitecture.json（AT-overseer-wm-01）"
+        },
+        {
+          "name": "lastSummaryAt",
+          "value": "2026-08-30T00:00:00.000Z"
         }
       ],
       "testcases": [
