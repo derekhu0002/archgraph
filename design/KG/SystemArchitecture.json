@@ -3512,6 +3512,13 @@
           "type": "Acceptance Test",
           "Input": "tests/actor-memory-tiers.test.js",
           "acceptanceCriteria": "tests/actor-memory-tiers.test.js"
+        },
+        {
+          "name": "AT-memory-archive-01",
+          "description": "GIVEN 归档迁移机制（scripts/memory-archive.js）；WHEN 选择候选并迁移；THEN 候选=delivered/COMPLETED 且过年龄门；迁移只移不删（T2 移除+T3 加入+memoryTier=T3+archivedAt）；无日期元素安全默认不自动归档。",
+          "type": "Acceptance Test",
+          "Input": "tests/memory-archive.test.js",
+          "acceptanceCriteria": "tests/memory-archive.test.js"
         }
       ],
       "attributes": [
