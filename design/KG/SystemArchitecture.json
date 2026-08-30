@@ -3531,6 +3531,11 @@
           "name": "commit",
           "value": "19cd21c",
           "description": "Phase 1+2 落地：规则层（SessionMemorySummarization/STEP 0）+ 视图约定（overseer-wm-001/overseer-archive-001 + memoryTier 约定）"
+        },
+        {
+          "name": "commit",
+          "value": "536b0c1",
+          "description": "scripts/memory-archive.js（归档迁移 T2->T3 只移不删：delivered/COMPLETED+年龄门，无日期安全跳过）；tests/memory-archive.test.js; design/KG/SystemArchitecture.json（AT-memory-archive-01）"
         }
       ]
     },
