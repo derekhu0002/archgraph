@@ -11,10 +11,15 @@
  * actually REACHED the target position (id/name) — i.e. "can an agent navigate
  * the map", not "can the backend answer a fact".
  *
+ * The eval exercises the WHOLE framework and NEVER modifies framework content:
+ * the real archgraph.instructions.md (deployed by argo-deploy into the
+ * container's AGENTS.md / prompts / rules) stays intact; navigation guidance is
+ * injected ONLY as session content (prepended to each opencode session prompt).
+ *
  * Flow:
- *   1. load env + argo init (generate initial graph) + full ARGO instructions
+ *   1. load env + argo init (generate initial graph) — framework rule stays deployed
  *   2. configure opencode with ONLY the argo MCP (complete toolchain, no lightrag)
- *   3. for each navigation question: opencode run (agent navigates the graph)
+ *   3. for each navigation question: opencode run (nav guidance + question as session)
  *   4. judge: does the agent's final answer contain the target id/name?
  *   5. package the RAW agent session record (opencode run NDJSON stream) for
  *      each question into /results/navigation-agent-raw/<NV-xx>.ndjson so every
@@ -81,23 +86,26 @@ function loadSeedQuestions() {
 }
 const QUESTIONS = loadSeedQuestions();
 
-// ── full ARGO instructions (NOT neutral — this eval runs the complete ARGO) ─
-const ARGO_AGENTS_MD = `# Full-ArchGraph navigation session
+// ── navigation session guidance (SESSION CONTENT ONLY — never a framework file) ─
+// The eval exercises the WHOLE framework: argo-deploy installs the real
+// archgraph.instructions.md into the container (AGENTS.md / prompts / rules) and
+// this harness must NEVER modify any of it. Navigation guidance is injected only
+// into each opencode session prompt (the "Question:" message), not into AGENTS.md.
+const NAV_SESSION_GUIDE = `# Full-ArchGraph navigation session
 You are an agent navigating the ArchGraph intent map. The map is an ArchiMate
 knowledge graph (elements, relationships, views) loaded into the argo memory
 backend, which IS mounted in this session.
 
-Available argo tools (use them to navigate the map):
+Navigate the map using the argo tools exposed in this session. Useful navigation kit:
 - argo_getSystemArchitecture: semantic retrieval; pass query.purpose + query.intent
-  (e.g. purpose "general") to locate relevant
-  elements/views by meaning.
+  (e.g. purpose "general") to locate relevant elements/views by meaning.
 - argo_queryNeo4jGraph: structural Cypher over the graph; e.g.
   MATCH (e:Element {graphKey:$graphKey}) RETURN e.id, e.name, e.type
 - argo_getIntentElementContext: semantic context of one element (parent chain,
   subdiagram_views, neighbours) — use for following relations / multi-hop.
 - argo_getArchitectureViewContext: full membership of one view.
 
-Rules:
+Session rules:
 1. Inspect the tool list first — the argo tools above are your navigation kit.
 2. To follow a parent chain: getIntentElementContext gives the element's parent
    (subgraph.elements[].parent) and subdiagram_views.
@@ -107,13 +115,6 @@ Rules:
 6. Do NOT guess ids. Only report ids you actually observed from the tools.
 7. End with a DIRECT, concise statement: the reached id(s)/name(s).
 8. Use only the tools that actually exist in this session.`;
-
-function writeArgoInstructions() {
-  try {
-    fs.writeFileSync(path.join(HOME, '.config/opencode/AGENTS.md'), ARGO_AGENTS_MD);
-    return true;
-  } catch (_) { return false; }
-}
 
 function configureArgoOnly() {
   const configPath = path.join(HOME, '.config/opencode/opencode.json');
@@ -219,11 +220,15 @@ function argoInit() {
 
 // ── agent run + event parsing ──────────────────────────────────────────────
 function runAgent(question) {
-  writeArgoInstructions();
+  // Framework content is NEVER modified: the deployed AGENTS.md (the real
+  // ARCHGRAPH rule) stays intact, so the eval exercises the WHOLE framework.
+  // Navigation guidance is injected ONLY as session content (prepended to the
+  // per-session question prompt).
+  const prompt = `${NAV_SESSION_GUIDE}\n\nQuestion: ${question}`;
   const t0 = Date.now();
   let out = ''; let rawSession = ''; let exit = -1;
   try {
-    const r = spawnSync('opencode', ['run', '--format', 'json', question], {
+    const r = spawnSync('opencode', ['run', '--format', 'json', prompt], {
       env: process.env, cwd: WORKSPACE, encoding: 'utf8', timeout: 600000, maxBuffer: 40 * 1024 * 1024,
     });
     exit = r.status;
