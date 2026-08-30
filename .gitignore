@@ -17,3 +17,4 @@ results/agent-eval-lightrag.log
 scripts/at-inventory-report.txt
 scripts/at-refresh-plan.json
 scripts/at-simplify-plan.json
+results
