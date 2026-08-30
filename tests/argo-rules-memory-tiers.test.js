@@ -56,3 +56,18 @@ test('AT rules: WakeupGuideline STEP 0 loads only T1 working memory (T2/T3 on de
   // AND the T2 hierarchy is a recall target, not a bulk context load
   assert.match(rules, /recall target, not as a bulk context load/, 'T2 is a recall target');
 });
+
+test('AT rules: MemoryRecallGuideline mandates two-step recall + loose/strict threshold layering', () => {
+  const rules = fs.readFileSync(RULES, 'utf8');
+  // THEN the framework rules declare the two-step recall (locate then full content)
+  assert.match(rules, /MemoryRecallGuideline/, 'must have a MemoryRecallGuideline section');
+  assert.match(rules, /TWO steps/, 'must mandate two-step recall');
+  assert.match(rules, /memory_search/, 'must reference memory_search (locate)');
+  assert.match(rules, /getIntentElementContext/, 'must reference full-content retrieval');
+  assert.match(rules, /compact card is a LOCATOR/, 'card is a locator, never the full memory');
+  // AND threshold layering: loose recall (0.55) / strict audit (0.8), reject only on zero hits
+  assert.match(rules, /LOOSE memory threshold/, 'must declare a loose memory threshold');
+  assert.match(rules, /0\.55/, 'must mention the loose memory threshold default');
+  assert.match(rules, /0\.8/, 'must mention the strict audit threshold');
+  assert.match(rules, /Reject only when there are ZERO/, 'must reject only on zero/irrelevant hits');
+});

@@ -117,6 +117,14 @@ Long-term memory writes are primarily triggered IMMEDIATELY at the following mom
 The above immediate records follow the conciseness and de-duplication requirements of `<SessionMemorySummarization>`. The session-end consolidated summary is a separate, opportunistic and idempotent write (see `<SessionMemorySummarization>`), NOT the primary capture path.
 </MemoryTriggerTiming>
 
+<MemoryRecallGuideline>
+Recall long-term memory in TWO steps — a compact card is a LOCATOR, never the full memory:
+1. LOCATE: run `memory_search` (or `getSystemArchitecture` with purpose `general`) to find relevant memory by meaning. Recall uses the LOOSE memory threshold (default 0.55, configurable via `ARGO_SEMANTIC_MEMORY_THRESHOLD` / `ARGO_SEMANTIC_MEMORY_THRESHOLD_<CHANNEL>`), so paraphrased-but-relevant memory is not missed.
+2. RETRIEVE FULL CONTENT: for each hit, call `getIntentElementContext` on the hit id to read the full element (description + attributes). Do NOT answer from the truncated card alone.
+Threshold layering: memory recall is loose; `audit` reads are strict (default 0.8). Reject only when there are ZERO or clearly irrelevant hits — never reject a low-but-relevant score.
+Recall target: an Actor's T2 long-term memory is its `<actor>-ltm-001` view hierarchy; T3 archive (`<actor>-archive-001`) is read by explicit retrieval. Recall on demand — never bulk-load memory into context.
+</MemoryRecallGuideline>
+
 <ToolsGuideline>
 You MUST read/write the intent architecture through the tools provided by the ARGO MCP server; direct modification of the intent architecture source file is forbidden:
 1. getSystemArchitecture: semantically read the architecture — MUST supply query.purpose + query.intent (semantic retrieval per <QueryPriorityGuideline>); an omitted-query full read is a last resort, not the default.
