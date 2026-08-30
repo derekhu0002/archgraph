@@ -3308,8 +3308,8 @@
       "attributes": [
         {
           "name": "commit",
-          "value": "a90abcf",
-          "description": "sandbox/navigation-agent-eval.js（修复：callTool 未定义 bug / byDimension 7 维 / purpose general / dataset 文案）; tests/navigation-agent-eval.test.js; results/navigation-agent-report.json + results/navigation-agent-raw/（完整 AGENT 导航评测 28/28，7 维度：定位 5/5 可达 5/5 视角切换 5/5 边界 5/5 验收 3/3 登记 2/2 影响 3/3，生产图 168 元素/41 视图，原始会话 28 条入包可回放）"
+          "value": "1390122",
+          "description": "sandbox/navigation-agent-eval.js（方法论修正：导航评测测整个框架，不再覆盖容器内 ~/.config/opencode/AGENTS.md 的真实 RULE；导航指引仅作为每次 opencode run 的会话内容注入）"
         },
         {
           "name": "deliveryStatus",
