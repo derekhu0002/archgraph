@@ -2385,6 +2385,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "de1f9e8",
+          "description": "mergeAttributesPatch 修复多值台账（commit 台账按 name+value 追加，单值属性按 name 就地 upsert，op:remove 支持按 name+value）；argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-element-mutation.test.js"
         }
       ]
     },
@@ -3296,6 +3301,21 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "65488fa",
+          "description": "docs/navigation-eval-dataset.md; scripts/navigation-eval-run.js; tests/navigation-eval-dataset.test.js; tests/navigation-eval-run.test.js; results/navigation-eval-report.json; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "c726508",
+          "description": "data/eval-seeds/navigation-seed.json（v1.0.1：NV-02/NV-05 retrievalHint 弃用 purpose=intent-decision 对齐为 general，描述性元数据修复）"
+        },
+        {
+          "name": "commit",
+          "value": "9bb8845",
+          "description": "data/eval-seeds/navigation-seed.json（v1.2.0：新增 hostScenarios 宿主视角三要素场景——instruction/expected/agentBehavior，28 题全覆盖）；scripts/eval-seed.js; tests/eval-seed.test.js; docs/navigation-host-scenarios.md"
         }
       ]
     },
