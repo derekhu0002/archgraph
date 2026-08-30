@@ -3547,6 +3547,15 @@
           "value": "19cd21c",
           "description": "design/KG/SystemArchitecture.json（T1 工作记忆视图 overseer-wm-001 + 摘要元素落地）；docs/actor-memory-tiers.md; tests/actor-memory-tiers.test.js"
         }
+      ],
+      "testcases": [
+        {
+          "name": "AT-overseer-wm-01",
+          "description": "GIVEN T1 工作记忆摘要机制（scripts/actor-working-memory.js）；WHEN 读摘要与写摘要；THEN T1 元素可解析（memoryTier=T1）、摘要内容结构化且紧凑截断、加载返回 T1 摘要+T2 最近 N 条紧凑卡片、写入为幂等覆盖不追加。",
+          "type": "Acceptance Test",
+          "Input": "tests/actor-working-memory.test.js",
+          "acceptanceCriteria": "tests/actor-working-memory.test.js"
+        }
       ]
     }
   ],
