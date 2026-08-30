@@ -3519,6 +3519,11 @@
           "name": "commit",
           "value": "ce16c34",
           "description": "docs/actor-memory-tiers.md; tests/actor-memory-tiers.test.js; design/KG/SystemArchitecture.json（ACTOR 三层记忆模型设计 + Principle 登记）"
+        },
+        {
+          "name": "commit",
+          "value": "19cd21c",
+          "description": "Phase 1+2 落地：规则层（SessionMemorySummarization/STEP 0）+ 视图约定（overseer-wm-001/overseer-archive-001 + memoryTier 约定）"
         }
       ]
     },
@@ -3536,6 +3541,11 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "19cd21c",
+          "description": "design/KG/SystemArchitecture.json（T1 工作记忆视图 overseer-wm-001 + 摘要元素落地）；docs/actor-memory-tiers.md; tests/actor-memory-tiers.test.js"
         }
       ]
     }
