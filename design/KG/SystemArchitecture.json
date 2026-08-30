@@ -3473,6 +3473,22 @@
           "acceptanceCriteria": "tests/argo-global-install.test.js"
         }
       ]
+    },
+    {
+      "id": "overseer-memory-tiers-001",
+      "name": "ACTOR 三层记忆模型（工作记忆/长期记忆/档案）",
+      "type": "Principle",
+      "parent": "project-overseer-001",
+      "description": "ACTOR 记忆分层原则（2026-08-30 对齐）：因一个 ACTOR 的记忆可能过多无法全部加载进上下文，按人类记忆分层——T1 工作记忆（意识区，<actor>-wm-001，会话开始只加载紧凑摘要+身份+会话钩子，≤2~4K token）、T2 长期记忆（可回忆，<actor>-ltm-001 即现有 LTM 子视图，不在上下文，靠 memory_search 语义回忆 + getIntentElementContext 取全文两步）、T3 档案（更长期，<actor>-archive-001，已完结/封存记忆，显式检索才读）。机制：T1 摘要=静态摘要元素+最近 N 条紧凑卡片（幂等覆盖不追加）；T2/T3 切分=视图分层为主+delivered 过期自动归档；STEP 0 只加载 T1；回忆两步法固化进规则；阈值回忆宽松拒答严格；归档只移不删。会话收尾不靠 LLM 精确判断——关键内容靠里程碑即时写入（MemoryTriggerTiming）兜底，会话摘要靠显式信号/机会式幂等覆盖写。设计文档 docs/actor-memory-tiers.md。",
+      "testcases": [
+        {
+          "name": "AT-actor-memory-tiers-01",
+          "description": "GIVEN ACTOR 三层记忆模型设计已确立；WHEN 检查设计文档与图谱登记；THEN 文档声明 T1/T2/T3 三层与视图约定、会话收尾不依赖 LLM 判断（里程碑即写+幂等覆盖）、图谱 Principle 挂载于 overseer-ltm-001。",
+          "type": "Acceptance Test",
+          "Input": "tests/actor-memory-tiers.test.js",
+          "acceptanceCriteria": "tests/actor-memory-tiers.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -4949,7 +4965,8 @@
         "overseer-content-storage-001",
         "overseer-subgraph-semantic-001",
         "overseer-wiki-eval-001",
-        "overseer-mcp-tool-surface-001"
+        "overseer-mcp-tool-surface-001",
+        "overseer-memory-tiers-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001"
