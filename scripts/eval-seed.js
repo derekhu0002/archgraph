@@ -64,6 +64,20 @@ function validateSeed(seed) {
   for (const dim of KNOWN_DIMENSIONS) {
     if (!dimCount[dim] || dimCount[dim] < 1) errors.push(`dimension ${dim} must have at least 1 question`);
   }
+  if (!seed.hostScenarios || typeof seed.hostScenarios !== 'object' || Array.isArray(seed.hostScenarios)) {
+    errors.push('hostScenarios object required (per-question host-perspective scenarios)');
+  } else {
+    for (const q of seed.questions || []) {
+      const hs = seed.hostScenarios[q.id];
+      if (!hs || typeof hs !== 'object' || Array.isArray(hs)) {
+        errors.push(`${q.id} missing hostScenario`);
+      } else {
+        for (const f of ['instruction', 'expected', 'agentBehavior']) {
+          if (typeof hs[f] !== 'string' || !hs[f]) errors.push(`${q.id} hostScenario missing ${f}`);
+        }
+      }
+    }
+  }
   return { ok: errors.length === 0, errors };
 }
 

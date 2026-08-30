@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "seedId": "archgraph-navigation-seed",
   "name": "ArchGraph 导航能力评测集",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "active",
   "source": "docs/navigation-eval-dataset.md",
   "description": "「给 AGENT 一张以 ArchiMate 为 schema 的导航地图」愿景下的导航能力可执行评测集 SEED v1：4 维度（定位/可达/视角切换/边界内导航）×5 = 20 题（NV-01..20）。每题含 GIVEN/WHEN/THEN 三件套、检索提示、判定目标（id/names）、可执行检索序列（含 pick 多跳）与判定要求。作为后续持续维护/扩展的单一事实源：加题/改题只改本 SEED 并升版本，harness 与测试统一消费。",
@@ -438,5 +438,35 @@
       "retrieval": [{ "tool": "getIntentElementContext", "args": { "elementId": "project-overseer-001" } }],
       "requirements": [{ "step": 0, "type": "contains", "values": ["overseer-ltm-001"] }]
     }
-  ]
+  ],
+  "hostScenarios": {
+    "NV-01": { "instruction": "找到组织元素 AgentOrganization，报它的 id 和类型。", "expected": "1962 / Grouping（AgentOrganization）", "agentBehavior": "inspect 工具列表后，用 argo_queryNeo4jGraph 按 name='AgentOrganization' 匹配，读到 id=1962、type=Grouping，直接回报。" },
+    "NV-02": { "instruction": "帮我找代表项目愿景的元素——为 AGENT 提供长期记忆系统。", "expected": "overseer-vision-001（项目愿景）", "agentBehavior": "用 argo_getSystemArchitecture 语义检索（purpose=general），按「愿景/长期记忆系统」语义命中并回报 id。" },
+    "NV-03": { "instruction": "长期记忆评测的视图是哪个？报视图 id。", "expected": "memory-eval-view-001", "agentBehavior": "用 argo_queryNeo4jGraph 按 view_name='长期记忆评测' 匹配，回报 view_id。" },
+    "NV-04": { "instruction": "项目总管这个角色在图里是哪个元素？", "expected": "project-overseer-001（项目总管，Business Actor）", "agentBehavior": "用 argo_getArchitectureViewContext(299) 取组织视图成员，找 type=Business Actor 且名「项目总管」。" },
+    "NV-05": { "instruction": "ArchiMate 在愿景里被定位成什么？找到对应元素。", "expected": "overseer-archimate-role-001", "agentBehavior": "用 argo_getSystemArchitecture 语义检索「ArchiMate 在长期记忆中的定位」，命中后回报 id。" },
+    "NV-06": { "instruction": "项目总管属于哪个组织？", "expected": "1962 AgentOrganization", "agentBehavior": "用 argo_getIntentElementContext(project-overseer-001) 读 parent，沿父链上溯到 1962。" },
+    "NV-07": { "instruction": "长期记忆评测视图挂在哪个顶层分组下？", "expected": "1249 Implementation and Migration Viewpoint", "agentBehavior": "用 argo_getArchitectureViewContext(memory-eval-view-001) 读 parentElement.id，回报。" },
+    "NV-08": { "instruction": "公众号发布团队视图是哪个？", "expected": "433（公众号发布团队）", "agentBehavior": "用 argo_getIntentElementContext(1962) 读 subdiagram_views，找 view_name 含「公众号」。" },
+    "NV-09": { "instruction": "EA Tooling 视图在哪？", "expected": "1800", "agentBehavior": "先取评测视图 parent=1249，再从 1249 的 subdiagram_views 找「EA Tooling」。" },
+    "NV-10": { "instruction": "自进化 Docker 沙箱视图在哪？", "expected": "self-evolution-sandbox-view-001", "agentBehavior": "先取评测视图 parent=1249，再从 1249 子视图找沙箱视图。" },
+    "NV-11": { "instruction": "从业务组织视角看，AgentOrganization 在哪幅图？", "expected": "视图 299（AgentOrganization）", "agentBehavior": "遍历 1249 子视图，找包含元素 1962 的那幅。" },
+    "NV-12": { "instruction": "媒体创作体系里，视频创作团队视图是哪个？", "expected": "video-team-001", "agentBehavior": "用 argo_getIntentElementContext(1962) 读子视图，找视频创作团队。" },
+    "NV-13": { "instruction": "EA 工具链在哪幅图？", "expected": "1800", "agentBehavior": "从 1249 子视图里找 view_name 含「EA」。" },
+    "NV-14": { "instruction": "内容发布相关在哪幅图？", "expected": "180 Content Publication and Announcement", "agentBehavior": "用 argo_getArchitectureViewContext(180) 定位内容发布视图。" },
+    "NV-15": { "instruction": "工程验证用的 Docker 沙箱视图在哪？", "expected": "self-evolution-sandbox-view-001", "agentBehavior": "从 1249 子视图按「工程/验证」语义定位。" },
+    "NV-16": { "instruction": "长期记忆评测视图下都有哪些工作包？", "expected": "memory-eval-bench/dataset/run-wp + navigation-eval-wp-001", "agentBehavior": "用 argo_getArchitectureViewContext(memory-eval-view-001) 列全 included_elements。" },
+    "NV-17": { "instruction": "项目总管的工作记录里有哪些记忆元素？", "expected": "overseer-vision-001、overseer-wiki-eval-001 等（全部 overseer-*）", "agentBehavior": "用 argo_getArchitectureViewContext(overseer-ltm-001) 列全成员，确认都在 LTM 边界内。" },
+    "NV-18": { "instruction": "AgentOrganization 下直属哪些团队视图？", "expected": "430/433/media-team-001/video-team-001", "agentBehavior": "用 argo_getIntentElementContext(1962) 读 subdiagram_views，且与 1249 直属视图区分。" },
+    "NV-19": { "instruction": "确认评测视图只含评测工作包，不含 EA Tooling 等越界元素。", "expected": "恰含 3 个评测 WP，不含 2760/EA Tooling/video-team-001", "agentBehavior": "取视图成员做 contains + expectAbsent 双重校验。" },
+    "NV-20": { "instruction": "确认 EA Tooling 视图含本地 Web 服务元素，不含记忆/评测视图。", "expected": "含 2758/2760，不含 memory-eval-view-001/overseer-ltm-001", "agentBehavior": "同上 contains + expectAbsent 校验。" },
+    "CA-01": { "instruction": "我要改工作流规则，先告诉我 archgraph-workflow-rules 的验收用例和测试文件。", "expected": "AT-rules-01 → tests/argo-rules-query.test.js", "agentBehavior": "用 argo_getIntentElementContext(archgraph-workflow-rules) 读 testcases，报 name + acceptanceCriteria。" },
+    "CA-02": { "instruction": "我要动 MCP 接口，验收看护服务上挂了哪些看护用例？", "expected": "含 AT-acceptance-guardian-01 → tests/acceptance-guardian.test.js", "agentBehavior": "读 acceptance-guardian-001 的 testcases，报首例。" },
+    "CA-03": { "instruction": "验收看护服务一共挂了几个 MCP 接口看护用例？全列出来。", "expected": "10 个（AT-acceptance-guardian-01..10）", "agentBehavior": "枚举 testcases 数组全部，报首尾证明全枚举。" },
+    "CR-01": { "instruction": "我改完代码了，确认 commit 已回登到 archgraph-workflow-rules，并看交付状态。", "expected": "台账含 f904aa2，deliveryStatus=delivered", "agentBehavior": "读 attributes 里的 commit/deliveryStatus，确认登记完整。" },
+    "CR-02": { "instruction": "确认导航评测工作包的 commit 台账里有 SEED 归档和修复提交。", "expected": "含 be47829 与 c726508", "agentBehavior": "读 navigation-eval-wp-001 的 commit 属性，核对两条提交。" },
+    "CI-01": { "instruction": "我要改验收看护服务，先看它的交付状态。", "expected": "deliveryStatus=delivered", "agentBehavior": "读 acceptance-guardian-001 的 deliveryStatus，报基线。" },
+    "CI-02": { "instruction": "验收看护服务挂在哪个 Actor 名下？改它归谁管？", "expected": "project-overseer-001（项目总管）", "agentBehavior": "用 argo_getIntentElementContext(acceptance-guardian-001) 读 parent，回报归属 Actor。" },
+    "CI-03": { "instruction": "会话结束，把这次的记忆写到项目总管的哪幅子视图？", "expected": "overseer-ltm-001（项目总管工作记录）", "agentBehavior": "用 argo_getIntentElementContext(project-overseer-001) 读 subdiagram_views，找 LTM 子视图。" }
+  }
 }

@@ -36,6 +36,12 @@ test('AT eval-seed: navigation SEED is valid (schema/version/7 dims × 28 questi
     assert.ok(q.target && q.target.id && Array.isArray(q.target.names), `${q.id} needs target`);
     assert.ok(Array.isArray(q.retrieval) && q.retrieval.length > 0, `${q.id} needs executable retrieval`);
     assert.ok(Array.isArray(q.requirements) && q.requirements.length > 0, `${q.id} needs requirements`);
+    // AND every question has a host-perspective scenario (instruction/expected/agentBehavior)
+    const hs = seed.hostScenarios && seed.hostScenarios[q.id];
+    assert.ok(hs && typeof hs === 'object', `${q.id} needs hostScenario`);
+    for (const f of ['instruction', 'expected', 'agentBehavior']) {
+      assert.ok(hs && typeof hs[f] === 'string' && hs[f], `${q.id} hostScenario.${f} required`);
+    }
   }
 });
 
