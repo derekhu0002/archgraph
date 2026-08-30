@@ -2314,6 +2314,13 @@
           "type": "Acceptance Test",
           "Input": "tests/argo-rules-query.test.js",
           "acceptanceCriteria": "tests/argo-rules-query.test.js"
+        },
+        {
+          "name": "AT-rules-02",
+          "description": "GIVEN ACTOR 三层记忆模型已写入规则（SessionMemorySummarization/MemoryTriggerTiming）；WHEN 检查规则文件；THEN 里程碑即时写为主干（MemoryTriggerTiming 立即触发）、会话摘要机会式幂等覆盖（不依赖检测会话结束、不追加）、T1/T2/T3 三层声明。",
+          "type": "Acceptance Test",
+          "Input": "tests/argo-rules-memory-tiers.test.js",
+          "acceptanceCriteria": "tests/argo-rules-memory-tiers.test.js"
         }
       ],
       "attributes": [

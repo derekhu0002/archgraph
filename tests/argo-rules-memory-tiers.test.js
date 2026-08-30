@@ -1,0 +1,46 @@
+'use strict';
+
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const ROOT = path.resolve(__dirname, '..');
+const RULES = path.join(ROOT, 'argo', 'rules', 'archgraph.instructions.md');
+
+// External-view acceptance tests for the SessionMemorySummarization /
+// MemoryTriggerTiming rules update (ACTOR three-tier memory model, Phase 1):
+// milestone immediate writes are the reliable backbone; the session summary is
+// opportunistic + idempotent (overwrite, never append) and MUST NOT rely on the
+// LLM precisely detecting session end.
+
+test('AT rules: SessionMemorySummarization makes milestone immediate writes the reliable backbone', () => {
+  // GIVEN the workflow rules' long-term memory capture section
+  const rules = fs.readFileSync(RULES, 'utf8');
+  // THEN it declares milestone immediate writes as the reliable backbone
+  assert.match(rules, /Milestone immediate writes are the RELIABLE BACKBONE/, 'must declare milestone writes as backbone');
+  assert.match(rules, /<MemoryTriggerTiming>/, 'must reference MemoryTriggerTiming');
+  assert.match(rules, /Never defer critical content/, 'must not defer critical content to session end');
+});
+
+test('AT rules: the session summary is opportunistic + idempotent, not dependent on detecting session end', () => {
+  const rules = fs.readFileSync(RULES, 'utf8');
+  // THEN it must not rely on precisely detecting session end
+  assert.match(rules, /MUST NOT rely on precisely detecting when a session ends/, 'must not depend on session-end detection');
+  // AND it is written by overwriting the single T1 element, never appending
+  assert.match(rules, /OVERWRITING that single element \(never append\)/, 'session summary must overwrite, never append');
+  assert.match(rules, /write amplification stays bounded/, 'must keep write amplification bounded');
+  // AND it is triggered by explicit signal or natural turn-end
+  assert.match(rules, /explicitly signals wrap-up/, 'explicit signal trigger');
+  assert.match(rules, /turn is ending naturally/, 'opportunistic turn-end trigger');
+});
+
+test('AT rules: the three-tier memory model is present (T1/T2/T3)', () => {
+  const rules = fs.readFileSync(RULES, 'utf8');
+  // THEN the rules declare the three-tier model
+  assert.match(rules, /T1 working memory/, 'must mention T1 working memory');
+  assert.match(rules, /T2 long-term memory/, 'must mention T2 long-term memory');
+  assert.match(rules, /T3 archive/, 'must mention T3 archive');
+  // AND MemoryTriggerTiming is framed as the immediate, reliable backbone (not "in addition to session end")
+  assert.match(rules, /primarily triggered IMMEDIATELY/, 'MemoryTriggerTiming must be the immediate backbone');
+});

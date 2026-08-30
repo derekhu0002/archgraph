@@ -103,20 +103,18 @@ Every repository change MUST be classified into exactly one tier BEFORE implemen
 </CapabilityDelegationGuideline>
 
 <SessionMemorySummarization>
-Before every session ends (before finishing work), you MUST perform a short-term memory summarization and write the summary into long-term memory — a SUBVIEW hierarchy mounted under the relevant `Business Actor` element, i.e. Views whose `parent_element_id` points to that Actor (create the first sub-view if none exists; you may mount multiple sub-views under the Actor, or expand new sub-views under the elements of an existing sub-view, forming a hierarchical long-term memory system) — refreshing long-term memory to prevent cross-session forgetting:
-1. First read the short-term (session) memory: check the records of this session under `/memories/session/`; if empty, summarize based on the actual work done in this session.
-2. Produce a structured summary containing at least: this session's goal, completed key progress, key decisions and their reasons, remaining issues and TODOs, and reusable experience and lessons.
-3. Write the summary into long-term memory:
-   - If this session's work belongs to a `Business Actor` role, write it into the long-term memory sub-views mounted under that Actor (the Views whose `parent_element_id` points to this Actor, NOT the View that merely contains the Actor itself; see `<CoperationGuideline>` item 3);
-4. The summary must be concise and de-duplicated: prefer updating existing memory files and only create new ones when necessary; do not copy redundant process content verbatim from the session into long-term memory.
+Long-term memory capture follows a three-tier model: T1 working memory (the Actor's session-summary element, idempotently overwritten), T2 long-term memory (the Actor's LTM sub-view hierarchy), and T3 archive (move-only). Two capture paths:
+1. Milestone immediate writes are the RELIABLE BACKBONE — see `<MemoryTriggerTiming>`. Never defer critical content (pitfalls, decisions, commit registrations) to session end.
+2. The session summary is OPPORTUNISTIC and IDEMPOTENT. You MUST NOT rely on precisely detecting when a session ends — the LLM cannot reliably predict the human partner ending the session. Instead, write the session summary when either: (a) the human partner explicitly signals wrap-up (e.g. "done", "summarize", "wrap up"); or (b) you have finished the latest request and the turn is ending naturally. Write it into the Actor's T1 working-memory element by OVERWRITING that single element (never append), so repeated triggers only update it and write amplification stays bounded. If the final summary is missed, the milestone immediate writes already preserve all critical content.
+Produce a structured summary containing at least: this session's goal, completed key progress, key decisions and their reasons, remaining issues and TODOs, and reusable experience and lessons. Write it into the Actor's memory: the session summary goes to the T1 working-memory element; long-term capture goes to the T2 LTM sub-view hierarchy mounted under that Actor (the Views whose `parent_element_id` points to this Actor, NOT the View that merely contains the Actor itself; see `<CoperationGuideline>` item 3). Keep the summary concise and de-duplicated: prefer updating existing memory and only create new entries when necessary; do not copy redundant process content verbatim.
 </SessionMemorySummarization>
 
 <MemoryTriggerTiming>
-In addition to "session end", long-term memory writes must be triggered immediately at the following moments and must not be deferred to session end:
+Long-term memory writes are primarily triggered IMMEDIATELY at the following moments — this is the reliable backbone and MUST NOT be deferred to session end:
 1. Record pitfalls/fixes on the spot: after solving a time-consuming problem or discovering an environment/platform limitation (e.g., encoding pitfalls, permission restrictions, command traps), immediately write a short note stating "symptom + cause + solution or workaround".
 2. Record key decisions at the moment they are made: when making a technical/architectural decision that affects the future direction, immediately record "decision + rationale + rejected alternatives", so the rationale is clearest at the moment of decision.
 3. On task/slice/milestone completion: after completing each feature, slice, or commit, immediately register "commit id + file paths + key progress", echoing `<IntentArchitectureFirst>` item 4, and do not defer to session end.
-The above immediate records also follow the conciseness and de-duplication requirements of `<SessionMemorySummarization>` item 4.
+The above immediate records follow the conciseness and de-duplication requirements of `<SessionMemorySummarization>`. The session-end consolidated summary is a separate, opportunistic and idempotent write (see `<SessionMemorySummarization>`), NOT the primary capture path.
 </MemoryTriggerTiming>
 
 <ToolsGuideline>
