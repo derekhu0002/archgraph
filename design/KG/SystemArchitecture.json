@@ -3546,6 +3546,11 @@
           "name": "commit",
           "value": "19cd21c",
           "description": "design/KG/SystemArchitecture.json（T1 工作记忆视图 overseer-wm-001 + 摘要元素落地）；docs/actor-memory-tiers.md; tests/actor-memory-tiers.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "c593c5a",
+          "description": "scripts/actor-working-memory.js（T1 摘要读写：loadWorkingMemoryDigest + writeWorkingMemory 幂等覆盖）；tests/actor-working-memory.test.js; design/KG/SystemArchitecture.json（AT-overseer-wm-01）"
         }
       ],
       "testcases": [
