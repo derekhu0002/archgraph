@@ -71,4 +71,7 @@
 - **Phase 1 ✅（规则层）**：`SessionMemorySummarization`/`MemoryTriggerTiming`（里程碑即写主干 + 会话摘要机会式幂等覆盖）；`WakeupGuideline STEP 0`（只加载 T1，T2/T3 按需回忆）
 - **Phase 2 ✅（视图约定落地）**：T1 视图 `overseer-wm-001`「项目总管工作记忆」+ T3 视图 `overseer-archive-001`「项目总管档案」（均挂 project-overseer-001）+ T1 摘要元素 `overseer-wm-summary-001`（memoryTier=T1）
 - **memoryTier 约定**：记忆元素带 `memoryTier: T1|T2|T3` 属性（T1=工作记忆必进上下文 / T2=长期记忆按需回忆 / T3=档案显式检索），用于检索过滤
-- **待实现**：Phase 3（T1 摘要读写机制）、Phase 4（归档迁移）、Phase 5（回忆两步法+阈值）、Phase 6（T2 回忆评测）
+- **Phase 3 ✅（T1 摘要读写机制）**：`scripts/actor-working-memory.js`（loadWorkingMemoryDigest 只读 / writeWorkingMemory 幂等覆盖不追加）+ AT-overseer-wm-01
+- **Phase 4 ✅（归档迁移）**：`scripts/memory-archive.js`（delivered/COMPLETED+年龄门；只移不删；无日期安全跳过）+ AT-memory-archive-01
+- **Phase 5 ✅（回忆两步法+阈值分层，框架级）**：规则 `<MemoryRecallGuideline>`（memory_search 宽松 0.55 定位 → getIntentElementContext 取全文；audit 严格 0.8；零命中才拒答）
+- **Phase 6 ✅（T2 回忆评测，框架级）**：memory-eval 新增维度 7 两步回忆（TR-01~03），harness 31/31（100%）；验证定位→取全文、低分相关命中召回、无关不虚构
