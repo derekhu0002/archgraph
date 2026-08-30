@@ -3023,8 +3023,16 @@
       "name": "实现记忆评测 harness 并跑实测基线",
       "type": "Work Package",
       "parent": "1249",
-      "description": "实现可执行评测 harness scripts/memory-eval-run.js：按 docs/memory-eval-dataset.md 的 28 题逐题通过 ARGO MCP 读路径（getArchitectureViewContext/getIntentElementContext/getSystemArchitecture，零 Neo4j 运行时依赖）检索记忆并对照 ground truth 判定，输出 6 维度/整体准确率、拒答准确率、平均时延与成本统计（token 成本 + 压缩率），配套可执行测试与验收用例。v2（2026-08-26）：新增多跳 pick 检索（上一步结果派生下一步参数）与 measureCost 成本统计。",
-      "testcases": [],
+      "description": "实现可执行评测 harness scripts/memory-eval-run.js：按 docs/memory-eval-dataset.md 的 31 题逐题通过 ARGO MCP 读路径（getArchitectureViewContext/getIntentElementContext/getSystemArchitecture/memory_search，零 Neo4j 运行时依赖）检索记忆并对照 ground truth 判定，输出 7 维度/整体准确率、拒答准确率、平均时延与成本统计（token 成本 + 压缩率），配套可执行测试与验收用例。v2（2026-08-26）：新增多跳 pick 检索与 measureCost 成本统计。v3（2026-08-30）：新增维度 7 两步回忆（TR-01~03，memory_search 定位→getIntentElementContext 取全文，验证三层记忆模型的回忆两步法与阈值分层）。",
+      "testcases": [
+        {
+          "name": "AT-memory-eval-run-03",
+          "description": "GIVEN 两步回忆维度（TR-01~03，框架级验证三层记忆回忆机制）；WHEN 运行 harness；THEN memory_search 语义定位（宽松阈值）+getIntentElementContext 取全文命中、paraphrase 低分相关命中仍召回、无关查询不虚构；整体 31 题基线达标。",
+          "type": "Acceptance Test",
+          "Input": "tests/memory-eval-run.test.js",
+          "acceptanceCriteria": "tests/memory-eval-run.test.js"
+        }
+      ],
       "attributes": [
         {
           "description": "scripts/memory-eval-run.js; tests/memory-eval-run.test.js; results/memory-eval-report.json; design/KG/SystemArchitecture.json（评测 harness 与实测基线 23/23 100%）",

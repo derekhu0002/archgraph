@@ -29,7 +29,7 @@ process.env.ARGO_REPO_ROOT = process.env.ARGO_REPO_ROOT || ROOT;
 const RESULTS_DIR = path.join(ROOT, 'results');
 const REPORT_PATH = path.join(RESULTS_DIR, 'memory-eval-report.json');
 
-const DIMENSIONS = ['信息抽取', '多会话推理', '时间推理', '知识更新', '拒答', '多跳召回'];
+const DIMENSIONS = ['信息抽取', '多会话推理', '时间推理', '知识更新', '拒答', '多跳召回', '两步回忆'];
 
 /**
  * 23 题评测规格：retrieval = 一次或多次 MCP 读调用；requirements = 判定条件，
@@ -236,6 +236,38 @@ const QUESTIONS = [
     ],
     requirements: [
       { step: 0, type: 'contains', values: ['overseer-vision-001', 'overseer-archimate-role-001', 'overseer-mem-eval-001', 'overseer-query-rules-001', 'overseer-content-storage-001', 'overseer-subgraph-semantic-001', 'overseer-wiki-eval-001'] },
+    ],
+  },
+  // ── 维度 7：两步回忆（T2 recall，框架级）──
+  // memory_search 语义定位（宽松阈值 0.55）→ getIntentElementContext 取全文；
+  // 验证「紧凑卡片只是定位器」+「低分相关命中不拒答」+「无关查询不虚构」。
+  {
+    id: 'TR-01', dimension: '两步回忆', label: '两步回忆：语义定位愿景元素并取全文读目标？',
+    retrieval: [
+      { tool: 'memory_search', args: { query: '项目愿景 为AGENT提供长期记忆系统 的目标是什么', top_k: 5 } },
+      { tool: 'getIntentElementContext', args: { elementId: 'overseer-vision-001' } },
+    ],
+    requirements: [
+      { step: 0, type: 'contains', values: ['overseer-vision-001'] },
+      { step: 1, type: 'contains', values: ['读写的极致'] },
+    ],
+  },
+  {
+    id: 'TR-02', dimension: '两步回忆', label: '低分相关命中：paraphrase 查询仍召回愿景元素（宽松阈值）？',
+    retrieval: [
+      { tool: 'memory_search', args: { query: '这个项目想给智能体做一个能记住事情的东西，它的北极星想法是什么', top_k: 8 } },
+    ],
+    requirements: [
+      { step: 0, type: 'contains', values: ['overseer-vision-001'] },
+    ],
+  },
+  {
+    id: 'TR-03', dimension: '两步回忆', label: '无关查询拒答且不虚构（阈值分层拒答侧）？',
+    retrieval: [
+      { tool: 'memory_search', args: { query: '长期记忆系统使用的界面配色与视觉风格偏好是什么', top_k: 5 } },
+    ],
+    requirements: [
+      { step: 0, type: 'expectAbsent', values: ['霓虹紫', '赛博朋克风'] },
     ],
   },
 ];

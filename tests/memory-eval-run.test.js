@@ -20,25 +20,25 @@ function runRunner() {
   return JSON.parse(result.stdout);
 }
 
-test('memory-eval-run-baseline: harness evaluates all 28 questions and reports metrics', () => {
-  // GIVEN 已具备 28 题评测题集（23 基础 + 5 多跳召回）与 ARGO MCP 读路径
+test('memory-eval-run-baseline: harness evaluates all 31 questions and reports metrics', () => {
+  // GIVEN 已具备 31 题评测题集（23 基础 + 5 多跳召回 + 3 两步回忆）与 ARGO MCP 读路径
   // WHEN 运行 scripts/memory-eval-run.js --json
-  // THEN 28 题全部评估（无 TOOL_ERROR 空判），报告含 6 维度/整体/拒答准确率、平均时延与成本统计
+  // THEN 31 题全部评估（无 TOOL_ERROR 空判），报告含 7 维度/整体/拒答准确率、平均时延与成本统计
   const summary = runRunner();
 
-  assert.equal(summary.totalQuestions, 28, 'should evaluate exactly 28 questions');
+  assert.equal(summary.totalQuestions, 31, 'should evaluate exactly 31 questions');
   assert.equal(summary.failed, 0, 'no question should fail with a TOOL_ERROR');
-  assert.equal(summary.dimStats.length, 6, 'should report 6 dimensions');
+  assert.equal(summary.dimStats.length, 7, 'should report 7 dimensions');
   assert.deepEqual(
     summary.dimStats.map(stat => stat.dimension),
-    ['信息抽取', '多会话推理', '时间推理', '知识更新', '拒答', '多跳召回'],
+    ['信息抽取', '多会话推理', '时间推理', '知识更新', '拒答', '多跳召回', '两步回忆'],
   );
   assert.equal(typeof summary.overallAccuracy, 'number');
   assert.ok(summary.avgLatencyMs >= 0, 'avg latency should be non-negative');
   assert.ok(summary.abstention, 'should report abstention accuracy');
   assert.ok(existsSync(REPORT), 'runner should write the report file');
   const report = JSON.parse(readFileSync(REPORT, 'utf8'));
-  assert.equal(report.results.length, 28, 'report should contain 28 evaluated results');
+  assert.equal(report.results.length, 31, 'report should contain 31 evaluated results');
 });
 
 test('memory-eval-run-fact: base fact question MQ-01 (项目总管) passes', () => {

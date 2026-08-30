@@ -213,6 +213,29 @@
   - THEN：7 个——vision / archimate-role / mem-eval / query-rules / content-storage / subgraph-semantic / wiki-eval（2026-08-26 新增评测口径 `overseer-wiki-eval-001`）
   - 检索提示：`getArchitectureViewContext(overseer-ltm-001)` 枚举 included_elements，全部命中即找全
 
+### 维度 7：两步回忆（two-step recall / 查得准 + 不撑爆上下文）
+> v3 新增（2026-08-30，对齐 ACTOR 三层记忆模型）：验证框架「回忆两步法 + 阈值分层」——
+> `memory_search` 语义定位（宽松阈值 0.55）→ `getIntentElementContext` 取全文；紧凑卡片只是**定位器**，
+> 低分相关命中不拒答，无关查询不虚构。
+
+- **TR-01**（两步回忆：定位→取全文）
+  - GIVEN：项目愿景元素 `overseer-vision-001` 是长期记忆系统的北极星
+  - WHEN：语义检索「项目愿景 为AGENT提供长期记忆系统 的目标是什么」，再取全文
+  - THEN：`memory_search` 命中 `overseer-vision-001`（定位）→ `getIntentElementContext` 全文含「读写的极致」（取全文）
+  - 检索提示：`memory_search(query=...)` → `getIntentElementContext(overseer-vision-001)`
+
+- **TR-02**（低分相关命中：宽松阈值）
+  - GIVEN：查询用 paraphrase（与描述不完全一致）
+  - WHEN：语义检索「这个项目想给智能体做一个能记住事情的东西，它的北极星想法是什么」
+  - THEN：仍召回 `overseer-vision-001`（0.55 宽松阈值，不被 0.8 严格阈值拒掉）
+  - 检索提示：`memory_search(query=paraphrase, top_k=8)`
+
+- **TR-03**（无关查询拒答且不虚构）
+  - GIVEN：查询与记忆内容无关（界面配色）
+  - WHEN：语义检索「长期记忆系统使用的界面配色与视觉风格偏好是什么」
+  - THEN：命中卡片**不含**虚构细节（如「霓虹紫」「赛博朋克风」）——拒答侧不虚构
+  - 检索提示：`memory_search(query=无关)` 判定 expectAbsent
+
 ---
 
 ## 3. 评测运行约定
