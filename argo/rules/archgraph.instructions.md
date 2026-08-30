@@ -125,6 +125,14 @@ Threshold layering: memory recall is loose; `audit` reads are strict (default 0.
 Recall target: an Actor's T2 long-term memory is its `<actor>-ltm-001` view hierarchy; T3 archive (`<actor>-archive-001`) is read by explicit retrieval. Recall on demand — never bulk-load memory into context.
 </MemoryRecallGuideline>
 
+<MemoryTierConventions>
+Operate the three-tier memory model directly from these conventions (no skill load required — they are part of the always-loaded rules):
+1. Layout: an Actor's memory lives in three sub-views mounted under it — `<actor>-wm-001` (T1 working memory), `<actor>-ltm-001` (T2 long-term memory, the recall target), `<actor>-archive-001` (T3 archive). Memory elements carry a `memoryTier` attribute (`T1|T2|T3`).
+2. T1 working-memory summary: the summary element is the single member of `<actor>-wm-001` (conventionally `<actor>-wm-summary-*`). Session summaries OVERWRITE its description (never append) and refresh `status=ACTIVE` + `lastSummaryAt` — see `<SessionMemorySummarization>`.
+3. T2 recall: recall on demand from `<actor>-ltm-001` via `memory_search` (locate) then `getIntentElementContext` (full content) — see `<MemoryRecallGuideline>`.
+4. T3 archive: when a T2 memory element is delivered/COMPLETED and no longer active, MOVE it to `<actor>-archive-001` — remove it from the T2 view membership, add it to the T3 view membership, set `memoryTier=T3` + `archivedAt`. Never delete archived memories (archive is move-only).
+</MemoryTierConventions>
+
 <ToolsGuideline>
 You MUST read/write the intent architecture through the tools provided by the ARGO MCP server; direct modification of the intent architecture source file is forbidden:
 1. getSystemArchitecture: semantically read the architecture — MUST supply query.purpose + query.intent (semantic retrieval per <QueryPriorityGuideline>); an omitted-query full read is a last resort, not the default.

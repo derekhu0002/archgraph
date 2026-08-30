@@ -71,3 +71,16 @@ test('AT rules: MemoryRecallGuideline mandates two-step recall + loose/strict th
   assert.match(rules, /0\.8/, 'must mention the strict audit threshold');
   assert.match(rules, /Reject only when there are ZERO/, 'must reject only on zero/irrelevant hits');
 });
+
+test('AT rules: MemoryTierConventions operate the tiers directly from the always-loaded rule (no skill)', () => {
+  const rules = fs.readFileSync(RULES, 'utf8');
+  // THEN the rule declares the three sub-view conventions and memoryTier attribute
+  assert.match(rules, /MemoryTierConventions/, 'must have a MemoryTierConventions section');
+  assert.match(rules, /<actor>-wm-001/, 'must declare the T1 working-memory view convention');
+  assert.match(rules, /<actor>-ltm-001/, 'must declare the T2 LTM view convention');
+  assert.match(rules, /<actor>-archive-001/, 'must declare the T3 archive view convention');
+  assert.match(rules, /memoryTier/, 'must declare the memoryTier attribute convention');
+  // AND the T1 summary is idempotent overwrite, archive is move-only
+  assert.match(rules, /OVERWRITE its description \(never append\)/, 'T1 summary must overwrite, never append');
+  assert.match(rules, /Never delete archived memories/, 'archive must be move-only');
+});
