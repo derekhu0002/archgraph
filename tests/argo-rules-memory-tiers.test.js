@@ -44,3 +44,15 @@ test('AT rules: the three-tier memory model is present (T1/T2/T3)', () => {
   // AND MemoryTriggerTiming is framed as the immediate, reliable backbone (not "in addition to session end")
   assert.match(rules, /primarily triggered IMMEDIATELY/, 'MemoryTriggerTiming must be the immediate backbone');
 });
+
+test('AT rules: WakeupGuideline STEP 0 loads only T1 working memory (T2/T3 on demand)', () => {
+  const rules = fs.readFileSync(RULES, 'utf8');
+  // THEN STEP 0 loads only the T1 working-memory digest
+  assert.match(rules, /load ONLY the T1 working-memory digest/, 'STEP 0 must load only the T1 digest');
+  assert.match(rules, /Do NOT bulk-load the T2 long-term memory or T3 archive/, 'must not bulk-load T2/T3');
+  // AND recall is on demand via semantic memory_search
+  assert.match(rules, /recall them on demand/, 'must recall on demand');
+  assert.match(rules, /memory_search/, 'must reference memory_search recall');
+  // AND the T2 hierarchy is a recall target, not a bulk context load
+  assert.match(rules, /recall target, not as a bulk context load/, 'T2 is a recall target');
+});
