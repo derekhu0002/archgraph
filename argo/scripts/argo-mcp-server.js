@@ -155,7 +155,7 @@ const TOOLS = [
   },
   {
     name: 'updateArchitectureElement',
-    description: 'Use for one global element metadata patch. Does not change view membership. Element id and type are immutable; remove and re-add to change them. patch.attributes is a targeted merge by attribute name: each entry {name, value?, description?} upserts that attribute, {name, op:"remove"} deletes it, and attributes NOT mentioned are preserved — updating one attribute never wipes out the others.',
+    description: 'Use for one global element metadata patch. Does not change view membership. Element id and type are immutable; remove and re-add to change them. patch.attributes is a targeted merge: single-valued attributes upsert by name; multi-valued ledgers (e.g. commit) upsert by name+value — a new value appends a new entry, re-registering the same value updates its description; {name, op:"remove"} (optionally with value) deletes the matching entries; attributes NOT mentioned are preserved — updating one attribute never wipes out the others.',
     inputSchema: {
       type: 'object',
       required: ['id', 'patch'],

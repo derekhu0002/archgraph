@@ -183,3 +183,56 @@ test('updateElement: patch.attributes upserts a new attribute and op:remove dele
   // THEN the new attribute is added and only the explicitly removed one is gone
   assert.deepEqual(elementById(document, 'a').attributes, [{ name: 'status', value: 'COMPLETED' }]);
 });
+
+test('updateElement: multi-valued commit ledger APPENDS a new sha (does not overwrite the first)', () => {
+  // GIVEN an element with an existing commit ledger (two shas)
+  const graph = baseDocument();
+  graph.elements[1].attributes = [
+    { name: 'commit', value: 'aaa' },
+    { name: 'commit', value: 'bbb' },
+    { name: 'deliveryStatus', value: 'delivered' },
+  ];
+  // WHEN registering a new commit by minimal patch (name+value)
+  const document = applyMutations(graph, [
+    { type: 'updateElement', id: 'a', patch: { attributes: [{ name: 'commit', value: 'ccc' }] } },
+  ]).document;
+  // THEN the new sha is APPENDED and both existing shas + deliveryStatus are preserved
+  const sortAttrs = list => [...list].sort((a, b) => `${a.name}:${a.value}`.localeCompare(`${b.name}:${b.value}`));
+  assert.deepEqual(sortAttrs(elementById(document, 'a').attributes), sortAttrs([
+    { name: 'commit', value: 'aaa' },
+    { name: 'commit', value: 'bbb' },
+    { name: 'commit', value: 'ccc' },
+    { name: 'deliveryStatus', value: 'delivered' },
+  ]));
+});
+
+test('updateElement: re-registering an existing commit sha updates its description (no duplicate)', () => {
+  // GIVEN an element with a commit ledger
+  const graph = baseDocument();
+  graph.elements[1].attributes = [{ name: 'commit', value: 'aaa', description: 'old' }];
+  // WHEN the same sha is re-registered with a new description
+  const document = applyMutations(graph, [
+    { type: 'updateElement', id: 'a', patch: { attributes: [{ name: 'commit', value: 'aaa', description: 'new' }] } },
+  ]).document;
+  // THEN the entry is updated in place (still exactly one entry)
+  assert.deepEqual(elementById(document, 'a').attributes, [{ name: 'commit', value: 'aaa', description: 'new' }]);
+});
+
+test('updateElement: op:remove with a value removes only that exact ledger entry', () => {
+  // GIVEN an element with a multi-sha commit ledger
+  const graph = baseDocument();
+  graph.elements[1].attributes = [
+    { name: 'commit', value: 'aaa' },
+    { name: 'commit', value: 'bbb' },
+    { name: 'commit', value: 'ccc' },
+  ];
+  // WHEN one specific sha is removed by name+value
+  const document = applyMutations(graph, [
+    { type: 'updateElement', id: 'a', patch: { attributes: [{ name: 'commit', value: 'bbb', op: 'remove' }] } },
+  ]).document;
+  // THEN only that sha is gone, the rest of the ledger survives
+  assert.deepEqual(elementById(document, 'a').attributes, [
+    { name: 'commit', value: 'aaa' },
+    { name: 'commit', value: 'ccc' },
+  ]);
+});

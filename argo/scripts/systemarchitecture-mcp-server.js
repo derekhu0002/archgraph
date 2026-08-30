@@ -248,7 +248,7 @@ const TOOLS = [
   },
   {
     name: 'updateArchitectureElement',
-    description: 'Use for one global element metadata patch. Does not change view membership. Element id and type are immutable; remove and re-add to change them. patch.attributes is a targeted merge by attribute name: each entry {name, value?, description?} upserts that attribute, {name, op:"remove"} deletes it, and attributes NOT mentioned are preserved — updating one attribute never wipes out the others. Set dryRun to preview without writing.',
+    description: 'Use for one global element metadata patch. Does not change view membership. Element id and type are immutable; remove and re-add to change them. patch.attributes is a targeted merge: single-valued attributes upsert by name; multi-valued ledgers (e.g. commit) upsert by name+value — a new value appends a new entry, re-registering the same value updates its description; {name, op:"remove"} (optionally with value) deletes the matching entries; attributes NOT mentioned are preserved — updating one attribute never wipes out the others. Set dryRun to preview without writing.',
     inputSchema: {
       type: 'object',
       required: ['id', 'patch'],
@@ -1032,16 +1032,32 @@ function buildNativeSubgraph(document, includedElementIds, includedRelationshipI
 }
 
 /**
+ * Attribute names that are MULTI-VALUED ledgers (many attributes share the same
+ * `name` but carry distinct `value`s). The canonical example is the `commit`
+ * ledger: an element accumulates one `{ name: 'commit', value: <sha> }` per
+ * commit. For these, a patch entry upserts by (name, value) — a new value
+ * APPENDS a new entry, re-registering the same value updates its description.
+ */
+const MULTI_VALUE_ATTRIBUTE_NAMES = new Set(['commit']);
+
+/**
  * Merge a targeted attribute patch into the element's existing attributes.
  *
  * Each patch entry is an object with a non-empty `name`:
- *   - `{ name, op: 'remove' }`                    -> remove that attribute;
- *   - `{ name, value }` / `{ name, value, description }` -> upsert (add or update in place).
+ *   - `{ name, op: 'remove' }` / `{ name, value, op: 'remove' }`
+ *     -> remove matching attribute(s); with `value`, only the exact entry.
+ *   - `{ name, value }` / `{ name, value, description }` -> upsert.
+ *
+ * Upsert semantics:
+ *   - Multi-valued ledgers (e.g. `commit`): match by (name, value). Same value
+ *     -> update description in place; new value -> APPEND a new entry.
+ *   - Single-valued attributes (e.g. `deliveryStatus`): match by name and
+ *     update value/description in place; absent -> append.
  *
  * Attributes NOT mentioned in the patch are preserved. This avoids the
  * full-array replacement footgun where updating one attribute would wipe out the
  * rest (e.g. a stale deliveryStatus being re-written when registering a commit
- * attribute).
+ * attribute), while still letting the commit ledger accumulate entries.
  */
 function mergeAttributesPatch(existing, patchEntries) {
   const result = Array.isArray(existing)
@@ -1055,21 +1071,37 @@ function mergeAttributesPatch(existing, patchEntries) {
       throw new Error('patch.attributes entries must have a non-empty string name');
     }
     if (entry.op === 'remove') {
-      const index = result.findIndex(attr => attr.name === entry.name);
-      if (index >= 0) {
-        result.splice(index, 1);
+      // Remove ALL matching entries; when a value is given, restrict to that
+      // exact (name, value) entry so a single ledger line can be removed.
+      for (let i = result.length - 1; i >= 0; i -= 1) {
+        const attr = result[i];
+        const nameMatches = attr.name === entry.name;
+        const valueMatches = !Object.prototype.hasOwnProperty.call(entry, 'value') || attr.value === entry.value;
+        if (nameMatches && valueMatches) result.splice(i, 1);
       }
       continue;
     }
-    const index = result.findIndex(attr => attr.name === entry.name);
-    if (index >= 0) {
-      if (Object.prototype.hasOwnProperty.call(entry, 'value')) result[index].value = entry.value;
-      if (Object.prototype.hasOwnProperty.call(entry, 'description')) result[index].description = entry.description;
+    if (MULTI_VALUE_ATTRIBUTE_NAMES.has(entry.name)) {
+      const index = result.findIndex(attr => attr.name === entry.name && attr.value === entry.value);
+      if (index >= 0) {
+        if (Object.prototype.hasOwnProperty.call(entry, 'description')) result[index].description = entry.description;
+      } else {
+        const newAttribute = { name: entry.name };
+        if (Object.prototype.hasOwnProperty.call(entry, 'value')) newAttribute.value = entry.value;
+        if (Object.prototype.hasOwnProperty.call(entry, 'description')) newAttribute.description = entry.description;
+        result.push(newAttribute);
+      }
     } else {
-      const newAttribute = { name: entry.name };
-      if (Object.prototype.hasOwnProperty.call(entry, 'value')) newAttribute.value = entry.value;
-      if (Object.prototype.hasOwnProperty.call(entry, 'description')) newAttribute.description = entry.description;
-      result.push(newAttribute);
+      const index = result.findIndex(attr => attr.name === entry.name);
+      if (index >= 0) {
+        if (Object.prototype.hasOwnProperty.call(entry, 'value')) result[index].value = entry.value;
+        if (Object.prototype.hasOwnProperty.call(entry, 'description')) result[index].description = entry.description;
+      } else {
+        const newAttribute = { name: entry.name };
+        if (Object.prototype.hasOwnProperty.call(entry, 'value')) newAttribute.value = entry.value;
+        if (Object.prototype.hasOwnProperty.call(entry, 'description')) newAttribute.description = entry.description;
+        result.push(newAttribute);
+      }
     }
   }
   return result;
