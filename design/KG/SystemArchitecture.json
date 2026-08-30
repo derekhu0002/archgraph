@@ -2402,6 +2402,11 @@
           "name": "commit",
           "value": "218d4a7",
           "description": "argo/rules/archgraph.instructions.md（SessionMemorySummarization/MemoryTriggerTiming 三层记忆 + 会话摘要机会式幂等覆盖）；tests/argo-rules-memory-tiers.test.js; design/KG/SystemArchitecture.json（AT-rules-02）"
+        },
+        {
+          "name": "commit",
+          "value": "7ff256b",
+          "description": "argo/rules/archgraph.instructions.md（WakeupGuideline STEP 0：只加载 T1 工作记忆摘要，T2/T3 按需回忆）；tests/argo-rules-memory-tiers.test.js"
         }
       ]
     },
