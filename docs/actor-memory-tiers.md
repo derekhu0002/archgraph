@@ -64,3 +64,11 @@
 3. **视图约定**：新建 `<actor>-wm-001`（T1）、`<actor>-archive-001`（T3）约定；存量 LTM 视图即 T2
 4. **实现**（后续切片）：T1 摘要元素读写、归档迁移规则、STEP 0 分层加载、回忆两步法固化、阈值分层
 5. **评测**：为 T2 回忆补充评测（含「摘要定位→取全文」两步的用例），验证「查得准 + 不撑爆上下文」
+
+## 实现状态
+
+- **Phase 0 ✅**：设计文档 + Principle `overseer-memory-tiers-001` + AT-actor-memory-tiers-01
+- **Phase 1 ✅（规则层）**：`SessionMemorySummarization`/`MemoryTriggerTiming`（里程碑即写主干 + 会话摘要机会式幂等覆盖）；`WakeupGuideline STEP 0`（只加载 T1，T2/T3 按需回忆）
+- **Phase 2 ✅（视图约定落地）**：T1 视图 `overseer-wm-001`「项目总管工作记忆」+ T3 视图 `overseer-archive-001`「项目总管档案」（均挂 project-overseer-001）+ T1 摘要元素 `overseer-wm-summary-001`（memoryTier=T1）
+- **memoryTier 约定**：记忆元素带 `memoryTier: T1|T2|T3` 属性（T1=工作记忆必进上下文 / T2=长期记忆按需回忆 / T3=档案显式检索），用于检索过滤
+- **待实现**：Phase 3（T1 摘要读写机制）、Phase 4（归档迁移）、Phase 5（回忆两步法+阈值）、Phase 6（T2 回忆评测）

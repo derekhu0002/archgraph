@@ -54,3 +54,22 @@ test('AT actor-memory-tiers: the Principle is registered in the intent graph und
   assert.ok(view && Array.isArray(view.included_elements) && view.included_elements.includes('overseer-memory-tiers-001'),
     'must be a member of overseer-ltm-001');
 });
+
+test('AT actor-memory-tiers: T1 working-memory and T3 archive views are realized under the actor', () => {
+  // GIVEN the three-tier view conventions are realized for the overseer actor
+  const wm = (GRAPH.views || []).find(v => v.view_id === 'overseer-wm-001');
+  const archive = (GRAPH.views || []).find(v => v.view_id === 'overseer-archive-001');
+  // THEN T1 and T3 views exist mounted under project-overseer-001
+  assert.ok(wm, 'overseer-wm-001 (T1) must exist');
+  assert.equal(wm.parent_element_id, 'project-overseer-001');
+  assert.ok(archive, 'overseer-archive-001 (T3) must exist');
+  assert.equal(archive.parent_element_id, 'project-overseer-001');
+  // AND the T1 summary element carries the memoryTier=T1 convention
+  const summary = (GRAPH.elements || []).find(e => e.id === 'overseer-wm-summary-001');
+  assert.ok(summary, 'T1 summary element must exist');
+  const tiers = (summary.attributes || []).filter(a => a.name === 'memoryTier').map(a => a.value);
+  assert.ok(tiers.includes('T1'), 'summary must carry memoryTier=T1');
+  // AND it is a member of the T1 view
+  const wmMembers = (wm && wm.included_elements) || [];
+  assert.ok(wmMembers.includes('overseer-wm-summary-001'), 'summary must be in overseer-wm-001');
+});

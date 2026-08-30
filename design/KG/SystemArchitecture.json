@@ -2867,6 +2867,14 @@
         {
           "view_id": "acceptance-guard-view-001",
           "view_name": "验收看护（Acceptance Guardianship）"
+        },
+        {
+          "view_id": "overseer-wm-001",
+          "view_name": "项目总管工作记忆"
+        },
+        {
+          "view_id": "overseer-archive-001",
+          "view_name": "项目总管档案"
         }
       ],
       "attributes": [
@@ -3511,6 +3519,23 @@
           "name": "commit",
           "value": "ce16c34",
           "description": "docs/actor-memory-tiers.md; tests/actor-memory-tiers.test.js; design/KG/SystemArchitecture.json（ACTOR 三层记忆模型设计 + Principle 登记）"
+        }
+      ]
+    },
+    {
+      "id": "overseer-wm-summary-001",
+      "name": "项目总管工作记忆摘要",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "T1 工作记忆摘要元素（<actor>-wm-001 视图）：会话开始时加载进上下文的紧凑摘要，幂等覆盖不追加。内容：身份（项目总管/项目总管）、当前任务、最近记忆卡片、会话钩子（上次未完成项/关键指针）。memoryTier 约定：T1=工作记忆（必进上下文）/T2=长期记忆（按需回忆）/T3=档案（显式检索）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T1"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
         }
       ]
     }
@@ -5030,6 +5055,23 @@
         "acceptance-guardian-001"
       ],
       "included_relationships": []
+    },
+    {
+      "view_id": "overseer-wm-001",
+      "view_name": "项目总管工作记忆",
+      "parent_element_id": "project-overseer-001",
+      "parent_element_name": "项目总管",
+      "description": "T1 工作记忆视图（<actor>-wm-001 约定）：会话开始时只加载进上下文的紧凑摘要——身份+职责、当前任务、最近记忆卡片、会话钩子。幂等覆盖不追加（SessionMemorySummarization）。",
+      "included_elements": [
+        "overseer-wm-summary-001"
+      ]
+    },
+    {
+      "view_id": "overseer-archive-001",
+      "view_name": "项目总管档案",
+      "parent_element_id": "project-overseer-001",
+      "parent_element_name": "项目总管",
+      "description": "T3 档案视图（<actor>-archive-001 约定）：已完结/封存的旧记忆，显式检索才读，只移不删（归档机制）。"
     }
   ]
 }
