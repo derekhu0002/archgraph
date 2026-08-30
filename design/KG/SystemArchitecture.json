@@ -2407,6 +2407,11 @@
           "name": "commit",
           "value": "7ff256b",
           "description": "argo/rules/archgraph.instructions.md（WakeupGuideline STEP 0：只加载 T1 工作记忆摘要，T2/T3 按需回忆）；tests/argo-rules-memory-tiers.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "20f221b",
+          "description": "argo/rules/archgraph.instructions.md（新增 MemoryRecallGuideline：两步回忆 memory_search→getIntentElementContext + 阈值分层 0.55/0.8）；tests/argo-rules-memory-tiers.test.js"
         }
       ]
     },
