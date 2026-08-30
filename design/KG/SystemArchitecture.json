@@ -3047,6 +3047,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "4324a7b",
+          "description": "scripts/memory-eval-run.js（维度 7 两步回忆 TR-01~03）；docs/memory-eval-dataset.md; tests/memory-eval-run.test.js; design/KG/SystemArchitecture.json（AT-memory-eval-run-03）；harness 31/31 100%"
         }
       ]
     },
