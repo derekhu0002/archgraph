@@ -2397,6 +2397,11 @@
           "name": "commit",
           "value": "de1f9e8",
           "description": "mergeAttributesPatch 修复多值台账（commit 台账按 name+value 追加，单值属性按 name 就地 upsert，op:remove 支持按 name+value）；argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-element-mutation.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "218d4a7",
+          "description": "argo/rules/archgraph.instructions.md（SessionMemorySummarization/MemoryTriggerTiming 三层记忆 + 会话摘要机会式幂等覆盖）；tests/argo-rules-memory-tiers.test.js; design/KG/SystemArchitecture.json（AT-rules-02）"
         }
       ]
     },
