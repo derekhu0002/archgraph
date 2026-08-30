@@ -2412,6 +2412,11 @@
           "name": "commit",
           "value": "20f221b",
           "description": "argo/rules/archgraph.instructions.md（新增 MemoryRecallGuideline：两步回忆 memory_search→getIntentElementContext + 阈值分层 0.55/0.8）；tests/argo-rules-memory-tiers.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "4d491cf",
+          "description": "argo/rules/archgraph.instructions.md（新增 MemoryTierConventions：三层记忆操作机制直接放规则免 skill 加载——视图约定/memoryTier/T1 幂等覆盖/T3 只移不删）；tests/argo-rules-memory-tiers.test.js"
         }
       ]
     },
