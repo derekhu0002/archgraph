@@ -3601,6 +3601,13 @@
           "acceptanceCriteria": "tests/actor-working-memory.test.js"
         }
       ]
+    },
+    {
+      "description": "概念澄清（2026-08-31 人类伙伴纠正）：design/KG/test-failure-records.json 记录的是验收测试的执行结果（测试用例 pass/fail 状态快照），属于「验证结果」，不是论文（From Storage to Experience, arXiv:2605.06716）Experience 阶段的「失败轨迹」。论文中的 failed trajectory = Agent 在真实任务交互中执行任务的失败过程（如排查 bug 失败、环境报错、任务未达成），是可作 contrastive induction 负样本的任务执行记录；验收测试结果只描述架构/实现与验收标准是否一致，是另一层级的验证证据，不得当作失败经验来源。后果：此前改进点「让失败记录跨会话累积成失败经验源」不成立，正确方向是采集 Agent 实际任务执行的失败过程作为 Experience 原材料；验收测试结果仍保留其验证/看护职能，二者不要混用。",
+      "id": "overseer-failure-exp-concept-001",
+      "name": "概念澄清：验收测试结果 ≠ 失败经验",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -4423,6 +4430,16 @@
       "target_id": "overseer-vision-001",
       "target_name": "项目愿景：为 AGENT 提供长期记忆系统",
       "type": "Association"
+    },
+    {
+      "id": "overseer-failure-exp-concept-rel-001",
+      "name": "概念区分",
+      "source_id": "overseer-failure-exp-concept-001",
+      "source_name": "概念澄清：验收测试结果 ≠ 失败经验",
+      "statement": "概念澄清：验收测试结果 ≠ 失败经验 --(Association)--> ACTOR 三层记忆模型（工作记忆/长期记忆/档案）",
+      "target_id": "overseer-memory-tiers-001",
+      "target_name": "ACTOR 三层记忆模型（工作记忆/长期记忆/档案）",
+      "type": "Association"
     }
   ],
   "views": [
@@ -5078,10 +5095,12 @@
         "overseer-subgraph-semantic-001",
         "overseer-wiki-eval-001",
         "overseer-mcp-tool-surface-001",
-        "overseer-memory-tiers-001"
+        "overseer-memory-tiers-001",
+        "overseer-failure-exp-concept-001"
       ],
       "included_relationships": [
-        "overseer-wiki-eval-rel-001"
+        "overseer-wiki-eval-rel-001",
+        "overseer-failure-exp-concept-rel-001"
       ]
     },
     {
