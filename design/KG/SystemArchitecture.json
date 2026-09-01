@@ -3784,6 +3784,12 @@
           "value": "2f249d9",
           "description": ".opencode/agents/insight-validator.md; design/KG/SystemArchitecture.json（模型修正为 alibaba-cn/qwen3.8-flash）"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "insight-validator-wm-001",
+          "view_name": "验证分析师工作记忆"
+        }
       ]
     },
     {
@@ -3806,6 +3812,16 @@
           "name": "commit",
           "value": "dd1c6d5",
           "description": ".opencode/agents/insight-synthesizer.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：DEEPSEEK V4 FLASH，由 argo/agents/ 移入本仓库 .opencode/agents/）"
+        }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "insight-synthesizer-wm-001",
+          "view_name": "综合汇报师工作记忆"
+        },
+        {
+          "view_id": "insight-synthesizer-ltm-001",
+          "view_name": "综合汇报师长期记忆"
         }
       ]
     },
@@ -4015,6 +4031,70 @@
           "name": "commit",
           "value": "4d9a709",
           "description": "design/KG/SystemArchitecture.json（假设清单产物：28 条可验证初始假设，交验证分析师）"
+        }
+      ]
+    },
+    {
+      "id": "insight-validator-wm-summary-001",
+      "name": "验证分析师工作记忆摘要",
+      "type": "Business Object",
+      "description": "验证分析师 T1 摘要（2026-09-01）：完成「组织级 AI 资产治理五大支柱」28 条假设全网验证（bl search web ×24 + 官方页直读）。关键修正：①SkillHub=科大讯飞 iflytek/skillhub 企业级开源注册中心（命名空间/RBAC/审核流/生命周期，Apache2.0，2026-04 开源），非假设所述「社区分享站」（疑与 ClawHub 混淆）；②AWS 应拆两套：AgentCore Agent Registry+Policy(Cedar/Dogwood 开源)+Evals+Observability 与 Agent Toolkit for AWS(CLI 分发)；③运行时权限治理 AWS 有第一方方案（Gateway+策略引擎 ENFORCE），H2.3 需修正；④Observability AWS 最强（CloudWatch GenAI+tracing+evaluation+反馈闭环，官方 FAQ 一手），「仅 AgentKit 有 eval」不成立；⑤JFrog AI Catalog(2025-09)含 Agent Skills Registry：自动版本化+恶意扫描+密码学签名+访问控制，唯一三要素齐备（H2.4 支持）；⑥H1.4 竞争稀疏被推翻：Google Gemini Enterprise Agent Platform+ARD 开放标准、MS AGT、特赞 skill0、Coze、Vercel skills 等涌现。支持：H1.3、H2.4、H3.3、H5.1、H5.2、H5.4、H6.3、H6.4；修正：H1.1、H1.2、H2.1、H2.2、H2.3、H3.1、H3.2、H4.1-4.3、H5.3；无法验证：H6.1 阈值（>50/>3 无证据）、H6.2（推测）。YouTube 直检命中弱，以 B 站/微博/JFrog 嵌入视频标注。交接综合汇报师。",
+      "attributes": [
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T1"
+        },
+        {
+          "name": "lastSummaryAt",
+          "value": "2026-09-01"
+        }
+      ]
+    },
+    {
+      "id": "insight-synthesizer-report-001",
+      "name": "综合建议报告：组织级 AI 资产治理五大支柱",
+      "type": "Business Object",
+      "description": "麦肯锡新五步法第 5 步「综合建议」工作产物（2026-09-01）：组织级 AI 资产治理五大支柱业界洞察综合报告。完整报告正文（Markdown）见 attributes.report_markdown。核心=治理深度双雄 JFrog（注册+自动版本+签名扫描+访问控制三要素齐备，供应链安全最强）与 AWS（五支柱覆盖最高，运行时策略+观测最强），优势维度互补；供应链安全已成独立议题（OWASP Agentic Skills Top 10 定稿、26.1% 含漏洞/5.2% 显恶意）；Observability 最薄弱（中低置信，AWS 最接近闭环>AgentKit 评测半边）；SKILL.md 事实收敛（30+ 产品）但注册中心协议互操作为零；12-18 个月向开放格式+企业制品库托管+供应链安全收敛；无通用赢家，按组织画像组合选型。交付结构=核心结论 5 条/五支柱最佳实践/覆盖度矩阵/方案对比表/共识差异/趋势/分阶段路线图(0-3/3-6/6-12月)/选型决策树(规模×云绑定×资产类型)/局限与置信度声明/ArchGraph 落地参考。",
+      "attributes": [
+        {
+          "name": "step",
+          "value": "5-synthesize"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "report_markdown",
+          "value": "# 组织级 AI 资产治理五大支柱：业界方案综合洞察与落地建议\n\n> 麦肯锡新五步法第 5 步「综合建议」交付 · 业界技术洞察团队 · 2026-09-01\n> 面向读者：泛化技术/管理读者；附 ArchGraph 项目落地参考\n> 证据基线：验证分析师全网验证（BAILIAN MCP 检索×24 + 官方页直读），28 条假设逐条验证/修正/推翻\n\n## 一、核心结论（5 条）\n\n**1. AI 资产治理已过「要不要」的关口，进入「怎么选型」阶段；格式已事实收敛，互操作是最大缺口。** 7 个点名方案之外，Google Gemini Enterprise Agent Platform（ARD 开放标准）、微软 AGT、特赞 skill0、Coze 技能商店、Vercel skills 等已入局，「竞争稀疏」假设被推翻。SKILL.md 获 Anthropic+GitHub+Microsoft Agent Framework+Gemini+扣子等 30+ 产品支持，事实标准候选成立；但注册中心协议互操作为零，正由 JFrog/SkillHub/OWASP/Google ARD 多路补齐——组织选型需自备「最后一公里」集成（Vercel npx skills add 已实现跨 agent 一键安装，为先行者）。\n\n**2. 治理深度双雄 JFrog 与 AWS，优势维度互补而非重叠，必须拆开评估。** JFrog 是「注册中心+自动版本+签名扫描+访问控制」三要素齐备的唯一点位（官方自述《Agent Skills are the New Packages of AI》），供应链安全维度胜出；AWS 是五支柱覆盖度最高者（AgentCore：URN 命名空间、Cedar 策略、CloudWatch GenAI 观测、re:Invent Evaluations；Agent Toolkit：CLI 分发），运行时策略与观测维度胜出。二者不可合并排序，只能按维度呈现。\n\n**3. 供应链安全已成独立议题，不再是高阶可选项。** OWASP Agentic Skills Top 10 已定稿；研究数据显示 26.1% skills 含漏洞、5.2% 显恶意；ClawHub 遭语义供应链攻击（注意：与 SkillHub 是两回事，后者为科大讯飞企业级开源注册中心）。签名/SBOM/恶意扫描正从「≤3/7 非共识」快速变为新共识。\n\n**4. Observability 是五支柱最薄弱环节（中低置信），但最接近闭环者是 AWS 而非此前认为的 AgentKit。** 无一方案提供「用量度量+效果评测+反馈回流」完整闭环；AWS（CloudWatch GenAI+tracing+evaluation+反馈闭环，云托管）> AgentKit（Evals 评测半边），其余五方案无第一方观测。该结论一手证据稀缺、YouTube 一手视频证据缺失，报告显式声明为中低置信。\n\n**5. 12-18 个月向「开放格式+企业制品库托管+供应链安全」收敛；无通用赢家，落地=按组织画像的组合策略。** 五路一手证据同向（JFrog agentic supply chain 战略/OWASP Universal Skill Format/AWS Dogwood 开源 CNCF/Google ARD/Anthropic 规范开放化）。选型本质是「治理深度×生态绑定×资产类型」的折中；「先轻后重」（格式→目录→版本→安全→观测）是最优路径，单一平台端到端满足属过度设计。\n\n## 二、五大支柱最佳实践\n\n### 支柱 1：Catalog / Registry（目录与注册中心）\n- 统一注册中心+标准化元数据（name/version/description/dependencies/permissions 字段）：JFrog AI Catalog、AWS AgentCore、OpenAI AgentKit 均有 Registry/Catalog 页与字段定义（H2.1 支持）。\n- 命名空间隔离+RBAC+审核流：AWS AgentCore 用 URN 命名空间；SkillHub 提供命名空间/RBAC/审核/生命周期。\n- 开放格式先行、协议自建：SKILL.md 事实收敛（30+ 产品），但注册中心协议互操作缺口仍在；Vercel npx skills add 为跨 agent 一键安装先行者。\n- 最佳实践：注册中心须含元数据 schema+命名空间+审核流；格式层选开放标准防锁定，协议层跟先行者或自建。\n\n### 支柱 2：Versioning & Reproducibility（版本与可复现）\n- 自动版本化+内容寻址/不可变版本：JFrog 制品坐标+哈希，继承 Artifactory 成熟能力（官方背书「Artifactory for AI」）。\n- 语义化版本+lockfile：teamai 继承 npm 锁定能力；teamai=git/PR for agent configs（H4.3 修正）。\n- 版本策略三分歧：语义化（teamai/npm）vs 内容哈希（JFrog）vs 纯 git（Copilot=repo 内文件随代码走，非 Releases；Anthropic=plugin marketplace，非无包管理时代）。\n- 最佳实践：至少做到不可变版本+依赖锁定；治理强化路径=企业制品库托管（JFrog 模式）。\n\n### 支柱 3：Security & Governance（安全与治理）\n- 双层安全模型：注册表侧（签名+SBOM+漏洞扫描，JFrog 三要素齐备）+运行时侧（Cedar 策略/Gateway+策略引擎 ENFORCE，AWS 第一方方案）——两层合起来才完整（H2.3 修正：运行时权限治理并非全空白）。\n- 攻击面实证：26.1% skills 含漏洞/5.2% 显恶意；OWASP Agentic Skills Top 10 定稿；ClawHub 语义供应链攻击（反面教材）。\n- 最佳实践：先签名+扫描再上生产；运行时权限治理用策略引擎（AWS Cedar/Dogwood 开源、CNCF 路径），不依赖 Agent 运行时工具授权。\n\n### 支柱 4：Distribution & Lifecycle（分发与生命周期）\n- 命名空间+RBAC+生命周期状态机：JFrog/AWS 三要素齐备（H3.1 支持）。\n- 分发形态四分：企业制品库（JFrog）/CLI 分发（AWS Agent Toolkit）/git+PR 评审（teamai push→MR→评审→钩子同步）/插件市场（Anthropic plugin marketplace）。\n- 跨 agent 一键安装：Vercel npx skills add。\n- 最佳实践：生命周期至少覆盖 deprecate/retire；协作走「共享库+版本评审」（H6.3 支持），替代聊天窗互传。\n\n### 支柱 5：Observability & Learning（可观测与学习）——最薄弱\n- 最接近闭环：AWS（CloudWatch GenAI 观测+tracing+evaluation+反馈闭环，官方 FAQ 一手）> AgentKit（Evals 评测半边）；其余五方案无第一方观测（H3.2 修正：观测最强从 AgentKit 改为 AWS）。\n- 无统一度量，代理指标散见：资产复用次数/引用数、重复开发率、新员工首用获取时间、发布周期（H6.4）。\n- 置信度：该支柱公开一手证据最稀缺、YouTube 一手视频证据缺失，结论标「中低置信」（H3.3 支持）。\n- 最佳实践：先定义统一度量（复用率/重复率/获取时间/发布周期），已绑 AWS 者用云托管观测，其余自建评测闭环。\n\n## 三、覆盖度矩阵（五大支柱×七方案）\n\n| 方案 | Catalog | Versioning | Security | Distribution | Observability | 覆盖合计 |\n|---|---|---|---|---|---|---|\n| JFrog AI Catalog | 强 | 强 | 强 | 强 | 无 | 4/5 |\n| AWS AgentCore+Toolkit | 强 | 中 | 强 | 强 | 中（最接近闭环） | 5/5 覆盖最高 |\n| OpenAI AgentKit | 中（连接器*） | 中 | 弱 | 弱 | 中（评测半边） | ~2.5/5 |\n| teamai-cli | 弱 | 强（继承 npm） | 弱 | 中 | 无 | ~2/5 |\n| GitHub Copilot Skills | 弱 | 弱（纯 git） | 弱 | 中 | 无 | ~1.5/5 |\n| Anthropic Skills | 弱（格式） | 弱 | 弱 | 中 | 无 | ~1.5/5 |\n| SkillHub（讯飞） | 强 | 中 | 中（审核+AgentGuard） | 强 | 无 | ~3.5/5 |\n\n注：*AgentKit 连接器目录是否计入 Catalog 为未决冲突点（计入则「中」，不计入则「弱」；本表按计入计）。AWS 拆为 AgentCore（治理）+Agent Toolkit（分发）两套评估。JFrog Observability 记为「无」（从严）。SkillHub 治理深度已从「最弱」上调（身份纠错后）。\n\n## 四、方案对比表\n\n| 方案 | 核心特性 | 优点 | 缺点 | 治理深度 | 生态绑定 |\n|---|---|---|---|---|---|\n| JFrog AI Catalog | 制品库扩展+Agent Skills Registry；自动版本化+恶意扫描+密码学签名+访问控制 | 「注册中心+版本+签名扫描+访问控制」三要素唯一齐备；供应链安全最强；可自托管 | 无第一方观测；商业产品（成本） | 最高（供应链维度） | 低-中（商业但多云中立、可自托管） |\n| AWS AgentCore+Toolkit | URN 命名空间；Cedar 策略（Dogwood 开源 CNCF）；CloudWatch GenAI 观测；Evals；CLI 分发 | 五支柱覆盖度最高；运行时策略+观测唯一完整；Dogwood 开源 | 绑定 AWS 云；需拆两套评估 | 最高（运行时+观测维度） | 高（强绑定 AWS） |\n| OpenAI AgentKit | SDK+Connector Registry+Evals | 框架完整；评测半边 | 治理链不完整（安全/分发弱） | 中 | 中（OpenAI 生态） |\n| teamai-cli | git-native；npm 语义版本；push→MR→评审→钩子同步 | 摩擦驱动；协作升级路径清晰；20+ 工具 | 无服务端 registry；无安全扫描；版本锁定弱 | 中低 | 低（git/npm 通用） |\n| GitHub Copilot Skills | SKILL.md 文件；repo 内随代码走 | 零成本起步；与企业治理结合 | 非 Releases、无依赖锁定；Catalog 弱 | 低 | 高（绑定 GitHub） |\n| Anthropic Skills | SKILL.md 格式定义者；plugin marketplace | 格式生态最成熟 | 治理最原始（格式强、治理弱） | 低 | 中（Claude 生态） |\n| SkillHub（讯飞） | 企业级开源注册中心：命名空间/RBAC/审核流/生命周期/CI/CD；Apache2.0；2026-04 开源 | 功能全、开源中立、治理深度超预期 | 年轻、成熟度待验证（无长期案例） | 中高 | 低（开源中立） |\n\n## 五、共识与差异\n\n**共识（6-7/7 具备）**：标准化元数据/版本化/可发现/可共享分发（H5.1 支持）。\n**高阶非共识（≤3/7）**：签名/扫描/RBAC/观测/评测——但安全正快速成为新共识（OWASP 定稿+攻击数据+JFrog/AWS 双雄齐备）。\n\n**三大分歧**：\n1. 元数据 schema：SKILL.md vs package.json/manifest vs 私有模型；\n2. 版本策略：语义化 vs 内容哈希 vs 纯 git；\n3. 注册中心形态：集中式 vs 复用 npm/制品库 vs 文件系统+git vs 开源注册中心。\n\n**效能影响（H6）**：H6.1 复用↑/重复↓方向被支持，但「共享资产>50 或团队>3 净收益转正」阈值无一手来源——已删除阈值、保留方向性表述；H6.3 协作升级为「共享库+版本评审」（teamai push→MR→评审→钩子同步实证）；H6.4 无统一度量，仅散点代理指标。\n\n## 六、趋势判断（12-18 个月）\n\n向「开放格式（SKILL.md/AGENTS.md）+企业制品库托管+供应链安全（签名/SBOM）」收敛；纯格式/纯分发方案将被治理平台吸收（H5.4 支持）。五路一手证据同向：JFrog agentic supply chain 战略/OWASP Universal Skill Format/AWS Dogwood 开源 CNCF/Google ARD 开放标准/Anthropic 规范开放化。注册中心协议互操作缺口正被多路补齐，12-18 个月内可能出现事实标准。\n\n## 七、分阶段落地路线图\n\n| 阶段 | 动作 | 交付物 |\n|---|---|---|\n| 0-3 月 | 格式标准化（SKILL.md/统一 manifest）→ git 版本+目录即注册表 → 资产盘点 | 格式规范+资产清单+目录即注册表 |\n| 3-6 月 | 内部制品库/注册中心（RBAC+生命周期+命名空间）→ 共享库+版本评审协作 | 组织级注册中心+协作流程 |\n| 6-12 月 | 供应链安全（签名+SBOM+扫描）→ 运行时策略 → 统一度量+评测闭环 | 签名/扫描流水线+观测仪表盘 |\n\n（对应 H7.1 先轻后重、H7.2 组合策略、H7.3 反模式规避：过度治理/格式碎片化/厂商锁定/「注册即治理」幻觉）\n\n## 八、选型决策树（按组织画像）\n\n**维度 1：规模**\n- <5 人：不上治理平台。SKILL.md 格式标准化+git 即可（治理成本>收益，方向性证据，无一手阈值）。\n- 5-50 人：轻量起步。SkillHub（开源注册中心）或 teamai（git-native 协作）或 Vercel skills（一键安装）。\n- >50 人/强合规：正式治理平台。JFrog（多云中立）或 AWS（已绑定者）。\n\n**维度 2：云绑定**\n- 已绑定 AWS → 直接 AgentCore+Agent Toolkit（五支柱覆盖最高，观测现成）。\n- 多云/中立/自托管 → JFrog（可自托管，供应链安全最强）。\n- 无云偏好+开源诉求 → SkillHub（开源、功能全）。\n\n**维度 3：资产类型**\n- 以 Skill/MCP 为主 → SKILL.md 格式+注册中心（SkillHub/JFrog）。\n- 以 Agent 应用为主 → OpenAI AgentKit（SDK+Evals）或 AWS AgentCore。\n- 以模型/数据集/全资产 → JFrog（制品库扩展）。\n\n## 九、局限与置信度声明\n\n| 项 | 说明 | 置信度 |\n|---|---|---|\n| Observability 支柱 | 一手证据最稀缺、YouTube 一手视频证据缺失；结论基于官方文档+源码推断 | 中低 |\n| H6.1 量化阈值 | 「共享资产>50/团队>3」无一手来源，已删除阈值 | 无源（改述为方向性） |\n| 供应链数据 | 26.1% 漏洞/5.2% 恶意、OWASP Top 10 定稿 | 中（依赖二手研究/报告） |\n| SkillHub 深度 | 身份纠错后上调为 Catalog/Version/Distribution/安全，但产品年轻（2026-04） | 功能面中高/成熟度待验证 |\n| JFrog vs AWS 排序 | 双维度互补，不合并排序；均为官方文档/博客一手 | 高 |\n| 未决冲突 | ①AgentKit 连接器目录是否计入 Catalog；②SkillHub/ClawHub 混淆曾致连锁失真（已修正） | — |\n\n## 十、对 ArchGraph 的落地参考\n\nArchGraph（teamai 系改造）现有短板与五支柱缺口一一对应：无安全扫描/无版本锁定/无服务端 registry/冲突处理简单。建议按五支柱顺序补齐：\n\n1. 格式层：接入 SKILL.md 开放格式（防锁定、随事实标准走）。\n2. 版本层：从 git 版本升级为不可变版本+依赖锁定（借鉴 npm 语义化+lockfile）。\n3. Catalog 层：将「目录即注册表」升级为服务端 registry（参照 SkillHub 开源模式或对接 JFrog AI Catalog）。\n4. 安全层：注册表侧签名/SBOM/恶意扫描（以 OWASP Agentic Skills Top 10 为风险框架）；运行时策略借鉴 AWS Cedar/Dogwood 开源思路。\n5. 观测层：先定义统一度量（复用次数/重复开发率/首用获取时间/发布周期），再补评测闭环（借鉴 AgentKit Evals、AWS CloudWatch GenAI）。\n6. 开放参与：SKILL.md/OWASP Universal Skill Format/Google ARD 标准演进中可跟进并贡献，抢占「注册中心协议互操作」空白——行业最大缺口，也是差异化机会。"
+        }
+      ]
+    },
+    {
+      "id": "insight-synthesizer-wm-summary-001",
+      "name": "综合汇报师工作记忆摘要",
+      "type": "Business Object",
+      "description": "综合汇报师 T1 工作记忆摘要（2026-09-01 会话）：1) 身份：业界技术洞察团队综合汇报师（insight-synthesizer-001），麦肯锡新五步法第 5 步「综合建议」执行者；2) 本次任务：接收验证分析师结论，将「组织级 AI 资产治理五大支柱」验证证据综合为洞察报告（面向泛化读者+ArchGraph 落地参考）；3) 本次进展：完成第 5 步综合——核心结论 5 条（治理双雄 JFrog/AWS 维度互补、供应链安全成独立议题、Observability 最薄弱中低置信、SKILL.md 事实收敛但互操作为零、无通用赢家按画像选型）；覆盖度矩阵 JFrog=4/5、AWS=5/5 最高、SkillHub≈3.5/5 上调（SkillHub=科大讯飞企业级开源注册中心，非 ClawHub 社区站）；产出分阶段路线图+选型决策树+ArchGraph 落地参考；4) 交接：报告产物 insight-synthesizer-report-001 交人类伙伴审阅；5) TODO：待人类伙伴审阅反馈；6) 经验：金字塔结论先行+未验证项显式标置信度（Observability 中低、H6 阈值无源删除）；未决冲突点（JFrog vs AWS 双维度排序、AgentKit 连接器目录是否计入 Catalog）须在报告中显式标注。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T1"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "lastSummaryAt",
+          "value": "2026-09-01"
         }
       ]
     }
@@ -5792,6 +5872,33 @@
       "description": "假设提出师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含假设清单产物与里程碑。",
       "included_elements": [
         "insight-hypothesis-list-001"
+      ]
+    },
+    {
+      "description": "验证分析师（insight-validator-001）的 T1 工作记忆视图（麦肯锡五步法第4步执行者）。",
+      "parent_element_id": "insight-validator-001",
+      "view_id": "insight-validator-wm-001",
+      "view_name": "验证分析师工作记忆",
+      "included_elements": [
+        "insight-validator-wm-summary-001"
+      ]
+    },
+    {
+      "view_id": "insight-synthesizer-wm-001",
+      "view_name": "综合汇报师工作记忆",
+      "parent_element_id": "insight-synthesizer-001",
+      "description": "综合汇报师（insight-synthesizer-001）的 T1 工作记忆视图（麦肯锡五步法第5步执行者），含会话摘要。",
+      "included_elements": [
+        "insight-synthesizer-wm-summary-001"
+      ]
+    },
+    {
+      "view_id": "insight-synthesizer-ltm-001",
+      "view_name": "综合汇报师长期记忆",
+      "parent_element_id": "insight-synthesizer-001",
+      "description": "综合汇报师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含综合建议报告产物与里程碑。",
+      "included_elements": [
+        "insight-synthesizer-report-001"
       ]
     }
   ]
