@@ -3778,6 +3778,11 @@
           "name": "commit",
           "value": "0021613",
           "description": ".opencode/agents/insight-validator.md; design/KG/SystemArchitecture.json（洞察范围扩展为全网多源：技术网站/博客/官网/YouTube/开源）"
+        },
+        {
+          "name": "commit",
+          "value": "2f249d9",
+          "description": ".opencode/agents/insight-validator.md; design/KG/SystemArchitecture.json（模型修正为 alibaba-cn/qwen3.8-flash）"
         }
       ]
     },
