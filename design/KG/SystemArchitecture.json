@@ -3780,6 +3780,16 @@
           "name": "commit",
           "value": "fc0beb6",
           "description": "design/KG/SystemArchitecture.json（项目总管 LTM 里程碑登记）"
+        },
+        {
+          "name": "commit",
+          "value": "c4cd076",
+          "description": "argo/agents/insight-{lead,definer,decomposer,hypothesis,validator,synthesizer}.agent.md; design/KG/SystemArchitecture.json（为洞察团队 6 角色定义 OpenCode Agent：验证分析师 QWEN3.8 PLUS 多模态，其余 DEEPSEEK V4 FLASH，图谱登记 agent 属性）"
+        },
+        {
+          "name": "commit",
+          "value": "acac9c5",
+          "description": "design/KG/SystemArchitecture.json（6 个 Actor 元素登记 agent/commit 属性）"
         }
       ]
     }
