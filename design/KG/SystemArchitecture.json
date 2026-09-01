@@ -3738,6 +3738,11 @@
           "name": "commit",
           "value": "dd1c6d5",
           "description": ".opencode/agents/insight-validator.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：QWEN3.8 PLUS 多模态，由 argo/agents/ 移入本仓库 .opencode/agents/）"
+        },
+        {
+          "name": "commit",
+          "value": "3f628df",
+          "description": ".opencode/agents/insight-validator.md; opencode.json; design/KG/SystemArchitecture.json（验证阶段强制全网数据收集 + BAILIAN MCP 检索）"
         }
       ]
     },
