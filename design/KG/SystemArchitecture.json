@@ -3736,6 +3736,16 @@
           "value": "dd1c6d5",
           "description": ".opencode/agents/insight-hypothesis.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：DEEPSEEK V4 FLASH，由 argo/agents/ 移入本仓库 .opencode/agents/）"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "insight-hypothesis-wm-001",
+          "view_name": "假设提出师工作记忆"
+        },
+        {
+          "view_id": "insight-hypothesis-ltm-001",
+          "view_name": "假设提出师长期记忆"
+        }
       ]
     },
     {
@@ -3920,6 +3930,11 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-01"
+        },
+        {
+          "name": "commit",
+          "value": "9a0f957",
+          "description": "design/KG/SystemArchitecture.json（问题拆解师建立 wm/ltm 记忆视图 + T1 摘要 + T2 议题树产物，麦肯锡第 2 步拆解问题）"
         }
       ]
     },
@@ -3940,6 +3955,51 @@
         {
           "name": "step",
           "value": "2-decompose"
+        },
+        {
+          "name": "commit",
+          "value": "9a0f957",
+          "description": "design/KG/SystemArchitecture.json（议题树产物：组织级 AI 资产治理五大支柱业界洞察）"
+        }
+      ]
+    },
+    {
+      "id": "insight-hypothesis-wm-summary-001",
+      "name": "假设提出师工作记忆摘要",
+      "type": "Business Object",
+      "description": "假设提出师 T1 工作记忆摘要（2026-09-01 会话）：1) 身份：业界技术洞察团队假设提出师（insight-hypothesis-001），麦肯锡新五步法第 3 步执行者；2) 本次任务：对问题拆解师交付的议题树（7 议题×28 子问题）逐子问题提出可验证假设；3) 本次进展：已产出 28 条假设清单（7 议题×4 子问题），每条含主假设+备选假设+验证标准（若真/若假）+证据优先级+预期来源；核心预判：治理深度 JFrog>AWS>AgentKit>teamai≈Copilot Skills≈Anthropic Skills≈SkillHub、Observability 为最不成熟支柱、无通用赢家需按画像选型；4) 交接：假设清单交验证分析师（insight-validator-001）验证；5) TODO：待验证分析师完成第 4 步后由综合汇报师产出报告；6) 经验：可验证假设的最小单位=「可证伪断言+明确判别阈值」，避免'可能有关系'表述；证据优先级 P0=官方文档、P1=开源代码/官网/发布博客、P2=社区讨论/技术博客/YouTube/行业报告。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T1"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "lastSummaryAt",
+          "value": "2026-09-01"
+        }
+      ]
+    },
+    {
+      "id": "insight-hypothesis-list-001",
+      "name": "假设清单：组织级 AI 资产治理五大支柱业界洞察",
+      "type": "Business Object",
+      "description": "麦肯锡新五步法第 3 步「提出假设」工作产物（2026-09-01）：针对拆解师议题树（7 一级议题×28 二级子问题）逐子问题给出 28 条可验证初始假设。说明：KG 中仅有议题树摘要，28 个子问题详细文本未落库，本清单按拆解师结构（议题1 全景/议题2-3 五支柱实证ⅠⅡ/议题4 覆盖度矩阵/议题5 共识差异/议题6 效能影响/议题7 落地建议，每议题 4 个子问题）重建编号 1.x-7.x；每条=主假设+备选+验证标准(若真/若假)+证据优先级。证据优先级：P0=官方文档、P1=开源代码/官网/发布博客、P2=社区讨论/技术博客/YouTube/行业报告。\n【议题1 方案全景盘点】\n[1.1] H1.1 四分类假设：七方案按交付形态分四类——格式标准型(Anthropic Agent Skills、GitHub Copilot Skills=SKILL.md 文件规范)；分发/CLI 型(teamai-cli=npm 共享机制、SkillHub=社区分享站)；框架+注册表型(OpenAI AgentKit=SDK+Agent Registry+Evals)；企业平台型(JFrog AI Catalog=制品库扩展、AWS Agent Toolkit/AgentCore=云托管注册+部署)；无一方案同时具备四类形态。备选：存在第五类全栈治理平台。验证：若真→官方文档可无重叠归入四类；若假→某方案横跨多类则重切维度。证据：P0 官方文档+产品官网；P1 开源 repo 结构。\n[1.2] H1.2 治理vs分发：治理深度排序 JFrog>AWS Agent Toolkit>OpenAI AgentKit>teamai≈Copilot Skills≈Anthropic Skills≈SkillHub；前两者具备注册+版本+安全+生命周期完整治理链，后四者只解决格式统一+分享分发。备选：AgentKit 治理深度反超 AWS。验证：若真→治理方文档出现 SBOM/签名/策略/生命周期等治理术语≥5 个、分发方≤2 个；若假→按实际特性数重排。证据：P0 官方文档特性清单；P1 官网对比页/发布博客。\n[1.3] H1.3 开放度与生态绑定：开放度从高到低=开源组(Anthropic Skills/AgentKit/teamai)+SkillHub(社区)>GitHub Copilot Skills(绑定 GitHub 生态)>AWS(绑定 AWS 云)>JFrog(商业但可自托管)。备选：JFrog 自托管 Artifactory 开放度不低于 AWS。验证：若真→凭 license/自托管能力/是否依赖专有云服务判别；若假→重新分档。证据：P1 GitHub license+源码；P1 官方自托管文档。\n[1.4] H1.4 目标用户与场景：Copilot/Anthropic Skills 面向编码助手(个人/小团队)；AWS/JFrog 面向企业全资产(模型/数据集/Agent)；AgentKit 面向 Agent 开发团队；teamai 面向团队共享 MCP 工具；场景错位、竞争稀疏。备选：AgentKit 与 Copilot Skills 在团队 Agent 共享场景直接竞争。验证：若真→官方 audience/use case 支撑错位定位；若假→重估竞争关系。证据：P1 官方 Getting Started/案例页；P2 博客/发布视频。\n【议题2 五支柱实证Ⅰ(Catalog/Versioning/Security)】\n[2.1] H2.1 Catalog 最佳实践=统一注册+标准化元数据：治理类方案(JFrog/AWS/AgentKit)必有注册中心+元数据 schema(name/version/description/dependencies/permissions)；分发类(Anthropic Skills/teamai/SkillHub)无集中注册表。备选：Anthropic skills 目录+SkillHub 构成去中心化注册表可替代集中式。验证：若真→文档存在 Registry/Catalog 页+字段定义；若假→文件系统+索引等效发现则集中注册非必需。证据：P0 官方文档 registry/API 参考；P1 源码 schema 定义。\n[2.2] H2.2 Versioning 最佳实践=内容寻址/不可变版本+lockfile：JFrog(制品坐标+哈希)与 teamai(npm 语义版本)继承成熟锁定能力；SKILL.md 类(Anthropic/GitHub)仅 git commit、无依赖锁定、可复现性最弱。备选：Copilot Skills 的 git tag/release 可达等效可复现。验证：若真→文档出现 lockfile/checksum/immutable/sha256 且可原子锁定 skill 依赖；若假→强弱排序下调。证据：P0 官方文档+开源代码；P1 技术博客复现性案例。\n[2.3] H2.3 Security 最佳实践=注册表侧(签名+扫描)与运行时侧(权限沙箱)双层：JFrog 覆盖注册表侧(AI SBOM/签名/漏洞扫描)；运行时权限治理七方案基本缺失——权限靠 Agent 运行时工具授权(如 Claude/Codex 工具权限)而非资产治理方案本身。备选：AWS 经 IAM/云权限实现资产级运行时治理。验证：若真→JFrog 文档有签名/SBOM 章节且各方案无『资产运行时授权』功能页；若假→运行时侧非空白。证据：P0 官方安全章节；P1 安全技术博客/发布会。\n[2.4] H2.4 支柱Ⅰ综合断层：同时满足『注册中心+锁定版本+供应链安全』三要素的仅 JFrog(可能+AWS AgentCore)；其余方案至少缺一项。备选：AgentKit Registry 的 version+integrity 字段满足三要素。验证：若真→3×7 达标表仅 1-2 方案全勾；若假→改为梯队差异表述。证据：P0 综合官方文档交叉核对；P1 第三方对比文。\n【议题3 五支柱实证Ⅱ(Distribution/Observability)】\n[3.1] H3.1 Distribution 最佳实践=命名空间+RBAC+生命周期状态机：JFrog/AWS 三要素齐备；teamai 借 npm scope 实现命名空间+弱 RBAC；Anthropic/GitHub Skills 与 SkillHub 只有上传/下载、无生命周期。备选：Copilot Skills 借 GitHub 权限+release 实现等效 RBAC+生命周期。验证：若真→文档出现 namespace/scope、role/permission、deprecate/retire 术语；若假→并入企业档。证据：P0 官方文档；P1 开源代码权限模型。\n[3.2] H3.2 Observability 为最不成熟支柱：七方案无一提供完整闭环(用量度量+效果评测+反馈回流)；仅 AgentKit 有 eval 集成；用量/评测其余全缺。备选：AWS 经 CloudWatch 集成提供用量观测。验证：若真→各方案无 skill/agent 粒度用量与质量指标页；若假→降级为『部分缺失』。证据：P1 官方 observability 文档+源码埋点；P2 技术博客。\n[3.3] H3.3 支柱Ⅱ证据边界(对应拆解师子问题 3.4 证据缺口清单)：Observability 公开一手证据最稀缺，验证主要靠官方文档+源码推断、独立第三方评测大概率缺位——最终报告需显式声明置信度。备选：第三方(Gartner/InfoQ)已有对比评测。验证：若真→按 3.4 清单检索后仍无独立评测；若假→证据充分度上调。证据：P1 源码(埋点/指标)+官方文档；P2 第三方检索补充。\n【议题4 覆盖度矩阵与成熟度对比】\n[4.1] H4.1 覆盖度矩阵：JFrog=5 支柱(或 4，Observability 存疑)；AWS=Catalog/Versioning/Distribution 强+Security 中+Observability 弱；AgentKit=Catalog/Versioning/Observability(eval)，Security/Distribution 弱；teamai=Versioning/Distribution；Copilot Skills=Catalog(弱)/Distribution；Anthropic Skills=格式+Distribution(1-2)；SkillHub=Distribution。备选：JFrog 不覆盖 Observability。验证：若真→矩阵与预测≥5/7 一致；若假→按实际修正并重算支柱覆盖数。证据：P0 综合官方文档；P1 第三方对比文章。\n[4.2] H4.2 成熟度排序：JFrog>AWS≈AgentKit>teamai≈Copilot Skills>Anthropic Skills≈SkillHub；判据=发布时长/版本≥1.0/企业案例/SLA/活跃维护。备选：AgentKit 社区活跃度反超 AWS。验证：若真→GitHub stars/commits/release 频率/企业案例数形成单调排序；若假→修正排序。证据：P1 GitHub 活跃度+官方发布记录；P2 行业报告(Gartner 等)。\n[4.3] H4.3 与经典制品治理映射：AI 治理正复用经典范式——teamai=『npm for agents』、JFrog=『Artifactory for AI』、Copilot Skills=『GitHub Releases for Skills』、Anthropic Skills=『无包管理时代』；据此可预测演进方向。备选：存在原生新模式(能力语义目录)。验证：若真→文档/代码出现对 npm/OCI/Artifactory/SBOM 的复用；若假→映射部分失效。证据：P1 官方博客+源码 API 调用。\n[4.4] H4.4 差异化定位：差异维度=治理深度×生态绑定×资产类型(Agent/Skill/模型/数据集)；无通用全场景赢家，选型本质=治理深度与生态锁定间取折中。备选：JFrog 成厂商中立通用治理层。验证：若真→四维定位图七方案互不重叠；若假→存在直接竞争需报告提示。证据：P2 合成判断(依赖 4.1-4.3)。\n【议题5 共识与差异】\n[5.1] H5.1 四项基础共识：标准化元数据/版本化/可发现/可共享分发为跨方案共识(预期 6-7/7 方案具备)；签名/扫描/RBAC/观测/评测属高阶非共识(≤3/7)。备选：安全正快速成为新共识。验证：若真→特性统计后基础覆盖≥6/7、高阶≤3/7；若假→修正共识集合。证据：P0 综合官方文档；P1 行业报告。\n[5.2] H5.2 三大分歧：①元数据 schema 未统一(SKILL.md vs package.json/manifest vs 私有模型)；②版本策略(语义化 vs 内容哈希 vs 纯 git)；③注册中心形态(集中式 vs 复用 npm/制品库 vs 文件系统+git vs 社区站)。备选：MCP/AGENTS.md 事实标准正在收敛 schema 分歧。验证：若真→manifest 字段集与版本/注册机制互不相同且无统一标准声明；若假→收敛判断成立。证据：P1 各方案格式文档+源码；P2 社区标准讨论。\n[5.3] H5.3 格式标准之争与互操作：SKILL.md 为事实标准候选(Anthropic+GitHub 双方案支持)，但跨方案互操作性差、无通用一键导入工具。备选：已有社区转换器实现互操作。验证：若真→官方无互操作声明且需手动转换；若假→互操作性上调。证据：P1 官方格式文档；P1 GitHub 转换器存在性；P2 社区讨论。\n[5.4] H5.4 收敛趋势：未来 12-18 个月向『开放格式(SKILL.md/AGENTS.md)+企业制品库托管+供应链安全(签名/SBOM)』收敛；纯格式/纯分发方案被治理平台吸收。备选：平台各自为政、碎片化加剧。验证：若真→存在治理平台宣布支持 SKILL.md 格式的发布/路线图公告；若假→碎片化判断成立。证据：P1 官方路线图/发布博客；P2 行业分析报告。\n【议题6 效能影响】\n[6.1] H6.1 收益机制：核心收益=资产复用率↑与重复造轮子↓；成本=注册/审查/版本管理流程；净收益在资产规模跨临界点(预估共享资产>50 或团队>3)后转正。备选：治理成本恒大于收益、组织回归『文件夹+git』。验证：若真→官方客户案例出现复用率/重复开发量化数据；若假→净收益判断改写。证据：P1 官方客户案例/白皮书；P2 独立落地复盘博客。\n[6.2] H6.2 成本启动门槛：治理收益有规模效应、成本有启动门槛——小团队(<5 人)上正式治理平台为净负，大组织(>50 人)净正显著。备选：渐进采用路径可消除净负区间。验证：若真→『小团队治理过重』负面反馈与『大组织必需』正向证据并存；若假→门槛假设不成立。证据：P1 社区讨论(HN/Reddit/知乎)+技术博客；P2 官方案例(注意偏见)。\n[6.3] H6.3 协作模式升级：治理将协作从『个人 prompt/脚本互传』升级为『团队共享资产库+版本评审』(类似 npm 进入前端协作的历史路径)；技能交付从聊天窗口分享变为注册中心拉取。备选：仅作归档工具、流程不变。验证：若真→案例描述团队工作流变化(共享目录/评审/拉取)；若假→影响假设下调。证据：P2 案例/博客；P2 YouTube 工作流演示。\n[6.4] H6.4 量化代理指标：①资产复用次数/引用数；②重复开发率(相似资产重复创建数)；③新员工首用资产获取时间；④发布周期；业界无统一度量、验证师提取散点证据。备选：已有统一框架(DORA/平台工程指标)可直接引用。验证：若真→无统一度量仅散点证据；若假→直接采用并核对。证据：P2 行业报告+博客；P2 YouTube 案例。\n【议题7 落地建议路线图】\n[7.1] H7.1 落地路径=先轻后重：①格式标准化(SKILL.md/统一 manifest)→②git 版本+目录即注册表→③制品库/注册中心(RBAC+生命周期)→④供应链安全(签名+扫描)→⑤观测/评测；安全与观测排在后段。备选：安全优先(问题不可逆)。验证：若真→落地复盘普遍『先目录版本后安全观测』；若假→调整优先级。证据：P2 多来源落地博客；P1 官方 best-practice 文档。\n[7.2] H7.2 组合策略优于单选：格式层=SKILL.md 开放标准(防锁定)；分发层=teamai/npm 或内部制品库；治理层=JFrog(多云中立)或 AWS(已绑定者默认)。备选：单一平台端到端满足、组合属过度设计。验证：若真→出现『多工具组合』落地模式(SKILL.md+内部 npm+制品库)；若假→组合策略降级为可选。证据：P2 落地案例/博客；P2 官方集成文档。\n[7.3] H7.3 四大反模式：①过度治理(流程重/采纳低/影子资产逃逸)；②格式碎片化(多 schema 不互操作)；③厂商锁定(治理层绑单云)；④『注册即治理』幻觉(只做目录而无安全/版本治理，误导合规)。备选：最大风险是『影子技能』(未治理分享扩散)。验证：若真→检索到真实失败案例(如治理回退 git)；若假→聚焦单一主要风险。证据：P2 社区讨论+失败案例博客；P2 YouTube 复盘。\n[7.4] H7.4 交付形态：最终建议=分阶段路线图(0-3 月格式与目录→3-6 月版本与分发→6-12 月安全与观测)+按组织画像(规模/云绑定/资产类型)选型决策树，而非单一推荐方案。备选：存在可单一推荐的最佳方案。验证：若真→议题 1-6 证据支持『无通用赢家、按画像选型』；若假→改为直接推荐。证据：P2 合成判断(依赖议题 1-6 验证结果)。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "step",
+          "value": "3-hypothesize"
         }
       ]
     }
@@ -5699,6 +5759,24 @@
       "description": "问题拆解师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含拆解工作产物与里程碑。",
       "included_elements": [
         "insight-decomposer-issue-tree-001"
+      ]
+    },
+    {
+      "view_id": "insight-hypothesis-wm-001",
+      "view_name": "假设提出师工作记忆",
+      "parent_element_id": "insight-hypothesis-001",
+      "description": "假设提出师 Business Actor 的 T1 工作记忆视图（wm-001 约定）：会话开始时只加载进上下文的紧凑摘要。幂等覆盖不追加。",
+      "included_elements": [
+        "insight-hypothesis-wm-summary-001"
+      ]
+    },
+    {
+      "view_id": "insight-hypothesis-ltm-001",
+      "view_name": "假设提出师长期记忆",
+      "parent_element_id": "insight-hypothesis-001",
+      "description": "假设提出师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含假设清单产物与里程碑。",
+      "included_elements": [
+        "insight-hypothesis-list-001"
       ]
     }
   ]
