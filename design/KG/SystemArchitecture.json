@@ -3980,6 +3980,11 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-01"
+        },
+        {
+          "name": "commit",
+          "value": "4d9a709",
+          "description": "design/KG/SystemArchitecture.json（假设提出师建立 wm/ltm 记忆视图 + T1 摘要 + T2 假设清单产物，麦肯锡第 3 步提出假设）"
         }
       ]
     },
@@ -4000,6 +4005,11 @@
         {
           "name": "step",
           "value": "3-hypothesize"
+        },
+        {
+          "name": "commit",
+          "value": "4d9a709",
+          "description": "design/KG/SystemArchitecture.json（假设清单产物：28 条可验证初始假设，交验证分析师）"
         }
       ]
     }
