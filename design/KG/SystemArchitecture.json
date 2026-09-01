@@ -4080,6 +4080,14 @@
           "name": "commit",
           "value": "014b22f",
           "description": "design/KG/SystemArchitecture.json（综合建议报告产物：组织级 AI 资产治理五大支柱业界洞察，麦肯锡第5步）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "email-sent"
+        },
+        {
+          "name": "deliveryChannel",
+          "value": "smtp.126.com:465（hdhscu@126.com 发送至 hdhscu@126.com，HTML 渲染）"
         }
       ]
     },
