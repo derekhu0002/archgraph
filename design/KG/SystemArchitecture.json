@@ -3641,6 +3641,11 @@
           "name": "commit",
           "value": "c4cd076",
           "description": "argo/agents/insight-lead.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：DEEPSEEK V4 FLASH）"
+        },
+        {
+          "name": "commit",
+          "value": "dd1c6d5",
+          "description": ".opencode/agents/insight-lead.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：DEEPSEEK V4 FLASH，由 argo/agents/ 移入本仓库 .opencode/agents/）"
         }
       ]
     },
@@ -3659,6 +3664,11 @@
           "name": "commit",
           "value": "c4cd076",
           "description": "argo/agents/insight-definer.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：DEEPSEEK V4 FLASH）"
+        },
+        {
+          "name": "commit",
+          "value": "dd1c6d5",
+          "description": ".opencode/agents/insight-definer.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：DEEPSEEK V4 FLASH，由 argo/agents/ 移入本仓库 .opencode/agents/）"
         }
       ]
     },
@@ -3677,6 +3687,11 @@
           "name": "commit",
           "value": "c4cd076",
           "description": "argo/agents/insight-decomposer.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：DEEPSEEK V4 FLASH）"
+        },
+        {
+          "name": "commit",
+          "value": "dd1c6d5",
+          "description": ".opencode/agents/insight-decomposer.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：DEEPSEEK V4 FLASH，由 argo/agents/ 移入本仓库 .opencode/agents/）"
         }
       ]
     },
@@ -3695,6 +3710,11 @@
           "name": "commit",
           "value": "c4cd076",
           "description": "argo/agents/insight-hypothesis.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：DEEPSEEK V4 FLASH）"
+        },
+        {
+          "name": "commit",
+          "value": "dd1c6d5",
+          "description": ".opencode/agents/insight-hypothesis.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：DEEPSEEK V4 FLASH，由 argo/agents/ 移入本仓库 .opencode/agents/）"
         }
       ]
     },
@@ -3713,6 +3733,11 @@
           "name": "commit",
           "value": "c4cd076",
           "description": "argo/agents/insight-validator.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：QWEN3.8 PLUS 多模态）"
+        },
+        {
+          "name": "commit",
+          "value": "dd1c6d5",
+          "description": ".opencode/agents/insight-validator.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：QWEN3.8 PLUS 多模态，由 argo/agents/ 移入本仓库 .opencode/agents/）"
         }
       ]
     },
@@ -3731,6 +3756,11 @@
           "name": "commit",
           "value": "c4cd076",
           "description": "argo/agents/insight-synthesizer.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：DEEPSEEK V4 FLASH）"
+        },
+        {
+          "name": "commit",
+          "value": "dd1c6d5",
+          "description": ".opencode/agents/insight-synthesizer.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：DEEPSEEK V4 FLASH，由 argo/agents/ 移入本仓库 .opencode/agents/）"
         }
       ]
     },
