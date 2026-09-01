@@ -3593,8 +3593,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-01T00:00:00.000Z",
-          "description": "2026-09-01 会话摘要写入时间"
+          "value": "2026-09-01T01:00:00.000Z",
+          "description": "2026-09-01 会话摘要更新（洞察团队 Agent 定义）"
         }
       ],
       "testcases": [
