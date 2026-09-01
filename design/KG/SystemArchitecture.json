@@ -3743,6 +3743,11 @@
           "name": "commit",
           "value": "3f628df",
           "description": ".opencode/agents/insight-validator.md; opencode.json; design/KG/SystemArchitecture.json（验证阶段强制全网数据收集 + BAILIAN MCP 检索）"
+        },
+        {
+          "name": "commit",
+          "value": "0021613",
+          "description": ".opencode/agents/insight-validator.md; design/KG/SystemArchitecture.json（洞察范围扩展为全网多源：技术网站/博客/官网/YouTube/开源）"
         }
       ]
     },
