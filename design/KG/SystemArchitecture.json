@@ -4092,6 +4092,11 @@
         {
           "name": "deliveryChannel",
           "value": "smtp.126.com:465（hdhscu@126.com 发送至 hdhscu@126.com，HTML 渲染）"
+        },
+        {
+          "name": "commit",
+          "value": "87e2f75",
+          "description": "docs/diagrams/insight-{teamai,jfrog,aws,agentkit,copilot,anthropic,skillhub}-cf.html + insight-report-full.html（七方案组件+功能视图 云侧/端侧 + 完整报告）"
         }
       ]
     },
