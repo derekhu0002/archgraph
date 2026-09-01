@@ -1084,6 +1084,10 @@
         {
           "view_id": "video-team-001",
           "view_name": "视频创作团队"
+        },
+        {
+          "view_id": "insight-team-001",
+          "view_name": "业界技术洞察团队"
         }
       ]
     },
@@ -3567,7 +3571,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-08-30 会话摘要）\n- 身份：项目总管（ArchGraph 项目 overseer），人类伙伴未指定角色时默认对话身份\n- 当前任务：ACTOR 三层记忆模型（T1/T2/T3）已全 Phase 落地（0-6），操作机制已进 RULE（MemoryTierConventions）自动生效\n- 本次进展：\n  - updateArchitectureElement attributes 合并语义：name+value 追加（修多值 commit 台账回归 de1f9e8）\n  - 导航评测 SEED v1.2.0（7 维 28 题 + hostScenarios 宿主视角场景 + 文档），AGENT 评测 28/28（新方法论：真实 RULE 在场、指引仅会话内容）\n  - 三层记忆全 Phase：设计文档 + 规则（S1.1/S1.2/RecallGuideline/TierConventions）+ 视图（wm/ltm/archive）+ T1 读写脚本 + 归档脚本 + memory-eval 维度 7 两步回忆（31/31）\n  - 部署核查：规则 4 harness + 全局脚本全绿\n- 关键决策：\n  - 同名多值属性（commit 台账）merge 必须 name+value 匹配（新值追加），不得 name-only 就地覆盖\n  - 框架操作机制优先进 RULE（自动注入），SKILL 仅用于需主动调用的专业能力\n  - 会话收尾不靠 LLM 判断：里程碑即写兜底 + 摘要机会式幂等覆盖（不追加，写放大有界）\n- 未完成/TODO：\n  - 三层记忆后续可选项：如需主动调用可做 memory-tiers skill；对外/公众号文章；T2 回忆 AGENT 评测（容器）\n  - 老记忆元素无日期属性，归档需先补日期属性才可自动归档\n- 经验教训：\n  - merge 逻辑改动必加多值台账回归测试\n  - 评测不得改框架文件（RULE 保持 deploy 原样），指引仅作为会话内容注入\n  - results/ 已 gitignore；语义检索真实后端有瞬态 flake（并发下）\n- 会话钩子：上次收尾于三层记忆全 Phase 完成 + 部署核查通过；下次优先可选项：对外文章或 T2 回忆 AGENT 评测",
+      "description": "# 项目总管 工作记忆（2026-08-31 会话摘要）\n- 身份：项目总管（ArchGraph 项目 overseer），人类伙伴未指定角色时默认对话身份\n- 本次进展：\n  - 研究分析论文「From Storage to Experience」(arXiv:2605.06716, ACL2026 Findings)：三阶段 Storage(轨迹保存)/Reflection(轨迹精化)/Experience(轨迹抽象)；已核原文 §4.3/B.3/Table1 + FLEX(2511.06449) 原论文，转述无误\n  - 概念澄清（人类伙伴纠正）：design/KG/test-failure-records.json 是验收测试执行结果（验证证据），不是论文的 failed trajectory（=Agent 真实任务执行失败过程）；验收测试结果不得作为失败经验/对比归纳负样本，此前的改进点作废\n  - 已把概念澄清写入 LTM：overseer-failure-exp-concept-001 + 关联 overseer-memory-tiers-001，commit bd9087e\n  - 修正后 Experience 落地路径：会话记录(含失败过程)→对比归纳成 trigger/scope/evidence 经验元素→按条件选中(routing)→验证行为改变(uptake)→稳定后内化为 RULE/SKILL；阶段0-4 已梳理待落地\n- 未完成/TODO：\n  - Experience 层落地（阶段0-4）未实施，仅设计待确认\n  - 多 AGENT 协作记忆摩擦：规则为单 Actor 心智（CoperationGuideline 隔离 vs 协作视图 Application Cooperation/DevelopmentTeam/视频创作团队；STEP 0 归属、commit 归属、记忆写入归属、验收影响面未定义）；拟引入团队级共享记忆+共享 commit 登记机制，草案待出\n  - 三层记忆后续可选项：对外/公众号文章；T2 回忆 AGENT 评测（容器）\n- 经验教训：\n  - 验收测试结果≠失败轨迹，不可当经验源；经验原材料=Agent 任务执行失败过程\n  - 多 Agent 协作是论文 Future Directions 里的 Distributed Shared Memory 前沿问题，非本项目独有\n- 会话钩子：下次优先：Experience 层落地设计 or 多 AGENT 协作记忆/commit 归属设计草案",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3589,7 +3593,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-08-30T00:00:00.000Z"
+          "value": "2026-08-31T00:00:00.000Z",
+          "description": "2026-08-31 会话摘要写入时间"
         }
       ],
       "testcases": [
@@ -3607,7 +3612,91 @@
       "id": "overseer-failure-exp-concept-001",
       "name": "概念澄清：验收测试结果 ≠ 失败经验",
       "parent": "project-overseer-001",
-      "type": "Business Object"
+      "type": "Business Object",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "bd9087e",
+          "description": "design/KG/SystemArchitecture.json（新增概念澄清元素：验收测试结果 ≠ 失败经验）"
+        }
+      ]
+    },
+    {
+      "id": "insight-lead-001",
+      "name": "洞察Lead",
+      "type": "Business Actor",
+      "parent": "1962",
+      "description": "业界技术洞察团队的编排 Business Actor：采用麦肯锡新五步法（界定问题→拆解问题→提出假设→验证假设→综合建议）统筹整个洞察流程，将五步分别派给「问题界定师」「问题拆解师」「假设提出师」「验证分析师」「综合汇报师」，对最终洞察交付（结论、对比、建议、报告）的整体质量负责。"
+    },
+    {
+      "id": "insight-definer-001",
+      "name": "问题界定师",
+      "type": "Business Actor",
+      "parent": "1962",
+      "description": "麦肯锡新五步法第 1 步「界定问题」的执行 Business Actor：将人类伙伴模糊的洞察诉求（如『洞察 teamai』）转化为清晰、可回答的问题陈述，明确目标、范围、成功标准与约束，避免答非所问。"
+    },
+    {
+      "id": "insight-decomposer-001",
+      "name": "问题拆解师",
+      "type": "Business Actor",
+      "parent": "1962",
+      "description": "麦肯锡新五步法第 2 步「拆解问题」的执行 Business Actor：用 MECE（相互独立、完全穷尽）原则把大问题拆成若干子问题（如：业界方案全景、核心特性对比、优缺点、落地模式），形成议题树/问题地图。"
+    },
+    {
+      "id": "insight-hypothesis-001",
+      "name": "假设提出师",
+      "type": "Business Actor",
+      "parent": "1962",
+      "description": "麦肯锡新五步法第 3 步「提出假设」的执行 Business Actor：针对每个子问题给出可验证的初始假设（Hypothesis），为后续检索与分析提供方向，避免无目的漫游。"
+    },
+    {
+      "id": "insight-validator-001",
+      "name": "验证分析师",
+      "type": "Business Actor",
+      "parent": "1962",
+      "description": "麦肯锡新五步法第 4 步「验证假设」的执行 Business Actor：通过联网检索（如 BAILIAN WEB MCP）、官方文档、一手资料等对假设逐条验证，收集事实与数据，修正或推翻假设，形成有证据支撑的结论。"
+    },
+    {
+      "id": "insight-synthesizer-001",
+      "name": "综合汇报师",
+      "type": "Business Actor",
+      "parent": "1962",
+      "description": "麦肯锡新五步法第 5 步「综合建议」的执行 Business Actor：把验证结论综合归纳，用金字塔/故事线组织成最终洞察交付（结论先行、论据支撑、给出可执行建议），输出给人伙伴审阅。"
+    },
+    {
+      "id": "mckinsey-define-step-001",
+      "name": "界定问题",
+      "type": "Business Process",
+      "parent": "1962",
+      "description": "麦肯锡新五步法第 1 步：把模糊诉求转化为清晰可回答的问题陈述。"
+    },
+    {
+      "id": "mckinsey-decompose-step-001",
+      "name": "拆解问题",
+      "type": "Business Process",
+      "parent": "1962",
+      "description": "麦肯锡新五步法第 2 步：用 MECE 原则拆解问题，形成议题树。"
+    },
+    {
+      "id": "mckinsey-hypothesis-step-001",
+      "name": "提出假设",
+      "type": "Business Process",
+      "parent": "1962",
+      "description": "麦肯锡新五步法第 3 步：为每个子问题提出可验证假设。"
+    },
+    {
+      "id": "mckinsey-validate-step-001",
+      "name": "验证假设",
+      "type": "Business Process",
+      "parent": "1962",
+      "description": "麦肯锡新五步法第 4 步：检索证据验证/修正假设。"
+    },
+    {
+      "id": "mckinsey-synthesize-step-001",
+      "name": "综合建议",
+      "type": "Business Process",
+      "parent": "1962",
+      "description": "麦肯锡新五步法第 5 步：综合结论，形成最终洞察交付。"
     }
   ],
   "relationships": [
@@ -4440,6 +4529,146 @@
       "target_id": "overseer-memory-tiers-001",
       "target_name": "ACTOR 三层记忆模型（工作记忆/长期记忆/档案）",
       "type": "Association"
+    },
+    {
+      "id": "insight-lead-definer-001",
+      "name": "orchestrates",
+      "statement": "洞察Lead --(Association)--> 问题界定师",
+      "type": "Association",
+      "source_id": "insight-lead-001",
+      "target_id": "insight-definer-001",
+      "source_name": "洞察Lead",
+      "target_name": "问题界定师"
+    },
+    {
+      "id": "insight-lead-decomposer-001",
+      "name": "orchestrates",
+      "statement": "洞察Lead --(Association)--> 问题拆解师",
+      "type": "Association",
+      "source_id": "insight-lead-001",
+      "target_id": "insight-decomposer-001",
+      "source_name": "洞察Lead",
+      "target_name": "问题拆解师"
+    },
+    {
+      "id": "insight-lead-hypothesis-001",
+      "name": "orchestrates",
+      "statement": "洞察Lead --(Association)--> 假设提出师",
+      "type": "Association",
+      "source_id": "insight-lead-001",
+      "target_id": "insight-hypothesis-001",
+      "source_name": "洞察Lead",
+      "target_name": "假设提出师"
+    },
+    {
+      "id": "insight-lead-validator-001",
+      "name": "orchestrates",
+      "statement": "洞察Lead --(Association)--> 验证分析师",
+      "type": "Association",
+      "source_id": "insight-lead-001",
+      "target_id": "insight-validator-001",
+      "source_name": "洞察Lead",
+      "target_name": "验证分析师"
+    },
+    {
+      "id": "insight-lead-synthesizer-001",
+      "name": "orchestrates",
+      "statement": "洞察Lead --(Association)--> 综合汇报师",
+      "type": "Association",
+      "source_id": "insight-lead-001",
+      "target_id": "insight-synthesizer-001",
+      "source_name": "洞察Lead",
+      "target_name": "综合汇报师"
+    },
+    {
+      "id": "insight-definer-perform-001",
+      "name": "performs",
+      "statement": "问题界定师 --(Association)--> 界定问题",
+      "type": "Association",
+      "source_id": "insight-definer-001",
+      "target_id": "mckinsey-define-step-001",
+      "source_name": "问题界定师",
+      "target_name": "界定问题"
+    },
+    {
+      "id": "insight-decomposer-perform-001",
+      "name": "performs",
+      "statement": "问题拆解师 --(Association)--> 拆解问题",
+      "type": "Association",
+      "source_id": "insight-decomposer-001",
+      "target_id": "mckinsey-decompose-step-001",
+      "source_name": "问题拆解师",
+      "target_name": "拆解问题"
+    },
+    {
+      "id": "insight-hypothesis-perform-001",
+      "name": "performs",
+      "statement": "假设提出师 --(Association)--> 提出假设",
+      "type": "Association",
+      "source_id": "insight-hypothesis-001",
+      "target_id": "mckinsey-hypothesis-step-001",
+      "source_name": "假设提出师",
+      "target_name": "提出假设"
+    },
+    {
+      "id": "insight-validator-perform-001",
+      "name": "performs",
+      "statement": "验证分析师 --(Association)--> 验证假设",
+      "type": "Association",
+      "source_id": "insight-validator-001",
+      "target_id": "mckinsey-validate-step-001",
+      "source_name": "验证分析师",
+      "target_name": "验证假设"
+    },
+    {
+      "id": "insight-synthesizer-perform-001",
+      "name": "performs",
+      "statement": "综合汇报师 --(Association)--> 综合建议",
+      "type": "Association",
+      "source_id": "insight-synthesizer-001",
+      "target_id": "mckinsey-synthesize-step-001",
+      "source_name": "综合汇报师",
+      "target_name": "综合建议"
+    },
+    {
+      "id": "mckinsey-define-decompose-001",
+      "name": "triggering",
+      "statement": "界定问题 --(Triggering)--> 拆解问题",
+      "type": "Triggering",
+      "source_id": "mckinsey-define-step-001",
+      "target_id": "mckinsey-decompose-step-001",
+      "source_name": "界定问题",
+      "target_name": "拆解问题"
+    },
+    {
+      "id": "mckinsey-decompose-hypothesis-001",
+      "name": "triggering",
+      "statement": "拆解问题 --(Triggering)--> 提出假设",
+      "type": "Triggering",
+      "source_id": "mckinsey-decompose-step-001",
+      "target_id": "mckinsey-hypothesis-step-001",
+      "source_name": "拆解问题",
+      "target_name": "提出假设"
+    },
+    {
+      "id": "mckinsey-hypothesis-validate-001",
+      "name": "triggering",
+      "statement": "提出假设 --(Triggering)--> 验证假设",
+      "type": "Triggering",
+      "source_id": "mckinsey-hypothesis-step-001",
+      "target_id": "mckinsey-validate-step-001",
+      "source_name": "提出假设",
+      "target_name": "验证假设"
+    },
+    {
+      "id": "mckinsey-validate-synthesize-001",
+      "name": "triggering",
+      "statement": "验证假设 --(Triggering)--> 综合建议",
+      "type": "Triggering",
+      "source_id": "mckinsey-validate-step-001",
+      "target_id": "mckinsey-synthesize-step-001",
+      "source_name": "验证假设",
+      "target_name": "综合建议"
     }
   ],
   "views": [
@@ -5154,6 +5383,41 @@
       "parent_element_id": "project-overseer-001",
       "parent_element_name": "项目总管",
       "description": "T3 档案视图（<actor>-archive-001 约定）：已完结/封存的旧记忆，显式检索才读，只移不删（归档机制）。"
+    },
+    {
+      "view_id": "insight-team-001",
+      "view_name": "业界技术洞察团队",
+      "parent_element_id": "1962",
+      "description": "负责业界技术情报洞察的团队视图：洞察Lead 采用麦肯锡新五步法（界定问题→拆解问题→提出假设→验证假设→综合建议）编排，将五个步骤分别派给对应角色的 Business Actor 执行。",
+      "included_elements": [
+        "insight-lead-001",
+        "insight-definer-001",
+        "insight-decomposer-001",
+        "insight-hypothesis-001",
+        "insight-validator-001",
+        "insight-synthesizer-001",
+        "mckinsey-define-step-001",
+        "mckinsey-decompose-step-001",
+        "mckinsey-hypothesis-step-001",
+        "mckinsey-validate-step-001",
+        "mckinsey-synthesize-step-001"
+      ],
+      "included_relationships": [
+        "insight-lead-definer-001",
+        "insight-lead-decomposer-001",
+        "insight-lead-hypothesis-001",
+        "insight-lead-validator-001",
+        "insight-lead-synthesizer-001",
+        "insight-definer-perform-001",
+        "insight-decomposer-perform-001",
+        "insight-hypothesis-perform-001",
+        "insight-validator-perform-001",
+        "insight-synthesizer-perform-001",
+        "mckinsey-define-decompose-001",
+        "mckinsey-decompose-hypothesis-001",
+        "mckinsey-hypothesis-validate-001",
+        "mckinsey-validate-synthesize-001"
+      ]
     }
   ]
 }
