@@ -4125,7 +4125,19 @@
       "name": "architecture-diagram",
       "parent": "1249",
       "type": "Skill",
-      "description": "Cocoon-AI 开源架构图生成 Skill（MIT）：生成暗色主题自包含 HTML+SVG 系统架构图。语义配色（Frontend 青/Backend 绿/Database 紫/Cloud 琥珀/Security 玫红/External 灰）、JetBrains Mono 字体、slate-950 网格背景、内建导出工具栏（Copy/PNG/PDF，html2canvas+jsPDF）。仓库位置 .opencode/skills/architecture-diagram/（SKILL.md + resources/template.html）。来源 https://github.com/Cocoon-AI/architecture-diagram-generator。用于为组织级 AI 资产治理五大支柱洞察绘制各方案暗色逻辑视图。"
+      "description": "Cocoon-AI 开源架构图生成 Skill（MIT）：生成暗色主题自包含 HTML+SVG 系统架构图。语义配色（Frontend 青/Backend 绿/Database 紫/Cloud 琥珀/Security 玫红/External 灰）、JetBrains Mono 字体、slate-950 网格背景、内建导出工具栏（Copy/PNG/PDF，html2canvas+jsPDF）。仓库位置 .opencode/skills/architecture-diagram/（SKILL.md + resources/template.html）。来源 https://github.com/Cocoon-AI/architecture-diagram-generator。用于为组织级 AI 资产治理五大支柱洞察绘制各方案暗色逻辑视图。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "7851a1e",
+          "description": "design/KG/SystemArchitecture.json（登记 Skill 元素 + 子视图）"
+        },
+        {
+          "name": "commit",
+          "value": "acbff17",
+          "description": ".opencode/skills/architecture-diagram/SKILL.md; .opencode/skills/architecture-diagram/resources/template.html; docs/diagrams/insight-teamai-logical.html"
+        }
+      ]
     }
   ],
   "relationships": [
