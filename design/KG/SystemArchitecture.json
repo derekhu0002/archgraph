@@ -3571,7 +3571,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-01 会话摘要）\n- 身份：项目总管（ArchGraph 项目 overseer），人类伙伴未指定角色时默认对话身份\n- 本次进展：\n  - 洞察 teamai（基于腾讯 teamai-cli 改造的 AI 编码代理资产分发工具）两轮：定位=AI 代理配置的组织级分发层（git-native/20+工具/摩擦驱动知识捕获/图增强检索）；业界对比 Anthropic Agent Skills / OpenAI AgentKit / GitHub Copilot Skills / AWS Agent Toolkit / JFrog AI Catalog / SkillHub / ClawHub 等；核心洞察=Agent 配置已是五层依赖图（Skill/MCP/App/Policy/Model Route），组织级 AI 资产治理五大支柱（Catalog/版本可复现/安全/分发生命周期/可观测学习）；teamai 短板=无安全扫描/无版本锁定/无服务端 registry/冲突简单\n  - 组建「业界技术洞察团队」（视图 insight-team-001 挂 AgentOrganization/1962）：洞察Lead + 麦肯锡新五步法五角色（问题界定师/拆解师/假设师/验证师/综合汇报师）+ 五步法 Business Process（Triggering 串联）+ Lead Association 编排；commit 484b5b2\n  - 记忆：LTM 里程碑 overseer-teamai-insight-001（commit fc0beb6）\n- 未完成/TODO：\n  - 洞察团队已组建待首个洞察任务委派\n  - Experience 层落地（阶段0-4）仍未实施\n  - 多 AGENT 协作记忆摩擦：规则为单 Actor 心智（CoperationGuideline 隔离 vs 协作视图）",
+      "description": "# 项目总管 工作记忆（2026-09-01 会话摘要）\n- 身份：项目总管（ArchGraph 项目 overseer），人类伙伴未指定角色时默认对话身份\n- 本次进展：\n  - 洞察 teamai + 组建「业界技术洞察团队」（视图 insight-team-001）：洞察Lead + 麦肯锡新五步法五角色（界定/拆解/假设/验证/综合）+ 五步法 Business Process；6 角色 OpenCode Agent 定义于 .opencode/agents/（验证分析师 alibaba-cn/qwen3.8-flash 多模态佐证 qwen3-vl-plus，其余 deepseek/deepseek-v4-flash）；验证阶段强制全网数据收集 + BAILIAN MCP（opencode.json 注册 Bailian WebSearch MCP，{env:DASHSCOPE_API_KEY}）\n  - 洞察团队完成首次完整五步法洞察「组织级 AI 资产治理五大支柱」：核心结论=格式已事实收敛（SKILL.md 30+ 产品）、注册中心协议互操作是最大缺口、供应链安全成独立议题、Observability 最薄弱（中低置信）、无通用赢家需按组织画像组合策略；关键纠错：SkillHub（讯飞企业级开源注册中心）≠ ClawHub（社区市场）；AWS 五支柱覆盖最高（非 AgentKit）；JFrog 供应链安全最强\n  - 记忆：LTM 里程碑 overseer-teamai-insight-001 更新；各角色 wm/ltm 已建（insight-definer/decomposer/hypothesis/validator/synthesizer-wm-ltm）\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅；可选迭代（面向调整/补充深度/公众号文章体）\n  - Experience 层落地（阶段0-4）仍未实施\n  - 多 AGENT 协作记忆摩擦：规则为单 Actor 心智（CoperationGuideline 隔离 vs 协作视图）",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3593,8 +3593,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-01T01:00:00.000Z",
-          "description": "2026-09-01 会话摘要更新（洞察团队 Agent 定义）"
+          "value": "2026-09-01T02:00:00.000Z",
+          "description": "2026-09-01 会话摘要更新（洞察团队完成首次洞察）"
         }
       ],
       "testcases": [
