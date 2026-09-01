@@ -71,6 +71,10 @@
         {
           "view_id": "self-evolution-sandbox-view-001",
           "view_name": "自进化测试环境（Docker 沙箱）"
+        },
+        {
+          "view_id": "diagram-skills-view-001",
+          "view_name": "Diagram Skills（架构图生成技能）"
         }
       ]
     },
@@ -4115,6 +4119,13 @@
           "description": "design/KG/SystemArchitecture.json（综合汇报师 T1 工作记忆摘要）"
         }
       ]
+    },
+    {
+      "id": "architecture-diagram-skill-001",
+      "name": "architecture-diagram",
+      "parent": "1249",
+      "type": "Skill",
+      "description": "Cocoon-AI 开源架构图生成 Skill（MIT）：生成暗色主题自包含 HTML+SVG 系统架构图。语义配色（Frontend 青/Backend 绿/Database 紫/Cloud 琥珀/Security 玫红/External 灰）、JetBrains Mono 字体、slate-950 网格背景、内建导出工具栏（Copy/PNG/PDF，html2canvas+jsPDF）。仓库位置 .opencode/skills/architecture-diagram/（SKILL.md + resources/template.html）。来源 https://github.com/Cocoon-AI/architecture-diagram-generator。用于为组织级 AI 资产治理五大支柱洞察绘制各方案暗色逻辑视图。"
     }
   ],
   "relationships": [
@@ -5917,6 +5928,15 @@
       "description": "综合汇报师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含综合建议报告产物与里程碑。",
       "included_elements": [
         "insight-synthesizer-report-001"
+      ]
+    },
+    {
+      "view_id": "diagram-skills-view-001",
+      "view_name": "Diagram Skills（架构图生成技能）",
+      "parent_element_id": "1249",
+      "description": "承载架构图生成类 Skill 的子视图：diagram-draw（Excalidraw）与 architecture-diagram（Cocoon-AI 暗色 HTML）。",
+      "included_elements": [
+        "architecture-diagram-skill-001"
       ]
     }
   ]
