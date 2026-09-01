@@ -3636,6 +3636,11 @@
         {
           "name": "agent",
           "value": "insight-lead"
+        },
+        {
+          "name": "commit",
+          "value": "c4cd076",
+          "description": "argo/agents/insight-lead.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：DEEPSEEK V4 FLASH）"
         }
       ]
     },
@@ -3649,6 +3654,11 @@
         {
           "name": "agent",
           "value": "insight-definer"
+        },
+        {
+          "name": "commit",
+          "value": "c4cd076",
+          "description": "argo/agents/insight-definer.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：DEEPSEEK V4 FLASH）"
         }
       ]
     },
@@ -3662,6 +3672,11 @@
         {
           "name": "agent",
           "value": "insight-decomposer"
+        },
+        {
+          "name": "commit",
+          "value": "c4cd076",
+          "description": "argo/agents/insight-decomposer.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：DEEPSEEK V4 FLASH）"
         }
       ]
     },
@@ -3675,6 +3690,11 @@
         {
           "name": "agent",
           "value": "insight-hypothesis"
+        },
+        {
+          "name": "commit",
+          "value": "c4cd076",
+          "description": "argo/agents/insight-hypothesis.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：DEEPSEEK V4 FLASH）"
         }
       ]
     },
@@ -3688,6 +3708,11 @@
         {
           "name": "agent",
           "value": "insight-validator"
+        },
+        {
+          "name": "commit",
+          "value": "c4cd076",
+          "description": "argo/agents/insight-validator.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：QWEN3.8 PLUS 多模态）"
         }
       ]
     },
@@ -3701,6 +3726,11 @@
         {
           "name": "agent",
           "value": "insight-synthesizer"
+        },
+        {
+          "name": "commit",
+          "value": "c4cd076",
+          "description": "argo/agents/insight-synthesizer.agent.md; design/KG/SystemArchitecture.json（定义 OpenCode Agent：DEEPSEEK V4 FLASH）"
         }
       ]
     },
