@@ -3670,6 +3670,16 @@
           "value": "dd1c6d5",
           "description": ".opencode/agents/insight-definer.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：DEEPSEEK V4 FLASH，由 argo/agents/ 移入本仓库 .opencode/agents/）"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "insight-definer-wm-001",
+          "view_name": "问题界定师工作记忆"
+        },
+        {
+          "view_id": "insight-definer-ltm-001",
+          "view_name": "问题界定师长期记忆"
+        }
       ]
     },
     {
@@ -3830,6 +3840,46 @@
           "name": "commit",
           "value": "acac9c5",
           "description": "design/KG/SystemArchitecture.json（6 个 Actor 元素登记 agent/commit 属性）"
+        }
+      ]
+    },
+    {
+      "id": "insight-definer-wm-summary-001",
+      "name": "问题界定师工作记忆摘要",
+      "type": "Business Object",
+      "description": "问题界定师 T1 工作记忆摘要（2026-09-01 会话）：1) 身份：业界技术洞察团队问题界定师（insight-definer-001），麦肯锡新五步法第 1 步执行者；2) 本次任务：对人类伙伴洞察诉求「组织级 AI 资产治理五大支柱」做问题界定（不调研、只产出问题陈述）；3) 本次进展：已输出问题界定书——问题陈述=业界各方案如何落地五支柱（Catalog/Registry、Versioning&Reproducibility、Security&Governance、Distribution&Lifecycle、Observability&Learning）的最佳实践/覆盖度/差距/建议；范围=7 个点名方案（teamai-cli、Anthropic Agent Skills、OpenAI AgentKit、JFrog AI Catalog、GitHub Copilot Skills、AWS Agent Toolkit、SkillHub）+五层依赖图贯穿；成功标准=覆盖度矩阵+每支柱 2-5 最佳实践+共识vs差异+可落地建议；约束=仅公开一手来源、BAILIAN MCP 检索（验证师执行）；待确认=补充对象/框架完备性/建议面向/交付形态；4) 交接：问题陈述交问题拆解师（insight-decomposer-001）MECE 拆解；5) TODO：待人类伙伴确认 4 项待确认项；6) 经验：PICO/5W1H 可快速把模糊诉求结构化。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T1"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "lastSummaryAt",
+          "value": "2026-09-01"
+        }
+      ]
+    },
+    {
+      "id": "insight-definer-problem-statement-001",
+      "name": "问题陈述：组织级 AI 资产治理五大支柱",
+      "type": "Business Object",
+      "description": "麦肯锡新五步法第 1 步「界定问题」工作产物（2026-09-01）：问题陈述=在「Agent 配置=五层依赖图（Skill/MCP/App/Policy/Model Route）」共识下，业界各方案如何落地组织级 AI 资产治理五大支柱（Catalog/Registry、Versioning&Reproducibility、Security&Governance、Distribution&Lifecycle、Observability&Learning），每支柱最佳实践、覆盖度/成熟度对比、差距与可落地建议。目标=逐支柱实证+覆盖度对比+最佳实践提炼+共识差异+落地建议。范围=7 点名方案必选+五层依赖图贯穿；不做代码深挖/模型评测/ArchGraph 产品设计。成功标准=覆盖度矩阵+每支柱2-5最佳实践(附一手来源)+共识vs差异+按支柱行动清单。约束=仅公开一手来源、BAILIAN MCP 检索（验证师）、框架固定。待确认项=是否补充参考对象/是否验证框架完备性/建议面向/交付形态。交接给问题拆解师（insight-decomposer-001）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "step",
+          "value": "1-define"
         }
       ]
     }
@@ -5553,6 +5603,24 @@
         "mckinsey-decompose-hypothesis-001",
         "mckinsey-hypothesis-validate-001",
         "mckinsey-validate-synthesize-001"
+      ]
+    },
+    {
+      "view_id": "insight-definer-wm-001",
+      "view_name": "问题界定师工作记忆",
+      "parent_element_id": "insight-definer-001",
+      "description": "问题界定师 Business Actor 的 T1 工作记忆视图（wm-001 约定）：会话开始时只加载进上下文的紧凑摘要。幂等覆盖不追加。",
+      "included_elements": [
+        "insight-definer-wm-summary-001"
+      ]
+    },
+    {
+      "view_id": "insight-definer-ltm-001",
+      "view_name": "问题界定师长期记忆",
+      "parent_element_id": "insight-definer-001",
+      "description": "问题界定师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含问题界定工作产物与里程碑。",
+      "included_elements": [
+        "insight-definer-problem-statement-001"
       ]
     }
   ]
