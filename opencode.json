@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "bailian-websearch": {
+      "type": "remote",
+      "url": "https://dashscope.aliyuncs.com/api/v1/mcps/WebSearch/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:DASHSCOPE_API_KEY}"
+      }
+    }
+  }
+}
