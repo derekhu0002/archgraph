@@ -3860,6 +3860,11 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-01"
+        },
+        {
+          "name": "commit",
+          "value": "ff0b949",
+          "description": "design/KG/SystemArchitecture.json（问题界定师建立 wm/ltm 记忆视图 + T1 摘要 + T2 问题陈述产物，麦肯锡第 1 步界定问题）"
         }
       ]
     },
@@ -3880,6 +3885,11 @@
         {
           "name": "step",
           "value": "1-define"
+        },
+        {
+          "name": "commit",
+          "value": "ff0b949",
+          "description": "design/KG/SystemArchitecture.json（问题陈述产物：组织级 AI 资产治理五大支柱业界洞察）"
         }
       ]
     }
