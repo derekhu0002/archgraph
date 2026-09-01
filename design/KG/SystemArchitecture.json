@@ -3703,6 +3703,16 @@
           "value": "dd1c6d5",
           "description": ".opencode/agents/insight-decomposer.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：DEEPSEEK V4 FLASH，由 argo/agents/ 移入本仓库 .opencode/agents/）"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "insight-decomposer-wm-001",
+          "view_name": "问题拆解师工作记忆"
+        },
+        {
+          "view_id": "insight-decomposer-ltm-001",
+          "view_name": "问题拆解师长期记忆"
+        }
       ]
     },
     {
@@ -3890,6 +3900,46 @@
           "name": "commit",
           "value": "ff0b949",
           "description": "design/KG/SystemArchitecture.json（问题陈述产物：组织级 AI 资产治理五大支柱业界洞察）"
+        }
+      ]
+    },
+    {
+      "id": "insight-decomposer-wm-summary-001",
+      "name": "问题拆解师工作记忆摘要",
+      "type": "Business Object",
+      "description": "问题拆解师 T1 工作记忆摘要（2026-09-01 会话）：1) 身份：业界技术洞察团队问题拆解师（insight-decomposer-001），麦肯锡新五步法第 2 步执行者；2) 本次任务：对问题界定师交付的问题陈述做 MECE 拆解，产出议题树给假设提出师；3) 本次进展：已输出 7 个一级议题×28 个二级子问题的议题树——议题1方案全景/议题2-3五支柱实证（2=目录版本安全、3=分发可观测）/议题4覆盖度矩阵对比/议题5共识差异/议题6效能影响/议题7落地建议；已通过 MECE 校验（价值链六段切分保证互斥，目标全覆盖保证完备），并为每个子问题标注证据类型清单；4) 交接：议题树交假设提出师（insight-hypothesis-001），证据缺口清单（子问题3.4）交验证分析师；5) TODO：待假设提出师产出假设后进入第 4 步验证；6) 经验：按价值链（是什么→怎么做→做得怎样→为什么→有何影响→怎么办）切分一级议题可快速满足 MECE。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T1"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "lastSummaryAt",
+          "value": "2026-09-01"
+        }
+      ]
+    },
+    {
+      "id": "insight-decomposer-issue-tree-001",
+      "name": "议题树：组织级 AI 资产治理五大支柱业界洞察",
+      "type": "Business Object",
+      "description": "麦肯锡新五步法第 2 步「拆解问题」工作产物（2026-09-01）：议题树含 7 个一级议题×28 个二级子问题。母问题=业界各方案（teamai-cli/Anthropic Agent Skills/OpenAI AgentKit/JFrog AI Catalog/GitHub Copilot Skills/AWS Agent Toolkit/SkillHub）如何落地组织级 AI 资产治理五大支柱（Catalog/Registry、Versioning&Reproducibility、Security&Governance、Distribution&Lifecycle、Observability&Learning）。一级议题：1方案全景盘点→2五支柱实证Ⅰ(目录/版本/安全)→3五支柱实证Ⅱ(分发/可观测)→4覆盖度矩阵与成熟度对比→5共识与差异→6效能影响→7落地建议路线图。MECE=价值链六段互斥、目标全覆盖；层级2层未过度细化。每个子问题已标注证据类型（官方文档/源码/视频/社区/报告，均公开一手）。子问题3.4输出证据缺口清单给验证师补检。交接给假设提出师（insight-hypothesis-001）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "step",
+          "value": "2-decompose"
         }
       ]
     }
@@ -5631,6 +5681,24 @@
       "description": "问题界定师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含问题界定工作产物与里程碑。",
       "included_elements": [
         "insight-definer-problem-statement-001"
+      ]
+    },
+    {
+      "view_id": "insight-decomposer-wm-001",
+      "view_name": "问题拆解师工作记忆",
+      "parent_element_id": "insight-decomposer-001",
+      "description": "问题拆解师 Business Actor 的 T1 工作记忆视图（wm-001 约定）：会话开始时只加载进上下文的紧凑摘要。幂等覆盖不追加。",
+      "included_elements": [
+        "insight-decomposer-wm-summary-001"
+      ]
+    },
+    {
+      "view_id": "insight-decomposer-ltm-001",
+      "view_name": "问题拆解师长期记忆",
+      "parent_element_id": "insight-decomposer-001",
+      "description": "问题拆解师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含拆解工作产物与里程碑。",
+      "included_elements": [
+        "insight-decomposer-issue-tree-001"
       ]
     }
   ]
