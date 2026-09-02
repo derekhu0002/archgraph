@@ -3644,6 +3644,11 @@
           "name": "commit",
           "value": "d9e3c21",
           "description": "design/KG/SystemArchitecture.json（T1 摘要更新）"
+        },
+        {
+          "name": "commit",
+          "value": "3c0155a",
+          "description": "design/KG/SystemArchitecture.json（T1 摘要更新：Cursor/VS Code/OpenClaw 宿主差异 pitfall）"
         }
       ],
       "testcases": [
@@ -4230,6 +4235,11 @@
           "name": "commit",
           "value": "148ec80",
           "description": "design/KG/SystemArchitecture.json（LTM 里程碑描述更新：Cursor/VS Code schema 差异）"
+        },
+        {
+          "name": "commit",
+          "value": "3c0155a",
+          "description": "design/KG/SystemArchitecture.json（LTM 里程碑描述更新）"
         }
       ]
     }
