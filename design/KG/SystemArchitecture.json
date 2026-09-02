@@ -3629,6 +3629,11 @@
           "name": "commit",
           "value": "7b12918",
           "description": "design/KG/SystemArchitecture.json（2026-09-02 T1 摘要更新：graph-mcp 默认 MCP 注册入部署包）"
+        },
+        {
+          "name": "commit",
+          "value": "d9e3c21",
+          "description": "design/KG/SystemArchitecture.json（T1 摘要更新）"
         }
       ],
       "testcases": [
@@ -4205,6 +4210,11 @@
           "name": "commit",
           "value": "2e48665",
           "description": "design/KG/SystemArchitecture.json（图谱回登记 WP1361 commit cc17b0d）"
+        },
+        {
+          "name": "commit",
+          "value": "d9e3c21",
+          "description": "design/KG/SystemArchitecture.json（记忆：LTM pitfall + T1 摘要更新）"
         }
       ]
     }
