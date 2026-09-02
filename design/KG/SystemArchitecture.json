@@ -961,6 +961,11 @@
           "name": "commit",
           "value": "54c7cd8",
           "description": "design/KG/SystemArchitecture.json（图谱回登记 148ec80 + LTM 里程碑 commit）"
+        },
+        {
+          "name": "commit",
+          "value": "d191eaf",
+          "description": "argo/scripts/ensureArgoHarnessEnvironment.js（CURSOR 工作区错误修复：validateSystemArchitecture 与 Neo4j sync/verify 显式透传 workspaceRoot，报告在 MCP 路径也落盘）"
         }
       ],
       "testcases": [
