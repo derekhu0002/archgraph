@@ -3600,7 +3600,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-02 会话摘要）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次进展：按人类伙伴要求将 graph-mcp（remote https://argo.derekworkspacev5.com/mcp）作为默认 MCP 配置加入部署包（WP1361/install-argo.ps1）：OpenCode/Cursor/VS Code/OpenClaw 四宿主默认注册 graph-mcp remote 条目（与 argo 平级，-GraphMcpUrl 可覆盖）；DSH 因 cordis 仅插件行记 limitation 提示不写坏配置。WP1361 挂载 AT-1361-01/02。回归：argo-deploy 6/6、argo-openclaw 6/6、guardian 4/4、sandbox 8/8；runArchitectureTests 27/29（本变更 AT 全过）。commit 55e32c2 + 图谱回登记 129b020 + LTM 里程碑 overseer-graph-mcp-deploy-001。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）仍未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider\n  - graph-mcp remote 在 Cursor/VS Code 若宿主 schema 不认 remote/url/enabled 形态需后续实测确认",
+      "description": "# 项目总管 工作记忆（2026-09-02 会话摘要）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次进展：\n  1) graph-mcp（url https://argo.derekworkspacev5.com/mcp）作为默认 MCP 配置加入部署包（WP1361/install-argo.ps1）：OpenCode/Cursor/VS Code 用 {type=remote,url,enabled}；OpenClaw 用 {url,transport=streamable-http,enabled}；DSH 记 limitation。AT-1361-01/02 挂载。commit 55e32c2/129b020。\n  2) 修复 OpenClaw graph-mcp 404：OpenClaw MCP server 以 transport 为键，type:remote 不会映射成 transport → 默认按 SSE 拨号对 Streamable HTTP 端点 404。改 OpenClaw 分支传 transport=streamable-http（cc17b0d/2e48665），真实 ~/.openclaw/openclaw.json 已修，openclaw mcp probe graph-mcp 4 tools 通过。\n- 可复用经验：不同宿主 MCP schema 不同（OpenCode type:remote vs OpenClaw transport），不能一律同构；OpenClaw canonicalize 只映射 type http/streamable-http/sse/stdio。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3623,7 +3623,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-02T00:00:00.000Z",
-          "description": "2026-09-02 会话摘要更新（graph-mcp 默认 MCP 注册入部署包）"
+          "description": "2026-09-02 会话更新（graph-mcp 入部署包 + OpenClaw transport 修复）"
         },
         {
           "name": "commit",
@@ -4179,7 +4179,7 @@
       "name": "里程碑：graph-mcp 默认 MCP 配置加入部署包",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "里程碑（2026-09-02）：按人类伙伴要求把 graph-mcp（type remote, url https://argo.derekworkspacev5.com/mcp, enabled true）作为默认 MCP 配置写入部署包。落地：install-argo.ps1 Write-McpConfig 增加 ExtraServers 参数、Write-OpenClawMcpConfig 增加 GraphMcpServer，OpenCode（mcp）、Cursor（mcpServers）、VS Code（servers）、OpenClaw（mcp.servers）四宿主均默认注册 graph-mcp remote 与 argo 平级（graph-mcp URL 默认值可 -GraphMcpUrl 覆盖）；DSH（~/.dsh/cordis.patch.yml 仅插件行，HTTP 远程 MCP 无对应行）记 limitation 提示不写坏配置；WP1361 挂载 AT-1361-01（tests/argo-deploy.test.js）与 AT-1361-02（tests/argo-openclaw.test.js）。验收：argo-deploy 6/6、argo-openclaw 6/6、acceptance-guardian 4/4、sandbox-framework 8/8、runArchitectureTests 27/29（本变更 AT 全过，两失败为既有：architecture-view-context 期望列表缺 diagram-skills-view-001——7851a1e/28f8998 引入 diagram skills 子视图时未同步测试；memory-eval-run 需在线 provider），validateSystemArchitecture 通过。commit：55e32c2 + 图谱回登记 129b020。",
+      "description": "里程碑（2026-09-02）：按人类伙伴要求把 graph-mcp（url https://argo.derekworkspacev5.com/mcp, enabled true）作为默认 MCP 配置写入部署包。落地：install-argo.ps1 Write-McpConfig 增加 ExtraServers、Write-OpenClawMcpConfig 增加 GraphMcpServer，四宿主默认注册 graph-mcp：OpenCode（mcp）/Cursor（mcpServers）/VS Code（servers）用同构 {type=remote,url,enabled}；OpenClaw（mcp.servers）用 {url, transport=streamable-http, enabled}。graph-mcp URL 默认值可 -GraphMcpUrl 覆盖；DSH（cordis.patch.yml 仅插件行）无法承载 HTTP 远程 MCP，记 limitation 提示不写坏配置。WP1361 挂载 AT-1361-01（tests/argo-deploy.test.js）与 AT-1361-02（tests/argo-openclaw.test.js）。可复用经验（关键 pitfall）：OpenClaw 的 MCP server 以 transport 为键（streamable-http/sse/stdio），canonicalizeConfiguredMcpServer 仅把 type=http/streamable-http/sse/stdio 映射为 transport；套用 OpenCode 的 {type:remote,url} 同构形态到 OpenClaw 会因无 transport 默认按 SSE 拨号，对 Streamable HTTP 端点（argo.derekworkspacev5.com/mcp）返回 404 导致 graph 工具不注册——各宿主 MCP schema 并不相同，不能一律同构。验收：argo-deploy 6/6、argo-openclaw 6/6、guardian 4/4、sandbox 8/8、validateSystemArchitecture 通过（runArchitectureTests 中两失败为既有）。真实 ~/.openclaw/openclaw.json 已补 transport 并验证 openclaw mcp probe graph-mcp 4 tools。commit：55e32c2/129b020/cc17b0d/2e48665。",
       "attributes": [
         {
           "name": "commit",
@@ -4195,6 +4195,16 @@
           "name": "commit",
           "value": "7b12918",
           "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素创建 + T1 摘要更新）"
+        },
+        {
+          "name": "commit",
+          "value": "cc17b0d",
+          "description": "design/KG/SystemArchitecture.json（LTM 里程碑描述更新：OpenClaw transport=streamable-http pitfall）"
+        },
+        {
+          "name": "commit",
+          "value": "2e48665",
+          "description": "design/KG/SystemArchitecture.json（图谱回登记 WP1361 commit cc17b0d）"
         }
       ]
     }
