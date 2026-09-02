@@ -970,16 +970,29 @@ if ($SkipMcp) {
     Write-Host 'Skipped MCP configuration (-SkipMcp).'
 } else {
     $argoServer = (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js').Replace('\', '/')
-    $graphMcpServer = [ordered]@{
+    # graph-mcp is a Streamable HTTP remote MCP endpoint. Its config shape is
+    # HOST-SPECIFIC (each host's mcp.json schema is different):
+    #   - OpenCode  (opencode.json mcp.<name>): {type: remote, url, enabled}
+    #   - Cursor    (mcp.json mcpServers.<name>): {url} — official remote
+    #     entries carry no `type` (type only means "stdio" for local servers);
+    #     Cursor dials url servers over Streamable HTTP.
+    #   - VS Code   (mcp.json servers.<name>): {type: http, url}
+    #   - OpenClaw  (openclaw.json mcp.servers.<name>): {url, transport:
+    #     streamable-http} — keyed by transport, not by a type alias.
+    # Reusing one uniform {type: remote} entry across hosts is INVALID for
+    # Cursor / VS Code / OpenClaw and makes the server fail to load.
+    $graphMcpOpenCode = [ordered]@{
         type    = 'remote'
         url     = $GraphMcpUrl
         enabled = $true
     }
-    # OpenClaw MCP servers are keyed by `transport` (streamable-http / sse /
-    # stdio), not by a `type: remote` alias: canonicalizeConfiguredMcpServer only
-    # maps type http/streamable-http/sse/stdio to a transport, so a bare
-    # {type:remote,url} entry would be dialed over SSE and the streamable-http
-    # endpoint returns 404 (openclaw mcp probe graph-mcp: SSE error Non-200 404).
+    $graphMcpCursor = [ordered]@{
+        url = $GraphMcpUrl
+    }
+    $graphMcpVSCode = [ordered]@{
+        type = 'http'
+        url  = $GraphMcpUrl
+    }
     $openClawGraphMcpServer = [ordered]@{
         url       = $GraphMcpUrl
         transport = 'streamable-http'
@@ -992,7 +1005,7 @@ if ($SkipMcp) {
         type    = 'stdio'
         command = 'node'
         args    = @($argoServer)
-    }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpServer })
+    }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpVSCode })
     Write-Host "argo MCP config written -> $mcpPath"
 
     Write-Host '==> Registering argo MCP server in Cursor'
@@ -1000,7 +1013,7 @@ if ($SkipMcp) {
         type    = 'stdio'
         command = 'node'
         args    = @($argoServer)
-    }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpServer })
+    }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpCursor })
     Write-Host "argo MCP config written -> $CursorMcpPath"
 
     Write-Host '==> Registering argo MCP server in OpenCode'
@@ -1008,7 +1021,7 @@ if ($SkipMcp) {
         type    = 'local'
         command = @('node', $argoServer)
         enabled = $true
-    }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpServer })
+    }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpOpenCode })
     Write-Host "argo MCP config written -> $OpenCodeConfigPath"
 
     if (-not $SkipOpenClaw) {

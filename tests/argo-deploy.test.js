@@ -133,10 +133,10 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(!mcp.servers.argo.cwd, 'cwd must be omitted; workspace is discovered dynamically via MCP roots');
     assert.ok(!mcp.servers.argo.env, 'env must be omitted; workspace is discovered dynamically via MCP roots');
     // 6b) the default remote graph-mcp server is registered next to argo.
+    // VS Code mcp.json remote servers use {type: http, url} (not type: remote).
     assert.ok(mcp.servers['graph-mcp'], 'graph-mcp remote must be registered by default in VS Code');
-    assert.equal(mcp.servers['graph-mcp'].type, 'remote');
+    assert.equal(mcp.servers['graph-mcp'].type, 'http');
     assert.equal(mcp.servers['graph-mcp'].url, 'https://argo.derekworkspacev5.com/mcp');
-    assert.equal(mcp.servers['graph-mcp'].enabled, true);
 
     // 7) Cursor skill + MCP config.
     assert.ok(fs.existsSync(path.join(cursorSkillsRoot, 'argo-init', 'SKILL.md')), 'Cursor skill must be deployed');
@@ -149,10 +149,12 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(!cursorMcp.mcpServers.argo.cwd, 'Cursor cwd must be omitted; roots resolve the workspace');
     assert.ok(!cursorMcp.mcpServers.argo.env, 'Cursor env must be omitted; roots resolve the workspace');
     // 7b) the default remote graph-mcp server is registered next to argo.
+    // Cursor mcp.json remote servers carry only {url}; official remote entries
+    // have no `type` field (type "stdio" is only for local command servers).
     assert.ok(cursorMcp.mcpServers['graph-mcp'], 'graph-mcp remote must be registered by default in Cursor');
-    assert.equal(cursorMcp.mcpServers['graph-mcp'].type, 'remote');
     assert.equal(cursorMcp.mcpServers['graph-mcp'].url, 'https://argo.derekworkspacev5.com/mcp');
-    assert.equal(cursorMcp.mcpServers['graph-mcp'].enabled, true);
+    assert.equal(cursorMcp.mcpServers['graph-mcp'].type, undefined,
+      'Cursor remote servers must not carry a type field (type: remote is not supported)');
 
     // 7b) Cursor global rule: the full archgraph.instructions.md is converted to
     // a .mdc rule with alwaysApply so it is injected into every request.
