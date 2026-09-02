@@ -62,7 +62,7 @@ async function buildHarnessReport({ checkOnly = false, workspaceRoot, includeBoo
           mode: checkOnly ? 'check' : 'fix-direct',
           reason: 'system architecture invalid; subdiagram_views repair skipped',
         };
-    report.neo4j = await ensureNeo4jProjection({ checkOnly });
+    report.neo4j = await ensureNeo4jProjection({ checkOnly, workspaceRoot });
     report.semanticLifecycle = await ensureCanonicalSemanticLifecycle({
       checkOnly,
       workspaceRoot,
@@ -79,6 +79,7 @@ async function buildHarnessReport({ checkOnly = false, workspaceRoot, includeBoo
     }
   }
 
+  writeJson(reportPath, report);
   return report;
 }
 
@@ -258,7 +259,10 @@ async function verifyCanonicalSystemArchitecture({ workspaceRoot } = {}) {
     };
   }
 
-  const validateResponse = await argoMcp.callTool('validateSystemArchitecture', {});
+  const validateResponse = await argoMcp.callTool('validateSystemArchitecture', {
+    workspaceRoot,
+    architecturePath: graphPath,
+  });
   const validatePayload = parseToolPayload(validateResponse);
   if (validatePayload.status !== 'passed') {
     return {
@@ -307,9 +311,9 @@ async function ensureSubdiagramViewsConsistency({ checkOnly, workspaceRoot }) {
   }
 }
 
-async function ensureNeo4jProjection({ checkOnly }) {
-  const config = getNeo4jConfig();
-  const dirtyBefore = getNeo4jGraphSyncState(DEFAULT_GRAPH_PATH);
+async function ensureNeo4jProjection({ checkOnly, workspaceRoot }) {
+  const config = getNeo4jConfig({ workspaceRoot });
+  const dirtyBefore = getNeo4jGraphSyncState(DEFAULT_GRAPH_PATH, workspaceRoot);
   const driver = createDriver(config);
   let databaseProvision = null;
   try {
@@ -332,11 +336,19 @@ async function ensureNeo4jProjection({ checkOnly }) {
 
   let syncResult = null;
   if (!checkOnly) {
-    syncResult = await syncArchitectureToNeo4j({ architecturePath: DEFAULT_GRAPH_PATH, ...config });
+    syncResult = await syncArchitectureToNeo4j({
+      architecturePath: DEFAULT_GRAPH_PATH,
+      workspaceRoot,
+      ...config,
+    });
     databaseProvision = syncResult.databaseProvision;
   }
 
-  const verification = await verifyArchitectureSync({ architecturePath: DEFAULT_GRAPH_PATH, ...config });
+  const verification = await verifyArchitectureSync({
+    architecturePath: DEFAULT_GRAPH_PATH,
+    workspaceRoot,
+    ...config,
+  });
   if (!verification.matches) {
     return {
       status: 'failed',
