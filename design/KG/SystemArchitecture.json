@@ -4245,6 +4245,11 @@
           "name": "pitfall",
           "value": "global-pkg-0.10.47-null",
           "description": "坑（2026-09-02）：npm 全局包 archgraph-argo@0.10.47 为中途坏版本——顶部已拆分 4 个 graphMcp 变量（OpenCode/Cursor/VSCode/OpenClaw）但三处 Write-McpConfig 调用点仍引用旧变量 $graphMcpServer（未定义→$null），部署后各宿主 mcp 配置 graph-mcp 写成字面 null 导致无法加载。教训：install-argo.ps1 被中途状态打包发布；仓库 HEAD 148ec80 代码正确（调用点用 $graphMcpVSCode/$graphMcpCursor/$graphMcpOpenCode）。已用仓库脚本重跑修复真实宿主（Cursor/VS Code/OpenCode 恢复非 null；OpenClaw 早已正确）；用户自行重打包全局包。"
+        },
+        {
+          "name": "commit",
+          "value": "b64e0f1",
+          "description": "design/KG/SystemArchitecture.json（坏全局包 0.10.47 null pitfall 记录）"
         }
       ]
     }
