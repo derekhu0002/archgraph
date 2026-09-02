@@ -185,7 +185,6 @@
       <a href="#install">Install</a>
       <a href="#howto">How to use</a>
       <a href="#community">Community</a>
-      <a href="docs/kglibrary.html">Reference Library</a>
       <a href="docs/insights.html">Insights</a>
       <a class="gh-btn" href="https://github.com/derekhu0002/archgraph">GitHub</a>
     </div>
@@ -197,7 +196,6 @@
     <div class="hero-actions">
       <a class="btn primary" href="https://github.com/derekhu0002/archgraph">View on GitHub</a>
       <a class="btn" href="https://argo.derekworkspacev5.com/archgraph/">Join the Community</a>
-      <a class="btn" href="docs/kglibrary.html">Explore Reference Library</a>
     </div>
   </header>
 
@@ -224,20 +222,56 @@
       <pre>npm install -g archgraph-argo
 argo-deploy</pre>
       <p class="lead" style="margin-top: 14px;">
-        <strong>Semantic (Graph RAG) queries</strong> also need Neo4j and a vector engine &mdash;
-        everything else works out of the box.
+        The <code>argo</code> MCP server registers automatically into GitHub Copilot, Cursor,
+        OpenCode, DeepSeek Harness, and <strong>OpenClaw</strong>. <code>argo-deploy</code> also
+        installs the skills, rules, and agents into each harness, then walks you through a
+        <code>~/.argo/.env</code> configuration prompt (existing non-empty values are kept).
       </p>
       <p class="lead" style="margin-top: 14px;">
-        The <code>argo</code> MCP server registers automatically into GitHub Copilot, Cursor,
-        OpenCode, DeepSeek Harness, and <strong>OpenClaw</strong>.
+        <strong>Prerequisites</strong> &mdash; everything works out of the box except
+        <strong>semantic (Graph RAG) queries</strong>, which need:
+      </p>
+      <div class="grid" style="margin-bottom: 14px;">
+        <div class="card">
+          <h3>Neo4j graph database</h3>
+          <p>
+            Stores the structural projection of your architecture graph. Point
+            <code>ARGO_NEO4J_DATABASE_URL</code>, <code>ARGO_NEO4J_DATABASE_USERNAME</code>, and
+            <code>ARGO_NEO4J_DATABASE_PASSWORD</code> at any Neo4j instance you can reach (local,
+            Docker, or hosted).
+          </p>
+        </div>
+        <div class="card">
+          <h3>Embedding / vector engine</h3>
+          <p>
+            Powers semantic Graph RAG retrieval. Configure <code>ARGO_EMBEDDING_BASE_URL</code>,
+            <code>ARGO_EMBEDDING_MODEL</code>, <code>ARGO_EMBEDDING_PROVIDER</code>, and
+            <code>ARGO_EMBEDDING_DIMENSIONS</code>, plus the API key <code>QWEN_KEY</code> from your
+            embedding provider.
+          </p>
+        </div>
+      </div>
+      <p class="lead">
+        Where do the values come from? The Neo4j credentials come from the Neo4j instance you own or
+        provision (URI, username, password). The embedding configuration and <code>QWEN_KEY</code>
+        come from your embedding provider&rsquo;s dashboard &mdash; for example Alibaba DashScope.
+        Supply them during <code>argo-deploy</code>, or edit <code>~/.argo/.env</code> afterwards and
+        re-run.
       </p>
     </section>
 
     <section id="howto">
       <h2><span class="num">02</span>How to use</h2>
       <p class="lead">
-        After installing, open your project and start a coding agent. It will locate the architecture
-        element behind the task, arm itself with that element&rsquo;s Skills and Rules, work test-first
+        <strong>Step 0 &mdash; initialize the workspace.</strong> In a fresh project, ask your coding
+        agent to run <code>argo init</code> (the <code>initializeWorkspace</code> MCP call). It
+        creates a starter <code>design/KG/SystemArchitecture.json</code> when missing, performs the
+        first JSON &rarr; Neo4j sync, initializes the semantic (Graph RAG) lifecycle, and verifies the
+        architecture. From then on, the intent graph is the source of truth for the project.
+      </p>
+      <p class="lead">
+        Then open your project and start a coding agent. It will locate the architecture element
+        behind the task, arm itself with that element&rsquo;s Skills and Rules, work test-first
         (GIVEN-WHEN-THEN), and trace every commit back to the graph.
       </p>
       <p class="lead">
@@ -265,13 +299,6 @@ argo-deploy</pre>
           <p>
             The graph-asset home: contribute a subgraph from your project, or pull one back to reuse in
             your own architecture.
-          </p>
-        </div>
-        <div class="card">
-          <h3><a href="docs/kglibrary.html">Reference Library</a></h3>
-          <p>
-            Curated reference models from the ArchGraph repo itself &mdash; browse locally before
-            going to the community hub.
           </p>
         </div>
       </div>

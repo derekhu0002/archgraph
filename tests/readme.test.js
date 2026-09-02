@@ -28,9 +28,11 @@ function sectionAfter(md, heading) {
 test('readme: how-to-use section explains the user workflow', () => {
   // GIVEN the README documents how to use the framework
   // WHEN a reader opens the How to use section
-  // THEN it describes the coding-agent workflow and the graph as the single source of truth
+  // THEN it describes the workspace bootstrap via argo init and the coding-agent workflow
   const section = sectionAfter(README, 'How to use');
   assert.ok(section, 'README should have a How to use section');
+  assert.match(section, /argo init/, 'should mention the argo init workspace bootstrap');
+  assert.match(section, /initializeWorkspace/, 'should mention the initializeWorkspace MCP call');
   assert.match(section, /ArchiMate 3\.2/, 'should state ArchiMate 3.2 compliance');
   assert.match(section, /coding agent/, 'should describe the coding-agent workflow');
   assert.match(section, /Skills and Rules/, 'should mention arming with Skills and Rules');
@@ -40,7 +42,7 @@ test('readme: how-to-use section explains the user workflow', () => {
 test('readme: install section documents npm deployment and semantic requirements', () => {
   // GIVEN the ARGO toolchain is published as an npm package
   // WHEN a reader opens README.md
-  // THEN it shows a minimal install: npm install + argo-deploy, plus a one-line note on Neo4j + vector engine for semantic queries
+  // THEN it shows a minimal install: npm install + argo-deploy, plus the Neo4j + vector engine prerequisites and their .env keys
   const section = sectionAfter(README, 'Install');
   assert.ok(section, 'README should have an Install section');
   assert.match(section, /npm install -g archgraph-argo/, 'should show the npm install command');
@@ -48,6 +50,9 @@ test('readme: install section documents npm deployment and semantic requirements
   assert.match(section, /MCP server/, 'should mention the registered MCP server');
   assert.match(section, /Neo4j/, 'should state the Neo4j requirement for semantic queries');
   assert.match(section, /vector engine/, 'should state the vector engine requirement');
+  assert.match(section, /ARGO_NEO4J_DATABASE_URL/, 'should list the Neo4j .env key');
+  assert.match(section, /ARGO_EMBEDDING_MODEL/, 'should list an embedding .env key');
+  assert.match(section, /QWEN_KEY/, 'should mention the embedding API key');
 });
 
 test('readme: supported harnesses include OpenClaw', () => {

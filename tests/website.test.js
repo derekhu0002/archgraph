@@ -2,33 +2,11 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync, readdirSync, statSync } = require('node:fs');
+const { readFileSync } = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const HTML = readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-
-function parseInfoFrontmatter(md) {
-  const m = md.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n/);
-  if (!m) {
-    throw new Error('info.md is missing a YAML frontmatter block');
-  }
-  const meta = {};
-  for (const line of m[1].split(/\r?\n/)) {
-    const kv = line.match(/^([A-Za-z_][A-Za-z0-9_-]*):\s*(.*)$/);
-    if (kv) {
-      let value = kv[2].trim();
-      if (
-        (value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))
-      ) {
-        value = value.slice(1, -1);
-      }
-      meta[kv[1]] = value;
-    }
-  }
-  return meta;
-}
 
 test('layout-style: tech-simple light layout with nav, hero and sections', () => {
   // GIVEN the project website is published
@@ -60,6 +38,9 @@ test('install-section: homepage shows npm install/deploy near the top', () => {
   assert.match(HTML, /argo-deploy/, 'should show the deploy command');
   assert.match(HTML, /Neo4j/, 'should mention Neo4j');
   assert.match(HTML, /vector engine/, 'should mention the vector engine');
+  assert.match(HTML, /ARGO_NEO4J_DATABASE_URL/, 'should list the Neo4j .env key');
+  assert.match(HTML, /ARGO_EMBEDDING_MODEL/, 'should list an embedding .env key');
+  assert.match(HTML, /QWEN_KEY/, 'should mention the embedding API key');
 });
 
 test('about-image: homepage embeds the core-model image under What is this?', () => {
@@ -72,44 +53,6 @@ test('about-image: homepage embeds the core-model image under What is this?', ()
     HTML.indexOf('docs/diagrams/image.png') < HTML.indexOf('id="install"'),
     'image should appear inside the What is this? section'
   );
-});
-
-test('kglibrary-area: lists every KGlibrary reference project', () => {
-  // GIVEN the KGlibrary directory contains reference projects
-  // WHEN a visitor opens the Reference Library page
-  // THEN the page has a KGlibrary area listing each project name, description and repo link
-  assert.match(HTML, /docs\/kglibrary\.html/, 'homepage should link to the Reference Library page');
-  const kglPage = readFileSync(path.join(ROOT, 'docs', 'kglibrary.html'), 'utf8');
-  assert.match(kglPage, /id="kglibrary"/, 'page should have a KGlibrary reference area');
-
-  const kgDir = path.join(ROOT, 'KGlibrary');
-  const projects = readdirSync(kgDir).filter((entry) =>
-    statSync(path.join(kgDir, entry)).isDirectory()
-  );
-  assert.ok(projects.length >= 1, 'KGlibrary should contain at least one reference project');
-
-  for (const project of projects) {
-    const info = readFileSync(path.join(kgDir, project, 'info.md'), 'utf8');
-    const meta = parseInfoFrontmatter(info);
-
-    assert.ok(meta.name, `project ${project} should declare a name`);
-    assert.ok(meta.repo, `project ${project} should declare a repo URL`);
-
-    assert.ok(
-      kglPage.includes(meta.name),
-      `page should list project name "${meta.name}" from KGlibrary/${project}`
-    );
-    assert.ok(
-      kglPage.includes(meta.repo),
-      `page should link to repo "${meta.repo}" from KGlibrary/${project}`
-    );
-    if (meta.description) {
-      assert.ok(
-        kglPage.includes(meta.description),
-        `page should show description of "${meta.name}" from KGlibrary/${project}`
-      );
-    }
-  }
 });
 
 test('openclaw-support: homepage mentions OpenClaw in install', () => {
@@ -146,9 +89,18 @@ test('readme-sync: home page mirrors README how-to-use', () => {
   // WHEN a visitor opens the homepage in a browser
   // THEN the page mirrors the How to use section
   assert.match(HTML, /id="howto"/, 'page should have a How to use section');
+  assert.match(HTML, /argo init/, 'How to use should mention the argo init workspace bootstrap');
   assert.match(HTML, /ArchiMate 3\.2/, 'How to use should mention ArchiMate 3.2');
   assert.match(HTML, /coding agent/, 'How to use should describe the coding-agent workflow');
   assert.match(HTML, /single source of truth/, 'How to use should state the graph is the single source of truth');
+});
+
+test('reference-library-removed: homepage no longer exposes a KGlibrary reference library', () => {
+  // GIVEN the reference library role moved to the community hub / graph-wiki
+  // WHEN a visitor opens the homepage
+  // THEN no Reference Library / KGlibrary entry remains and the legacy pages are gone
+  assert.doesNotMatch(HTML, /kglibrary/i, 'homepage should not reference KGlibrary');
+  assert.doesNotMatch(HTML, /Reference Library/i, 'homepage should not have a Reference Library link');
 });
 
 test('insight-report-archived: industry insight report archived under docs/', () => {

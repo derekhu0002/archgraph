@@ -43,10 +43,29 @@ argo-deploy
 
 Done &mdash; the ARGO toolchain, skills, and rules are deployed, and the `argo` MCP server is registered automatically in **GitHub Copilot**, **Cursor**, **OpenCode**, **DeepSeek Harness** (dsh), and **OpenClaw**.
 
-> Semantic (Graph RAG) queries also need **Neo4j** and a **vector engine** configured in
-> `~/.argo/.env`; everything else works out of the box.
+### Prerequisites and configuration
+
+Everything works out of the box except **semantic (Graph RAG) queries**, which need:
+
+- **Neo4j graph database** — stores the structural projection of your architecture graph. During
+  `argo-deploy` you configure `ARGO_NEO4J_DATABASE_URL`, `ARGO_NEO4J_DATABASE_USERNAME`, and
+  `ARGO_NEO4J_DATABASE_PASSWORD` in `~/.argo/.env`.
+- **Embedding / vector engine** — powers semantic Graph RAG retrieval. Configure
+  `ARGO_EMBEDDING_BASE_URL`, `ARGO_EMBEDDING_MODEL`, `ARGO_EMBEDDING_PROVIDER`,
+  `ARGO_EMBEDDING_MODEL_VERSION`, `ARGO_EMBEDDING_DIMENSIONS`, plus the API key `QWEN_KEY`.
+
+Where do the values come from? The Neo4j credentials come from the Neo4j instance you own or
+provision (URI, username, password). The embedding configuration and `QWEN_KEY` come from your
+embedding provider's dashboard — for example Alibaba DashScope. `argo-deploy` walks you through the
+prompt (existing non-empty values in `~/.argo/.env` are kept); you can also edit the file afterwards
+and re-run.
 
 ## How to use
+
+**Step 0 — initialize the workspace.** In a fresh project, ask your coding agent to run `argo init`
+(the `initializeWorkspace` MCP call). It creates a starter `design/KG/SystemArchitecture.json` when
+missing, performs the first JSON → Neo4j sync, initializes the semantic (Graph RAG) lifecycle, and
+verifies the architecture. From then on, the intent graph is the source of truth for the project.
 
 After installing, open your project and start a coding agent. It will:
 

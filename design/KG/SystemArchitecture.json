@@ -124,11 +124,11 @@
       ],
       "testcases": [
         {
-          "name": "AT-website-01",
-          "description": "GIVEN 网站已创建并发布；WHEN 用户在浏览器打开首页；THEN 页面完整呈现项目定位与内容（导航/Hero/section），且 KGlibrary 参考库、安装部署、OpenClaw 支持、洞察报告子页等用户可见区块齐备。",
-          "type": "Acceptance Test",
           "Input": "tests/website.test.js",
-          "acceptanceCriteria": "tests/website.test.js"
+          "acceptanceCriteria": "tests/website.test.js",
+          "description": "GIVEN 网站已创建并发布；WHEN 用户在浏览器打开首页；THEN 页面完整呈现项目定位与内容（导航/Hero/section），Install 小节说明 Neo4j/embedding 前置依赖与 .env 配置键，How to use 含 argo init 初始化，Community 衔接社区与 graph-wiki，且不再展示 KGlibrary 参考库入口。",
+          "name": "AT-website-01",
+          "type": "Acceptance Test"
         }
       ]
     },
@@ -170,7 +170,7 @@
       "name": "project website",
       "parent": "1240",
       "type": "Application Component",
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力；What is this 置于页面最前）、紧随其后的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯），并提供 GitHub 仓库入口；Community 区块衔接对外社区（community_site https://argo.derekworkspacev5.com/archgraph/ 与图资产仓库 graph_wiki_repo https://github.com/derekhu0002/graph-wiki：子图共建共享/治理规范/开放共建，导航与 hero 均提供入口）；Reference Library（KGlibrary 案例库）通过导航链接到独立页面 docs/kglibrary.html，Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
+      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力；What is this 置于页面最前）、紧随其后的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，说明前置依赖：Neo4j 图数据库存结构投影 + embedding/向量引擎供语义 Graph RAG，及 ~/.argo/.env 中 ARGO_NEO4J_DATABASE_URL/USERNAME/PASSWORD、ARGO_EMBEDDING_*、QWEN_KEY 等配置键与取值来源）、How to use 小节（先 argo init / initializeWorkspace 初始化工作区，再用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯），并提供 GitHub 仓库入口；Community 区块衔接对外社区（community_site https://argo.derekworkspacev5.com/archgraph/ 与图资产仓库 graph_wiki_repo https://github.com/derekhu0002/graph-wiki：子图共建共享/治理规范/开放共建，导航与 hero 均提供入口；参考图库角色由社区子图库承接，主页不再展示 KGlibrary Reference Library 入口）；Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
       "attributes": [
         {
           "name": "commit",
@@ -306,7 +306,7 @@
       "name": "kglibrary-info-format",
       "parent": "1249",
       "type": "Rule",
-      "description": "KGlibrary 参考项目 info.md 的 YAML frontmatter 格式规则：每个 KGlibrary/<project>/info.md 必须用 frontmatter（name/description/repo，建议 branch/commit_id），供网站主页、Agent 与自动化脚本统一消费；修改后需同步刷新 index.html #kglibrary 区域并运行 node --test tests/website.test.js 验证同步。",
+      "description": "KGlibrary 参考项目 info.md 的 YAML frontmatter 格式规则（已退役 2026-09-02）：原规定每个 KGlibrary/<project>/info.md 用 frontmatter（name/description/repo），供主页 #kglibrary 区域消费；KGlibrary 目录已彻底移除，参考图库角色由 ArchGraph 社区子图库（https://argo.derekworkspacev5.com/archgraph/）与图资产仓库 graph-wiki（https://github.com/derekhu0002/graph-wiki）承接，本规则不再适用，保留作历史记录。",
       "attributes": [
         {
           "name": "commit",
@@ -316,6 +316,11 @@
         {
           "name": "kglibrary.instructions.md",
           "description": "# KGlibrary Info Format (global rule)\n\nKGlibrary 是本项目积累的参考项目知识库。每个参考项目位于 `KGlibrary/<project>/`，并必须提供一份 `info.md`，供网站主页、Agent 与自动化脚本统一消费。\n\n## Rules\n\n- **MUST** 每个参考项目在 `KGlibrary/<project>/info.md` 顶部使用 YAML frontmatter，且至少包含以下键：\n  - `name`：项目名（字符串）\n  - `description`：一句话简介（字符串，建议加引号）\n  - `repo`：GitHub 仓库完整 URL（https://github.com/<owner>/<repo>）\n- **SHOULD** 额外提供：\n  - `branch`：主分支名（默认 `main`）\n  - `commit_id`：被收录时的提交 SHA\n- **MUST** frontmatter 之后可以书写正文（如该项目 SystemArchitecture.json 的摘要），正文不影响机器消费。\n- **MUST** 当新增或修改 `KGlibrary/*/info.md` 时，同步刷新网站主页 `index.html` 中的 `#kglibrary` 区域，并运行 `node --test tests/website.test.js` 验证同步。\n\n## Example\n\n```markdown\n---\nname: XKG-TEST\ndescription: \"a test repo which created a online mindmapping draft panel\"\nrepo: https://github.com/derekhu0002/XKG-TEST\nbranch: main\ncommit_id: 1372c4e528f1ae93538af37272f0937fa52bdfee\n---\n\n正文摘要…\n```"
+        },
+        {
+          "name": "retired",
+          "value": "true",
+          "description": "2026-09-02 退役：KGlibrary 参考库随主页改版彻底移除（目录与 docs/kglibrary.html 删除），参考图库角色由 community/graph-wiki 承接，此 info.md 格式规则不再适用。"
         }
       ]
     },
@@ -5411,7 +5416,7 @@
       "view_name": "KGlibrary Reference Library",
       "parent_element_id": "1249",
       "parent_element_name": "Implementation and Migration Viewpoint",
-      "description": "KGlibrary 参考项目知识库的管理视图：info 格式规则（kglibrary-info-format）与收录各参考项目 info.md 的工作包。",
+      "description": "KGlibrary 参考项目知识库管理视图（已退役 2026-09-02）：原管理 info 格式规则（kglibrary-info-format）与收录各参考项目 info.md 的工作包；KGlibrary 目录已彻底移除，参考图库角色由 ArchGraph 社区子图库与 graph-wiki 承接，视图保留作历史记录（元素 1320/1360/1364）。",
       "included_elements": [
         "1320",
         "1360",
