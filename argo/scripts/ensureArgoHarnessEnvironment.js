@@ -160,7 +160,7 @@ async function ensureCanonicalSemanticLifecycle({ checkOnly, workspaceRoot, neo4
 
   try {
     const semanticLifecycle = await runCanonicalSemanticInit(
-      systemArchitectureMcp.createDefaultCanonicalSemanticInitComposition(),
+      systemArchitectureMcp.createDefaultCanonicalSemanticInitComposition({ repositoryRoot: workspaceRoot }),
       {
         repositoryRoot: workspaceRoot,
         neo4j,
