@@ -120,6 +120,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "cd365ea",
+          "description": "tests/website.test.js; design/KG/SystemArchitecture.json（AT-website-01 描述刷新：去掉 KGlibrary 区块、新增 argo init/.env/无 Reference Library 断言）"
         }
       ],
       "testcases": [
@@ -271,6 +276,11 @@
           "name": "commit",
           "value": "8099bd1",
           "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json（主页衔接 ArchGraph 社区与 graph-wiki：新增 Community 区块/导航/hero 按钮，Links 收录社区与图资产仓库）"
+        },
+        {
+          "name": "commit",
+          "value": "cd365ea",
+          "description": "index.html; tests/website.test.js; KGlibrary/（删除）; docs/kglibrary.html（删除）; design/KG/SystemArchitecture.json（主页改版：Install 补前置依赖/.env 配置键、How to use 补 argo init、去除 Reference Library 由 community 承接）"
         }
       ],
       "testcases": [
@@ -321,6 +331,11 @@
           "name": "retired",
           "value": "true",
           "description": "2026-09-02 退役：KGlibrary 参考库随主页改版彻底移除（目录与 docs/kglibrary.html 删除），参考图库角色由 community/graph-wiki 承接，此 info.md 格式规则不再适用。"
+        },
+        {
+          "name": "commit",
+          "value": "cd365ea",
+          "description": "KGlibrary/（删除）; docs/kglibrary.html（删除）; design/KG/SystemArchitecture.json（Rule 退役标记：参考图库由 community/graph-wiki 承接）"
         }
       ]
     },
@@ -398,6 +413,11 @@
           "name": "commit",
           "value": "8099bd1",
           "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json（README 新增 Community 小节衔接社区站与 graph-wiki 图资产仓库）"
+        },
+        {
+          "name": "commit",
+          "value": "cd365ea",
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json（README Install 补前置依赖/.env 配置键、How to use 补 argo init，与主页同步）"
         }
       ],
       "testcases": [
