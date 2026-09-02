@@ -943,7 +943,22 @@
           "value": "delivered"
         }
       ],
-      "testcases": []
+      "testcases": [
+        {
+          "acceptanceCriteria": "tests/argo-deploy.test.js",
+          "description": "GIVEN install-argo.ps1 部署并在 OpenCode/Cursor/VS Code 宿主注册 MCP；WHEN 读取生成的 MCP 配置（opencode.json mcp / mcp.json mcpServers / mcp.json servers）；THEN 默认同时注册 graph-mcp remote 条目（type=remote, url=https://argo.derekworkspacev5.com/mcp, enabled=true），与 argo 条目平级。",
+          "Input": "tests/argo-deploy.test.js",
+          "name": "AT-1361-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/argo-openclaw.test.js",
+          "description": "GIVEN install-argo.ps1 部署 OpenClaw 集成（mcp.servers.argo）；WHEN 读取 ~/.openclaw/openclaw.json；THEN 默认同时注册 graph-mcp remote 条目（type=remote, url=https://argo.derekworkspacev5.com/mcp, enabled=true），与 argo 平级；DSH（cordis.patch.yml 插件行机制）无法承载 HTTP 远程 MCP，安装时给出 limitation 提示且不写坏配置。",
+          "Input": "tests/argo-openclaw.test.js",
+          "name": "AT-1361-02",
+          "type": "Acceptance Test"
+        }
+      ]
     },
     {
       "id": "1362",

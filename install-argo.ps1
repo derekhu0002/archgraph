@@ -24,7 +24,8 @@ param(
     [string]$OpenClawWorkspace = "$env:USERPROFILE\.openclaw\workspace",
     [string]$OpenClawRepoRoot = '',
     [switch]$SkipOpenClaw,
-    [string]$McpPath
+    [string]$McpPath,
+    [string]$GraphMcpUrl = 'https://argo.derekworkspacev5.com/mcp'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -135,7 +136,8 @@ function Write-McpConfig {
     param(
         [string]$Path,
         [string]$ServersKey,
-        $ServerConfig
+        $ServerConfig,
+        [System.Collections.IDictionary]$ExtraServers = $null
     )
 
     $root = [ordered]@{}
@@ -160,6 +162,11 @@ function Write-McpConfig {
         }
     }
     $servers['argo'] = $ServerConfig
+    if ($null -ne $ExtraServers) {
+        foreach ($name in $ExtraServers.Keys) {
+            $servers[$name] = $ExtraServers[$name]
+        }
+    }
     $root[$ServersKey] = $servers
 
     New-Item -ItemType Directory -Force -Path (Split-Path $Path) | Out-Null
@@ -346,7 +353,8 @@ function Write-OpenClawMcpConfig {
     param(
         [string]$OpenClawHome,
         [string]$RepoRoot,
-        [string]$ArgoServer
+        [string]$ArgoServer,
+        $GraphMcpServer
     )
     $configPath = Join-Path $OpenClawHome 'openclaw.json'
     $root = [ordered]@{}
@@ -408,6 +416,9 @@ function Write-OpenClawMcpConfig {
         $argoServerObj.env = $envBlock
     }
     $servers['argo'] = $argoServerObj
+    if ($null -ne $GraphMcpServer) {
+        $servers['graph-mcp'] = $GraphMcpServer
+    }
     $mcp['servers'] = $servers
     $root['mcp'] = $mcp
     New-Item -ItemType Directory -Force -Path $OpenClawHome | Out-Null
@@ -836,7 +847,10 @@ if ($SkipDsh) {
     Write-Host "[19/22] argo\agents -> $DshHome\.agent-presets\<id> (DeepSeek Harness agent presets)"
     New-DshAgentPresets -DshHome $DshHome -AgentsSrc (Join-Path $argoDir 'agents')
 
-    Write-Host '  Restart `dsh web` to activate the MCP bridge and the wakeup plugin;'
+    Write-Host "  note: graph-mcp remote ($GraphMcpUrl) is NOT registered for DeepSeek Harness -"
+    Write-Host "  ~/.dsh/cordis.patch.yml only carries plugin rows (the dsh-argo-workspace bridge spawns"
+    Write-Host "  the local argo server); an HTTP remote MCP server has no equivalent cordis row here."
+    Write-Host "  Restart `dsh web` to activate the MCP bridge and the wakeup plugin;"
     Write-Host '  new sessions pick up the global rule and the argo-init skill automatically.'
     Write-Host '  The argo tools (mcp__argo__*) auto-follow the workspace the user switched to'
     Write-Host '  in one dsh instance - no restart needed between workspaces (the server honors'
@@ -956,6 +970,11 @@ if ($SkipMcp) {
     Write-Host 'Skipped MCP configuration (-SkipMcp).'
 } else {
     $argoServer = (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js').Replace('\', '/')
+    $graphMcpServer = [ordered]@{
+        type    = 'remote'
+        url     = $GraphMcpUrl
+        enabled = $true
+    }
 
     Write-Host '==> Registering argo MCP server in VS Code (GitHub Copilot)'
     $mcpPath = if ($McpPath) { $McpPath } else { Join-Path $env:APPDATA 'Code\User\mcp.json' }
@@ -963,7 +982,7 @@ if ($SkipMcp) {
         type    = 'stdio'
         command = 'node'
         args    = @($argoServer)
-    })
+    }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpServer })
     Write-Host "argo MCP config written -> $mcpPath"
 
     Write-Host '==> Registering argo MCP server in Cursor'
@@ -971,7 +990,7 @@ if ($SkipMcp) {
         type    = 'stdio'
         command = 'node'
         args    = @($argoServer)
-    })
+    }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpServer })
     Write-Host "argo MCP config written -> $CursorMcpPath"
 
     Write-Host '==> Registering argo MCP server in OpenCode'
@@ -979,7 +998,7 @@ if ($SkipMcp) {
         type    = 'local'
         command = @('node', $argoServer)
         enabled = $true
-    })
+    }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpServer })
     Write-Host "argo MCP config written -> $OpenCodeConfigPath"
 
     if (-not $SkipOpenClaw) {
@@ -988,7 +1007,7 @@ if ($SkipMcp) {
         # installer runs from a non-workspace npm-global package dir).
         $openClawRepoRoot = if ($OpenClawRepoRoot) { $OpenClawRepoRoot } else { $repoRoot }
         Write-Host "[22/22] argo MCP server -> $(Join-Path $OpenClawHome 'openclaw.json') (OpenClaw mcp.servers.argo, env.ARGO_REPO_ROOT pinned)"
-        Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $openClawRepoRoot -ArgoServer $argoServer
+        Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $openClawRepoRoot -ArgoServer $argoServer -GraphMcpServer $graphMcpServer
     }
 }
 

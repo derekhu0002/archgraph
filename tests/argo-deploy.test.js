@@ -132,6 +132,11 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(mcp.servers.argo.args[0].endsWith('argo-mcp-server.js'));
     assert.ok(!mcp.servers.argo.cwd, 'cwd must be omitted; workspace is discovered dynamically via MCP roots');
     assert.ok(!mcp.servers.argo.env, 'env must be omitted; workspace is discovered dynamically via MCP roots');
+    // 6b) the default remote graph-mcp server is registered next to argo.
+    assert.ok(mcp.servers['graph-mcp'], 'graph-mcp remote must be registered by default in VS Code');
+    assert.equal(mcp.servers['graph-mcp'].type, 'remote');
+    assert.equal(mcp.servers['graph-mcp'].url, 'https://argo.derekworkspacev5.com/mcp');
+    assert.equal(mcp.servers['graph-mcp'].enabled, true);
 
     // 7) Cursor skill + MCP config.
     assert.ok(fs.existsSync(path.join(cursorSkillsRoot, 'argo-init', 'SKILL.md')), 'Cursor skill must be deployed');
@@ -143,6 +148,11 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(cursorMcp.mcpServers.argo.args[0].endsWith('argo-mcp-server.js'));
     assert.ok(!cursorMcp.mcpServers.argo.cwd, 'Cursor cwd must be omitted; roots resolve the workspace');
     assert.ok(!cursorMcp.mcpServers.argo.env, 'Cursor env must be omitted; roots resolve the workspace');
+    // 7b) the default remote graph-mcp server is registered next to argo.
+    assert.ok(cursorMcp.mcpServers['graph-mcp'], 'graph-mcp remote must be registered by default in Cursor');
+    assert.equal(cursorMcp.mcpServers['graph-mcp'].type, 'remote');
+    assert.equal(cursorMcp.mcpServers['graph-mcp'].url, 'https://argo.derekworkspacev5.com/mcp');
+    assert.equal(cursorMcp.mcpServers['graph-mcp'].enabled, true);
 
     // 7b) Cursor global rule: the full archgraph.instructions.md is converted to
     // a .mdc rule with alwaysApply so it is injected into every request.
@@ -165,6 +175,11 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(openCode.mcp.argo.command[1].endsWith('argo-mcp-server.js'));
     assert.equal(openCode.mcp.argo.enabled, true);
     assert.ok(!openCode.mcp.argo.cwd, 'OpenCode cwd must be omitted; default is the project directory');
+    // 9a2) the default remote graph-mcp server is registered next to argo.
+    assert.ok(openCode.mcp['graph-mcp'], 'graph-mcp remote must be registered by default in OpenCode');
+    assert.equal(openCode.mcp['graph-mcp'].type, 'remote');
+    assert.equal(openCode.mcp['graph-mcp'].url, 'https://argo.derekworkspacev5.com/mcp');
+    assert.equal(openCode.mcp['graph-mcp'].enabled, true);
 
     // 9b) argo plugins deploy to ~/.argo/plugins and the wakeup plugin is
     // registered in the OpenCode config plugin array.

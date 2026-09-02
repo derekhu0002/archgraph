@@ -118,6 +118,13 @@ test('install-argo.ps1 deploys OpenClaw rules, skill, and MCP registration', () 
       ROOT,
       'ARGO_REPO_ROOT must pin the repository root for the fixed-workspace host',
     );
+    // AT-1361-02: the default remote graph-mcp server is registered next to argo
+    // in the OpenClaw MCP config (graph-mcp remote is not DSH-writable; cordis
+    // rows are plugin-only, so install-argo.ps1 prints a limitation note instead).
+    assert.ok(config.mcp.servers['graph-mcp'], 'graph-mcp remote must be registered by default in OpenClaw');
+    assert.equal(config.mcp.servers['graph-mcp'].type, 'remote');
+    assert.equal(config.mcp.servers['graph-mcp'].url, 'https://argo.derekworkspacev5.com/mcp');
+    assert.equal(config.mcp.servers['graph-mcp'].enabled, true);
 
     // AT-2780-04: UTF-8 non-ASCII (em dash U+2014) survives the deploy intact.
     assert.match(agents, /—/, 'em dash (U+2014) must survive the deploy intact');
