@@ -975,6 +975,16 @@ if ($SkipMcp) {
         url     = $GraphMcpUrl
         enabled = $true
     }
+    # OpenClaw MCP servers are keyed by `transport` (streamable-http / sse /
+    # stdio), not by a `type: remote` alias: canonicalizeConfiguredMcpServer only
+    # maps type http/streamable-http/sse/stdio to a transport, so a bare
+    # {type:remote,url} entry would be dialed over SSE and the streamable-http
+    # endpoint returns 404 (openclaw mcp probe graph-mcp: SSE error Non-200 404).
+    $openClawGraphMcpServer = [ordered]@{
+        url       = $GraphMcpUrl
+        transport = 'streamable-http'
+        enabled   = $true
+    }
 
     Write-Host '==> Registering argo MCP server in VS Code (GitHub Copilot)'
     $mcpPath = if ($McpPath) { $McpPath } else { Join-Path $env:APPDATA 'Code\User\mcp.json' }
@@ -1007,7 +1017,7 @@ if ($SkipMcp) {
         # installer runs from a non-workspace npm-global package dir).
         $openClawRepoRoot = if ($OpenClawRepoRoot) { $OpenClawRepoRoot } else { $repoRoot }
         Write-Host "[22/22] argo MCP server -> $(Join-Path $OpenClawHome 'openclaw.json') (OpenClaw mcp.servers.argo, env.ARGO_REPO_ROOT pinned)"
-        Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $openClawRepoRoot -ArgoServer $argoServer -GraphMcpServer $graphMcpServer
+        Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $openClawRepoRoot -ArgoServer $argoServer -GraphMcpServer $openClawGraphMcpServer
     }
 }
 

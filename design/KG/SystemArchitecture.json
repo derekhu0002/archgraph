@@ -958,7 +958,7 @@
         },
         {
           "acceptanceCriteria": "tests/argo-openclaw.test.js",
-          "description": "GIVEN install-argo.ps1 部署 OpenClaw 集成（mcp.servers.argo）；WHEN 读取 ~/.openclaw/openclaw.json；THEN 默认同时注册 graph-mcp remote 条目（type=remote, url=https://argo.derekworkspacev5.com/mcp, enabled=true），与 argo 平级；DSH（cordis.patch.yml 插件行机制）无法承载 HTTP 远程 MCP，安装时给出 limitation 提示且不写坏配置。",
+          "description": "GIVEN install-argo.ps1 部署 OpenClaw 集成（mcp.servers.argo）；WHEN 读取 ~/.openclaw/openclaw.json；THEN 默认同时注册 graph-mcp 条目（url=https://argo.derekworkspacev5.com/mcp, transport=streamable-http, enabled=true）与 argo 平级——OpenClaw MCP server 以 transport 为键（非 type:remote 别名），缺失 transport 会按 SSE 拨号导致 404；DSH（cordis.patch.yml 插件行机制）无法承载 HTTP 远程 MCP，安装时给出 limitation 提示且不写坏配置。",
           "Input": "tests/argo-openclaw.test.js",
           "name": "AT-1361-02",
           "type": "Acceptance Test"

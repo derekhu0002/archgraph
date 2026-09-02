@@ -119,11 +119,16 @@ test('install-argo.ps1 deploys OpenClaw rules, skill, and MCP registration', () 
       'ARGO_REPO_ROOT must pin the repository root for the fixed-workspace host',
     );
     // AT-1361-02: the default remote graph-mcp server is registered next to argo
-    // in the OpenClaw MCP config (graph-mcp remote is not DSH-writable; cordis
-    // rows are plugin-only, so install-argo.ps1 prints a limitation note instead).
-    assert.ok(config.mcp.servers['graph-mcp'], 'graph-mcp remote must be registered by default in OpenClaw');
-    assert.equal(config.mcp.servers['graph-mcp'].type, 'remote');
+    // in the OpenClaw MCP config. OpenClaw MCP servers are keyed by `transport`
+    // (streamable-http / sse / stdio), NOT by a `type: remote` alias — OpenClaw's
+    // canonicalizeConfiguredMcpServer only maps type http/streamable-http/sse/stdio
+    // to a transport, so a bare {type:remote,url} entry is dialed over SSE and the
+    // streamable-http endpoint returns 404. graph-mcp is not DSH-writable (cordis
+    // rows are plugin-only), so install-argo.ps1 prints a limitation note instead.
+    assert.ok(config.mcp.servers['graph-mcp'], 'graph-mcp must be registered by default in OpenClaw');
     assert.equal(config.mcp.servers['graph-mcp'].url, 'https://argo.derekworkspacev5.com/mcp');
+    assert.equal(config.mcp.servers['graph-mcp'].transport, 'streamable-http',
+      'OpenClaw graph-mcp must declare transport=streamable-http so the endpoint is not dialed as SSE');
     assert.equal(config.mcp.servers['graph-mcp'].enabled, true);
 
     // AT-2780-04: UTF-8 non-ASCII (em dash U+2014) survives the deploy intact.
