@@ -4273,7 +4273,14 @@
       "name": "里程碑：harness 报告 workspaceRoot 显式透传修复（宿主无关）",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "里程碑（2026-09-02）：修复 argo-init harness 报告在 CURSOR 下的工作区错误。根因：ensureArgoHarnessEnvironment.js 中两处调用未使用 buildHarnessReport 显式传入的 workspaceRoot，回退到进程 cwd 推断（getWorkspaceRoot）：①argoMcp.callTool('validateSystemArchitecture',{}) 空参；②ensureNeo4jProjection({checkOnly}) 使 getNeo4jConfig/getNeo4jGraphSyncState/syncArchitectureToNeo4j/verifyArchitectureSync 全部按 cwd 解析；③补全 semantic lifecycle：createDefaultCanonicalSemanticInitComposition() 无参→repositoryRoot 回退 resolveWorkspaceRoot()（CURSOR 版修复遗漏，端到端复现才暴露）。宿主差异本质：OpenCode/VS Code 以项目根为 cwd 拉全局 MCP server→cwd 巧合=项目根掩盖缺陷；CURSOR 用户级 ~/.cursor/mcp.json 以配置/用户目录为 cwd→暴露。修复=显式 workspaceRoot 贯穿 validate+Neo4j+semanticLifecycle，报告在 MCP 路径也落盘（原 MCP initializeWorkspace 只返回 reportPath 不写文件）。对 VS Code/OpenCode/OpenClaw/DSH 无影响（传相同值）。交付：commits d191eaf/317a8b5；图谱 WP1361 登记；回归 12/12（argo-init-interface/workspace-bootstrap/global-install/guardian）+ validate 通过；npm 发布 archgraph-argo@0.10.50→0.10.51 + 全局安装 + install-argo.ps1 22/22 部署；~/.cursor cwd 端到端 harness 报告全绿。可复用经验：buildHarnessReport 内所有内部阶段必须显式透传 workspaceRoot，禁止依赖宿主进程 cwd；改完要在非项目 cwd（如 ~/.cursor）端到端复测 harness 报告。"
+      "description": "里程碑（2026-09-02）：修复 argo-init harness 报告在 CURSOR 下的工作区错误。根因：ensureArgoHarnessEnvironment.js 中两处调用未使用 buildHarnessReport 显式传入的 workspaceRoot，回退到进程 cwd 推断（getWorkspaceRoot）：①argoMcp.callTool('validateSystemArchitecture',{}) 空参；②ensureNeo4jProjection({checkOnly}) 使 getNeo4jConfig/getNeo4jGraphSyncState/syncArchitectureToNeo4j/verifyArchitectureSync 全部按 cwd 解析；③补全 semantic lifecycle：createDefaultCanonicalSemanticInitComposition() 无参→repositoryRoot 回退 resolveWorkspaceRoot()（CURSOR 版修复遗漏，端到端复现才暴露）。宿主差异本质：OpenCode/VS Code 以项目根为 cwd 拉全局 MCP server→cwd 巧合=项目根掩盖缺陷；CURSOR 用户级 ~/.cursor/mcp.json 以配置/用户目录为 cwd→暴露。修复=显式 workspaceRoot 贯穿 validate+Neo4j+semanticLifecycle，报告在 MCP 路径也落盘（原 MCP initializeWorkspace 只返回 reportPath 不写文件）。对 VS Code/OpenCode/OpenClaw/DSH 无影响（传相同值）。交付：commits d191eaf/317a8b5；图谱 WP1361 登记；回归 12/12（argo-init-interface/workspace-bootstrap/global-install/guardian）+ validate 通过；npm 发布 archgraph-argo@0.10.50→0.10.51 + 全局安装 + install-argo.ps1 22/22 部署；~/.cursor cwd 端到端 harness 报告全绿。可复用经验：buildHarnessReport 内所有内部阶段必须显式透传 workspaceRoot，禁止依赖宿主进程 cwd；改完要在非项目 cwd（如 ~/.cursor）端到端复测 harness 报告。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "76a0b5b",
+          "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素创建 + T1 摘要更新）"
+        }
+      ]
     }
   ],
   "relationships": [
