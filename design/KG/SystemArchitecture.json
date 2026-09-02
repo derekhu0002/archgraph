@@ -3667,7 +3667,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-02 会话摘要，第二次更新）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次会话目标（追加）：主页/README 衔接 ArchGraph 社区站与 graph-wiki 图资产仓库。\n- 关键进展：\n  1) 主页 index.html 新增 Community 衔接：导航 Community 链接 + hero「Join the Community」按钮 + 新 Community 区块（社区站/graph-wiki/Reference Library 三卡片），Links 小节收录社区与图资产仓库（编号 03→04）。\n  2) README.md 新增 Community 小节（社区站 + graph-wiki 仓库）。\n  3) tests：website.test.js 增 community-linkage、readme.test.js 增 community section 断言。AT-website-01/AT-readme-01 通过；全量 runArchitectureTests 29 中 27 通过（2 失败为既有：memory-eval-run 需在线 provider、view-context 缺 diagram-skills-view-001）。\n  4) 图谱：1318 project website 登记 community_site/graph_wiki_repo 属性 + 描述更新 + commit；1321 update README 登记 commit。commits 8099bd1（内容+测试）/ de64a6c（图谱登记）。\n- 外部资源：社区站 https://argo.derekworkspacev5.com/archgraph/（Docusaurus：文档/社区/子图库/博客，子图共建共享+治理+开放共建）；图资产仓库 https://github.com/derekhu0002/graph-wiki（推送于 2026-09-02）。\n- 可复用经验：主页/README 等用户面交付件改动遵循「内容+测试断言同步 + 图谱元素登记」，删除外部链接测试前先确认目标资源；community 区块插在 howto 与 links 之间不影响既有顺序断言（install 在 about 与 howto 之间仍成立）。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider\n  - 全局包已升 0.10.51（修复两处 workspaceRoot 透传）\n- 本会话前半段已完成 CURSOR argo-init 工作区错误修复 + npm 0.10.50/0.10.51 发布部署（详见 LTM overseer-harness-workspaceroot-fix-001）。",
+      "description": "# 项目总管 工作记忆（2026-09-02 会话摘要，第三次更新）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次会话目标（追加）：主页/README 三处改版——Install 补前置依赖与 deploy 配置、How to use 补 argo init、去除 Reference Library（社区承接）。\n- 关键进展：\n  1) index.html：Install & deploy 新增 Prerequisites 两张卡（Neo4j 存结构投影 + embedding/向量引擎）+ ~/.argo/.env 键（ARGO_NEO4J_DATABASE_URL/USERNAME/PASSWORD、ARGO_EMBEDDING_BASE_URL/MODEL/PROVIDER/MODEL_VERSION/DIMENSIONS、QWEN_KEY）与取值来源（Neo4j 实例、DashScope）；How to use 增 Step 0 argo init（initializeWorkspace 初始化）；Community 保留社区站+graph-wiki，去掉 Reference Library 导航/按钮/卡片。\n  2) README.md 同步 Install 前置依赖/.env 键 + How to use argo init（无 Reference 内容需删）。\n  3) 彻底移除 Reference Library：git rm KGlibrary/（4 参考项目，含 XKG-TEST 子图快照）+ docs/kglibrary.html；website.test.js 删 kglibrary-area 增 reference-library-removed/.env/argo-init 断言；readme.test.js 同步。\n  4) 图谱：1311 AT-website-01 描述刷新；1318/1321 登记 commit cd365ea；1320 kglibrary-info-format Rule + 视图 179 退役标记（KGlibrary 目录删除但图谱元素保留作历史）。commits cd365ea（内容+删除）/ 9f789d8（图谱登记）。\n- 验收：AT-website-01/AT-readme-01/AT-custom-domain-01 通过；全量 runArchitectureTests 29 中 27 通过（2 失败为既有：memory-eval-run 在线 provider、view-context 缺 diagram-skills-view-001）；validateSystemArchitecture 通过。\n- 决策：参考图库角色彻底交由 community 子图库 + graph-wiki 承接；KGlibrary 目录删除在 git 历史可回滚；developer-community 文档中 KGlibrary/ 作为大子图承载处的描述未改动（独立机制，遗留待办）。\n- 可复用经验：runArchitectureTests 会刷新 deliveryStatus 副产物，随提交即可；更新图谱 testcase 描述用 applySystemArchitectureMutation updateElement patch.testcases（preview 先行）；退役元素不改结构只加 retired 属性+描述。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider\n  - developer-community-*.md 中「>10MB 子图提交仓库 KGlibrary/」承载描述已失配（目录已删），需后续更新为 graph-wiki/社区承载\n  - 全局包 0.10.51（修复两处 workspaceRoot 透传）\n- 本会话前段：CURSOR argo-init 修复 + npm 0.10.50/0.10.51 发布部署 + 官网衔接社区（详见 LTM overseer-harness-workspaceroot-fix-001 / overseer-community-linkage-001）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4346,6 +4346,13 @@
           "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素创建 + T1 摘要更新）"
         }
       ]
+    },
+    {
+      "description": "里程碑（2026-09-02）：主页/README 三处改版 + Reference Library 彻底移除。①Install & deploy 补前置依赖（Neo4j 图数据库存结构投影 + embedding/向量引擎供语义 Graph RAG）与 ~/.argo/.env 配置键（ARGO_NEO4J_DATABASE_URL/USERNAME/PASSWORD、ARGO_EMBEDDING_*、QWEN_KEY）及取值来源（Neo4j 实例、DashScope）；②How to use 补 Step 0 argo init（initializeWorkspace：创建 starter SystemArchitecture.json、JSON→Neo4j 同步、语义生命周期、校验）；③Community 保留社区站+graph-wiki，参考图库角色由社区子图库承接。彻底移除 Reference Library：git rm KGlibrary/（GPT-Research/GPT-Researcher-Agent-Method/McKinsey-5-Step/XKG-TEST 四参考项目）+ docs/kglibrary.html；图谱 1320 kglibrary-info-format Rule + 视图 179 退役标记（元素保留作历史）；website/readme 测试同步（AT-website-01 描述刷新）。验收：AT-website-01/AT-readme-01 通过，全量 27/29（2 既有失败），validate 通过。commits cd365ea/9f789d8。决策：参考图库彻底交 community/graph-wiki；KGlibrary 目录 git 历史可回滚；developer-community 文档的 KGlibrary 承载描述（独立机制）遗留待更新。",
+      "id": "overseer-homepage-v3-kglibrary-retire-001",
+      "name": "里程碑：主页 v3 改版 + Reference Library 移除（community 承接）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -5978,7 +5985,8 @@
         "overseer-teamai-insight-001",
         "overseer-graph-mcp-deploy-001",
         "overseer-harness-workspaceroot-fix-001",
-        "overseer-community-linkage-001"
+        "overseer-community-linkage-001",
+        "overseer-homepage-v3-kglibrary-retire-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
