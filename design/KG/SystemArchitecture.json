@@ -4313,7 +4313,14 @@
       "id": "overseer-community-linkage-001",
       "name": "里程碑：官网/README 衔接 ArchGraph 社区与 graph-wiki",
       "parent": "project-overseer-001",
-      "type": "Business Object"
+      "type": "Business Object",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "aa7f462",
+          "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素创建 + T1 摘要更新）"
+        }
+      ]
     }
   ],
   "relationships": [
