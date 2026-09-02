@@ -3610,7 +3610,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-02 会话摘要）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次进展：\n  graph-mcp（url https://argo.derekworkspacev5.com/mcp）作为默认 MCP 配置写入部署包（WP1361/install-argo.ps1），形态按宿主 MCP schema 差异化：OpenCode={type:remote,url,enabled}、Cursor={url}（type 仅 stdio 用）、VS Code={type:http,url}、OpenClaw={url,transport:streamable-http,enabled}；DSH 记 limitation。AT-1361-01/02 挂载。\n  修复三处宿主无法加载 graph-mcp：OpenClaw 缺 transport 按 SSE 拨号 404（cc17b0d）；Cursor/VS Code 不认 type:remote（148ec80）。真实 ~/.cursor/mcp.json、VS Code mcp.json、~/.openclaw/openclaw.json 均已修复（各有 .graph-mcp-fix.bak），OpenClaw probe 4 tools 通过。\n- 可复用经验（关键）：不同宿主 MCP server schema 不同，不能一律同构——OpenCode 用 type:remote；Cursor 远程只写 url；VS Code 用 type:http；OpenClaw 以 transport 为键（streamable-http/sse/stdio）。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider",
+      "description": "# 项目总管 工作记忆（2026-09-02 会话结束摘要）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次会话目标：将 graph-mcp（url https://argo.derekworkspacev5.com/mcp, enabled）作为默认 MCP 配置写入部署包并跑通各宿主。\n- 关键进展（全部落地）：\n  1) WP1361/install-argo.ps1：四宿主默认注册 graph-mcp，形态按宿主 MCP schema 差异化——OpenCode(mcp)={type:remote,url,enabled}、Cursor(mcpServers)={url}、VS Code(servers)={type:http,url}、OpenClaw(mcp.servers)={url,transport:streamable-http,enabled}；DSH 记 limitation 不写。WP1361 挂 AT-1361-01/02（tests/argo-deploy/openclaw）。\n  2) 修复三处宿主无法加载：OpenClaw 缺 transport 按 SSE 拨号 404（cc17b0d）；Cursor/VS Code 不认 type:remote（148ec80）。\n  3) 修复坏版本全局包：npm 全局包 archgraph-argo@0.10.47 为中途坏版本（调用点引用未定义 $graphMcpServer），部署后 graph-mcp 写成 null；用仓库正确脚本重跑修复真实宿主（Cursor/VS Code/OpenCode 恢复非 null，OpenClaw 早已正确）；用户自行重打包全局包。\n- 验收：argo-deploy 6/6、argo-openclaw 6/6、guardian 4/4、sandbox 8/8、validateSystemArchitecture 通过；本会话 graph-mcp 工具可用（graph_list 返回 graph-collab-demo）。\n- 可复用经验：不同宿主 MCP server schema 不同不能一律同构（OpenCode type:remote / Cursor url / VS Code type:http / OpenClaw transport）；install-argo.ps1 中途状态被打包发布会写出 null——发布前需确认调用点变量与定义一致。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider\n  - 全局包需用户自行重打包替换坏的 0.10.47（工作区 package.json 已为 0.10.48）",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3632,8 +3632,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-02T00:00:00.000Z",
-          "description": "2026-09-02 会话更新（graph-mcp 宿主差异修复完成）"
+          "value": "2026-09-02T02:00:00.000Z",
+          "description": "2026-09-02 会话结束摘要（graph-mcp 全链路交付 + 宿主差异修复 + 坏全局包修复）"
         },
         {
           "name": "commit",
