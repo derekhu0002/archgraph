@@ -170,7 +170,7 @@
       "name": "project website",
       "parent": "1240",
       "type": "Application Component",
-      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力；What is this 置于页面最前）、紧随其后的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯），并提供 GitHub 仓库入口；Reference Library（KGlibrary 案例库）通过导航链接到独立页面 docs/kglibrary.html，Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
+      "description": "GitHub Pages 项目主页（index.html），本项目的对外门户。向访客展示：项目定位（ArchGraph：构建一种统一语言，将 harness 设计与目标产品设计放进同一模型，提供统一视图以作业与观察、形成人对 Agent 工作的掌控力；What is this 置于页面最前）、紧随其后的 Install 部署小节（npm install -g archgraph-argo 与 argo-deploy 两条命令，并说明语义查询需要 Neo4j 与向量引擎）、How to use 小节（用户视角的编码代理工作流：定位元素、武装 Skills/Rules、测试先行、提交可追溯），并提供 GitHub 仓库入口；Community 区块衔接对外社区（community_site https://argo.derekworkspacev5.com/archgraph/ 与图资产仓库 graph_wiki_repo https://github.com/derekhu0002/graph-wiki：子图共建共享/治理规范/开放共建，导航与 hero 均提供入口）；Reference Library（KGlibrary 案例库）通过导航链接到独立页面 docs/kglibrary.html，Insights 通过导航链接到独立列表页 docs/insights.html（含「ArchGraph 带来的额外收益」洞察文章）。已配置自定义域名 archgraph.org（DNS A 记录指向 GitHub Pages），与默认域名 https://derekhu0002.github.io/archgraph/ 等价访问。",
       "attributes": [
         {
           "name": "commit",
@@ -258,6 +258,19 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "community_site",
+          "value": "https://argo.derekworkspacev5.com/archgraph/"
+        },
+        {
+          "name": "graph_wiki_repo",
+          "value": "https://github.com/derekhu0002/graph-wiki"
+        },
+        {
+          "name": "commit",
+          "value": "8099bd1",
+          "description": "index.html; tests/website.test.js; design/KG/SystemArchitecture.json（主页衔接 ArchGraph 社区与 graph-wiki：新增 Community 区块/导航/hero 按钮，Links 收录社区与图资产仓库）"
         }
       ],
       "testcases": [
@@ -375,6 +388,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "8099bd1",
+          "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json（README 新增 Community 小节衔接社区站与 graph-wiki 图资产仓库）"
         }
       ],
       "testcases": [
@@ -939,10 +957,6 @@
           "description": "argo/scripts/ensureArgoHarnessEnvironment.js; argo/scripts/argo-mcp-server.js; argo/skills/argo-init/SKILL.md; tests/argo-init-interface.test.js; design/KG/SystemArchitecture.json（argo-init 确定性初始化收进 initializeWorkspace MCP 接口：skill 不再执行 WORKSPACE 外脚本；initializeWorkspace 进程内构建完整 harness 报告（mcp/systemArchitecture/subdiagramViews/neo4j/semanticLifecycle））"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "55e32c2",
           "description": "install-argo.ps1 (Write-McpConfig ExtraServers + OpenCode/Cursor/VS Code graph-mcp remote 默认注册; Write-OpenClawMcpConfig GraphMcpServer; DSH limitation note); tests/argo-deploy.test.js; tests/argo-openclaw.test.js; design/KG/SystemArchitecture.json (WP1361 AT-1361-01/02)"
@@ -971,6 +985,10 @@
           "name": "commit",
           "value": "317a8b5",
           "description": "argo/scripts/ensureArgoHarnessEnvironment.js（semantic lifecycle 分支同源修复：createDefaultCanonicalSemanticInitComposition 显式传 repositoryRoot，消除对进程 cwd 的依赖）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -2443,10 +2461,6 @@
           "description": "updateArchitectureElement patch.attributes 改为按 name 定向合并（upsert + {name,op:'remove'} 删除，未提及属性保留），修复单属性更新清空其它属性的 footgun；argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-element-mutation.test.js"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "de1f9e8",
           "description": "mergeAttributesPatch 修复多值台账（commit 台账按 name+value 追加，单值属性按 name 就地 upsert，op:remove 支持按 name+value）；argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/architecture-element-mutation.test.js"
@@ -2470,6 +2484,10 @@
           "name": "commit",
           "value": "4d491cf",
           "description": "argo/rules/archgraph.instructions.md（新增 MemoryTierConventions：三层记忆操作机制直接放规则免 skill 加载——视图约定/memoryTier/T1 幂等覆盖/T3 只移不删）；tests/argo-rules-memory-tiers.test.js"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3103,13 +3121,13 @@
           "value": "75d0e53"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "4324a7b",
           "description": "scripts/memory-eval-run.js（维度 7 两步回忆 TR-01~03）；docs/memory-eval-dataset.md; tests/memory-eval-run.test.js; design/KG/SystemArchitecture.json（AT-memory-eval-run-03）；harness 31/31 100%"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ]
     },
@@ -3499,7 +3517,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "delivered"
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -3612,6 +3630,10 @@
           "name": "commit",
           "value": "536b0c1",
           "description": "scripts/memory-archive.js（归档迁移 T2->T3 只移不删：delivered/COMPLETED+年龄门，无日期安全跳过）；tests/memory-archive.test.js; design/KG/SystemArchitecture.json（AT-memory-archive-01）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3664,6 +3686,10 @@
           "name": "commit",
           "value": "f34ade2",
           "description": "design/KG/SystemArchitecture.json（T1 会话结束摘要 2026-09-02）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
