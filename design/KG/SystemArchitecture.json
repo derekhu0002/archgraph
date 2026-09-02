@@ -941,6 +941,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "55e32c2",
+          "description": "install-argo.ps1 (Write-McpConfig ExtraServers + OpenCode/Cursor/VS Code graph-mcp remote 默认注册; Write-OpenClawMcpConfig GraphMcpServer; DSH limitation note); tests/argo-deploy.test.js; tests/argo-openclaw.test.js; design/KG/SystemArchitecture.json (WP1361 AT-1361-01/02)"
         }
       ],
       "testcases": [
