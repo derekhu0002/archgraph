@@ -4352,7 +4352,14 @@
       "id": "overseer-homepage-v3-kglibrary-retire-001",
       "name": "里程碑：主页 v3 改版 + Reference Library 移除（community 承接）",
       "parent": "project-overseer-001",
-      "type": "Business Object"
+      "type": "Business Object",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "09cc836",
+          "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素创建 + T1 摘要更新）"
+        }
+      ]
     }
   ],
   "relationships": [
