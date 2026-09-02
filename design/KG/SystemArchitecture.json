@@ -3595,7 +3595,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-01 会话摘要）\n- 身份：项目总管（ArchGraph 项目 overseer），人类伙伴未指定角色时默认对话身份\n- 本次进展：\n  - 洞察 teamai + 组建「业界技术洞察团队」（视图 insight-team-001）：洞察Lead + 麦肯锡新五步法五角色（界定/拆解/假设/验证/综合）+ 五步法 Business Process；6 角色 OpenCode Agent 定义于 .opencode/agents/（验证分析师 alibaba-cn/qwen3.8-flash 多模态佐证 qwen3-vl-plus，其余 deepseek/deepseek-v4-flash）；验证阶段强制全网数据收集 + BAILIAN MCP（opencode.json 注册 Bailian WebSearch MCP，{env:DASHSCOPE_API_KEY}）\n  - 洞察团队完成首次完整五步法洞察「组织级 AI 资产治理五大支柱」：核心结论=格式已事实收敛（SKILL.md 30+ 产品）、注册中心协议互操作是最大缺口、供应链安全成独立议题、Observability 最薄弱（中低置信）、无通用赢家需按组织画像组合策略；关键纠错：SkillHub（讯飞企业级开源注册中心）≠ ClawHub（社区市场）；AWS 五支柱覆盖最高（非 AgentKit）；JFrog 供应链安全最强\n  - 记忆：LTM 里程碑 overseer-teamai-insight-001 更新；各角色 wm/ltm 已建（insight-definer/decomposer/hypothesis/validator/synthesizer-wm-ltm）\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅；可选迭代（面向调整/补充深度/公众号文章体）\n  - Experience 层落地（阶段0-4）仍未实施\n  - 多 AGENT 协作记忆摩擦：规则为单 Actor 心智（CoperationGuideline 隔离 vs 协作视图）",
+      "description": "# 项目总管 工作记忆（2026-09-02 会话摘要）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次进展：按人类伙伴要求将 graph-mcp（remote https://argo.derekworkspacev5.com/mcp）作为默认 MCP 配置加入部署包（WP1361/install-argo.ps1）：OpenCode/Cursor/VS Code/OpenClaw 四宿主默认注册 graph-mcp remote 条目（与 argo 平级，-GraphMcpUrl 可覆盖）；DSH 因 cordis 仅插件行记 limitation 提示不写坏配置。WP1361 挂载 AT-1361-01/02。回归：argo-deploy 6/6、argo-openclaw 6/6、guardian 4/4、sandbox 8/8；runArchitectureTests 27/29（本变更 AT 全过）。commit 55e32c2 + 图谱回登记 129b020 + LTM 里程碑 overseer-graph-mcp-deploy-001。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）仍未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider\n  - graph-mcp remote 在 Cursor/VS Code 若宿主 schema 不认 remote/url/enabled 形态需后续实测确认",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3617,8 +3617,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-01T02:00:00.000Z",
-          "description": "2026-09-01 会话摘要更新（洞察团队完成首次洞察）"
+          "value": "2026-09-02T00:00:00.000Z",
+          "description": "2026-09-02 会话摘要更新（graph-mcp 默认 MCP 注册入部署包）"
         }
       ],
       "testcases": [
@@ -4161,6 +4161,25 @@
           "name": "commit",
           "value": "acbff17",
           "description": ".opencode/skills/architecture-diagram/SKILL.md; .opencode/skills/architecture-diagram/resources/template.html; docs/diagrams/insight-teamai-logical.html"
+        }
+      ]
+    },
+    {
+      "id": "overseer-graph-mcp-deploy-001",
+      "name": "里程碑：graph-mcp 默认 MCP 配置加入部署包",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-09-02）：按人类伙伴要求把 graph-mcp（type remote, url https://argo.derekworkspacev5.com/mcp, enabled true）作为默认 MCP 配置写入部署包。落地：install-argo.ps1 Write-McpConfig 增加 ExtraServers 参数、Write-OpenClawMcpConfig 增加 GraphMcpServer，OpenCode（mcp）、Cursor（mcpServers）、VS Code（servers）、OpenClaw（mcp.servers）四宿主均默认注册 graph-mcp remote 与 argo 平级（graph-mcp URL 默认值可 -GraphMcpUrl 覆盖）；DSH（~/.dsh/cordis.patch.yml 仅插件行，HTTP 远程 MCP 无对应行）记 limitation 提示不写坏配置；WP1361 挂载 AT-1361-01（tests/argo-deploy.test.js）与 AT-1361-02（tests/argo-openclaw.test.js）。验收：argo-deploy 6/6、argo-openclaw 6/6、acceptance-guardian 4/4、sandbox-framework 8/8、runArchitectureTests 27/29（本变更 AT 全过，两失败为既有：architecture-view-context 期望列表缺 diagram-skills-view-001——7851a1e/28f8998 引入 diagram skills 子视图时未同步测试；memory-eval-run 需在线 provider），validateSystemArchitecture 通过。commit：55e32c2 + 图谱回登记 129b020。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "55e32c2",
+          "description": "install-argo.ps1; tests/argo-deploy.test.js; tests/argo-openclaw.test.js; design/KG/SystemArchitecture.json（WP1361 AT-1361-01/02）"
+        },
+        {
+          "name": "commit",
+          "value": "129b020",
+          "description": "design/KG/SystemArchitecture.json（commit attr 图谱回登记）"
         }
       ]
     }
@@ -5792,7 +5811,8 @@
         "overseer-mcp-tool-surface-001",
         "overseer-memory-tiers-001",
         "overseer-failure-exp-concept-001",
-        "overseer-teamai-insight-001"
+        "overseer-teamai-insight-001",
+        "overseer-graph-mcp-deploy-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
