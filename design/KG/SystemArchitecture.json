@@ -3619,6 +3619,11 @@
           "name": "lastSummaryAt",
           "value": "2026-09-02T00:00:00.000Z",
           "description": "2026-09-02 会话摘要更新（graph-mcp 默认 MCP 注册入部署包）"
+        },
+        {
+          "name": "commit",
+          "value": "7b12918",
+          "description": "design/KG/SystemArchitecture.json（2026-09-02 T1 摘要更新：graph-mcp 默认 MCP 注册入部署包）"
         }
       ],
       "testcases": [
@@ -4180,6 +4185,11 @@
           "name": "commit",
           "value": "129b020",
           "description": "design/KG/SystemArchitecture.json（commit attr 图谱回登记）"
+        },
+        {
+          "name": "commit",
+          "value": "7b12918",
+          "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素创建 + T1 摘要更新）"
         }
       ]
     }
