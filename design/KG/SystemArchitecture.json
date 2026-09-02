@@ -3642,7 +3642,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-02 会话摘要）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次会话目标：分析并修复 CURSOR 上 argo-init 工作区错误，发布 npm 并部署。\n- 关键进展（全部落地）：\n  1) 修复 harness 报告 workspaceRoot 显式透传（宿主无关）：ensureArgoHarnessEnvironment.js 三处从进程 cwd 推断 root 改为显式透传——validateSystemArchitecture 调用、ensureNeo4jProjection（getNeo4jConfig/getNeo4jGraphSyncState/sync/verify）、semanticLifecycle createDefaultCanonicalSemanticInitComposition({repositoryRoot})；报告在 MCP initializeWorkspace 路径也真正落盘。\n  2) 根因：OpenCode/VS Code 以项目根为 cwd 拉全局 MCP→cwd 巧合=项目根掩盖缺陷；CURSOR 用户级 mcp.json 以配置/用户目录为 cwd→暴露。对 OpenCode/VS Code/OpenClaw/DSH 无影响（显式传同一 root）。\n  3) 交付：commits d191eaf+317a8b5（后者为 CURSOR 修复遗漏的 semantic lifecycle 补全，~/.cursor cwd 端到端复现才暴露）；图谱 WP1361 登记 + LTM 里程碑 overseer-harness-workspaceroot-fix-001；回归 12/12 + validate 通过；npm 发布 archgraph-argo@0.10.50→0.10.51 + 全局安装 + install-argo.ps1 22/22 部署；~/.cursor cwd 端到端 harness 报告全绿。\n- 可复用经验（关键）：①不同宿主以不同 cwd 启动全局 MCP server，buildHarnessReport 内所有内部阶段必须显式透传 workspaceRoot，禁止依赖进程 cwd/env 推断；②CURSOR 用户级 mcp.json（非项目级）不以项目根为 cwd；③改完 harness 要在非项目 cwd（如 ~/.cursor）端到端复测整份报告，OpenCode/VS Code 正常不代表无潜在缺陷；④npm publish 后 registry 同步有延迟，立即 install 会 ETARGET，等 ~15s 再装。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider\n  - 全局包已升 0.10.51（修复两处 workspaceRoot 透传）",
+      "description": "# 项目总管 工作记忆（2026-09-02 会话摘要，第二次更新）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次会话目标（追加）：主页/README 衔接 ArchGraph 社区站与 graph-wiki 图资产仓库。\n- 关键进展：\n  1) 主页 index.html 新增 Community 衔接：导航 Community 链接 + hero「Join the Community」按钮 + 新 Community 区块（社区站/graph-wiki/Reference Library 三卡片），Links 小节收录社区与图资产仓库（编号 03→04）。\n  2) README.md 新增 Community 小节（社区站 + graph-wiki 仓库）。\n  3) tests：website.test.js 增 community-linkage、readme.test.js 增 community section 断言。AT-website-01/AT-readme-01 通过；全量 runArchitectureTests 29 中 27 通过（2 失败为既有：memory-eval-run 需在线 provider、view-context 缺 diagram-skills-view-001）。\n  4) 图谱：1318 project website 登记 community_site/graph_wiki_repo 属性 + 描述更新 + commit；1321 update README 登记 commit。commits 8099bd1（内容+测试）/ de64a6c（图谱登记）。\n- 外部资源：社区站 https://argo.derekworkspacev5.com/archgraph/（Docusaurus：文档/社区/子图库/博客，子图共建共享+治理+开放共建）；图资产仓库 https://github.com/derekhu0002/graph-wiki（推送于 2026-09-02）。\n- 可复用经验：主页/README 等用户面交付件改动遵循「内容+测试断言同步 + 图谱元素登记」，删除外部链接测试前先确认目标资源；community 区块插在 howto 与 links 之间不影响既有顺序断言（install 在 about 与 howto 之间仍成立）。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider\n  - 全局包已升 0.10.51（修复两处 workspaceRoot 透传）\n- 本会话前半段已完成 CURSOR argo-init 工作区错误修复 + npm 0.10.50/0.10.51 发布部署（详见 LTM overseer-harness-workspaceroot-fix-001）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4307,6 +4307,13 @@
           "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素创建 + T1 摘要更新）"
         }
       ]
+    },
+    {
+      "description": "里程碑（2026-09-02）：ArchGraph 建立对外社区并完成官网/README 衔接。外部资源：社区站 https://argo.derekworkspacev5.com/archgraph/（Docusaurus：文档/社区/子图库/博客；定位子图共建共享/治理与规范/开放共建，跨项目共享架构知识）；图资产仓库 https://github.com/derekhu0002/graph-wiki（社区与图谱资产 home，可贡献/复用架构子图）。交付：主页 index.html 新增 Community 区块+导航+hero 按钮+Links 收录两入口；README.md 新增 Community 小节；website/readme 测试增断言（AT-website-01/AT-readme-01 通过）。图谱：1318 project website 登记 community_site/graph_wiki_repo 属性+描述更新+commit，1321 update README 登记 commit。commits 8099bd1/de64a6c。决策：主页衔接用英文（与现主页一致）+独立 Community 区块（非仅链接），使访客能理解社区定位（子图库/治理/共建）。",
+      "id": "overseer-community-linkage-001",
+      "name": "里程碑：官网/README 衔接 ArchGraph 社区与 graph-wiki",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -5938,7 +5945,8 @@
         "overseer-failure-exp-concept-001",
         "overseer-teamai-insight-001",
         "overseer-graph-mcp-deploy-001",
-        "overseer-harness-workspaceroot-fix-001"
+        "overseer-harness-workspaceroot-fix-001",
+        "overseer-community-linkage-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
