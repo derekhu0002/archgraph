@@ -3649,6 +3649,11 @@
           "name": "commit",
           "value": "3c0155a",
           "description": "design/KG/SystemArchitecture.json（T1 摘要更新：Cursor/VS Code/OpenClaw 宿主差异 pitfall）"
+        },
+        {
+          "name": "commit",
+          "value": "f34ade2",
+          "description": "design/KG/SystemArchitecture.json（T1 会话结束摘要 2026-09-02）"
         }
       ],
       "testcases": [
