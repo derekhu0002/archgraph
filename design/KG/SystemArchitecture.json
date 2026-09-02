@@ -946,6 +946,11 @@
           "name": "commit",
           "value": "55e32c2",
           "description": "install-argo.ps1 (Write-McpConfig ExtraServers + OpenCode/Cursor/VS Code graph-mcp remote 默认注册; Write-OpenClawMcpConfig GraphMcpServer; DSH limitation note); tests/argo-deploy.test.js; tests/argo-openclaw.test.js; design/KG/SystemArchitecture.json (WP1361 AT-1361-01/02)"
+        },
+        {
+          "name": "commit",
+          "value": "cc17b0d",
+          "description": "install-argo.ps1 (OpenClaw graph-mcp 用 url+transport=streamable-http+enabled 形态，修复缺 transport 按 SSE 拨号 404); tests/argo-openclaw.test.js; design/KG/SystemArchitecture.json (AT-1361-02 描述同步)"
         }
       ],
       "testcases": [
