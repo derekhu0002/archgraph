@@ -3620,7 +3620,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-02 会话结束摘要）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次会话目标：将 graph-mcp（url https://argo.derekworkspacev5.com/mcp, enabled）作为默认 MCP 配置写入部署包并跑通各宿主。\n- 关键进展（全部落地）：\n  1) WP1361/install-argo.ps1：四宿主默认注册 graph-mcp，形态按宿主 MCP schema 差异化——OpenCode(mcp)={type:remote,url,enabled}、Cursor(mcpServers)={url}、VS Code(servers)={type:http,url}、OpenClaw(mcp.servers)={url,transport:streamable-http,enabled}；DSH 记 limitation 不写。WP1361 挂 AT-1361-01/02（tests/argo-deploy/openclaw）。\n  2) 修复三处宿主无法加载：OpenClaw 缺 transport 按 SSE 拨号 404（cc17b0d）；Cursor/VS Code 不认 type:remote（148ec80）。\n  3) 修复坏版本全局包：npm 全局包 archgraph-argo@0.10.47 为中途坏版本（调用点引用未定义 $graphMcpServer），部署后 graph-mcp 写成 null；用仓库正确脚本重跑修复真实宿主（Cursor/VS Code/OpenCode 恢复非 null，OpenClaw 早已正确）；用户自行重打包全局包。\n- 验收：argo-deploy 6/6、argo-openclaw 6/6、guardian 4/4、sandbox 8/8、validateSystemArchitecture 通过；本会话 graph-mcp 工具可用（graph_list 返回 graph-collab-demo）。\n- 可复用经验：不同宿主 MCP server schema 不同不能一律同构（OpenCode type:remote / Cursor url / VS Code type:http / OpenClaw transport）；install-argo.ps1 中途状态被打包发布会写出 null——发布前需确认调用点变量与定义一致。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider\n  - 全局包需用户自行重打包替换坏的 0.10.47（工作区 package.json 已为 0.10.48）",
+      "description": "# 项目总管 工作记忆（2026-09-02 会话摘要）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本次会话目标：分析并修复 CURSOR 上 argo-init 工作区错误，发布 npm 并部署。\n- 关键进展（全部落地）：\n  1) 修复 harness 报告 workspaceRoot 显式透传（宿主无关）：ensureArgoHarnessEnvironment.js 三处从进程 cwd 推断 root 改为显式透传——validateSystemArchitecture 调用、ensureNeo4jProjection（getNeo4jConfig/getNeo4jGraphSyncState/sync/verify）、semanticLifecycle createDefaultCanonicalSemanticInitComposition({repositoryRoot})；报告在 MCP initializeWorkspace 路径也真正落盘。\n  2) 根因：OpenCode/VS Code 以项目根为 cwd 拉全局 MCP→cwd 巧合=项目根掩盖缺陷；CURSOR 用户级 mcp.json 以配置/用户目录为 cwd→暴露。对 OpenCode/VS Code/OpenClaw/DSH 无影响（显式传同一 root）。\n  3) 交付：commits d191eaf+317a8b5（后者为 CURSOR 修复遗漏的 semantic lifecycle 补全，~/.cursor cwd 端到端复现才暴露）；图谱 WP1361 登记 + LTM 里程碑 overseer-harness-workspaceroot-fix-001；回归 12/12 + validate 通过；npm 发布 archgraph-argo@0.10.50→0.10.51 + 全局安装 + install-argo.ps1 22/22 部署；~/.cursor cwd 端到端 harness 报告全绿。\n- 可复用经验（关键）：①不同宿主以不同 cwd 启动全局 MCP server，buildHarnessReport 内所有内部阶段必须显式透传 workspaceRoot，禁止依赖进程 cwd/env 推断；②CURSOR 用户级 mcp.json（非项目级）不以项目根为 cwd；③改完 harness 要在非项目 cwd（如 ~/.cursor）端到端复测整份报告，OpenCode/VS Code 正常不代表无潜在缺陷；④npm publish 后 registry 同步有延迟，立即 install 会 ETARGET，等 ~15s 再装。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider\n  - 全局包已升 0.10.51（修复两处 workspaceRoot 透传）",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4267,6 +4267,13 @@
           "description": "design/KG/SystemArchitecture.json（坏全局包 0.10.47 null pitfall 记录）"
         }
       ]
+    },
+    {
+      "id": "overseer-harness-workspaceroot-fix-001",
+      "name": "里程碑：harness 报告 workspaceRoot 显式透传修复（宿主无关）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-09-02）：修复 argo-init harness 报告在 CURSOR 下的工作区错误。根因：ensureArgoHarnessEnvironment.js 中两处调用未使用 buildHarnessReport 显式传入的 workspaceRoot，回退到进程 cwd 推断（getWorkspaceRoot）：①argoMcp.callTool('validateSystemArchitecture',{}) 空参；②ensureNeo4jProjection({checkOnly}) 使 getNeo4jConfig/getNeo4jGraphSyncState/syncArchitectureToNeo4j/verifyArchitectureSync 全部按 cwd 解析；③补全 semantic lifecycle：createDefaultCanonicalSemanticInitComposition() 无参→repositoryRoot 回退 resolveWorkspaceRoot()（CURSOR 版修复遗漏，端到端复现才暴露）。宿主差异本质：OpenCode/VS Code 以项目根为 cwd 拉全局 MCP server→cwd 巧合=项目根掩盖缺陷；CURSOR 用户级 ~/.cursor/mcp.json 以配置/用户目录为 cwd→暴露。修复=显式 workspaceRoot 贯穿 validate+Neo4j+semanticLifecycle，报告在 MCP 路径也落盘（原 MCP initializeWorkspace 只返回 reportPath 不写文件）。对 VS Code/OpenCode/OpenClaw/DSH 无影响（传相同值）。交付：commits d191eaf/317a8b5；图谱 WP1361 登记；回归 12/12（argo-init-interface/workspace-bootstrap/global-install/guardian）+ validate 通过；npm 发布 archgraph-argo@0.10.50→0.10.51 + 全局安装 + install-argo.ps1 22/22 部署；~/.cursor cwd 端到端 harness 报告全绿。可复用经验：buildHarnessReport 内所有内部阶段必须显式透传 workspaceRoot，禁止依赖宿主进程 cwd；改完要在非项目 cwd（如 ~/.cursor）端到端复测 harness 报告。"
     }
   ],
   "relationships": [
@@ -5897,7 +5904,8 @@
         "overseer-memory-tiers-001",
         "overseer-failure-exp-concept-001",
         "overseer-teamai-insight-001",
-        "overseer-graph-mcp-deploy-001"
+        "overseer-graph-mcp-deploy-001",
+        "overseer-harness-workspaceroot-fix-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
