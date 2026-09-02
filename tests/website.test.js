@@ -119,6 +119,28 @@ test('openclaw-support: homepage mentions OpenClaw in install', () => {
   assert.match(HTML, /OpenClaw/, 'homepage should mention OpenClaw');
 });
 
+test('community-linkage: homepage links the community site and graph-wiki asset repo', () => {
+  // GIVEN a dedicated ArchGraph community hub and graph-wiki asset repository exist
+  // WHEN a visitor opens the homepage
+  // THEN the nav, hero and a Community section link to the community site and the graph-wiki repo
+  assert.match(HTML, /#community/, 'nav should link to the Community section');
+  assert.match(
+    HTML,
+    /argo\.derekworkspacev5\.com\/archgraph\//,
+    'homepage should link the ArchGraph community site'
+  );
+  assert.match(
+    HTML,
+    /github\.com\/derekhu0002\/graph-wiki/,
+    'homepage should link the graph-wiki asset repository'
+  );
+  assert.ok(
+    HTML.indexOf('id="community"') > HTML.indexOf('id="howto"') &&
+    HTML.indexOf('id="community"') < HTML.indexOf('id="links"'),
+    'Community section should appear after How to use and before Links'
+  );
+});
+
 test('readme-sync: home page mirrors README how-to-use', () => {
   // GIVEN the README documents how to use the framework
   // WHEN a visitor opens the homepage in a browser

@@ -59,3 +59,21 @@ test('readme: supported harnesses include OpenClaw', () => {
   assert.match(section, /OpenClaw/, 'should list OpenClaw in the harness table');
   assert.match(README, /OpenClaw/, 'README should mention OpenClaw in the install/deploy note');
 });
+
+test('readme: community section links the community site and graph-wiki asset repo', () => {
+  // GIVEN a dedicated ArchGraph community hub and graph-wiki asset repository exist
+  // WHEN a reader opens README.md
+  // THEN a Community section links to the community site and the graph-wiki asset repo
+  const section = sectionAfter(README, 'Community');
+  assert.ok(section, 'README should have a Community section');
+  assert.match(
+    section,
+    /argo\.derekworkspacev5\.com\/archgraph\//,
+    'should link the ArchGraph community site'
+  );
+  assert.match(
+    section,
+    /github\.com\/derekhu0002\/graph-wiki/,
+    'should link the graph-wiki asset repository'
+  );
+});

@@ -56,6 +56,15 @@ After installing, open your project and start a coding agent. It will:
 
 The intent architecture graph — modelled in **ArchiMate 3.2** — is the single source of truth.
 
+## Community
+
+ArchGraph runs on open co-building. Join the community hub to share, browse and reuse **architecture
+subgraphs** across projects, and follow the governance & contribution guides:
+
+- **Community site** — https://argo.derekworkspacev5.com/archgraph/ (subgraph library, docs, blog)
+- **graph-wiki repository** — https://github.com/derekhu0002/graph-wiki (graph-asset home: contribute
+  a subgraph from your project, or pull one back to reuse)
+
 ## License
 
 [Apache License 2.0](LICENSE)
