@@ -966,6 +966,11 @@
           "name": "commit",
           "value": "d191eaf",
           "description": "argo/scripts/ensureArgoHarnessEnvironment.js（CURSOR 工作区错误修复：validateSystemArchitecture 与 Neo4j sync/verify 显式透传 workspaceRoot，报告在 MCP 路径也落盘）"
+        },
+        {
+          "name": "commit",
+          "value": "317a8b5",
+          "description": "argo/scripts/ensureArgoHarnessEnvironment.js（semantic lifecycle 分支同源修复：createDefaultCanonicalSemanticInitComposition 显式传 repositoryRoot，消除对进程 cwd 的依赖）"
         }
       ],
       "testcases": [
