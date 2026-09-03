@@ -3,11 +3,11 @@
   "graphKey": "D:\\Projects\\archgraph\\design\\KG\\SystemArchitecture.json",
   "view_id": "178",
   "signature": "43de7dcc15c279b8a91402d93010968d1167ef2bfe1a1194b944747280235162",
-  "updatedAt": "2026-09-03T11:19:10.256Z",
+  "updatedAt": "2026-09-03T12:23:43.725Z",
   "elements": {
     "1354": {
-      "x": 250,
-      "y": 30
+      "x": 190,
+      "y": 50
     },
     "1355": {
       "x": 236,
@@ -27,7 +27,7 @@
     },
     "1362": {
       "x": 248,
-      "y": -257
+      "y": -110
     }
   }
 }
