@@ -4453,7 +4453,7 @@
       "id": "insight-lead-wm-summary-001",
       "name": "洞察Lead工作记忆摘要",
       "type": "Business Object",
-      "description": "洞察Lead T1 工作记忆摘要（2026-09-03，聚焦方案设计会话）：1) 本轮=人类拍板『EA=Sparx 为人类设计界面』，委托 AGENT→EA 单向实时同步聚焦方案设计（只设计不实施），方案结论→LTM milestone agent2ea-sync-001。核心推荐：观察进程（Node，fs.watch+轮询复用 ea-web-service 模式）监听 canonical JSON → 快照 diff → 写 design/KG/ea-sync-state/command-queue.jsonl(seq/checkpoint/error log)；EA 侧 JScript 执行器（eatool/EA-jsscript/apply-sync-queue.js，进程内）消费队列；定位复用既有 tag(schema_id/Alias)，更新=字段级 patch 不删建（位置安全），新增元素=view 差量补空白区或仅入树，删除=tag 存在才删+顺序合规；对象映射复用 import-from-kg 的 map* 与占位函数，主流程改为固定同步根包+增量（不复用时间戳新包全量导入）。EA 官网全站 403 无法直取一手文档，已列 3 项本地复核点供立项前验证。2) 上下文链：EA工具洞察→drawio评估→本方案；前轮结论维持（web/G6 为人机共享读/写前端；EA=人类设计界面离线批处理通道升级为单向同步目标）。3) 交付：完整方案报告作为最后消息；未实施代码、未立项。4) 经验：面向 EA 这类封闭 GUI 平台做自动化，『进程内脚本消费外部队列』比『外部进程 COM 驱动』更稳（规避文件锁/权限/实例 attach 不确定性）；证据受阻时把平台行为假设显式列为本地复核点而非硬写。",
+      "description": "洞察Lead T1 工作记忆摘要（2026-09-03，方案修订会话）：1) 本轮=人类问『能否主动经 MCP 同步到 EA』，修订 AGENT→EA 同步桥方案。结论=能：Sparx Japan 官方 MCP Server for EA v3.0.0（免费可商用）即原设计 b) 通道的官方化（MCP3.exe STDIO + EA 进程内 MCP_EA.dll add-in），推荐混合形态=同步驱动器为主（观察进程+diff+命令队列保留，Node stdio MCP client 驱动 MCP3.exe 确定性应用，复用 ea-web-service callStdio 先例；不经 LLM→无漂移），AGENT 直驱=可选。JScript 执行器降级兜底；审计双轨(CSV+侧车账本)；定位=名称/包路径/ID 账本(无 GUID，schema_id tag 仅回查锚点)；位置安全=只用 place 做新增补位、禁 layout/reset 工具、实测 create_or_update 几何不变性；删除=-enableDelete+先 create_baseline。2) 本机探测关键：EA=15.2 Trial x86 在 Program Files (x86)\\Sparx Systems\\EA Trial；MCP Server 2.8.2 x64 误装无 EA 的 Program Files\\Sparx Systems\\EA → bitness/目录错配（日志 80070005 管道中断）；.NET Desktop Runtime 10 缺失（3.0.0 需要），2.8.2 用 .NET9 可跑且已含 ArchiMate3.1 prompt/delete/审计→可先用。3) 交付：修订报告=最后消息；未实施未立项。4) 经验：官方 MCP 把『进程内写库』标准化后，原自研 JScript 执行器价值下降但仍是最稳兜底；『官方工具按名称自然定位+无 GUID』对确定性同步是短板→驱动器必须自建 ID 账本；EA Trial 环境不能代表生产授权环境，bitness 错配是环境修复第一顺位。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4909,6 +4909,22 @@
       "description": "里程碑（2026-09-03，人类拍板方向：EA=Sparx 为人类设计界面，AGENT→EA 单向实时同步，位置安全，.feap+EA桌面运行时）。聚焦方案设计（只设计不实施）：①访问通道裁决=主通道 EA 内置 JScript 执行器消费外部命令队列（全部操作在 EA 进程内，天然规避 .feap 独占锁、复用既有 eatool Repository API 用法）；外部 COM(EA.App/GetObject)仅作 EA 未占用时的可选自动增强；EA Server 否决（单机过重）。②差异引擎=观察进程 fs.watch+轮询(复用 ea-web-service 模式)读 canonical JSON→规范化快照 diff→写 design/KG/ea-sync-state/command-queue.jsonl(JSONL, seq 递增)+checkpoint+error log；EA 侧定位复用 import-from-kg 已写的 tag(schema_id/archimate_type/Alias)→查 tag 定位，GUID 映射表非必需。③位置安全=EA DiagramObject 位置与 Element 定义分离（仓库 addElementToDiagram 实证 geometry 独立）；更新=字段级 patch 绝不删建；新增元素进图策略推荐=view 成员差量补空白区(包围盒外)否则仅入模型树；删除=先关系后元素、tag 存在才删。④字段权属=KG 权威字段(name/type/description/attributes/included 成员) vs EA 侧自由(DiagramObject 几何/手绘元素/非 schema_ 前缀 tag)。⑤对象映射=复用 mapElementTypeToEa/mapRelationshipTypeToEa(Direction 修复 00d831d)/ensure 挂载/网格占位函数，不复用 main 的『时间戳新包全量导入』；改为固定同步根包+增量。切片 S1 add/update 闭环→S2 delete+视图差量+错误日志→S3 GUID 缓存/Addin 自动。证据：Sparx 官网 403 反爬无法直取，EA 平台行为以仓库产线脚本为准，列 3 项本地复核点（同 .feap 双实例行为、EA.App COM 行为、DiagramObject 位置独立性）供立项前验证。",
       "id": "insight-lead-milestone-agent2ea-sync-001",
       "name": "里程碑：AGENT→EA 单向实时同步方案设计",
+      "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "里程碑（2026-09-03，方案修订：能否主动经 EA 官方 MCP 同步）：结论=能。Sparx Systems Japan MCP Server for EA v3.0.0（2026-09-02 发布，免费可商用；STDIO MCP3.exe + EA 进程内 add-in MCP_EA.dll→天然规避 .feap 锁，与原设计 b) 通道同构但官方化）。推荐形态=混合 c)：主=同步驱动器（保留观察进程+diff+命令队列，Node 以 STDIO MCP client 驱动 MCP3.exe -enableEdit 确定性应用差异——复用 scripts/ea-web-service.js callStdio 现成客户端模式 L594-649，不经 LLM 无漂移）；AGENT 直驱=可选实验通道（需 agent 规则纪律）。取舍：命令队列/checkpoint 保留（幂等+断点）；JScript 执行器降级为无 MCP 环境兜底；审计双轨=-modifiedInfoPath CSV(EA 侧实际变更) + 侧车账本(意图/重放)。定位适配无 GUID：官方按名称自然定位；策略=同步根包路径限定+find_elements_by_name 精确匹配+create/update 返回 EA ID 写入侧车映射账本(KG id↔EA id+名称+包路径)；schema_id tag 仍写入作回查锚点但无按 tag 查询工具；ArchiMate 类型字符串须对接 EA Automation 接口（官方仅 SysML/UML/BPMN + v2.3.10 起 ArchiMate 3.1 limited prompt，3.2 需自建扩展，可复用 import-from-kg mapElementTypeToEa）。位置安全：官方 v2.3.4 已把 layout_diagram 改名 reset_diagram 防 LLM 破坏布局；place_elements_on_diagram 2.4.4 起可更新已有元素位置→只用于新增补位、绝不改已有元素、禁用 layout/reset 工具；create_or_update_elements 是否动几何需实测。删除：-enableDelete 官方警告曾误删整个包→只删账本确认目标+删除前 create_baseline(官方工具)。本机探测(2026-09-03)：EA=15.2 Trial x86(Program Files (x86)\\Sparx Systems\\EA Trial)，MCP Server 2.8.2 x64 装进无 EA 的 Program Files\\Sparx Systems\\EA → bitness/目录错配，MCP_EA.log 现 80070005 访问被拒+管道中断；.NET Desktop Runtime 仅 8.0.6/9.0.17，v3.0.0 需 10.0→升级前须装；MCP_Server 目录证实 MCP3.exe+deps+ModelContextProtocol.dll+MCP_EA.dll 架构。切片：R-S1 环境对齐+只读连通验证→R-S2 add/update diff 应用+ID 账本+审计→R-S3 delete+baseline+视图差量补位；决策点新增 D7 环境修复(授权版 vs Trial、bitness、.NET10)、D8 升级 3.0.0 或先用 2.8.2(.NET9 已满足、已含 ArchiMate3.1 prompt/delete/审计)。",
+      "id": "insight-lead-milestone-agent2ea-mcp-revision-001",
+      "name": "里程碑：修订 AGENT→EA 同步桥为官方 MCP 主通道",
       "type": "Business Object"
     }
   ],
@@ -6798,7 +6814,8 @@
       "included_elements": [
         "insight-lead-milestone-ea-tool-frontend-001",
         "insight-lead-milestone-drawio-eval-001",
-        "insight-lead-milestone-agent2ea-sync-001"
+        "insight-lead-milestone-agent2ea-sync-001",
+        "insight-lead-milestone-agent2ea-mcp-revision-001"
       ],
       "included_relationships": []
     }
