@@ -26,7 +26,10 @@ param(
     [string]$OpenClawRepoRoot = '',
     [switch]$SkipOpenClaw,
     [string]$McpPath,
-    [string]$GraphMcpUrl = 'https://argo.derekworkspacev5.com/mcp'
+    [string]$GraphMcpUrl = 'https://argo.derekworkspacev5.com/mcp',
+    [switch]$SkipEaWeb,
+    [int]$EaWebPort = 8787,
+    [string]$EaWebRoot = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -737,37 +740,37 @@ Write-Host '==> Deploying Argo toolchain'
 
 $schemaSrc = Join-Path $argoDir 'schema'
 $schemaDest = Join-Path $ArgoRoot 'schema'
-Write-Host "[1/22] argo\schema -> $schemaDest"
+Write-Host "[1/23] argo\schema -> $schemaDest"
 Copy-Tree -Source $schemaSrc -Destination $schemaDest
 
 $scriptsSrc = Join-Path $argoDir 'scripts'
 $scriptsDest = Join-Path $ArgoRoot 'scripts'
-Write-Host "[2/22] argo\scripts -> $scriptsDest"
+Write-Host "[2/23] argo\scripts -> $scriptsDest"
 Copy-Tree -Source $scriptsSrc -Destination $scriptsDest
 
 $defaultsSrc = Join-Path $argoDir 'defaults'
 $defaultsDest = Join-Path $ArgoRoot 'defaults'
-Write-Host "[3/22] argo\defaults -> $defaultsDest"
+Write-Host "[3/23] argo\defaults -> $defaultsDest"
 Copy-Tree -Source $defaultsSrc -Destination $defaultsDest
 
 $skillSrc = Join-Path (Join-Path $argoDir 'skills') 'argo-init'
 $skillDest = Join-Path $SkillsRoot 'argo-init'
-Write-Host "[4/22] argo\skills\argo-init -> $skillDest"
+Write-Host "[4/23] argo\skills\argo-init -> $skillDest"
 Copy-Tree -Source $skillSrc -Destination $skillDest
 
 $ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
 $ruleDest = Join-Path $PromptsRoot 'archgraph.instructions.md'
-Write-Host "[5/22] argo\rules\archgraph.instructions.md -> $ruleDest"
+Write-Host "[5/23] argo\rules\archgraph.instructions.md -> $ruleDest"
 New-Item -ItemType Directory -Force -Path $PromptsRoot | Out-Null
 Copy-Item -Force -Path $ruleSrc -Destination $ruleDest
 
 $depsSrc = Join-Path $argoDir 'package.json'
 $depsDest = Join-Path $ArgoRoot 'package.json'
-Write-Host "[6/22] argo\package.json -> $depsDest"
+Write-Host "[6/23] argo\package.json -> $depsDest"
 Copy-Item -Force -Path $depsSrc -Destination $depsDest
 
 $cursorSkillDest = Join-Path $CursorSkillsRoot 'argo-init'
-Write-Host "[7/22] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
+Write-Host "[7/23] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
 Copy-Tree -Source $skillSrc -Destination $cursorSkillDest
 
 $mcpBridgeSrc = Join-Path $argoDir 'mcp-bridges'
@@ -776,29 +779,29 @@ Write-Host "  argo\mcp-bridges -> $mcpBridgeDest (Cursor graph-mcp stdio bridge)
 Copy-Tree -Source $mcpBridgeSrc -Destination $mcpBridgeDest
 
 $openCodeSkillDest = Join-Path $OpenCodeSkillsRoot 'argo-init'
-Write-Host "[8/22] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
+Write-Host "[8/23] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
 Copy-Tree -Source $skillSrc -Destination $openCodeSkillDest
 
-Write-Host "[9/22] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
+Write-Host "[9/23] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
 Add-AgentsRule -AgentsPath $OpenCodeAgentsPath -RulePath $ruleSrc
 
 $agentsSrc = Join-Path $argoDir 'agents'
-Write-Host "[10/22] argo\agents -> $CopilotAgentsRoot (Copilot user-level)"
+Write-Host "[10/23] argo\agents -> $CopilotAgentsRoot (Copilot user-level)"
 Copy-Agents -Source $agentsSrc -Destination $CopilotAgentsRoot
 
-Write-Host "[11/22] argo\agents -> $CursorAgentsRoot (Cursor user-level, converted to .md)"
+Write-Host "[11/23] argo\agents -> $CursorAgentsRoot (Cursor user-level, converted to .md)"
 Copy-Agents -Source $agentsSrc -Destination $CursorAgentsRoot -Target cursor
 
-Write-Host "[12/22] argo\agents -> $OpenCodeAgentsRoot (OpenCode user-level, converted to .md)"
+Write-Host "[12/23] argo\agents -> $OpenCodeAgentsRoot (OpenCode user-level, converted to .md)"
 Copy-Agents -Source $agentsSrc -Destination $OpenCodeAgentsRoot -Target opencode
 
 $pluginsSrc = Join-Path $argoDir 'plugins'
-Write-Host "[13/22] argo\plugins -> $PluginsRoot (Argo opencode plugins)"
+Write-Host "[13/23] argo\plugins -> $PluginsRoot (Argo opencode plugins)"
 Copy-Tree -Source $pluginsSrc -Destination $PluginsRoot
 
 $cursorRuleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
 $cursorRuleDest = Join-Path $CursorRulesRoot 'archgraph.mdc'
-Write-Host "[14/22] argo\rules\archgraph.instructions.md -> $cursorRuleDest (Cursor global rule, alwaysApply)"
+Write-Host "[14/23] argo\rules\archgraph.instructions.md -> $cursorRuleDest (Cursor global rule, alwaysApply)"
 New-Item -ItemType Directory -Force -Path $CursorRulesRoot | Out-Null
 Convert-RuleFile -SourceFile $cursorRuleSrc -DestinationFile $cursorRuleDest
 
@@ -810,16 +813,16 @@ if ($SkipDsh) {
     $patchPath = Join-Path $DshHome 'cordis.patch.yml'
     $argoServer = (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js').Replace('\', '/')
 
-    Write-Host "[15/22] argo\rules\archgraph.instructions.md -> $DshHome\AGENTS.md (DeepSeek Harness user-global rule, frontmatter stripped)"
+    Write-Host "[15/23] argo\rules\archgraph.instructions.md -> $DshHome\AGENTS.md (DeepSeek Harness user-global rule, frontmatter stripped)"
     Write-DshAgentRule -DshHome $DshHome -RuleText $ruleSrcContent
 
-    Write-Host "[16/22] argo\skills\argo-init -> $dshSkillDest (DeepSeek Harness skill)"
+    Write-Host "[16/23] argo\skills\argo-init -> $dshSkillDest (DeepSeek Harness skill)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $dshSkillDest
 
-    Write-Host "[17/22] argo\rules\<WakeupGuideline> -> $DshHome\plugins\dsh-argo-wakeup\index.js (DeepSeek Harness wakeup plugin)"
+    Write-Host "[17/23] argo\rules\<WakeupGuideline> -> $DshHome\plugins\dsh-argo-wakeup\index.js (DeepSeek Harness wakeup plugin)"
     $wakeupDshPath = New-DshWakeupPlugin -DshHome $DshHome -RuleText $ruleSrcContent
 
-    Write-Host "[18/22] argo-workspace + argo-wakeup rows -> $patchPath (DeepSeek Harness MCP bridge + wakeup plugin)"
+    Write-Host "[18/23] argo-workspace + argo-wakeup rows -> $patchPath (DeepSeek Harness MCP bridge + wakeup plugin)"
     # The generated dsh-argo-workspace bridge connects directly to the argo
     # server (no dsh-mcp-client row), registers every tool as mcp__argo__* and
     # injects the current session's workspace (SessionHeader.cwd) as the
@@ -850,7 +853,7 @@ if ($SkipDsh) {
         Write-DshManagedBlock -Path $patchPath -Block $block -MarkerStart '# BEGIN ArchGraph ARGO deployment' -MarkerEnd '# END ArchGraph ARGO deployment'
     }
 
-    Write-Host "[19/22] argo\agents -> $DshHome\.agent-presets\<id> (DeepSeek Harness agent presets)"
+    Write-Host "[19/23] argo\agents -> $DshHome\.agent-presets\<id> (DeepSeek Harness agent presets)"
     New-DshAgentPresets -DshHome $DshHome -AgentsSrc (Join-Path $argoDir 'agents')
 
     Write-Host "  note: graph-mcp remote ($GraphMcpUrl) is NOT registered for DeepSeek Harness -"
@@ -871,10 +874,10 @@ if ($SkipOpenClaw) {
     $openClawAgentsDest = Join-Path $OpenClawWorkspace 'AGENTS.md'
 
     Write-Host '==> Deploying OpenClaw integration'
-    Write-Host "[20/22] argo\rules\archgraph.instructions.md -> $openClawAgentsDest (OpenClaw workspace AGENTS.md, frontmatter stripped)"
+    Write-Host "[20/23] argo\rules\archgraph.instructions.md -> $openClawAgentsDest (OpenClaw workspace AGENTS.md, frontmatter stripped)"
     Write-OpenClawAgentRule -OpenClawWorkspace $OpenClawWorkspace -RuleText $ruleSrcContent
 
-    Write-Host "[21/22] argo\skills\argo-init -> $openClawSkillDest (OpenClaw managed skill, all agents)"
+    Write-Host "[21/23] argo\skills\argo-init -> $openClawSkillDest (OpenClaw managed skill, all agents)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $openClawSkillDest
 
     Write-Host '  OpenClaw injects AGENTS.md into Project Context on every session, so the wakeup'
@@ -1043,7 +1046,7 @@ if ($SkipMcp) {
         # location; -OpenClawRepoRoot overrides it (e.g. for tests or when the
         # installer runs from a non-workspace npm-global package dir).
         $openClawRepoRoot = if ($OpenClawRepoRoot) { $OpenClawRepoRoot } else { $repoRoot }
-        Write-Host "[22/22] argo MCP server -> $(Join-Path $OpenClawHome 'openclaw.json') (OpenClaw mcp.servers.argo, env.ARGO_REPO_ROOT pinned)"
+        Write-Host "[22/23] argo MCP server -> $(Join-Path $OpenClawHome 'openclaw.json') (OpenClaw mcp.servers.argo, env.ARGO_REPO_ROOT pinned)"
         Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $openClawRepoRoot -ArgoServer $argoServer -GraphMcpServer $openClawGraphMcpServer
     }
 }
@@ -1053,6 +1056,69 @@ if (Test-Path $wakeupPluginPath) {
     Write-Host '==> Registering argo-wakeup plugin in OpenCode'
     Register-OpenCodePlugin -ConfigPath $OpenCodeConfigPath -PluginFilePath $wakeupPluginPath
     Write-Host "argo-wakeup plugin registered -> $OpenCodeConfigPath"
+}
+
+# EA local web service (WP2786): deploy the two service scripts next to the
+# harness scripts (REPO_ROOT = $ArgoRoot keeps the relative layout intact) plus
+# the web/ statics, then start the service in the background. Re-running the
+# installer is idempotent: an occupied port skips the startup.
+$eaServiceSrc = Join-Path $repoRoot 'scripts\ea-web-service.js'
+$eaLayoutStoreSrc = Join-Path $repoRoot 'scripts\ea-layout-store.js'
+$eaWebSrc = Join-Path $repoRoot 'web'
+Write-Host "[23/23] scripts\ea-web-service.js + scripts\ea-layout-store.js + web -> $ArgoRoot (EA local web service)"
+if ((Test-Path $eaServiceSrc) -and (Test-Path $eaLayoutStoreSrc) -and (Test-Path $eaWebSrc)) {
+    Copy-Item -Force -Path $eaServiceSrc -Destination (Join-Path $scriptsDest 'ea-web-service.js')
+    Copy-Item -Force -Path $eaLayoutStoreSrc -Destination (Join-Path $scriptsDest 'ea-layout-store.js')
+    Copy-Tree -Source $eaWebSrc -Destination (Join-Path $ArgoRoot 'web')
+    Write-Host "  service scripts + web statics deployed -> $scriptsDest / $(Join-Path $ArgoRoot 'web')"
+    if ($SkipEaWeb) {
+        Write-Host '  EA web service startup skipped (-SkipEaWeb)'
+    }
+    else {
+        $eaWebRoot = if ($EaWebRoot) { $EaWebRoot } else { $PWD.Path }
+        $eaPortInUse = $false
+        try {
+            $eaProbe = New-Object System.Net.Sockets.TcpClient
+            $eaProbe.Connect('127.0.0.1', $EaWebPort)
+            $eaPortInUse = $true
+            $eaProbe.Close()
+        }
+        catch {
+            $eaPortInUse = $false
+        }
+        if ($eaPortInUse) {
+            Write-Host "  EA web service already listening on 127.0.0.1:$EaWebPort; startup skipped (idempotent re-deploy)"
+        }
+        else {
+            $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+            if (-not $nodeCmd) {
+                throw 'EA web service startup failed: node not found on PATH'
+            }
+            $eaServiceDest = Join-Path $scriptsDest 'ea-web-service.js'
+            $eaLogOut = Join-Path $ArgoRoot 'ea-web-service.log'
+            $eaLogErr = Join-Path $ArgoRoot 'ea-web-service.err.log'
+            # Start the service through WMI (Win32_Process.Create) instead of
+            # Start-Process: the process is then created by the WMI service and
+            # inherits NONE of this installer's stdio pipe handles. Inherited
+            # pipes would keep spawnSync-based launchers (argo-deploy bin, tests)
+            # blocked until the service exits. cmd.exe is used only to redirect
+            # the service stdout/stderr into log files.
+            $q = [char]34
+            $eaCmdLine = "cmd.exe /S /c $q$q$($nodeCmd.Source)$q $q$eaServiceDest$q --root $q$eaWebRoot$q --port $EaWebPort > $q$eaLogOut$q 2> $q$eaLogErr$q$q"
+            $eaCreate = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{
+                CommandLine      = $eaCmdLine
+                CurrentDirectory = $ArgoRoot
+            }
+            if ($eaCreate.ReturnValue -ne 0) {
+                throw "EA web service startup failed: Win32_Process.Create ReturnValue $($eaCreate.ReturnValue)"
+            }
+            Write-Host "  EA web service started in background (pid $($eaCreate.ProcessId)): http://127.0.0.1:$EaWebPort (root: $eaWebRoot)"
+            Write-Host "  logs: $eaLogOut / $eaLogErr"
+        }
+    }
+}
+else {
+    Write-Host '  EA web service sources not present in this package; step skipped'
 }
 
 Write-Host ''
