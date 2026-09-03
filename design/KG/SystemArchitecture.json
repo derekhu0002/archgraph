@@ -4936,6 +4936,40 @@
       "id": "insight-lead-milestone-agent2ea-mcp-revision-001",
       "name": "里程碑：修订 AGENT→EA 同步桥为官方 MCP 主通道",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "2026-09-03 人类拍板：D7 生产 EA=本机 Trial 15.2 x86；D8 先用已装 MCP 2.8.2 验证（免 .NET 10）。安全红线：一切写探测只在临时 scratch .feap 副本上进行，绝不触碰 archgraph.feap 生产设计文件。",
+          "name": "decision",
+          "value": "r1-env-d7-d8"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "EA 同步桥 R-S1（修订方案首切片，先决环境片）：① 环境对齐——本机 EA=Trial 15.2 x86（Program Files (x86)\\Sparx Systems\\EA Trial），已装 MCP Server 2.8.2 为 x64 且装入无 EA 本体目录（位宽/目录错配，MCP_EA.log 已有 80070005/管道中断）：需卸载错配件、把匹配 x86 的 MCP add-in 装入 EA Trial 目录；优先复用 2.8.2 二进制（D8），若官网 x86 MSI 仅 3.0.0（需 .NET Desktop Runtime 10）则如实报告并给出选项（装 .NET 10+3.0.0 或寻找 2.8.2 x86）；② 同步驱动器只读骨架：新建 scripts/ea-sync-driver.js（Node STDIO MCP client，复用 scripts/ea-web-service.js createMcpAdapter/callStdio 模式）：spawn MCP3.exe → initialize/tools/list → 读工具冒烟；③ 连通验证（AC-01）与位置不变性实测（AC-02，-enableEdit 最小写探测：仅改 Notes 后 geometry 逐字节不变 + -modifiedInfoPath 审计 CSV 记录）。EA 实例：EA.exe 打开 scratch 项目（临时副本，禁用生产文件）。测试环境不可用时用例显式 skip 计通过。约束：不修改 argo/**；不触碰 archgraph.feap；MSI 安装需管理员权限时如实报告人工步骤不强装。",
+      "id": "2789",
+      "name": "EA同步桥 R-S1：环境对齐与 MCP 连通验证",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/ea-sync-r1.test.js",
+          "acceptanceCriteria": "tests/ea-sync-r1.test.js",
+          "description": "GIVEN 本机 EA（Trial 15.2 x86）已打开 scratch 项目且 MCP add-in 匹配加载；WHEN 同步驱动器 spawn MCP3.exe（stdio）并调 tools/list 与读工具；THEN 返回工具清单（含读/写/删工具组）且 get_current_diagram/get_diagrams_information/find_elements_by_name 返回 scratch 项目真实内容，MCP_EA.log 无 80070005/管道中断；环境不可用（EA 未运行/add-in 未加载）时显式消息 skip 计通过。",
+          "name": "AT-2789-R1-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-sync-r1.test.js",
+          "acceptanceCriteria": "tests/ea-sync-r1.test.js",
+          "description": "GIVEN scratch 项目某图中元素 E 有已知 geometry；WHEN 驱动器以 -enableEdit 调 create_or_update_elements（仅改 Notes）并读回；THEN E 的 DiagramObject geometry 与调用前逐字节一致（位置安全核心断言），且 -modifiedInfoPath 审计 CSV 记录该变更；环境不可用时显式消息 skip 计通过。",
+          "name": "AT-2789-R1-02",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -6019,7 +6053,8 @@
         "2785",
         "2786",
         "2787",
-        "2788"
+        "2788",
+        "2789"
       ],
       "included_relationships": [
         "1980",
