@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ArchGraph 本地知识图谱工具</title>
   <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/vendor/excalidraw/excalidraw.css">
+  <link rel="stylesheet" href="/vendor/maxgraph/maxgraph.css">
 </head>
 <body>
   <header>
@@ -77,7 +77,7 @@
           <div id="graph-panel">
             <h3 id="graph-title">图形化视图</h3>
             <div id="graph-container"></div>
-            <p class="hint">Excalidraw 画布：平移 / 缩放 / 选择 / 拖动形状（拖动后坐标自动持久化到布局侧车），随窗口自适应。</p>
+            <p class="hint">MaxGraph 画布：拖动背景平移 / 滚轮缩放 / 拖动顶点（拖动后坐标自动持久化到布局侧车），随窗口自适应。</p>
           </div>
         </div>
       </div>
@@ -86,11 +86,7 @@
 
   <footer>本地运行（127.0.0.1），数据不离开本机。</footer>
 
-  <script>
-    // Excalidraw 字体/静态资产基址（0.18.1 官方资产路径机制），须在 vendor bundle 之前设置。
-    window.EXCALIDRAW_ASSET_PATH = '/vendor/excalidraw/';
-  </script>
-  <script type="module" src="/vendor/excalidraw/excalidraw.js"></script>
+  <script type="module" src="/vendor/maxgraph/maxgraph.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>

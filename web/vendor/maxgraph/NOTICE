@@ -1,0 +1,23 @@
+NOTICE — vendored maxGraph (ArchGraph EA local web tool)
+==========================================================
+
+This directory contains a vendored, one-off esbuild bundle of the maxGraph
+library for browser use without a build chain in this repository.
+
+- Library:     maxGraph (@maxgraph/core), version 0.24.0
+- Source:      https://github.com/maxGraph/maxGraph (npm package @maxgraph/core@0.24.0)
+- License:     Apache License, Version 2.0 — full text in ./LICENSE
+- Copyright:   The maxGraph contributors. maxGraph is the community successor
+               of the mxGraph engine (the rendering engine lineage behind draw.io).
+- Bundled by:  esbuild (JS API, one-off build; no build tooling is kept in the
+               repository). Entry: import { Graph, InternalEvent, constants }
+               from '@maxgraph/core' + '@maxgraph/core/css/common.css', exposed
+               as window.MaxGraphLib.
+- Artifacts:   maxgraph.js (ESM bundle, carries the Apache-2.0 copyright/license
+               banner), maxgraph.css (maxGraph common styles).
+
+Upstream license and source can be obtained from the npm package
+(@maxgraph/core ships LICENSE at its package root) or from the project
+repository at https://github.com/maxGraph/maxGraph.
+
+No modifications were made to the maxGraph source beyond bundling/minification.

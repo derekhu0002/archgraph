@@ -1,11 +1,11 @@
 'use strict';
 
-// AT-2788-S1-02（WP2788）：Playwright 真实浏览器渲染与拖动落盘验收。
+// AT-2788-S1B-02（WP2788-S1B）：Playwright 真实浏览器验收 — MaxGraph 画布渲染与拖动落盘。
 // GIVEN 本地 Web 服务运行且本机具备 Playwright+Chromium；
 // WHEN 在真实浏览器中打开任一视图；
-// THEN Excalidraw 画布挂载成功（嵌套 vendor 资源含 css/字体无 404），
-//      视图成员渲染为形状并按层着色、关系呈现为箭头；
-// WHEN 拖动某形状；THEN 坐标落盘到该项目 design/KG/ea-layouts/ 侧车。
+// THEN MaxGraph 画布挂载成功（嵌套 vendor 资源无 404），视图成员渲染为顶点并按层着色、
+//      关系呈现为带箭头边；
+// WHEN 拖动某顶点；THEN 坐标落盘到该项目 design/KG/ea-layouts/ 侧车。
 // 环境无浏览器/缺 Playwright 时用例显式消息 skip 计通过（保障无浏览器环境基线不破）。
 
 const { test } = require('node:test');
@@ -37,13 +37,13 @@ function fixtureGraph() {
   };
 }
 
-// colorForLayer 同值：形状填充色（像素断言目标）。
+// colorForLayer 同值：顶点填充色（SVG DOM 断言目标，比像素稳）。
 const LAYER_COLORS = {
-  Application: [209, 250, 229], // #d1fae5
-  Technology: [254, 243, 199], // #fef3c7
-  Business: [219, 234, 254], // #dbeafe
+  Application: '#d1fae5',
+  Technology: '#fef3c7',
+  Business: '#dbeafe',
 };
-const ARROW_COLOR = [134, 142, 150]; // #868e96
+const EDGE_COLOR = '#868e96';
 
 // 能力探测：缺 playwright 模块或本机无 chromium 可执行文件 → 返回原因供 skip。
 function probeBrowser() {
@@ -63,7 +63,6 @@ function probeBrowser() {
   if (registryPath && fs.existsSync(registryPath)) {
     return { ok: true, pw, executablePath: registryPath };
   }
-  // 兜底：扫描本机 ms-playwright 目录下任意已安装的 chromium。
   const base = path.join(os.homedir(), 'AppData', 'Local', 'ms-playwright');
   if (fs.existsSync(base)) {
     const dirs = fs.readdirSync(base).filter((name) => /^chromium-\d+$/.test(name)).sort().reverse();
@@ -77,54 +76,7 @@ function probeBrowser() {
   return { ok: false, reason: `未找到 chromium 可执行文件（registry 期望 ${registryPath || '未知'}）` };
 }
 
-// 在画布像素中查找指定颜色团块（Excalidraw 以 2D canvas 渲染，直接读像素）。
-// 返回 { count, cx, cy, width, height }（cx/cy 为 canvas 设备像素坐标）或 null。
-function findColorBlobExpression([r, g, b, tol]) {
-  const canvas = document.querySelector('.excalidraw__canvas');
-  if (!canvas) {
-    return null;
-  }
-  const ctx = canvas.getContext('2d');
-  const { width, height } = canvas;
-  const data = ctx.getImageData(0, 0, width, height).data;
-  let count = 0;
-  let sx = 0;
-  let sy = 0;
-  for (let y = 0; y < height; y += 2) {
-    for (let x = 0; x < width; x += 2) {
-      const i = (y * width + x) * 4;
-      if (
-        data[i + 3] > 200
-        && Math.abs(data[i] - r) <= tol
-        && Math.abs(data[i + 1] - g) <= tol
-        && Math.abs(data[i + 2] - b) <= tol
-      ) {
-        count += 1;
-        sx += x;
-        sy += y;
-      }
-    }
-  }
-  if (count < 20) {
-    return null;
-  }
-  return { count, cx: sx / count, cy: sy / count, width, height };
-}
-
-async function waitForColorBlob(page, rgb, timeoutMs = 15000, tolerance = 12) {
-  const deadline = Date.now() + timeoutMs;
-  let last = null;
-  while (Date.now() < deadline) {
-    last = await page.evaluate(findColorBlobExpression, [...rgb, tolerance]);
-    if (last) {
-      return last;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 300));
-  }
-  return last;
-}
-
-test('AT-2788-S1-02：真实浏览器打开视图 → Excalidraw 挂载/按层渲染/箭头/资源零 404，拖动形状坐标落侧车', async (t) => {
+test('AT-2788-S1B-02：真实浏览器打开视图 → MaxGraph SVG 挂载/按层着色/箭头边/资源零 404，拖动顶点坐标落侧车', async (t) => {
   const probe = probeBrowser();
   if (!probe.ok) {
     t.skip(`浏览器环境不可用，跳过真实浏览器验收：${probe.reason}`);
@@ -173,36 +125,49 @@ test('AT-2788-S1-02：真实浏览器打开视图 → Excalidraw 挂载/按层�
       }
     });
 
-    // a. 打开页面 → 选中项目 → 打开视图 → 等待 Excalidraw 挂载
+    // 打开页面 → 选中项目 → 打开视图 → 等待 MaxGraph SVG 挂载
     await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'load' });
     await page.waitForSelector('#project-list li');
     await page.click('#project-list li:has-text("proj")');
     await page.waitForSelector('#view-list li:has-text("V100")');
     await page.click('#view-list li:has-text("V100")');
-    await page.waitForSelector('.excalidraw', { timeout: 20000 });
-    await page.waitForSelector('canvas.excalidraw__canvas', { timeout: 20000 });
+    await page.waitForSelector('#graph-container svg', { timeout: 20000 });
 
-    // c. 视图成员渲染为形状并按层着色：三层填充色均出现在画布像素中
-    const blobA = await waitForColorBlob(page, LAYER_COLORS.Application);
-    assert.ok(blobA, 'Application 层形状（AlphaComponent）应按 #d1fae5 渲染');
-    const blobB = await waitForColorBlob(page, LAYER_COLORS.Technology);
-    assert.ok(blobB, 'Technology 层形状（BetaDevice）应按 #fef3c7 渲染');
-    const blobC = await waitForColorBlob(page, LAYER_COLORS.Business);
-    assert.ok(blobC, 'Business 层形状（GammaActor）应按 #dbeafe 渲染');
-    // 关系呈现为箭头：箭头描边色 #868e96 出现在画布像素中
-    const arrowBlob = await waitForColorBlob(page, ARROW_COLOR, 15000, 24);
-    assert.ok(arrowBlob, '关系应以箭头（#868e96 描边）呈现');
+    // 视图成员渲染为顶点并按层着色：SVG 中存在对应填充色的矩形（SVG DOM 断言，比像素稳）
+    for (const [layer, color] of Object.entries(LAYER_COLORS)) {
+      const rect = page.locator(`#graph-container svg rect[fill="${color}"]`);
+      await rect.first().waitFor({ state: 'attached', timeout: 20000 });
+      assert.ok(await rect.count() >= 1, `${layer} 层顶点应按 ${color} 填充渲染`);
+    }
+    // 顶点数 = 视图成员数（3）
+    const vertexCount = await page.locator('#graph-container svg rect[rx]').count();
+    assert.ok(vertexCount >= 3, `应渲染 3 个圆角顶点（实际 ${vertexCount}）`);
 
-    // d. 拖动落盘：对 A 形状（Application 色团质心）执行指针拖动
+    // 标签文本：name + type 双行（SVG <text>）
+    const svgText = await page.locator('#graph-container svg').first().textContent();
+    for (const label of ['AlphaComponent', 'BetaDevice', 'GammaActor', 'Application Component', 'Device', 'Business Actor']) {
+      assert.ok(svgText.includes(label), `SVG 应含标签文本: ${label}`);
+    }
+
+    // 关系呈现为带箭头边：正交路径（描边色）+ 箭头（同色填充）
+    const edgePaths = page.locator(`#graph-container svg path[stroke="${EDGE_COLOR}"]`);
+    assert.ok(await edgePaths.count() >= 2, '两条关系应渲染为边路径');
+    const arrowHeads = page.locator(`#graph-container svg path[fill="${EDGE_COLOR}"]`);
+    assert.ok(await arrowHeads.count() >= 2, '边应带箭头（同色填充路径）');
+    // 边标签（关系类型）
+    for (const label of ['Serving', 'Assignment']) {
+      assert.ok(svgText.includes(label), `SVG 应含边标签: ${label}`);
+    }
+
+    // 拖动落盘：对 A 顶点（Application 色）执行指针拖动
     const sidecarBefore = JSON.parse(fs.readFileSync(sidecarPath, 'utf8'));
     const beforeA = sidecarBefore.elements.A;
     assert.deepEqual(beforeA, seed.A, '拖动前 A 坐标应为预置值');
 
-    const canvasBox = await page.locator('canvas.excalidraw__canvas').first().boundingBox();
-    assert.ok(canvasBox, '画布应有 boundingBox');
-    const scale = blobA.width / canvasBox.width; // 设备像素 ↔ CSS 像素
-    const startX = canvasBox.x + blobA.cx / scale;
-    const startY = canvasBox.y + blobA.cy / scale;
+    const vertexBox = await page.locator(`#graph-container svg rect[fill="${LAYER_COLORS.Application}"]`).first().boundingBox();
+    assert.ok(vertexBox, 'A 顶点应有 bounding盒');
+    const startX = vertexBox.x + vertexBox.width / 2;
+    const startY = vertexBox.y + vertexBox.height / 2;
     await page.mouse.move(startX, startY);
     await page.mouse.down();
     await page.mouse.move(startX + 80, startY + 50, { steps: 10 });
@@ -220,7 +185,7 @@ test('AT-2788-S1-02：真实浏览器打开视图 → Excalidraw 挂载/按层�
     assert.deepEqual(sidecarAfter.elements.B, sidecarBefore.elements.B, '未拖动的 B 坐标不应变化');
     assert.deepEqual(sidecarAfter.elements.C, sidecarBefore.elements.C, '未拖动的 C 坐标不应变化');
 
-    // b. 资源与控制台断言：/vendor 嵌套资源（js/css/woff2）零 404；无页面错误
+    // 资源与控制台断言：/vendor 嵌套资源零 404；无页面错误
     const vendor404 = notFounds.filter((url) => url.includes('/vendor/'));
     assert.deepEqual(vendor404, [], '/vendor 资源不应出现 404');
     assert.deepEqual(pageErrors, [], '页面不应有未捕获错误');
