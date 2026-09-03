@@ -531,6 +531,15 @@ function importRelationships(importPkg, relationships, elementMap, relationshipM
       connector.SupplierEnd.Aggregation = connectorMeta.aggregationKind;
     }
 
+    // EA only draws an arrowhead at the target (supplier) end when the connector carries an
+    // explicit direction. Directed ArchiMate relationships are therefore stored with
+    // Direction = "Source -> Destination" so the generated views show the relationship
+    // direction (source -> target); undirected Association and structural
+    // Composition/Aggregation keep Direction = Unspecified on purpose.
+    if (connectorMeta.directed) {
+      connector.Direction = 'Source -> Destination';
+    }
+
     // Persist the connector core fields before attaching tagged values. Tagged values
     // require a saved connector (with a valid ConnectorID), otherwise EA silently drops
     // them and the original schema id would be lost on the next export.
@@ -883,7 +892,13 @@ function mapRelationshipTypeToEa(relationshipType) {
   var normalized = normalizeArchimateName(relationshipType);
   var meta = {
     connectorType: 'Association',
-    aggregationKind: -1
+    aggregationKind: -1,
+    // Whether the ArchiMate relationship is directed. Directed relations must store an
+    // explicit EA Direction ("Source -> Destination") or Association-mapped connectors
+    // (Serving, Assignment) render as plain lines with no arrowhead on the generated views.
+    // Undirected Association and the structural Composition/Aggregation (whose whole/part
+    // diamond already marks the direction) stay directed:false with Direction = Unspecified.
+    directed: false
   };
 
   switch (normalized) {
@@ -897,13 +912,18 @@ function mapRelationshipTypeToEa(relationshipType) {
       break;
     case 'Specialization':
       meta.connectorType = 'Generalization';
+      meta.directed = true;
       break;
     case 'Realization':
     case 'Access':
       meta.connectorType = 'Dependency';
+      meta.directed = true;
       break;
     case 'Serving':
     case 'Assignment':
+      meta.connectorType = 'Association';
+      meta.directed = true;
+      break;
     case 'Association':
       meta.connectorType = 'Association';
       break;
@@ -911,6 +931,7 @@ function mapRelationshipTypeToEa(relationshipType) {
     case 'Flow':
     case 'Influence':
       meta.connectorType = 'ControlFlow';
+      meta.directed = true;
       break;
     default:
       meta.connectorType = 'Association';
