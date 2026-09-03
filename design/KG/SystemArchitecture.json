@@ -4715,6 +4715,11 @@
           "name": "commit",
           "value": "ec12dda",
           "description": "scripts/ea-web-service.js; web/app.js; web/index.html; web/style.css; tests/ea-web-service-roots.test.js; tests/ea-web-service-impl.test.js; tests/ea-layout-store.test.js; tests/ea-web-service-g6-render.test.js（手动项目根持久化 ~/.argo/ea-tool/projects.json + POST/DELETE/GET /api/roots + UI 添加/移除/切换，测试隔离传参）"
+        },
+        {
+          "name": "commit",
+          "value": "3fcf590",
+          "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（交付登记：ec12dda + 89d5553 + LTM/T1 + 测试记录 36/38）"
         }
       ],
       "description": "WEB 手动选择项目根目录与切换：ArchGraph 本地 Web 服务（2760）目前仅自动发现 --root/-EaWebRoot 扫描范围（默认 REPO_ROOT+父级+祖父级）内的项目，无法选择范围外的本地项目。本 WP 新增：① UI/项目栏：「添加项目」入口（手动指定本地目录），服务校验该目录含 design/KG/SystemArchitecture.json（marker）后才加入，否则明确报错；手动添加的 root 持久化到工具级配置（默认 ~/.argo/ea-tool/projects.json，可经 createService 选项/环境变量覆盖供测试），服务重启后自动恢复，支持移除；② 项目间切换（既有列表选择）保持可用，视图/状态/布局侧车随切换；③ API 加法（如 POST/DELETE /api/roots），既有端点契约与测试基线不退化。约束：argo/** 零改动；写图红线不变（手动添加只改变发现范围，不改变写路径）；部署形态（~/.argo）与仓库开发形态行为一致。",
