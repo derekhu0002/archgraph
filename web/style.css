@@ -13,8 +13,17 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
   font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
@@ -24,179 +33,229 @@ body {
 header {
   background: var(--panel);
   border-bottom: 1px solid var(--border);
-  padding: 14px 20px;
+  padding: 8px 14px;
+  flex: none;
 }
 
 header h1 {
   margin: 0;
-  font-size: 20px;
+  font-size: 17px;
 }
 
 .subtitle {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
 }
 
-main {
+/* ------------------------------------------------------------------ */
+/* 外壳骨架：顶栏 + 状态条 + 三栏工作区（flex + 视口单位，全区域自适应） */
+/* ------------------------------------------------------------------ */
+
+#app-shell {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  gap: 16px;
-  padding: 16px;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px;
 }
 
-#projects-panel {
-  width: 280px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  flex-shrink: 0;
-}
-
-#add-project-box {
+#topbar {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: 8px;
-}
-
-#add-project-path {
-  width: 100%;
-}
-
-#add-project-feedback {
-  color: var(--bad);
-  font-size: 12px;
-  word-break: break-all;
-}
-
-#add-project-feedback:empty {
-  display: none;
-}
-
-li {
-  position: relative;
-}
-
-.remove-project {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: var(--bad);
-  font-size: 11px;
-  padding: 2px 8px;
-}
-
-.badge.manual {
-  background: var(--accent);
-}
-
-#main-panel {
-  flex: 1;
-  min-width: 0;
-}
-
-#columns {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-}
-
-#left-col {
-  width: 300px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-#graph-panel {
-  flex: 1;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 12px;
+  padding: 8px 10px;
+  flex: none;
 }
 
-#toolbar {
+.topbar-row {
   display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 12px;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.topbar-label {
+  font-size: 12px;
+  color: var(--muted);
+  flex: none;
 }
 
 #status-bar {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 8px 12px;
-  margin-bottom: 12px;
+  padding: 4px 10px;
   color: var(--muted);
+  font-size: 12px;
+  flex: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-#search-box {
-  display: flex;
-  gap: 6px;
-}
-
-#search-box input {
+#workspace {
   flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 8px;
 }
 
-#view-list,
-#search-results,
-#project-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* ----------------------------- 左右栏 ----------------------------- */
+
+#left-panel,
+#right-panel {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   overflow: hidden;
-  max-height: 260px;
-  overflow-y: auto;
+  flex: none;
+  transition: width 0.15s ease;
 }
 
-li {
-  padding: 8px 12px;
+#left-panel {
+  width: clamp(200px, 22vw, 320px);
+}
+
+#right-panel {
+  width: clamp(240px, 26vw, 400px);
+}
+
+#left-panel.collapsed,
+#right-panel.collapsed {
+  width: 0;
+  min-width: 0;
+  border: none;
+}
+
+.panel-header {
+  padding: 8px 10px;
   border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex: none;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* ------------------------- 左栏：模型树 ------------------------- */
+
+#view-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.tree-view {
+  border-bottom: 1px solid var(--border);
+}
+
+.tree-view-row {
+  padding: 6px 10px;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-li:last-child {
-  border-bottom: none;
+.tree-view-row:hover {
+  background: #f9fafb;
 }
 
-li.selected {
+.tree-view.selected > .tree-view-row {
   background: #eff6ff;
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
-li:hover {
-  background: #f9fafb;
+.member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 4px;
+  background: #fafbfc;
 }
 
-.badge {
-  display: inline-block;
-  padding: 1px 8px;
-  border-radius: 10px;
+.tree-member {
+  padding: 4px 10px 4px 22px;
+  cursor: pointer;
   font-size: 12px;
-  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.badge.ok {
-  background: var(--ok);
+.tree-member:hover {
+  background: #f1f5f9;
 }
 
-.badge.bad {
-  background: var(--bad);
+.tree-member.selected {
+  background: #dbeafe;
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
-.muted {
+.tree-empty {
+  padding: 10px;
+  cursor: default;
+}
+
+/* ------------------------- 中栏：画布 ------------------------- */
+
+#center-panel {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+#graph-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#graph-panel h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  flex: none;
+}
+
+#graph-container {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fafafa;
+  overflow: hidden;
+}
+
+.hint {
   color: var(--muted);
   font-size: 12px;
+  margin: 8px 0 0;
+  flex: none;
 }
 
 .placeholder {
@@ -208,14 +267,180 @@ li:hover {
   color: var(--muted);
 }
 
+/* ------------------------- 右栏：属性面板 ------------------------- */
+
+#right-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.tab {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 3px 10px;
+}
+
+.tab.active {
+  background: var(--bg);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+#properties-tab,
+#advanced-tab {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.props {
+  margin: 0;
+}
+
+.props dt {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.props dt:first-child {
+  margin-top: 0;
+}
+
+.props dd {
+  margin: 2px 0 0;
+  word-break: break-all;
+}
+
+#edit-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#edit-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+#edit-feedback {
+  color: var(--muted);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+/* ------------------------- 项目列表（顶栏芯片） ------------------------- */
+
+#project-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+#project-list li {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 3px 10px;
+  cursor: pointer;
+  background: var(--panel);
+  font-size: 12px;
+  max-width: 100%;
+}
+
+#project-list li:hover {
+  background: #f9fafb;
+}
+
+#project-list li.selected {
+  background: #eff6ff;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+#project-list .project-name {
+  display: inline;
+}
+
+#project-list .project-meta {
+  display: inline;
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.remove-project {
+  margin-left: 6px;
+  background: var(--bad);
+  font-size: 10px;
+  padding: 1px 6px;
+}
+
+/* ------------------------- 检索下拉 ------------------------- */
+
+#search-box {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+#search-box input {
+  flex: 1;
+  min-width: 120px;
+}
+
+#search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 8px;
+  right: 8px;
+  z-index: 30;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+#search-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#search-results li {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+#search-results li:last-child {
+  border-bottom: none;
+}
+
+#search-results li:hover {
+  background: #f9fafb;
+}
+
+/* ------------------------- 通用控件 ------------------------- */
+
 button {
   background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 6px;
-  padding: 6px 12px;
+  padding: 4px 10px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
+  flex: none;
 }
 
 button:hover {
@@ -227,9 +452,10 @@ select,
 textarea {
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 6px 8px;
-  font-size: 13px;
+  padding: 4px 8px;
+  font-size: 12px;
   font-family: inherit;
+  min-width: 0;
 }
 
 textarea {
@@ -244,48 +470,78 @@ label {
   font-size: 12px;
 }
 
-#edit-panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
+#add-project-path {
+  width: clamp(160px, 24vw, 340px);
 }
 
-#edit-actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-#edit-feedback {
-  margin-top: 8px;
-  color: var(--muted);
+.feedback {
+  color: var(--bad);
+  font-size: 12px;
   word-break: break-all;
 }
 
-#graph-container {
-  width: 100%;
-  height: calc(100vh - 260px);
-  min-height: 420px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: #fafafa;
-  overflow: hidden;
+.badge {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  color: #fff;
 }
 
-.hint {
+.badge.ok {
+  background: var(--ok);
+}
+
+.badge.bad {
+  background: var(--bad);
+}
+
+.badge.manual {
+  background: var(--accent);
+}
+
+.muted {
   color: var(--muted);
   font-size: 12px;
-  margin: 8px 0 0;
-}
-
-h3 {
-  margin: 8px 0;
-  font-size: 15px;
 }
 
 footer {
-  padding: 12px 20px;
+  padding: 4px 14px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
+  flex: none;
+}
+
+/* ------------------------- 窄屏降级（≤700px） ------------------------- */
+/* 三栏堆叠为纵向：左右栏限高且可折叠（display:none），画布仍可用。 */
+
+@media (max-width: 700px) {
+  #workspace {
+    flex-direction: column;
+  }
+
+  #left-panel,
+  #right-panel {
+    width: auto;
+    flex: none;
+    max-height: 28vh;
+  }
+
+  #left-panel.collapsed,
+  #right-panel.collapsed {
+    display: none;
+  }
+
+  #center-panel {
+    flex: 1;
+    min-height: 40vh;
+  }
+
+  #add-project-path {
+    width: 100%;
+  }
+
+  header h1 {
+    font-size: 15px;
+  }
 }

@@ -10,78 +10,94 @@
 <body>
   <header>
     <h1>ArchGraph 本地知识图谱工具</h1>
-    <p class="subtitle">面向无 EA 经验的用户：导入 / 导出 / 查看 / 编辑本地知识图谱</p>
+    <p class="subtitle">面向无 EA 经验的用户：导入 / 导出 / 查看 / 编辑本地知识图谱（三栏编辑器外壳 · 全区域自适应）</p>
   </header>
 
-  <main>
-    <section id="projects-panel">
-      <h2>项目</h2>
-      <button id="refresh-projects">刷新项目</button>
-      <div id="add-project-box">
+  <main id="app-shell">
+    <div id="topbar">
+      <div class="topbar-row" id="project-bar">
+        <span class="topbar-label">项目</span>
+        <ul id="project-list"></ul>
+        <button id="refresh-projects" title="重新扫描项目">刷新</button>
         <input id="add-project-path" placeholder="项目根目录绝对路径（含 design/KG）">
         <button id="btn-add-project" title="校验并添加该目录为项目（需含 design/KG/SystemArchitecture.json）">添加项目</button>
-        <div id="add-project-feedback"></div>
+        <button id="btn-remove-project" title="移除当前选中的手动项目（自动发现的项目不可移除）">移除项目</button>
+        <span id="add-project-feedback" class="feedback"></span>
       </div>
-      <ul id="project-list"></ul>
-    </section>
-
-    <section id="main-panel">
-      <div id="no-selection" class="placeholder">请从左侧选择一个项目。</div>
-
-      <div id="workspace" hidden>
-        <div id="toolbar">
-          <span id="current-project"></span>
-          <button id="btn-export" title="导出当前项目图谱 JSON">导出</button>
-          <button id="btn-import" title="导入外部图谱 JSON（整体替换）">导入</button>
-          <button id="btn-undo" title="撤销上一步编辑">撤销</button>
-          <button id="btn-redo" title="重做">重做</button>
-          <input id="import-file" type="file" accept="application/json,.json" hidden>
+      <div class="topbar-row" id="action-bar">
+        <span id="current-project" class="muted"></span>
+        <span id="current-view-hint" class="muted"></span>
+        <div id="search-box">
+          <input id="search-input" placeholder="搜索元素 / 关系 / 视图">
+          <select id="search-mode">
+            <option value="local">本地检索</option>
+            <option value="semantic">语义检索</option>
+            <option value="context">上下文检索</option>
+          </select>
+          <button id="btn-search">搜索</button>
         </div>
+        <button id="btn-export" title="导出当前项目图谱 JSON">导出</button>
+        <button id="btn-import" title="导入外部图谱 JSON（整体替换）">导入</button>
+        <button id="btn-undo" title="撤销上一步编辑">撤销</button>
+        <button id="btn-redo" title="重做">重做</button>
+        <input id="import-file" type="file" accept="application/json,.json" hidden>
+        <button id="btn-toggle-left" title="展开 / 收起左侧模型树面板">左栏</button>
+        <button id="btn-toggle-right" title="展开 / 收起右侧属性面板">右栏</button>
+      </div>
+      <div id="search-dropdown" hidden>
+        <ul id="search-results"></ul>
+      </div>
+    </div>
 
-        <div id="status-bar"></div>
+    <div id="status-bar"></div>
 
-        <div id="columns">
-          <aside id="left-col">
-            <div id="search-box">
-              <input id="search-input" placeholder="搜索元素 / 关系 / 视图">
-              <select id="search-mode">
-                <option value="local">本地检索</option>
-                <option value="semantic">语义检索</option>
-                <option value="context">上下文检索</option>
-              </select>
-              <button id="btn-search">搜索</button>
-            </div>
-            <ul id="search-results"></ul>
+    <div id="workspace">
+      <aside id="left-panel">
+        <div class="panel-header">
+          <h2>模型树</h2>
+          <span class="muted">视图与成员</span>
+        </div>
+        <ul id="view-list"></ul>
+      </aside>
 
-            <h3>视图列表</h3>
-            <ul id="view-list"></ul>
+      <section id="center-panel">
+        <div id="no-selection" class="placeholder">请从顶部项目列表选择一个项目，再从左侧模型树打开视图。</div>
+        <div id="graph-panel" hidden>
+          <h3 id="graph-title">图形化视图</h3>
+          <div id="graph-container"></div>
+          <p class="hint">MaxGraph 画布：拖动背景平移 / 滚轮缩放 / 点选查看详情 / 拖动顶点（坐标自动持久化到布局侧车），随窗口自适应。</p>
+        </div>
+      </section>
 
-            <h3>编辑</h3>
-            <div id="edit-panel">
-              <div id="edit-form"></div>
-              <div id="edit-actions">
-                <select id="edit-op">
-                  <option value="addElement">新增元素</option>
-                  <option value="updateElement">编辑元素属性</option>
-                  <option value="removeElement">删除元素</option>
-                  <option value="addView">新增视图</option>
-                  <option value="updateRelationship">编辑关系属性</option>
-                  <option value="removeRelationship">删除关系</option>
-                </select>
-                <button id="btn-edit">执行</button>
-              </div>
-              <div id="edit-feedback"></div>
-            </div>
-          </aside>
-
-          <div id="graph-panel">
-            <h3 id="graph-title">图形化视图</h3>
-            <div id="graph-container"></div>
-            <p class="hint">MaxGraph 画布：拖动背景平移 / 滚轮缩放 / 拖动顶点（拖动后坐标自动持久化到布局侧车），随窗口自适应。</p>
+      <aside id="right-panel">
+        <div class="panel-header">
+          <div id="right-tabs">
+            <button id="tab-properties" class="tab active">属性</button>
+            <button id="tab-advanced" class="tab">高级编辑</button>
           </div>
         </div>
-      </div>
-    </section>
+        <div id="properties-tab">
+          <div id="properties-detail" class="muted">点击画布顶点 / 边或模型树元素查看详情</div>
+        </div>
+        <div id="advanced-tab" hidden>
+          <div id="edit-panel">
+            <div id="edit-form"></div>
+            <div id="edit-actions">
+              <select id="edit-op">
+                <option value="addElement">新增元素</option>
+                <option value="updateElement">编辑元素属性</option>
+                <option value="removeElement">删除元素</option>
+                <option value="addView">新增视图</option>
+                <option value="updateRelationship">编辑关系属性</option>
+                <option value="removeRelationship">删除关系</option>
+              </select>
+              <button id="btn-edit">执行</button>
+            </div>
+            <div id="edit-feedback"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
   </main>
 
   <footer>本地运行（127.0.0.1），数据不离开本机。</footer>

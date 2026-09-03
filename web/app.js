@@ -1,12 +1,16 @@
 'use strict';
 
 // ArchGraph 本地知识图谱工具 — 前端逻辑（零构建）。
+// 编辑器外壳（WP2788-S2）：顶栏（项目选择/添加移除/检索/导入导出/undo/redo）
+// + 三栏主区（左模型树 / 中画布 / 右属性面板），CSS flex+视口单位全区域自适应，
+// 左右栏可折叠，窄屏（≤700px）堆叠降级。
 // 画布内核（WP2788-S1B）：MaxGraph 0.24.0（Apache-2.0，draw.io 引擎后继，
 // vendored /vendor/maxgraph/，一次性 esbuild bundle，见 web/vendor/maxgraph/NOTICE）。
 // 视图成员→顶点（圆角矩形 + 按 ArchiMate 层着色 + name/type 双行标签），
 // 关系→正交路由箭头边（标签=关系类型）；交互收敛：允许拖动顶点/平移/缩放，
 // 禁用单元格内文字编辑（防手改标签脱离模型）。
 // 内核沿革：G6 v5（M1）→ Excalidraw（S1，因风格不适退役）→ MaxGraph（S1B）。
+// 选中联动：画布点选 ↔ 模型树高亮 ↔ 右栏属性详情；树点击 → 画布定位并选中。
 // 布局侧车（M1-S2）：打开视图先 GET /views/:id/layout 覆盖顶点坐标；
 // 顶点拖动结束后防抖 PUT /views/:id/layout 落盘。坐标不进图谱 JSON。
 // 手动项目根（WP2787）：项目栏可添加本地目录为项目（/api/roots 校验+持久化），
@@ -52,6 +56,10 @@
       .replace(/"/g, '&quot;');
   }
 
+  // ------------------------------------------------------------------
+  // 项目（顶栏）：列表 / 添加 / 移除（WP2787 能力全保留）
+  // ------------------------------------------------------------------
+
   async function loadProjects() {
     const [{ projects }, roots] = await Promise.all([api('/api/projects'), loadManualRoots()]);
     state.projects = projects;
@@ -77,17 +85,17 @@
       const manual = state.manualRoots.includes(project.root);
       li.className = project.id === state.selectedProjectId ? 'selected' : '';
       li.innerHTML = `
-        <div class="project-name">${escapeHtml(project.name)}${manual ? ' <span class="badge manual">手动</span>' : ''}</div>
-        <div class="project-meta">
+        <span class="project-name">${escapeHtml(project.name)}${manual ? ' <span class="badge manual">手动</span>' : ''}</span>
+        <span class="project-meta">
           <span class="badge ${project.valid ? 'ok' : 'bad'}">${valid}</span>
-          元素 ${project.elements} · 关系 ${project.relationships} · 视图 ${project.views}
-        </div>`;
+          ${project.elements}元素/${project.views}视图
+        </span>`;
       li.addEventListener('click', () => selectProject(project.id));
       if (manual) {
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove-project';
         removeBtn.title = `移除手动项目：${project.root}`;
-        removeBtn.textContent = '移除';
+        removeBtn.textContent = '×';
         removeBtn.addEventListener('click', (event) => {
           event.stopPropagation();
           doRemoveProject(project);
@@ -138,15 +146,32 @@
     }
   }
 
+  function doRemoveSelectedProject() {
+    const feedback = $('add-project-feedback');
+    const project = state.projects.find((p) => p.id === state.selectedProjectId);
+    if (!project) {
+      feedback.textContent = '请先选择要移除的项目';
+      return;
+    }
+    if (!state.manualRoots.includes(project.root)) {
+      feedback.textContent = '自动发现的项目不可移除（仅手动添加的项目可移除）';
+      return;
+    }
+    doRemoveProject(project);
+  }
+
   async function selectProject(id) {
     state.selectedProjectId = id;
     state.currentViewId = null;
     state.graph = null;
+    destroyGraph();
+    $('graph-panel').hidden = true;
     renderProjects();
     $('no-selection').hidden = true;
-    $('workspace').hidden = false;
     const project = state.projects.find((p) => p.id === id);
     $('current-project').textContent = `当前项目：${project ? project.name : id}`;
+    $('current-view-hint').textContent = '';
+    clearProperties();
     await Promise.all([loadStatus(), loadViews()]);
   }
 
@@ -157,6 +182,10 @@
       : `图谱无效：${status.error || (status.errors || []).join('; ')}`;
   }
 
+  // ------------------------------------------------------------------
+  // 左栏模型树：视图列表 → 打开的视图展开成员元素
+  // ------------------------------------------------------------------
+
   async function loadViews() {
     const { views } = await api(`/api/projects/${state.selectedProjectId}/views`);
     state.views = views;
@@ -166,14 +195,52 @@
   function renderViews() {
     const list = $('view-list');
     list.innerHTML = '';
+    if (state.views.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'muted tree-empty';
+      li.textContent = state.selectedProjectId ? '该项目无视图' : '请先选择项目';
+      list.appendChild(li);
+      return;
+    }
     for (const view of state.views) {
       const li = document.createElement('li');
-      li.className = view.view_id === state.currentViewId ? 'selected' : '';
-      li.innerHTML = `${escapeHtml(view.view_name)} <span class="muted">(元素 ${view.element_count})</span>`;
-      li.addEventListener('click', () => openView(view.view_id, view.view_name));
+      const open = view.view_id === state.currentViewId;
+      li.className = `tree-view${open ? ' selected open' : ''}`;
+      li.dataset.viewId = view.view_id;
+      const row = document.createElement('div');
+      row.className = 'tree-view-row';
+      row.innerHTML = `${escapeHtml(view.view_name)} <span class="muted">(元素 ${view.element_count})</span>`;
+      row.addEventListener('click', () => openView(view.view_id, view.view_name));
+      li.appendChild(row);
+      if (open && state.graph) {
+        const members = document.createElement('ul');
+        members.className = 'member-list';
+        for (const node of state.graph.nodes) {
+          const mli = document.createElement('li');
+          mli.className = 'tree-member';
+          mli.dataset.elementId = node.id;
+          mli.innerHTML = `${escapeHtml(node.label || node.id)} <span class="muted">${escapeHtml(node.type || '')}</span>`;
+          mli.addEventListener('click', (event) => {
+            event.stopPropagation();
+            focusElement(node.id);
+          });
+          members.appendChild(mli);
+        }
+        li.appendChild(members);
+      }
       list.appendChild(li);
     }
   }
+
+  function highlightTreeMember(graphId) {
+    for (const el of document.querySelectorAll('#view-list .tree-member')) {
+      el.classList.toggle('selected', graphId != null && el.dataset.elementId === graphId);
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // 中栏画布（MaxGraph）
+  // ------------------------------------------------------------------
 
   async function openView(viewId, viewName) {
     state.currentViewId = viewId;
@@ -197,7 +264,11 @@
     state.graph = data;
     state.lastSavedLayout = '';
     $('graph-title').textContent = `视图：${viewName}`;
+    $('current-view-hint').textContent = `当前视图：${viewName}`;
+    $('graph-panel').hidden = false;
+    renderViews();
     renderGraph();
+    clearProperties();
   }
 
   function renderGraph() {
@@ -233,6 +304,9 @@
 
     // 顶点拖动结束 → 防抖落布局侧车（语义不变，签名由侧车端点承担）。
     graph.addListener(lib.InternalEvent.MOVE_CELLS, () => scheduleLayoutSave());
+
+    // 选中联动：画布点选 → 右栏属性详情 + 左栏模型树高亮。
+    graph.getSelectionModel().addListener(lib.InternalEvent.CHANGE, () => onSelectionChange());
 
     graph.batchUpdate(() => {
       const parent = graph.getDefaultParent();
@@ -281,7 +355,7 @@
       }
     });
 
-    // 画布随容器/窗口自适应：容器为 flex 布局，窗口 resize 时同步画布尺寸。
+    // 画布随容器/窗口自适应：窗口 resize 时同步画布尺寸。
     state.resizeHandler = () => {
       try {
         graph.sizeDidChange();
@@ -322,6 +396,109 @@
     }
   }
 
+  // 树点击 → 画布定位并选中该顶点（0.24：scrollCellToVisible(cell, center) + setSelectionCell）。
+  function focusElement(graphId) {
+    if (!state.maxGraph) {
+      return;
+    }
+    const cell = state.maxGraph.getDataModel().getCell(shapeIdFor(graphId));
+    if (!cell) {
+      return;
+    }
+    try {
+      state.maxGraph.scrollCellToVisible(cell, true);
+    } catch {
+      /* 定位失败不阻断选中 */
+    }
+    state.maxGraph.setSelectionCell(cell);
+  }
+
+  // ------------------------------------------------------------------
+  // 右栏属性面板：展示 + 选中联动（编辑向导为 S3，本切片只读展示）
+  // ------------------------------------------------------------------
+
+  function onSelectionChange() {
+    const graph = state.maxGraph;
+    if (!graph || !state.graph) {
+      return;
+    }
+    const cell = graph.getSelectionCell();
+    const id = cell && typeof cell.getId === 'function' ? cell.getId() : null;
+    if (typeof id === 'string' && id.startsWith('n-')) {
+      const graphId = id.slice(2);
+      const node = state.graph.nodes.find((n) => n.id === graphId);
+      if (node) {
+        showElementProperties(node);
+        highlightTreeMember(graphId);
+        return;
+      }
+    }
+    if (typeof id === 'string' && id.startsWith('e-')) {
+      const edge = state.graph.edges.find((e) => e.id === id.slice(2));
+      if (edge) {
+        showEdgeProperties(edge);
+        highlightTreeMember(null);
+        return;
+      }
+    }
+    clearProperties();
+  }
+
+  function propsHtml(rows) {
+    return `<dl class="props">${rows
+      .map(([key, value]) => `<dt>${escapeHtml(key)}</dt><dd>${escapeHtml(value)}</dd>`)
+      .join('')}</dl>`;
+  }
+
+  function showElementProperties(node) {
+    const detail = $('properties-detail');
+    detail.classList.remove('muted');
+    const data = node.data || {};
+    detail.innerHTML = propsHtml([
+      ['名称', node.label || node.id],
+      ['元素 id', node.id],
+      ['类型', node.type || '—'],
+      ['ArchiMate 层', node.layer || '—'],
+      ['描述', data.description || '—'],
+      ['父元素', data.parent || '—'],
+      ['属性', data.attributes || '（图端点未返回 attributes，可经高级编辑/上下文检索查看）'],
+    ]);
+  }
+
+  function showEdgeProperties(edge) {
+    const nameOf = (graphId) => {
+      const node = state.graph.nodes.find((n) => n.id === graphId);
+      return node ? node.label || node.id : graphId;
+    };
+    const detail = $('properties-detail');
+    detail.classList.remove('muted');
+    detail.innerHTML = propsHtml([
+      ['关系类型', edge.type || '—'],
+      ['关系 id', edge.id],
+      ['源元素', nameOf(edge.source)],
+      ['目标元素', nameOf(edge.target)],
+      ['陈述', edge.label || edge.type || '—'],
+    ]);
+  }
+
+  function clearProperties() {
+    const detail = $('properties-detail');
+    detail.classList.add('muted');
+    detail.textContent = '点击画布顶点 / 边或模型树元素查看详情';
+    highlightTreeMember(null);
+  }
+
+  function switchRightTab(name) {
+    $('tab-properties').classList.toggle('active', name === 'properties');
+    $('tab-advanced').classList.toggle('active', name === 'advanced');
+    $('properties-tab').hidden = name !== 'properties';
+    $('advanced-tab').hidden = name !== 'advanced';
+  }
+
+  // ------------------------------------------------------------------
+  // 布局侧车落盘（语义不变）
+  // ------------------------------------------------------------------
+
   function scheduleLayoutSave() {
     if (state.layoutSaveTimer) {
       clearTimeout(state.layoutSaveTimer);
@@ -359,6 +536,10 @@
     }
   }
 
+  // ------------------------------------------------------------------
+  // 检索（顶栏入口，结果下拉）
+  // ------------------------------------------------------------------
+
   async function doSearch() {
     const query = $('search-input').value.trim();
     const mode = $('search-mode').value;
@@ -394,10 +575,20 @@
       li.innerHTML = `<b>${escapeHtml(hit.kind)}</b> ${escapeHtml(hit.name || hit.id)} <span class="muted">${escapeHtml(hit.type || '')}</span>`;
       li.addEventListener('click', () => {
         $('search-input').value = hit.id || hit.name || '';
+        $('search-dropdown').hidden = true;
+        // 命中当前画布内的元素 → 画布定位并选中
+        if (hit.kind === 'element' && state.graph && state.graph.nodes.some((n) => n.id === hit.id)) {
+          focusElement(hit.id);
+        }
       });
       list.appendChild(li);
     }
+    $('search-dropdown').hidden = false;
   }
+
+  // ------------------------------------------------------------------
+  // 高级编辑（既有手填 JSON 编辑区，保留为右栏页签）
+  // ------------------------------------------------------------------
 
   function renderEditForm(op) {
     const form = $('edit-form');
@@ -473,6 +664,25 @@
     }
   }
 
+  // ------------------------------------------------------------------
+  // 面板折叠（全区域自适应：桌面宽度收缩，窄屏 display:none 降级）
+  // ------------------------------------------------------------------
+
+  function togglePanel(panelId) {
+    const panel = $(panelId);
+    panel.classList.toggle('collapsed');
+    // 折叠改变画布容器尺寸 → 同步画布
+    requestAnimationFrame(() => {
+      if (state.maxGraph) {
+        try {
+          state.maxGraph.sizeDidChange();
+        } catch {
+          /* 忽略 */
+        }
+      }
+    });
+  }
+
   function bindEvents() {
     $('refresh-projects').addEventListener('click', loadProjects);
     $('btn-add-project').addEventListener('click', doAddProject);
@@ -481,6 +691,7 @@
         doAddProject();
       }
     });
+    $('btn-remove-project').addEventListener('click', doRemoveSelectedProject);
     $('btn-export').addEventListener('click', doExport);
     $('btn-import').addEventListener('click', () => $('import-file').click());
     $('import-file').addEventListener('change', (event) => {
@@ -497,6 +708,10 @@
         doSearch();
       }
     });
+    $('btn-toggle-left').addEventListener('click', () => togglePanel('left-panel'));
+    $('btn-toggle-right').addEventListener('click', () => togglePanel('right-panel'));
+    $('tab-properties').addEventListener('click', () => switchRightTab('properties'));
+    $('tab-advanced').addEventListener('click', () => switchRightTab('advanced'));
     $('edit-op').addEventListener('change', (event) => renderEditForm(event.target.value));
     $('btn-edit').addEventListener('click', doEdit);
     renderEditForm('addElement');
