@@ -4331,6 +4331,11 @@
           "name": "commit",
           "value": "972d8dd",
           "description": "design/KG/SystemArchitecture.json（LTM 里程碑描述更新 + WP1361 AT-1361-01 同步）"
+        },
+        {
+          "name": "commit",
+          "value": "e2c47de",
+          "description": "design/KG/SystemArchitecture.json（LTM 里程碑描述更新 + T1 摘要更新）"
         }
       ]
     },
