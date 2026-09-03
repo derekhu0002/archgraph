@@ -225,7 +225,9 @@ label {
   word-break: break-all;
 }
 
-#graph-svg {
+#graph-container {
+  width: 760px;
+  height: 520px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: #fafafa;

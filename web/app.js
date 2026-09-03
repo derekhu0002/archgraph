@@ -1,8 +1,10 @@
 'use strict';
 
-// ArchGraph 本地知识图谱工具 — 前端逻辑（零依赖，基础 SVG 渲染 + 拖动）。
-// TODO(后续切片)：图形内核接入 AntV G6 v5（web/vendor/g6.min.js 本地 vendor），
-// 使用其内置 force/dagre 布局、原生拖动/选择/命中/固定节点，替换下方基础 SVG 渲染。
+// ArchGraph 本地知识图谱工具 — 前端逻辑（零构建）。
+// 图形内核：AntV G6 v5（本地 vendor /vendor/g6.min.js，默认 Canvas 渲染），
+// 支持 drag-canvas / zoom-canvas / drag-element / click-select。
+// 布局侧车（M1-S2）：打开视图先 GET /views/:id/layout 覆盖节点坐标；
+// 节点拖动结束后 PUT /views/:id/layout 落盘（防抖）。坐标不进图谱 JSON。
 
 (function () {
   const state = {
@@ -11,7 +13,8 @@
     views: [],
     currentViewId: null,
     graph: null,
-    dragNodeId: null,
+    g6Graph: null,
+    layoutSaveTimer: null,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -105,71 +108,96 @@
     state.currentViewId = viewId;
     renderViews();
     const data = await api(`/api/projects/${state.selectedProjectId}/views/${viewId}/graph`);
+    // 布局侧车（M1-S2）：先取合并后的侧车坐标覆盖图数据默认圆形布局。
+    // 侧车不可用时回退图端点自带坐标，不阻塞渲染。
+    try {
+      const layout = await api(`/api/projects/${state.selectedProjectId}/views/${viewId}/layout`);
+      const positions = (layout && layout.elements) || {};
+      for (const node of data.nodes) {
+        const pos = positions[node.id];
+        if (pos && Number.isFinite(pos.x) && Number.isFinite(pos.y)) {
+          node.x = pos.x;
+          node.y = pos.y;
+        }
+      }
+    } catch {
+      /* 布局侧车不可用：使用图端点默认坐标 */
+    }
     state.graph = data;
     $('graph-title').textContent = `视图：${viewName}`;
     renderGraph();
   }
 
   function renderGraph() {
-    const svg = $('graph-svg');
-    svg.innerHTML = '';
+    if (state.g6Graph) {
+      state.g6Graph.destroy();
+      state.g6Graph = null;
+    }
+    const container = $('graph-container');
+    container.innerHTML = '';
     if (!state.graph) {
       return;
     }
+    if (!window.G6) {
+      container.textContent = 'G6 v5 未加载（/vendor/g6.min.js 缺失）';
+      return;
+    }
     const { nodes, edges } = state.graph;
-    for (const edge of edges) {
-      const source = nodes.find((n) => n.id === edge.source);
-      const target = nodes.find((n) => n.id === edge.target);
-      if (!source || !target) {
-        continue;
-      }
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', source.x + 60);
-      line.setAttribute('y1', source.y + 20);
-      line.setAttribute('x2', target.x + 60);
-      line.setAttribute('y2', target.y + 20);
-      line.setAttribute('stroke', '#999');
-      line.setAttribute('stroke-width', '1');
-      svg.appendChild(line);
-    }
-    for (const node of nodes) {
-      const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      group.setAttribute('transform', `translate(${node.x}, ${node.y})`);
-      group.dataset.id = node.id;
-
-      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      rect.setAttribute('width', '120');
-      rect.setAttribute('height', '40');
-      rect.setAttribute('rx', '6');
-      rect.setAttribute('fill', colorForLayer(node.layer));
-      rect.setAttribute('stroke', '#555');
-      group.appendChild(rect);
-
-      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('x', '8');
-      text.setAttribute('y', '18');
-      text.setAttribute('fill', '#111');
-      text.setAttribute('font-size', '12');
-      text.textContent = (node.label || node.id).slice(0, 16);
-      group.appendChild(text);
-
-      const type = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      type.setAttribute('x', '8');
-      type.setAttribute('y', '33');
-      type.setAttribute('fill', '#333');
-      type.setAttribute('font-size', '9');
-      type.textContent = (node.type || '').slice(0, 20);
-      group.appendChild(type);
-
-      group.style.cursor = 'move';
-      group.addEventListener('mousedown', (event) => {
-        state.dragNodeId = node.id;
-        event.preventDefault();
-      });
-      svg.appendChild(group);
-    }
-    svg.addEventListener('mousemove', onSvgMouseMove);
-    svg.addEventListener('mouseup', onSvgMouseUp);
+    const graph = new G6.Graph({
+      container,
+      width: container.clientWidth || 760,
+      height: container.clientHeight || 520,
+      autoFit: 'view',
+      data: {
+        nodes: nodes.map((node) => ({
+          id: node.id,
+          data: {
+            label: node.label,
+            type: node.type,
+            layer: node.layer,
+            description: node.data ? node.data.description : '',
+          },
+          style: { x: node.x, y: node.y },
+        })),
+        edges: edges.map((edge) => ({
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          data: { label: edge.label, type: edge.type },
+        })),
+      },
+      node: {
+        type: 'rect',
+        style: (datum) => ({
+          size: [140, 44],
+          radius: 6,
+          fill: colorForLayer(datum.data && datum.data.layer),
+          stroke: '#555',
+          labelText: `${(datum.data && datum.data.label) || datum.id}\n${(datum.data && datum.data.type) || ''}`,
+          labelFill: '#111',
+          labelFontSize: 11,
+          labelLineHeight: 14,
+          labelPlacement: 'center',
+          cursor: 'move',
+        }),
+      },
+      edge: {
+        type: 'line',
+        style: (datum) => ({
+          stroke: '#999',
+          lineWidth: 1,
+          endArrow: true,
+          labelText: (datum.data && datum.data.label) || '',
+          labelFill: '#666',
+          labelFontSize: 9,
+        }),
+      },
+      behaviors: ['drag-canvas', 'zoom-canvas', 'drag-element', 'click-select'],
+    });
+    // 拖动结束 → 布局侧车落盘（防抖，见 scheduleLayoutSave）。
+    graph.on('node:dragend', () => scheduleLayoutSave());
+    graph.render();
+    state.g6Graph = graph;
   }
 
   function colorForLayer(layer) {
@@ -182,26 +210,41 @@
     }
   }
 
-  function onSvgMouseMove(event) {
-    if (!state.dragNodeId || !state.graph) {
-      return;
+  function scheduleLayoutSave() {
+    if (state.layoutSaveTimer) {
+      clearTimeout(state.layoutSaveTimer);
     }
-    const svg = $('graph-svg');
-    const rect = svg.getBoundingClientRect();
-    const x = event.clientX - rect.left - 60;
-    const y = event.clientY - rect.top - 20;
-    const node = state.graph.nodes.find((n) => n.id === state.dragNodeId);
-    if (node) {
-      node.x = Math.max(0, Math.min(700, x));
-      node.y = Math.max(0, Math.min(500, y));
-      node.fx = node.x;
-      node.fy = node.y;
-      renderGraph();
-    }
+    state.layoutSaveTimer = setTimeout(saveLayout, 400);
   }
 
-  function onSvgMouseUp() {
-    state.dragNodeId = null;
+  async function saveLayout() {
+    state.layoutSaveTimer = null;
+    if (!state.g6Graph || !state.graph || !state.selectedProjectId || !state.currentViewId) {
+      return;
+    }
+    const elements = {};
+    for (const node of state.graph.nodes) {
+      let pos = null;
+      try {
+        pos = state.g6Graph.getElementPosition(node.id);
+      } catch {
+        pos = null;
+      }
+      if (Array.isArray(pos)) {
+        elements[node.id] = { x: Math.round(pos[0]), y: Math.round(pos[1]) };
+      } else if (pos && Number.isFinite(pos.x) && Number.isFinite(pos.y)) {
+        elements[node.id] = { x: Math.round(pos.x), y: Math.round(pos.y) };
+      }
+    }
+    try {
+      await api(`/api/projects/${state.selectedProjectId}/views/${state.currentViewId}/layout`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ elements }),
+      });
+    } catch {
+      /* 布局持久化失败不影响画布交互 */
+    }
   }
 
   async function doSearch() {

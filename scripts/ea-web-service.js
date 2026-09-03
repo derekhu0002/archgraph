@@ -20,6 +20,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const readline = require('node:readline');
 const { spawn } = require('node:child_process');
+const { createLayoutStore } = require('./ea-layout-store.js');
 
 const DEFAULT_HOST = '127.0.0.1';
 const DEFAULT_PORT = 8787;
@@ -823,6 +824,9 @@ function createService(options = {}) {
   const staticDir = options.staticDir || path.join(REPO_ROOT, 'web');
   const undoDepth = options.undoDepth || DEFAULT_UNDO_DEPTH;
   const mcpAdapter = options.mcpAdapter || createMcpAdapter(options.mcp || {});
+  // 布局侧车（M1-S2）：坐标独立持久化，与图谱 JSON 物理隔离。
+  // layoutRoot 选项 / EA_LAYOUT_ROOT 环境变量可覆盖默认 ~/.argo/ea-tool/layouts/。
+  const layoutStore = options.layoutStore || createLayoutStore({ layoutRoot: options.layoutRoot });
 
   const state = {
     projects: new Map(),
@@ -1018,6 +1022,10 @@ function createService(options = {}) {
       if (req.method === 'GET' && (pathname === '/app.js' || pathname === '/style.css')) {
         return serveStatic(res, path.join(staticDir, pathname.slice(1)), staticDir);
       }
+      // 本地 vendor 静态资源（如 AntV G6 v5：/vendor/g6.min.js）；路径穿越由 serveStatic 防护。
+      if (req.method === 'GET' && pathname.startsWith('/vendor/')) {
+        return serveStatic(res, path.join(staticDir, pathname.slice(1)), staticDir);
+      }
 
       if (req.method === 'GET' && pathname === '/api/projects') {
         refreshProjects();
@@ -1029,7 +1037,9 @@ function createService(options = {}) {
       if (m) {
         const projectId = m[1];
         const rest = m[2] || '';
-        return handleProjectRoute(req, res, projectId, rest, url);
+        // await 使异步路由内抛出的 HttpError 能被上方 catch 捕获并转为 JSON 错误响应，
+        // 而非未处理的 Promise 拒绝（进程崩溃）。
+        return await handleProjectRoute(req, res, projectId, rest, url);
       }
 
       return sendJson(res, 404, { error: `not found: ${pathname}` });
@@ -1082,6 +1092,36 @@ function createService(options = {}) {
         throw new HttpError(404, `view not found: ${viewMatch[1]}`);
       }
       return sendJson(res, 200, { project: { id: project.id, name: project.name }, ...graph });
+    }
+    // 布局侧车（M1-S2，加法端点）：GET 返回按当前成员合并后的坐标全集，
+    // PUT 按当前文档计算成员身份签名后原子写入侧车；坐标永不进入图谱 JSON。
+    const layoutMatch = rest.match(/^\/views\/([A-Za-z0-9._-]+)\/layout$/);
+    if (layoutMatch) {
+      const project = getProject(projectId);
+      const doc = readGraphDocument(project.graphPath);
+      const view = (doc.views || []).find((entry) => entry.view_id === layoutMatch[1]);
+      if (!view) {
+        throw new HttpError(404, `view not found: ${layoutMatch[1]}`);
+      }
+      if (req.method === 'GET') {
+        const layout = layoutStore.mergeLayout({ projectId: project.id, graphKey: project.graphPath, view });
+        return sendJson(res, 200, { project: project.id, view_id: view.view_id, ...layout });
+      }
+      if (req.method === 'PUT') {
+        const body = await readJsonBody(req, MAX_BODY_BYTES);
+        try {
+          const result = layoutStore.putLayout({
+            projectId: project.id,
+            graphKey: project.graphPath,
+            view,
+            elements: body && body.elements,
+          });
+          return sendJson(res, 200, { ok: true, project: project.id, ...result });
+        } catch (error) {
+          throw new HttpError(400, error.message);
+        }
+      }
+      throw new HttpError(405, `method not allowed: ${req.method}`);
     }
     if (req.method === 'GET' && rest === '/export') {
       const project = getProject(projectId);
@@ -1174,6 +1214,10 @@ function createService(options = {}) {
     return new Promise((resolve) => {
       stopRefreshing();
       server.close(() => resolve());
+      // 主动关闭挂起的连接（含未消费响应体的 keep-alive 连接），保证 stop 必然完成。
+      if (typeof server.closeAllConnections === 'function') {
+        server.closeAllConnections();
+      }
     });
   }
 
@@ -1188,6 +1232,7 @@ function createService(options = {}) {
     redoProject,
     importProject,
     mcpAdapter,
+    layoutStore,
     state,
   };
 }

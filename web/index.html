@@ -70,8 +70,8 @@
 
           <div id="graph-panel">
             <h3 id="graph-title">图形化视图</h3>
-            <svg id="graph-svg" width="760" height="520"></svg>
-            <p class="hint">拖动节点调整位置。图形内核后续接入 AntV G6 v5（本地 vendor）。</p>
+            <div id="graph-container"></div>
+            <p class="hint">AntV G6 v5 画布：平移 / 缩放 / 点选 / 拖动节点（拖动后坐标自动持久化到布局侧车）。</p>
           </div>
         </div>
       </div>
@@ -80,6 +80,7 @@
 
   <footer>本地运行（127.0.0.1），数据不离开本机。</footer>
 
+  <script src="/vendor/g6.min.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>
