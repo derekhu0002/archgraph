@@ -1019,6 +1019,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "417b0e5",
+          "description": "install-argo.ps1; tests/argo-deploy.test.js; tests/argo-openclaw.test.js（WP2786：新增 [23/23] EA Web 服务部署+后台启动步，-SkipEaWeb/-EaWebPort/-EaWebRoot，步骤分母 22→23 重编号）"
         }
       ],
       "testcases": [
@@ -3238,7 +3243,17 @@
       "name": "里程碑：内容存储策略（文档入KG）",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "里程碑（2026-08-26 人类伙伴确立）：文档内容存储策略——除必须放在仓库中的内容或无法放入 KG 的内容（如视频/二进制）外，其余所有文档内容一律写入 KG（KG-first document storage）；必须留在仓库的内容（视频/二进制/可执行）也需 SUMMARY 后登记入 KG（元素摘要 + 仓库路径/commit 属性）；KG 为文档内容的事实源。落地：argo/rules/archgraph.instructions.md 新增 <ContentStoragePolicy> 章节 + CoreRule 8（全英文）；新增 tests/argo-rules-content-storage.test.js（2 用例）；图谱新增 Principle archgraph-content-storage-policy-001（+ AT-archgraph-content-storage-policy-01）与决策记录 cs-policy-decision-001（挂于 argo-workflow-rules-view）。相关测试 30/30 通过、validateSystemArchitecture 通过，规则已部署到 %APPDATA%\\Code\\User\\prompts\\archgraph.instructions.md。commits 91d7c07（工作）/bbee873（commit 属性登记）。后续：迁移既有 docs/*.md 文档内容入 KG。"
+      "description": "里程碑（2026-08-26 人类伙伴确立）：文档内容存储策略——除必须放在仓库中的内容或无法放入 KG 的内容（如视频/二进制）外，其余所有文档内容一律写入 KG（KG-first document storage）；必须留在仓库的内容（视频/二进制/可执行）也需 SUMMARY 后登记入 KG（元素摘要 + 仓库路径/commit 属性）；KG 为文档内容的事实源。落地：argo/rules/archgraph.instructions.md 新增 <ContentStoragePolicy> 章节 + CoreRule 8（全英文）；新增 tests/argo-rules-content-storage.test.js（2 用例）；图谱新增 Principle archgraph-content-storage-policy-001（+ AT-archgraph-content-storage-policy-01）与决策记录 cs-policy-decision-001（挂于 argo-workflow-rules-view）。相关测试 30/30 通过、validateSystemArchitecture 通过，规则已部署到 %APPDATA%\\Code\\User\\prompts\\archgraph.instructions.md。commits 91d7c07（工作）/bbee873（commit 属性登记）。后续：迁移既有 docs/*.md 文档内容入 KG。",
+      "attributes": [
+        {
+          "name": "archivedAt",
+          "value": "2026-09-03"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T3"
+        }
+      ]
     },
     {
       "id": "subgraph-semantic-retrieval-001",
@@ -3690,7 +3705,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要）\n- 身份：项目总管（ArchGraph overseer）；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin（DevelopmentTeam 430）。\n- 本会话完成：\n  1) **EA 类工具洞察**（洞察Lead 五步法）：结论=现成 EA 产品均不满足“双向一致+写必以 ARGO MCP”，正解=升级既有 web/ 本地 Web 服务为画布式工具；洞察团队记忆 411f940/b33db60。\n  2) **路线+任务分解**：M0 收口 / M1 图形化内核 / M2 向导+并发感知 / M3 体验与决策。\n  3) **人类伙伴红线**：坐标持久化且独立于图谱 JSON（侧车）；Agent 内容修改不扰动坐标（成员身份签名失效）；不得改既有 ARGO MCP 代码；【修订】侧车默认存储按项目隔离，存各项目自己的 design/KG/ 目录下。\n  4) **WP2785 立项**（ee2aed4/5417da4）+ M1-S1/S2 交付（21a52c0/3615700）+ 侧车按项目存储修订（80c2dfc）：G6 v5 画布 + ea-layout-store（GET/PUT layout 端点，默认 <projectRoot>/design/KG/ea-layouts/<view_id>.json）；顺带修复 handle 未 await、stop 挂起 2 个既有 bug。\n- 验收：6 条 AT 全过（含 L5 按项目隔离），架构测试 33/35（2 既有失败），validate 通过，diff 白名单核验（argo/**/SystemArchitecture.json 零改动）。LTM 里程碑 overseer-wp2785-m1s1s2-milestone-001（含修订）；overseer-mem-eval-001 归档 T3。\n- 可复用经验：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 前先看 status；b) Node 24 用 glob 不用目录形式跑 node --test；c) 侧车失效键=成员身份签名；d) LTM 视图满 15 先归档；e) 侧车进项目 design/KG/ 后为未跟踪产物，.git 忽略策略待定。\n- 未完成/TODO：浏览器人工走查（本环境无浏览器）；M1-S3~S5 未启动；WP2758 todo 未清；archgraph.feap 外部改动在工作区未处理（勿提交）；侧车文件 .git 忽略策略待人类伙伴定；既有 2 失败未修；Experience 层未实施。",
+      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要）\n- 身份：项目总管（ArchGraph overseer）；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin（DevelopmentTeam 430）。\n- 本会话完成：\n  1) **EA 类工具洞察**（洞察Lead 五步法，411f940/b33db60）：结论=现成 EA 产品均不满足双向一致+写必以 ARGO MCP，正解=升级既有 web/ 本地 Web 服务为画布式工具。\n  2) **路线+任务分解**：M0 收口 / M1 图形化内核 / M2 向导+并发感知 / M3 体验与决策。\n  3) **人类伙伴红线/决策**：坐标持久化且独立于图谱 JSON（侧车）；Agent 内容修改不扰动坐标（成员身份签名失效）；不得改既有 ARGO MCP 代码；侧车默认按项目存 <projectRoot>/design/KG/ea-layouts/；**侧车文件=正式项目资产，随项目 commit 共享，禁止 gitignore**（2785 decision 属性）。\n  4) **WP2785 交付**（21a52c0/3615700/80c2dfc）：G6 v5 画布 + ea-layout-store（GET/PUT layout 端点）+ 侧车按项目存储修订；顺带修 handle 未 await、stop 挂起 2 既有 bug。\n  5) **WP2786 交付**（417b0e5）：EA Web 服务纳入 npm 部署包（files +3 条）并随 argo-deploy 后台启动（install-argo.ps1 [23/23] 步，-SkipEaWeb/-EaWebPort/-EaWebRoot，WMI 零句柄继承拉起，端口探测幂等）；未 bump 版本未发布。\n- 验收：架构测试 35/37（2 既有失败：memory-eval-run-03、architecture-view-context-08），validate 通过，各轮 diff 白名单核验（argo/** 零改动）。LTM：wp2785/wp2786 里程碑已记；mem-eval、content-storage 归档 T3（LTM 15 上限）。\n- 可复用经验：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 前先看 status；b) Node 24 用 glob 跑 node --test；c) 侧车失效键=成员身份签名；d) LTM 满 15 先归档；e) **Windows 后台拉起禁用 Start-Process**（孙进程继承 stdio 管道句柄→spawnSync 调用方阻塞），用 WMI Win32_Process.Create；cmd 带重定向多引号需 /S+外层引号；f) npm publish 后 registry 同步有延迟。\n- 未完成/TODO：**npm publish 时机由人类伙伴定**（包内容已就绪，当前版本 0.10.52 未含本轮变更）；浏览器人工走查（本环境无浏览器）；M1-S3~S5 未启动；WP2758 todo 未清；archgraph.feap 外部改动在工作区未处理（勿提交）；既有 2 失败未修；Experience 层未实施。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3712,8 +3727,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-03T14:00:00.000Z",
-          "description": "2026-09-03 会话摘要（EA 类工具洞察 + 路线/任务分解 + WP2785 M1-S1/S2 交付 + 侧车按项目存储修订）"
+          "value": "2026-09-03T16:30:00.000Z",
+          "description": "2026-09-03 会话摘要（EA 类工具洞察 + 路线分解 + WP2785 交付与侧车修订 + 侧车正式资产决策 + WP2786 部署包集成）"
         },
         {
           "name": "commit",
@@ -4467,10 +4482,6 @@
           "description": "design/KG/SystemArchitecture.json（立项：WP2785 + AT-2785-S1-01/L1~L4 + Realization→2760，EA Tooling 1800）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "21a52c0",
           "description": "scripts/ea-layout-store.js; scripts/ea-web-service.js; tests/ea-layout-store.test.js（M1-S2 布局侧车独立持久化，成员身份签名失效）"
@@ -4499,6 +4510,10 @@
           "name": "decision",
           "value": "layout-sidecar-formal-asset",
           "description": "2026-09-03 人类伙伴决策：布局侧车文件（各项目 design/KG/ea-layouts/*.json）是正式项目资产，随项目 commit 共享（团队共用视图布局），禁止加入 .gitignore。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "EA 图谱画布图形化编辑内核与布局侧车（M1，洞察报告 P1 首批切片 M1-S1/S2，WP2758 TODO R-2 延续）：① M1-S1 图形内核：将 ArchGraph 本地 Web 服务（2760）图形区从基础 SVG 升级为 AntV G6 v5 画布（本地 vendored web/vendor/g6.min.js，零构建），替换 web/app.js 基础 SVG 渲染+拖动；层着色沿用 layerOf/colorForLayer，支持平移/缩放/选择/节点拖动。② M1-S2 布局侧车：画布坐标持久化于独立侧车存储（新模块 scripts/ea-layout-store.js + REST 端点 GET/PUT /api/projects/:id/views/:viewId/layout），与 design/KG/SystemArchitecture.json 完全物理隔离——坐标不进图谱 JSON、不进 schema，ARGO MCP 可查询内容保持不变。失效键=视图成员身份签名（included_elements+included_relationships 身份集合的 sha256），非内容哈希：Agent 对老元素的内容级修改（name/description/attributes）不扰动其在各视图中的坐标；仅成员结构变化触发新成员补位/移除成员清理，其余坐标保留。【2026-09-03 人类伙伴需求修订】布局侧车默认存储改为按项目隔离：每个项目的坐标存放在该项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json（独立文件，仍不进 SystemArchitecture.json）；layoutRoot 选项/EA_LAYOUT_ROOT 覆盖仍有效（测试用，回退 <root>/<projectId>/<view_id>.json）；~/.argo/ea-tool/layouts/ 不再作为默认。硬性约束：不得改动 argo/** 任何既有 ARGO MCP 功能代码，不得改动 design/KG/SystemArchitecture.json 的结构与 schema；diff 只允许 scripts/ea-web-service.js、scripts/ea-layout-store.js（新）、web/**、tests/**；既有端点契约只做加法不做破坏性修改，既有测试基线不退化。",
@@ -4586,12 +4601,21 @@
       "attributes": [
         {
           "name": "status",
-          "value": "ACTIVE"
+          "value": "COMPLETED"
         },
         {
           "name": "commit",
           "value": "220e881",
           "description": "design/KG/SystemArchitecture.json（立项：WP2786 + AT-2786-01/02 + Realization→2760；同提交含 2785 侧车正式资产决策属性 + LTM 里程碑描述更新）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "417b0e5",
+          "description": "package.json; install-argo.ps1; tests/argo-deploy.test.js; tests/argo-openclaw.test.js; tests/ea-web-deploy.test.js（EA Web 服务纳入 npm 部署包 + argo-deploy [23/23] 后台启动步，WMI 零句柄继承拉起，端口探测幂等）"
         }
       ],
       "description": "将 EA 本地 Web 服务（2760）打包进 archgraph-argo npm 部署包，并随 argo-deploy（install-argo.ps1）安装后启动后台服务：① package.json files 增加 scripts/ea-web-service.js、scripts/ea-layout-store.js、web/**（含 vendor/g6.min.js）；② install-argo.ps1 新增部署步：服务脚本复制到 <ArgoRoot>/scripts/、web 静态资源到 <ArgoRoot>/web/（与 harness 脚本同目录，REPO_ROOT 相对关系不变），随后后台启动 node <ArgoRoot>/scripts/ea-web-service.js --root <EaWebRoot> --port <EaWebPort>（Start-Process 隐藏窗口 + 日志 <ArgoRoot>/ea-web-service.log）；端口已监听则跳过启动，保证重复部署幂等；③ 参数：-SkipEaWeb 禁用、-EaWebPort（默认 8787）、-EaWebRoot（默认 $PWD，即 argo-deploy 执行处）；既有宿主部署测试（argo-deploy/argo-openclaw）以 -SkipEaWeb 保持隔离。约束：argo/** 零改动；scripts/ea-web-service.js 预期不改；既有部署断言基线不退化；不 bump 版本、不发布（发布由人类伙伴决定）。",
@@ -4615,6 +4639,27 @@
         }
       ],
       "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json; install-argo.ps1; tests/argo-deploy.test.js; tests/argo-openclaw.test.js; tests/ea-web-deploy.test.js",
+          "name": "commit",
+          "value": "417b0e5"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "WP2786 交付（2026-09-03，委派 Developer/Xiaoming，项目总管编排+验收）：EA 本地 Web 服务纳入 archgraph-argo npm 部署包并随 argo-deploy 后台启动。落地：package.json files +（scripts/ea-web-service.js、scripts/ea-layout-store.js、web）；install-argo.ps1 新增 [23/23] 步（分母 22→23 重编号）：服务脚本→<ArgoRoot>/scripts/、web→<ArgoRoot>/web/，端口探测幂等跳过，否则后台拉起，日志 <ArgoRoot>/ea-web-service.log；参数 -SkipEaWeb/-EaWebPort(8787)/-EaWebRoot($PWD)。关键偏差（实证）：后台拉起用 WMI Win32_Process.Create + cmd /S /c 重定向包装替代 Start-Process——Start-Process 孙进程继承安装器 stdio 管道句柄会使所有 spawnSync 调用方（含 argo-deploy bin）阻塞挂起（实测 >180s），WMI 经 WMI 服务建进程零句柄继承（AT-2786-02 182s→5.5s）；cmd 引号坑：带重定向多引号命令行直传被 cmd 剥引号静默失败（rc=0），必须 /S+外层引号形式，含空格路径已端到端验证。验收：AT-2786-01（npm pack --dry-run 含 6 必需条目，71 文件 2.6MB）/AT-2786-02（部署+拉起+幂等+SkipEaWeb）全过，架构测试 35/37（2 既有失败），validate 通过，测试进程零残留。待办：npm publish 时机与版本 bump 由人类伙伴决定（本轮未 bump）；浏览器人工走查未做。",
+      "id": "overseer-wp2786-deploy-milestone-001",
+      "name": "里程碑：WP2786 EA Web 服务纳入 npm 部署包并随 argo-deploy 后台启动",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -6261,7 +6306,6 @@
         "overseer-vision-001",
         "overseer-archimate-role-001",
         "overseer-query-rules-001",
-        "overseer-content-storage-001",
         "overseer-subgraph-semantic-001",
         "overseer-wiki-eval-001",
         "overseer-mcp-tool-surface-001",
@@ -6272,7 +6316,8 @@
         "overseer-harness-workspaceroot-fix-001",
         "overseer-community-linkage-001",
         "overseer-homepage-v3-kglibrary-retire-001",
-        "overseer-wp2785-m1s1s2-milestone-001"
+        "overseer-wp2785-m1s1s2-milestone-001",
+        "overseer-wp2786-deploy-milestone-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
@@ -6331,7 +6376,8 @@
       "parent_element_name": "项目总管",
       "description": "T3 档案视图（<actor>-archive-001 约定）：已完结/封存的旧记忆，显式检索才读，只移不删（归档机制）。",
       "included_elements": [
-        "overseer-mem-eval-001"
+        "overseer-mem-eval-001",
+        "overseer-content-storage-001"
       ]
     },
     {
