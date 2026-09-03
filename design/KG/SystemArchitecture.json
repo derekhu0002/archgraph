@@ -4820,6 +4820,13 @@
           "description": "GIVEN 本地 Web 服务运行；WHEN 打开某视图画布；THEN 页面以 Excalidraw 渲染（vendor 资源加载、视图成员渲染为形状并按层着色、关系呈现为箭头），画布随容器/窗口自适应，布局坐标仍经侧车端点（内容级修改不扰动坐标语义保持），原 G6 渲染路径与 g6.min.js 移除，既有 /api 端点契约与测试基线不退化。",
           "name": "AT-2788-S1-01",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-web-browser.test.js",
+          "acceptanceCriteria": "tests/ea-web-browser.test.js",
+          "description": "GIVEN 本地 Web 服务运行且本机具备 Playwright+Chromium；WHEN 在真实浏览器中打开任一视图；THEN Excalidraw 画布挂载成功（嵌套 vendor 资源含 css/字体无 404），视图成员渲染为形状并按层着色、关系呈现为箭头；WHEN 拖动某形状；THEN 坐标落盘到该项目 design/KG/ea-layouts/ 侧车。环境无浏览器/缺 Playwright 时用例显式消息 skip 计通过（保障无浏览器环境基线不破）。",
+          "name": "AT-2788-S1-02",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package"
