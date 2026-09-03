@@ -1664,6 +1664,11 @@
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "commit",
+          "value": "00d831d",
+          "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-direction.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": []
