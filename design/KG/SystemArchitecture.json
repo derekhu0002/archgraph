@@ -1014,12 +1014,17 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "6a04493",
+          "description": "install-argo.ps1 (Cursor graph-mcp 改本地 stdio 桥：新增 -CursorMcpBridgesRoot 与 argo/mcp-bridges/graph-mcp-stdio.js 部署；Cursor 对远程 url 按 SSE GET 拨号 404，经桥转发 POST Streamable HTTP)；package.json files 加 argo/mcp-bridges；tests/argo-deploy.test.js (AT-1361-01 Cursor 断言改桥形态)；argo/mcp-bridges/graph-mcp-stdio.js"
         }
       ],
       "testcases": [
         {
           "acceptanceCriteria": "tests/argo-deploy.test.js",
-          "description": "GIVEN install-argo.ps1 部署并在 OpenCode/Cursor/VS Code 宿主注册 MCP；WHEN 读取生成的 MCP 配置（opencode.json mcp / mcp.json mcpServers / mcp.json servers）；THEN 默认同时注册 graph-mcp remote 条目（url=https://argo.derekworkspacev5.com/mcp）且形态按宿主 schema 区分：OpenCode mcp.graph-mcp={type:remote,url,enabled:true}、Cursor mcpServers.graph-mcp={url}（官方远程条目无 type 字段，type 仅 stdio 用）、VS Code servers.graph-mcp={type:http,url}；与 argo 条目平级。",
+          "description": "GIVEN install-argo.ps1 部署并在 OpenCode/Cursor/VS Code 宿主注册 MCP；WHEN 读取生成的 MCP 配置（opencode.json mcp / mcp.json mcpServers / mcp.json servers）；THEN 默认同时注册 graph-mcp 条目（url=https://argo.derekworkspacev5.com/mcp）且形态按宿主 schema/传输能力区分：OpenCode mcp.graph-mcp={type:remote,url,enabled:true}、Cursor mcpServers.graph-mcp={type:stdio,command:node,args:[mcp-bridges/graph-mcp-stdio.js],env.GRAPH_MCP_URL=远端 URL}（Cursor 对远程 url 按 SSE GET /mcp 拨号得 404，故经本地 stdio 桥转发 POST；桥文件由部署复制到 ~/.cursor/mcp-bridges/）、VS Code servers.graph-mcp={type:http,url}；与 argo 条目平级。",
           "Input": "tests/argo-deploy.test.js",
           "name": "AT-1361-01",
           "type": "Acceptance Test"
