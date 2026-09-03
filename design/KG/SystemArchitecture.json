@@ -118,13 +118,13 @@
           "value": "COMPLETED"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "cd365ea",
           "description": "tests/website.test.js; design/KG/SystemArchitecture.json（AT-website-01 描述刷新：去掉 KGlibrary 区块、新增 argo init/.env/无 Reference Library 断言）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -261,10 +261,6 @@
           "value": "https://derekhu0002.github.io/archgraph/"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "community_site",
           "value": "https://argo.derekworkspacev5.com/archgraph/"
         },
@@ -281,6 +277,10 @@
           "name": "commit",
           "value": "cd365ea",
           "description": "index.html; tests/website.test.js; KGlibrary/（删除）; docs/kglibrary.html（删除）; design/KG/SystemArchitecture.json（主页改版：Install 补前置依赖/.env 配置键、How to use 补 argo init、去除 Reference Library 由 community 承接）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -406,10 +406,6 @@
           "value": "2c79ca9"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "8099bd1",
           "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json（README 新增 Community 小节衔接社区站与 graph-wiki 图资产仓库）"
@@ -418,6 +414,10 @@
           "name": "commit",
           "value": "cd365ea",
           "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json（README Install 补前置依赖/.env 配置键、How to use 补 argo init，与主页同步）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -1012,13 +1012,13 @@
           "description": "argo/scripts/ensureArgoHarnessEnvironment.js（semantic lifecycle 分支同源修复：createDefaultCanonicalSemanticInitComposition 显式传 repositoryRoot，消除对进程 cwd 的依赖）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "6a04493",
           "description": "install-argo.ps1 (Cursor graph-mcp 改本地 stdio 桥：新增 -CursorMcpBridgesRoot 与 argo/mcp-bridges/graph-mcp-stdio.js 部署；Cursor 对远程 url 按 SSE GET 拨号 404，经桥转发 POST Streamable HTTP)；package.json files 加 argo/mcp-bridges；tests/argo-deploy.test.js (AT-1361-01 Cursor 断言改桥形态)；argo/mcp-bridges/graph-mcp-stdio.js"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -2241,7 +2241,7 @@
       ]
     },
     {
-      "description": "视图列表选择→图形化展开→自动布局（力导向/分层）→节点拖动；以 SVG 渲染节点/边图数据（nodes/edges/布局坐标）。",
+      "description": "视图列表选择→图形化展开→AntV G6 v5 画布渲染（节点按 ArchiMate 层着色，平移/缩放/选择/节点拖动；本地 vendored，零构建）；图数据来自 buildViewGraph（nodes/edges）。画布坐标持久化于独立布局侧车（scripts/ea-layout-store.js，默认 ~/.argo/ea-tool/layouts/，按视图成员身份签名失效：内容级修改不扰动坐标），不进图谱 JSON、不进 ARGO MCP 查询内容。",
       "id": "2764",
       "name": "知识图谱图形化查看服务",
       "parent": "2760",
@@ -2251,6 +2251,11 @@
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "commit",
+          "value": "3615700",
+          "description": "web/app.js; web/index.html; web/vendor/g6.min.js; scripts/ea-web-service.js; scripts/ea-layout-store.js（G6 v5 画布 + 布局侧车端点）"
         }
       ]
     },
@@ -3094,6 +3099,14 @@
           "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素 v2 描述更新）",
           "name": "commit",
           "value": "8c32d0b"
+        },
+        {
+          "name": "archivedAt",
+          "value": "2026-09-03"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T3"
         }
       ]
     },
@@ -3677,7 +3690,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-02 会话摘要，最终版）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份\n- 本会话（2026-09-02 起，跨 CURSOR argo-init / graph-mcp / 官网改版多条线）完成事项：\n  1) **CURSOR argo-init 工作区错误修复**：ensureArgoHarnessEnvironment.js 显式透传 workspaceRoot（validate + Neo4j sync/verify + semanticLifecycle repositoryRoot 补全），报告在 MCP 路径落盘。commits d191eaf/317a8b5。根因=宿主 cwd 差异（OpenCode/VS Code 以项目根为 cwd 掩盖缺陷；CURSOR 用户级 mcp.json 非项目根）。\n  2) **graph-mcp Cursor stdio 桥**：Cursor 对远程 url 按 SSE GET /mcp 拨号（POST-only Streamable HTTP 端点返回 404）→ 无法加载；新增 argo/mcp-bridges/graph-mcp-stdio.js（stdio JSON-RPC ↔ 远端 POST 翻译桥）+ install-argo.ps1 -CursorMcpBridgesRoot + Cursor graph-mcp 改 stdio 形态。commit 6a04493。真实 ~/.cursor/mcp.json 已更新（备份 mcp.json.graph-mcp-bridge.bak），桥端到端验证通过。\n  3) **官网衔接社区 + 主页 v3 改版**：index.html/README 新增 Community 区块（community_site https://argo.derekworkspacev5.com/archgraph/ + graph_wiki_repo https://github.com/derekhu0002/graph-wiki）；主页 Install 补前置依赖（Neo4j/embedding + ~/.argo/.env 键）+ How to use 补 argo init；彻底移除 KGlibrary Reference Library（git rm KGlibrary/ + docs/kglibrary.html，图谱 Rule1320/视图179 退役标记）。commits 8099bd1/cd365ea。\n  4) **npm 发布**：archgraph-argo@0.10.52 已发布（含 Cursor 桥 + harness workspaceRoot 修复），全局安装验证通过；本地 version bump 提交 22544be。\n- 验收：argo-deploy 6/6、argo-openclaw 6/6、guardian 4/4、validateSystemArchitecture 通过；全量 runArchitectureTests 27/29（2 失败为既有：memory-eval-run-03 需在线 provider、architecture-view-context-08 期望缺 diagram-skills-view-001）。\n- 图谱登记：WP1361（d191eaf/317a8b5/6a04493）、1318/1321/1311/1320（cd365ea）、1318（8099bd1）；LTM 里程碑 overseer-harness-workspaceroot-fix-001 / overseer-community-linkage-001 / overseer-homepage-v3-kglibrary-retire-001 / overseer-graph-mcp-deploy-001（描述已含 Cursor 桥）。\n- 可复用经验：①宿主 MCP 传输实现不同，验证需模拟宿主拨号实测（Cursor=SSE GET/桥），不能只看 mcp.json 形态；②harness 内部阶段必须显式透传 workspaceRoot 不依赖进程 cwd；③npm publish 后 registry 同步有延迟（ETARGET 需等 ~15s）；④退役图谱元素只加 retired 属性+描述不改结构。\n- 未完成/TODO：\n  - 洞察报告（综合建议）待人类伙伴审阅（见 LTM overseer-teamai-insight-001）\n  - Experience 层落地（阶段0-4）未实施\n  - 既有失败未修：architecture-view-context.test.js 期望缺 diagram-skills-view-001；memory-eval-run 需在线 provider\n  - developer-community-*.md 中「>10MB 子图提交仓库 KGlibrary/」承载描述已失配（目录已删），需后续更新为 graph-wiki/社区承载\n  - 真实 CURSOR 需重启/新会话让 graph-mcp 桥与 argo-init 修复生效",
+      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin（DevelopmentTeam 430）。\n- 本会话完成：\n  1) **EA 类工具洞察**（委派洞察Lead 五步法，结论：现成 EA 产品均不满足“双向一致+写必以 ARGO MCP”，正解=升级既有 web/ 本地 Web 服务为画布式工具；写路径/读路径骨架已存在），洞察团队记忆已登记（411f940/b33db60）。\n  2) **路线+任务分解**：M0 收口 / M1 图形化内核（=2758 R-2）/ M2 向导+人机并发感知 / M3 体验与决策。\n  3) **人类伙伴定红线**：画布坐标持久化且独立于图谱 JSON（侧车）；Agent 对老元素的内容修改不扰动各视图坐标（失效键=成员身份签名，非内容哈希）；不得改动任何既有 ARGO MCP 功能代码（argo/**）。\n  4) **WP2785 立项**（ee2aed4/5417da4）：开发EA图谱画布图形化编辑内核与布局侧车（M1）+ AT-2785-S1-01/L1~L4 + Realization→2760（EA Tooling 1800）。\n  5) **M1-S1/S2 交付**（委派 Developer/Xiaoming，commits 21a52c0/3615700）：G6 v5 画布（@antv/g6@5.1.1 vendored web/vendor/g6.min.js，零构建）替换基础 SVG；布局侧车 scripts/ea-layout-store.js + GET/PUT /api/projects/:id/views/:viewId/layout，存储默认 ~/.argo/ea-tool/layouts/（EA_LAYOUT_ROOT 可覆盖），成员身份签名失效；顺带修复 handle() 未 await 路由异常、stop() keep-alive 挂起两个既有 bug。\n- 验收：新增 AT 13/13、ea-web-service 基线 48/48、架构测试 32/34（2 既有失败：memory-eval-run-03、architecture-view-context-08）、validateSystemArchitecture 通过、diff 白名单核验（argo/**/design/KG 零改动）。LTM 里程碑 overseer-wp2785-m1s1s2-milestone-001；overseer-mem-eval-001 归档 T3（LTM 视图 15 元素上限）。\n- 可复用经验：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 操作前先看 status；b) Node 24 下 `node --test tests/` 目录形式不可用，用 glob；c) 侧车失效键必须用成员身份签名，内容哈希会误伤；d) LTM 视图满 15 先归档再写。\n- 未完成/TODO：浏览器人工走查（本环境无浏览器，仅契约级验证）；M1-S3~S5（连线建关系/属性编辑向导/收口）未启动；WP2758 todo 未清（项目发现扫描范围、fs.watch 实测、NF-9、锁压测）；archgraph.feap 外部改动仍在工作区未处理（勿提交）；既有 2 失败未修；Experience 层未实施。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3699,8 +3712,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-02T02:00:00.000Z",
-          "description": "2026-09-02 会话结束摘要（graph-mcp 全链路交付 + 宿主差异修复 + 坏全局包修复）"
+          "value": "2026-09-03T12:00:00.000Z",
+          "description": "2026-09-03 会话摘要（EA 类工具洞察 + 路线/任务分解 + WP2785 立项与 M1-S1/S2 交付）"
         },
         {
           "name": "commit",
@@ -4446,12 +4459,26 @@
       "attributes": [
         {
           "name": "status",
-          "value": "ACTIVE"
+          "value": "COMPLETED"
         },
         {
           "name": "commit",
           "value": "ee2aed4",
           "description": "design/KG/SystemArchitecture.json（立项：WP2785 + AT-2785-S1-01/L1~L4 + Realization→2760，EA Tooling 1800）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "21a52c0",
+          "description": "scripts/ea-layout-store.js; scripts/ea-web-service.js; tests/ea-layout-store.test.js（M1-S2 布局侧车独立持久化，成员身份签名失效）"
+        },
+        {
+          "name": "commit",
+          "value": "3615700",
+          "description": "web/vendor/g6.min.js; web/index.html; web/app.js; web/style.css; scripts/ea-web-service.js; tests/ea-web-service-g6-render.test.js（M1-S1 G6 v5 图形内核 + 布局侧车端点集成；顺带修复 handle 未 await 路由异常/stop 挂起）"
         }
       ],
       "description": "EA 图谱画布图形化编辑内核与布局侧车（M1，洞察报告 P1 首批切片 M1-S1/S2，WP2758 TODO R-2 延续）：① M1-S1 图形内核：将 ArchGraph 本地 Web 服务（2760）图形区从基础 SVG 升级为 AntV G6 v5 画布（本地 vendored web/vendor/g6.min.js，零构建），替换 web/app.js 基础 SVG 渲染+拖动；层着色沿用 layerOf/colorForLayer，支持平移/缩放/选择/节点拖动。② M1-S2 布局侧车：画布坐标持久化于独立侧车存储（新模块 scripts/ea-layout-store.js + REST 端点 GET/PUT /api/projects/:id/views/:viewId/layout），与 design/KG/SystemArchitecture.json 完全物理隔离——坐标不进图谱 JSON、不进 schema，ARGO MCP 可查询内容保持不变。失效键=视图成员身份签名（included_elements+included_relationships 身份集合的 sha256），非内容哈希：Agent 对老元素的内容级修改（name/description/attributes）不扰动其在各视图中的坐标；仅成员结构变化触发新成员补位/移除成员清理，其余坐标保留。硬性约束：不得改动 argo/** 任何既有 ARGO MCP 功能代码，不得改动 design/KG/SystemArchitecture.json 的结构与 schema；diff 只允许 scripts/ea-web-service.js、scripts/ea-layout-store.js（新）、web/**、tests/**；既有端点契约只做加法不做破坏性修改，既有测试基线不退化。",
@@ -4496,6 +4523,32 @@
         }
       ],
       "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "description": "scripts/ea-layout-store.js; scripts/ea-web-service.js; tests/ea-layout-store.test.js",
+          "name": "commit",
+          "value": "21a52c0"
+        },
+        {
+          "description": "web/vendor/g6.min.js; web/index.html; web/app.js; web/style.css; scripts/ea-web-service.js; tests/ea-web-service-g6-render.test.js",
+          "name": "commit",
+          "value": "3615700"
+        }
+      ],
+      "description": "WP2785 交付（2026-09-03，委派 Developer/Xiaoming，项目总管编排+验收）：EA 图谱画布图形化编辑内核 M1-S1/S2。① G6 v5 画布替换基础 SVG（@antv/g6@5.1.1 UMD vendored web/vendor/g6.min.js，零构建；层着色/平移/缩放/选择/拖动）。② 布局侧车：坐标持久化独立于图谱 JSON（默认 ~/.argo/ea-tool/layouts/，EA_LAYOUT_ROOT/layoutRoot 可覆盖），失效键=视图成员身份签名（included_elements+included_relationships sha256）——Agent 内容级修改不扰动坐标，仅成员结构变化触发补位/清理；新增 GET/PUT /api/projects/:id/views/:viewId/layout。硬约束守住：argo/** 与图谱 JSON 结构零改动（diff 白名单核验）。验收：新增 5 条 AT 全过，架构测试 32/34（2 失败为既有：memory-eval-run-03 需在线 provider、architecture-view-context-08 期望缺 diagram-skills-view-001），validateSystemArchitecture 通过。可复用经验/坑：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 操作前先看 status，勿误 stash/提交；b) Node 24 下 node --test tests/ 目录形式不可用，用 package.json 的 glob 形式；c) 语义检索基线测试冷启动偶发超时（复跑稳定）；d) Developer 顺带修复 handle() 未 await 异步路由异常（404 变进程崩溃）与 stop() 被 keep-alive 未消费响应体挂起两个既有 bug。待办：M1-S3~S5（连线建关系/属性编辑/收口）、浏览器人工走查（本环境无浏览器，仅契约级验证）、R-2 完成后清理 WP2758 todo。",
+      "id": "overseer-wp2785-m1s1s2-milestone-001",
+      "name": "里程碑：WP2785 M1-S1/S2 交付（G6 画布 + 布局侧车）",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -6129,7 +6182,6 @@
       "included_elements": [
         "overseer-vision-001",
         "overseer-archimate-role-001",
-        "overseer-mem-eval-001",
         "overseer-query-rules-001",
         "overseer-content-storage-001",
         "overseer-subgraph-semantic-001",
@@ -6141,7 +6193,8 @@
         "overseer-graph-mcp-deploy-001",
         "overseer-harness-workspaceroot-fix-001",
         "overseer-community-linkage-001",
-        "overseer-homepage-v3-kglibrary-retire-001"
+        "overseer-homepage-v3-kglibrary-retire-001",
+        "overseer-wp2785-m1s1s2-milestone-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
@@ -6198,7 +6251,10 @@
       "view_name": "项目总管档案",
       "parent_element_id": "project-overseer-001",
       "parent_element_name": "项目总管",
-      "description": "T3 档案视图（<actor>-archive-001 约定）：已完结/封存的旧记忆，显式检索才读，只移不删（归档机制）。"
+      "description": "T3 档案视图（<actor>-archive-001 约定）：已完结/封存的旧记忆，显式检索才读，只移不删（归档机制）。",
+      "included_elements": [
+        "overseer-mem-eval-001"
+      ]
     },
     {
       "view_id": "insight-team-001",
