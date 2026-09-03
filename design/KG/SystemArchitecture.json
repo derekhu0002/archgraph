@@ -4479,6 +4479,11 @@
           "name": "commit",
           "value": "3615700",
           "description": "web/vendor/g6.min.js; web/index.html; web/app.js; web/style.css; scripts/ea-web-service.js; tests/ea-web-service-g6-render.test.js（M1-S1 G6 v5 图形内核 + 布局侧车端点集成；顺带修复 handle 未 await 路由异常/stop 挂起）"
+        },
+        {
+          "name": "commit",
+          "value": "b3a77a3",
+          "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（交付登记：21a52c0/3615700 + 2764 描述刷新 + LTM 里程碑 + T1 摘要 + mem-eval 归档 + 测试记录 32/34）"
         }
       ],
       "description": "EA 图谱画布图形化编辑内核与布局侧车（M1，洞察报告 P1 首批切片 M1-S1/S2，WP2758 TODO R-2 延续）：① M1-S1 图形内核：将 ArchGraph 本地 Web 服务（2760）图形区从基础 SVG 升级为 AntV G6 v5 画布（本地 vendored web/vendor/g6.min.js，零构建），替换 web/app.js 基础 SVG 渲染+拖动；层着色沿用 layerOf/colorForLayer，支持平移/缩放/选择/节点拖动。② M1-S2 布局侧车：画布坐标持久化于独立侧车存储（新模块 scripts/ea-layout-store.js + REST 端点 GET/PUT /api/projects/:id/views/:viewId/layout），与 design/KG/SystemArchitecture.json 完全物理隔离——坐标不进图谱 JSON、不进 schema，ARGO MCP 可查询内容保持不变。失效键=视图成员身份签名（included_elements+included_relationships 身份集合的 sha256），非内容哈希：Agent 对老元素的内容级修改（name/description/attributes）不扰动其在各视图中的坐标；仅成员结构变化触发新成员补位/移除成员清理，其余坐标保留。硬性约束：不得改动 argo/** 任何既有 ARGO MCP 功能代码，不得改动 design/KG/SystemArchitecture.json 的结构与 schema；diff 只允许 scripts/ea-web-service.js、scripts/ea-layout-store.js（新）、web/**、tests/**；既有端点契约只做加法不做破坏性修改，既有测试基线不退化。",
