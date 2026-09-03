@@ -1,16 +1,20 @@
 'use strict';
 
 /**
- * 布局侧车（Layout Sidecar，WP2785 M1-S2）— 图谱画布坐标独立持久化。
+ * 布局侧车（Layout Sidecar，WP2785 M1-S2，2026-09-03 修订：默认按项目隔离，AT-2785-L5）
+ * — 图谱画布坐标独立持久化。
  *
- * 零第三方依赖（仅 Node 内置 os/path/fs/crypto）。与 design/KG/SystemArchitecture.json
- * 完全物理隔离：坐标不进图谱 JSON、不进 schema；本模块永远不读写图谱文件。
+ * 零第三方依赖（仅 Node 内置 path/fs/crypto）。与 design/KG/SystemArchitecture.json
+ * 完全物理隔离：坐标不进图谱 JSON、不进 schema；本模块永远不读写图谱文件本身。
  *
- * 存储根：默认 ~/.argo/ea-tool/layouts/（os.homedir()），可被
- * createLayoutStore({ layoutRoot }) 选项或 EA_LAYOUT_ROOT 环境变量覆盖。
+ * 存储根（按优先级）：
+ * 1. 显式覆盖：createLayoutStore({ layoutRoot }) 选项或 EA_LAYOUT_ROOT 环境变量
+ *    → <layoutRoot>/<projectId>/<view_id>.json（测试 / 自定义集中存储根）。
+ * 2. 默认（无任何覆盖）：按项目隔离
+ *    → <projectRoot>/design/KG/ea-layouts/<view_id>.json（仍是独立文件，
+ *      只落在 ea-layouts/ 子目录，绝不触碰 SystemArchitecture.json 本身）。
  *
- * 文件组织：<layoutRoot>/<projectId>/<view_id>.json
- * 内容：{ version, graphKey, view_id, signature, updatedAt, elements: { <elementId>: {x,y} } }
+ * 文件内容：{ version, graphKey, view_id, signature, updatedAt, elements: { <elementId>: {x,y} } }
  *
  * 失效键 = 视图成员身份签名（成员身份集合的 sha256，只含身份 id，不含任何内容字段）：
  * signature = sha256(sorted(included_elements) + sorted(included_relationships))。
@@ -22,14 +26,18 @@
  * 已不在成员中的坐标清理。
  */
 
-const os = require('node:os');
 const path = require('node:path');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 
 const LAYOUT_VERSION = 1;
-const DEFAULT_LAYOUT_ROOT = path.join(os.homedir(), '.argo', 'ea-tool', 'layouts');
+// 默认按项目隔离时，侧车相对项目根的存放目录。
+const PROJECT_LAYOUT_DIR = path.join('design', 'KG', 'ea-layouts');
 
+/**
+ * 解析显式存储根覆盖：选项 > EA_LAYOUT_ROOT 环境变量。
+ * 返回 null 表示无覆盖 → 使用默认的按项目隔离存储。
+ */
 function resolveLayoutRoot(explicitRoot) {
   if (explicitRoot) {
     return path.resolve(explicitRoot);
@@ -37,7 +45,7 @@ function resolveLayoutRoot(explicitRoot) {
   if (process.env.EA_LAYOUT_ROOT) {
     return path.resolve(process.env.EA_LAYOUT_ROOT);
   }
-  return DEFAULT_LAYOUT_ROOT;
+  return null;
 }
 
 /**
@@ -76,16 +84,47 @@ function isValidPosition(pos) {
 }
 
 function createLayoutStore(options = {}) {
-  const root = resolveLayoutRoot(options.layoutRoot);
+  // null → 默认按项目隔离存储；否则为显式集中存储根。
+  const explicitRoot = resolveLayoutRoot(options.layoutRoot);
 
-  function filePathFor(projectId, viewId) {
-    return path.join(root, safeFileName(projectId), `${safeFileName(viewId)}.json`);
+  /**
+   * 目标解析：target = { project?: {id, root, graphPath}, projectId?, graphKey? }。
+   * 显式根模式用 projectId 分桶；默认模式用 project.root 定位项目内 ea-layouts/ 目录。
+   */
+  function resolveTarget(target, viewId) {
+    const t = target || {};
+    const project = t.project || {};
+    const projectId = t.projectId || project.id || null;
+    const graphKey = t.graphKey || project.graphPath || null;
+    if (explicitRoot) {
+      if (!projectId) {
+        throw new Error('layout store: 显式存储根模式下必须提供 projectId（或 project.id）');
+      }
+      return {
+        projectId,
+        graphKey,
+        filePath: path.join(explicitRoot, safeFileName(projectId), `${safeFileName(viewId)}.json`),
+      };
+    }
+    const projectRoot = project.root;
+    if (!projectRoot) {
+      throw new Error('layout store: 默认按项目隔离存储必须提供 project.root');
+    }
+    return {
+      projectId,
+      graphKey,
+      filePath: path.join(path.resolve(projectRoot), PROJECT_LAYOUT_DIR, `${safeFileName(viewId)}.json`),
+    };
   }
 
-  function readRecord(projectId, viewId) {
+  function filePathFor(target, viewId) {
+    return resolveTarget(target, viewId).filePath;
+  }
+
+  function readRecord(target, viewId) {
     let text;
     try {
-      text = fs.readFileSync(filePathFor(projectId, viewId), 'utf8');
+      text = fs.readFileSync(filePathFor(target, viewId), 'utf8');
     } catch {
       return null;
     }
@@ -103,8 +142,8 @@ function createLayoutStore(options = {}) {
     }
   }
 
-  function writeRecord(projectId, viewId, record) {
-    const filePath = filePathFor(projectId, viewId);
+  function writeRecord(target, viewId, record) {
+    const filePath = filePathFor(target, viewId);
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
     fs.writeFileSync(tempPath, JSON.stringify(record, null, 2), 'utf8');
@@ -115,15 +154,17 @@ function createLayoutStore(options = {}) {
   /**
    * 读取合并后的布局（以当前图谱视图成员为准）。
    * 有补位/清理/签名变化时写回侧车；纯内容级修改（签名不变）不触发写入。
+   * 入参：{ project?: {id, root, graphPath}, projectId?, graphKey?, view }。
    * 返回 { signature, elements: { <elementId>: {x,y} } }。
    */
-  function mergeLayout({ projectId, graphKey, view }) {
+  function mergeLayout({ project, projectId, graphKey, view }) {
     if (!view || typeof view.view_id !== 'string') {
       throw new Error('mergeLayout: view with view_id is required');
     }
+    const target = { project, projectId, graphKey };
     const viewId = view.view_id;
     const signature = computeViewSignature(view);
-    const record = readRecord(projectId, viewId);
+    const record = readRecord(target, viewId);
     const saved = record ? record.elements : {};
     const members = Array.isArray(view.included_elements) ? view.included_elements : [];
     const elements = {};
@@ -144,9 +185,9 @@ function createLayoutStore(options = {}) {
       }
     }
     if (dirty) {
-      writeRecord(projectId, viewId, {
+      writeRecord(target, viewId, {
         version: LAYOUT_VERSION,
-        graphKey: graphKey || null,
+        graphKey: resolveTarget(target, viewId).graphKey,
         view_id: viewId,
         signature,
         updatedAt: new Date().toISOString(),
@@ -158,9 +199,10 @@ function createLayoutStore(options = {}) {
 
   /**
    * 全量写入布局（按当前文档计算签名后原子写入侧车文件）。
+   * 入参：{ project?: {id, root, graphPath}, projectId?, graphKey?, view, elements }；
    * elements: { <elementId>: {x,y} }；非法坐标抛错（由服务端映射为 400）。
    */
-  function putLayout({ projectId, graphKey, view, elements }) {
+  function putLayout({ project, projectId, graphKey, view, elements }) {
     if (!view || typeof view.view_id !== 'string') {
       throw new Error('putLayout: view with view_id is required');
     }
@@ -174,10 +216,11 @@ function createLayoutStore(options = {}) {
       }
       normalized[id] = { x: Number(pos.x), y: Number(pos.y) };
     }
+    const target = { project, projectId, graphKey };
     const signature = computeViewSignature(view);
-    writeRecord(projectId, view.view_id, {
+    writeRecord(target, view.view_id, {
       version: LAYOUT_VERSION,
-      graphKey: graphKey || null,
+      graphKey: resolveTarget(target, view.view_id).graphKey,
       view_id: view.view_id,
       signature,
       updatedAt: new Date().toISOString(),
@@ -186,12 +229,12 @@ function createLayoutStore(options = {}) {
     return { signature, view_id: view.view_id };
   }
 
-  return { root, filePathFor, readRecord, writeRecord, mergeLayout, putLayout };
+  return { root: explicitRoot, filePathFor, readRecord, writeRecord, mergeLayout, putLayout };
 }
 
 module.exports = {
   LAYOUT_VERSION,
-  DEFAULT_LAYOUT_ROOT,
+  PROJECT_LAYOUT_DIR,
   resolveLayoutRoot,
   computeViewSignature,
   defaultPosition,

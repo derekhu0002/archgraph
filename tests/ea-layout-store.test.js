@@ -1,11 +1,15 @@
 'use strict';
 
-// AT-2785-L1~L4（WP2785 M1-S2）：布局侧车（坐标独立持久化，成员身份签名失效）
+// AT-2785-L1~L5（WP2785 M1-S2，2026-09-03 修订：默认按项目隔离）：
+// 布局侧车（坐标独立持久化，成员身份签名失效）
 // L1：内容级修改（name/description/attributes）不改变成员集合 → signature 不变 → 坐标不动，
 //     图谱 JSON 无任何 layout 字段；
 // L2：新增成员 B → B 自动补位写入侧车，A 坐标原样保留；
 // L3：移除成员 B → B 坐标被清理，A 坐标保留；
-// L4：全程图谱 JSON 未被侧车写入/污染，侧车文件只落在配置的独立存储根目录。
+// L4：全程图谱 JSON 未被侧车写入/污染，侧车文件只落在配置的独立存储根目录；
+// L5：未配置 layoutRoot/EA_LAYOUT_ROOT 时，侧车默认落在各项目自己的
+//     <projectRoot>/design/KG/ea-layouts/<view_id>.json，不写 ~/.argo、不写
+//     SystemArchitecture.json，多项目坐标互不串扰。
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -121,17 +125,17 @@ test('补位：默认位置确定性（沿用圆形布局公式）', () => {
   assert.ok(Number.isFinite(p1.x) && Number.isFinite(p1.y));
 });
 
-test('存储根：选项 > EA_LAYOUT_ROOT 环境变量 > 默认 ~/.argo/ea-tool/layouts', () => {
+test('存储根：显式覆盖为 选项 > EA_LAYOUT_ROOT；无覆盖则按项目隔离（无全局默认根）', () => {
   // GIVEN 不同的根配置来源
   // WHEN 解析存储根
-  // THEN 优先级为 显式选项 > 环境变量 > 默认
+  // THEN 显式选项 > 环境变量；两者皆无时返回 null（= 默认按项目隔离存储）
   const explicit = path.join(os.tmpdir(), 'explicit-root');
   assert.equal(resolveLayoutRoot(explicit), path.resolve(explicit));
 
   const previous = process.env.EA_LAYOUT_ROOT;
   try {
     process.env.EA_LAYOUT_ROOT = path.join(os.tmpdir(), 'env-root');
-    assert.equal(resolveLayoutRoot(), path.resolve(process.env.EA_LAYOUT_ROOT));
+    assert.equal(resolveLayoutRoot(), path.resolve(process.env.EA_LAYOUT_ROOT), '环境变量次之');
     const store = createLayoutStore({ layoutRoot: explicit });
     assert.equal(store.root, path.resolve(explicit), '显式选项优先于环境变量');
   } finally {
@@ -139,6 +143,17 @@ test('存储根：选项 > EA_LAYOUT_ROOT 环境变量 > 默认 ~/.argo/ea-tool/
       delete process.env.EA_LAYOUT_ROOT;
     } else {
       process.env.EA_LAYOUT_ROOT = previous;
+    }
+  }
+
+  const before = process.env.EA_LAYOUT_ROOT;
+  delete process.env.EA_LAYOUT_ROOT;
+  try {
+    assert.equal(resolveLayoutRoot(), null, '无任何覆盖时应为按项目隔离（无全局默认根）');
+    assert.equal(createLayoutStore().root, null);
+  } finally {
+    if (before !== undefined) {
+      process.env.EA_LAYOUT_ROOT = before;
     }
   }
 });
@@ -264,6 +279,93 @@ test('L2→L4：成员新增补位 / 移除清理 / 图谱零污染、侧车只�
     assert.ok(!storeSrc.includes('SystemArchitecture.json'), '布局侧车模块不得引用图谱文件');
   } finally {
     await service.stop();
+  }
+});
+
+test('L5：默认存储按项目隔离（design/KG/ea-layouts/），不写 ~/.argo、不写图谱、多项目不串扰', async () => {
+  // GIVEN 未配置 layoutRoot 选项与 EA_LAYOUT_ROOT 环境变量，临时项目（可多个）各含最小图谱
+  // WHEN 对各项目读写视图布局
+  // THEN 侧车文件落在各项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json，
+  //      不写 ~/.argo/ea-tool/layouts、不写 SystemArchitecture.json，多项目坐标互不串扰
+  const previousEnv = process.env.EA_LAYOUT_ROOT;
+  delete process.env.EA_LAYOUT_ROOT;
+  const homeLayoutDir = path.join(os.homedir(), '.argo', 'ea-tool', 'layouts');
+  const homeBefore = listFilesRecursive(homeLayoutDir);
+  try {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-layout-l5-'));
+    function makeProject(name) {
+      const projectRoot = path.join(tmp, name);
+      fs.mkdirSync(path.join(projectRoot, 'design', 'KG'), { recursive: true });
+      const graphPath = path.join(projectRoot, ...GRAPH_REL);
+      fs.writeFileSync(graphPath, JSON.stringify(fixtureGraph(), null, 2));
+      return { projectRoot, graphPath };
+    }
+    const { projectRoot, graphPath } = makeProject('proj');
+    const service = createService({ searchRoots: [tmp], port: 0 });
+    const { port } = await service.start();
+    try {
+      const { projects } = await (await fetch(`http://127.0.0.1:${port}/api/projects`)).json();
+      const id = projects.find((p) => p.name === 'proj').id;
+      const base = `http://127.0.0.1:${port}/api/projects/${id}/views/v1/layout`;
+
+      // WHEN 读写视图布局
+      const bytesBefore = fs.readFileSync(graphPath, 'utf8');
+      const putRes = await fetch(base, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ elements: { A: { x: 11, y: 22 } } }),
+      });
+      assert.equal(putRes.status, 200);
+      await putRes.text();
+      const layout = await (await fetch(base)).json();
+      assert.deepEqual(layout.elements.A, { x: 11, y: 22 });
+
+      // THEN 侧车落在项目自己的 design/KG/ea-layouts/ 下
+      const sidecarPath = path.join(projectRoot, 'design', 'KG', 'ea-layouts', 'v1.json');
+      assert.ok(fs.existsSync(sidecarPath), `侧车文件应位于 ${sidecarPath}`);
+      const sidecar = JSON.parse(fs.readFileSync(sidecarPath, 'utf8'));
+      assert.equal(sidecar.view_id, 'v1');
+      assert.equal(sidecar.version, 1);
+      assert.deepEqual(sidecar.elements.A, { x: 11, y: 22 });
+
+      // THEN 不写 SystemArchitecture.json
+      assert.equal(fs.readFileSync(graphPath, 'utf8'), bytesBefore, '侧车操作不得写图谱文件');
+      for (const forbidden of ['layout', 'layouts', 'x', 'y', 'signature']) {
+        assert.ok(!collectKeys(readDoc(graphPath)).has(forbidden), `图谱 JSON 不应出现字段 '${forbidden}'`);
+      }
+
+      // THEN 不写全局 ~/.argo 存储根
+      assert.deepEqual(listFilesRecursive(homeLayoutDir), homeBefore, '不应写 ~/.argo/ea-tool/layouts');
+
+      // WHEN 第二个项目使用相同 view_id 写入不同坐标
+      const { projectRoot: projectRoot2 } = makeProject('proj2');
+      service.refreshProjects();
+      const { projects: projects2 } = await (await fetch(`http://127.0.0.1:${port}/api/projects`)).json();
+      const id2 = projects2.find((p) => p.name === 'proj2').id;
+      assert.notEqual(id2, id);
+      const base2 = `http://127.0.0.1:${port}/api/projects/${id2}/views/v1/layout`;
+      const putRes2 = await fetch(base2, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ elements: { A: { x: 333, y: 444 } } }),
+      });
+      assert.equal(putRes2.status, 200);
+      await putRes2.text();
+
+      // THEN 多项目坐标互不串扰，各自落在各自项目目录
+      const layout1 = await (await fetch(base)).json();
+      const layout2 = await (await fetch(base2)).json();
+      assert.deepEqual(layout1.elements.A, { x: 11, y: 22 }, 'proj 的坐标不应被 proj2 覆盖');
+      assert.deepEqual(layout2.elements.A, { x: 333, y: 444 });
+      assert.ok(fs.existsSync(path.join(projectRoot2, 'design', 'KG', 'ea-layouts', 'v1.json')));
+      assert.deepEqual(listFilesRecursive(homeLayoutDir), homeBefore, '全程不应写 ~/.argo/ea-tool/layouts');
+    } finally {
+      await service.stop();
+    }
+  } finally {
+    if (previousEnv !== undefined) {
+      process.env.EA_LAYOUT_ROOT = previousEnv;
+    }
   }
 });
 

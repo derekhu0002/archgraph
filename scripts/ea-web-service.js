@@ -824,8 +824,9 @@ function createService(options = {}) {
   const staticDir = options.staticDir || path.join(REPO_ROOT, 'web');
   const undoDepth = options.undoDepth || DEFAULT_UNDO_DEPTH;
   const mcpAdapter = options.mcpAdapter || createMcpAdapter(options.mcp || {});
-  // 布局侧车（M1-S2）：坐标独立持久化，与图谱 JSON 物理隔离。
-  // layoutRoot 选项 / EA_LAYOUT_ROOT 环境变量可覆盖默认 ~/.argo/ea-tool/layouts/。
+  // 布局侧车（M1-S2，2026-09-03 修订：默认按项目隔离）：坐标独立持久化，与图谱 JSON 物理隔离。
+  // 默认落在各项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json；
+  // layoutRoot 选项 / EA_LAYOUT_ROOT 环境变量可显式覆盖为集中存储根。
   const layoutStore = options.layoutStore || createLayoutStore({ layoutRoot: options.layoutRoot });
 
   const state = {
@@ -1104,15 +1105,14 @@ function createService(options = {}) {
         throw new HttpError(404, `view not found: ${layoutMatch[1]}`);
       }
       if (req.method === 'GET') {
-        const layout = layoutStore.mergeLayout({ projectId: project.id, graphKey: project.graphPath, view });
+        const layout = layoutStore.mergeLayout({ project, view });
         return sendJson(res, 200, { project: project.id, view_id: view.view_id, ...layout });
       }
       if (req.method === 'PUT') {
         const body = await readJsonBody(req, MAX_BODY_BYTES);
         try {
           const result = layoutStore.putLayout({
-            projectId: project.id,
-            graphKey: project.graphPath,
+            project,
             view,
             elements: body && body.elements,
           });
