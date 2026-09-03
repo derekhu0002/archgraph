@@ -4494,6 +4494,11 @@
           "name": "commit",
           "value": "6a0b716",
           "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（修订登记：侧车按项目存储 80c2dfc + AT-2785-L5-01 + 测试记录 33/35）"
+        },
+        {
+          "name": "decision",
+          "value": "layout-sidecar-formal-asset",
+          "description": "2026-09-03 人类伙伴决策：布局侧车文件（各项目 design/KG/ea-layouts/*.json）是正式项目资产，随项目 commit 共享（团队共用视图布局），禁止加入 .gitignore。"
         }
       ],
       "description": "EA 图谱画布图形化编辑内核与布局侧车（M1，洞察报告 P1 首批切片 M1-S1/S2，WP2758 TODO R-2 延续）：① M1-S1 图形内核：将 ArchGraph 本地 Web 服务（2760）图形区从基础 SVG 升级为 AntV G6 v5 画布（本地 vendored web/vendor/g6.min.js，零构建），替换 web/app.js 基础 SVG 渲染+拖动；层着色沿用 layerOf/colorForLayer，支持平移/缩放/选择/节点拖动。② M1-S2 布局侧车：画布坐标持久化于独立侧车存储（新模块 scripts/ea-layout-store.js + REST 端点 GET/PUT /api/projects/:id/views/:viewId/layout），与 design/KG/SystemArchitecture.json 完全物理隔离——坐标不进图谱 JSON、不进 schema，ARGO MCP 可查询内容保持不变。失效键=视图成员身份签名（included_elements+included_relationships 身份集合的 sha256），非内容哈希：Agent 对老元素的内容级修改（name/description/attributes）不扰动其在各视图中的坐标；仅成员结构变化触发新成员补位/移除成员清理，其余坐标保留。【2026-09-03 人类伙伴需求修订】布局侧车默认存储改为按项目隔离：每个项目的坐标存放在该项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json（独立文件，仍不进 SystemArchitecture.json）；layoutRoot 选项/EA_LAYOUT_ROOT 覆盖仍有效（测试用，回退 <root>/<projectId>/<view_id>.json）；~/.argo/ea-tool/layouts/ 不再作为默认。硬性约束：不得改动 argo/** 任何既有 ARGO MCP 功能代码，不得改动 design/KG/SystemArchitecture.json 的结构与 schema；diff 只允许 scripts/ea-web-service.js、scripts/ea-layout-store.js（新）、web/**、tests/**；既有端点契约只做加法不做破坏性修改，既有测试基线不退化。",
@@ -4572,10 +4577,39 @@
           "description": "scripts/ea-layout-store.js; scripts/ea-web-service.js; tests/ea-layout-store.test.js（侧车默认存储改按项目）"
         }
       ],
-      "description": "WP2785 交付（2026-09-03，委派 Developer/Xiaoming，项目总管编排+验收）：EA 图谱画布图形化编辑内核 M1-S1/S2。① G6 v5 画布替换基础 SVG（@antv/g6@5.1.1 UMD vendored web/vendor/g6.min.js，零构建；层着色/平移/缩放/选择/拖动）。② 布局侧车：坐标持久化独立于图谱 JSON，失效键=视图成员身份签名（included_elements+included_relationships sha256）——Agent 内容级修改不扰动坐标，仅成员结构变化触发补位/清理；新增 GET/PUT /api/projects/:id/views/:viewId/layout。【修订（同日人类伙伴要求，80c2dfc）】侧车默认存储改为按项目隔离：各项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json（仍不进 SystemArchitecture.json）；layoutRoot/EA_LAYOUT_ROOT 覆盖保留（<root>/<projectId>/<view_id>.json，测试用）；~/.argo 不再作默认。硬约束守住：argo/** 与图谱 JSON 结构零改动（diff 白名单核验）。验收：6 条 AT 全过（含 L5 按项目隔离），架构测试 33/35（2 失败为既有：memory-eval-run-03、architecture-view-context-08），validateSystemArchitecture 通过。可复用经验/坑：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 操作前先看 status；b) Node 24 下 node --test tests/ 目录形式不可用，用 glob；c) 侧车失效键必须用成员身份签名，内容哈希会误伤；d) LTM 视图满 15 先归档再写；e) 侧车目录进项目 design/KG/ 后为未跟踪产物，是否入 .git 忽略待定（本轮未改 .gitignore）。待办：M1-S3~S5（连线建关系/属性编辑/收口）、浏览器人工走查、R-2 完成后清理 WP2758 todo。",
+      "description": "WP2785 交付（2026-09-03，委派 Developer/Xiaoming，项目总管编排+验收）：EA 图谱画布图形化编辑内核 M1-S1/S2。① G6 v5 画布替换基础 SVG（@antv/g6@5.1.1 UMD vendored web/vendor/g6.min.js，零构建；层着色/平移/缩放/选择/拖动）。② 布局侧车：坐标持久化独立于图谱 JSON，失效键=视图成员身份签名（included_elements+included_relationships sha256）——Agent 内容级修改不扰动坐标，仅成员结构变化触发补位/清理；新增 GET/PUT /api/projects/:id/views/:viewId/layout。【修订（同日人类伙伴要求，80c2dfc）】侧车默认存储改为按项目隔离：各项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json（仍不进 SystemArchitecture.json）；layoutRoot/EA_LAYOUT_ROOT 覆盖保留（测试用）；~/.argo 不再作默认。【决策（同日人类伙伴拍板）】侧车文件（design/KG/ea-layouts/*.json）是正式项目资产：随项目 commit 共享（团队共用视图布局），禁止 .gitignore。硬约束守住：argo/** 与图谱 JSON 结构零改动（diff 白名单核验）。验收：6 条 AT 全过（含 L5 按项目隔离），架构测试 33/35（2 失败为既有），validateSystemArchitecture 通过。可复用经验/坑：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 前先看 status；b) Node 24 用 glob 不用目录形式跑 node --test；c) 侧车失效键必须用成员身份签名，内容哈希会误伤；d) LTM 视图满 15 先归档再写。待办：M1-S3~S5（连线建关系/属性编辑/收口）、浏览器人工走查、R-2 完成后清理 WP2758 todo。",
       "id": "overseer-wp2785-m1s1s2-milestone-001",
       "name": "里程碑：WP2785 M1-S1/S2 交付（G6 画布 + 布局侧车）",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "将 EA 本地 Web 服务（2760）打包进 archgraph-argo npm 部署包，并随 argo-deploy（install-argo.ps1）安装后启动后台服务：① package.json files 增加 scripts/ea-web-service.js、scripts/ea-layout-store.js、web/**（含 vendor/g6.min.js）；② install-argo.ps1 新增部署步：服务脚本复制到 <ArgoRoot>/scripts/、web 静态资源到 <ArgoRoot>/web/（与 harness 脚本同目录，REPO_ROOT 相对关系不变），随后后台启动 node <ArgoRoot>/scripts/ea-web-service.js --root <EaWebRoot> --port <EaWebPort>（Start-Process 隐藏窗口 + 日志 <ArgoRoot>/ea-web-service.log）；端口已监听则跳过启动，保证重复部署幂等；③ 参数：-SkipEaWeb 禁用、-EaWebPort（默认 8787）、-EaWebRoot（默认 $PWD，即 argo-deploy 执行处）；既有宿主部署测试（argo-deploy/argo-openclaw）以 -SkipEaWeb 保持隔离。约束：argo/** 零改动；scripts/ea-web-service.js 预期不改；既有部署断言基线不退化；不 bump 版本、不发布（发布由人类伙伴决定）。",
+      "id": "2786",
+      "name": "EA本地Web服务纳入npm部署包并随argo-deploy后台启动",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/ea-web-deploy.test.js",
+          "acceptanceCriteria": "tests/ea-web-deploy.test.js",
+          "description": "GIVEN archgraph-argo 包定义；WHEN npm pack --dry-run；THEN 产物清单包含 scripts/ea-web-service.js、scripts/ea-layout-store.js、web/index.html、web/app.js、web/style.css、web/vendor/g6.min.js。",
+          "name": "AT-2786-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-web-deploy.test.js",
+          "acceptanceCriteria": "tests/ea-web-deploy.test.js",
+          "description": "GIVEN 临时宿主环境与植入测试项目（design/KG/SystemArchitecture.json marker）的临时工作区；WHEN 执行 install-argo.ps1（-EaWebRoot 测试工作区 -EaWebPort 随机端口）；THEN 服务文件部署到 ArgoRoot（scripts/ea-web-service.js + ea-layout-store.js + web/），后台服务在该端口监听且 /api/projects 返回 200 并发现植入项目，重复执行不重复拉起；WHEN 传 -SkipEaWeb THEN 不启动后台进程。",
+          "name": "AT-2786-02",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -5558,6 +5592,16 @@
       "target_id": "2760",
       "target_name": "ArchGraph 本地 Web 服务",
       "type": "Realization"
+    },
+    {
+      "id": "2786-realizes-2760",
+      "name": "Realization",
+      "source_id": "2786",
+      "source_name": "EA本地Web服务纳入npm部署包并随argo-deploy后台启动",
+      "statement": "EA本地Web服务纳入npm部署包并随argo-deploy后台启动 --(Realization)--> ArchGraph 本地 Web 服务",
+      "target_id": "2760",
+      "target_name": "ArchGraph 本地 Web 服务",
+      "type": "Realization"
     }
   ],
   "views": [
@@ -5626,7 +5670,8 @@
         "2765",
         "2766",
         "subgraph-semantic-retrieval-001",
-        "2785"
+        "2785",
+        "2786"
       ],
       "included_relationships": [
         "1980",
@@ -5636,7 +5681,8 @@
         "1984",
         "1985",
         "1986",
-        "2785-realizes-2760"
+        "2785-realizes-2760",
+        "2786-realizes-2760"
       ]
     },
     {
