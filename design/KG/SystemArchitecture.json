@@ -1017,13 +1017,13 @@
           "description": "install-argo.ps1 (Cursor graph-mcp 改本地 stdio 桥：新增 -CursorMcpBridgesRoot 与 argo/mcp-bridges/graph-mcp-stdio.js 部署；Cursor 对远程 url 按 SSE GET 拨号 404，经桥转发 POST Streamable HTTP)；package.json files 加 argo/mcp-bridges；tests/argo-deploy.test.js (AT-1361-01 Cursor 断言改桥形态)；argo/mcp-bridges/graph-mcp-stdio.js"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "417b0e5",
           "description": "install-argo.ps1; tests/argo-deploy.test.js; tests/argo-openclaw.test.js（WP2786：新增 [23/23] EA Web 服务部署+后台启动步，-SkipEaWeb/-EaWebPort/-EaWebRoot，步骤分母 22→23 重编号）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -3203,7 +3203,17 @@
       "name": "里程碑：查询规则升级（KG优先 + 语义检索优先）",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "里程碑（2026-08-25）：改进 ArchGraph 查询规则——①任何检索优先检索KG（KG-first retrieval，任何检索先查询意图图谱，不默认搜文件系统/代码/网络）；②检索KG必须优先通过语义检索（Semantic-first KG retrieval，getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径。落地：argo/rules/archgraph.instructions.md 新增 QueryPriorityGuideline 章节 + CoreRule 7 + ExplorationGuideline 第 0 条 + ToolsGuideline/GraphQueryGuideline 语义优先措辞；新增 tests/argo-rules-query.test.js（2 用例）；图谱元素 archgraph-workflow-rules 更新描述 + 新增 AT-archgraph-workflow-rules-05/06。相关测试 28/28 通过，validateSystemArchitecture 通过。commits e705807（工作）/8eaef12（commit 属性登记）。随后按人类伙伴要求将 argo/rules/archgraph.instructions.md 全英文化（去除全部中文，规则名译为 KG-first retrieval / Semantic-first KG retrieval），同步更新 tests/argo-rules-query/change-tier/capability-delegation 断言为英文、图谱 archgraph-workflow-rules 描述与 AT-02/03/04/05/06 表述对齐；相关测试 28/28 通过、validateSystemArchitecture 通过，规则已部署到 %APPDATA%\\Code\\User\\prompts\\archgraph.instructions.md。commits bdf1016（工作）/e28e719（commit 属性登记）。"
+      "description": "里程碑（2026-08-25）：改进 ArchGraph 查询规则——①任何检索优先检索KG（KG-first retrieval，任何检索先查询意图图谱，不默认搜文件系统/代码/网络）；②检索KG必须优先通过语义检索（Semantic-first KG retrieval，getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径。落地：argo/rules/archgraph.instructions.md 新增 QueryPriorityGuideline 章节 + CoreRule 7 + ExplorationGuideline 第 0 条 + ToolsGuideline/GraphQueryGuideline 语义优先措辞；新增 tests/argo-rules-query.test.js（2 用例）；图谱元素 archgraph-workflow-rules 更新描述 + 新增 AT-archgraph-workflow-rules-05/06。相关测试 28/28 通过，validateSystemArchitecture 通过。commits e705807（工作）/8eaef12（commit 属性登记）。随后按人类伙伴要求将 argo/rules/archgraph.instructions.md 全英文化（去除全部中文，规则名译为 KG-first retrieval / Semantic-first KG retrieval），同步更新 tests/argo-rules-query/change-tier/capability-delegation 断言为英文、图谱 archgraph-workflow-rules 描述与 AT-02/03/04/05/06 表述对齐；相关测试 28/28 通过、validateSystemArchitecture 通过，规则已部署到 %APPDATA%\\Code\\User\\prompts\\archgraph.instructions.md。commits bdf1016（工作）/e28e719（commit 属性登记）。",
+      "attributes": [
+        {
+          "name": "archivedAt",
+          "value": "2026-09-03"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T3"
+        }
+      ]
     },
     {
       "id": "archgraph-content-storage-policy-001",
@@ -3705,7 +3715,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要，最终版）\n- 身份：项目总管（ArchGraph overseer）；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin（DevelopmentTeam 430）。\n- 本会话完成：\n  1) **EA 类工具洞察**（洞察Lead 五步法，411f940/b33db60）：结论=现成 EA 产品均不满足双向一致+写必以 ARGO MCP，正解=升级既有 web/ 本地 Web 服务为画布式工具。\n  2) **路线+任务分解**：M0 收口 / M1 图形化内核 / M2 向导+并发感知 / M3 体验与决策。\n  3) **人类伙伴红线/决策**：坐标持久化且独立于图谱 JSON（侧车）；Agent 内容修改不扰动坐标（成员身份签名失效）；不得改既有 ARGO MCP 代码；侧车默认按项目存 <projectRoot>/design/KG/ea-layouts/；**侧车文件=正式项目资产，随项目 commit 共享，禁止 gitignore**（2785 decision 属性）。\n  4) **WP2785 交付**（21a52c0/3615700/80c2dfc）：G6 v5 画布 + ea-layout-store（GET/PUT layout 端点）+ 侧车按项目存储修订；顺带修 handle 未 await、stop 挂起 2 既有 bug。\n  5) **WP2786 交付**（417b0e5）：EA Web 服务纳入 npm 部署包并随 argo-deploy 后台启动（install-argo.ps1 [23/23] 步，-SkipEaWeb/-EaWebPort/-EaWebRoot，WMI 零句柄继承拉起，端口探测幂等）。\n  6) **发布**（28f0a0a）：archgraph-argo@0.11.0 已发布（71 文件 2.6MB，含 EA Web 服务全部新条目），registry latest 已同步验证。安装后 `argo-deploy` 自动后台起服务（默认 127.0.0.1:8787）。\n- 验收：架构测试 35/37（2 既有失败：memory-eval-run-03、architecture-view-context-08），validate 通过，各轮 diff 白名单核验（argo/** 零改动）。LTM：wp2785/wp2786 里程碑已记；mem-eval、content-storage 归档 T3（LTM 15 上限）。\n- 可复用经验：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 前先看 status；b) Node 24 用 glob 跑 node --test；c) 侧车失效键=成员身份签名；d) LTM 满 15 先归档；e) **Windows 后台拉起禁用 Start-Process**（孙进程继承 stdio 管道句柄→调用方阻塞），用 WMI Win32_Process.Create；cmd 带重定向多引号需 /S+外层引号；f) npm publish 后 registry 同步延迟 ~15s。\n- 未完成/TODO：浏览器人工走查（本环境无浏览器）；M1-S3~S5 未启动；WP2758 todo 未清；archgraph.feap 外部改动在工作区未处理（勿提交）；既有 2 失败未修；Experience 层未实施。",
+      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要，最终版）\n- 身份：项目总管（ArchGraph overseer）；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin（DevelopmentTeam 430）。\n- 本会话完成：\n  1) **EA 类工具洞察**（洞察Lead 五步法，411f940/b33db60）：结论=升级既有 web/ 为画布式工具。\n  2) **路线+任务分解**：M0/M1/M2/M3。\n  3) **人类伙伴红线/决策**：坐标独立侧车；Agent 内容修改不扰动坐标（成员身份签名）；不改既有 ARGO MCP 代码；侧车按项目存 design/KG/ea-layouts/；侧车=正式资产随项目 commit 禁止 ignore。\n  4) **WP2785**（21a52c0/3615700/80c2dfc）：G6 v5 画布 + 布局侧车 + 按项目存储修订。\n  5) **WP2786**（417b0e5）+ **发布 archgraph-argo@0.11.0**（28f0a0a，registry 已同步）：纳入 npm 部署包，argo-deploy [23/23] 后台启动（WMI 零句柄继承，端口幂等）。\n  6) **WP2787**（ec12dda）：手动选择项目根目录与切换（~/.argo/ea-tool/projects.json 持久化 + POST/DELETE/GET /api/roots + UI 添加/移除）。\n  7) **侧车正式资产入库**（89d5553：433/1805/jlm-001，真实使用产生）。\n  8) **drawio 跟进评估**（洞察Lead，ba72e30/ebb6edc）：结论=不移植 drawio/mxGraph/MaxGraph（mxGraph 停维、MaxGraph 不支持页面直引违反零构建、drawio 需 build 且自由图形与模型强约束冲突）；维持 G6 v5，M2 投「交互壳」成熟化（属性面板/模型树/连线吸附/右键/缩略图，借鉴 drawio 交互不借鉴代码）；drawio embed diffSync 部分翻案但仍否决。待人类拍板 D1~D4。\n- 验收：架构测试 36/38（2 既有失败），validate 通过，各轮 diff 白名单（argo/** 零改动）。\n- 可复用经验：a) archgraph.feap 会被外部 EA 会话改动（已自行恢复）；b) Node 24 用 glob 跑 node --test；c) 侧车失效键=成员身份签名；d) LTM 满 15 先归档（本轮归档 mem-eval/content-storage/query-rules）；e) Windows 后台拉起禁 Start-Process（句柄继承阻塞），用 WMI；f) 起服务的测试必须传临时 projectsConfigPath/layoutRoot 隔离真实用户配置。\n- 未完成/TODO：**人类拍板 D1（维持 G6+M2 vs 仍移植 drawio）/D2（M2 优先级）/D3（签名失效遗留）/D4（零构建放松门槛）**；浏览器人工走查；M1-S3~S5；WP2758 todo；既有 2 失败未修；Experience 层未实施。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3727,8 +3737,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-03T17:00:00.000Z",
-          "description": "2026-09-03 会话摘要（最终版：+ archgraph-argo@0.11.0 发布）"
+          "value": "2026-09-03T18:30:00.000Z",
+          "description": "2026-09-03 会话摘要（最终版：+ WP2787 交付 + 侧车资产入库 + drawio 跟进评估待拍板）"
         },
         {
           "name": "commit",
@@ -4519,6 +4529,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "89d5553",
+          "description": "design/KG/ea-layouts/433.json; design/KG/ea-layouts/1805.json; design/KG/ea-layouts/jlm-001.json（真实使用产生的布局侧车正式资产登记入库，随项目共享）"
         }
       ],
       "description": "EA 图谱画布图形化编辑内核与布局侧车（M1，洞察报告 P1 首批切片 M1-S1/S2，WP2758 TODO R-2 延续）：① M1-S1 图形内核：将 ArchGraph 本地 Web 服务（2760）图形区从基础 SVG 升级为 AntV G6 v5 画布（本地 vendored web/vendor/g6.min.js，零构建），替换 web/app.js 基础 SVG 渲染+拖动；层着色沿用 layerOf/colorForLayer，支持平移/缩放/选择/节点拖动。② M1-S2 布局侧车：画布坐标持久化于独立侧车存储（新模块 scripts/ea-layout-store.js + REST 端点 GET/PUT /api/projects/:id/views/:viewId/layout），与 design/KG/SystemArchitecture.json 完全物理隔离——坐标不进图谱 JSON、不进 schema，ARGO MCP 可查询内容保持不变。失效键=视图成员身份签名（included_elements+included_relationships 身份集合的 sha256），非内容哈希：Agent 对老元素的内容级修改（name/description/attributes）不扰动其在各视图中的坐标；仅成员结构变化触发新成员补位/移除成员清理，其余坐标保留。【2026-09-03 人类伙伴需求修订】布局侧车默认存储改为按项目隔离：每个项目的坐标存放在该项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json（独立文件，仍不进 SystemArchitecture.json）；layoutRoot 选项/EA_LAYOUT_ROOT 覆盖仍有效（测试用，回退 <root>/<projectId>/<view_id>.json）；~/.argo/ea-tool/layouts/ 不再作为默认。硬性约束：不得改动 argo/** 任何既有 ARGO MCP 功能代码，不得改动 design/KG/SystemArchitecture.json 的结构与 schema；diff 只允许 scripts/ea-web-service.js、scripts/ea-layout-store.js（新）、web/**、tests/**；既有端点契约只做加法不做破坏性修改，既有测试基线不退化。",
@@ -4614,10 +4629,6 @@
           "description": "design/KG/SystemArchitecture.json（立项：WP2786 + AT-2786-01/02 + Realization→2760；同提交含 2785 侧车正式资产决策属性 + LTM 里程碑描述更新）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "417b0e5",
           "description": "package.json; install-argo.ps1; tests/argo-deploy.test.js; tests/argo-openclaw.test.js; tests/ea-web-deploy.test.js（EA Web 服务纳入 npm 部署包 + argo-deploy [23/23] 后台启动步，WMI 零句柄继承拉起，端口探测幂等）"
@@ -4636,6 +4647,10 @@
           "name": "commit",
           "value": "e116426",
           "description": "design/KG/SystemArchitecture.json（发布登记：archgraph-argo@0.11.0 commit 28f0a0a + T1 最终摘要）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "将 EA 本地 Web 服务（2760）打包进 archgraph-argo npm 部署包，并随 argo-deploy（install-argo.ps1）安装后启动后台服务：① package.json files 增加 scripts/ea-web-service.js、scripts/ea-layout-store.js、web/**（含 vendor/g6.min.js）；② install-argo.ps1 新增部署步：服务脚本复制到 <ArgoRoot>/scripts/、web 静态资源到 <ArgoRoot>/web/（与 harness 脚本同目录，REPO_ROOT 相对关系不变），随后后台启动 node <ArgoRoot>/scripts/ea-web-service.js --root <EaWebRoot> --port <EaWebPort>（Start-Process 隐藏窗口 + 日志 <ArgoRoot>/ea-web-service.log）；端口已监听则跳过启动，保证重复部署幂等；③ 参数：-SkipEaWeb 禁用、-EaWebPort（默认 8787）、-EaWebRoot（默认 $PWD，即 argo-deploy 执行处）；既有宿主部署测试（argo-deploy/argo-openclaw）以 -SkipEaWeb 保持隔离。约束：argo/** 零改动；scripts/ea-web-service.js 预期不改；既有部署断言基线不退化；不 bump 版本、不发布（发布由人类伙伴决定）。",
@@ -4685,12 +4700,21 @@
       "attributes": [
         {
           "name": "status",
-          "value": "ACTIVE"
+          "value": "COMPLETED"
         },
         {
           "name": "commit",
           "value": "34caf3e",
           "description": "design/KG/SystemArchitecture.json（立项：WP2787 + AT-2787-01 + Realization→2760）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "ec12dda",
+          "description": "scripts/ea-web-service.js; web/app.js; web/index.html; web/style.css; tests/ea-web-service-roots.test.js; tests/ea-web-service-impl.test.js; tests/ea-layout-store.test.js; tests/ea-web-service-g6-render.test.js（手动项目根持久化 ~/.argo/ea-tool/projects.json + POST/DELETE/GET /api/roots + UI 添加/移除/切换，测试隔离传参）"
         }
       ],
       "description": "WEB 手动选择项目根目录与切换：ArchGraph 本地 Web 服务（2760）目前仅自动发现 --root/-EaWebRoot 扫描范围（默认 REPO_ROOT+父级+祖父级）内的项目，无法选择范围外的本地项目。本 WP 新增：① UI/项目栏：「添加项目」入口（手动指定本地目录），服务校验该目录含 design/KG/SystemArchitecture.json（marker）后才加入，否则明确报错；手动添加的 root 持久化到工具级配置（默认 ~/.argo/ea-tool/projects.json，可经 createService 选项/环境变量覆盖供测试），服务重启后自动恢复，支持移除；② 项目间切换（既有列表选择）保持可用，视图/状态/布局侧车随切换；③ API 加法（如 POST/DELETE /api/roots），既有端点契约与测试基线不退化。约束：argo/** 零改动；写图红线不变（手动添加只改变发现范围，不改变写路径）；部署形态（~/.argo）与仓库开发形态行为一致。",
@@ -4727,6 +4751,27 @@
       "description": "里程碑（2026-09-03 跟进评估，人类反馈『界面成熟度太低，建议移植 Draw.io/mxGraph/MaxGraph』）：四路线对比评估，只评估不实施。结论：①mxGraph=jgraph/mxgraph 已 archived（2020-11-09 官方停维，README 明言不建议新项目基于它）；②MaxGraph=活跃后继（pushed 2026-09-02，Apache-2.0，TS，1.1k★），但 README 明确『Direct usage in a web page is not supported』需 bundler/npm→违反本项目零构建约束；③drawio=活跃（pushed 2026-09-01，Apache-2.0，7.9k★）完整编辑器应用，自托管需 build/docker，非零构建；embed 模式官方 JSON 协议新增 diffSync（checksum/patch(i/u/r)/merge/resetDiff）+ export json（node/edge/layer+metadata 结构化）——系上轮 AD-c 否决时不存在的新能力，部分翻案『无绑定机制』理由，但 patch 为 drawio 文档级 cell 变更非 ArchiMate 模型级 op，模型语义映射层仍需自研，且 embed 官方仅保障 embed.diagrams.net；④G6 v5（antvis/G6 12.3k★，MIT，活跃，default branch v5，支持 vendored 直接 script 引入）=对照路线维持。裁决：核心矛盾未变（drawio/mxGraph/MaxGraph 是『自由图形文档内核/应用』，本项目需要『ArchiMate 模型强约束编辑』，所有图编辑都须经 ARGO MCP preview→apply）；界面成熟度痛点根因是缺编辑器外壳（右侧 format 面板/形状与模型树/对齐吸附/右键菜单/缩略图），换内核或移植 drawio=约束翻译层+外壳全部重做。推荐=维持 G6 v5 内核 + 按 M2 投入交互壳成熟化（借鉴 drawio/Archi 交互模式），不移植 drawio；触发重新评估条件：转向多人实时协作 或 接受 npm/React 构建链。证据=GitHub API/README 一手元数据 + drawio embed-mode 官方文档；本会话无 BAILIAN MCP，webfetch 检索并如实标注。",
       "id": "insight-lead-milestone-drawio-eval-001",
       "name": "里程碑：跟进评估 drawio移植 vs G6成熟化",
+      "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "scripts/ea-web-service.js; web/app.js; web/index.html; web/style.css; tests/ea-web-service-roots.test.js",
+          "name": "commit",
+          "value": "ec12dda"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "WP2787 交付（2026-09-03，委派 Developer/Xiaoming，项目总管编排+验收）：WEB 手动选择项目根目录与切换。落地：手动根持久化（默认 ~/.argo/ea-tool/projects.json，projectsConfigPath 选项/EA_PROJECTS_CONFIG 覆盖）；发现合并=自动扫描∪手动根（解析后 graphPath 去重）；加法 API POST/DELETE/GET /api/roots（无 marker/不存在/空→400，重复→409，删非手动根→404，中文报错）；UI 项目栏「添加项目」绝对路径输入+失败提示、手动徽标+移除按钮，切换沿用既有联动（视图/状态/布局侧车）。验收：AT-2787-01 全场景（添加→查看→重启恢复→报错→移除）通过，回归 62/62，架构测试 36/38（2 既有失败），validate 通过。同日：真实使用产生的布局侧车正式资产登记入库（89d5553：433/1805/jlm-001）。可复用经验：凡起服务的测试必须显式传临时 projectsConfigPath，否则读到真实用户配置污染断言。待办：M2 交互壳方向待人类伙伴对 drawio 跟进评估拍板（洞察结论：不移植，维持 G6 v5 + 交互壳成熟化）。",
+      "id": "overseer-wp2787-milestone-001",
+      "name": "里程碑：WP2787 WEB手动选择项目根目录与切换",
       "type": "Business Object"
     }
   ],
@@ -6385,7 +6430,6 @@
       "included_elements": [
         "overseer-vision-001",
         "overseer-archimate-role-001",
-        "overseer-query-rules-001",
         "overseer-subgraph-semantic-001",
         "overseer-wiki-eval-001",
         "overseer-mcp-tool-surface-001",
@@ -6397,7 +6441,8 @@
         "overseer-community-linkage-001",
         "overseer-homepage-v3-kglibrary-retire-001",
         "overseer-wp2785-m1s1s2-milestone-001",
-        "overseer-wp2786-deploy-milestone-001"
+        "overseer-wp2786-deploy-milestone-001",
+        "overseer-wp2787-milestone-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
@@ -6457,7 +6502,8 @@
       "description": "T3 档案视图（<actor>-archive-001 约定）：已完结/封存的旧记忆，显式检索才读，只移不删（归档机制）。",
       "included_elements": [
         "overseer-mem-eval-001",
-        "overseer-content-storage-001"
+        "overseer-content-storage-001",
+        "overseer-query-rules-001"
       ]
     },
     {
