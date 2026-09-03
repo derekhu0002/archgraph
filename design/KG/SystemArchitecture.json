@@ -4453,7 +4453,7 @@
       "id": "insight-lead-wm-summary-001",
       "name": "洞察Lead工作记忆摘要",
       "type": "Business Object",
-      "description": "洞察Lead T1 工作记忆摘要（2026-09-03 跟进评估会话）：1) 上轮任务=EA类工具共享前端洞察（报告→LTM milestone insight-lead-milestone-ea-tool-frontend-001；结论已落地 M1：web/vendor/g6.min.js 接入、布局侧车 design/KG/ea-layouts/ GET/PUT /views/:id/layout、archgraph-argo@0.11.0 + argo-deploy 后台启动）。2) 本轮（只评估不实施）=人类反馈『界面成熟度太低，建议移植 Draw.io/mxGraph/MaxGraph』，四路线对比。3) 结论：mxGraph 已归档停维（2020-11，官方不建议新项目用）；MaxGraph 活跃但明确不支持页面直接引用、需 bundler，违反零构建约束；drawio 活跃(Apache-2.0)但为完整应用需自托管 build，embed 模式官方 JSON 协议已有 diffSync/checksum/patch/merge + export json（新证据，部分翻案上轮 AD-c『无绑定机制』否决理由），但 patch 是文档级 cell 变更、模型语义映射仍需自研，且『自由图形 vs ArchiMate 模型约束』核心矛盾未变；G6 v5(12.3k★ MIT 活跃)对照路线维持。4) 推荐=维持 G6 v5 + M2 交互壳成熟化（借鉴 drawio/Archi 的右侧 format 面板/模型树+形状库/对齐吸附/右键菜单/缩略图）；不移植 drawio；触发重估条件=多人实时协作或接受构建链。5) 经验：界面成熟度痛点的根因=纯图内核没有编辑器外壳，解法是投资交互壳而非换内核；移植成熟编辑器=约束翻译层+外壳整体重做，成本数倍且大量自由绘图能力被约束闲置。6) 交付：决策报告作为最后消息；记忆已更新（T2 milestone drawio-eval-001）；未实施代码、未立项。",
+      "description": "洞察Lead T1 工作记忆摘要（2026-09-03，聚焦方案设计会话）：1) 本轮=人类拍板『EA=Sparx 为人类设计界面』，委托 AGENT→EA 单向实时同步聚焦方案设计（只设计不实施），方案结论→LTM milestone agent2ea-sync-001。核心推荐：观察进程（Node，fs.watch+轮询复用 ea-web-service 模式）监听 canonical JSON → 快照 diff → 写 design/KG/ea-sync-state/command-queue.jsonl(seq/checkpoint/error log)；EA 侧 JScript 执行器（eatool/EA-jsscript/apply-sync-queue.js，进程内）消费队列；定位复用既有 tag(schema_id/Alias)，更新=字段级 patch 不删建（位置安全），新增元素=view 差量补空白区或仅入树，删除=tag 存在才删+顺序合规；对象映射复用 import-from-kg 的 map* 与占位函数，主流程改为固定同步根包+增量（不复用时间戳新包全量导入）。EA 官网全站 403 无法直取一手文档，已列 3 项本地复核点供立项前验证。2) 上下文链：EA工具洞察→drawio评估→本方案；前轮结论维持（web/G6 为人机共享读/写前端；EA=人类设计界面离线批处理通道升级为单向同步目标）。3) 交付：完整方案报告作为最后消息；未实施代码、未立项。4) 经验：面向 EA 这类封闭 GUI 平台做自动化，『进程内脚本消费外部队列』比『外部进程 COM 驱动』更稳（规避文件锁/权限/实例 attach 不确定性）；证据受阻时把平台行为假设显式列为本地复核点而非硬写。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4874,6 +4874,22 @@
         }
       ],
       "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "里程碑（2026-09-03，人类拍板方向：EA=Sparx 为人类设计界面，AGENT→EA 单向实时同步，位置安全，.feap+EA桌面运行时）。聚焦方案设计（只设计不实施）：①访问通道裁决=主通道 EA 内置 JScript 执行器消费外部命令队列（全部操作在 EA 进程内，天然规避 .feap 独占锁、复用既有 eatool Repository API 用法）；外部 COM(EA.App/GetObject)仅作 EA 未占用时的可选自动增强；EA Server 否决（单机过重）。②差异引擎=观察进程 fs.watch+轮询(复用 ea-web-service 模式)读 canonical JSON→规范化快照 diff→写 design/KG/ea-sync-state/command-queue.jsonl(JSONL, seq 递增)+checkpoint+error log；EA 侧定位复用 import-from-kg 已写的 tag(schema_id/archimate_type/Alias)→查 tag 定位，GUID 映射表非必需。③位置安全=EA DiagramObject 位置与 Element 定义分离（仓库 addElementToDiagram 实证 geometry 独立）；更新=字段级 patch 绝不删建；新增元素进图策略推荐=view 成员差量补空白区(包围盒外)否则仅入模型树；删除=先关系后元素、tag 存在才删。④字段权属=KG 权威字段(name/type/description/attributes/included 成员) vs EA 侧自由(DiagramObject 几何/手绘元素/非 schema_ 前缀 tag)。⑤对象映射=复用 mapElementTypeToEa/mapRelationshipTypeToEa(Direction 修复 00d831d)/ensure 挂载/网格占位函数，不复用 main 的『时间戳新包全量导入』；改为固定同步根包+增量。切片 S1 add/update 闭环→S2 delete+视图差量+错误日志→S3 GUID 缓存/Addin 自动。证据：Sparx 官网 403 反爬无法直取，EA 平台行为以仓库产线脚本为准，列 3 项本地复核点（同 .feap 双实例行为、EA.App COM 行为、DiagramObject 位置独立性）供立项前验证。",
+      "id": "insight-lead-milestone-agent2ea-sync-001",
+      "name": "里程碑：AGENT→EA 单向实时同步方案设计",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -6761,7 +6777,8 @@
       "description": "洞察Lead T2 长期记忆（父视图：洞察Lead）",
       "included_elements": [
         "insight-lead-milestone-ea-tool-frontend-001",
-        "insight-lead-milestone-drawio-eval-001"
+        "insight-lead-milestone-drawio-eval-001",
+        "insight-lead-milestone-agent2ea-sync-001"
       ],
       "included_relationships": []
     }
