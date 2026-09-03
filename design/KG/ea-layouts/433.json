@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "graphKey": "D:\\Projects\\archgraph\\design\\KG\\SystemArchitecture.json",
+  "view_id": "433",
+  "signature": "c2c26cae0f352f64d5fc264f5012eb9da1e59afddf964a6bfc0cb3f6b1b70d84",
+  "updatedAt": "2026-09-03T08:01:04.894Z",
+  "elements": {
+    "2753": {
+      "x": 238,
+      "y": 221
+    },
+    "2754": {
+      "x": 0,
+      "y": 219
+    },
+    "2755": {
+      "x": -2,
+      "y": 47
+    }
+  }
+}
