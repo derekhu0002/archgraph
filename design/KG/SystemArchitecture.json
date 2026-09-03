@@ -4446,6 +4446,11 @@
           "name": "commit",
           "value": "411f940",
           "description": "design/KG/SystemArchitecture.json（洞察Lead T1/T2 记忆视图创建 + EA类工具共享前端洞察里程碑）"
+        },
+        {
+          "name": "commit",
+          "value": "ba72e30",
+          "description": "design/KG/SystemArchitecture.json（跟进评估里程碑 + T1 摘要登记）"
         }
       ]
     },
@@ -4712,6 +4717,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "ba72e30",
+          "description": "design/KG/SystemArchitecture.json（跟进评估里程碑 + T1 摘要登记）"
         }
       ],
       "description": "里程碑（2026-09-03 跟进评估，人类反馈『界面成熟度太低，建议移植 Draw.io/mxGraph/MaxGraph』）：四路线对比评估，只评估不实施。结论：①mxGraph=jgraph/mxgraph 已 archived（2020-11-09 官方停维，README 明言不建议新项目基于它）；②MaxGraph=活跃后继（pushed 2026-09-02，Apache-2.0，TS，1.1k★），但 README 明确『Direct usage in a web page is not supported』需 bundler/npm→违反本项目零构建约束；③drawio=活跃（pushed 2026-09-01，Apache-2.0，7.9k★）完整编辑器应用，自托管需 build/docker，非零构建；embed 模式官方 JSON 协议新增 diffSync（checksum/patch(i/u/r)/merge/resetDiff）+ export json（node/edge/layer+metadata 结构化）——系上轮 AD-c 否决时不存在的新能力，部分翻案『无绑定机制』理由，但 patch 为 drawio 文档级 cell 变更非 ArchiMate 模型级 op，模型语义映射层仍需自研，且 embed 官方仅保障 embed.diagrams.net；④G6 v5（antvis/G6 12.3k★，MIT，活跃，default branch v5，支持 vendored 直接 script 引入）=对照路线维持。裁决：核心矛盾未变（drawio/mxGraph/MaxGraph 是『自由图形文档内核/应用』，本项目需要『ArchiMate 模型强约束编辑』，所有图编辑都须经 ARGO MCP preview→apply）；界面成熟度痛点根因是缺编辑器外壳（右侧 format 面板/形状与模型树/对齐吸附/右键菜单/缩略图），换内核或移植 drawio=约束翻译层+外壳全部重做。推荐=维持 G6 v5 内核 + 按 M2 投入交互壳成熟化（借鉴 drawio/Archi 交互模式），不移植 drawio；触发重新评估条件：转向多人实时协作 或 接受 npm/React 构建链。证据=GitHub API/README 一手元数据 + drawio embed-mode 官方文档；本会话无 BAILIAN MCP，webfetch 检索并如实标注。",
