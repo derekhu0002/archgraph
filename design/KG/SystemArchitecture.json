@@ -3777,6 +3777,16 @@
           "value": "dd1c6d5",
           "description": ".opencode/agents/insight-lead.md; design/KG/SystemArchitecture.json（opencode 原生 Agent：DEEPSEEK V4 FLASH，由 argo/agents/ 移入本仓库 .opencode/agents/）"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "insight-lead-wm-001",
+          "view_name": "洞察Lead工作记忆"
+        },
+        {
+          "view_id": "insight-lead-ltm-001",
+          "view_name": "洞察Lead长期记忆"
+        }
       ]
     },
     {
@@ -4383,6 +4393,42 @@
           "name": "commit",
           "value": "09cc836",
           "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素创建 + T1 摘要更新）"
+        }
+      ]
+    },
+    {
+      "id": "insight-lead-wm-summary-001",
+      "name": "洞察Lead工作记忆摘要",
+      "type": "Business Object",
+      "description": "洞察Lead T1 工作记忆摘要（2026-09-03 会话）：1) 身份：业界技术洞察团队编排者（insight-lead-001），麦肯锡五步法统筹。2) 本次任务（委派：project-overseer-001）：洞察『EA类工具作 AGENT×人类共享可视化前端——Agent 经 ARGO MCP 写图须同时反映到工具；人类在工具上的编辑同样经 ARGO MCP（preview→validate→apply）落图，确保规范不破』，交付可执行方案报告。3) 核心结论：现成 EA/建模工具（Sparx EA、Archi、draw.io、Structurizr、Neo4j Bloom、SAP LeanIX 等云 EA）均以自有模型文件/云 meta-model 为事实源，只支持『导出→导入』批处理或自有 schema，无法承担逐 UI 操作经外部 schema(ARGO) 强约束的实时写入；推荐=以既有本地 Web 服务（scripts/ea-web-service.js + web/，WP2758/2760）为基底升级为图形化 EA 工具：写路径已 100% 经进程内 ARGO MCP callTool（EDIT_OP_TOOL_MAP 一一映射，与 Agent 同一份代码）；读路径 fs.watch+轮询已实现（AD-e）；缺口=图形化直接编辑（G6 v5 内核，接 2758 TODO R-2）、拖放/位置持久化、表单化编辑向导、Agent 外部变更时的并发感知刷新、commit 登记联动。4) 关键决策：①图形内核 AntV G6 v5（MIT，零构建，延续 AD-c/AD-g 与已 vendored 计划）；②编辑动作一律映射 ARGO 变更原语/applyMutation 原子批量 + preview 前置失败展示；③导入整体替换保持受控例外（AD-a）；④不引入 OT/CRDT（本地单用户场景过重，业界仅多人实时才需）；⑤既有 eatool/Sparx EA 保留为离线批量建模可选通道，不作为实时共享前端。5) 交付：完整报告作为最后消息交人类伙伴；报告/图谱落盘由委派方后续处理。6) 经验：业界无『受外部 schema 强约束的现成 EA』，正解是把约束端（ARGO MCP + schema + validate）当核心，可视化工具只是前端；人机共享前端成败在写路径是否与 Agent 同构。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T1"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "lastSummaryAt",
+          "value": "2026-09-03"
+        }
+      ]
+    },
+    {
+      "id": "insight-lead-milestone-ea-tool-frontend-001",
+      "name": "里程碑：EA类工具人机共享前端洞察",
+      "type": "Business Object",
+      "description": "里程碑（2026-09-03，委派 project-overseer-001）：洞察『AGENT×人类共享的 EA 类图谱工具』双向一致性方案。五步法产出：①界定=选/设计一工具同时满足(A)Agent 经 ARGO MCP 写图后工具即时反映、(B)人类在工具编辑必须经 ARGO MCP(preview→apply) 且规范不破、单一事实源 design/KG/SystemArchitecture.json 不变、人机并发不丢改；②拆解=MECE 议题树(工具阵营全景/双向一致同步机制/人写路径设计/Agent写读路径/人机并发/在 web+eatool 现实上演进)；③假设 8 条；④验证=业界一手源(Archi 官网、archi-contribs GitHub、React Flow、AntV G6、draw.io、Structurizr、Neo4j Bloom 文档、MCP 官方、SAP LeanIX)+仓库实证(web/app.js doEdit、scripts/ea-web-service.js EDIT_OP_TOOL_MAP/callTool 进程内/undo-redo/fs.watch/导入受控例外、eatool EA JScript 离线条带、docs/ea-web-service-design AD-a..i、tests/ea-web-service-impl.test.js 全部通过)；注：BAILIAN MCP 本会话未挂载，联网检索用 webfetch 并如实标注。⑤结论=业界无受外部 schema 强约束的现成 EA；推荐以 web/ 升级为图形化 EA 工具(方案、机制、分期、验收见交付报告)。关键证据结论：Sparx EA/Archi 用脚本+git/DB 批处理(grafico-plugin/database-plugin 佐证)；Structurizr 模型即代码+官方 MCP validation 工具(约束写入业界同构)；Neo4j 图/云 EA 无 ArchiMate schema 约束或自有 meta-model；React Flow(38.2k★/13.8M 周安装) 为节点编辑器主流但需 React 构建链，G6 v5 满足零构建约束。相关元素：WP2758、2760、2764/2765 服务、2766 洞察。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
         }
       ]
     }
@@ -6201,6 +6247,26 @@
       "included_elements": [
         "architecture-diagram-skill-001"
       ]
+    },
+    {
+      "view_id": "insight-lead-wm-001",
+      "view_name": "洞察Lead工作记忆",
+      "parent_element_id": "insight-lead-001",
+      "description": "洞察Lead T1 工作记忆（父视图：洞察Lead）",
+      "included_elements": [
+        "insight-lead-wm-summary-001"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "insight-lead-ltm-001",
+      "view_name": "洞察Lead长期记忆",
+      "parent_element_id": "insight-lead-001",
+      "description": "洞察Lead T2 长期记忆（父视图：洞察Lead）",
+      "included_elements": [
+        "insight-lead-milestone-ea-tool-frontend-001"
+      ],
+      "included_relationships": []
     }
   ]
 }
