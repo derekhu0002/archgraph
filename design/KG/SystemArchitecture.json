@@ -4441,6 +4441,56 @@
           "description": "design/KG/SystemArchitecture.json（洞察Lead T1/T2 记忆视图创建 + EA类工具共享前端洞察里程碑）"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "EA 图谱画布图形化编辑内核与布局侧车（M1，洞察报告 P1 首批切片 M1-S1/S2，WP2758 TODO R-2 延续）：① M1-S1 图形内核：将 ArchGraph 本地 Web 服务（2760）图形区从基础 SVG 升级为 AntV G6 v5 画布（本地 vendored web/vendor/g6.min.js，零构建），替换 web/app.js 基础 SVG 渲染+拖动；层着色沿用 layerOf/colorForLayer，支持平移/缩放/选择/节点拖动。② M1-S2 布局侧车：画布坐标持久化于独立侧车存储（新模块 scripts/ea-layout-store.js + REST 端点 GET/PUT /api/projects/:id/views/:viewId/layout），与 design/KG/SystemArchitecture.json 完全物理隔离——坐标不进图谱 JSON、不进 schema，ARGO MCP 可查询内容保持不变。失效键=视图成员身份签名（included_elements+included_relationships 身份集合的 sha256），非内容哈希：Agent 对老元素的内容级修改（name/description/attributes）不扰动其在各视图中的坐标；仅成员结构变化触发新成员补位/移除成员清理，其余坐标保留。硬性约束：不得改动 argo/** 任何既有 ARGO MCP 功能代码，不得改动 design/KG/SystemArchitecture.json 的结构与 schema；diff 只允许 scripts/ea-web-service.js、scripts/ea-layout-store.js（新）、web/**、tests/**；既有端点契约只做加法不做破坏性修改，既有测试基线不退化。",
+      "id": "2785",
+      "name": "开发EA图谱画布图形化编辑内核与布局侧车（M1）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/ea-web-service-g6-render.test.js",
+          "acceptanceCriteria": "tests/ea-web-service-g6-render.test.js",
+          "description": "GIVEN 本地 Web 服务运行中；WHEN 打开某视图画布；THEN 以 G6 v5 渲染（节点按 ArchiMate 层着色、支持平移/缩放/选择/节点拖动），原基础 SVG 渲染路径被移除，且既有 /api 端点契约与既有测试基线不退化。",
+          "name": "AT-2785-S1-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-layout-store.test.js",
+          "acceptanceCriteria": "tests/ea-layout-store.test.js",
+          "description": "GIVEN 视图内元素 A 的手动坐标已存于布局侧车；WHEN Agent 经 ARGO MCP 仅修改 A 的内容（description/name/attributes）；THEN 侧车中 A 坐标不变，图谱 JSON 无任何 layout 字段，getArchitectureViewContext/buildViewGraph 返回不含侧车坐标，成员身份签名不变。",
+          "name": "AT-2785-L1-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-layout-store.test.js",
+          "acceptanceCriteria": "tests/ea-layout-store.test.js",
+          "description": "GIVEN 元素 A 坐标已存；WHEN Agent 经 ARGO MCP 向同一视图新增元素 B（成员结构变化）；THEN B 自动补位写入侧车，A 坐标原样保留。",
+          "name": "AT-2785-L2-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-layout-store.test.js",
+          "acceptanceCriteria": "tests/ea-layout-store.test.js",
+          "description": "GIVEN 元素 A/B 坐标已存；WHEN Agent 从该视图移除成员 B；THEN B 坐标被清理，A 坐标保留。",
+          "name": "AT-2785-L3-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-layout-store.test.js",
+          "acceptanceCriteria": "tests/ea-layout-store.test.js",
+          "description": "GIVEN M1-S1/S2 实现完成；WHEN 执行布局侧车全部操作后检查；THEN design/KG/SystemArchitecture.json 内容无 layout 污染且未被侧车写入，侧车文件只落在配置的独立存储根目录，validateSystemArchitecture 与既有 runArchitectureTests 基线不退化。",
+          "name": "AT-2785-L4-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -5413,6 +5463,16 @@
       "target_id": "mckinsey-synthesize-step-001",
       "source_name": "验证假设",
       "target_name": "综合建议"
+    },
+    {
+      "id": "2785-realizes-2760",
+      "name": "Realization",
+      "source_id": "2785",
+      "source_name": "开发EA图谱画布图形化编辑内核与布局侧车（M1）",
+      "statement": "开发EA图谱画布图形化编辑内核与布局侧车（M1） --(Realization)--> ArchGraph 本地 Web 服务",
+      "target_id": "2760",
+      "target_name": "ArchGraph 本地 Web 服务",
+      "type": "Realization"
     }
   ],
   "views": [
@@ -5480,7 +5540,8 @@
         "2764",
         "2765",
         "2766",
-        "subgraph-semantic-retrieval-001"
+        "subgraph-semantic-retrieval-001",
+        "2785"
       ],
       "included_relationships": [
         "1980",
@@ -5489,7 +5550,8 @@
         "1983",
         "1984",
         "1985",
-        "1986"
+        "1986",
+        "2785-realizes-2760"
       ]
     },
     {
