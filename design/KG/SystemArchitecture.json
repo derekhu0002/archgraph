@@ -4832,6 +4832,11 @@
           "name": "commit",
           "value": "1758e18",
           "description": "design/KG/SystemArchitecture.json（新增 AT-2788-S2-01 三栏自适应外壳浏览器验收）"
+        },
+        {
+          "name": "commit",
+          "value": "02963a4",
+          "description": "design/KG/SystemArchitecture.json（画布内核改选 MaxGraph：决策记录 + 描述沿革 + AT 重写 S1B-01/02 + S2-01 措辞更新）"
         }
       ],
       "description": "M2 编辑器外壳与画布内核（全区域自适应）。内核沿革与决策链：M1 用 G6 v5 → 人类反馈界面成熟度低提议 tldraw → 一手核实 tldraw license 禁无授权生产分发而否 → 人类选 Excalidraw（MIT，S1 交付 c473140/05641c0）→ **人类体验后判定手绘白板风格不适合严肃架构设计 → 改选 MaxGraph（Apache-2.0，draw.io 引擎后继，结构化 cell/样式/正交路由）**（本切片，记为 S1B）。侧车坐标、/api 写路径（经 ARGO MCP）、三栏外壳设计与内核解耦，换内核只动 web/ 画布层。切片：S1B MaxGraph 内核接入：一次性 esbuild bundle vendored（web/vendor/maxgraph/，打包后删除 web/vendor/excalidraw/），视图成员→顶点（层着色+name/type 标签），关系→边（箭头+类型标签，正交路由），画布随窗口自适应，布局坐标仍走侧车（成员身份签名语义不变）；Excalidraw 相关测试/资产退役。S2 三栏外壳：左模型树/中画布/右属性面板，CSS grid/flex+视口单位全区域自适应，窄屏降级。S3 画布操作向导化→ARGO MCP（替代手填 JSON）。S4 收口。红线：写图 100% 经 ARGO MCP；argo/** 零改动；图谱 JSON 无坐标字段。",
