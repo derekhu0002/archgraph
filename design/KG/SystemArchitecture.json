@@ -4789,9 +4789,9 @@
           "value": "ACTIVE"
         },
         {
-          "description": "2026-09-03 人类伙伴决策：① 编辑器外壳整体所有窗口区域自适应屏幕；② 画布内核采用 Excalidraw（MIT）——原提议 tldraw 因许可证被否（tldraw license 禁止无授权生产分发：无 License Key 禁生产使用、内置 Key 校验/水印/遥测、不得以 MIT 等覆盖，与 archgraph-argo npm 分发冲突，一手文本已核实）；③ Excalidraw 视觉风格（手绘感）为其固有特性，接受。",
+          "description": "2026-09-03 人类伙伴二次决策：Excalidraw 手绘白板风格不适合严肃架构设计，画布内核改选 **MaxGraph（Apache-2.0，draw.io 同款引擎后继）**；侧车坐标/ARGO MCP 写路径/三栏外壳不受影响，只换画布层；打包沿用一次性 bundle vendored 模式（仓库零构建链）。内核沿革：G6 v5（M1）→ Excalidraw（S1，因风格不适退役）→ MaxGraph。",
           "name": "decision",
-          "value": "m2-shell-excalidraw"
+          "value": "canvas-kernel-maxgraph"
         },
         {
           "name": "commit",
@@ -4827,31 +4827,36 @@
           "name": "commit",
           "value": "975e746",
           "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（登记：05641c0 + 2764 + deliveryStatus 校正 + T1 + 测试记录 37/39）"
+        },
+        {
+          "name": "commit",
+          "value": "1758e18",
+          "description": "design/KG/SystemArchitecture.json（新增 AT-2788-S2-01 三栏自适应外壳浏览器验收）"
         }
       ],
-      "description": "M2 编辑器外壳 + Excalidraw 画布（人类伙伴 2026-09-03 决策：外壳全区域自适应屏幕 + 画布采用 Excalidraw MIT）。背景：人类体验后反馈界面成熟度低，提议 tldraw；经一手核实 tldraw license 禁止无授权生产分发（无 License Key 禁生产使用、内置水印/遥测/不得以其他许可证覆盖），与 archgraph-argo npm 分发冲突，故改采 **Excalidraw（@excalidraw/excalidraw 0.18.1，MIT）**。切片：S1 Excalidraw 内核接入：vendored 单文件方案（优先包内 UMD：react.production.min.js + react-dom + excalidraw UMD + css 入 web/vendor/；无 UMD 则一次性 esbuild 打包，仓库不引入构建链），替换 G6 v5 画布（g6.min.js 下线移除以减包体）：视图成员→形状（按 ArchiMate 层着色 + name/type 标签），关系→箭头（优先用 Excalidraw 箭头绑定），画布随窗口自适应；布局坐标仍走既有侧车（GET/PUT /views/:id/layout，成员身份签名语义不变，内容级修改不扰动坐标）。S2 编辑器外壳：三栏自适应布局（左模型树/中画布/右属性面板，CSS grid/flex + 视口单位，全区域随屏幕自适应，窄屏降级）。S3 画布操作→写路径：双击属性编辑/新建元素/连线建关系/删除，向导化表单（ArchiMate 类型枚举引导）全部经既有 /edit→ARGO MCP，替代手填 JSON（保留高级入口）。S4 收口：对齐吸附/网格、错误文案人话化、undo 与侧车一致性、回归与测试报告。红线：所有写图仍 100% 经 ARGO MCP；argo/** 零改动；图谱 JSON 无坐标字段。",
+      "description": "M2 编辑器外壳与画布内核（全区域自适应）。内核沿革与决策链：M1 用 G6 v5 → 人类反馈界面成熟度低提议 tldraw → 一手核实 tldraw license 禁无授权生产分发而否 → 人类选 Excalidraw（MIT，S1 交付 c473140/05641c0）→ **人类体验后判定手绘白板风格不适合严肃架构设计 → 改选 MaxGraph（Apache-2.0，draw.io 引擎后继，结构化 cell/样式/正交路由）**（本切片，记为 S1B）。侧车坐标、/api 写路径（经 ARGO MCP）、三栏外壳设计与内核解耦，换内核只动 web/ 画布层。切片：S1B MaxGraph 内核接入：一次性 esbuild bundle vendored（web/vendor/maxgraph/，打包后删除 web/vendor/excalidraw/），视图成员→顶点（层着色+name/type 标签），关系→边（箭头+类型标签，正交路由），画布随窗口自适应，布局坐标仍走侧车（成员身份签名语义不变）；Excalidraw 相关测试/资产退役。S2 三栏外壳：左模型树/中画布/右属性面板，CSS grid/flex+视口单位全区域自适应，窄屏降级。S3 画布操作向导化→ARGO MCP（替代手填 JSON）。S4 收口。红线：写图 100% 经 ARGO MCP；argo/** 零改动；图谱 JSON 无坐标字段。",
       "id": "2788",
       "name": "M2编辑器外壳与Excalidraw画布（全区域自适应）",
       "parent": "1249",
       "testcases": [
         {
-          "Input": "tests/ea-web-service-excalidraw.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-excalidraw.test.js",
-          "description": "GIVEN 本地 Web 服务运行；WHEN 打开某视图画布；THEN 页面以 Excalidraw 渲染（vendor 资源加载、视图成员渲染为形状并按层着色、关系呈现为箭头），画布随容器/窗口自适应，布局坐标仍经侧车端点（内容级修改不扰动坐标语义保持），原 G6 渲染路径与 g6.min.js 移除，既有 /api 端点契约与测试基线不退化。",
-          "name": "AT-2788-S1-01",
+          "Input": "tests/ea-web-maxgraph.test.js",
+          "acceptanceCriteria": "tests/ea-web-maxgraph.test.js",
+          "description": "GIVEN 本地 Web 服务运行；WHEN 打开某视图画布；THEN 页面以 MaxGraph 渲染（vendor 资源加载、视图成员渲染为顶点并按层着色、关系呈现为带箭头边），画布随容器/窗口自适应，布局坐标仍经侧车端点（内容级修改不扰动坐标语义保持），Excalidraw 资产与渲染路径移除，既有 /api 端点契约与测试基线不退化。",
+          "name": "AT-2788-S1B-01",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/ea-web-browser.test.js",
           "acceptanceCriteria": "tests/ea-web-browser.test.js",
-          "description": "GIVEN 本地 Web 服务运行且本机具备 Playwright+Chromium；WHEN 在真实浏览器中打开任一视图；THEN Excalidraw 画布挂载成功（嵌套 vendor 资源含 css/字体无 404），视图成员渲染为形状并按层着色、关系呈现为箭头；WHEN 拖动某形状；THEN 坐标落盘到该项目 design/KG/ea-layouts/ 侧车。环境无浏览器/缺 Playwright 时用例显式消息 skip 计通过（保障无浏览器环境基线不破）。",
-          "name": "AT-2788-S1-02",
+          "description": "GIVEN 本地 Web 服务运行且本机具备 Playwright+Chromium；WHEN 在真实浏览器中打开任一视图；THEN MaxGraph 画布挂载成功（嵌套 vendor 资源无 404），视图成员渲染为顶点并按层着色、关系呈现为带箭头边；WHEN 拖动某顶点；THEN 坐标落盘到该项目 design/KG/ea-layouts/ 侧车。环境无浏览器/缺 Playwright 时显式消息 skip 计通过。",
+          "name": "AT-2788-S1B-02",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/ea-web-shell.test.js",
           "acceptanceCriteria": "tests/ea-web-shell.test.js",
-          "description": "GIVEN 本地 Web 服务运行且本机具备 Playwright+Chromium；WHEN 在真实浏览器中以不同视口尺寸（宽屏≥1440 / 中屏≈1024 / 窄屏≤700）打开应用；THEN 编辑器呈三栏外壳（左模型树 / 中 Excalidraw 画布 / 右属性面板）且全部区域随视口自适应（无固定宽高溢出，画布随窗口 resize，窄屏面板折叠/堆叠降级）；模型树列出选中项目的视图与成员元素，点视图打开画布，点树中元素在画布定位/高亮；既有添加/移除项目、检索、编辑、导入导出、undo/redo 入口保持可用。环境无浏览器/缺 Playwright 时显式消息 skip 计通过。",
+          "description": "GIVEN 本地 Web 服务运行且本机具备 Playwright+Chromium；WHEN 在真实浏览器中以不同视口尺寸（宽屏≥1440 / 中屏≈1024 / 窄屏≤700）打开应用；THEN 编辑器呈三栏外壳（左模型树 / 中画布 / 右属性面板）且全部区域随视口自适应（无固定宽高溢出，画布随窗口 resize，窄屏面板折叠/堆叠降级）；模型树列出选中项目的视图与成员元素，点视图打开画布，点树中元素在画布定位/高亮；既有添加/移除项目、检索、编辑、导入导出、undo/redo 入口保持可用。环境无浏览器/缺 Playwright 时显式消息 skip 计通过。",
           "name": "AT-2788-S2-01",
           "type": "Acceptance Test"
         }
