@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "graphKey": "D:\\Projects\\archgraph\\design\\KG\\SystemArchitecture.json",
+  "view_id": "jlm-001",
+  "signature": "08d79ca36cae9dab8117285c2a695ca9d22792d27d11a20cc61f15223c3b4af7",
+  "updatedAt": "2026-09-03T08:04:21.194Z",
+  "elements": {
+    "john-mem-001": {
+      "x": 240,
+      "y": 80
+    }
+  }
+}
