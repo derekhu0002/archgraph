@@ -4947,6 +4947,11 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "0d905fb",
+          "description": "design/KG/SystemArchitecture.json（立项：WP2789 + AT-2789-R1-01/02 + D7/D8 决策）"
         }
       ],
       "description": "EA 同步桥 R-S1（修订方案首切片，先决环境片）：① 环境对齐——本机 EA=Trial 15.2 x86（Program Files (x86)\\Sparx Systems\\EA Trial），已装 MCP Server 2.8.2 为 x64 且装入无 EA 本体目录（位宽/目录错配，MCP_EA.log 已有 80070005/管道中断）：需卸载错配件、把匹配 x86 的 MCP add-in 装入 EA Trial 目录；优先复用 2.8.2 二进制（D8），若官网 x86 MSI 仅 3.0.0（需 .NET Desktop Runtime 10）则如实报告并给出选项（装 .NET 10+3.0.0 或寻找 2.8.2 x86）；② 同步驱动器只读骨架：新建 scripts/ea-sync-driver.js（Node STDIO MCP client，复用 scripts/ea-web-service.js createMcpAdapter/callStdio 模式）：spawn MCP3.exe → initialize/tools/list → 读工具冒烟；③ 连通验证（AC-01）与位置不变性实测（AC-02，-enableEdit 最小写探测：仅改 Notes 后 geometry 逐字节不变 + -modifiedInfoPath 审计 CSV 记录）。EA 实例：EA.exe 打开 scratch 项目（临时副本，禁用生产文件）。测试环境不可用时用例显式 skip 计通过。约束：不修改 argo/**；不触碰 archgraph.feap；MSI 安装需管理员权限时如实报告人工步骤不强装。",
