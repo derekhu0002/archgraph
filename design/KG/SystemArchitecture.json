@@ -2246,7 +2246,7 @@
       ]
     },
     {
-      "description": "视图列表选择→图形化展开→AntV G6 v5 画布渲染（节点按 ArchiMate 层着色，平移/缩放/选择/节点拖动；本地 vendored，零构建）；图数据来自 buildViewGraph（nodes/edges）。画布坐标持久化于独立布局侧车（scripts/ea-layout-store.js，默认存于各项目自己的 design/KG/ea-layouts/，按视图成员身份签名失效：内容级修改不扰动坐标），不进图谱 JSON、不进 ARGO MCP 查询内容。",
+      "description": "视图列表选择→图形化展开→Excalidraw 画布渲染（@excalidraw/excalidraw 0.18.1 MIT vendored；视图成员→形状按 ArchiMate 层着色+name/type 标签，关系→箭头绑定）；图数据来自 buildViewGraph（nodes/edges）；画布随容器/窗口自适应。画布坐标持久化于独立布局侧车（scripts/ea-layout-store.js，默认存于各项目自己的 design/KG/ea-layouts/，按视图成员身份签名失效：内容级修改不扰动坐标），不进图谱 JSON、不进 ARGO MCP 查询内容。",
       "id": "2764",
       "name": "知识图谱图形化查看服务",
       "parent": "2760",
@@ -2261,6 +2261,11 @@
           "name": "commit",
           "value": "3615700",
           "description": "web/app.js; web/index.html; web/vendor/g6.min.js; scripts/ea-web-service.js; scripts/ea-layout-store.js（G6 v5 画布 + 布局侧车端点）"
+        },
+        {
+          "name": "commit",
+          "value": "c473140",
+          "description": "web/vendor/excalidraw/**; web/app.js; web/index.html（画布内核 G6 v5 → Excalidraw 0.18.1 vendored）"
         }
       ]
     },
@@ -3715,7 +3720,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要，最终版）\n- 身份：项目总管（ArchGraph overseer）；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin（DevelopmentTeam 430）。\n- 本会话完成：\n  1) **EA 类工具洞察**（洞察Lead 五步法，411f940/b33db60）：结论=升级既有 web/ 为画布式工具。\n  2) **路线+任务分解**：M0/M1/M2/M3。\n  3) **人类伙伴红线/决策**：坐标独立侧车；Agent 内容修改不扰动坐标（成员身份签名）；不改既有 ARGO MCP 代码；侧车按项目存 design/KG/ea-layouts/；侧车=正式资产随项目 commit 禁止 ignore。\n  4) **WP2785**（21a52c0/3615700/80c2dfc）：G6 v5 画布 + 布局侧车 + 按项目存储修订。\n  5) **WP2786**（417b0e5）+ **发布 archgraph-argo@0.11.0**（28f0a0a，registry 已同步）：纳入 npm 部署包，argo-deploy [23/23] 后台启动（WMI 零句柄继承，端口幂等）。\n  6) **WP2787**（ec12dda）：手动选择项目根目录与切换（~/.argo/ea-tool/projects.json 持久化 + POST/DELETE/GET /api/roots + UI 添加/移除）。\n  7) **侧车正式资产入库**（89d5553：433/1805/jlm-001，真实使用产生）。\n  8) **drawio 跟进评估**（洞察Lead，ba72e30/ebb6edc）：结论=不移植 drawio/mxGraph/MaxGraph（mxGraph 停维、MaxGraph 不支持页面直引违反零构建、drawio 需 build 且自由图形与模型强约束冲突）；维持 G6 v5，M2 投「交互壳」成熟化（属性面板/模型树/连线吸附/右键/缩略图，借鉴 drawio 交互不借鉴代码）；drawio embed diffSync 部分翻案但仍否决。待人类拍板 D1~D4。\n- 验收：架构测试 36/38（2 既有失败），validate 通过，各轮 diff 白名单（argo/** 零改动）。\n- 可复用经验：a) archgraph.feap 会被外部 EA 会话改动（已自行恢复）；b) Node 24 用 glob 跑 node --test；c) 侧车失效键=成员身份签名；d) LTM 满 15 先归档（本轮归档 mem-eval/content-storage/query-rules）；e) Windows 后台拉起禁 Start-Process（句柄继承阻塞），用 WMI；f) 起服务的测试必须传临时 projectsConfigPath/layoutRoot 隔离真实用户配置。\n- 未完成/TODO：**人类拍板 D1（维持 G6+M2 vs 仍移植 drawio）/D2（M2 优先级）/D3（签名失效遗留）/D4（零构建放松门槛）**；浏览器人工走查；M1-S3~S5；WP2758 todo；既有 2 失败未修；Experience 层未实施。",
+      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要，最终版）\n- 身份：项目总管（ArchGraph overseer）；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin。\n- 本会话完成（时间序）：\n  1) EA 类工具洞察（洞察Lead 五步法，411f940/b33db60）+ 路线/任务分解（M0~M3）。\n  2) 人类红线/决策：坐标独立侧车；Agent 内容修改不扰动坐标（成员身份签名）；不改既有 ARGO MCP 代码；侧车按项目存 design/KG/ea-layouts/ 且=正式资产随项目 commit 禁 ignore。\n  3) WP2785（21a52c0/3615700/80c2dfc）：G6 画布+布局侧车+按项目存储。\n  4) WP2786（417b0e5）+ archgraph-argo@0.11.0 发布（28f0a0a）：npm 部署包 + argo-deploy 后台启动（WMI 拉起）。\n  5) WP2787（ec12dda）：手动选择项目根与切换（~/.argo/ea-tool/projects.json）。\n  6) 侧车正式资产入库（89d5553：433/1805/jlm-001）。\n  7) drawio 跟进评估（洞察Lead）：不移植，维持既有内核+交互壳。\n  8) **画布内核再决策**：人类提议 tldraw → 一手核实 tldraw license 禁无授权生产分发（内置水印/遥测/不得以 MIT 覆盖）→ 人类改选 **Excalidraw（MIT）** → WP2788 立项（765edfc，含决策记录）+ 退役 AT-2785-S1-01（a09bbe6）。\n  9) **WP2788-S1 交付**（c473140）：Excalidraw 0.18.1 vendored（react 18.3.1，一次性 esbuild ESM 8.8MB+css+字体，仓库零构建链）替换 G6（g6.min.js 删除）；形状/箭头绑定/侧车集成；npm 包体 2.6→18.0MB（310 文件）。\n- 验收：架构测试 36/38（2 既有失败），validate 通过，各轮 diff 白名单（argo/** 零改动）。WP2788 deliveryStatus 人工校正 not_delivered（S2~S4 未开始，harness 自动 delivered 仅基于已挂载 AT）。\n- 可复用经验：a) tldraw 许可证陷阱（npm license 字段 SEE LICENSE 必须拉一手 LICENSE 全文）；b) Excalidraw 无 UMD，一次性 esbuild ESM + EXCALIDRAW_ASSET_PATH 字体基址；convertToExcalidrawElements 默认重生 id 需显式 regenerateIds:false；customData 可作身份映射；c) Windows 后台拉起禁 Start-Process 用 WMI；d) 起服务测试传临时 projectsConfigPath/layoutRoot 隔离；e) LTM 满 15 先归档。\n- 未完成/TODO：WP2788 S2 三栏自适应外壳（人类要求整体所有窗口区域自适应屏幕）/S3 画布操作向导化→ARGO MCP/S4 收口；浏览器人工走查（本环境无浏览器）；npm 包体 18MB 待人类确认是否发布 0.12.0；既有 2 失败未修；Experience 层未实施。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3737,8 +3742,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-03T18:30:00.000Z",
-          "description": "2026-09-03 会话摘要（最终版：+ WP2787 交付 + 侧车资产入库 + drawio 跟进评估待拍板）"
+          "value": "2026-09-03T20:00:00.000Z",
+          "description": "2026-09-03 会话摘要（最终版：+ WP2788-S1 Excalidraw 画布交付）"
         },
         {
           "name": "commit",
@@ -4527,13 +4532,13 @@
           "description": "2026-09-03 人类伙伴决策：布局侧车文件（各项目 design/KG/ea-layouts/*.json）是正式项目资产，随项目 commit 共享（团队共用视图布局），禁止加入 .gitignore。"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "89d5553",
           "description": "design/KG/ea-layouts/433.json; design/KG/ea-layouts/1805.json; design/KG/ea-layouts/jlm-001.json（真实使用产生的布局侧车正式资产登记入库，随项目共享）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "EA 图谱画布图形化编辑内核与布局侧车（M1，洞察报告 P1 首批切片 M1-S1/S2，WP2758 TODO R-2 延续）：① M1-S1 图形内核：将 ArchGraph 本地 Web 服务（2760）图形区从基础 SVG 升级为 AntV G6 v5 画布（本地 vendored web/vendor/g6.min.js，零构建），替换 web/app.js 基础 SVG 渲染+拖动；层着色沿用 layerOf/colorForLayer，支持平移/缩放/选择/节点拖动。② M1-S2 布局侧车：画布坐标持久化于独立侧车存储（新模块 scripts/ea-layout-store.js + REST 端点 GET/PUT /api/projects/:id/views/:viewId/layout），与 design/KG/SystemArchitecture.json 完全物理隔离——坐标不进图谱 JSON、不进 schema，ARGO MCP 可查询内容保持不变。失效键=视图成员身份签名（included_elements+included_relationships 身份集合的 sha256），非内容哈希：Agent 对老元素的内容级修改（name/description/attributes）不扰动其在各视图中的坐标；仅成员结构变化触发新成员补位/移除成员清理，其余坐标保留。【2026-09-03 人类伙伴需求修订】布局侧车默认存储改为按项目隔离：每个项目的坐标存放在该项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json（独立文件，仍不进 SystemArchitecture.json）；layoutRoot 选项/EA_LAYOUT_ROOT 覆盖仍有效（测试用，回退 <root>/<projectId>/<view_id>.json）；~/.argo/ea-tool/layouts/ 不再作为默认。硬性约束：不得改动 argo/** 任何既有 ARGO MCP 功能代码，不得改动 design/KG/SystemArchitecture.json 的结构与 schema；diff 只允许 scripts/ea-web-service.js、scripts/ea-layout-store.js（新）、web/**、tests/**；既有端点契约只做加法不做破坏性修改，既有测试基线不退化。",
@@ -4701,10 +4706,6 @@
           "description": "design/KG/SystemArchitecture.json（立项：WP2787 + AT-2787-01 + Realization→2760）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "ec12dda",
           "description": "scripts/ea-web-service.js; web/app.js; web/index.html; web/style.css; tests/ea-web-service-roots.test.js; tests/ea-web-service-impl.test.js; tests/ea-layout-store.test.js; tests/ea-web-service-g6-render.test.js（手动项目根持久化 ~/.argo/ea-tool/projects.json + POST/DELETE/GET /api/roots + UI 添加/移除/切换，测试隔离传参）"
@@ -4713,6 +4714,10 @@
           "name": "commit",
           "value": "3fcf590",
           "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（交付登记：ec12dda + 89d5553 + LTM/T1 + 测试记录 36/38）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "WEB 手动选择项目根目录与切换：ArchGraph 本地 Web 服务（2760）目前仅自动发现 --root/-EaWebRoot 扫描范围（默认 REPO_ROOT+父级+祖父级）内的项目，无法选择范围外的本地项目。本 WP 新增：① UI/项目栏：「添加项目」入口（手动指定本地目录），服务校验该目录含 design/KG/SystemArchitecture.json（marker）后才加入，否则明确报错；手动添加的 root 持久化到工具级配置（默认 ~/.argo/ea-tool/projects.json，可经 createService 选项/环境变量覆盖供测试），服务重启后自动恢复，支持移除；② 项目间切换（既有列表选择）保持可用，视图/状态/布局侧车随切换；③ API 加法（如 POST/DELETE /api/roots），既有端点契约与测试基线不退化。约束：argo/** 零改动；写图红线不变（手动添加只改变发现范围，不改变写路径）；部署形态（~/.argo）与仓库开发形态行为一致。",
@@ -4787,6 +4792,16 @@
           "name": "commit",
           "value": "765edfc",
           "description": "design/KG/SystemArchitecture.json（立项：WP2788 + AT-2788-S1-01 + Realization→2760 + tldraw 否决/Excalidraw 采纳决策）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered",
+          "description": "S1 已交付（c473140）；S2（三栏自适应外壳）/S3（画布操作向导化→ARGO MCP）/S4（收口）未开始。harness 自动 delivered 仅基于已挂载 AT，此处人工校正为未完成。"
+        },
+        {
+          "name": "commit",
+          "value": "c473140",
+          "description": "web/vendor/excalidraw/**（8.8MB ESM bundle + css + 字体，@excalidraw/excalidraw@0.18.1 + react@18.3.1 一次性 esbuild，仓库零构建链）; web/app.js; web/index.html; web/style.css; scripts/ea-web-service.js; tests/ea-web-service-excalidraw.test.js；删除 web/vendor/g6.min.js + tests/ea-web-service-g6-render.test.js（S1：Excalidraw 画布替换 G6，布局侧车语义不变；包体 2.6→18.0MB）"
         }
       ],
       "description": "M2 编辑器外壳 + Excalidraw 画布（人类伙伴 2026-09-03 决策：外壳全区域自适应屏幕 + 画布采用 Excalidraw MIT）。背景：人类体验后反馈界面成熟度低，提议 tldraw；经一手核实 tldraw license 禁止无授权生产分发（无 License Key 禁生产使用、内置水印/遥测/不得以其他许可证覆盖），与 archgraph-argo npm 分发冲突，故改采 **Excalidraw（@excalidraw/excalidraw 0.18.1，MIT）**。切片：S1 Excalidraw 内核接入：vendored 单文件方案（优先包内 UMD：react.production.min.js + react-dom + excalidraw UMD + css 入 web/vendor/；无 UMD 则一次性 esbuild 打包，仓库不引入构建链），替换 G6 v5 画布（g6.min.js 下线移除以减包体）：视图成员→形状（按 ArchiMate 层着色 + name/type 标签），关系→箭头（优先用 Excalidraw 箭头绑定），画布随窗口自适应；布局坐标仍走既有侧车（GET/PUT /views/:id/layout，成员身份签名语义不变，内容级修改不扰动坐标）。S2 编辑器外壳：三栏自适应布局（左模型树/中画布/右属性面板，CSS grid/flex + 视口单位，全区域随屏幕自适应，窄屏降级）。S3 画布操作→写路径：双击属性编辑/新建元素/连线建关系/删除，向导化表单（ArchiMate 类型枚举引导）全部经既有 /edit→ARGO MCP，替代手填 JSON（保留高级入口）。S4 收口：对齐吸附/网格、错误文案人话化、undo 与侧车一致性、回归与测试报告。红线：所有写图仍 100% 经 ARGO MCP；argo/** 零改动；图谱 JSON 无坐标字段。",
