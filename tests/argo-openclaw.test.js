@@ -43,7 +43,6 @@ function buildInstallArgs(opts) {
     ...(opts.openClawRepoRoot ? ['-OpenClawRepoRoot', opts.openClawRepoRoot] : []),
     '-SkipDsh',
     '-SkipDeps',
-    '-SkipEaWeb',
     ...(opts.skipEnv ? ['-SkipEnv'] : []),
     ...(opts.skipMcp ? ['-SkipMcp'] : []),
     ...(opts.skipOpenClaw ? ['-SkipOpenClaw'] : []),
