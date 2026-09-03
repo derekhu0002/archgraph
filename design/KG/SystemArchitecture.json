@@ -4629,7 +4629,8 @@
       "attributes": [
         {
           "name": "status",
-          "value": "COMPLETED"
+          "value": "SUPERSEDED",
+          "description": "2026-09-03 方向转折（人类决策：EA 为主设计界面，Web 冻结）：打包与部署的 Web 移除——package.json files 去掉 web/ea-web-service/ea-layout-store，install-argo.ps1 移除 [23/23] 后台启动步（步骤总数回 22）；AT-2786-01/02 退役；仓库内 web/ 保留可本地运行（仅不再分发）。历史交付保留（含 WMI 拉起等经验）。"
         },
         {
           "name": "commit",
@@ -4665,22 +4666,7 @@
       "id": "2786",
       "name": "EA本地Web服务纳入npm部署包并随argo-deploy后台启动",
       "parent": "1249",
-      "testcases": [
-        {
-          "Input": "tests/ea-web-deploy.test.js",
-          "acceptanceCriteria": "tests/ea-web-deploy.test.js",
-          "description": "GIVEN archgraph-argo 包定义；WHEN npm pack --dry-run；THEN 产物清单包含 scripts/ea-web-service.js、scripts/ea-layout-store.js、web/index.html、web/app.js、web/style.css、web/vendor/g6.min.js。",
-          "name": "AT-2786-01",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "tests/ea-web-deploy.test.js",
-          "acceptanceCriteria": "tests/ea-web-deploy.test.js",
-          "description": "GIVEN 临时宿主环境与植入测试项目（design/KG/SystemArchitecture.json marker）的临时工作区；WHEN 执行 install-argo.ps1（-EaWebRoot 测试工作区 -EaWebPort 随机端口）；THEN 服务文件部署到 ArgoRoot（scripts/ea-web-service.js + ea-layout-store.js + web/），后台服务在该端口监听且 /api/projects 返回 200 并发现植入项目，重复执行不重复拉起；WHEN 传 -SkipEaWeb THEN 不启动后台进程。",
-          "name": "AT-2786-02",
-          "type": "Acceptance Test"
-        }
-      ],
+      "testcases": [],
       "type": "Work Package"
     },
     {
@@ -4791,7 +4777,8 @@
       "attributes": [
         {
           "name": "status",
-          "value": "ACTIVE"
+          "value": "FROZEN",
+          "description": "2026-09-03 人类决策：EA 为主设计界面，Web 冻结——本 WP 止于 S2（已交付）：S3（向导化）/S4（收口）取消；仓库内 Web 工具保留作轻量查看/应急编辑，不再新增功能、不再打包分发（见 2786 SUPERSEDED）。"
         },
         {
           "description": "2026-09-03 人类伙伴二次决策：Excalidraw 手绘白板风格不适合严肃架构设计，画布内核改选 **MaxGraph（Apache-2.0，draw.io 同款引擎后继）**；侧车坐标/ARGO MCP 写路径/三栏外壳不受影响，只换画布层；打包沿用一次性 bundle vendored 模式（仓库零构建链）。内核沿革：G6 v5（M1）→ Excalidraw（S1，因风格不适退役）→ MaxGraph。",
