@@ -54,6 +54,44 @@ main {
   flex-shrink: 0;
 }
 
+#add-project-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+#add-project-path {
+  width: 100%;
+}
+
+#add-project-feedback {
+  color: var(--bad);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+#add-project-feedback:empty {
+  display: none;
+}
+
+li {
+  position: relative;
+}
+
+.remove-project {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--bad);
+  font-size: 11px;
+  padding: 2px 8px;
+}
+
+.badge.manual {
+  background: var(--accent);
+}
+
 #main-panel {
   flex: 1;
   min-width: 0;

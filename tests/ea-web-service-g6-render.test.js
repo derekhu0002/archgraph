@@ -56,7 +56,7 @@ test('M1-S1 vendor：/vendor/g6.min.js 可服务且为 JS（本地 vendor，零�
   assert.ok(fs.existsSync(vendorFile), 'web/vendor/g6.min.js 应随仓库提交');
 
   const { tmp } = makeFixture();
-  const service = createService({ searchRoots: [tmp], port: 0 });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json'), port: 0 });
   const { port } = await service.start();
   try {
     const res = await fetch(`http://127.0.0.1:${port}/vendor/g6.min.js`);
@@ -75,7 +75,7 @@ test('M1-S1 vendor：路径穿越被拒绝（/vendor/.. 不能逃逸静态目录
   // WHEN GET /vendor/../app.js 之外的穿越路径（如 /vendor/../package.json 的编码变体不可达）
   // THEN 逃逸静态目录的请求被 403 拒绝
   const { tmp } = makeFixture();
-  const service = createService({ searchRoots: [tmp], port: 0 });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json'), port: 0 });
   const { port } = await service.start();
   try {
     const res = await fetch(`http://127.0.0.1:${port}/vendor/../scripts/ea-web-service.js`, { redirect: 'manual' });
@@ -117,7 +117,7 @@ test('M1-S1 契约：既有 /api 端点形状不退化（/projects、/views、/v
   // WHEN 抽样请求既有端点
   // THEN 响应形状与既有契约一致（字段不缺失、类型不变）
   const { tmp } = makeFixture();
-  const service = createService({ searchRoots: [tmp], port: 0 });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json'), port: 0 });
   const { port } = await service.start();
   try {
     const projectsRes = await fetch(`http://127.0.0.1:${port}/api/projects`);

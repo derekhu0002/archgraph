@@ -5,10 +5,13 @@
 // 支持 drag-canvas / zoom-canvas / drag-element / click-select。
 // 布局侧车（M1-S2）：打开视图先 GET /views/:id/layout 覆盖节点坐标；
 // 节点拖动结束后 PUT /views/:id/layout 落盘（防抖）。坐标不进图谱 JSON。
+// 手动项目根（WP2787）：项目栏可添加本地目录为项目（/api/roots 校验+持久化），
+// 手动添加的项目可移除；自动发现的项目不可移除。
 
 (function () {
   const state = {
     projects: [],
+    manualRoots: [],
     selectedProjectId: null,
     views: [],
     currentViewId: null,
@@ -44,9 +47,19 @@
   }
 
   async function loadProjects() {
-    const { projects } = await api('/api/projects');
+    const [{ projects }, roots] = await Promise.all([api('/api/projects'), loadManualRoots()]);
     state.projects = projects;
+    state.manualRoots = roots;
     renderProjects();
+  }
+
+  async function loadManualRoots() {
+    try {
+      const { roots } = await api('/api/roots');
+      return Array.isArray(roots) ? roots : [];
+    } catch {
+      return [];
+    }
   }
 
   function renderProjects() {
@@ -55,15 +68,67 @@
     for (const project of state.projects) {
       const li = document.createElement('li');
       const valid = project.valid ? '有效' : '无效';
+      const manual = state.manualRoots.includes(project.root);
       li.className = project.id === state.selectedProjectId ? 'selected' : '';
       li.innerHTML = `
-        <div class="project-name">${escapeHtml(project.name)}</div>
+        <div class="project-name">${escapeHtml(project.name)}${manual ? ' <span class="badge manual">手动</span>' : ''}</div>
         <div class="project-meta">
           <span class="badge ${project.valid ? 'ok' : 'bad'}">${valid}</span>
           元素 ${project.elements} · 关系 ${project.relationships} · 视图 ${project.views}
         </div>`;
       li.addEventListener('click', () => selectProject(project.id));
+      if (manual) {
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-project';
+        removeBtn.title = `移除手动项目：${project.root}`;
+        removeBtn.textContent = '移除';
+        removeBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          doRemoveProject(project);
+        });
+        li.appendChild(removeBtn);
+      }
       list.appendChild(li);
+    }
+  }
+
+  async function doAddProject() {
+    const input = $('add-project-path');
+    const feedback = $('add-project-feedback');
+    const root = input.value.trim();
+    if (!root) {
+      feedback.textContent = '请输入项目根目录绝对路径';
+      return;
+    }
+    try {
+      await api('/api/roots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ root }),
+      });
+      input.value = '';
+      feedback.textContent = '';
+      await loadProjects();
+    } catch (error) {
+      feedback.textContent = `添加失败：${error.message}`;
+    }
+  }
+
+  async function doRemoveProject(project) {
+    const feedback = $('add-project-feedback');
+    try {
+      await api('/api/roots', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ root: project.root }),
+      });
+      if (state.selectedProjectId === project.id) {
+        state.selectedProjectId = null;
+      }
+      feedback.textContent = '';
+      await loadProjects();
+    } catch (error) {
+      feedback.textContent = `移除失败：${error.message}`;
     }
   }
 
@@ -363,6 +428,12 @@
 
   function bindEvents() {
     $('refresh-projects').addEventListener('click', loadProjects);
+    $('btn-add-project').addEventListener('click', doAddProject);
+    $('add-project-path').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        doAddProject();
+      }
+    });
     $('btn-export').addEventListener('click', doExport);
     $('btn-import').addEventListener('click', () => $('import-file').click());
     $('import-file').addEventListener('change', (event) => {

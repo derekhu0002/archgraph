@@ -163,7 +163,7 @@ test('L1：内容级修改不扰动坐标与签名，图谱 JSON 无 layout 字�
   // WHEN Agent 仅修改图谱中 A 的内容（description），再 GET 布局
   // THEN A 坐标不变、signature 不变，图谱 JSON 无任何 layout 字段，图谱文件未被侧车写入
   const { tmp, layoutRoot, graphPath } = makeFixture();
-  const service = createService({ searchRoots: [tmp], layoutRoot, port: 0 });
+  const service = createService({ searchRoots: [tmp], layoutRoot, projectsConfigPath: path.join(tmp, 'projects.json'), port: 0 });
   const { port } = await service.start();
   try {
     const { projects } = await (await fetch(`http://127.0.0.1:${port}/api/projects`)).json();
@@ -210,7 +210,7 @@ test('L2→L4：成员新增补位 / 移除清理 / 图谱零污染、侧车只�
   // THEN B 补位写入且 A 保留；随后 B 坐标被清理、A 保留；
   //      图谱 JSON 未被侧车写入/污染，侧车文件只存在于配置的 layoutRoot 下
   const { tmp, layoutRoot, graphPath } = makeFixture();
-  const service = createService({ searchRoots: [tmp], layoutRoot, port: 0 });
+  const service = createService({ searchRoots: [tmp], layoutRoot, projectsConfigPath: path.join(tmp, 'projects.json'), port: 0 });
   const { port } = await service.start();
   try {
     const { projects } = await (await fetch(`http://127.0.0.1:${port}/api/projects`)).json();
@@ -301,7 +301,7 @@ test('L5：默认存储按项目隔离（design/KG/ea-layouts/），不写 ~/.ar
       return { projectRoot, graphPath };
     }
     const { projectRoot, graphPath } = makeProject('proj');
-    const service = createService({ searchRoots: [tmp], port: 0 });
+    const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json'), port: 0 });
     const { port } = await service.start();
     try {
       const { projects } = await (await fetch(`http://127.0.0.1:${port}/api/projects`)).json();
@@ -374,7 +374,7 @@ test('端点：视图不存在 → 404；非法载荷 → 400', async () => {
   // WHEN 请求不存在视图的布局 / 提交非法坐标载荷
   // THEN 分别返回 404 / 400
   const { tmp, layoutRoot } = makeFixture();
-  const service = createService({ searchRoots: [tmp], layoutRoot, port: 0 });
+  const service = createService({ searchRoots: [tmp], layoutRoot, projectsConfigPath: path.join(tmp, 'projects.json'), port: 0 });
   const { port } = await service.start();
   try {
     const { projects } = await (await fetch(`http://127.0.0.1:${port}/api/projects`)).json();
@@ -409,7 +409,7 @@ test('端点：GET 首访自动补位全体成员并写回（确定性圆形布�
   // WHEN 首次 GET 布局
   // THEN 全部成员获得确定性坐标，签名可复算，侧车文件被创建
   const { tmp, layoutRoot, graphPath } = makeFixture();
-  const service = createService({ searchRoots: [tmp], layoutRoot, port: 0 });
+  const service = createService({ searchRoots: [tmp], layoutRoot, projectsConfigPath: path.join(tmp, 'projects.json'), port: 0 });
   const { port } = await service.start();
   try {
     const { projects } = await (await fetch(`http://127.0.0.1:${port}/api/projects`)).json();

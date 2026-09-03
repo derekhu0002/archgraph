@@ -16,6 +16,7 @@
 
 const http = require('node:http');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const readline = require('node:readline');
@@ -69,6 +70,49 @@ function defaultSearchRoots(explicitRoot) {
   }
   const roots = [REPO_ROOT, path.dirname(REPO_ROOT), path.dirname(path.dirname(REPO_ROOT))];
   return [...new Set(roots.map((root) => path.resolve(root)))];
+}
+
+// ---------------------------------------------------------------------------
+// 手动项目根（WP2787）：工具级配置持久化 + 与自动发现合并
+// ---------------------------------------------------------------------------
+
+const DEFAULT_PROJECTS_CONFIG_PATH = path.join(os.homedir(), '.argo', 'ea-tool', 'projects.json');
+const PROJECTS_CONFIG_VERSION = 1;
+
+/** 配置文件路径解析：显式选项 > EA_PROJECTS_CONFIG 环境变量 > 默认 ~/.argo/ea-tool/projects.json。 */
+function resolveProjectsConfigPath(explicitPath) {
+  if (explicitPath) {
+    return path.resolve(explicitPath);
+  }
+  if (process.env.EA_PROJECTS_CONFIG) {
+    return path.resolve(process.env.EA_PROJECTS_CONFIG);
+  }
+  return DEFAULT_PROJECTS_CONFIG_PATH;
+}
+
+/** 读取手动根配置；文件不存在/损坏时返回空集（不阻断服务启动）。 */
+function loadManualRoots(configPath) {
+  try {
+    const doc = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    if (doc && Array.isArray(doc.roots)) {
+      return [...new Set(
+        doc.roots
+          .filter((root) => typeof root === 'string' && root.trim() !== '')
+          .map((root) => path.resolve(root)),
+      )];
+    }
+  } catch {
+    /* 无配置或损坏：按空集处理 */
+  }
+  return [];
+}
+
+/** 原子写手动根配置（{version, roots}）。 */
+function saveManualRoots(configPath, roots) {
+  fs.mkdirSync(path.dirname(configPath), { recursive: true });
+  const tempPath = `${configPath}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(tempPath, JSON.stringify({ version: PROJECTS_CONFIG_VERSION, roots }, null, 2), 'utf8');
+  fs.renameSync(tempPath, configPath);
 }
 
 function projectIdForGraphPath(graphPath) {
@@ -828,6 +872,9 @@ function createService(options = {}) {
   // 默认落在各项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json；
   // layoutRoot 选项 / EA_LAYOUT_ROOT 环境变量可显式覆盖为集中存储根。
   const layoutStore = options.layoutStore || createLayoutStore({ layoutRoot: options.layoutRoot });
+  // 手动项目根（WP2787）：启动时加载持久化配置，服务重启后自动恢复。
+  const projectsConfigPath = resolveProjectsConfigPath(options.projectsConfigPath);
+  let manualRoots = loadManualRoots(projectsConfigPath);
 
   const state = {
     projects: new Map(),
@@ -838,8 +885,74 @@ function createService(options = {}) {
 
   function refreshProjects() {
     const projects = discoverProjects(searchRoots);
+    // 合并手动根：按解析后 graphPath 去重；手动根在扫描范围外也能显示；
+    // marker 已不存在的手动根暂不列入（保留配置，可经 API 移除）。
+    const seenPaths = new Set(projects.map((project) => project.graphPath));
+    for (const root of manualRoots) {
+      const graphPath = path.join(root, ...GRAPH_MARKER);
+      if (seenPaths.has(graphPath) || !fs.existsSync(graphPath)) {
+        continue;
+      }
+      seenPaths.add(graphPath);
+      projects.push({
+        id: projectIdForGraphPath(graphPath),
+        name: path.basename(root),
+        root,
+        graphPath,
+      });
+    }
+    projects.sort((a, b) => a.name.localeCompare(b.name));
     state.projects = new Map(projects.map((project) => [project.id, project]));
     return projects;
+  }
+
+  function findProjectByRoot(resolvedRoot) {
+    for (const project of state.projects.values()) {
+      if (project.root === resolvedRoot) {
+        return project;
+      }
+    }
+    return null;
+  }
+
+  function addManualRoot(rawRoot) {
+    if (typeof rawRoot !== 'string' || rawRoot.trim() === '') {
+      throw new HttpError(400, 'root 必须是非空字符串（项目根目录绝对路径）');
+    }
+    const resolved = path.resolve(rawRoot.trim());
+    let isDirectory = false;
+    try {
+      isDirectory = fs.statSync(resolved).isDirectory();
+    } catch {
+      throw new HttpError(400, `目录不存在：${resolved}`);
+    }
+    if (!isDirectory) {
+      throw new HttpError(400, `不是一个目录：${resolved}`);
+    }
+    if (!fs.existsSync(path.join(resolved, ...GRAPH_MARKER))) {
+      throw new HttpError(400, `目录不包含图谱标记 ${GRAPH_MARKER.join('/')}：${resolved}`);
+    }
+    if (manualRoots.includes(resolved)) {
+      throw new HttpError(409, `该项目根已添加：${resolved}`);
+    }
+    manualRoots = [...manualRoots, resolved];
+    saveManualRoots(projectsConfigPath, manualRoots);
+    refreshProjects();
+    return findProjectByRoot(resolved);
+  }
+
+  function removeManualRoot(rawRoot) {
+    if (typeof rawRoot !== 'string' || rawRoot.trim() === '') {
+      throw new HttpError(400, 'root 必须是非空字符串（项目根目录绝对路径）');
+    }
+    const resolved = path.resolve(rawRoot.trim());
+    if (!manualRoots.includes(resolved)) {
+      throw new HttpError(404, `不是手动添加的项目根（自动发现的项目不可移除）：${resolved}`);
+    }
+    manualRoots = manualRoots.filter((root) => root !== resolved);
+    saveManualRoots(projectsConfigPath, manualRoots);
+    refreshProjects();
+    return resolved;
   }
 
   function getProject(id) {
@@ -1032,6 +1145,27 @@ function createService(options = {}) {
         refreshProjects();
         const projects = [...state.projects.values()].map(computeStatus);
         return sendJson(res, 200, { projects });
+      }
+
+      // 手动项目根（WP2787，加法端点）：添加/移除/列出手动根，仅影响发现范围，不触碰写路径。
+      if (pathname === '/api/roots') {
+        if (req.method === 'GET') {
+          return sendJson(res, 200, { roots: [...manualRoots] });
+        }
+        if (req.method === 'POST') {
+          const body = await readJsonBody(req, MAX_BODY_BYTES);
+          const project = addManualRoot(body && body.root);
+          if (!project) {
+            throw new HttpError(500, 'internal error: 添加后未找到项目');
+          }
+          return sendJson(res, 200, { ok: true, root: project.root, project: computeStatus(project) });
+        }
+        if (req.method === 'DELETE') {
+          const body = await readJsonBody(req, MAX_BODY_BYTES);
+          const removed = removeManualRoot(body && body.root);
+          return sendJson(res, 200, { ok: true, root: removed, roots: [...manualRoots] });
+        }
+        throw new HttpError(405, `method not allowed: ${req.method}`);
       }
 
       const m = pathname.match(/^\/api\/projects\/([A-Za-z0-9]+)(\/.*)?$/);
@@ -1233,6 +1367,9 @@ function createService(options = {}) {
     importProject,
     mcpAdapter,
     layoutStore,
+    projectsConfigPath,
+    addManualRoot,
+    removeManualRoot,
     state,
   };
 }
@@ -1326,6 +1463,10 @@ module.exports = {
   REPO_ROOT,
   HttpError,
   defaultSearchRoots,
+  DEFAULT_PROJECTS_CONFIG_PATH,
+  resolveProjectsConfigPath,
+  loadManualRoots,
+  saveManualRoots,
   discoverProjects,
   computeStatus,
   validateGraphDocument,

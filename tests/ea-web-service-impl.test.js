@@ -151,7 +151,7 @@ test('导入校验：合法 JSON 通过并替换文件', async () => {
   // WHEN 执行 importProject
   // THEN 文件被替换为导入内容
   const { tmp, graphPath } = makeFixture();
-  const service = createService({ searchRoots: [tmp] });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json') });
   service.refreshProjects();
   const project = [...service.state.projects.values()][0];
   const imported = miniGraph();
@@ -168,7 +168,7 @@ test('导入校验：非法 JSON 不改动文件', async () => {
   // THEN 抛出可读错误且文件内容不变
   const { tmp, graphPath } = makeFixture();
   const before = fs.readFileSync(graphPath, 'utf8');
-  const service = createService({ searchRoots: [tmp] });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json') });
   service.refreshProjects();
   const project = [...service.state.projects.values()][0];
   await assert.rejects(
@@ -184,7 +184,7 @@ test('导入校验：缺少根字段不改动文件', async () => {
   // THEN 抛出校验错误且文件内容不变
   const { tmp, graphPath } = makeFixture();
   const before = fs.readFileSync(graphPath, 'utf8');
-  const service = createService({ searchRoots: [tmp] });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json') });
   service.refreshProjects();
   const project = [...service.state.projects.values()][0];
   const bad = { name: 'x', description: 'y', relationships: [], views: [] };
@@ -201,7 +201,7 @@ test('导入校验：引用断裂（source_id 不存在）不改动文件', asyn
   // THEN 抛出引用完整性错误且文件内容不变
   const { tmp, graphPath } = makeFixture();
   const before = fs.readFileSync(graphPath, 'utf8');
-  const service = createService({ searchRoots: [tmp] });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json') });
   service.refreshProjects();
   const project = [...service.state.projects.values()][0];
   const bad = miniGraph();
@@ -219,7 +219,7 @@ test('导入校验：超大文件被拒绝且不改动文件', async () => {
   // THEN 抛出 413 且文件内容不变
   const { tmp, graphPath } = makeFixture();
   const before = fs.readFileSync(graphPath, 'utf8');
-  const service = createService({ searchRoots: [tmp] });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json') });
   service.refreshProjects();
   const project = [...service.state.projects.values()][0];
   const huge = 'a'.repeat(MAX_IMPORT_BYTES + 1);
@@ -279,7 +279,7 @@ test('撤销/重做：addElement 后 undo 回退、redo 前进（真实文件状
   // WHEN 执行 addElement → undo → redo
   // THEN 文件分别出现/消失/再出现该元素
   const { tmp, graphPath } = makeFixture();
-  const service = createService({ searchRoots: [tmp], mcpAdapter: createFakeAdapter() });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json'), mcpAdapter: createFakeAdapter() });
   service.refreshProjects();
   const project = [...service.state.projects.values()][0];
 
@@ -328,7 +328,7 @@ test('服务启动冒烟：临时端口启动，GET /api/projects 与 /export �
   // THEN 返回 200，项目被列出，导出内容与文件一致且无 BOM
   const graph = miniGraph();
   const { tmp, graphPath } = makeFixture({ graph });
-  const service = createService({ searchRoots: [tmp], port: 0 });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json'), port: 0 });
   const { port } = await service.start();
 
   try {
@@ -354,7 +354,7 @@ test('导入校验：视图 parent_element_id 引用断裂不改动文件', asyn
   // THEN 抛出引用完整性错误且文件内容不变
   const { tmp, graphPath } = makeFixture();
   const before = fs.readFileSync(graphPath, 'utf8');
-  const service = createService({ searchRoots: [tmp] });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json') });
   service.refreshProjects();
   const project = [...service.state.projects.values()][0];
   const bad = miniGraph();
@@ -410,7 +410,7 @@ test('撤销/重做：applyMutation 快照回退（真实文件状态）', async
       return { ok: false, error: { message: `unsupported ${toolName}` } };
     },
   };
-  const service = createService({ searchRoots: [tmp], mcpAdapter: adapter });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json'), mcpAdapter: adapter });
   service.refreshProjects();
   const project = [...service.state.projects.values()][0];
 
@@ -431,7 +431,7 @@ test('服务端点：POST /select 与 GET /context 可用', async () => {
   // WHEN 请求 POST /select 与 GET /context/:elementId
   // THEN /select 返回 200；/context 在 fake 适配器下返回 502（getIntentElementContext 不可用）
   const { tmp } = makeFixture();
-  const service = createService({ searchRoots: [tmp], port: 0, mcpAdapter: createFakeAdapter() });
+  const service = createService({ searchRoots: [tmp], projectsConfigPath: path.join(tmp, 'projects.json'), port: 0, mcpAdapter: createFakeAdapter() });
   const { port } = await service.start();
   try {
     const projectsRes = await fetch(`http://127.0.0.1:${port}/api/projects`);
