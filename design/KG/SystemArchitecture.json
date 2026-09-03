@@ -4847,6 +4847,11 @@
           "name": "commit",
           "value": "2c6cd8a",
           "description": "web/vendor/maxgraph/**（maxgraph.js 420KB ESM bundle @maxgraph/core@0.24.0 + css + LICENSE/NOTICE Apache-2.0）; web/app.js; web/index.html; tests/ea-web-maxgraph.test.js; tests/ea-web-browser.test.js（重写）; tests/ea-web-deploy.test.js；删除 web/vendor/excalidraw/ + tests/ea-web-service-excalidraw.test.js（S1B：MaxGraph 内核替换 Excalidraw，包体 18.0→2.3MB；样式对象语法/正交路由/禁编辑/MOVE_CELLS 拖拽落侧车）"
+        },
+        {
+          "name": "commit",
+          "value": "7198da8",
+          "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json; design/KG/ea-layouts/*（S1B 交付登记 + 侧车正式资产）"
         }
       ],
       "description": "M2 编辑器外壳与画布内核（全区域自适应）。内核沿革与决策链：M1 用 G6 v5 → 人类反馈界面成熟度低提议 tldraw → 一手核实 tldraw license 禁无授权生产分发而否 → 人类选 Excalidraw（MIT，S1 交付 c473140/05641c0）→ **人类体验后判定手绘白板风格不适合严肃架构设计 → 改选 MaxGraph（Apache-2.0，draw.io 引擎后继，结构化 cell/样式/正交路由）**（本切片，记为 S1B）。侧车坐标、/api 写路径（经 ARGO MCP）、三栏外壳设计与内核解耦，换内核只动 web/ 画布层。切片：S1B MaxGraph 内核接入：一次性 esbuild bundle vendored（web/vendor/maxgraph/，打包后删除 web/vendor/excalidraw/），视图成员→顶点（层着色+name/type 标签），关系→边（箭头+类型标签，正交路由），画布随窗口自适应，布局坐标仍走侧车（成员身份签名语义不变）；Excalidraw 相关测试/资产退役。S2 三栏外壳：左模型树/中画布/右属性面板，CSS grid/flex+视口单位全区域自适应，窄屏降级。S3 画布操作向导化→ARGO MCP（替代手填 JSON）。S4 收口。红线：写图 100% 经 ARGO MCP；argo/** 零改动；图谱 JSON 无坐标字段。",
