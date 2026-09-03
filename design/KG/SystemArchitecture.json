@@ -4413,6 +4413,11 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-03"
+        },
+        {
+          "name": "commit",
+          "value": "411f940",
+          "description": "design/KG/SystemArchitecture.json（洞察Lead T1/T2 记忆视图创建 + EA类工具共享前端洞察里程碑）"
         }
       ]
     },
@@ -4429,6 +4434,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "411f940",
+          "description": "design/KG/SystemArchitecture.json（洞察Lead T1/T2 记忆视图创建 + EA类工具共享前端洞察里程碑）"
         }
       ]
     }
