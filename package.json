@@ -41,7 +41,8 @@
     "neo4j-driver": "^6.2.0"
   },
   "devDependencies": {
-    "@resvg/resvg-js": "^2.6.2"
+    "@resvg/resvg-js": "^2.6.2",
+    "playwright": "1.61.1"
   },
   "scripts": {
     "test": "node --test \"tests/*.test.js\""
