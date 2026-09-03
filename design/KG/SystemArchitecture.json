@@ -4428,7 +4428,7 @@
       "id": "insight-lead-wm-summary-001",
       "name": "洞察Lead工作记忆摘要",
       "type": "Business Object",
-      "description": "洞察Lead T1 工作记忆摘要（2026-09-03 会话）：1) 身份：业界技术洞察团队编排者（insight-lead-001），麦肯锡五步法统筹。2) 本次任务（委派：project-overseer-001）：洞察『EA类工具作 AGENT×人类共享可视化前端——Agent 经 ARGO MCP 写图须同时反映到工具；人类在工具上的编辑同样经 ARGO MCP（preview→validate→apply）落图，确保规范不破』，交付可执行方案报告。3) 核心结论：现成 EA/建模工具（Sparx EA、Archi、draw.io、Structurizr、Neo4j Bloom、SAP LeanIX 等云 EA）均以自有模型文件/云 meta-model 为事实源，只支持『导出→导入』批处理或自有 schema，无法承担逐 UI 操作经外部 schema(ARGO) 强约束的实时写入；推荐=以既有本地 Web 服务（scripts/ea-web-service.js + web/，WP2758/2760）为基底升级为图形化 EA 工具：写路径已 100% 经进程内 ARGO MCP callTool（EDIT_OP_TOOL_MAP 一一映射，与 Agent 同一份代码）；读路径 fs.watch+轮询已实现（AD-e）；缺口=图形化直接编辑（G6 v5 内核，接 2758 TODO R-2）、拖放/位置持久化、表单化编辑向导、Agent 外部变更时的并发感知刷新、commit 登记联动。4) 关键决策：①图形内核 AntV G6 v5（MIT，零构建，延续 AD-c/AD-g 与已 vendored 计划）；②编辑动作一律映射 ARGO 变更原语/applyMutation 原子批量 + preview 前置失败展示；③导入整体替换保持受控例外（AD-a）；④不引入 OT/CRDT（本地单用户场景过重，业界仅多人实时才需）；⑤既有 eatool/Sparx EA 保留为离线批量建模可选通道，不作为实时共享前端。5) 交付：完整报告作为最后消息交人类伙伴；报告/图谱落盘由委派方后续处理。6) 经验：业界无『受外部 schema 强约束的现成 EA』，正解是把约束端（ARGO MCP + schema + validate）当核心，可视化工具只是前端；人机共享前端成败在写路径是否与 Agent 同构。",
+      "description": "洞察Lead T1 工作记忆摘要（2026-09-03 跟进评估会话）：1) 上轮任务=EA类工具共享前端洞察（报告→LTM milestone insight-lead-milestone-ea-tool-frontend-001；结论已落地 M1：web/vendor/g6.min.js 接入、布局侧车 design/KG/ea-layouts/ GET/PUT /views/:id/layout、archgraph-argo@0.11.0 + argo-deploy 后台启动）。2) 本轮（只评估不实施）=人类反馈『界面成熟度太低，建议移植 Draw.io/mxGraph/MaxGraph』，四路线对比。3) 结论：mxGraph 已归档停维（2020-11，官方不建议新项目用）；MaxGraph 活跃但明确不支持页面直接引用、需 bundler，违反零构建约束；drawio 活跃(Apache-2.0)但为完整应用需自托管 build，embed 模式官方 JSON 协议已有 diffSync/checksum/patch/merge + export json（新证据，部分翻案上轮 AD-c『无绑定机制』否决理由），但 patch 是文档级 cell 变更、模型语义映射仍需自研，且『自由图形 vs ArchiMate 模型约束』核心矛盾未变；G6 v5(12.3k★ MIT 活跃)对照路线维持。4) 推荐=维持 G6 v5 + M2 交互壳成熟化（借鉴 drawio/Archi 的右侧 format 面板/模型树+形状库/对齐吸附/右键菜单/缩略图）；不移植 drawio；触发重估条件=多人实时协作或接受构建链。5) 经验：界面成熟度痛点的根因=纯图内核没有编辑器外壳，解法是投资交互壳而非换内核；移植成熟编辑器=约束翻译层+外壳整体重做，成本数倍且大量自由绘图能力被约束闲置。6) 交付：决策报告作为最后消息；记忆已更新（T2 milestone drawio-eval-001）；未实施代码、未立项。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4702,6 +4702,22 @@
         }
       ],
       "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "里程碑（2026-09-03 跟进评估，人类反馈『界面成熟度太低，建议移植 Draw.io/mxGraph/MaxGraph』）：四路线对比评估，只评估不实施。结论：①mxGraph=jgraph/mxgraph 已 archived（2020-11-09 官方停维，README 明言不建议新项目基于它）；②MaxGraph=活跃后继（pushed 2026-09-02，Apache-2.0，TS，1.1k★），但 README 明确『Direct usage in a web page is not supported』需 bundler/npm→违反本项目零构建约束；③drawio=活跃（pushed 2026-09-01，Apache-2.0，7.9k★）完整编辑器应用，自托管需 build/docker，非零构建；embed 模式官方 JSON 协议新增 diffSync（checksum/patch(i/u/r)/merge/resetDiff）+ export json（node/edge/layer+metadata 结构化）——系上轮 AD-c 否决时不存在的新能力，部分翻案『无绑定机制』理由，但 patch 为 drawio 文档级 cell 变更非 ArchiMate 模型级 op，模型语义映射层仍需自研，且 embed 官方仅保障 embed.diagrams.net；④G6 v5（antvis/G6 12.3k★，MIT，活跃，default branch v5，支持 vendored 直接 script 引入）=对照路线维持。裁决：核心矛盾未变（drawio/mxGraph/MaxGraph 是『自由图形文档内核/应用』，本项目需要『ArchiMate 模型强约束编辑』，所有图编辑都须经 ARGO MCP preview→apply）；界面成熟度痛点根因是缺编辑器外壳（右侧 format 面板/形状与模型树/对齐吸附/右键菜单/缩略图），换内核或移植 drawio=约束翻译层+外壳全部重做。推荐=维持 G6 v5 内核 + 按 M2 投入交互壳成熟化（借鉴 drawio/Archi 交互模式），不移植 drawio；触发重新评估条件：转向多人实时协作 或 接受 npm/React 构建链。证据=GitHub API/README 一手元数据 + drawio embed-mode 官方文档；本会话无 BAILIAN MCP，webfetch 检索并如实标注。",
+      "id": "insight-lead-milestone-drawio-eval-001",
+      "name": "里程碑：跟进评估 drawio移植 vs G6成熟化",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -6575,7 +6591,8 @@
       "parent_element_id": "insight-lead-001",
       "description": "洞察Lead T2 长期记忆（父视图：洞察Lead）",
       "included_elements": [
-        "insight-lead-milestone-ea-tool-frontend-001"
+        "insight-lead-milestone-ea-tool-frontend-001",
+        "insight-lead-milestone-drawio-eval-001"
       ],
       "included_relationships": []
     }
