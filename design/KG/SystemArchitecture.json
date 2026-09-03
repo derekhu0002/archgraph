@@ -4476,6 +4476,11 @@
           "name": "commit",
           "value": "ba72e30",
           "description": "design/KG/SystemArchitecture.json（跟进评估里程碑 + T1 摘要登记）"
+        },
+        {
+          "name": "commit",
+          "value": "36e7e26",
+          "description": "design/KG/SystemArchitecture.json（AGENT→EA 方案设计里程碑 + T1 摘要）"
         }
       ]
     },
@@ -4884,6 +4889,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "36e7e26",
+          "description": "design/KG/SystemArchitecture.json（AGENT→EA 方案设计里程碑 + T1 摘要）"
         }
       ],
       "description": "里程碑（2026-09-03，人类拍板方向：EA=Sparx 为人类设计界面，AGENT→EA 单向实时同步，位置安全，.feap+EA桌面运行时）。聚焦方案设计（只设计不实施）：①访问通道裁决=主通道 EA 内置 JScript 执行器消费外部命令队列（全部操作在 EA 进程内，天然规避 .feap 独占锁、复用既有 eatool Repository API 用法）；外部 COM(EA.App/GetObject)仅作 EA 未占用时的可选自动增强；EA Server 否决（单机过重）。②差异引擎=观察进程 fs.watch+轮询(复用 ea-web-service 模式)读 canonical JSON→规范化快照 diff→写 design/KG/ea-sync-state/command-queue.jsonl(JSONL, seq 递增)+checkpoint+error log；EA 侧定位复用 import-from-kg 已写的 tag(schema_id/archimate_type/Alias)→查 tag 定位，GUID 映射表非必需。③位置安全=EA DiagramObject 位置与 Element 定义分离（仓库 addElementToDiagram 实证 geometry 独立）；更新=字段级 patch 绝不删建；新增元素进图策略推荐=view 成员差量补空白区(包围盒外)否则仅入模型树；删除=先关系后元素、tag 存在才删。④字段权属=KG 权威字段(name/type/description/attributes/included 成员) vs EA 侧自由(DiagramObject 几何/手绘元素/非 schema_ 前缀 tag)。⑤对象映射=复用 mapElementTypeToEa/mapRelationshipTypeToEa(Direction 修复 00d831d)/ensure 挂载/网格占位函数，不复用 main 的『时间戳新包全量导入』；改为固定同步根包+增量。切片 S1 add/update 闭环→S2 delete+视图差量+错误日志→S3 GUID 缓存/Addin 自动。证据：Sparx 官网 403 反爬无法直取，EA 平台行为以仓库产线脚本为准，列 3 项本地复核点（同 .feap 双实例行为、EA.App COM 行为、DiagramObject 位置独立性）供立项前验证。",
