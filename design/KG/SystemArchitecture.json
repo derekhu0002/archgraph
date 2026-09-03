@@ -4670,6 +4670,11 @@
           "name": "commit",
           "value": "dd9f359",
           "description": "design/KG/SystemArchitecture.json（方向转折登记：2786 SUPERSEDED + 2788 FROZEN）"
+        },
+        {
+          "name": "commit",
+          "value": "aac9b7f",
+          "description": "package.json; install-argo.ps1; tests/argo-deploy.test.js; tests/argo-openclaw.test.js; tests/ea-web-deploy.test.js（删除）——移除打包 Web 三条目 + [23/23] 后台启动步与三参数（步骤 23→22）；包体 2.3→2.1MB，registry 待下次发布生效；仓库内 Web 保留可本地运行"
         }
       ],
       "description": "将 EA 本地 Web 服务（2760）打包进 archgraph-argo npm 部署包，并随 argo-deploy（install-argo.ps1）安装后启动后台服务：① package.json files 增加 scripts/ea-web-service.js、scripts/ea-layout-store.js、web/**（含 vendor/g6.min.js）；② install-argo.ps1 新增部署步：服务脚本复制到 <ArgoRoot>/scripts/、web 静态资源到 <ArgoRoot>/web/（与 harness 脚本同目录，REPO_ROOT 相对关系不变），随后后台启动 node <ArgoRoot>/scripts/ea-web-service.js --root <EaWebRoot> --port <EaWebPort>（Start-Process 隐藏窗口 + 日志 <ArgoRoot>/ea-web-service.log）；端口已监听则跳过启动，保证重复部署幂等；③ 参数：-SkipEaWeb 禁用、-EaWebPort（默认 8787）、-EaWebRoot（默认 $PWD，即 argo-deploy 执行处）；既有宿主部署测试（argo-deploy/argo-openclaw）以 -SkipEaWeb 保持隔离。约束：argo/** 零改动；scripts/ea-web-service.js 预期不改；既有部署断言基线不退化；不 bump 版本、不发布（发布由人类伙伴决定）。",
