@@ -4481,6 +4481,11 @@
           "name": "commit",
           "value": "36e7e26",
           "description": "design/KG/SystemArchitecture.json（AGENT→EA 方案设计里程碑 + T1 摘要）"
+        },
+        {
+          "name": "commit",
+          "value": "d358357",
+          "description": "design/KG/SystemArchitecture.json（MCP 主通道修订里程碑 + T1 摘要）"
         }
       ]
     },
@@ -4920,6 +4925,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "d358357",
+          "description": "design/KG/SystemArchitecture.json（MCP 主通道修订里程碑 + T1 摘要）"
         }
       ],
       "description": "里程碑（2026-09-03，方案修订：能否主动经 EA 官方 MCP 同步）：结论=能。Sparx Systems Japan MCP Server for EA v3.0.0（2026-09-02 发布，免费可商用；STDIO MCP3.exe + EA 进程内 add-in MCP_EA.dll→天然规避 .feap 锁，与原设计 b) 通道同构但官方化）。推荐形态=混合 c)：主=同步驱动器（保留观察进程+diff+命令队列，Node 以 STDIO MCP client 驱动 MCP3.exe -enableEdit 确定性应用差异——复用 scripts/ea-web-service.js callStdio 现成客户端模式 L594-649，不经 LLM 无漂移）；AGENT 直驱=可选实验通道（需 agent 规则纪律）。取舍：命令队列/checkpoint 保留（幂等+断点）；JScript 执行器降级为无 MCP 环境兜底；审计双轨=-modifiedInfoPath CSV(EA 侧实际变更) + 侧车账本(意图/重放)。定位适配无 GUID：官方按名称自然定位；策略=同步根包路径限定+find_elements_by_name 精确匹配+create/update 返回 EA ID 写入侧车映射账本(KG id↔EA id+名称+包路径)；schema_id tag 仍写入作回查锚点但无按 tag 查询工具；ArchiMate 类型字符串须对接 EA Automation 接口（官方仅 SysML/UML/BPMN + v2.3.10 起 ArchiMate 3.1 limited prompt，3.2 需自建扩展，可复用 import-from-kg mapElementTypeToEa）。位置安全：官方 v2.3.4 已把 layout_diagram 改名 reset_diagram 防 LLM 破坏布局；place_elements_on_diagram 2.4.4 起可更新已有元素位置→只用于新增补位、绝不改已有元素、禁用 layout/reset 工具；create_or_update_elements 是否动几何需实测。删除：-enableDelete 官方警告曾误删整个包→只删账本确认目标+删除前 create_baseline(官方工具)。本机探测(2026-09-03)：EA=15.2 Trial x86(Program Files (x86)\\Sparx Systems\\EA Trial)，MCP Server 2.8.2 x64 装进无 EA 的 Program Files\\Sparx Systems\\EA → bitness/目录错配，MCP_EA.log 现 80070005 访问被拒+管道中断；.NET Desktop Runtime 仅 8.0.6/9.0.17，v3.0.0 需 10.0→升级前须装；MCP_Server 目录证实 MCP3.exe+deps+ModelContextProtocol.dll+MCP_EA.dll 架构。切片：R-S1 环境对齐+只读连通验证→R-S2 add/update diff 应用+ID 账本+审计→R-S3 delete+baseline+视图差量补位；决策点新增 D7 环境修复(授权版 vs Trial、bitness、.NET10)、D8 升级 3.0.0 或先用 2.8.2(.NET9 已满足、已含 ArchiMate3.1 prompt/delete/审计)。",
