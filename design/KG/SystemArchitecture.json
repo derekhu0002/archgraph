@@ -4675,6 +4675,28 @@
       "id": "overseer-wp2786-deploy-milestone-001",
       "name": "里程碑：WP2786 EA Web 服务纳入 npm 部署包并随 argo-deploy 后台启动",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "WEB 手动选择项目根目录与切换：ArchGraph 本地 Web 服务（2760）目前仅自动发现 --root/-EaWebRoot 扫描范围（默认 REPO_ROOT+父级+祖父级）内的项目，无法选择范围外的本地项目。本 WP 新增：① UI/项目栏：「添加项目」入口（手动指定本地目录），服务校验该目录含 design/KG/SystemArchitecture.json（marker）后才加入，否则明确报错；手动添加的 root 持久化到工具级配置（默认 ~/.argo/ea-tool/projects.json，可经 createService 选项/环境变量覆盖供测试），服务重启后自动恢复，支持移除；② 项目间切换（既有列表选择）保持可用，视图/状态/布局侧车随切换；③ API 加法（如 POST/DELETE /api/roots），既有端点契约与测试基线不退化。约束：argo/** 零改动；写图红线不变（手动添加只改变发现范围，不改变写路径）；部署形态（~/.argo）与仓库开发形态行为一致。",
+      "id": "2787",
+      "name": "WEB手动选择项目根目录与切换",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/ea-web-service-roots.test.js",
+          "acceptanceCriteria": "tests/ea-web-service-roots.test.js",
+          "description": "GIVEN 本地 Web 服务运行（临时环境，显式工具配置路径）；WHEN 经 API 添加含 design/KG/SystemArchitecture.json 的本地目录；THEN /api/projects 列出新项目且可选中正常查看视图与布局，添加的 root 持久化且服务重启后仍在，可经 API 移除；WHEN 添加不含 marker 的目录；THEN 明确报错且不加入。",
+          "name": "AT-2787-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -5667,6 +5689,16 @@
       "target_id": "2760",
       "target_name": "ArchGraph 本地 Web 服务",
       "type": "Realization"
+    },
+    {
+      "id": "2787-realizes-2760",
+      "name": "Realization",
+      "source_id": "2787",
+      "source_name": "WEB手动选择项目根目录与切换",
+      "statement": "WEB手动选择项目根目录与切换 --(Realization)--> ArchGraph 本地 Web 服务",
+      "target_id": "2760",
+      "target_name": "ArchGraph 本地 Web 服务",
+      "type": "Realization"
     }
   ],
   "views": [
@@ -5736,7 +5768,8 @@
         "2766",
         "subgraph-semantic-retrieval-001",
         "2785",
-        "2786"
+        "2786",
+        "2787"
       ],
       "included_relationships": [
         "1980",
@@ -5747,7 +5780,8 @@
         "1985",
         "1986",
         "2785-realizes-2760",
-        "2786-realizes-2760"
+        "2786-realizes-2760",
+        "2787-realizes-2760"
       ]
     },
     {
