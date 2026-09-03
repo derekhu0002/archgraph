@@ -4946,15 +4946,20 @@
         },
         {
           "name": "status",
-          "value": "ACTIVE"
+          "value": "BLOCKED_ON_HUMAN"
         },
         {
           "name": "commit",
           "value": "0d905fb",
           "description": "design/KG/SystemArchitecture.json（立项：WP2789 + AT-2789-R1-01/02 + D7/D8 决策）"
+        },
+        {
+          "name": "commit",
+          "value": "94a8862",
+          "description": "scripts/ea-sync-driver.js; tests/ea-sync-r1.test.js（驱动器只读骨架 env/tools/read/probe-edit + 退出码分级 + AT-2789-R1-01/02 skip 降级）——环境探测结论：位宽已对齐（x86 add-in 2.8.2 已在 EA Trial 目录，x64 MCP3.exe 进程外服务正确）；add-in 可加载但管道已死（80070005→管道中断），需人类在 EA 内重开项目重建管道；D9 已定：create_or_update_elements 受 elementID（0=新建/现有=更新），geometry 仅 place_elements_on_diagram 触碰；驱动器硬编码不传 -enableDelete；scratch 副本就绪（%TEMP%/ea-scratch/）；MCP_EA.ini 全量日志已开"
         }
       ],
-      "description": "EA 同步桥 R-S1（修订方案首切片，先决环境片）：① 环境对齐——本机 EA=Trial 15.2 x86（Program Files (x86)\\Sparx Systems\\EA Trial），已装 MCP Server 2.8.2 为 x64 且装入无 EA 本体目录（位宽/目录错配，MCP_EA.log 已有 80070005/管道中断）：需卸载错配件、把匹配 x86 的 MCP add-in 装入 EA Trial 目录；优先复用 2.8.2 二进制（D8），若官网 x86 MSI 仅 3.0.0（需 .NET Desktop Runtime 10）则如实报告并给出选项（装 .NET 10+3.0.0 或寻找 2.8.2 x86）；② 同步驱动器只读骨架：新建 scripts/ea-sync-driver.js（Node STDIO MCP client，复用 scripts/ea-web-service.js createMcpAdapter/callStdio 模式）：spawn MCP3.exe → initialize/tools/list → 读工具冒烟；③ 连通验证（AC-01）与位置不变性实测（AC-02，-enableEdit 最小写探测：仅改 Notes 后 geometry 逐字节不变 + -modifiedInfoPath 审计 CSV 记录）。EA 实例：EA.exe 打开 scratch 项目（临时副本，禁用生产文件）。测试环境不可用时用例显式 skip 计通过。约束：不修改 argo/**；不触碰 archgraph.feap；MSI 安装需管理员权限时如实报告人工步骤不强装。",
+      "description": "EA 同步桥 R-S1（修订方案首切片，先决环境片）：① 环境对齐——本机 EA=Trial 15.2 x86，探测修正：位宽实际已对齐（x86 add-in 2.8.2 已在 EA Trial 目录，x64 MCP3.exe 为进程外 STDIO 服务，无需重装）；真实故障=EA 进程内 add-in 管道已死（80070005 访问拒绝→管道中断），需人类在 EA 内重开项目/重启 EA 重建管道（BLOCKED_ON_HUMAN）；② 同步驱动器只读骨架：scripts/ea-sync-driver.js（复用 callStdio：env/tools/read/probe-edit，退出码分级，安全门：无 --allow-scratch-write 拒写、目标必须在 scratch 根下、硬编码不传 -enableDelete）；③ D9 已定：create_or_update_elements 接受 elementID（0=create/现有=update），geometry 仅 place_elements_on_diagram 触碰——位置安全有 schema 级保障；④ tests/ea-sync-r1.test.js（AC-01 连通/AC-02 位置不变性，环境不可用显式 skip）。安全红线：绝不触碰 archgraph.feap；写探测仅在 %TEMP%/ea-scratch/ 副本（EA-model-template.feap）；MCP_EA.ini 全量日志已开。人类操作：EA 内 File→Close Project（当前就地开着仓库模板，有保存污染仓库风险）→ Open scratch 副本 → 打开任意图，然后跑 node --test tests/ea-sync-r1.test.js。",
       "id": "2789",
       "name": "EA同步桥 R-S1：环境对齐与 MCP 连通验证",
       "parent": "1249",
