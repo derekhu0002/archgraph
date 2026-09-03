@@ -3705,7 +3705,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要）\n- 身份：项目总管（ArchGraph overseer）；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin（DevelopmentTeam 430）。\n- 本会话完成：\n  1) **EA 类工具洞察**（洞察Lead 五步法，411f940/b33db60）：结论=现成 EA 产品均不满足双向一致+写必以 ARGO MCP，正解=升级既有 web/ 本地 Web 服务为画布式工具。\n  2) **路线+任务分解**：M0 收口 / M1 图形化内核 / M2 向导+并发感知 / M3 体验与决策。\n  3) **人类伙伴红线/决策**：坐标持久化且独立于图谱 JSON（侧车）；Agent 内容修改不扰动坐标（成员身份签名失效）；不得改既有 ARGO MCP 代码；侧车默认按项目存 <projectRoot>/design/KG/ea-layouts/；**侧车文件=正式项目资产，随项目 commit 共享，禁止 gitignore**（2785 decision 属性）。\n  4) **WP2785 交付**（21a52c0/3615700/80c2dfc）：G6 v5 画布 + ea-layout-store（GET/PUT layout 端点）+ 侧车按项目存储修订；顺带修 handle 未 await、stop 挂起 2 既有 bug。\n  5) **WP2786 交付**（417b0e5）：EA Web 服务纳入 npm 部署包（files +3 条）并随 argo-deploy 后台启动（install-argo.ps1 [23/23] 步，-SkipEaWeb/-EaWebPort/-EaWebRoot，WMI 零句柄继承拉起，端口探测幂等）；未 bump 版本未发布。\n- 验收：架构测试 35/37（2 既有失败：memory-eval-run-03、architecture-view-context-08），validate 通过，各轮 diff 白名单核验（argo/** 零改动）。LTM：wp2785/wp2786 里程碑已记；mem-eval、content-storage 归档 T3（LTM 15 上限）。\n- 可复用经验：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 前先看 status；b) Node 24 用 glob 跑 node --test；c) 侧车失效键=成员身份签名；d) LTM 满 15 先归档；e) **Windows 后台拉起禁用 Start-Process**（孙进程继承 stdio 管道句柄→spawnSync 调用方阻塞），用 WMI Win32_Process.Create；cmd 带重定向多引号需 /S+外层引号；f) npm publish 后 registry 同步有延迟。\n- 未完成/TODO：**npm publish 时机由人类伙伴定**（包内容已就绪，当前版本 0.10.52 未含本轮变更）；浏览器人工走查（本环境无浏览器）；M1-S3~S5 未启动；WP2758 todo 未清；archgraph.feap 外部改动在工作区未处理（勿提交）；既有 2 失败未修；Experience 层未实施。",
+      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要，最终版）\n- 身份：项目总管（ArchGraph overseer）；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin（DevelopmentTeam 430）。\n- 本会话完成：\n  1) **EA 类工具洞察**（洞察Lead 五步法，411f940/b33db60）：结论=现成 EA 产品均不满足双向一致+写必以 ARGO MCP，正解=升级既有 web/ 本地 Web 服务为画布式工具。\n  2) **路线+任务分解**：M0 收口 / M1 图形化内核 / M2 向导+并发感知 / M3 体验与决策。\n  3) **人类伙伴红线/决策**：坐标持久化且独立于图谱 JSON（侧车）；Agent 内容修改不扰动坐标（成员身份签名失效）；不得改既有 ARGO MCP 代码；侧车默认按项目存 <projectRoot>/design/KG/ea-layouts/；**侧车文件=正式项目资产，随项目 commit 共享，禁止 gitignore**（2785 decision 属性）。\n  4) **WP2785 交付**（21a52c0/3615700/80c2dfc）：G6 v5 画布 + ea-layout-store（GET/PUT layout 端点）+ 侧车按项目存储修订；顺带修 handle 未 await、stop 挂起 2 既有 bug。\n  5) **WP2786 交付**（417b0e5）：EA Web 服务纳入 npm 部署包并随 argo-deploy 后台启动（install-argo.ps1 [23/23] 步，-SkipEaWeb/-EaWebPort/-EaWebRoot，WMI 零句柄继承拉起，端口探测幂等）。\n  6) **发布**（28f0a0a）：archgraph-argo@0.11.0 已发布（71 文件 2.6MB，含 EA Web 服务全部新条目），registry latest 已同步验证。安装后 `argo-deploy` 自动后台起服务（默认 127.0.0.1:8787）。\n- 验收：架构测试 35/37（2 既有失败：memory-eval-run-03、architecture-view-context-08），validate 通过，各轮 diff 白名单核验（argo/** 零改动）。LTM：wp2785/wp2786 里程碑已记；mem-eval、content-storage 归档 T3（LTM 15 上限）。\n- 可复用经验：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 前先看 status；b) Node 24 用 glob 跑 node --test；c) 侧车失效键=成员身份签名；d) LTM 满 15 先归档；e) **Windows 后台拉起禁用 Start-Process**（孙进程继承 stdio 管道句柄→调用方阻塞），用 WMI Win32_Process.Create；cmd 带重定向多引号需 /S+外层引号；f) npm publish 后 registry 同步延迟 ~15s。\n- 未完成/TODO：浏览器人工走查（本环境无浏览器）；M1-S3~S5 未启动；WP2758 todo 未清；archgraph.feap 外部改动在工作区未处理（勿提交）；既有 2 失败未修；Experience 层未实施。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3727,8 +3727,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-03T16:30:00.000Z",
-          "description": "2026-09-03 会话摘要（EA 类工具洞察 + 路线分解 + WP2785 交付与侧车修订 + 侧车正式资产决策 + WP2786 部署包集成）"
+          "value": "2026-09-03T17:00:00.000Z",
+          "description": "2026-09-03 会话摘要（最终版：+ archgraph-argo@0.11.0 发布）"
         },
         {
           "name": "commit",
@@ -4621,6 +4621,11 @@
           "name": "commit",
           "value": "32dba85",
           "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（交付登记：417b0e5 + 1361 登记 + LTM/T1 + 测试记录 35/37）"
+        },
+        {
+          "name": "commit",
+          "value": "28f0a0a",
+          "description": "package.json（version bump 0.10.52→0.11.0）；npm publish archgraph-argo@0.11.0 成功（71 文件 2.6MB，含 scripts/ea-web-service.js、scripts/ea-layout-store.js、web/**、install-argo.ps1 [23/23] 步），registry latest 已同步"
         }
       ],
       "description": "将 EA 本地 Web 服务（2760）打包进 archgraph-argo npm 部署包，并随 argo-deploy（install-argo.ps1）安装后启动后台服务：① package.json files 增加 scripts/ea-web-service.js、scripts/ea-layout-store.js、web/**（含 vendor/g6.min.js）；② install-argo.ps1 新增部署步：服务脚本复制到 <ArgoRoot>/scripts/、web 静态资源到 <ArgoRoot>/web/（与 harness 脚本同目录，REPO_ROOT 相对关系不变），随后后台启动 node <ArgoRoot>/scripts/ea-web-service.js --root <EaWebRoot> --port <EaWebPort>（Start-Process 隐藏窗口 + 日志 <ArgoRoot>/ea-web-service.log）；端口已监听则跳过启动，保证重复部署幂等；③ 参数：-SkipEaWeb 禁用、-EaWebPort（默认 8787）、-EaWebRoot（默认 $PWD，即 argo-deploy 执行处）；既有宿主部署测试（argo-deploy/argo-openclaw）以 -SkipEaWeb 保持隔离。约束：argo/** 零改动；scripts/ea-web-service.js 预期不改；既有部署断言基线不退化；不 bump 版本、不发布（发布由人类伙伴决定）。",
