@@ -2,7 +2,7 @@
 
 // AT-2786-01 / AT-2786-02（WP2786）：EA 本地 Web 服务纳入 npm 部署包并随
 // install-argo.ps1（argo-deploy）后台启动。
-// AT-2786-01：npm pack --dry-run 产物清单含服务脚本与 web 静态资源（含 vendor G6）。
+// AT-2786-01：npm pack --dry-run 产物清单含服务脚本与 web 静态资源（含 vendor Excalidraw）。
 // AT-2786-02：临时宿主 + 植入项目工作区 → 部署文件落 ArgoRoot、后台服务发现植入项目、
 //              重复执行幂等（不重复拉起）、-SkipEaWeb 不启动后台进程；finally 清理进程。
 
@@ -158,7 +158,7 @@ function killPort(port) {
 test('AT-2786-01: npm pack --dry-run 清单包含服务脚本与 web 静态资源', () => {
   // GIVEN archgraph-argo 包定义（package.json files）
   // WHEN npm pack --dry-run
-  // THEN 产物清单含服务脚本与 web/（含 vendor/g6.min.js）
+  // THEN 产物清单含服务脚本与 web/（含 vendor/excalidraw/excalidraw.js）
   const result = spawnSync('npm.cmd', ['pack', '--dry-run', '--json'], {
     cwd: ROOT,
     encoding: 'utf8',
@@ -182,7 +182,7 @@ test('AT-2786-01: npm pack --dry-run 清单包含服务脚本与 web 静态资�
     'web/index.html',
     'web/app.js',
     'web/style.css',
-    'web/vendor/g6.min.js',
+    'web/vendor/excalidraw/excalidraw.js',
   ]) {
     assert.ok(files.includes(required), `产物清单应包含 ${required}`);
   }
@@ -204,7 +204,7 @@ test('AT-2786-02: 部署文件落 ArgoRoot、后台服务发现植入项目、�
     // ① 部署文件落位
     assert.ok(fs.existsSync(path.join(paths.argoRoot, 'scripts', 'ea-web-service.js')), 'ea-web-service.js 应部署');
     assert.ok(fs.existsSync(path.join(paths.argoRoot, 'scripts', 'ea-layout-store.js')), 'ea-layout-store.js 应部署');
-    for (const rel of ['index.html', 'app.js', 'style.css', path.join('vendor', 'g6.min.js')]) {
+    for (const rel of ['index.html', 'app.js', 'style.css', path.join('vendor', 'excalidraw', 'excalidraw.js')]) {
       assert.ok(fs.existsSync(path.join(paths.argoRoot, 'web', rel)), `web/${rel} 应部署`);
     }
 

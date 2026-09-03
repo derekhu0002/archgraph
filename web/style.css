@@ -264,11 +264,13 @@ label {
 }
 
 #graph-container {
-  width: 760px;
-  height: 520px;
+  width: 100%;
+  height: calc(100vh - 260px);
+  min-height: 420px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: #fafafa;
+  overflow: hidden;
 }
 
 .hint {
