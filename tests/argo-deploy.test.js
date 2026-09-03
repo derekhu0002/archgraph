@@ -35,6 +35,7 @@ function buildInstallArgs(opts) {
     '-McpPath', opts.mcpPath,
     '-CursorSkillsRoot', opts.cursorSkillsRoot,
     '-CursorMcpPath', opts.cursorMcpPath,
+    '-CursorMcpBridgesRoot', opts.cursorMcpBridgesRoot,
     '-CursorRulesRoot', opts.cursorRulesRoot,
     '-OpenCodeSkillsRoot', opts.openCodeSkillsRoot,
     '-OpenCodeAgentsPath', opts.openCodeAgentsPath,
@@ -60,6 +61,7 @@ function hostPaths(tmp) {
     mcpPath: path.join(tmp, 'vscode', 'mcp.json'),
     cursorSkillsRoot: path.join(tmp, '.cursor', 'skills'),
     cursorMcpPath: path.join(tmp, '.cursor', 'mcp.json'),
+    cursorMcpBridgesRoot: path.join(tmp, '.cursor', 'mcp-bridges'),
     openCodeSkillsRoot: path.join(tmp, '.config', 'opencode', 'skills'),
     openCodeAgentsPath: path.join(tmp, '.config', 'opencode', 'AGENTS.md'),
     openCodeConfigPath: path.join(tmp, '.config', 'opencode', 'opencode.json'),
@@ -87,7 +89,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
   const paths = hostPaths(tmp);
   const {
     argoRoot, skillsRoot, promptsRoot, mcpPath,
-    cursorSkillsRoot, cursorMcpPath,
+    cursorSkillsRoot, cursorMcpPath, cursorMcpBridgesRoot,
     openCodeSkillsRoot, openCodeAgentsPath, openCodeConfigPath,
     copilotAgentsRoot, cursorAgentsRoot, openCodeAgentsRoot,
     pluginsRoot, cursorRulesRoot,
@@ -118,6 +120,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     const npmManifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
     assert.ok(Array.isArray(npmManifest.files) && npmManifest.files.includes('argo/defaults'));
     assert.ok(npmManifest.files.includes('argo/agents'), 'npm package must ship the agents directory');
+    assert.ok(npmManifest.files.includes('argo/mcp-bridges'), 'npm package must ship the Cursor mcp-bridges');
 
     // temp stays in the repository, and no .env is written in non-interactive mode.
     assert.ok(!fs.existsSync(path.join(argoRoot, 'temp')), 'temp must not be deployed');
@@ -148,13 +151,23 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(cursorMcp.mcpServers.argo.args[0].endsWith('argo-mcp-server.js'));
     assert.ok(!cursorMcp.mcpServers.argo.cwd, 'Cursor cwd must be omitted; roots resolve the workspace');
     assert.ok(!cursorMcp.mcpServers.argo.env, 'Cursor env must be omitted; roots resolve the workspace');
-    // 7b) the default remote graph-mcp server is registered next to argo.
-    // Cursor mcp.json remote servers carry only {url}; official remote entries
-    // have no `type` field (type "stdio" is only for local command servers).
-    assert.ok(cursorMcp.mcpServers['graph-mcp'], 'graph-mcp remote must be registered by default in Cursor');
-    assert.equal(cursorMcp.mcpServers['graph-mcp'].url, 'https://argo.derekworkspacev5.com/mcp');
-    assert.equal(cursorMcp.mcpServers['graph-mcp'].type, undefined,
-      'Cursor remote servers must not carry a type field (type: remote is not supported)');
+    // 7b) graph-mcp is registered for Cursor as a local stdio bridge: Cursor
+    // dials remote url servers over SSE GET /mcp (404 on the Streamable HTTP
+    // endpoint), so the bridge forwards stdio JSON-RPC to the remote over POST.
+    assert.ok(cursorMcp.mcpServers['graph-mcp'], 'graph-mcp must be registered by default in Cursor');
+    assert.equal(cursorMcp.mcpServers['graph-mcp'].type, 'stdio', 'Cursor graph-mcp must run as a stdio bridge');
+    assert.equal(cursorMcp.mcpServers['graph-mcp'].command, 'node');
+    assert.ok(
+      cursorMcp.mcpServers['graph-mcp'].args[0].endsWith(path.join('mcp-bridges', 'graph-mcp-stdio.js').replace(/\\/g, '/')),
+      'Cursor graph-mcp must point at the stdio bridge script'
+    );
+    assert.equal(
+      cursorMcp.mcpServers['graph-mcp'].env && cursorMcp.mcpServers['graph-mcp'].env.GRAPH_MCP_URL,
+      'https://argo.derekworkspacev5.com/mcp',
+      'Cursor graph-mcp bridge must carry the remote URL env'
+    );
+    const bridgePath = path.join(cursorMcpBridgesRoot, 'graph-mcp-stdio.js');
+    assert.ok(fs.existsSync(bridgePath), 'Cursor mcp-bridges/graph-mcp-stdio.js must be deployed');
 
     // 7b) Cursor global rule: the full archgraph.instructions.md is converted to
     // a .mdc rule with alwaysApply so it is injected into every request.

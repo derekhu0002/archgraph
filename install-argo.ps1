@@ -5,6 +5,7 @@ param(
     [string]$PromptsRoot = "$env:APPDATA\Code\User\prompts",
     [string]$CursorSkillsRoot = "$env:USERPROFILE\.cursor\skills",
     [string]$CursorMcpPath = "$env:USERPROFILE\.cursor\mcp.json",
+    [string]$CursorMcpBridgesRoot = "$env:USERPROFILE\.cursor\mcp-bridges",
     [string]$OpenCodeSkillsRoot = "$env:USERPROFILE\.config\opencode\skills",
     [string]$OpenCodeAgentsPath = "$env:USERPROFILE\.config\opencode\AGENTS.md",
     [string]$OpenCodeConfigPath = "$env:USERPROFILE\.config\opencode\opencode.json",
@@ -769,6 +770,11 @@ $cursorSkillDest = Join-Path $CursorSkillsRoot 'argo-init'
 Write-Host "[7/22] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
 Copy-Tree -Source $skillSrc -Destination $cursorSkillDest
 
+$mcpBridgeSrc = Join-Path $argoDir 'mcp-bridges'
+$mcpBridgeDest = Join-Path $CursorMcpBridgesRoot ''
+Write-Host "  argo\mcp-bridges -> $mcpBridgeDest (Cursor graph-mcp stdio bridge)"
+Copy-Tree -Source $mcpBridgeSrc -Destination $mcpBridgeDest
+
 $openCodeSkillDest = Join-Path $OpenCodeSkillsRoot 'argo-init'
 Write-Host "[8/22] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
 Copy-Tree -Source $skillSrc -Destination $openCodeSkillDest
@@ -973,9 +979,10 @@ if ($SkipMcp) {
     # graph-mcp is a Streamable HTTP remote MCP endpoint. Its config shape is
     # HOST-SPECIFIC (each host's mcp.json schema is different):
     #   - OpenCode  (opencode.json mcp.<name>): {type: remote, url, enabled}
-    #   - Cursor    (mcp.json mcpServers.<name>): {url} — official remote
-    #     entries carry no `type` (type only means "stdio" for local servers);
-    #     Cursor dials url servers over Streamable HTTP.
+    #   - Cursor    (mcp.json mcpServers.<name>): stdio bridge — Cursor dials
+    #     remote url servers over SSE GET /mcp, which the Streamable HTTP
+    #     endpoint answers with 404, so graph-mcp is exposed as a local stdio
+    #     bridge (graph-mcp-stdio.js) that forwards to the remote over POST.
     #   - VS Code   (mcp.json servers.<name>): {type: http, url}
     #   - OpenClaw  (openclaw.json mcp.servers.<name>): {url, transport:
     #     streamable-http} — keyed by transport, not by a type alias.
@@ -986,8 +993,14 @@ if ($SkipMcp) {
         url     = $GraphMcpUrl
         enabled = $true
     }
+    $graphMcpBridgePath = (Join-Path $CursorMcpBridgesRoot 'graph-mcp-stdio.js').Replace('\', '/')
     $graphMcpCursor = [ordered]@{
-        url = $GraphMcpUrl
+        type    = 'stdio'
+        command = 'node'
+        args    = @($graphMcpBridgePath)
+        env     = [ordered]@{
+            GRAPH_MCP_URL = $GraphMcpUrl
+        }
     }
     $graphMcpVSCode = [ordered]@{
         type = 'http'
@@ -1015,6 +1028,7 @@ if ($SkipMcp) {
         args    = @($argoServer)
     }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpCursor })
     Write-Host "argo MCP config written -> $CursorMcpPath"
+    Write-Host "  graph-mcp registered as stdio bridge -> $graphMcpBridgePath"
 
     Write-Host '==> Registering argo MCP server in OpenCode'
     Write-McpConfig -Path $OpenCodeConfigPath -ServersKey 'mcp' -ServerConfig ([ordered]@{
