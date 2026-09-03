@@ -2241,7 +2241,7 @@
       ]
     },
     {
-      "description": "视图列表选择→图形化展开→AntV G6 v5 画布渲染（节点按 ArchiMate 层着色，平移/缩放/选择/节点拖动；本地 vendored，零构建）；图数据来自 buildViewGraph（nodes/edges）。画布坐标持久化于独立布局侧车（scripts/ea-layout-store.js，默认 ~/.argo/ea-tool/layouts/，按视图成员身份签名失效：内容级修改不扰动坐标），不进图谱 JSON、不进 ARGO MCP 查询内容。",
+      "description": "视图列表选择→图形化展开→AntV G6 v5 画布渲染（节点按 ArchiMate 层着色，平移/缩放/选择/节点拖动；本地 vendored，零构建）；图数据来自 buildViewGraph（nodes/edges）。画布坐标持久化于独立布局侧车（scripts/ea-layout-store.js，默认存于各项目自己的 design/KG/ea-layouts/，按视图成员身份签名失效：内容级修改不扰动坐标），不进图谱 JSON、不进 ARGO MCP 查询内容。",
       "id": "2764",
       "name": "知识图谱图形化查看服务",
       "parent": "2760",
@@ -3690,7 +3690,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要）\n- 身份：项目总管（ArchGraph overseer），人类伙伴未指定角色时默认对话身份；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin（DevelopmentTeam 430）。\n- 本会话完成：\n  1) **EA 类工具洞察**（委派洞察Lead 五步法，结论：现成 EA 产品均不满足“双向一致+写必以 ARGO MCP”，正解=升级既有 web/ 本地 Web 服务为画布式工具；写路径/读路径骨架已存在），洞察团队记忆已登记（411f940/b33db60）。\n  2) **路线+任务分解**：M0 收口 / M1 图形化内核（=2758 R-2）/ M2 向导+人机并发感知 / M3 体验与决策。\n  3) **人类伙伴定红线**：画布坐标持久化且独立于图谱 JSON（侧车）；Agent 对老元素的内容修改不扰动各视图坐标（失效键=成员身份签名，非内容哈希）；不得改动任何既有 ARGO MCP 功能代码（argo/**）。\n  4) **WP2785 立项**（ee2aed4/5417da4）：开发EA图谱画布图形化编辑内核与布局侧车（M1）+ AT-2785-S1-01/L1~L4 + Realization→2760（EA Tooling 1800）。\n  5) **M1-S1/S2 交付**（委派 Developer/Xiaoming，commits 21a52c0/3615700）：G6 v5 画布（@antv/g6@5.1.1 vendored web/vendor/g6.min.js，零构建）替换基础 SVG；布局侧车 scripts/ea-layout-store.js + GET/PUT /api/projects/:id/views/:viewId/layout，存储默认 ~/.argo/ea-tool/layouts/（EA_LAYOUT_ROOT 可覆盖），成员身份签名失效；顺带修复 handle() 未 await 路由异常、stop() keep-alive 挂起两个既有 bug。\n- 验收：新增 AT 13/13、ea-web-service 基线 48/48、架构测试 32/34（2 既有失败：memory-eval-run-03、architecture-view-context-08）、validateSystemArchitecture 通过、diff 白名单核验（argo/**/design/KG 零改动）。LTM 里程碑 overseer-wp2785-m1s1s2-milestone-001；overseer-mem-eval-001 归档 T3（LTM 视图 15 元素上限）。\n- 可复用经验：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 操作前先看 status；b) Node 24 下 `node --test tests/` 目录形式不可用，用 glob；c) 侧车失效键必须用成员身份签名，内容哈希会误伤；d) LTM 视图满 15 先归档再写。\n- 未完成/TODO：浏览器人工走查（本环境无浏览器，仅契约级验证）；M1-S3~S5（连线建关系/属性编辑向导/收口）未启动；WP2758 todo 未清（项目发现扫描范围、fs.watch 实测、NF-9、锁压测）；archgraph.feap 外部改动仍在工作区未处理（勿提交）；既有 2 失败未修；Experience 层未实施。",
+      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要）\n- 身份：项目总管（ArchGraph overseer）；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin（DevelopmentTeam 430）。\n- 本会话完成：\n  1) **EA 类工具洞察**（洞察Lead 五步法）：结论=现成 EA 产品均不满足“双向一致+写必以 ARGO MCP”，正解=升级既有 web/ 本地 Web 服务为画布式工具；洞察团队记忆 411f940/b33db60。\n  2) **路线+任务分解**：M0 收口 / M1 图形化内核 / M2 向导+并发感知 / M3 体验与决策。\n  3) **人类伙伴红线**：坐标持久化且独立于图谱 JSON（侧车）；Agent 内容修改不扰动坐标（成员身份签名失效）；不得改既有 ARGO MCP 代码；【修订】侧车默认存储按项目隔离，存各项目自己的 design/KG/ 目录下。\n  4) **WP2785 立项**（ee2aed4/5417da4）+ M1-S1/S2 交付（21a52c0/3615700）+ 侧车按项目存储修订（80c2dfc）：G6 v5 画布 + ea-layout-store（GET/PUT layout 端点，默认 <projectRoot>/design/KG/ea-layouts/<view_id>.json）；顺带修复 handle 未 await、stop 挂起 2 个既有 bug。\n- 验收：6 条 AT 全过（含 L5 按项目隔离），架构测试 33/35（2 既有失败），validate 通过，diff 白名单核验（argo/**/SystemArchitecture.json 零改动）。LTM 里程碑 overseer-wp2785-m1s1s2-milestone-001（含修订）；overseer-mem-eval-001 归档 T3。\n- 可复用经验：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 前先看 status；b) Node 24 用 glob 不用目录形式跑 node --test；c) 侧车失效键=成员身份签名；d) LTM 视图满 15 先归档；e) 侧车进项目 design/KG/ 后为未跟踪产物，.git 忽略策略待定。\n- 未完成/TODO：浏览器人工走查（本环境无浏览器）；M1-S3~S5 未启动；WP2758 todo 未清；archgraph.feap 外部改动在工作区未处理（勿提交）；侧车文件 .git 忽略策略待人类伙伴定；既有 2 失败未修；Experience 层未实施。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3712,8 +3712,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-03T12:00:00.000Z",
-          "description": "2026-09-03 会话摘要（EA 类工具洞察 + 路线/任务分解 + WP2785 立项与 M1-S1/S2 交付）"
+          "value": "2026-09-03T14:00:00.000Z",
+          "description": "2026-09-03 会话摘要（EA 类工具洞察 + 路线/任务分解 + WP2785 M1-S1/S2 交付 + 侧车按项目存储修订）"
         },
         {
           "name": "commit",
@@ -4484,9 +4484,14 @@
           "name": "commit",
           "value": "b3a77a3",
           "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（交付登记：21a52c0/3615700 + 2764 描述刷新 + LTM 里程碑 + T1 摘要 + mem-eval 归档 + 测试记录 32/34）"
+        },
+        {
+          "name": "commit",
+          "value": "80c2dfc",
+          "description": "scripts/ea-layout-store.js; scripts/ea-web-service.js; tests/ea-layout-store.test.js（修订：默认侧车存储改按项目 <projectRoot>/design/KG/ea-layouts/<view_id>.json，AT-2785-L5-01 通过）"
         }
       ],
-      "description": "EA 图谱画布图形化编辑内核与布局侧车（M1，洞察报告 P1 首批切片 M1-S1/S2，WP2758 TODO R-2 延续）：① M1-S1 图形内核：将 ArchGraph 本地 Web 服务（2760）图形区从基础 SVG 升级为 AntV G6 v5 画布（本地 vendored web/vendor/g6.min.js，零构建），替换 web/app.js 基础 SVG 渲染+拖动；层着色沿用 layerOf/colorForLayer，支持平移/缩放/选择/节点拖动。② M1-S2 布局侧车：画布坐标持久化于独立侧车存储（新模块 scripts/ea-layout-store.js + REST 端点 GET/PUT /api/projects/:id/views/:viewId/layout），与 design/KG/SystemArchitecture.json 完全物理隔离——坐标不进图谱 JSON、不进 schema，ARGO MCP 可查询内容保持不变。失效键=视图成员身份签名（included_elements+included_relationships 身份集合的 sha256），非内容哈希：Agent 对老元素的内容级修改（name/description/attributes）不扰动其在各视图中的坐标；仅成员结构变化触发新成员补位/移除成员清理，其余坐标保留。硬性约束：不得改动 argo/** 任何既有 ARGO MCP 功能代码，不得改动 design/KG/SystemArchitecture.json 的结构与 schema；diff 只允许 scripts/ea-web-service.js、scripts/ea-layout-store.js（新）、web/**、tests/**；既有端点契约只做加法不做破坏性修改，既有测试基线不退化。",
+      "description": "EA 图谱画布图形化编辑内核与布局侧车（M1，洞察报告 P1 首批切片 M1-S1/S2，WP2758 TODO R-2 延续）：① M1-S1 图形内核：将 ArchGraph 本地 Web 服务（2760）图形区从基础 SVG 升级为 AntV G6 v5 画布（本地 vendored web/vendor/g6.min.js，零构建），替换 web/app.js 基础 SVG 渲染+拖动；层着色沿用 layerOf/colorForLayer，支持平移/缩放/选择/节点拖动。② M1-S2 布局侧车：画布坐标持久化于独立侧车存储（新模块 scripts/ea-layout-store.js + REST 端点 GET/PUT /api/projects/:id/views/:viewId/layout），与 design/KG/SystemArchitecture.json 完全物理隔离——坐标不进图谱 JSON、不进 schema，ARGO MCP 可查询内容保持不变。失效键=视图成员身份签名（included_elements+included_relationships 身份集合的 sha256），非内容哈希：Agent 对老元素的内容级修改（name/description/attributes）不扰动其在各视图中的坐标；仅成员结构变化触发新成员补位/移除成员清理，其余坐标保留。【2026-09-03 人类伙伴需求修订】布局侧车默认存储改为按项目隔离：每个项目的坐标存放在该项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json（独立文件，仍不进 SystemArchitecture.json）；layoutRoot 选项/EA_LAYOUT_ROOT 覆盖仍有效（测试用，回退 <root>/<projectId>/<view_id>.json）；~/.argo/ea-tool/layouts/ 不再作为默认。硬性约束：不得改动 argo/** 任何既有 ARGO MCP 功能代码，不得改动 design/KG/SystemArchitecture.json 的结构与 schema；diff 只允许 scripts/ea-web-service.js、scripts/ea-layout-store.js（新）、web/**、tests/**；既有端点契约只做加法不做破坏性修改，既有测试基线不退化。",
       "id": "2785",
       "name": "开发EA图谱画布图形化编辑内核与布局侧车（M1）",
       "parent": "1249",
@@ -4525,6 +4530,13 @@
           "description": "GIVEN M1-S1/S2 实现完成；WHEN 执行布局侧车全部操作后检查；THEN design/KG/SystemArchitecture.json 内容无 layout 污染且未被侧车写入，侧车文件只落在配置的独立存储根目录，validateSystemArchitecture 与既有 runArchitectureTests 基线不退化。",
           "name": "AT-2785-L4-01",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-layout-store.test.js",
+          "acceptanceCriteria": "tests/ea-layout-store.test.js",
+          "description": "GIVEN 未配置 layoutRoot 选项与 EA_LAYOUT_ROOT 环境变量；WHEN 对某项目读写视图布局；THEN 侧车文件默认落在该项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json（按项目隔离、不写 ~/.argo、不写 SystemArchitecture.json），且多项目间坐标互不串扰。",
+          "name": "AT-2785-L5-01",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package"
@@ -4548,9 +4560,14 @@
           "description": "web/vendor/g6.min.js; web/index.html; web/app.js; web/style.css; scripts/ea-web-service.js; tests/ea-web-service-g6-render.test.js",
           "name": "commit",
           "value": "3615700"
+        },
+        {
+          "name": "commit",
+          "value": "80c2dfc",
+          "description": "scripts/ea-layout-store.js; scripts/ea-web-service.js; tests/ea-layout-store.test.js（侧车默认存储改按项目）"
         }
       ],
-      "description": "WP2785 交付（2026-09-03，委派 Developer/Xiaoming，项目总管编排+验收）：EA 图谱画布图形化编辑内核 M1-S1/S2。① G6 v5 画布替换基础 SVG（@antv/g6@5.1.1 UMD vendored web/vendor/g6.min.js，零构建；层着色/平移/缩放/选择/拖动）。② 布局侧车：坐标持久化独立于图谱 JSON（默认 ~/.argo/ea-tool/layouts/，EA_LAYOUT_ROOT/layoutRoot 可覆盖），失效键=视图成员身份签名（included_elements+included_relationships sha256）——Agent 内容级修改不扰动坐标，仅成员结构变化触发补位/清理；新增 GET/PUT /api/projects/:id/views/:viewId/layout。硬约束守住：argo/** 与图谱 JSON 结构零改动（diff 白名单核验）。验收：新增 5 条 AT 全过，架构测试 32/34（2 失败为既有：memory-eval-run-03 需在线 provider、architecture-view-context-08 期望缺 diagram-skills-view-001），validateSystemArchitecture 通过。可复用经验/坑：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 操作前先看 status，勿误 stash/提交；b) Node 24 下 node --test tests/ 目录形式不可用，用 package.json 的 glob 形式；c) 语义检索基线测试冷启动偶发超时（复跑稳定）；d) Developer 顺带修复 handle() 未 await 异步路由异常（404 变进程崩溃）与 stop() 被 keep-alive 未消费响应体挂起两个既有 bug。待办：M1-S3~S5（连线建关系/属性编辑/收口）、浏览器人工走查（本环境无浏览器，仅契约级验证）、R-2 完成后清理 WP2758 todo。",
+      "description": "WP2785 交付（2026-09-03，委派 Developer/Xiaoming，项目总管编排+验收）：EA 图谱画布图形化编辑内核 M1-S1/S2。① G6 v5 画布替换基础 SVG（@antv/g6@5.1.1 UMD vendored web/vendor/g6.min.js，零构建；层着色/平移/缩放/选择/拖动）。② 布局侧车：坐标持久化独立于图谱 JSON，失效键=视图成员身份签名（included_elements+included_relationships sha256）——Agent 内容级修改不扰动坐标，仅成员结构变化触发补位/清理；新增 GET/PUT /api/projects/:id/views/:viewId/layout。【修订（同日人类伙伴要求，80c2dfc）】侧车默认存储改为按项目隔离：各项目自己的 <projectRoot>/design/KG/ea-layouts/<view_id>.json（仍不进 SystemArchitecture.json）；layoutRoot/EA_LAYOUT_ROOT 覆盖保留（<root>/<projectId>/<view_id>.json，测试用）；~/.argo 不再作默认。硬约束守住：argo/** 与图谱 JSON 结构零改动（diff 白名单核验）。验收：6 条 AT 全过（含 L5 按项目隔离），架构测试 33/35（2 失败为既有：memory-eval-run-03、architecture-view-context-08），validateSystemArchitecture 通过。可复用经验/坑：a) archgraph.feap 会被外部 Sparx EA 会话改动，git 操作前先看 status；b) Node 24 下 node --test tests/ 目录形式不可用，用 glob；c) 侧车失效键必须用成员身份签名，内容哈希会误伤；d) LTM 视图满 15 先归档再写；e) 侧车目录进项目 design/KG/ 后为未跟踪产物，是否入 .git 忽略待定（本轮未改 .gitignore）。待办：M1-S3~S5（连线建关系/属性编辑/收口）、浏览器人工走查、R-2 完成后清理 WP2758 todo。",
       "id": "overseer-wp2785-m1s1s2-milestone-001",
       "name": "里程碑：WP2785 M1-S1/S2 交付（G6 画布 + 布局侧车）",
       "type": "Business Object"
