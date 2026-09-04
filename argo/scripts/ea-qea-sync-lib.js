@@ -747,9 +747,46 @@ function fullProjection(graph, qeaPath, opts) {
 // ---------------------------------------------------------------------------
 // Export
 // ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-// Export
-// ---------------------------------------------------------------------------
+// Read the EA diagram GEOMETRY for one KG view from a .qea model (read-only).
+// The view maps to the diagram anchored by the deterministic ea_guid (diag:<viewId>)
+// or the schema_view_id StyleEx token written by the sync. Returns:
+//   - element boxes  = t_diagramobjects rects joined to t_object.Alias (schema id)
+//   - connector lines = t_diagramlinks rows joined to the connector's schema_id tag
+// Returns null when the view has no matching EA diagram. Never writes EA geometry.
+function readViewDiagramGeometry(qeaPath, viewId) {
+  const v = String(viewId === null || viewId === undefined ? '' : viewId).trim();
+  if (v === '') { return null; }
+  const db = openQea(qeaPath);
+  try {
+    ensureMetaTable(db);
+    const guid = deterministicGuid('diag:' + v);
+    const diag = db.prepare('SELECT Diagram_ID FROM t_diagram WHERE ea_guid = ? OR StyleEx LIKE ?')
+      .get(guid, '%schema_view_id=' + v + ';%');
+    if (!diag) { return null; }
+    const diagramId = Number(diag.Diagram_ID);
+    const elements = db.prepare(
+      'SELECT o.Alias AS id, d.RectLeft AS left, d.RectTop AS top, d.RectRight AS right, d.RectBottom AS bottom ' +
+      'FROM t_diagramobjects d JOIN t_object o ON o.Object_ID = d.Object_ID ' +
+      'WHERE d.Diagram_ID = ? AND o.Alias IS NOT NULL AND o.Alias <> ? ' +
+      'ORDER BY d.Sequence'
+    ).all(diagramId, '').map((r) => ({
+      id: String(r.id),
+      left: Number(r.left), top: Number(r.top), right: Number(r.right), bottom: Number(r.bottom),
+    }));
+    const relationships = db.prepare(
+      'SELECT t.VALUE AS id, dl.Geometry AS path ' +
+      'FROM t_diagramlinks dl JOIN t_connectortag t ON t.ElementID = dl.ConnectorID AND t.Property = ? ' +
+      'WHERE dl.DiagramID = ? ORDER BY dl.ConnectorID'
+    ).all('schema_id', diagramId).map((r) => ({
+      id: String(r.id),
+      path: String(r.path === null || r.path === undefined ? '' : r.path),
+    }));
+    return { diagramId, elements, relationships };
+  } finally {
+    try { db.close(); } catch { /* ignore */ }
+  }
+}
+
 function exportQeaToGraph(qeaPath) {
   const db = openQea(qeaPath);
   try {
@@ -789,6 +826,7 @@ module.exports = {
   canonicalArchimateType,
   syncGraphToQea,
   exportQeaToGraph,
+  readViewDiagramGeometry,
   snapshotQea,
   readMetaKind,
   fullProjection,

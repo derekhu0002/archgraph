@@ -219,7 +219,7 @@ const TOOLS = [
   },
   {
     name: 'getArchitectureViewContext',
-    description: 'read-only query that resolves one view by view_id into its complete membership: the view object, every member element (from included_elements), every member relationship (from included_relationships), the parent element, and optionally child sub-views declared by member elements. Resolves ids into full canonical objects instead of returning raw id lists.',
+    description: 'read-only query that resolves one view by view_id into its complete membership: the view object, every member element (from included_elements), every member relationship (from included_relationships), the parent element, and optionally child sub-views declared by member elements. Resolves ids into full canonical objects instead of returning raw id lists. Optional includeEaGeometry (default false) additionally returns the EA diagram geometry of the resolved view.',
     inputSchema: viewContextInputSchema(),
   },
   {
@@ -441,6 +441,7 @@ function viewContextInputSchema() {
       view_id: { type: 'string', description: 'The id of the view to resolve.' },
       includeParentElement: { type: 'boolean', description: 'Default: true. Resolve the parent element referenced by the view.' },
       includeChildViews: { type: 'boolean', description: 'Default: false. Include child views declared by member elements through subdiagram_views.' },
+      includeEaGeometry: { type: 'boolean', description: 'Default: false (opt-in). When true, additionally resolve the diagram GEOMETRY (element boxes + connector line paths) for this view from the workspace EA model (.qea) and return it under a `geometry` field aligned by schema id with the resolved members. By default the EA model is never touched and no `geometry` field is returned; a missing EA model/diagram yields geometry.present=false, never an error.' },
     },
     additionalProperties: false,
   };
@@ -678,6 +679,50 @@ function buildIntentElementContext(context, args = {}) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Optional EA diagram GEOMETRY (opt-in, default off)
+// ---------------------------------------------------------------------------
+// getArchitectureViewContext is a canonical-graph read; it never touches the EA
+// model unless the caller explicitly sets includeEaGeometry=true. The workspace's
+// EA model (.qea, the SQLite carrier this toolchain can read) may hold human-laid-out
+// diagram geometry for a view — element boxes (t_diagramobjects rects) and connector
+// line paths (t_diagramlinks). When present it is returned under `geometry`, aligned
+// by schema id with the resolved members, so an image-capable LLM can redraw the view
+// faithfully. Absent model/diagram → present:false (never an error).
+const EA_GEOMETRY_MODEL_EXTENSIONS = new Set(['.qea']);
+function findEaGeometryModelPath(workspaceRoot) {
+  try {
+    const entries = fs.readdirSync(workspaceRoot, { withFileTypes: true });
+    const names = entries
+      .filter((entry) => entry.isFile() && EA_GEOMETRY_MODEL_EXTENSIONS.has(path.extname(entry.name).toLowerCase()))
+      .map((entry) => entry.name)
+      .sort();
+    return names.length > 0 ? path.join(workspaceRoot, names[0]) : null;
+  } catch {
+    return null;
+  }
+}
+function readEaViewGeometry(workspaceRoot, viewId) {
+  // Lazily require the .qea projection lib: it depends on node:sqlite (Node >= 22),
+  // so it is only loaded when geometry is actually requested, never for other calls.
+  let modelRel = null;
+  try {
+    const modelPath = findEaGeometryModelPath(workspaceRoot);
+    if (!modelPath) {
+      return { source: null, present: false, elements: [], relationships: [] };
+    }
+    modelRel = normalizeRelativePath(path.relative(workspaceRoot, modelPath)) || null;
+    const eaQeaLib = require('./ea-qea-sync-lib.js');
+    const geo = eaQeaLib.readViewDiagramGeometry(modelPath, viewId);
+    if (!geo) {
+      return { source: modelRel, present: false, elements: [], relationships: [] };
+    }
+    return { source: modelRel, present: true, elements: geo.elements, relationships: geo.relationships };
+  } catch {
+    return { source: modelRel, present: false, elements: [], relationships: [] };
+  }
+}
+
 function buildViewContext(context, args = {}) {
   const viewId = typeof args.view_id === 'string' ? args.view_id.trim() : '';
   if (!viewId) {
@@ -746,7 +791,7 @@ function buildViewContext(context, args = {}) {
     }
   }
 
-  return {
+  const result = {
     status: 'passed',
     graphPath: context.graphPath.relativePath,
     view: clone(view),
@@ -757,6 +802,10 @@ function buildViewContext(context, args = {}) {
     parentElement,
     childViews,
   };
+  if (args.includeEaGeometry === true) {
+    result.geometry = readEaViewGeometry(context.workspaceRoot, viewId);
+  }
+  return result;
 }
 
 function resolveFocusElement(document, args) {

@@ -318,6 +318,53 @@ test('ea-qea-sync (incremental): single element change updates only that element
   }
 });
 
+test('ea-qea-sync (view geometry read): readViewDiagramGeometry returns stored EA element rects and connector line geometry aligned by schema id; null when the view has no diagram', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-geo-'));
+  try {
+    const qea = tmpQea(dir);
+    const g = {
+      name: 'geometry', description: 'x',
+      elements: [
+        { id: 'e1', name: 'Element One', type: 'Business Object', description: '' },
+        { id: 'e2', name: 'Element Two', type: 'Business Object', description: '' },
+      ],
+      relationships: [
+        { id: 'r1', name: 'R1', type: 'Association', source_id: 'e1', target_id: 'e2', description: '' },
+      ],
+      views: [
+        { view_id: 'v1', view_name: 'View One', description: '', included_elements: ['e1', 'e2'], included_relationships: ['r1'] },
+      ],
+    };
+    lib.syncGraphToQea(g, qea, { dryRun: false, allowDelete: false });
+
+    // Plant known geometry as EA would after manual layout; the sync never rewrites
+    // existing geometry, so the reader must return exactly these stored values.
+    const db = new DatabaseSync(qea);
+    const guid = lib.deterministicGuid('diag:v1');
+    const diag = db.prepare('SELECT Diagram_ID FROM t_diagram WHERE ea_guid=?').get(guid);
+    assert.ok(diag, 'v1 diagram present');
+    const e1 = db.prepare("SELECT Object_ID FROM t_object WHERE Alias='e1'").get();
+    db.prepare('UPDATE t_diagramobjects SET RectLeft=1111, RectTop=222, RectRight=3333, RectBottom=444 WHERE Diagram_ID=? AND Object_ID=?')
+      .run(Number(diag.Diagram_ID), Number(e1.Object_ID));
+    const link = db.prepare('SELECT ConnectorID FROM t_diagramlinks WHERE DiagramID=?').get(Number(diag.Diagram_ID));
+    assert.ok(link, 'v1 connector placed');
+    db.prepare("UPDATE t_diagramlinks SET Geometry='10:20;30:40;50:60' WHERE DiagramID=? AND ConnectorID=?")
+      .run(Number(diag.Diagram_ID), Number(link.ConnectorID));
+    db.close();
+
+    const geo = lib.readViewDiagramGeometry(qea, 'v1');
+    assert.ok(geo, 'geometry returned for a synced view');
+    assert.deepEqual(geo.elements.map((x) => x.id).sort(), ['e1', 'e2']);
+    assert.deepEqual(geo.elements.find((x) => x.id === 'e1'), { id: 'e1', left: 1111, top: 222, right: 3333, bottom: 444 }, 'stored element rect read back exactly');
+    assert.deepEqual(geo.relationships, [{ id: 'r1', path: '10:20;30:40;50:60' }], 'stored connector line geometry read back by schema id');
+
+    assert.equal(lib.readViewDiagramGeometry(qea, 'no-such-view'), null, 'view without an EA diagram → null (server maps to present:false)');
+    assert.equal(lib.readViewDiagramGeometry(qea, ''), null, 'blank view id → null');
+  } finally {
+    removeTree(dir);
+  }
+});
+
 test('ea-qea-sync (migration): projection lives in argo/scripts; no top-level scripts/ea-qea-sync residue', () => {
   assert.equal(fs.existsSync(path.join(ROOT, 'scripts', 'ea-qea-sync.js')), false, 'top-level scripts/ea-qea-sync.js removed');
   assert.equal(fs.existsSync(path.join(ROOT, 'scripts', 'ea-qea-sync-lib.js')), false, 'top-level scripts/ea-qea-sync-lib.js removed');
