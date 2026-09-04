@@ -5446,6 +5446,11 @@
           "name": "commit",
           "value": "10d6015",
           "description": "docs/diagrams/ea-tooling.excalidraw; docs/diagrams/ea-tooling.png"
+        },
+        {
+          "name": "commit",
+          "value": "10b4f66",
+          "description": "design/KG/SystemArchitecture.json"
         }
       ]
     }
