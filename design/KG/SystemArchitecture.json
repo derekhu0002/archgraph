@@ -5263,6 +5263,11 @@
           "name": "commit",
           "value": "4113798",
           "description": "package.json（0.12.1→0.12.2）；npm publish archgraph-argo@0.12.2 成功（含 argo-init SKILL 投影核验文档，0.12.1 遗漏此文档故升 0.12.2），registry latest 已同步；部署安装后 initializeWorkspace 验证全绿（qeaFullProjection ok 246ms→本仓 archgraph.qea；neo4j db archgraph==仓库名 archgraph）"
+        },
+        {
+          "name": "commit",
+          "value": "7674cba",
+          "description": "argo/scripts/argo-mcp-server.js; argo/scripts/ensureArgoHarnessEnvironment.js; argo/skills/argo-init/SKILL.md; tests/argo-qea-projection.test.js; tests/argo-workspace-bootstrap.test.js; design/KG/SystemArchitecture.json（initializeWorkspace bootstrap .feap→.qea：缺 EA 文件生成 <project>.qea、已有 .qea/.feap 不重复补建、移除 Argo.feap 模板候选、targetFeapName→targetEaName；新增 AT-2791-07）"
         }
       ],
       "description": "ARGO 写图 → 下游直写 .qea 投影（Node + node:sqlite，标准批量 SQL）。背景与结论：Repository.Execute 仅 DBMS 库可用（.feap 内嵌 Firebird 单条可用、.qea/SQLite 完全禁用）；.qea 是标准 SQLite，外部直写最符“一把 SQL 写库”诉求，EA 开/关皆可写（实测）；仓库 EA 文件已换 archgraph.qea。本 WP：① Node 模块直接对 .qea 做图谱⇄SQLite 批量读写（t_object/t_connector/t_diagram/t_objectproperties/t_connectortag/t_diagramobjects/t_diagramlinks），对账语义沿用 2100（固定同步根包/update-in-place 不动几何/删除清单确认/幂等）；② ARGO MCP 写图下游投影：观察 design/KG/SystemArchitecture.json 落盘→投影到 archgraph.qea（不改 argo/**）；③ 并发 busy_timeout+短事务+重试，EA 开着也能写；EA 缓存需人工刷新可见；④ unchanged-skip 变更检测使稳态增量快；⑤ .feap(Firebird) 旧路径保留。在本项目验证：真实图谱投影到 archgraph.qea + 回环一致 + 幂等 + 测速。",
@@ -5313,9 +5318,14 @@
           "description": "综合 5d71d58/7a9e981/fda5e47/11c5930/389e1a5/4113798 等",
           "name": "commit",
           "value": "20f3fab"
+        },
+        {
+          "name": "commit",
+          "value": "7674cba",
+          "description": "遗留项已清：initializeWorkspace bootstrap .feap→.qea（缺 EA 文件生成 <project>.qea；已有 .qea/.feap 不重复补建；AT-2791-07）。"
         }
       ],
-      "description": "里程碑（2026-09-04）：EA 同步收敛到 .qea 直写投影并发布。沿革：EA 类工具洞察→Web 冻结→EA 为主设计界面；WP2100 导入优化→SQL 直写实验（.feap Execute 单条可用批量挂、.qea Execute Internal Error）→headless COM 回环保真全绿→定论 .qea=SQLite 外部直写。交付 argo/scripts/ea-qea-sync.js+lib（node:sqlite；全量约50ms 稳态约16ms；full 整库 wipe 重建；写前快照；verify）；ARGO MCP 写后增量投影（fda5e47）+argo init full（initializeWorkspace 内，同 Neo4j init）；移除 ea-qea.json；本仓 archgraph.qea 与 canonical 213/102/57 一致。发布 0.11→0.12.0→0.12.2（0.12.1 漏 SKILL 文档教训：发布前核对 pack）；install+deploy+initializeWorkspace 验证全绿（qea 目标==本仓 .qea 246ms；neo4j db==仓库名）。SKILL.md 补 qea/neo4j 投影核验。遗留：bootstrap 仍建 .feap 需改 .qea；archgraph.qea 入库待定。",
+      "description": "里程碑（2026-09-04）：EA 同步收敛到 .qea 直写投影并发布。沿革：EA 类工具洞察→Web 冻结→EA 为主设计界面；WP2100 导入优化→SQL 直写实验（.feap Execute 单条可用批量挂、.qea Execute Internal Error）→headless COM 回环保真全绿→定论 .qea=SQLite 外部直写。交付 argo/scripts/ea-qea-sync.js+lib（node:sqlite；全量约50ms 稳态约16ms；full 整库 wipe 重建；写前快照；verify）；ARGO MCP 写后增量投影（fda5e47）+argo init full（initializeWorkspace 内，同 Neo4j init）；移除 ea-qea.json；本仓 archgraph.qea 与 canonical 213/102/57 一致。发布 0.11→0.12.0→0.12.2（0.12.1 漏 SKILL 文档教训：发布前核对 pack）；install+deploy+initializeWorkspace 验证全绿（qea 目标==本仓 .qea 246ms；neo4j db==仓库名）。SKILL.md 补 qea/neo4j 投影核验。遗留项：bootstrap 仍建 .feap 需改 .qea（已由 7674cba 修复）；archgraph.qea 入库待定。",
       "id": "overseer-ea-qea-projection-arc-001",
       "name": "里程碑：EA 同步收敛 .qea 直写投影（argo 写后+init 全量）",
       "type": "Business Object"
