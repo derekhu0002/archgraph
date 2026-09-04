@@ -33,8 +33,8 @@ const EA_TEMPLATE_PATH_CANDIDATES = [
   ['.opencode', 'EA-model-template.qea'],
   ['eatool', 'EA-model-template.qea'],
   ['EA-model-template.qea'],
-  ['Argo.feap'],
 ];
+const EA_MODEL_EXTENSIONS = new Set(['.qea', '.feap', '.eap']);
 const WINDOWS_RESERVED_NAMES = new Set([
   'CON', 'PRN', 'AUX', 'NUL',
   'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
@@ -379,7 +379,7 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
     return toolResult({
       status: report.status,
       workspaceRoot: workspace.workspaceRoot,
-      targetFeapName: workspace.targetFeapName,
+      targetEaName: workspace.targetEaName,
       createdFiles: workspace.createdFiles,
       updatedFiles: workspace.updatedFiles,
       removedFiles: workspace.removedFiles,
@@ -387,7 +387,7 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
       workspaceBootstrap: {
         status: 'ok',
         workspaceRoot: workspace.workspaceRoot,
-        targetFeapName: workspace.targetFeapName,
+        targetEaName: workspace.targetEaName,
         createdFiles: workspace.createdFiles,
         updatedFiles: workspace.updatedFiles,
         removedFiles: workspace.removedFiles,
@@ -481,13 +481,18 @@ async function initializeWorkspace(workspaceRoot) {
   }
 
   const templateSourcePath = resolveTemplateSourcePath(workspaceRoot);
-  const targetFeapName = buildTargetFileName(workspaceName);
-  const targetFeapPath = path.join(workspaceRoot, targetFeapName);
-  if (!fs.existsSync(targetFeapPath)) {
-    await fs.promises.copyFile(templateSourcePath, targetFeapPath);
-    createdFiles.push(normalizeRelativePath(targetFeapName));
+  const targetEaName = buildEaTargetFileName(workspaceName);
+  const targetEaPath = path.join(workspaceRoot, targetEaName);
+  const existingEaFiles = listExistingEaModelFiles(workspaceRoot);
+  if (existingEaFiles.length === 0) {
+    // No EA model file in the workspace: bootstrap a project-named .qea from the
+    // template (EA 17.2+ .qea/SQLite). Never generate a legacy .feap anymore.
+    await fs.promises.copyFile(templateSourcePath, targetEaPath);
+    createdFiles.push(normalizeRelativePath(targetEaName));
+  } else if (existingEaFiles.includes(targetEaName)) {
+    skippedSteps.push(`${normalizeRelativePath(targetEaName)} already exists`);
   } else {
-    skippedSteps.push(`${normalizeRelativePath(targetFeapName)} already exists`);
+    skippedSteps.push(`EA model already present (${existingEaFiles.join(', ')}); skip bootstrapping ${normalizeRelativePath(targetEaName)}`);
   }
 
   for (const handoffPath of HANDOFF_FILES_TO_RESET) {
@@ -509,7 +514,7 @@ async function initializeWorkspace(workspaceRoot) {
   return {
     workspaceRoot,
     qeaFullProjection,
-    targetFeapName,
+    targetEaName,
     createdFiles,
     updatedFiles,
     removedFiles,
@@ -543,12 +548,24 @@ function resolveGraphDefaultSourcePath() {
   throw new Error(`Unable to locate default SystemArchitecture template. Checked: bundled ${BUNDLED_GRAPH_DEFAULT_SEGMENTS.join('/')}`);
 }
 
-function buildTargetFileName(workspaceName) {
+function listExistingEaModelFiles(workspaceRoot) {
+  let names = [];
+  try {
+    names = fs.readdirSync(workspaceRoot).filter(name =>
+      EA_MODEL_EXTENSIONS.has(path.extname(name).toLowerCase()),
+    );
+  } catch {
+    /* treat an unreadable root as having no EA model file */
+  }
+  return names.sort();
+}
+
+function buildEaTargetFileName(workspaceName) {
   const sanitized = sanitizeFileName(workspaceName) || 'workspace';
   const safeBaseName = WINDOWS_RESERVED_NAMES.has(sanitized.toUpperCase())
     ? `${sanitized}_workspace`
     : sanitized;
-  return `${safeBaseName}.feap`;
+  return `${safeBaseName}.qea`;
 }
 
 function sanitizeFileName(value) {

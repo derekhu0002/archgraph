@@ -137,24 +137,28 @@ test('argo-qea-projection (AT-2791-06): initializeWorkspace runs whole-file .qea
     assert.equal(db2.prepare('SELECT COUNT(*) AS c FROM t_object').get().c, newGraph.elements.length, 'whole db equals canonical element count');
     db2.close();
 
-    assert.equal(fs.existsSync(path.join(dir, wsName + '.feap')), true, 'init still bootstraps the EA template feap');
+    assert.equal(fs.existsSync(path.join(dir, wsName + '.qea')), false, 'init must not bootstrap a second .qea when one already exists');
+    assert.equal(fs.existsSync(path.join(dir, wsName + '.feap')), false, 'init must not bootstrap a legacy .feap when a .qea already exists');
+    assert.equal(fs.readdirSync(dir).some(n => n.toLowerCase().endsWith('.feap')), false, 'no .feap may be created at all');
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
 
-test('argo-qea-projection (no qea): initializeWorkspace with no .qea target -> noop qea step', async () => {
+test('argo-qea-projection (no qea): initializeWorkspace with only a legacy .feap -> no .qea target -> noop qea step', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-init-noqea-'));
   try {
     const graphPath = path.join(dir, 'design', 'KG', 'SystemArchitecture.json');
     fs.mkdirSync(path.dirname(graphPath), { recursive: true });
     const g = { name: 'n', description: 'x', elements: [{ id: 'a1', name: 'Actor One', type: 'Business Actor', description: 'd' }], relationships: [], views: [] };
     fs.writeFileSync(graphPath, JSON.stringify(g), 'utf8');
+    fs.writeFileSync(path.join(dir, 'archgraph.feap'), 'legacy sentinel', 'utf8'); // legacy EA model only
     const argoMcp = require(path.join(ROOT, 'argo', 'scripts', 'argo-mcp-server.js'));
     const init = await argoMcp.initializeWorkspace(dir);
     assert.equal(init.status, 'ok');
-    assert.equal(init.qeaFullProjection && init.qeaFullProjection.status, 'noop', 'no qea target -> noop');
-    assert.equal(fs.existsSync(path.join(dir, 'archgraph.qea')), false, 'no stray qea created');
+    assert.equal(init.qeaFullProjection && init.qeaFullProjection.status, 'noop', 'legacy .feap only -> no .qea target -> noop');
+    assert.equal(fs.existsSync(path.join(dir, 'archgraph.qea')), false, 'no stray qea created next to a legacy .feap');
+    assert.equal(fs.existsSync(path.join(dir, 'archgraph.feap')), true, 'legacy .feap untouched');
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

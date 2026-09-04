@@ -7,9 +7,9 @@ disable-model-invocation: true
 
 # ARGO INIT
 
-`argo-init` 通过 ARGO MCP 的 `initializeWorkspace` 接口完成确定性初始化：工作区 bootstrap（缺 `SystemArchitecture.json` / `.feap` 自动生成）+ Neo4j 结构投影同步 + **.qea 全量投影（整库清空重建，逻辑同 Neo4j init）** + 语义生命周期初始化 + canonical 校验 + subdiagram_views 一致性，并返回完整报告。**不需要也不应执行任何 WORKSPACE 外脚本**——所有确定性步骤都在 MCP 进程内完成，避免扩大访问面。
+`argo-init` 通过 ARGO MCP 的 `initializeWorkspace` 接口完成确定性初始化：工作区 bootstrap（缺 `SystemArchitecture.json` / EA 模型文件（`.qea`）自动生成）+ Neo4j 结构投影同步 + **.qea 全量投影（整库清空重建，逻辑同 Neo4j init）** + 语义生命周期初始化 + canonical 校验 + subdiagram_views 一致性，并返回完整报告。**不需要也不应执行任何 WORKSPACE 外脚本**——所有确定性步骤都在 MCP 进程内完成，避免扩大访问面。
 
-- 工作区缺少 `design/KG/SystemArchitecture.json` 时自动从部署的 `defaults` 拷贝默认模板；缺 `.feap` 时以当前项目名拷贝默认模板。
+- 工作区缺少 `design/KG/SystemArchitecture.json` 时自动从部署的 `defaults` 拷贝默认模板；缺 EA 模型文件（仓库根无 `.qea`/`.feap`/`.eap`）时以当前项目名拷贝默认 `.qea` 模板（不再补建遗留 `.feap`）。
 - 本机 Neo4j 连接可用，canonical 意图图完成至少一次 JSON -> Neo4j 初始同步并通过一致性校验；**投影到的 Neo4j 数据库名称必须与本仓库名称一致**（如仓库 archgraph → 库 archgraph），不一致须报告为告警/失败。
 - **.qea 投影**：init 对仓库 EA 文件（仓库根 `.qea`，经 `ARGO_EA_QEA` 或仓库根唯一 `*.qea` 解析）执行整库清空后全量重建；**必须确认投影目标是本仓库自己的 `.qea` 文件**，并报告投影成功/失败与耗时。
 - 语义生命周期：双 gate 未开启时记录 skipped/disabled；开启时执行全量 embedding backfill 与 readiness 对齐。
@@ -29,7 +29,7 @@ disable-model-invocation: true
 
 调用 ARGO MCP 工具 `initializeWorkspace`（传入当前工作区根 `workspaceRoot`）。该接口在 MCP 进程内完成全部确定性步骤并返回报告：
 
-- `workspaceBootstrap`：缺 `SystemArchitecture.json` / `.feap` 时自动生成（createdFiles / skippedSteps）
+- `workspaceBootstrap`：缺 `SystemArchitecture.json` / EA 模型文件时自动生成 `.qea`（createdFiles / skippedSteps；仓库根已有 `.qea`/`.feap` 时不重复补建）
 - `mcp`：ARGO MCP 健康（协议 / tools-list / ping）
 - `systemArchitecture`：canonical 校验（元素/关系/视图计数）
 - `subdiagramViews`：subdiagram_views 一致性检查/修复

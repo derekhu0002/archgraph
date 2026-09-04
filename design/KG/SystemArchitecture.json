@@ -5283,6 +5283,13 @@
           "description": "GIVEN 临时 workspace（含仓库根 *.qea + scripts/ea-qea-sync.js）执行 initializeWorkspace（argo init）；WHEN init 成功；THEN 目标 .qea 被**全量清除并全量写入**当前图谱（含 starter/既有内容），非仅增量；无 .qea/无脚本时 no-op 且 init 成功。",
           "name": "AT-2791-06",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/argo-workspace-bootstrap.test.js",
+          "acceptanceCriteria": "tests/argo-workspace-bootstrap.test.js",
+          "description": "GIVEN 临时 workspace 执行 initializeWorkspace（argo init）；WHEN 仓库根缺 EA 模型文件；THEN bootstrap 以项目名生成 `.qea` 且不生成任何 `.feap`；当仓库根已存在 `.qea`（如 archgraph.qea）或遗留 `.feap` 时不补建第二个 EA 文件（createdFiles 不含 qea/feap，skippedSteps 说明原因）。",
+          "name": "AT-2791-07",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package"

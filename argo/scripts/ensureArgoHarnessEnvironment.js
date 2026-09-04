@@ -135,7 +135,7 @@ async function ensureWorkspaceBootstrap({ checkOnly, workspaceRoot }) {
     return {
       status: 'ok',
       workspaceRoot: workspace.workspaceRoot,
-      targetFeapName: workspace.targetFeapName,
+      targetEaName: workspace.targetEaName,
       createdFiles: workspace.createdFiles,
       updatedFiles: workspace.updatedFiles,
       removedFiles: workspace.removedFiles,
