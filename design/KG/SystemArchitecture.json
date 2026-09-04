@@ -3846,7 +3846,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管 工作记忆（2026-09-04 压缩版，含本日三次 EA 相关修复收尾）。主线：人类要 EA 类工具，人类在 EA 设计、AGENT 经 ARGO MCP 写图同步到 EA 且不破坏位置。关键演进：1) Web 冻结。2) EA 为主设计界面（EA17.2+.qea）。3) 主线 WP2791：.qea=标准 SQLite，argo/scripts/ea-qea-sync.js+lib（node:sqlite 直写：sync/full、写前快照、verify）；ARGO MCP 写后增量 + init full；目标解析 ARGO_EA_QEA > 仓库根唯一 *.qea（无配置）；canonical↔archgraph.qea 一致 214/102/57。发布 0.11→0.12.2（0.12.5 bump 在 package.json 未提交，发布待人类）。**本日三次修复（均 Tier 2）：①7674cba bootstrap .feap→.qea**（缺 EA 生成 <project>.qea、已有不补建、移除 Argo.feap 候选、targetEaName；AT-2791-07）；**②e456897 attributes/testcases→EA 可见层**（attributes→t_attribute 同名 ledger 幂等/短值 Default 长值 Notes、testcases→t_objecttests TestClass=4+Notes/InputData/AcceptanceCriteria、不覆盖 EA 运行态；AT-2791-08）；**③5cdec8f EA 投影状态显式上报**（其他项目症状=NEO4J 投影成功但 EA 不见；根因=compactMutationResponse 成功写入丢弃 qeaProjection/neo4jSync/warnings + 无目标时 buildMutationResult 全静默仅 console.log；修复=compact 恒带 qeaProjection(passed/failed/noop+reason)/neo4jSync.status/warnings；无 .qea 目标附加 noop，有 EA 信号(遗留 .feap/.eap/多 .qea/ARGO_EA_QEA 缺失)给 warning 指引转 .qea 或设 env，无 EA 文件仅 noop 不 warning；AT-2791-09）。其他决策：坐标侧车独立随 commit；EA=投影可重建；EA MCP 不开放给 AGENT。可复用经验/坑：.qea 直写最快通道；EA Execute 仅 DBMS；t_attribute 无 Alias 列、t_objecttests PK=(Object_ID,Test,TestClass)、Acceptance=TestClass 4；**ARGO MCP 变更类工具成功响应是 compact 的——下游投影/警告必须显式加入 compact，否则静默（写后核对 qeaProjection 字段）**；EA GUI 外部直写后需刷新/重开项目才可见（EA 开着写并不报错）；runArchitectureTests 会刷 delivery/failure-records（登记前 git checkout 还原）；Windows sqlite 句柄释放延迟（测试 rm retry）；ea-web-maxgraph 偶发崩溃 0xC0000409（环境 flake 重跑过）。未完成/TODO：package.json 0.12.5 发布待人类；archgraph.qea 入库待人类定；全局副本/其它仓库同步 0.12.x；既有 2 失败（memory-eval-run-03、architecture-view-context-08）未修；Experience 层未实施；eatool .feap 与 MCP 桥 WP2789 PARKED。",
+      "description": "项目总管 工作记忆（2026-09-04 压缩版，含本日四次 EA 修复收尾）。主线：EA 为主设计界面（EA17.2+.qea）；AGENT 经 ARGO MCP 写图同步到 EA 且不破坏位置；WP2791 为 .qea 直写投影（argo/scripts/ea-qea-sync.js+lib，node:sqlite：sync/full/写前快照/verify；写后增量+init full；目标解析 ARGO_EA_QEA>仓库根唯一 *.qea；canonical↔archgraph.qea 214/102/57）。发布至 0.12.2；0.12.5 bump 未提交发布待人类。**本日四次修复（均 Tier 2）：①7674cba bootstrap .feap→.qea**（AT-2791-07）；**②e456897 attributes/testcases→EA 可见层**（AT-2791-08）；**③5cdec8f apply 后 qeaProjection/neo4jSync/warnings 显式上报**（compact 不再吞；无目标 noop+reason/EA 信号 warning；AT-2791-09）；**④77d2c1d EA 投影真失败根因**（实证本仓 archgraph.qea drift 而 Neo4j 正常；根因=EA 打开项目会用自身 token 重写 t_diagram.StyleEx、丢掉 schema_view_id 锚（保留确定性 ea_guid）→ 原仅按 StyleEx token 匹配 diagram → 重试 INSERT 同 ea_guid → UNIQUE constraint failed: t_diagram.ea_guid → 整事务失败 EA 永不更新（旧 compact 又吞错）→ 表现为'EA 投影没看到'；修复=diagram 双身份匹配(token|ea_guid)+ensureStyleToken 重注入锚保 EA 格式化 token；AT-2791-10；本仓 archgraph.qea 已 full 重建归一）。其他决策：坐标侧车独立随 commit；EA=投影可重建；EA MCP 不开放给 AGENT。**关键 pitfall（必须记住）：①真实 ARGO MCP 走全局安装 ~/.argo/scripts（opencode 配置 node ~/.argo/scripts/argo-mcp-server.js），改仓库代码后必须同步/重部署全局副本才生效——本次仅热补 2 文件（ea-qea-sync-lib.js、systemarchitecture-mcp-server.js），单测 require 本地模块可能掩盖运行时旧代码缺陷；②EA 打开期间会重写 StyleEx 丢自定义 token，凡'按 EA 侧可被改写字段做唯一匹配'都须有 ea_guid/确定性 id 兜底；③变更新工具成功响应是 compact 的，下游投影/警告必须显式加入否则静默；④EA GUI 外部直写后需刷新/重开项目才可见；⑤t_attribute 无 Alias、t_objecttests PK=(Object_ID,Test,TestClass) 类 4=Acceptance；⑥runArchitectureTests 刷 delivery/failure-records 污染 diff（登记前 git checkout）；⑦Windows sqlite 句柄释放延迟（测试 rm retry）；ea-web-maxgraph 偶发 0xC0000409 为环境 flake。未完成/TODO：0.12.5 发布+部署全局（本次热补待随发布固化）；archgraph.qea 入库待人类定；全局其它仓库同步 0.12.x；既有 2 失败未修；Experience 层未实施；eatool .feap 与 MCP 桥 WP2789 PARKED。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3868,8 +3868,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-04T20:00:00.000Z",
-          "description": "2026-09-04 EA 投影静默缺陷修复收尾（三连修）"
+          "value": "2026-09-04T21:30:00.000Z",
+          "description": "2026-09-04 EA 投影真失败根因修复收尾（四次 EA 修复）"
         },
         {
           "name": "commit",
@@ -5278,6 +5278,11 @@
           "name": "commit",
           "value": "5cdec8f",
           "description": "argo/scripts/systemarchitecture-mcp-server.js; tests/argo-qea-projection.test.js; design/KG/SystemArchitecture.json（apply 后 EA .qea 投影状态显式上报：compact 响应携带 qeaProjection/neo4jSync/warnings，无目标时 noop+reason(+EA 信号 warning)；新增 AT-2791-09）"
+        },
+        {
+          "name": "commit",
+          "value": "77d2c1d",
+          "description": "argo/scripts/ea-qea-sync-lib.js; tests/ea-qea-sync.test.js; design/KG/SystemArchitecture.json（修复投影真失败：diagram 按 token OR 确定性 ea_guid 双匹配 + ensureStyleToken 重注入锚；新增 AT-2791-10；运行时 ~/.argo/scripts 已热补）"
         }
       ],
       "description": "ARGO 写图 → 下游直写 .qea 投影（Node + node:sqlite，标准批量 SQL）。背景与结论：Repository.Execute 仅 DBMS 库可用（.feap 内嵌 Firebird 单条可用、.qea/SQLite 完全禁用）；.qea 是标准 SQLite，外部直写最符“一把 SQL 写库”诉求，EA 开/关皆可写（实测）；仓库 EA 文件已换 archgraph.qea。本 WP：① Node 模块直接对 .qea 做图谱⇄SQLite 批量读写（t_object/t_connector/t_diagram/t_objectproperties/t_connectortag/t_diagramobjects/t_diagramlinks），对账语义沿用 2100（固定同步根包/update-in-place 不动几何/删除清单确认/幂等）；② ARGO MCP 写图下游投影：观察 design/KG/SystemArchitecture.json 落盘→投影到 archgraph.qea（不改 argo/**）；③ 并发 busy_timeout+短事务+重试，EA 开着也能写；EA 缓存需人工刷新可见；④ unchanged-skip 变更检测使稳态增量快；⑤ .feap(Firebird) 旧路径保留。在本项目验证：真实图谱投影到 archgraph.qea + 回环一致 + 幂等 + 测速。",
@@ -5364,6 +5369,11 @@
           "name": "commit",
           "value": "5cdec8f",
           "description": "静默缺陷修复：apply 写图后 EA(.qea) 投影状态显式上报（compact 响应带 qeaProjection/neo4jSync/warnings + 无目标 noop/legacy .feap 指引），AT-2791-09 看护。"
+        },
+        {
+          "name": "commit",
+          "value": "77d2c1d",
+          "description": "EA 投影真失败根因修复：EA 打开项目会用自身 token 重写 t_diagram.StyleEx、丢掉 schema_view_id 锚 → 增量 sync 重复 INSERT 同 ea_guid → UNIQUE 崩溃致投影不落地（本仓 drift + 他项目同因）；修复=diagram 双身份匹配(token|ea_guid)+重注入锚，AT-2791-10。"
         }
       ],
       "description": "里程碑（2026-09-04）：EA 同步收敛到 .qea 直写投影并发布。沿革：EA 类工具洞察→Web 冻结→EA 为主设计界面；WP2100 导入优化→SQL 直写实验（.feap Execute 单条可用批量挂、.qea Execute Internal Error）→headless COM 回环保真全绿→定论 .qea=SQLite 外部直写。交付 argo/scripts/ea-qea-sync.js+lib（node:sqlite；全量约50ms 稳态约16ms；full 整库 wipe 重建；写前快照；verify）；ARGO MCP 写后增量投影（fda5e47）+argo init full（initializeWorkspace 内，同 Neo4j init）；移除 ea-qea.json；本仓 archgraph.qea 与 canonical 213/102/57 一致。发布 0.11→0.12.0→0.12.2（0.12.1 漏 SKILL 文档教训：发布前核对 pack）；install+deploy+initializeWorkspace 验证全绿（qea 目标==本仓 .qea 246ms；neo4j db==仓库名）。SKILL.md 补 qea/neo4j 投影核验。遗留项：bootstrap 仍建 .feap 需改 .qea（已由 7674cba 修复）；archgraph.qea 入库待定。",
