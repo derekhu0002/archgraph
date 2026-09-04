@@ -264,6 +264,17 @@ function parseStyleToken(styleEx, key) {
   const m = re.exec(text);
   return m ? m[2] : '';
 }
+function ensureStyleToken(styleEx, keyValue) {
+  // EA rewrites StyleEx with its own tokens and drops unknown ones (e.g. schema_view_id).
+  // Re-inject our anchor while preserving EA's formatting tokens so diagram identity
+  // stays discoverable on the next sync.
+  const text = String(styleEx === null || styleEx === undefined ? '' : styleEx);
+  const key = String(keyValue).split('=')[0];
+  const existing = parseStyleToken(text, key);
+  if (existing !== '') { return text; }
+  const token = String(keyValue).indexOf('=') >= 0 ? String(keyValue) + ';' : String(keyValue) + '=;';
+  return text ? token + text : token;
+}
 
 // ---------------------------------------------------------------------------
 // Core sync
@@ -496,12 +507,20 @@ function syncGraphToQea(graph, qeaPath, opts) {
     stages.relTags = nowMs();
 
     // --- views/diagrams ----------------------------------------------------
+    // Diagram identity is matched by BOTH the schema_view_id StyleEx token AND the
+    // deterministic ea_guid. EA rewrites StyleEx (its own formatting tokens) whenever
+    // it touches an open project and DROPS unknown tokens like schema_view_id — if we
+    // only matched by the token we would re-INSERT the same deterministic ea_guid and
+    // crash on t_diagram's UNIQUE(ea_guid) (projection failure: Neo4j ok, EA stale).
     const existingDiags = db.prepare('SELECT Diagram_ID, Package_ID, Name, StyleEx, ea_guid FROM t_diagram WHERE Package_ID=?').all(syncId);
     const diagByView = new Map();
+    const diagByGuid = new Map();
     for (const d of existingDiags) {
+      if (d.ea_guid) { diagByGuid.set(String(d.ea_guid), d); }
       const v = parseStyleToken(d.StyleEx, 'schema_view_id');
       if (v) { diagByView.set(v, d); }
     }
+    const diagViewRows = new Map(); // view_id -> matched existing row (token OR guid)
     const newDiags = [];
     for (const view of graph.views || []) {
       if (!view || view.view_id === undefined || view.view_id === null) { continue; }
@@ -514,7 +533,7 @@ function syncGraphToQea(graph, qeaPath, opts) {
         }
         return 0;
       })();
-      const existing = diagByView.get(viewId);
+      const existing = diagByView.get(viewId) || diagByGuid.get(deterministicGuid('diag:' + viewId)) || null;
       const intended = {
         Name: safeName(view.view_name, viewId),
         Diagram_Type: DIAGRAM_TYPE,
@@ -524,10 +543,15 @@ function syncGraphToQea(graph, qeaPath, opts) {
         StyleEx: styleEx,
       };
       if (existing) {
-        const changed = intended.Name !== (existing.Name || '');
-        if (DEBUG && changed) { console.error('DEBUG diagram chg', viewId, JSON.stringify({n:[intended.Name,(existing.Name||'')], notes:[intended.Notes,(existing.Notes||'')]})); }
+        diagViewRows.set(viewId, existing);
+        // EA may have rewritten StyleEx and dropped the anchor — re-inject it while
+        // preserving EA's own formatting tokens so identity stays discoverable.
+        const anchoredStyleEx = ensureStyleToken(existing.StyleEx, 'schema_view_id=' + viewId);
+        const changed = intended.Name !== (existing.Name || '') || (existing.StyleEx || '') !== anchoredStyleEx;
+        if (DEBUG && changed) { console.error('DEBUG diagram chg', viewId, JSON.stringify({n:[intended.Name,(existing.Name||'')], style: !!parseStyleToken(existing.StyleEx,'schema_view_id')})); }
         if (changed && !o.dryRun) {
-          updateRow(db, 't_diagram', ['Name'], 'Diagram_ID', Number(existing.Diagram_ID), intended);
+          db.prepare('UPDATE t_diagram SET Name=?, StyleEx=? WHERE Diagram_ID=?')
+            .run(intended.Name, anchoredStyleEx, Number(existing.Diagram_ID));
         }
         stats[changed ? 'updated' : 'skipped'].diagrams++;
       } else {
@@ -552,6 +576,12 @@ function syncGraphToQea(graph, qeaPath, opts) {
     } else {
       for (const d of newDiags) { diagAliasToId.set(parseStyleToken(d.StyleEx, 'schema_view_id'), -1); }
     }
+    const diagIdForView = (viewId) => {
+      const row = diagViewRows.get(viewId) || diagByView.get(viewId);
+      if (row) { return Number(row.Diagram_ID !== undefined ? row.Diagram_ID : row); }
+      const planned = diagAliasToId.get(viewId);
+      return planned === undefined ? null : planned;
+    };
     // view meta
     if (!o.dryRun) {
       for (const view of graph.views || []) {
@@ -562,10 +592,8 @@ function syncGraphToQea(graph, qeaPath, opts) {
     for (const view of graph.views || []) {
       if (!view || view.view_id === undefined || view.view_id === null) { continue; }
       const viewId = String(view.view_id);
-      let dId = diagByView.get(viewId);
-      if (!dId) { dId = diagAliasToId.get(viewId); }
-      if (!dId) { continue; }
-      const diagramId = Number(dId.Diagram_ID !== undefined ? dId.Diagram_ID : dId);
+      const diagramId = diagIdForView(viewId);
+      if (diagramId === null) { continue; }
       const placedObjs = new Set();
       const objs = db.prepare('SELECT Object_ID FROM t_diagramobjects WHERE Diagram_ID=?').all(diagramId);
       for (const r of objs) { placedObjs.add(Number(r.Object_ID)); }

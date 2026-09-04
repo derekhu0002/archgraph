@@ -237,6 +237,53 @@ test('ea-qea-sync (AT-2791-08): element attributes and testcases are mirrored in
   }
 });
 
+test('ea-qea-sync (AT-2791-10): incremental sync survives EA-rewritten diagram StyleEx (matched by deterministic ea_guid, no t_diagram UNIQUE crash) and is idempotent', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-styleex-'));
+  try {
+    const qea = tmpQea(dir);
+    const g = {
+      name: 'styleex', description: 'x', elements: [], relationships: [],
+      views: [
+        { view_id: 'v1', view_name: 'View One', description: '', parent_element_name: '', included_elements: [], included_relationships: [] },
+        { view_id: 'v2', view_name: 'View Two', description: '', parent_element_name: '', included_elements: [], included_relationships: [] },
+      ],
+    };
+    const r1 = lib.syncGraphToQea(g, qea, { dryRun: false });
+    assert.equal(r1.stats.added.diagrams, 2, 'two diagrams created');
+
+    // Simulate EA having opened the project and rewritten StyleEx with its own
+    // formatting tokens, dropping our schema_view_id anchor (kept ea_guid), plus a
+    // stale orphan diagram EA kept around.
+    const db = new DatabaseSync(qea);
+    const syncId = db.prepare("SELECT Package_ID FROM t_package WHERE Name='ArchGraph Sync'").get().Package_ID;
+    const v1 = db.prepare("SELECT Diagram_ID, ea_guid FROM t_diagram WHERE StyleEx LIKE '%schema_view_id=v1;%'").get();
+    assert.ok(v1, 'v1 diagram present after sync');
+    db.prepare("UPDATE t_diagram SET StyleEx='ExcludeRTF=0;SaveTag=034DF09E;Theme=:119;' WHERE Diagram_ID=?").run(Number(v1.Diagram_ID));
+    db.prepare("INSERT INTO t_diagram (Name, Diagram_Type, Package_ID, ParentID, StyleEx, ea_guid) VALUES ('StaleOrphan','Logical',?,0,'',?)").run(Number(syncId), '{00000000-0000-0000-0000-00000000dead}');
+    db.close();
+
+    // Old code crashed here with UNIQUE constraint failed: t_diagram.ea_guid.
+    const r2 = lib.syncGraphToQea(g, qea, { dryRun: false, allowDelete: false });
+    assert.equal(r2.stats.added.diagrams, 0, 'v1 must be matched by ea_guid, not re-inserted (no UNIQUE crash)');
+    assert.equal(r2.stats.updated.diagrams, 1, 'v1 diagram re-anchored with schema_view_id');
+
+    const db2 = new DatabaseSync(qea);
+    const rows = db2.prepare('SELECT COUNT(*) AS c FROM t_diagram').get().c;
+    assert.equal(rows, 3, '2 canonical diagrams + 1 stale orphan; no duplicate created');
+    const v1b = db2.prepare("SELECT StyleEx FROM t_diagram WHERE Diagram_ID=?").get(Number(v1.Diagram_ID));
+    assert.match(v1b.StyleEx, /schema_view_id=v1;/, 'schema_view_id anchor re-injected while preserving EA tokens');
+    assert.ok(v1b.StyleEx.includes('SaveTag=034DF09E'), 'EA formatting tokens preserved');
+    db2.close();
+
+    // idempotent third sync
+    const r3 = lib.syncGraphToQea(g, qea, { dryRun: false, allowDelete: false });
+    assert.equal(r3.stats.added.diagrams, 0, 'no churn on third sync');
+    assert.equal(r3.stats.updated.diagrams, 0, 'stable after re-anchor');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('ea-qea-sync (incremental): single element change updates only that element; steady-state timing', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-'));
   try {
