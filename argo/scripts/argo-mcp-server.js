@@ -27,12 +27,12 @@ const HANDOFF_FILES_TO_RESET = [
 ];
 const WORKSPACE_GRAPH_PATH_SEGMENTS = ['design', 'KG', 'SystemArchitecture.json'];
 const BUNDLED_GRAPH_DEFAULT_SEGMENTS = ['defaults', 'design', 'KG', 'SystemArchitecture.json'];
-const BUNDLED_EA_TEMPLATE_SEGMENTS = ['defaults', 'EA-model-template.feap'];
+const BUNDLED_EA_TEMPLATE_SEGMENTS = ['defaults', 'EA-model-template.qea'];
 const EA_TEMPLATE_PATH_CANDIDATES = [
-  ['.opencode', 'customtools', 'EA-model-template.feap'],
-  ['.opencode', 'EA-model-template.feap'],
-  ['eatool', 'EA-model-template.feap'],
-  ['EA-model-template.feap'],
+  ['.opencode', 'customtools', 'EA-model-template.qea'],
+  ['.opencode', 'EA-model-template.qea'],
+  ['eatool', 'EA-model-template.qea'],
+  ['EA-model-template.qea'],
   ['Argo.feap'],
 ];
 const WINDOWS_RESERVED_NAMES = new Set([

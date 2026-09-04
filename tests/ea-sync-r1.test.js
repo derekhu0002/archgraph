@@ -119,7 +119,7 @@ test('AT-2789-R1-02：位置不变性——仅改 Notes 后 DiagramObject geomet
   const probe = driver(['probe-edit', '--allow-scratch-write'], 300000);
   if (probe.result.status === 4) {
     // 环境未就绪：EA 当前打开的不是 scratch 项目（安全门②拒绝）→ 显式消息 skip 计通过
-    t.skip(`写探测环境未就绪，跳过位置不变性验证：${probe.parsed.error}${probe.parsed.gate ? `（EA 当前打开：${probe.parsed.gate.lastOpen || '未知'}）` : ''}。请把临时 scratch 副本（如 ${path.join(os.tmpdir(), 'ea-scratch', 'EA-model-template.feap')}）在 EA 中打开并展开任意图后重跑`);
+    t.skip(`写探测环境未就绪，跳过位置不变性验证：${probe.parsed.error}${probe.parsed.gate ? `（EA 当前打开：${probe.parsed.gate.lastOpen || '未知'}）` : ''}。请把临时 scratch 副本（如 ${path.join(os.tmpdir(), 'ea-scratch', 'EA-model-template.qea')}）在 EA 中打开并展开任意图后重跑`);
     return;
   }
   if (probe.result.status === 3) {

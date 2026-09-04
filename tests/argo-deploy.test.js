@@ -104,7 +104,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(fs.existsSync(path.join(argoRoot, 'scripts', 'argo-mcp-server.js')));
     // 2b) defaults (workspace bootstrap templates)
     assert.ok(fs.existsSync(path.join(argoRoot, 'defaults', 'design', 'KG', 'SystemArchitecture.json')));
-    assert.ok(fs.existsSync(path.join(argoRoot, 'defaults', 'EA-model-template.feap')));
+    assert.ok(fs.existsSync(path.join(argoRoot, 'defaults', 'EA-model-template.qea')));
     // 3) argo-init skill
     assert.ok(fs.existsSync(path.join(skillsRoot, 'argo-init', 'SKILL.md')));
     // 4) global rule

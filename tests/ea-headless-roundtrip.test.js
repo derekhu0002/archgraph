@@ -24,7 +24,7 @@ const { spawnSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const TEMPLATE_QEA = path.join(ROOT, 'argo', 'defaults', 'EA-model-template.qea');
-const TEMPLATE_FEAP = path.join(ROOT, 'argo', 'defaults', 'EA-model-template.feap');
+const TEMPLATE_FEAP = path.join(ROOT, 'argo', 'defaults', 'EA-model-template.qea');
 const TEMPLATE = fs.existsSync(TEMPLATE_QEA) ? TEMPLATE_QEA : TEMPLATE_FEAP;
 const TEMPLATE_EXT = TEMPLATE.endsWith('.qea') ? '.qea' : '.feap'; // EA 按扩展名识别文件库类型
 const GRAPH = path.join(ROOT, 'design', 'KG', 'SystemArchitecture.json');

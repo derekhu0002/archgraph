@@ -10,7 +10,7 @@ const ROOT = path.resolve(__dirname, '..');
 const { initializeWorkspace } = require(path.join(ROOT, 'argo', 'scripts', 'argo-mcp-server.js'));
 
 const DEFAULT_GRAPH_SOURCE = path.join(ROOT, 'argo', 'defaults', 'design', 'KG', 'SystemArchitecture.json');
-const DEFAULT_FEAP_SOURCE = path.join(ROOT, 'argo', 'defaults', 'EA-model-template.feap');
+const DEFAULT_FEAP_SOURCE = path.join(ROOT, 'argo', 'defaults', 'EA-model-template.qea');
 
 function createEmptyWorkspace() {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-workspace-bootstrap-'));
