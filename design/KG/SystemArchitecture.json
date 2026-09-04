@@ -4940,9 +4940,9 @@
     {
       "attributes": [
         {
-          "description": "2026-09-04 人类拍板架构修正：EA MCP 不直接开放给 AGENT（不注册任何宿主 MCP）；EA 同步 = ARGO MCP 图谱写入的下游投影流程（与「落盘→Neo4j 结构投影」同构），由同步驱动器内部调用 EA MCP 把差异应用到**本仓库 EA 文件 archgraph.feap**；驱动器以观察 canonical JSON 落盘实现后续流程（不改 argo/**）。开发/测试用 scratch 副本，生产同步目标=仓库 archgraph.feap。",
+          "description": "2026-09-04 人类伙伴补充需求：同一台机器上可能同时开发多个项目，各项目 AGENT 经 ARGO MCP 写各自仓库图谱；EA 投影必须按项目归属——写哪个仓库的图谱就投影到哪个仓库的 EA 文件。影响：同步驱动器需多项目感知（多根 watch + 每项目队列/状态），EA 单项目单实例的现实约束决定路由策略（活跃项目投影 vs 多实例）。",
           "name": "decision",
-          "value": "ea-sync-downstream-projection"
+          "value": "ea-sync-multi-project"
         },
         {
           "name": "status",
