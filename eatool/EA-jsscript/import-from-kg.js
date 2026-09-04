@@ -75,9 +75,21 @@ function reportTimings() {
   }
 }
 
+// Repository.Execute 能力探测：EA 文件库方言不同——.feap(Firebird) 支持 Execute（逐条单语句，批语法不可用），
+// .qea(SQLite, EA16+/17.2) Execute 一律返回 'Internal Error'（probe15/15b）。SQL 默认开启时先做零行 no-op
+// UPDATE 探测，不支持则静默回退对象模型（无头本就默认对象模型）。
+function sqlExecuteCapable() {
+  try {
+    var ok = Repository.Execute('UPDATE t_object SET Status = Status WHERE Object_ID = -999999');
+    return ok !== false;
+  } catch (e) {
+    return false;
+  }
+}
+
 // 通道分发：默认 SQL 直写；OBJECT_MODEL_FALLBACK=true 时走 518c2b0 对象模型全量路径。
 function main() {
-  if (sqlDirectEnabled()) {
+  if (sqlDirectEnabled() && sqlExecuteCapable()) {
     sqlImportMain();
     return;
   }

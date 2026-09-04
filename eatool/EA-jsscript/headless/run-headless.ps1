@@ -23,7 +23,9 @@ param(
 $sqlPos = if ($SqlDirect -eq '1' -or $SqlDirect -eq '0') { $SqlDirect } else { '-' }
 $ErrorActionPreference = 'Stop'
 $bootstrap = Join-Path $PSScriptRoot 'bootstrap.js'
-$cs = 'C:\Windows\SysWOW64\cscript.exe'
+$eaX64 = Test-Path 'C:\Program Files\Sparx Systems\EA Trial\EA.exe'
+$eaX86 = Test-Path 'C:\Program Files (x86)\Sparx Systems\EA Trial\EA.exe'
+$cs = if ($eaX64) { 'C:\Windows\System32\cscript.exe' } elseif ($eaX86) { 'C:\Windows\SysWOW64\cscript.exe' } else { 'C:\Windows\System32\cscript.exe' }
 if (-not (Test-Path $bootstrap)) { throw "bootstrap not found: $bootstrap" }
 if (-not (Test-Path $cs)) { throw 'SysWOW64 cscript missing' }
 

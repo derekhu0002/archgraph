@@ -6,7 +6,7 @@
 // 前提（环境门，不满足则显式 skip 计通过）：
 //   - EA 本机可用且非交互占用（测试前应无 EA 实例 / 或由 run-headless 自动 -KillEA）
 //   - 显式开启：$env:EA_RUN_HEADLESS = "1"（默认关闭，避免在无 EA/交互占用时挂起）
-//   - 隔离 .feap 副本必须源于 argo/defaults/EA-model-template.feap
+//   - 隔离副本必须源于 argo/defaults/EA-model-template.qea（优先，EA16+ SQLite）或 .feap（回退），扩展名保留
 //
 // 运行方式：
 //   $env:EA_RUN_HEADLESS="1"
@@ -23,7 +23,10 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const TEMPLATE = path.join(ROOT, 'argo', 'defaults', 'EA-model-template.feap');
+const TEMPLATE_QEA = path.join(ROOT, 'argo', 'defaults', 'EA-model-template.qea');
+const TEMPLATE_FEAP = path.join(ROOT, 'argo', 'defaults', 'EA-model-template.feap');
+const TEMPLATE = fs.existsSync(TEMPLATE_QEA) ? TEMPLATE_QEA : TEMPLATE_FEAP;
+const TEMPLATE_EXT = TEMPLATE.endsWith('.qea') ? '.qea' : '.feap'; // EA 按扩展名识别文件库类型
 const GRAPH = path.join(ROOT, 'design', 'KG', 'SystemArchitecture.json');
 const RUNNER = path.join(ROOT, 'eatool', 'EA-jsscript', 'headless', 'run-headless.ps1');
 const { compareRoundtrip, formatReport } = require(path.join(__dirname, '_ea-roundtrip-lib.js'));
@@ -51,7 +54,7 @@ test('ea-headless-roundtrip (AT-2100-OPT-05): 隔离副本 import→export→比
   if (!fs.existsSync(RUNNER)) { t.skip(`无头运行器缺失，跳过：${RUNNER}`); return; }
 
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-headless-rt-'));
-  const feap = path.join(tmp, 'isolated.feap');
+  const feap = path.join(tmp, 'isolated' + TEMPLATE_EXT);
   const exportJson = path.join(tmp, 'export.json');
   const responseFile = path.join(tmp, 'responses.txt'); // 删除确认：默认跳过删除
   fs.copyFileSync(TEMPLATE, feap);
