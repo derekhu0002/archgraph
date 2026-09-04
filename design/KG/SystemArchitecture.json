@@ -3722,78 +3722,83 @@
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "commit",
+          "value": "3c4c492",
+          "description": "argo/scripts/ea-qea-sync-lib.js; argo/scripts/systemarchitecture-mcp-server.js; tests/architecture-view-context.test.js; tests/ea-qea-sync.test.js（getArchitectureViewContext 可选 includeEaGeometry 返回 EA 图几何）"
         }
       ],
       "testcases": [
         {
-          "name": "AT-acceptance-guardian-01",
-          "description": "GIVEN ARCHGRAPH HARNESS 验收看护注册表为单一事实源；WHEN 运行看护驱动器 tests/acceptance-guardian.test.js；THEN 每个 ARGO MCP 接口与框架交付件都被可执行功能测试覆盖、图谱挂载 AT 均为裸可执行路径、runArchitectureTests 执行器可处理裸测试路径。",
-          "type": "Acceptance Test",
           "Input": "tests/acceptance-guardian.test.js",
-          "acceptanceCriteria": "tests/acceptance-guardian.test.js"
+          "acceptanceCriteria": "tests/acceptance-guardian.test.js",
+          "description": "GIVEN ARCHGRAPH HARNESS 验收看护注册表为单一事实源；WHEN 运行看护驱动器 tests/acceptance-guardian.test.js；THEN 每个 ARGO MCP 接口与框架交付件都被可执行功能测试覆盖、图谱挂载 AT 均为裸可执行路径、runArchitectureTests 执行器可处理裸测试路径。",
+          "name": "AT-acceptance-guardian-01",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-acceptance-guardian-02",
-          "description": "GIVEN getIntentElementContext 曾仅注册未功能覆盖；WHEN 进程内真实调用；THEN 对稳定元素返回焦点语义子图（含 subgraph/boundary）、未知元素明确失败。",
-          "type": "Acceptance Test",
           "Input": "tests/mcp-interface-behavior.test.js",
-          "acceptanceCriteria": "tests/mcp-interface-behavior.test.js"
+          "acceptanceCriteria": "tests/mcp-interface-behavior.test.js",
+          "description": "GIVEN getIntentElementContext 曾仅注册未功能覆盖；WHEN 进程内真实调用；THEN 对稳定元素返回焦点语义子图（含 subgraph/boundary）、未知元素明确失败。",
+          "name": "AT-acceptance-guardian-02",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-acceptance-guardian-03",
-          "description": "GIVEN getSystemArchitecture 工具面契约（query 必填、purpose 收拢 general/audit、全量图谱移除）；WHEN 以外部视角调用工具；THEN 无 query 返回 QUERY_REQUIRED、graph-tidy 与旧内部类别返回 QUERY_PURPOSE_INVALID、保留工具仍在 tools/list。",
-          "type": "Acceptance Test",
           "Input": "tests/argo-mcp-tools.test.js",
-          "acceptanceCriteria": "tests/argo-mcp-tools.test.js"
+          "acceptanceCriteria": "tests/argo-mcp-tools.test.js",
+          "description": "GIVEN getSystemArchitecture 工具面契约（query 必填、purpose 收拢 general/audit、全量图谱移除）；WHEN 以外部视角调用工具；THEN 无 query 返回 QUERY_REQUIRED、graph-tidy 与旧内部类别返回 QUERY_PURPOSE_INVALID、保留工具仍在 tools/list。",
+          "name": "AT-acceptance-guardian-03",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-acceptance-guardian-04",
-          "description": "GIVEN queryNeo4jGraph 只读 Cypher 接口；WHEN 以 schema 模式、写查询、空查询、脏投影恢复等场景调用；THEN schema 模式返回投影 schema、写查询被拒绝、空查询被拒绝、脏投影触发恢复。",
-          "type": "Acceptance Test",
           "Input": "tests/neo4j-cypher-query.test.js",
-          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js"
+          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js",
+          "description": "GIVEN queryNeo4jGraph 只读 Cypher 接口；WHEN 以 schema 模式、写查询、空查询、脏投影恢复等场景调用；THEN schema 模式返回投影 schema、写查询被拒绝、空查询被拒绝、脏投影触发恢复。",
+          "name": "AT-acceptance-guardian-04",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-acceptance-guardian-05",
-          "description": "GIVEN memory_search 语义记忆检索工具；WHEN 以外部视角调用；THEN 工具在工具列表注册、返回紧凑摘要卡片（max_desc_len 默认 800）、无 query 明确失败、结果符合 MCP content 数组契约。",
-          "type": "Acceptance Test",
           "Input": "tests/semantic-memory-search.test.js",
-          "acceptanceCriteria": "tests/semantic-memory-search.test.js"
+          "acceptanceCriteria": "tests/semantic-memory-search.test.js",
+          "description": "GIVEN memory_search 语义记忆检索工具；WHEN 以外部视角调用；THEN 工具在工具列表注册、返回紧凑摘要卡片（max_desc_len 默认 800）、无 query 明确失败、结果符合 MCP content 数组契约。",
+          "name": "AT-acceptance-guardian-05",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-acceptance-guardian-06",
-          "description": "GIVEN argo-init SKILL 作为框架交付件；WHEN 以功能视角检查其行为；THEN skill 通过 initializeWorkspace MCP 接口驱动确定性初始化且不执行 WORKSPACE 外脚本，buildHarnessReport 供进程内复用。",
-          "type": "Acceptance Test",
           "Input": "tests/argo-init-interface.test.js",
-          "acceptanceCriteria": "tests/argo-init-interface.test.js"
+          "acceptanceCriteria": "tests/argo-init-interface.test.js",
+          "description": "GIVEN argo-init SKILL 作为框架交付件；WHEN 以功能视角检查其行为；THEN skill 通过 initializeWorkspace MCP 接口驱动确定性初始化且不执行 WORKSPACE 外脚本，buildHarnessReport 供进程内复用。",
+          "name": "AT-acceptance-guardian-06",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-acceptance-guardian-07",
-          "description": "GIVEN RULE 交付件（KG-first/语义优先检索、变更分级、能力委派、内容入 KG）；WHEN 以功能视角验证规则行为语义；THEN 规则文档与测试断言保持既定功能语义。",
-          "type": "Acceptance Test",
           "Input": "tests/argo-rules-query.test.js",
-          "acceptanceCriteria": "tests/argo-rules-query.test.js"
+          "acceptanceCriteria": "tests/argo-rules-query.test.js",
+          "description": "GIVEN RULE 交付件（KG-first/语义优先检索、变更分级、能力委派、内容入 KG）；WHEN 以功能视角验证规则行为语义；THEN 规则文档与测试断言保持既定功能语义。",
+          "name": "AT-acceptance-guardian-07",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-acceptance-guardian-08",
-          "description": "GIVEN getArchitectureViewContext 视图解析接口；WHEN 以已知/未知/含子视图场景调用；THEN 返回视图成员、未知视图明确失败、子视图可按需展开。",
-          "type": "Acceptance Test",
           "Input": "tests/architecture-view-context.test.js",
-          "acceptanceCriteria": "tests/architecture-view-context.test.js"
+          "acceptanceCriteria": "tests/architecture-view-context.test.js",
+          "description": "GIVEN getArchitectureViewContext 视图解析接口；WHEN 以已知/未知/含子视图场景调用，且显式 includeEaGeometry=true 时再解析工作区 EA 模型(.qea)中该视图的图几何；THEN 返回视图成员、未知视图明确失败、子视图可按需展开；开启几何时返回按 schema id 对齐的 geometry（元素 rect + 连线路径）、缺 EA 模型/图时 geometry.present=false 不报错、默认不开启则不触碰 EA 且不返回 geometry。",
+          "name": "AT-acceptance-guardian-08",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-acceptance-guardian-09",
-          "description": "GIVEN ARGO MCP 写接口族（add/update/remove + preview/apply）；WHEN 以真实图状态执行写与撤销重做；THEN 写入生效、undo/redo 回退到真实文件状态、embedding 生命周期一致。",
-          "type": "Acceptance Test",
           "Input": "tests/ea-web-service-impl.test.js",
-          "acceptanceCriteria": "tests/ea-web-service-impl.test.js"
+          "acceptanceCriteria": "tests/ea-web-service-impl.test.js",
+          "description": "GIVEN ARGO MCP 写接口族（add/update/remove + preview/apply）；WHEN 以真实图状态执行写与撤销重做；THEN 写入生效、undo/redo 回退到真实文件状态、embedding 生命周期一致。",
+          "name": "AT-acceptance-guardian-09",
+          "type": "Acceptance Test"
         },
         {
-          "name": "AT-acceptance-guardian-10",
-          "description": "GIVEN 全局安装的 ARGO MCP 服务器与 validateSystemArchitecture 校验器；WHEN 从仓库外全局安装调用；THEN tools/list 暴露核心工具、getSystemArchitecture 无 query 返回 QUERY_REQUIRED、validateSystemArchitecture 通过。",
-          "type": "Acceptance Test",
           "Input": "tests/argo-global-install.test.js",
-          "acceptanceCriteria": "tests/argo-global-install.test.js"
+          "acceptanceCriteria": "tests/argo-global-install.test.js",
+          "description": "GIVEN 全局安装的 ARGO MCP 服务器与 validateSystemArchitecture 校验器；WHEN 从仓库外全局安装调用；THEN tools/list 暴露核心工具、getSystemArchitecture 无 query 返回 QUERY_REQUIRED、validateSystemArchitecture 通过。",
+          "name": "AT-acceptance-guardian-10",
+          "type": "Acceptance Test"
         }
       ]
     },
@@ -5288,6 +5293,11 @@
           "name": "commit",
           "value": "e7b646a",
           "description": "archgraph-argo@0.12.6 发布（含 bootstrap/attributes-testcases/投影上报/StyleEx 崩溃四项修复；部署后 initializeWorkspace 验证全绿 + EA attributes/testcases 全量一致 625/625、51/51）"
+        },
+        {
+          "name": "commit",
+          "value": "3c4c492",
+          "description": "argo/scripts/ea-qea-sync-lib.js（readViewDiagramGeometry 视图→EA 图几何只读）；tests/ea-qea-sync.test.js（reader 精确值单测）"
         }
       ],
       "description": "ARGO 写图 → 下游直写 .qea 投影（Node + node:sqlite，标准批量 SQL）。背景与结论：Repository.Execute 仅 DBMS 库可用（.feap 内嵌 Firebird 单条可用、.qea/SQLite 完全禁用）；.qea 是标准 SQLite，外部直写最符“一把 SQL 写库”诉求，EA 开/关皆可写（实测）；仓库 EA 文件已换 archgraph.qea。本 WP：① Node 模块直接对 .qea 做图谱⇄SQLite 批量读写（t_object/t_connector/t_diagram/t_objectproperties/t_connectortag/t_diagramobjects/t_diagramlinks），对账语义沿用 2100（固定同步根包/update-in-place 不动几何/删除清单确认/幂等）；② ARGO MCP 写图下游投影：观察 design/KG/SystemArchitecture.json 落盘→投影到 archgraph.qea（不改 argo/**）；③ 并发 busy_timeout+短事务+重试，EA 开着也能写；EA 缓存需人工刷新可见；④ unchanged-skip 变更检测使稳态增量快；⑤ .feap(Firebird) 旧路径保留。在本项目验证：真实图谱投影到 archgraph.qea + 回环一致 + 幂等 + 测速。",
