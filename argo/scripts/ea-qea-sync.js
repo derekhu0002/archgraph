@@ -2,7 +2,7 @@
 'use strict';
 
 // WP2791 Node direct .qea projection CLI (no EA, no third-party deps).
-//   node scripts/ea-qea-sync.js --graph <json> --qea <file.qea> --mode import|sync|full|export|watch
+//   node argo/scripts/ea-qea-sync.js --graph <json> --qea <file.qea> --mode import|sync|full|export|watch
 //   [--delete-confirm-file <f> | -y] [--dry-run] [--snapshot-dir <dir>] [--out <file>] [--no-backup]
 //
 // import/sync : project design/KG graph into the .qea (update-in-place, batch INSERT,

@@ -424,39 +424,29 @@ function resolveQeaProjectionTarget(workspaceRoot) {
   try {
     if (!workspaceRoot || !fs.existsSync(workspaceRoot)) { return null; }
     const pick = (p) => (p && fs.existsSync(p) ? path.resolve(p) : null);
-    let qeaPath = pick(process.env.ARGO_EA_QEA);
-    if (!qeaPath) {
-      const cfgPath = path.join(workspaceRoot, 'design', 'KG', 'ea-qea.json');
-      if (fs.existsSync(cfgPath)) {
-        try {
-          const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
-          if (cfg && cfg.enabled !== false && cfg.qeaPath) { qeaPath = pick(path.resolve(workspaceRoot, cfg.qeaPath)); }
-        } catch { /* fallthrough */ }
-      }
-    }
-    if (!qeaPath) {
-      let qeas = [];
-      try { qeas = fs.readdirSync(workspaceRoot).filter((n) => n.toLowerCase().endsWith('.qea')); } catch { /* ignore */ }
-      if (qeas.length === 1) { qeaPath = pick(path.join(workspaceRoot, qeas[0])); }
-    }
-    if (!qeaPath) { return null; }
-    const script = path.join(workspaceRoot, 'scripts', 'ea-qea-sync.js');
-    if (!fs.existsSync(script)) { return null; }
-    return { qeaPath, script, workspaceRoot };
+    const qeaPath = pick(process.env.ARGO_EA_QEA);
+    if (qeaPath) { return { qeaPath, workspaceRoot }; }
+    let qeas = [];
+    try { qeas = fs.readdirSync(workspaceRoot).filter((n) => n.toLowerCase().endsWith('.qea')); } catch { /* ignore */ }
+    if (qeas.length === 1) { return { qeaPath: path.resolve(workspaceRoot, qeas[0]), workspaceRoot }; }
+    console.log('[ea-qea] init projection target: none' + (qeas.length > 1 ? ' (' + qeas.length + ' *.qea found; expected exactly one or ARGO_EA_QEA)' : '') + ' in ' + workspaceRoot);
+    return null;
   } catch (error) {
+    console.log('[ea-qea] init projection target resolution failed: ' + String(error && error.message ? error.message : error));
     return null;
   }
 }
 
-// argo init .qea FULL projection (mirrors Neo4j initial full sync): clears projection-owned
-// content then re-writes the whole graph. Non-fatal by contract; no target/script -> noop.
+// argo init .qea FULL projection (mirrors Neo4j initial full sync): wipes the whole target
+// .qea then rebuilds it purely from the canonical graph. Non-fatal by contract.
 function runQeaFullProjection(workspaceRoot, graphTargetPath) {
   const target = resolveQeaProjectionTarget(workspaceRoot);
-  if (!target) {
-    return { status: 'noop', reason: 'no .qea target or scripts/ea-qea-sync.js in workspace' };
+  const script = path.join(__dirname, 'ea-qea-sync.js');
+  if (!target || !fs.existsSync(script)) {
+    return { status: 'noop', reason: !target ? 'no .qea target (env ARGO_EA_QEA or exactly one root *.qea)' : 'argo/scripts/ea-qea-sync.js missing' };
   }
   const snapshotDir = path.join(workspaceRoot, '.argo', 'temp', 'qea-backups');
-  const args = ['scripts/ea-qea-sync.js', '--mode', 'full', '--graph', graphTargetPath, '--qea', target.qeaPath, '--snapshot-dir', snapshotDir];
+  const args = [script, '--mode', 'full', '--graph', graphTargetPath, '--qea', target.qeaPath, '--snapshot-dir', snapshotDir];
   const started = Date.now();
   try {
     const res = spawnSync(process.execPath, args, { cwd: workspaceRoot, encoding: 'utf8', windowsHide: true, timeout: 120000 });

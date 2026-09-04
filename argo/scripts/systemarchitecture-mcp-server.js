@@ -1833,6 +1833,10 @@ function summarizeDocument(document) {
 }
 
 // --- WP2791: post-canonical-write .qea projection (parallel to Neo4j sync, non-fatal) ---
+// Target resolution (decision qea-full-wholefile-argo-scripts-no-config): env ARGO_EA_QEA >
+// the single *.qea at the workspace root (0/many -> no-op with an explicit log). NO config file.
+// Projection script runs from argo/scripts (same package as the MCP runtime), so a workspace
+// does not need to ship its own projection script (bundled argo/scripts module).
 function resolveQeaProjectionTarget(context) {
   try {
     const workspaceRoot = String(context && context.workspaceRoot ? context.workspaceRoot : '');
@@ -1841,33 +1845,29 @@ function resolveQeaProjectionTarget(context) {
     if (!graphAbsolute || !fs.existsSync(graphAbsolute)) { return null; }
     const pick = (p) => (p && fs.existsSync(p) ? path.resolve(p) : null);
     let qeaPath = pick(process.env.ARGO_EA_QEA);
-    if (!qeaPath) {
-      const cfgPath = path.join(workspaceRoot, 'design', 'KG', 'ea-qea.json');
-      if (fs.existsSync(cfgPath)) {
-        try {
-          const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
-          if (cfg && cfg.enabled !== false && cfg.qeaPath) { qeaPath = pick(path.resolve(workspaceRoot, cfg.qeaPath)); }
-        } catch { /* fallthrough */ }
-      }
+    if (qeaPath) { return { qeaPath, graphPath: graphAbsolute, workspaceRoot }; }
+    let qeas = [];
+    try { qeas = fs.readdirSync(workspaceRoot).filter((n) => n.toLowerCase().endsWith('.qea')); } catch { /* ignore */ }
+    if (qeas.length === 1) {
+      return { qeaPath: path.resolve(workspaceRoot, qeas[0]), graphPath: graphAbsolute, workspaceRoot };
     }
-    if (!qeaPath) {
-      let qeas = [];
-      try { qeas = fs.readdirSync(workspaceRoot).filter((n) => n.toLowerCase().endsWith('.qea')); } catch { /* ignore */ }
-      if (qeas.length === 1) { qeaPath = pick(path.join(workspaceRoot, qeas[0])); }
-    }
-    if (!qeaPath) { return null; }
-    const script = path.join(workspaceRoot, 'scripts', 'ea-qea-sync.js');
-    if (!fs.existsSync(script)) { return null; }
-    return { qeaPath, graphPath: graphAbsolute, script, workspaceRoot };
+    console.log('[ea-qea] projection target: none' + (qeas.length > 1 ? ' (' + qeas.length + ' *.qea found; expected exactly one or ARGO_EA_QEA)' : '') + ' in ' + workspaceRoot);
+    return null;
   } catch (error) {
+    console.log('[ea-qea] projection target resolution failed: ' + String(error && error.message ? error.message : error));
     return null;
   }
 }
 
 function runQeaProjection(target) {
   return new Promise((resolve) => {
+    const script = path.join(__dirname, 'ea-qea-sync.js');
+    if (!fs.existsSync(script)) {
+      resolve({ ok: false, error: 'argo/scripts/ea-qea-sync.js missing', ms: 0 });
+      return;
+    }
     const snapshotDir = path.join(target.workspaceRoot, '.argo', 'temp', 'qea-backups');
-    const args = ['scripts/ea-qea-sync.js', '--mode', 'sync', '--graph', target.graphPath, '--qea', target.qeaPath, '--snapshot-dir', snapshotDir];
+    const args = [script, '--mode', 'sync', '--graph', target.graphPath, '--qea', target.qeaPath, '--snapshot-dir', snapshotDir];
     const started = Date.now();
     let stderr = '';
     let child;
