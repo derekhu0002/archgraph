@@ -5151,13 +5151,13 @@
     {
       "attributes": [
         {
-          "description": "2026-09-04 人类需求：像 Neo4j 投影一样在 ARGO MCP 写入图谱时自动投影到 .qea。实现=观察驱动（不改 argo/**）：常驻 watch design/KG/SystemArchitecture.json（防抖+轮询兜底+single-flight）→ canonical 落盘即增量 sync archgraph.qea；稳态 ~16ms、EA 开着可写（busy_timeout+重试）。",
+          "description": "2026-09-04 人类解除“不改 argo/**”红线，要求像 Neo4j 投影一样在 ARGO MCP 写图**流程内**自动投影 .qea（非外部 watch）。实现：在 systemarchitecture-mcp-server 写后触发链加 workspace 级 .qea 投影步骤（config/仓库根单 *.qea 自动发现 + 调用仓库 scripts/ea-qea-sync.js，投影失败不阻断 ARGO 写入，异步同 Neo4j 模式）。",
           "name": "decision",
-          "value": "qea-auto-projection-watcher"
+          "value": "argo-in-flow-qea-projection"
         },
         {
           "name": "status",
-          "value": "COMPLETED",
+          "value": "ACTIVE",
           "description": "AT-2791-01/02 通过（隔离副本回环 equal + 幂等 + 几何不动 + 并发模拟 + 增量）；仓库 archgraph.qea 真实投影完成（EA 未持有文件时写入，写前自动备份）。"
         },
         {
@@ -5207,8 +5207,15 @@
         {
           "Input": "tests/ea-qea-sync.test.js",
           "acceptanceCriteria": "tests/ea-qea-sync.test.js",
-          "description": "GIVEN watch 观察驱动（进程内短时实例）监听图谱 JSON 并指向隔离 .qea 副本；WHEN 模拟 ARGO 写图（改写图谱 JSON 文件，新增一个元素/改动一个 description）；THEN 驱动器自动触发 sync：.qea 出现新增元素/更新该元素，其余 unchanged-skip 不重写；无图谱变化时无写入；EA 持库（保持连接）期间写入成功或重试后成功。纯 Node 可测。",
+          "description": "GIVEN watch 观察驱动（进程内短时实例）监听图谱 JSON 并指向隔离 .qea 副本；WHEN 模拟 ARGO 写图（改写图谱 JSON 文件新增元素/改 description）；THEN 驱动器自动触发 sync：.qea 出现新增/更新，其余 unchanged-skip；无变化不写；EA 持库期间写入成功或重试后成功。",
           "name": "AT-2791-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/argo-qea-projection.test.js",
+          "acceptanceCriteria": "tests/argo-qea-projection.test.js",
+          "description": "GIVEN ARGO MCP 服务器运行于含仓库根 *.qea 且含 scripts/ea-qea-sync.js 的临时工作区；WHEN 经 applySystemArchitectureMutation 成功写入图谱；THEN 写后投影自动触发：目标 .qea 内容更新为新图谱（新增元素可见）、图谱写入成功不被投影失败阻断；无 *.qea 或投影脚本的临时工作区时写后投影为 no-op。",
+          "name": "AT-2791-04",
           "type": "Acceptance Test"
         }
       ],
