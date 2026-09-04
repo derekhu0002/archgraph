@@ -114,6 +114,84 @@ function sha1(text) {
 }
 
 // ---------------------------------------------------------------------------
+// Element child mirror (attributes -> t_attribute, testcases -> t_objecttests)
+// Mirrors the legacy object-model import (import-from-kg.js applyElementAttributes /
+// applyTestcases) so canonical attributes and acceptance tests are visible in EA
+// under the element's Attributes / Testing tabs. Canonical-owned fields only:
+// run status/results on tests are left untouched on update (EA-side state).
+// ---------------------------------------------------------------------------
+const MAX_ATTRIBUTE_DEFAULT_LENGTH = 250;
+const TEST_CLASS_ACCEPTANCE = 4; // mirrors import-from-kg mapTestTypeToEaClass('Acceptance Test')
+
+function attrRowGuid(elementAlias, name, occurrence) {
+  return deterministicGuid('attr:' + elementAlias + ':' + name + '#' + occurrence);
+}
+function attributeDefaultValue(attr) {
+  const value = attr.value === undefined || attr.value === null ? '' : String(attr.value);
+  return value.length > MAX_ATTRIBUTE_DEFAULT_LENGTH ? '' : value;
+}
+function attributeNoteText(attr) {
+  const parts = [];
+  const value = attr.value === undefined || attr.value === null ? '' : String(attr.value);
+  if (value.length > MAX_ATTRIBUTE_DEFAULT_LENGTH) { parts.push(value); }
+  if (attr.description !== undefined && attr.description !== null && String(attr.description) !== '') { parts.push(String(attr.description)); }
+  if (attr.content !== undefined && attr.content !== null && String(attr.content) !== '') { parts.push(String(attr.content)); }
+  return parts.join('\r\n\r\n');
+}
+function isPersistedAttribute(attr) {
+  return !!(attr && typeof attr === 'object' && typeof attr.name === 'string' && attr.name.trim() !== '' && attr.op !== 'remove');
+}
+function mirrorElementChildren(db, objectId, element, stats) {
+  const alias = String(element.id);
+  const attrs = (Array.isArray(element.attributes) ? element.attributes : []).filter(isPersistedAttribute);
+  if (attrs.length > 0) {
+    const existing = db.prepare('SELECT ID, Name, "Default", Notes, ea_guid, Pos FROM t_attribute WHERE Object_ID=?').all(objectId);
+    const available = existing.map((r) => ({ ...r }));
+    let maxPos = 0;
+    for (const r of existing) { const p = Number(r.Pos); if (!Number.isNaN(p) && p > maxPos) { maxPos = p; } }
+    const occurrence = {};
+    for (const a of attrs) {
+      occurrence[a.name] = (occurrence[a.name] || 0) + 1;
+      const guid = attrRowGuid(alias, a.name, occurrence[a.name]);
+      const notes = attributeNoteText(a);
+      const def = attributeDefaultValue(a);
+      const idx = available.findIndex((r) => String(r.ea_guid || '') === guid);
+      if (idx >= 0) {
+        db.prepare('UPDATE t_attribute SET Name=?, Type=?, "Default"=?, Notes=? WHERE ID=?')
+          .run(a.name, 'String', def, notes, Number(available[idx].ID));
+        available.splice(idx, 1);
+        stats.attributesUpdated++;
+      } else {
+        maxPos += 16;
+        db.prepare('INSERT INTO t_attribute (Object_ID, Name, Scope, Type, "Default", Notes, Pos, ea_guid) VALUES (?,?,?,?,?,?,?,?)')
+          .run(objectId, a.name, 'Public', 'String', def, notes, maxPos, guid);
+        stats.attributesAdded++;
+      }
+    }
+  }
+  const tests = Array.isArray(element.testcases) ? element.testcases : [];
+  for (const tc of tests) {
+    if (!tc || typeof tc.name !== 'string' || tc.name.trim() === '') { continue; }
+    const name = tc.name.trim();
+    const type = (tc.type !== undefined && tc.type !== null && String(tc.type) !== '') ? String(tc.type) : 'Acceptance Test';
+    const notes = tc.description === undefined || tc.description === null ? '' : String(tc.description);
+    const input = tc.Input === undefined || tc.Input === null ? '' : String(tc.Input);
+    const criteria = tc.acceptanceCriteria === undefined || tc.acceptanceCriteria === null ? '' : String(tc.acceptanceCriteria);
+    const existing = db.prepare('SELECT Test FROM t_objecttests WHERE Object_ID=? AND Test=? AND TestClass=?')
+      .get(objectId, name, TEST_CLASS_ACCEPTANCE);
+    if (existing) {
+      db.prepare('UPDATE t_objecttests SET TestType=?, Notes=?, InputData=?, AcceptanceCriteria=? WHERE Object_ID=? AND Test=? AND TestClass=?')
+        .run(type, notes, input, criteria, objectId, name, TEST_CLASS_ACCEPTANCE);
+      stats.testsUpdated++;
+    } else {
+      db.prepare('INSERT INTO t_objecttests (Object_ID, Test, TestClass, TestType, Notes, InputData, AcceptanceCriteria, Status, Results) VALUES (?,?,?,?,?,?,?,?,?)')
+        .run(objectId, name, TEST_CLASS_ACCEPTANCE, type, notes, input, criteria, 'Proposed', '');
+      stats.testsAdded++;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // sqlite helpers
 // ---------------------------------------------------------------------------
 function openQea(file) {
@@ -334,6 +412,10 @@ function syncGraphToQea(graph, qeaPath, opts) {
           tagStats.propsNew += newProps.length;
         }
         tagStats.propsSkip = propsToWrite.length - newProps.length;
+      }
+      // canonical attributes -> t_attribute, canonical testcases -> t_objecttests
+      for (const t of toTag) {
+        mirrorElementChildren(db, t.id, t.e, tagStats);
       }
     }
     stages.elemTags = nowMs();

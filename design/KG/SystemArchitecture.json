@@ -5295,6 +5295,13 @@
           "description": "GIVEN 临时 workspace 执行 initializeWorkspace（argo init）；WHEN 仓库根缺 EA 模型文件；THEN bootstrap 以项目名生成 `.qea` 且不生成任何 `.feap`；当仓库根已存在 `.qea`（如 archgraph.qea）或遗留 `.feap` 时不补建第二个 EA 文件（createdFiles 不含 qea/feap，skippedSteps 说明原因）。",
           "name": "AT-2791-07",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-qea-sync.test.js",
+          "acceptanceCriteria": "tests/ea-qea-sync.test.js",
+          "description": "GIVEN 同步 Node 模块 syncGraphToQea/fullProjection；WHEN 元素带 attributes（含同名 ledger 重复）与 testcases 投影到隔离 .qea 副本；THEN attributes 逐条写入 EA t_attribute（同名允许多行、短值入 Default、长值/描述入 Notes、ea_guid 唯一）、testcases 写入 t_objecttests（TestClass=Acceptance Test、Notes/InputData/AcceptanceCriteria 与 canonical 一致）；再次 sync 幂等不新增行；改值 update-in-place；full 整库重建后同样携带。纯 Node 可测。",
+          "name": "AT-2791-08",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package"

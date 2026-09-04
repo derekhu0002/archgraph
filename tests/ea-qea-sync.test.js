@@ -1,6 +1,6 @@
 'use strict';
 
-// WP2791 (AT-2791-01/02/05 + incremental): Node direct .qea projection — pure Node, no EA.
+// WP2791 (AT-2791-01/02/05/08 + incremental): Node direct .qea projection — pure Node, no EA.
 // The projection implementation lives in argo/scripts (same package as the ARGO MCP runtime).
 //   - import -> export roundtrip equality (ignore order, _ea-roundtrip-lib)
 //   - second import idempotent (added = 0) and unchanged-skip stable
@@ -8,6 +8,8 @@
 //   - a concurrently open SQLite connection does not block writes (busy_timeout)
 //   - full mode wipes the WHOLE target .qea then rebuilds it purely from canonical
 //     (decision qea-full-wholefile-argo-scripts-no-config), verified export == canonical
+//   - element attributes -> EA t_attribute, element testcases -> EA t_objecttests
+//     (visible under the element Attributes / Testing tabs), idempotent update-in-place
 //   - migration guard: projection code lives in argo/scripts, no top-level scripts/ residue
 
 const { test } = require('node:test');
@@ -33,6 +35,45 @@ function tmpQea(dir) {
   fs.copyFileSync(TEMPLATE, target);
   return target;
 }
+
+// Windows: sqlite handles can take a beat to release after close; retry before
+// treating directory removal as a failure (see AT-2791-08 cleanup).
+function removeTree(dir) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      fs.rmSync(dir, { recursive: true, force: true });
+      return;
+    } catch (error) {
+      if (attempt === 4) { throw error; }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 150);
+    }
+  }
+}
+
+const CHILD_GRAPH = {
+  name: 'child-mirror-fixture',
+  description: '',
+  elements: [
+    {
+      id: 'e1',
+      name: 'Element One',
+      type: 'Business Object',
+      description: 'desc one',
+      attributes: [
+        { name: 'commit', value: 'aaa111', description: 'first commit' },
+        { name: 'commit', value: 'bbb222' },
+        { name: 'decision', value: 'x'.repeat(300), description: 'long note' },
+        { name: 'status', value: 'ACTIVE' },
+      ],
+      testcases: [
+        { name: 'AT-E1-01', type: 'Acceptance Test', description: 'acceptance one', Input: 'tests/foo.test.js', acceptanceCriteria: 'tests/foo.test.js' },
+        { name: 'AT-E1-02', type: 'Acceptance Test', description: 'acceptance two', Input: 'tests/bar.test.js', acceptanceCriteria: 'tests/bar.test.js' },
+      ],
+    },
+  ],
+  relationships: [],
+  views: [],
+};
 
 test('ea-qea-sync (AT-2791-01): isolated import -> export roundtrip equal + idempotent + geometry preserved', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-'));
@@ -133,6 +174,66 @@ test('ea-qea-sync (AT-2791-05): full wipes the WHOLE .qea then rebuilds canonica
     db3.close();
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('ea-qea-sync (AT-2791-08): element attributes and testcases are mirrored into EA (t_attribute / t_objecttests), idempotent update-in-place', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-child-'));
+  try {
+    const qea = tmpQea(dir);
+    lib.syncGraphToQea(CHILD_GRAPH, qea, { dryRun: false, allowDelete: false });
+
+    const db = new DatabaseSync(qea);
+    const eid = db.prepare("SELECT Object_ID FROM t_object WHERE Alias='e1'").get().Object_ID;
+    const attrs = db.prepare('SELECT Name, "Default", Notes, ea_guid FROM t_attribute WHERE Object_ID=? ORDER BY Pos, ID').all(Number(eid));
+    assert.equal(attrs.length, 4, 'one EA attribute row per canonical attribute entry (incl. ledger duplicates)');
+    assert.deepEqual(attrs.map((a) => a.Name), ['commit', 'commit', 'decision', 'status']);
+    assert.equal(attrs[0].Default, 'aaa111');
+    assert.equal(attrs[1].Default, 'bbb222');
+    assert.equal(attrs[2].Default, '', 'long attribute value must not overflow the Default column');
+    assert.ok(attrs[2].Notes.includes('x'.repeat(300)) && attrs[2].Notes.includes('long note'), 'long value + description go to Notes');
+    assert.equal(attrs[3].Default, 'ACTIVE');
+    assert.equal(new Set(attrs.map((a) => a.ea_guid)).size, 4, 'attribute ea_guid must be unique');
+
+    const tests = db.prepare('SELECT Test, TestClass, TestType, Notes, InputData, AcceptanceCriteria, Results FROM t_objecttests WHERE Object_ID=? ORDER BY Test').all(Number(eid));
+    assert.equal(tests.length, 2, 'one t_objecttests row per canonical testcase');
+    const t1 = tests.find((t) => t.Test === 'AT-E1-01');
+    assert.ok(t1, 'AT-E1-01 mirrored');
+    assert.equal(t1.TestClass, 4, 'Acceptance Test class (mirrors import-from-kg)');
+    assert.equal(t1.Notes, 'acceptance one');
+    assert.equal(t1.InputData, 'tests/foo.test.js');
+    assert.equal(t1.AcceptanceCriteria, 'tests/foo.test.js');
+    db.close();
+
+    // idempotent second sync: no new rows
+    lib.syncGraphToQea(CHILD_GRAPH, qea, { dryRun: false, allowDelete: false });
+    const db2 = new DatabaseSync(qea);
+    const eid2 = db2.prepare("SELECT Object_ID FROM t_object WHERE Alias='e1'").get().Object_ID;
+    assert.equal(db2.prepare('SELECT COUNT(*) AS c FROM t_attribute WHERE Object_ID=?').get(Number(eid2)).c, 4, 'no attribute rows churned by re-sync');
+    assert.equal(db2.prepare('SELECT COUNT(*) AS c FROM t_objecttests WHERE Object_ID=?').get(Number(eid2)).c, 2, 'no test rows churned by re-sync');
+    db2.close();
+
+    // value change updates in place (row count stable, no duplicate)
+    const changed = JSON.parse(JSON.stringify(CHILD_GRAPH));
+    changed.elements[0].attributes[1].value = 'ccc333';
+    lib.syncGraphToQea(changed, qea, { dryRun: false, allowDelete: false });
+    const db3 = new DatabaseSync(qea);
+    const eid3 = db3.prepare("SELECT Object_ID FROM t_object WHERE Alias='e1'").get().Object_ID;
+    assert.equal(db3.prepare('SELECT COUNT(*) AS c FROM t_attribute WHERE Object_ID=?').get(Number(eid3)).c, 4, 'attribute update must not grow rows');
+    assert.equal(!!db3.prepare('SELECT 1 FROM t_attribute WHERE Object_ID=? AND "Default"=?').get(Number(eid3), 'ccc333'), true, 'updated value applied in place');
+    assert.equal(!!db3.prepare('SELECT 1 FROM t_attribute WHERE Object_ID=? AND "Default"=?').get(Number(eid3), 'bbb222'), false, 'old value replaced');
+    db3.close();
+
+    // full projection also mirrors child rows after the whole-file rebuild
+    const full = lib.fullProjection(CHILD_GRAPH, qea, { dryRun: false });
+    assert.ok(full.verification && full.verification.consistent === true, 'child graph full projection export equals canonical');
+    const db4 = new DatabaseSync(qea);
+    const eid4 = db4.prepare("SELECT Object_ID FROM t_object WHERE Alias='e1'").get().Object_ID;
+    assert.equal(db4.prepare('SELECT COUNT(*) AS c FROM t_attribute WHERE Object_ID=?').get(Number(eid4)).c, 4, 'full rebuild carries attributes');
+    assert.equal(db4.prepare('SELECT COUNT(*) AS c FROM t_objecttests WHERE Object_ID=?').get(Number(eid4)).c, 2, 'full rebuild carries testcases');
+    db4.close();
+  } finally {
+    removeTree(dir);
   }
 });
 
