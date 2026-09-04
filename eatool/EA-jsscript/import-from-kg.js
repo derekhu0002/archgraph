@@ -1681,6 +1681,12 @@ function col(row, name) {
   return undefined;
 }
 
+// 批量 INSERT 可行性结论（probe13/probe14，EA Trial 15.2 .feap/Firebird 嵌入式）：
+//   * 多行 VALUES 单语句（VALUES (...),(...)）→ Repository.Execute 无头挂起（Firebird<2.0 不支持多行 VALUES，
+//     错误被 EA 吞成阻塞）；交互侧应返回真实 ODBC 错误。
+//   * ';' 拼接多语句单次 Execute → RPC 调用失败（EA 进程终止）。
+//   → SQL 写路径必须逐条单语句 Execute（本文件现有形态）；批大小/提速实验不适用本环境，
+//     逐条 Execute 与对象模型总耗时相当（全图约 165s，见 sqlDirectEnabled 注释）。
 function sqlExec(sqlText, label) {
   try {
     var ok = Repository.Execute(sqlText);

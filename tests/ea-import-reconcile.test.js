@@ -153,12 +153,15 @@ test('ea-import-reconcile (AT-2100-OPT-03): SQL 直写通道——读侧 SQLQuer
   // THEN SQL_DIRECT 默认开启（Firebird .feap 列名已按实测 schema 修正：OBJECT_TYPE/ea_guid/NOTE/STEREOTYPE；
   //      无头默认回退对象模型，交互默认 SQL，运行期 EA_SQL_DIRECT=0 可强制回退）；
   //       读侧对账用 Repository.SQLQuery（sqlRows），写侧用 Repository.Execute（sqlExec）；
-  //       SQL 覆盖核心投影表 t_package/t_object/t_connector/t_diagram 与 tag 表 t_objectproperties/t_connectortag
+  //       SQL 覆盖核心投影表 t_package/t_object/t_connector/t_diagram 与 tag 表 t_objectproperties/t_connectortag；
+  //       写侧必须逐条单语句 Execute —— 多行 VALUES 挂起、';' 多语句 RPC 崩溃（probe13/14 实测，Firebird<2.0）
   const content = readScript();
 
   assert.match(content, /var\s+SQL_DIRECT\s*=\s*true/, 'SQL 直写通道默认开启（列名修正后 Execute 可用；无头由 sqlDirectEnabled 依 EA_HEADLESS 回退对象模型）');
   assert.match(content, /var\s+OBJECT_MODEL_FALLBACK\s*=\s*false/, '对象模型全量回退默认关闭');
   assert.match(content, /function\s+sqlDirectEnabled\s*\(/, '应定义 sqlDirectEnabled（交互默认 SQL / 无头默认对象模型 / EA_SQL_DIRECT 覆盖）');
+  assert.doesNotMatch(content, /EXECUTE BLOCK/i, '不采用 EXECUTE BLOCK（本环境 Execute 需单语句，见 probe14）');
+  assert.doesNotMatch(content, /INSERT\s+INTO[^;]*VALUES\s*\([^)]*\),\s*\(/i, '不采用多行 VALUES 单语句（Firebird<2.0 不支持，probe13 无头挂起）');
   assert.match(content, /function\s+sqlRows\s*\(/, '应定义 SQLQuery 读侧（sqlRows）');
   assert.match(content, /Repository\.SQLQuery\s*\(/, '应调用 Repository.SQLQuery');
   assert.match(content, /function\s+sqlExec\s*\(/, '应定义 Execute 写侧（sqlExec）');
