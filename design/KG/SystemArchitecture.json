@@ -3418,7 +3418,17 @@
       "name": "里程碑：子图语义检索（getSystemArchitecture scope）",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "里程碑（2026-08-26）：getSystemArchitecture 新增 scope 子图语义检索，避免全图语义检索范围过大返回过多内容——scope（view_id 或 element_id+depth）解析为 canonical 身份集合 → 作为 canonicalIdentities 喂给语义检索边界（VECTOR_QUERY_CYPHER_SCOPED 按身份过滤）→ 返回内容按 applySemanticScopeFilter 裁剪；未知视图/元素返回 SCOPE_VIEW_NOT_FOUND / SCOPE_ELEMENT_NOT_FOUND。落地：argo/scripts/systemarchitecture-mcp-server.js（resolveSemanticScope/applySemanticScopeFilter）、graph-rag/defaultSemanticRetrieval.js（exhaustChannel scope 过滤）、argo-mcp-server.js（schema）；新增 tests/argo-semantic-scope.test.js（6 用例）；规则层 QueryPriorityGuideline 新增 Bound-the-scope 约定（AT-archgraph-workflow-rules-07）；图谱新增 Application Service subgraph-semantic-retrieval-001（视图 1800，AT-subgraph-semantic-retrieval-01）。全量 234 通过/1 既有失败，validateSystemArchitecture 通过。commits ddc46c6（工作）/6e72f1f（commit 属性登记）。"
+      "description": "里程碑（2026-08-26）：getSystemArchitecture 新增 scope 子图语义检索，避免全图语义检索范围过大返回过多内容——scope（view_id 或 element_id+depth）解析为 canonical 身份集合 → 作为 canonicalIdentities 喂给语义检索边界（VECTOR_QUERY_CYPHER_SCOPED 按身份过滤）→ 返回内容按 applySemanticScopeFilter 裁剪；未知视图/元素返回 SCOPE_VIEW_NOT_FOUND / SCOPE_ELEMENT_NOT_FOUND。落地：argo/scripts/systemarchitecture-mcp-server.js（resolveSemanticScope/applySemanticScopeFilter）、graph-rag/defaultSemanticRetrieval.js（exhaustChannel scope 过滤）、argo-mcp-server.js（schema）；新增 tests/argo-semantic-scope.test.js（6 用例）；规则层 QueryPriorityGuideline 新增 Bound-the-scope 约定（AT-archgraph-workflow-rules-07）；图谱新增 Application Service subgraph-semantic-retrieval-001（视图 1800，AT-subgraph-semantic-retrieval-01）。全量 234 通过/1 既有失败，validateSystemArchitecture 通过。commits ddc46c6（工作）/6e72f1f（commit 属性登记）。",
+      "attributes": [
+        {
+          "name": "archivedAt",
+          "value": "2026-09-04"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T3"
+        }
+      ]
     },
     {
       "description": "项目评测口径（2026-08-26 人类伙伴确立）：今后围绕 LLM-Wiki 两层指标研究。查询层（终极用户指标，读取的极致）：①查得准 Query Precision——无事实冲突/无幻觉生成、回答精准且行行有出处；②找得全 Query Recall——不仅能查单点事实，还能顺着拓扑内链把深层复杂关联（多跳推理）找全；③回得快且省 Query Latency & Cost——高语义密度预压缩让下游 context 减 70~90%、毫秒级响应、极低 token 成本；白盒补充：人类可读性（排版清晰、无 AI 废话）+ 精确行内溯源（一键反查源头证据）。写入层（底层机制，写入的极致，1:1 兑现为查询价值）：①逻辑与时效冲突识别消歧→查询准确率；②实体归一去重+知识图谱/内链拓扑→多跳查询召回率；③长文本提炼/去噪/事实保真压缩→查询速度+token 成本节约；④局部增量热更新 Delta Ingestion→系统生命周期与工程维护 ROI。定位：与项目愿景对齐——查询层=读取的极致、写入层=写入的极致、架构化存储（意图图+SUBVIEW+ARGO MCP）是兑现手段；把『世界级最优秀的 AGENT 长期记忆系统』从口号变成可评测的指标集。现状差距：memory-eval 已实测准确率 100%/拒答 100%/时延 5.7ms（覆盖 Precision 部分+Latency）；未覆盖 Query Cost（context 压缩率/token 成本）、多跳 Recall 深度、行内溯源 provenance、写入层四能力、白盒人类可读性。",
@@ -3836,7 +3846,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "# 项目总管 工作记忆（2026-09-03 会话摘要，最终版）\n- 身份：项目总管（ArchGraph overseer）；开发委派链路=产品经理 xiaoniu/设计师 caoyang/规划 tanwen/架构 laodong/Developer Xiaoming/Reviewer adam/验证 chenlin。\n- 本会话完成（时间序）：\n  1) EA 类工具洞察 + 路线分解（M0~M3）。\n  2) 红线/决策：坐标侧车独立；内容修改不扰动坐标（成员签名）；不改 ARGO MCP；侧车按项目存 design/KG/ea-layouts/ 且正式资产随项目 commit 禁 ignore。\n  3) WP2785（G6 画布+侧车，21a52c0/3615700/80c2dfc）→ WP2786（npm 部署包+后台启动，417b0e5）→ 发布 0.11.0（28f0a0a）→ WP2787（手动项目选择，ec12dda）→ 侧车资产入库（89d5553）。\n  4) 画布内核再决策：tldraw 许可证否决（一手核实）→ 人类选 Excalidraw MIT → WP2788 立项（765edfc）。\n  5) WP2788-S1（c473140）：Excalidraw 0.18.1 vendored 替换 G6。\n  6) **人类报告「Excalidraw 未加载」定位（双因）**：a) 打开的是 argo-deploy 后台服务（~/.argo 仍 0.11.0 旧部署）；b) **真实 bug**：S1 构建时 PowerShell 吞掉 esbuild --define 引号，NODE_ENV 被定义为裸标识符，浏览器抛 ReferenceError: production is not defined（当时“0 个 NODE_ENV 残留”校验有盲区）。修复（05641c0）：esbuild JS API + JSON.stringify 重建 bundle（8.8→8.4MB）。\n  7) **Playwright 真实浏览器验收**（人类提供本机浏览器）：tests/ea-web-browser.test.js + AT-2788-S1-02（挂载/层色像素/箭头/资源零 404/拖动落盘侧车），真跑 3.7s 通过；playwright 锁 1.61.1（配套本机 chromium-1228；人类提供的 1234 zip 经核为截断损坏件 26/133MB，不再需要）。\n  8) **部署刷新**：仓库模式重跑 install-argo.ps1，~/.argo 更新，后台服务重启（pid 3900，8787）；部署实例端到端验证（真实浏览器打开项目→视图→Excalidraw 挂载 0 错误）。\n- 验收：架构测试 37/39（2 既有失败），validate 通过。WP2788 deliveryStatus 人工保持 not_delivered（S2~S4 未开始，harness 会按已挂载 AT 自动翻转）。\n- 可复用经验：a) **PowerShell 中 esbuild --define 引号会被吞**，必须用 JS API + JSON.stringify；构建产物验证要在真实浏览器跑，静态文本扫描有盲区；b) 用户报“资源缺失”先分清仓库模式/部署模式两条链路；c) Playwright executablePath 用 chrome-win64 而非 chrome-win；d) tldraw 许可证陷阱（npm license=SEE LICENSE 必须拉一手全文）；e) Windows 后台拉起用 WMI；f) LTM 满 15 先归档。\n- 未完成/TODO：**npm 0.11.0 已发布包含损坏 bundle，建议尽快发 0.12.0**（含修复+WP2787，待人类拍板）；WP2788 S2 三栏自适应外壳（人类需求①）/S3 向导化/S4 收口；既有 2 失败未修；Experience 层未实施。",
+      "description": "项目总管 工作记忆（2026-09-03~04 跨日会话压缩版）。主线：人类要 EA 类工具，人类在 EA 设计、AGENT 经 ARGO MCP 写图同步到 EA 且不破坏位置。关键演进：1) 洞察与 Web 路线：画布内核 G6→Excalidraw→MaxGraph→Web FROZEN（WP2785 侧车/2786 npm0.11.0/2787 手动选项目/2788 画布已交付，2786 SUPERSEDED Web 移除、2788 FROZEN）；tldraw 许可证否决、Excalidraw/MaxGraph 风格否决。2) EA 为主设计界面（EA17.2+.qea）；WP2100 导入优化+SQL 直写实验：.feap Firebird Execute 单条可用批量挂、.qea SQLite Execute 整体 Internal Error；headless COM 无头运行器回环保真全绿。3) 主线 WP2791：定论 .qea=标准 SQLite，argo/scripts/ea-qea-sync.js+lib（node:sqlite 直写，全量约50ms/稳态约16ms，full 整库 wipe 重建，写前快照，verify）；ARGO MCP 写后增量投影（buildMutationResult 内）+initializeWorkspace init full（整库清空重建同 Neo4j init）；目标解析 ARGO_EA_QEA > 仓库根唯一 *.qea（无配置文件）；本仓 canonical 与 archgraph.qea 一致 213/102/57。发布 0.11→0.12.0→0.12.2（0.12.1 漏 SKILL 文档教训）；install+deploy+initializeWorkspace 验证全绿（qea 目标==本仓 .qea 246ms、neo4j db archgraph==仓库名）；SKILL.md 补 qea/neo4j 投影核验口径。其他决策：坐标侧车独立且正式资产随 commit；EA=投影可重建（坏则重导入）；不改 argo 红线段解除（流程内投影）；EA MCP 不开放给 AGENT。验收：架构测试 45/47（2 既有失败 memory-eval-run-03、architecture-view-context-08）；EA/qea 全绿；图谱 EA Tooling 拆子视图 ea-tooling-wps-001；LTM 新增里程碑 overseer-ea-qea-projection-arc-001，归档 overseer-subgraph-semantic-001 腾位。可复用经验：.qea 直写是 EA 投影最快通道；EA Execute 仅 DBMS；Windows 后台拉起用 WMI；esbuild define 引号坑用 JS API+JSON.stringify 且产物要真实浏览器验证；EA 运行中实例 COM 不可 attach，无头需独立实例+隔离副本；EA 缓存外部写后需刷新/重开项目；npm 发布前核对 pack 内容；LTM 满 15 先归档。未完成/TODO：initializeWorkspace bootstrap 仍按 .feap 补建（已两次清理）应改缺 EA 文件生成 .qea 待修可随下次发布；archgraph.qea 是否入库待人类定；全局副本/其它仓库同步 0.12.2；既有 2 失败未修；Experience 层未实施；eatool .feap 路径与 MCP 桥 WP2789 PARKED 保留。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3858,8 +3868,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-03T22:00:00.000Z",
-          "description": "2026-09-03 会话摘要（最终版：+ Excalidraw 未加载问题定位与修复 + 部署刷新）"
+          "value": "2026-09-04T17:00:00.000Z",
+          "description": "2026-09-04 跨日会话收尾"
         },
         {
           "name": "commit",
@@ -5276,6 +5286,32 @@
         }
       ],
       "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "description": "2026-09-04 核心决策：① EA=图谱投影可整库重建；② .qea=标准 SQLite，node:sqlite 外部直写最优（EA Execute 仅 DBMS：.feap Firebird 单条可用批量挂、.qea 整体禁用）；③ 目标解析无配置文件（ARGO_EA_QEA > 仓库根唯一 *.qea）；④ 投影进 argo 流程（写后增量+init 整库 full）；⑤ EA 开着可写（busy_timeout+重试），EA 缓存需人工刷新。",
+          "name": "decision",
+          "value": "ea-qea-direct-write-is-the-way"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "description": "综合 5d71d58/7a9e981/fda5e47/11c5930/389e1a5/4113798 等",
+          "name": "commit",
+          "value": "20f3fab"
+        }
+      ],
+      "description": "里程碑（2026-09-04）：EA 同步收敛到 .qea 直写投影并发布。沿革：EA 类工具洞察→Web 冻结→EA 为主设计界面；WP2100 导入优化→SQL 直写实验（.feap Execute 单条可用批量挂、.qea Execute Internal Error）→headless COM 回环保真全绿→定论 .qea=SQLite 外部直写。交付 argo/scripts/ea-qea-sync.js+lib（node:sqlite；全量约50ms 稳态约16ms；full 整库 wipe 重建；写前快照；verify）；ARGO MCP 写后增量投影（fda5e47）+argo init full（initializeWorkspace 内，同 Neo4j init）；移除 ea-qea.json；本仓 archgraph.qea 与 canonical 213/102/57 一致。发布 0.11→0.12.0→0.12.2（0.12.1 漏 SKILL 文档教训：发布前核对 pack）；install+deploy+initializeWorkspace 验证全绿（qea 目标==本仓 .qea 246ms；neo4j db==仓库名）。SKILL.md 补 qea/neo4j 投影核验。遗留：bootstrap 仍建 .feap 需改 .qea；archgraph.qea 入库待定。",
+      "id": "overseer-ea-qea-projection-arc-001",
+      "name": "里程碑：EA 同步收敛 .qea 直写投影（argo 写后+init 全量）",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -6946,7 +6982,6 @@
       "included_elements": [
         "overseer-vision-001",
         "overseer-archimate-role-001",
-        "overseer-subgraph-semantic-001",
         "overseer-wiki-eval-001",
         "overseer-mcp-tool-surface-001",
         "overseer-memory-tiers-001",
@@ -6958,7 +6993,8 @@
         "overseer-homepage-v3-kglibrary-retire-001",
         "overseer-wp2785-m1s1s2-milestone-001",
         "overseer-wp2786-deploy-milestone-001",
-        "overseer-wp2787-milestone-001"
+        "overseer-wp2787-milestone-001",
+        "overseer-ea-qea-projection-arc-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
@@ -7019,7 +7055,8 @@
       "included_elements": [
         "overseer-mem-eval-001",
         "overseer-content-storage-001",
-        "overseer-query-rules-001"
+        "overseer-query-rules-001",
+        "overseer-subgraph-semantic-001"
       ]
     },
     {
