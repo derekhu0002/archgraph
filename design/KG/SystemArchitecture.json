@@ -1654,7 +1654,7 @@
         },
         {
           "name": "status",
-          "value": "ACTIVE",
+          "value": "COMPLETED",
           "description": "2026-09-04 人类伙伴决策：方向回到 eatool/EA 脚本导入导出；本 WP 重开承接导入脚本优化——① 固定同步根包（树选中父包下建/复用 ArchGraph Sync，不再每轮时间戳新包）；② 幂等对账：EA 有(schema_id)→仅更新；图谱有 EA 无→新建；图谱无 EA 有（对账包内全部）→删除但先列清单人工确认；③ 速度：只写库不刷 UI（导入全程不逐个集合刷新）。EA 反向自动回写不在此范围（人工导出导入流程不变）。"
         },
         {
@@ -1666,10 +1666,6 @@
           "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-perf.test.js; design/KG/SystemArchitecture.json",
           "name": "commit",
           "value": "122162b"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
         },
         {
           "name": "commit",
@@ -1685,6 +1681,15 @@
           "name": "commit",
           "value": "263a4ae",
           "description": "design/KG/SystemArchitecture.json（重开：EA 导入脚本优化 + AT-2100-OPT-01/02）"
+        },
+        {
+          "name": "commit",
+          "value": "518c2b0",
+          "description": "eatool/EA-jsscript/import-from-kg.js; tests/ea-import-reconcile.test.js; tests/ea-import-perf.test.js（固定同步根包 ArchGraph Sync 幂等对账：schema_id 先查后建 update-in-place 不删建 + 删除清单人工键入 delete 确认 + 移除热路径逐集合 Refresh 只写库；ea-import 全族 15/15）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -4867,11 +4872,6 @@
           "description": "design/KG/SystemArchitecture.json（新增 AT-2788-S1-02 Playwright 浏览器验收）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered",
-          "description": "S1 已交付（c473140 + 05641c0 含 bundle 修复与浏览器验收）；S2（三栏自适应外壳）/S3（画布操作向导化→ARGO MCP）/S4（收口）未开始。"
-        },
-        {
           "name": "commit",
           "value": "05641c0",
           "description": "package.json(devDep playwright 1.61.1); tests/ea-web-browser.test.js（AT-2788-S1-02 真实浏览器验收）; web/vendor/excalidraw/excalidraw.js（重建修复：S1 构建时 PowerShell 吞 esbuild --define 引号致 NODE_ENV 被定义为裸标识符，浏览器抛 ReferenceError: production is not defined；改用 esbuild JS API + JSON.stringify 重建，8.8→8.4MB）"
@@ -4900,6 +4900,10 @@
           "name": "commit",
           "value": "7198da8",
           "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json; design/KG/ea-layouts/*（S1B 交付登记 + 侧车正式资产）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "M2 编辑器外壳与画布内核（全区域自适应）。内核沿革与决策链：M1 用 G6 v5 → 人类反馈界面成熟度低提议 tldraw → 一手核实 tldraw license 禁无授权生产分发而否 → 人类选 Excalidraw（MIT，S1 交付 c473140/05641c0）→ **人类体验后判定手绘白板风格不适合严肃架构设计 → 改选 MaxGraph（Apache-2.0，draw.io 引擎后继，结构化 cell/样式/正交路由）**（本切片，记为 S1B）。侧车坐标、/api 写路径（经 ARGO MCP）、三栏外壳设计与内核解耦，换内核只动 web/ 画布层。切片：S1B MaxGraph 内核接入：一次性 esbuild bundle vendored（web/vendor/maxgraph/，打包后删除 web/vendor/excalidraw/），视图成员→顶点（层着色+name/type 标签），关系→边（箭头+类型标签，正交路由），画布随窗口自适应，布局坐标仍走侧车（成员身份签名语义不变）；Excalidraw 相关测试/资产退役。S2 三栏外壳：左模型树/中画布/右属性面板，CSS grid/flex+视口单位全区域自适应，窄屏降级。S3 画布操作向导化→ARGO MCP（替代手填 JSON）。S4 收口。红线：写图 100% 经 ARGO MCP；argo/** 零改动；图谱 JSON 无坐标字段。",
@@ -5004,6 +5008,10 @@
           "name": "commit",
           "value": "9060ffd",
           "description": "design/KG/SystemArchitecture.json（R-S1 交付完成登记）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "EA 同步桥 R-S1（环境对齐与 MCP 连通验证）交付完成（COMPLETED）：环境升级为本机 EA Trial 15.2 x86 + MCP Server 3.0.1 x86（add-in MCP_EA.dll 3.0.1.0 装入 EA Trial 目录）+ .NET Desktop Runtime 10.0.11（x64/x86，官方 SHA512 校验）。同步驱动器 scripts/ea-sync-driver.js（env/tools/read/probe-edit，退出码分级，安全门：非 scratch 拒写/硬编码不 -enableDelete）+ tests/ea-sync-r1.test.js。验收真实执行全绿：AC-01 连通（只读 19 工具 + enableEdit 写组 + 无删除工具，会话日志无 80070005/管道中断）；AC-02 位置不变性（元素 1249 几何 x337,y273,w180,h80，仅改 Notes 前后逐字节一致）+ 审计 CSV（正斜杠路径修复后正常追加变更记录）。关键坑（已记录）：① -modifiedInfoPath 反斜杠路径被 EA add-in 二次 JSON 解析报 80070057（反斜杠 U 被当非法转义序列）→ 必须正斜杠；② MCP 3.0.1 响应几何在 holder 的 position in the current diagram 嵌套对象，解析须下钻。D9 已确认：create_or_update_elements 受 elementID（0=create/现有=update）。人类拍板定位：EA MCP 不开放给 AGENT，作为 ARGO 写图下游投影同步到本仓库 archgraph.feap。下一步：R-S2（add/update 差异应用 + ID 账本 + 审计轮转），开发/测试仍用 scratch 副本，生产同步目标=仓库 archgraph.feap。",
