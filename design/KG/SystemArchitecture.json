@@ -514,6 +514,10 @@
           "name": "commit",
           "value": "c10bb45",
           "description": ".opencode/skills/excalidraw-diagram/* (removed); .github/skills/excalidraw-diagram/* (removed); tests/excalidraw-diagram-skill.test.js（改为校验用户级部署）；design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -1060,13 +1064,13 @@
           "description": "install-argo.ps1; tests/argo-deploy.test.js; tests/argo-openclaw.test.js（WP2786：新增 [23/23] EA Web 服务部署+后台启动步，-SkipEaWeb/-EaWebPort/-EaWebRoot，步骤分母 22→23 重编号）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "1295747",
           "description": "argo/skills/argo-init/SKILL.md（docs：补充 .qea 全量投影成功/目标为本仓库 .qea 核验 + Neo4j 投影库名==本仓库名核验；随部署包分发）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -3754,13 +3758,13 @@
           "description": "docs/acceptance-testcases.md（挂载 AT 清单文档：22 用例控制点+观察点；分组 A MCP 接口看护 10 + 分组 B 用户面交付件 12）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "not_delivered"
-        },
-        {
           "name": "commit",
           "value": "3c4c492",
           "description": "argo/scripts/ea-qea-sync-lib.js; argo/scripts/systemarchitecture-mcp-server.js; tests/architecture-view-context.test.js; tests/ea-qea-sync.test.js（getArchitectureViewContext 可选 includeEaGeometry 返回 EA 图几何）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -5225,10 +5229,6 @@
           "description": "scripts/ea-qea-sync.js; scripts/ea-qea-sync-lib.js; tests/ea-qea-sync.test.js（Node 直写 .qea：全量 44-55ms（CLI 0.13s）vs EA 对象模型 68s，3-4 个数量级提速；幂等/位置保护/unchanged-skip 稳态 14-16ms；仓库 archgraph.qea 已真实投影 213 元素/102 关系/57 图，EA 17.2 打开正常）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "36ec053",
           "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（交付登记 + 测试记录 45/47）"
@@ -5337,6 +5337,10 @@
           "name": "commit",
           "value": "ee70d23",
           "description": "argo/scripts/ea-qea-sync-lib.js; tests/ea-qea-sync.test.js; design/KG/SystemArchitecture.json（投影每条关系皆显式写入 Direction='Source -> Destination'，EA 视图渲染 source→target 箭头，不再对 Association/Composition/Aggregation 留空；AT-2791-11。）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "ARGO 写图 → 下游直写 .qea 投影（Node + node:sqlite，标准批量 SQL）。背景与结论：Repository.Execute 仅 DBMS 库可用（.feap 内嵌 Firebird 单条可用、.qea/SQLite 完全禁用）；.qea 是标准 SQLite，外部直写最符“一把 SQL 写库”诉求，EA 开/关皆可写（实测）；仓库 EA 文件已换 archgraph.qea。本 WP：① Node 模块直接对 .qea 做图谱⇄SQLite 批量读写（t_object/t_connector/t_diagram/t_objectproperties/t_connectortag/t_diagramobjects/t_diagramlinks），对账语义沿用 2100（固定同步根包/update-in-place 不动几何/删除清单确认/幂等）；② ARGO MCP 写图下游投影：观察 design/KG/SystemArchitecture.json 落盘→投影到 archgraph.qea（不改 argo/**）；③ 并发 busy_timeout+短事务+重试，EA 开着也能写；EA 缓存需人工刷新可见；④ unchanged-skip 变更检测使稳态增量快；⑤ .feap(Firebird) 旧路径保留。在本项目验证：真实图谱投影到 archgraph.qea + 回环一致 + 幂等 + 测速。",
