@@ -494,6 +494,11 @@
           "name": "commit",
           "value": "bf87aff",
           "description": ".opencode/skills/diagram-draw/SKILL.md; .opencode/skills/diagram-draw/renderExcalidrawSvg.js; tests/diagram-draw-skill.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "c52cf65",
+          "description": "design/KG/SystemArchitecture.json（AT-diagram-draw-skill-01 acceptanceCriteria 改为可执行裸路径）"
         }
       ],
       "testcases": [
