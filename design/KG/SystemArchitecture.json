@@ -502,7 +502,7 @@
           "description": "GIVEN 一个有效的 .excalidraw JSON v2 源文件（Layered Viewpoint 图，含 rectangle band / text / arrow）；WHEN 调用仓库原生渲染器 node .opencode/skills/diagram-draw/renderExcalidrawSvg.js 导出 SVG；THEN 输出包含矩形、文本与带箭头标记的 polyline 的 SVG 文件。",
           "type": "Acceptance Test",
           "Input": "tests/diagram-draw-skill.test.js",
-          "acceptanceCriteria": "tests/diagram-draw-skill.test.js::diagram-draw-skill: renderer produces SVG from Excalidraw JSON"
+          "acceptanceCriteria": "tests/diagram-draw-skill.test.js"
         }
       ]
     },
