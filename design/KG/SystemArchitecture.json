@@ -475,7 +475,7 @@
       "name": "diagram-draw",
       "parent": "1249",
       "type": "Skill",
-      "description": "Draw architecture diagrams as Excalidraw JSON and render them to SVG for embedding in the README. Use when the user asks to draw or insert a diagram (e.g. a Layered Viewpoint architecture diagram) into documentation. Reference: https://github.com/coleam00/excalidraw-diagram-skill",
+      "description": "Excalidraw diagram skill (verbatim upstream coleam00/excalidraw-diagram-skill). Create .excalidraw diagram JSON that argues visually, render to PNG via references/render_excalidraw.py for visual validation. Installed at .opencode/skills/excalidraw-diagram/ and deployed to ~/.copilot/skills/excalidraw-diagram/. Use when the user asks to visualize workflows, architectures, or concepts.",
       "attributes": [
         {
           "name": "commit",
@@ -503,11 +503,11 @@
       ],
       "testcases": [
         {
-          "name": "AT-diagram-draw-skill-01",
-          "description": "GIVEN 一个有效的 .excalidraw JSON v2 源文件（Layered Viewpoint 图，含 rectangle band / text / arrow）；WHEN 调用仓库原生渲染器 node .opencode/skills/diagram-draw/renderExcalidrawSvg.js 导出 SVG；THEN 输出包含矩形、文本与带箭头标记的 polyline 的 SVG 文件。",
+          "name": "AT-excalidraw-diagram-skill-01",
+          "description": "GIVEN 主流 coleam00/excalidraw-diagram-skill 已原封不动安装；WHEN 检查仓库 .opencode/skills/excalidraw-diagram/；THEN SKILL.md 存在且 name=excalidraw-diagram，references/ 各文件齐备。",
           "type": "Acceptance Test",
-          "Input": "tests/diagram-draw-skill.test.js",
-          "acceptanceCriteria": "tests/diagram-draw-skill.test.js"
+          "Input": "tests/excalidraw-diagram-skill.test.js",
+          "acceptanceCriteria": "tests/excalidraw-diagram-skill.test.js"
         }
       ]
     },
