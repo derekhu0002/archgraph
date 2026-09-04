@@ -1730,6 +1730,11 @@
           "name": "commit",
           "value": "b32ed8b",
           "description": "eatool/EA-jsscript/headless/**（无头运行器 cscript+EA.Repository+Session/JSON shim）; eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/export-to-kg.js; tests/_ea-roundtrip-lib.js; tests/ea-headless-roundtrip.test.js; tests/ea-import-reconcile.test.js（无头隔离副本回环保真全绿）"
+        },
+        {
+          "name": "commit",
+          "value": "2be658d",
+          "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（无头回环保真全绿登记 + 测试记录 43/45）"
         }
       ],
       "testcases": [
