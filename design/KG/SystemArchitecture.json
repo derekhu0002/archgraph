@@ -1720,6 +1720,11 @@
           "name": "commit",
           "value": "2419e25",
           "description": "tests/ea-roundtrip.test.js; tests/_ea-roundtrip-lib.js（回环无损比较器：元素/关系/视图内容集合一致忽略顺序；归一化规则集中于 lib；真实 EA 回环验证待执行——EA_ROUNDTRIP_EXPORT 指定导出产物后跑）"
+        },
+        {
+          "name": "commit",
+          "value": "48bd60f",
+          "description": "design/KG/SystemArchitecture.json（无头运行器路线 + AT-2100-OPT-05）"
         }
       ],
       "testcases": [
