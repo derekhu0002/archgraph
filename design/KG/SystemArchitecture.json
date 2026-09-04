@@ -1674,8 +1674,8 @@
         },
         {
           "name": "decision",
-          "value": "ea-projection-sql-direct",
-          "description": "2026-09-04 人类拍板（降风险门槛）：EA 本就是图谱投影，即使 SQL 直写导致项目损坏也可从图谱重导入重建——采纳 Repository.Execute/SQLQuery 直写数据库加速。仍保留位置保护红线（update-in-place 不触碰 DiagramObject 几何）与删除清单确认。"
+          "value": "ea-headless-com-runner",
+          "description": "2026-09-04 人类拍板调试路线：把脚本逻辑放到隔离 COM scratch 副本上先自跑通（纯 SQL 通道由 Repository.SQLQuery/Execute 驱动），再交真环境验收。实现=EA 无头运行器（cscript SysWOW64 + EA.Repository COM + Session shim，隔离 scratch 副本），以回环比较器全绿为门槛。"
         },
         {
           "name": "commit",
@@ -1740,15 +1740,22 @@
         {
           "Input": "tests/ea-import-reconcile.test.js",
           "acceptanceCriteria": "tests/ea-import-reconcile.test.js",
-          "description": "GIVEN 导入脚本含 SQL 直写通道（静态审查）：WHEN 检查其 SQL 路径；THEN 读侧对账用 Repository.SQLQuery、写侧用 Repository.Execute 批量（Insert/Update/Delete 单语句逐条执行或分批）；update 按 schema 键匹配且不触碰 t_diagramobjects 几何（无 DELETE/重建、无对已有元素图上几何的 UPDATE）；新增保证 ea_guid 唯一并读回对象 id；删除分支保留删除清单+人工确认；同图重复导入幂等不产生重复行。",
+          "description": "GIVEN 导入脚本含 SQL 直写通道（静态审查）：WHEN 检查其 SQL 路径；THEN 读侧对账用 Repository.SQLQuery、写侧用 Repository.Execute 批量；update 按 schema 键匹配且不触碰 t_diagramobjects 几何；新增保证 ea_guid 唯一并读回 id；删除分支保留清单+人工确认；幂等无重复行。",
           "name": "AT-2100-OPT-03",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/ea-roundtrip.test.js",
           "acceptanceCriteria": "tests/ea-roundtrip.test.js",
-          "description": "GIVEN 初始图谱 JSON（默认 design/KG/SystemArchitecture.json）与经 import-from-kg.js 导入 EA 后再经 export-to-kg.js 导出的 JSON（路径经 EA_ROUNDTRIP_EXPORT 或参数指定）；WHEN 规范化比较；THEN 元素/关系/视图的内容字段按集合相等（忽略 JSON 内部顺序/键序），任何失配字段级报告；导出文件缺失时显式消息 skip 计通过。",
+          "description": "GIVEN 初始图谱 JSON 与导入 EA 后再导出的 JSON（EA_ROUNDTRIP_EXPORT 指定）；WHEN 规范化比较；THEN 元素/关系/视图内容集合一致（忽略顺序），失配字段级报告；导出缺失时显式 skip。",
           "name": "AT-2100-OPT-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-headless-roundtrip.test.js",
+          "acceptanceCriteria": "tests/ea-headless-roundtrip.test.js",
+          "description": "GIVEN 无头运行器（cscript SysWOW64 + EA.Repository COM + Session shim）与隔离 scratch .feap 副本及真实图谱 JSON；WHEN 运行器在副本上依次执行 import-from-kg.js（SQL 通道）与 export-to-kg.js，再以回环比较器比较；THEN 导入幂等（重复导入无重复行）且导入后导出内容与源图谱一致（忽略顺序）；EA/运行器不可用时显式消息 skip 计通过。",
+          "name": "AT-2100-OPT-05",
           "type": "Acceptance Test"
         }
       ]
