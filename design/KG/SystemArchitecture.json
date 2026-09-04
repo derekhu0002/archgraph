@@ -1695,6 +1695,11 @@
           "name": "commit",
           "value": "ecfa62f",
           "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（交付登记：518c2b0 + COMPLETED + 测试记录 40/42）"
+        },
+        {
+          "name": "commit",
+          "value": "245f19e",
+          "description": "design/KG/SystemArchitecture.json（重开：SQL 直写通道 + AT-2100-OPT-03）"
         }
       ],
       "testcases": [
