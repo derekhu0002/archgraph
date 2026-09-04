@@ -4453,7 +4453,7 @@
       "id": "insight-lead-wm-summary-001",
       "name": "洞察Lead工作记忆摘要",
       "type": "Business Object",
-      "description": "洞察Lead T1 工作记忆摘要（2026-09-04，多项目/EA开关可行性复核会话）：1) 本轮=人类新增需求（多项目并行 + EA 或开或关均要投影 + .feap 按仓库自动发现），做聚焦复核与修订（只设计不实施）。核心结论→LTM milestone multiproject-ea-feasibility-001。关键实测：.feap=EA 私有封装（非 Jet 非 SQLite，Jet.OLEDB.4.0 拒开，含明文 t_*@10.2MB），EA 关时不可外部直写→安全默认=队列暂存+EA 打开自动补放（打开即最新）；真离线=可选自动拉起 EA 经 add-in。多实例：MCP_EA.log pid 前缀可辨实例，MCP3 路由未文档化→应用前校验 FileOpen 路径匹配。架构=多根 watch+每仓库独立 ea-sync-state+唯一 *.feap 自动绑定+串行单实例。2) 上下文：EA洞察→drawio评估→AGENT→EA方案→MCP主通道修订(R-S1 落地全绿)→本轮多项目复核。3) 交付：聚焦报告=最后消息；未实施代码、未立项、未改仓库文件。4) 经验：判定『能否离线直写』=读文件头+真实 provider 连接实测，勿猜；EA 平台『实例路由』无文档时，设计以『写入前项目身份强校验+宁可拒写』兜底；日志 pid 前缀是 EA 多实例区分的现成信号。",
+      "description": "洞察Lead T1 工作记忆摘要（2026-09-04，反向受约束写设计会话）：1) 本轮=人类补反向需求『EA 人类改→ARGO MCP 写图谱；校验失败→EA 回退+提示用例错误原因』，做聚焦设计（只设计不实施）→LTM milestone reverse-ea2kg-001。核心裁决：人类 GUI 修改检测=EA 快照 diff(读工具 vs ea-mirror.json 内容指纹)主（-modifiedInfoPath CSV 只记 MCP 写、EA 界面改不进 CSV——已确认）；审计无读工具、基线仅回滚保护；最大待实测=读工具能否包级枚举全部对象。回滚=preview 失败逆写原值/删回新建/镜像复活+create_baseline，二级失败告警。提示=Windows通知+last-error.json+EA 导航高亮(System Output 无工具不可行)。一致性=双侧 last-applied 指纹状态机、双向同改挂起。切片 R-S2B/RC/R-S2D。2) 上下文链继续：…→多项目复核→本反向设计；正向 R-S2' 已采纳待立项。3) 交付：报告=最后消息；未实施未立项。4) 经验：反向同步的核心风险不是写，而是『检测人类改动』与『校验失败后的 EA 侧可信回滚』；先把『读工具枚举能力』实测清楚再谈覆盖面。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -5016,6 +5016,22 @@
       "id": "insight-lead-milestone-multiproject-ea-feasibility-001",
       "name": "里程碑：多项目+EA开关两态可行性复核与修订",
       "type": "Business Object"
+    },
+    {
+      "id": "insight-lead-milestone-reverse-ea2kg-001",
+      "name": "里程碑：反向受约束写 EA→图谱聚焦设计",
+      "type": "Business Object",
+      "description": "反向受约束写（EA→图谱）聚焦设计里程碑（2026-09-04，只设计不实施）：①人类 GUI 修改检测裁决=EA 模型快照 diff（MCP 读工具读同步根包 vs 本地 ea-mirror.json 内容指纹；位置/纯视觉不入指纹）为主；EA Audit 无读工具、基线仅作回滚保护。最大待实测=读工具能否包级枚举全部对象（无 SQL/无按 tag 查询），不能则快照退化为会话级。②字段权属=元素 name/description/attributes 双向；type 默认不反向覆盖(identity 级)；关系存在/类型/端点双向；DiagramObject 几何永不同步进图谱；视图成员默认不同步；图对象增删改名可反向。③映射=有锚(EA tag schema_id/archimate_type)→ARGO update；EA 新对象→add，id='ea<epochMs>' 前缀防撞+成功后回写 schema_id tag（tag 写支持待实测）；EA 手工无 ArchiMate 立体对象→排除并通知不猜类型；反向类型映射复用 import-from-kg displayArchimateName(L959-1041 可逆表)+archimate_type tag。④回滚=ARGO preview 失败→EA 逆写原值(镜像原值)；EA add 失败→删回刚建对象(-enableDelete 低风险+create_baseline 前置)；EA remove 失败(图谱仍引用)→镜像复活；回滚再失败=二级告警。⑤错误提示=Windows 通知/托盘 + ea-sync-state/last-error.json(含 ARGO 校验错误译文) + EA 内导航高亮(select_element_in_browser/open_diagrams)；EA System Output 写文本无工具不可行(据现工具面)。⑥双向一致性=每对象双侧 last-applied 指纹(KG hash vs ea-mirror)状态机；任一方向推进后更新双方；双向同改(两侧 hash 均≠各自 last-applied)→挂起告警不自动覆盖。⑦切片 R-S2B(反向检测+映射+preview，含读工具包级枚举实测)/R-S2C(回滚+错误提示+remove 复活)/R-S2D(可选双向冲突 UI)；决策点 D-R1~R7。仓库接缝已核实：ea-sync-driver.js 有 McpSession/callTool/geometrySnapshot/safetyGateCheck/readEaLogTail/lastFileOpenFromLog；tests AT-2789-R1-01/02。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -6907,7 +6923,8 @@
         "insight-lead-milestone-drawio-eval-001",
         "insight-lead-milestone-agent2ea-sync-001",
         "insight-lead-milestone-agent2ea-mcp-revision-001",
-        "insight-lead-milestone-multiproject-ea-feasibility-001"
+        "insight-lead-milestone-multiproject-ea-feasibility-001",
+        "insight-lead-milestone-reverse-ea2kg-001"
       ],
       "included_relationships": []
     }
