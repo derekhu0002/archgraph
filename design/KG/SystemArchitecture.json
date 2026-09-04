@@ -1654,8 +1654,8 @@
         },
         {
           "name": "status",
-          "value": "COMPLETED",
-          "description": "2026-09-04 人类伙伴决策：方向回到 eatool/EA 脚本导入导出；本 WP 重开承接导入脚本优化——① 固定同步根包（树选中父包下建/复用 ArchGraph Sync，不再每轮时间戳新包）；② 幂等对账：EA 有(schema_id)→仅更新；图谱有 EA 无→新建；图谱无 EA 有（对账包内全部）→删除但先列清单人工确认；③ 速度：只写库不刷 UI（导入全程不逐个集合刷新）。EA 反向自动回写不在此范围（人工导出导入流程不变）。"
+          "value": "ACTIVE",
+          "description": "2026-09-04 对象模型版已完成（518c2b0）；现重开做 SQL 直写通道：读侧对账 Repository.SQLQuery + 写侧批量 Repository.Execute，幂等语义（固定同步根包 update-in-place/add/删除清单确认）不变。"
         },
         {
           "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-perf.test.js; design/KG/SystemArchitecture.json",
@@ -1674,8 +1674,8 @@
         },
         {
           "name": "decision",
-          "value": "ea-import-reconcile-opt",
-          "description": "2026-09-04 人类拍板：对账目标=固定同步根包（ArchGraph Sync）；删除范围=对账包内全删（含无 schema_id 手绘）但删除前列清单人工确认。"
+          "value": "ea-projection-sql-direct",
+          "description": "2026-09-04 人类拍板（降风险门槛）：EA 本就是图谱投影，即使 SQL 直写导致项目损坏也可从图谱重导入重建——采纳 Repository.Execute/SQLQuery 直写数据库加速。仍保留位置保护红线（update-in-place 不触碰 DiagramObject 几何）与删除清单确认。"
         },
         {
           "name": "commit",
@@ -1701,7 +1701,7 @@
         {
           "Input": "tests/ea-import-reconcile.test.js",
           "acceptanceCriteria": "tests/ea-import-reconcile.test.js",
-          "description": "GIVEN 导入脚本（静态审查 import-from-kg.js）：WHEN 解析其逻辑；THEN ①目标包为固定名同步根包（不存在则先建、复用不再时间戳新包）；②幂等分支：按 schema_id 匹配已存在→update 不重建、图谱独有→add；③删除分支：对账包内图谱缺失对象收集删除清单且需人类确认后才执行；④UI 刷新只在最后或省略（无逐对象/逐集合 Refresh 刷屏）。",
+          "description": "GIVEN 导入脚本（静态审查）：WHEN 解析其逻辑；THEN ①目标包为固定名同步根包（不存在则先建、复用不再时间戳新包）；②幂等分支：按 schema_id 匹配已存在→update 不重建、图谱独有→add；③删除分支：对账包内图谱缺失对象收集删除清单且需人类确认后才执行；④UI 刷新只在最后或省略（无逐对象/逐集合 Refresh 刷屏）。",
           "name": "AT-2100-OPT-01",
           "type": "Acceptance Test"
         },
@@ -1710,6 +1710,13 @@
           "acceptanceCriteria": "tests/ea-import-perf.test.js",
           "description": "GIVEN 既有/扩展的导入性能断言基线；WHEN 对比优化前后导入关键路径；THEN 导入避免每对象 Update 后立即全集合 Refresh 等已知慢操作（静态断言辅助）+ 结构级不变性：重复导入同一图谱不产生重复对象（update-in-place 幂等）。",
           "name": "AT-2100-OPT-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-import-reconcile.test.js",
+          "acceptanceCriteria": "tests/ea-import-reconcile.test.js",
+          "description": "GIVEN 导入脚本含 SQL 直写通道（静态审查）：WHEN 检查其 SQL 路径；THEN 读侧对账用 Repository.SQLQuery、写侧用 Repository.Execute 批量（Insert/Update/Delete 单语句逐条执行或分批）；update 按 schema 键匹配且不触碰 t_diagramobjects 几何（无 DELETE/重建、无对已有元素图上几何的 UPDATE）；新增保证 ea_guid 唯一并读回对象 id；删除分支保留删除清单+人工确认；同图重复导入幂等不产生重复行。",
+          "name": "AT-2100-OPT-03",
           "type": "Acceptance Test"
         }
       ]
