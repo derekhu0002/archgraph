@@ -6,9 +6,9 @@ const { readFileSync, existsSync } = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
+// WP2100 EA 导入脚本：import-from-external-package.js 已于仓库清理（6971c3b）移除，仅剩 import-from-kg.js。
 const SCRIPTS = [
   path.join(ROOT, 'eatool', 'EA-jsscript', 'import-from-kg.js'),
-  path.join(ROOT, 'eatool', 'EA-jsscript', 'import-from-external-package.js'),
 ];
 // WP2100 优化断言的目标脚本：import-from-kg.js（EA 导入脚本）。
 const KG_SCRIPT = path.join(ROOT, 'eatool', 'EA-jsscript', 'import-from-kg.js');
@@ -27,7 +27,7 @@ function sectionBetween(content, startMarker, endMarker) {
 }
 
 test('ea-import-perf: UI updates are disabled during import and re-enabled after', () => {
-  // GIVEN both EA import scripts
+  // GIVEN the EA import script
   // WHEN each script's main flow is inspected
   // THEN UI updates are disabled at import start and re-enabled when import finishes
   for (const file of SCRIPTS) {
@@ -39,7 +39,7 @@ test('ea-import-perf: UI updates are disabled during import and re-enabled after
 });
 
 test('ea-import-perf: a single Project Browser refresh happens only after import completes', () => {
-  // GIVEN both EA import scripts
+  // GIVEN the EA import script
   // WHEN the tree-refresh call is located relative to the UI re-enable call
   // THEN the tree is refreshed exactly once, only after import finishes (not during import)
   for (const file of SCRIPTS) {
@@ -60,7 +60,7 @@ test('ea-import-perf: a single Project Browser refresh happens only after import
 });
 
 test('ea-import-perf: import does not auto-open any diagram/view', () => {
-  // GIVEN both EA import scripts
+  // GIVEN the EA import script
   // WHEN the view-handling flow is inspected
   // THEN no diagram/view is opened automatically after import
   for (const file of SCRIPTS) {
@@ -75,7 +75,7 @@ test('ea-import-perf: import does not auto-open any diagram/view', () => {
 });
 
 test('ea-import-perf: auto-layout is disabled so diagrams are not opened one by one', () => {
-  // GIVEN both EA import scripts
+  // GIVEN the EA import script
   // WHEN the layout flag is inspected
   // THEN auto-layout is off, so LayoutDiagramEx is not invoked per diagram during import
   for (const file of SCRIPTS) {

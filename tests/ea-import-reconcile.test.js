@@ -160,6 +160,8 @@ test('ea-import-reconcile (AT-2100-OPT-03): SQL 直写通道——读侧 SQLQuer
   assert.match(content, /var\s+SQL_DIRECT\s*=\s*true/, 'SQL 直写通道默认开启（列名修正后 Execute 可用；无头由 sqlDirectEnabled 依 EA_HEADLESS 回退对象模型）');
   assert.match(content, /var\s+OBJECT_MODEL_FALLBACK\s*=\s*false/, '对象模型全量回退默认关闭');
   assert.match(content, /function\s+sqlDirectEnabled\s*\(/, '应定义 sqlDirectEnabled（交互默认 SQL / 无头默认对象模型 / EA_SQL_DIRECT 覆盖）');
+  assert.match(content, /function\s+sqlExecuteCapable\s*\(/, '应定义 sqlExecuteCapable（.qea/SQLite Execute 不支持 → 自动回退对象模型）');
+  assert.match(content, /sqlDirectEnabled\(\) && sqlExecuteCapable\(\)/, 'SQL 通道应叠加 Execute 能力探测');
   assert.doesNotMatch(content, /EXECUTE BLOCK/i, '不采用 EXECUTE BLOCK（本环境 Execute 需单语句，见 probe14）');
   assert.doesNotMatch(content, /INSERT\s+INTO[^;]*VALUES\s*\([^)]*\),\s*\(/i, '不采用多行 VALUES 单语句（Firebird<2.0 不支持，probe13 无头挂起）');
   assert.match(content, /function\s+sqlRows\s*\(/, '应定义 SQLQuery 读侧（sqlRows）');
