@@ -509,6 +509,11 @@
           "name": "commit",
           "value": "8879c54",
           "description": ".github/skills/excalidraw-diagram/*; tests/excalidraw-diagram-skill.test.js（扩展校验两个安装位置：.opencode 与 .github）"
+        },
+        {
+          "name": "commit",
+          "value": "c10bb45",
+          "description": ".opencode/skills/excalidraw-diagram/* (removed); .github/skills/excalidraw-diagram/* (removed); tests/excalidraw-diagram-skill.test.js（改为校验用户级部署）；design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
