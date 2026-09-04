@@ -499,6 +499,11 @@
           "name": "commit",
           "value": "c52cf65",
           "description": "design/KG/SystemArchitecture.json（AT-diagram-draw-skill-01 acceptanceCriteria 改为可执行裸路径）"
+        },
+        {
+          "name": "commit",
+          "value": "c7ceac8",
+          "description": ".opencode/skills/excalidraw-diagram/SKILL.md; .opencode/skills/excalidraw-diagram/README.md; .opencode/skills/excalidraw-diagram/references/*; tests/excalidraw-diagram-skill.test.js; .opencode/skills/diagram-draw/* (removed); tests/diagram-draw-skill.test.js (removed); design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
