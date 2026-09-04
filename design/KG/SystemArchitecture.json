@@ -1680,6 +1680,11 @@
           "name": "decision",
           "value": "ea-import-reconcile-opt",
           "description": "2026-09-04 人类拍板：对账目标=固定同步根包（ArchGraph Sync）；删除范围=对账包内全删（含无 schema_id 手绘）但删除前列清单人工确认。"
+        },
+        {
+          "name": "commit",
+          "value": "263a4ae",
+          "description": "design/KG/SystemArchitecture.json（重开：EA 导入脚本优化 + AT-2100-OPT-01/02）"
         }
       ],
       "testcases": [
