@@ -5380,6 +5380,13 @@
           "description": "GIVEN 已投影的 .qea（diagram 带 schema_view_id 锚与确定性 ea_guid）被 EA 打开/改写 StyleEx 丢掉了 schema_view_id 锚（或遗留孤儿 diagram）；WHEN 再次 syncGraphToQea（增量）；THEN 通过确定性 ea_guid 匹配既有 diagram 原位更新并重注入锚（保留 EA 格式化 token），不重复 INSERT（不再 UNIQUE constraint failed: t_diagram.ea_guid 崩溃），再次 sync 幂等。纯 Node 可测。",
           "name": "AT-2791-10",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-qea-sync.test.js",
+          "acceptanceCriteria": "tests/ea-qea-sync.test.js",
+          "description": "GIVEN 图谱含无向（Association/Composition/Aggregation）与有向关系投影到隔离 .qea 副本；WHEN 读回每条投影连接（t_connector.ea_guid 匹配确定性 rel guid）；THEN 每条关系都显式写入 Direction='Source -> Destination'（无空/Unspecified，EA 视图渲染 source→target 箭头、不丢方向）。纯 Node 可测。",
+          "name": "AT-2791-11",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package"

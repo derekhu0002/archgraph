@@ -447,7 +447,12 @@ function syncGraphToQea(graph, qeaPath, opts) {
       const end = elemIdByAliasAll.get(String(rel.target_id));
       if (start === undefined || end === undefined) { continue; }
       const map = relationshipMap(rel.type);
-      const direction = map.directed ? 'Source -> Destination' : '';
+      // Every ArchiMate relationship in the graph carries an explicit source->target
+      // orientation. Write an EA Direction unconditionally so the projected VIEW renders
+      // each relationship's arrowhead and the source/target orientation is never lost —
+      // an empty/Unspecified Direction renders Association-mapped connectors as arrowless
+      // lines (Serving/Assignment/Composition/Aggregation) which hides their direction.
+      const direction = 'Source -> Destination';
       const existing = relByGuid.get(guid);
       const intended = {
         Name: safeName(rel.name, alias),

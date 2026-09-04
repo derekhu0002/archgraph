@@ -119,6 +119,37 @@ function openRead(q) {
   return new DatabaseSync(q);
 }
 
+test('ea-qea-sync (AT-2791-11): every relationship is projected with an explicit Direction so arrowheads render', () => {
+  // GIVEN a canonical graph with a mix of undirected (Association/Composition/Aggregation)
+  //   and directed relationships, projected into an isolated .qea
+  // WHEN the connector row for each projected relationship is read back
+  // THEN every relationship must carry Direction = "Source -> Destination" so the EA view
+  //   renders the source->target arrowhead (empty/Unspecified renders Association-mapped
+  //   connectors as arrowless lines and loses the orientation).
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-'));
+  try {
+    const qea = tmpQea(dir);
+    const graph = copyGraphTo(path.join(dir, 'graph.json'));
+    lib.syncGraphToQea(graph, qea, { dryRun: false, allowDelete: false });
+    const elemIds = new Set((graph.elements || []).map((e) => String(e.id)));
+    const db = openRead(qea);
+    const bad = [];
+    for (const rel of graph.relationships || []) {
+      if (!rel || rel.id === undefined || rel.id === null) { continue; }
+      // skip relationships whose endpoints are not projected (would be skipped by the lib)
+      if (!elemIds.has(String(rel.source_id)) || !elemIds.has(String(rel.target_id))) { continue; }
+      const guid = lib.deterministicGuid('rel:' + rel.id);
+      const row = db.prepare('SELECT Connector_ID, Direction FROM t_connector WHERE ea_guid = ?').get(guid);
+      if (!row) { bad.push({ id: rel.id, error: 'connector missing' }); continue; }
+      if ((row.Direction || '') !== 'Source -> Destination') { bad.push({ id: rel.id, direction: row.Direction }); }
+    }
+    assert.deepEqual(bad, [], `every relationship must be projected with Direction='Source -> Destination'; problems: ${JSON.stringify(bad)}`);
+    db.close();
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('ea-qea-sync (AT-2791-02): concurrent open SQLite connection does not block writes (busy_timeout)', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-'));
   try {
