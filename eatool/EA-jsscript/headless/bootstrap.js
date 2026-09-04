@@ -128,28 +128,28 @@ function parseRowNums(xml, tag) {
 }
 
 // Pick an export root diagram inside the sync package (prefer schema_view_id=429).
-function pickSyncDiagram() {
+function pickSyncDiagram(r) {
   var pkgIds = [];
   try {
-    pkgIds = parseRowNums('' + Repository.SQLQuery("SELECT Package_ID FROM t_package WHERE Name='ArchGraph Sync'"), 'Package_ID');
+    pkgIds = parseRowNums('' + r.SQLQuery("SELECT Package_ID FROM t_package WHERE Name='ArchGraph Sync'"), 'Package_ID');
   } catch (e) { pkgIds = []; }
   var pkgId = pkgIds.length > 0 ? pkgIds[0] : 0;
   var where = pkgId != 0 ? ' WHERE Package_ID=' + pkgId : '';
-  var target = scanDiagrams(where, '429');
+  var target = scanDiagrams(r, where, '429');
   if (target != 0) { return target; }
   // fallback 1: any diagram in the package
-  target = scanDiagrams(where, '');
+  target = scanDiagrams(r, where, '');
   if (target != 0) { return target; }
   // fallback 2: any diagram in the model (root-level preferred)
-  target = scanDiagrams('', '429');
+  target = scanDiagrams(r, '', '429');
   if (target != 0) { return target; }
-  return scanDiagrams('', '');
+  return scanDiagrams(r, '', '');
 }
 
-function scanDiagrams(where, prefViewId) {
+function scanDiagrams(r, where, prefViewId) {
   var listXml = '';
   try {
-    listXml = '' + Repository.SQLQuery('SELECT Diagram_ID, StyleEx FROM t_diagram' + where);
+    listXml = '' + r.SQLQuery('SELECT Diagram_ID, StyleEx FROM t_diagram' + where);
   } catch (e) { listXml = ''; }
   var fallback = 0;
   var rowRe = /<Row>([\s\S]*?)<\/Row>/gi;
@@ -204,10 +204,11 @@ function run() {
     var diagramId = 0;
     try { diagramId = parseInt(DIAGRAM, 10) || 0; } catch (e) { diagramId = 0; }
     if (diagramId == 0) {
-      diagramId = pickSyncDiagram();
+      diagramId = pickSyncDiagram(repo);
       writeLog('auto diagramId=' + diagramId);
     }
     if (diagramId != 0) {
+      EA_HEADLESS_DIAGRAM_ID = diagramId;
       try {
         Repository.OpenDiagram(diagramId);
         writeLog('OpenDiagram OK id=' + diagramId);

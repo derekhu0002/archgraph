@@ -46,7 +46,7 @@ $argList.Add($scriptJs)
 $argList.Add($Mode)
 $argList.Add($(if ($Graph) { $Graph } else { "-" }))
 $argList.Add($(if ($Output) { $Output } else { "-" }))
-$argList.Add($(if ($Diagram -gt 0) { [string]$Diagram } else { "" }))
+$argList.Add($(if ($Diagram -gt 0) { [string]$Diagram } else { "-" }))
 $argList.Add($(if ($Response) { $Response } else { "-" }))
 $argList.Add($log)
 $proc = Start-Process -FilePath $cs -ArgumentList $argList -WindowStyle Hidden -PassThru `
@@ -58,9 +58,22 @@ if (-not $proc.WaitForExit(($TimeoutSec * 1000))) {
     try { Stop-Process -Id $proc.Id -Force -ErrorAction Stop } catch { }
 }
 $exitCode = 0
-if ($timedOut) { $exitCode = -1 } else { $exitCode = $proc.ExitCode }
+if ($timedOut) {
+    $exitCode = -1
+} else {
+    try { $proc.Refresh() } catch { }
+    $exitCode = $proc.ExitCode
+    if ($null -eq $exitCode) { $exitCode = -1 }
+}
 $logText = ''
-if (Test-Path $log) { $logText = Get-Content $log -Raw -ErrorAction SilentlyContinue }
+if (Test-Path -LiteralPath $log) {
+    try { $logText = [string](Get-Content -LiteralPath $log -Raw -ErrorAction Stop) } catch { $logText = '' }
+}
+
+# 本机 Start-Process -PassThru 在 EA COM 场景下 ExitCode 常为 null：以日志 OK 标记兜底判定。
+if ($exitCode -lt 0) {
+    if ($logText -match ('HEADLESS_' + $Mode.ToUpper() + '_OK')) { $exitCode = 0 } else { $exitCode = 1 }
+}
 
 $result = [ordered]@{
     ok       = (-not $timedOut) -and ($exitCode -eq 0)

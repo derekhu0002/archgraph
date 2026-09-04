@@ -86,42 +86,62 @@ function summarize(value) {
   return oneLine.length > 80 ? oneLine.slice(0, 80) + '…' : oneLine;
 }
 
-// attributes 数组比较：按 name 对齐（顺序忽略）；每个 attribute 逐字段比较。
-// opts.compareAttribute 允许调用方覆盖（如对超长 value 合并进 Notes 造成的已知差异做降级）。
+function normCrLf(text) {
+  return String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
+
+// 属性规范化文本：value 与 description 视为同一文本的若干段（EA 端超长 value 并入 Notes
+// 时用空行分隔，拆分再排序可把 value+description 的合并/拆分差异归一），段内行尾归一。
+function canonicalAttrText(o, opts) {
+  const parts = [];
+  if (!o) { return ''; }
+  const push = (v) => {
+    const s = normScalar(v, opts);
+    if (s === '') { return; }
+    for (const piece of normCrLf(s).split(/\n\n+/)) {
+      const t = piece.replace(/^\s+|\s+$/g, '');
+      if (t !== '') { parts.push(t); }
+    }
+  };
+  push(o.value);
+  push(o.description);
+  parts.sort();
+  return parts.join('\u0001');
+}
+
+function canonicalAttrKey(o, opts) {
+  return keyOf(o.name) + '\u0001' + canonicalAttrText(o, opts);
+}
+
+// attributes 数组比较：多集（multiset）比较 —— 同名且文本等价视同同一属性，数量差异才算 diff；
+// 天然支持同名多行台账（如多次 commit）与导出端顺序重排，且不要求长度一致。
 function diffAttributes(origList, expList, opts, out, where) {
-  const origByName = indexObjects(origList, { keyOf: (x) => keyOf(x.name) });
-  const expByName = indexObjects(expList, { keyOf: (x) => keyOf(x.name) });
-  const names = new Set([...origByName.keys(), ...expByName.keys()]);
-  const compareField = opts.compareAttribute || ((a, b) => {
-    const diffs = [];
-    for (const field of ['value', 'description', 'content']) {
-      const aVal = a === undefined ? undefined : a[field];
-      const bVal = b === undefined ? undefined : b[field];
-      if ((aVal === undefined || aVal === null || aVal === '') && (bVal === undefined || bVal === null || bVal === '')) {
-        continue;
-      }
-      const d = scalarDiff(aVal, bVal, opts);
-      if (d) {
-        diffs.push({ field, orig: d.orig, exp: d.exp });
-      }
+  const counts = new Map();
+  const bump = (list, delta) => {
+    for (const entry of list || []) {
+      if (!isPlainObject(entry)) { continue; }
+      const k = canonicalAttrKey(entry, opts);
+      const cur = counts.get(k) || [0, 0];
+      cur[delta > 0 ? 0 : 1] += Math.abs(delta);
+      counts.set(k, cur);
     }
-    return diffs;
-  });
-  for (const name of names) {
-    const o = origByName.get(name);
-    const e = expByName.get(name);
+  };
+  bump(origList, +1);
+  bump(expList, -1);
+  for (const [k, [oc, ec]] of counts) {
+    const sep = k.indexOf('\u0001');
+    const name = k.slice(0, sep);
     const whereAttr = `${where}.attributes[${name}]`;
-    if (o && !e) {
-      out.push({ kind: 'attribute', where: whereAttr, issue: 'missing-in-export' });
-      continue;
-    }
-    if (!o && e) {
-      out.push({ kind: 'attribute', where: whereAttr, issue: 'extra-in-export' });
-      continue;
-    }
-    const subDiffs = compareField(o, e);
-    for (const d of subDiffs) {
-      out.push({ kind: 'attribute', where: whereAttr + '.' + d.field, issue: 'value-diff', orig: d.orig, exp: d.exp });
+    const text = k.slice(sep + 1);
+    const excess = oc - ec;
+    if (excess > 0) {
+      for (let i = 0; i < excess; i++) {
+        out.push({ kind: 'attribute', where: whereAttr, issue: 'missing-in-export', orig: summarize(text) });
+      }
+    } else if (excess < 0) {
+      for (let i = 0; i < -excess; i++) {
+        out.push({ kind: 'attribute', where: whereAttr, issue: 'extra-in-export', exp: summarize(text) });
+      }
     }
   }
 }
@@ -167,6 +187,9 @@ function diffOne(kind, key, origObj, expObj, fields, opts, out, knownGaps) {
     const eEmpty = e === undefined || e === null || normScalar(e, opts) === '';
     if (oEmpty && eEmpty) {
       continue;
+    }
+    if (oEmpty && !eEmpty && kind === 'view' && field === 'parent_element_name') {
+      continue; // 导出端由 EA 父元素名派生的富集字段，orig 缺省视为一致
     }
     if (!oEmpty && eEmpty && ignoreOrigOnly.has(field)) {
       knownGaps.push({ kind, key, field });

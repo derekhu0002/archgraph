@@ -550,17 +550,24 @@ function applyElementAttributes(element, attributes) {
     return;
   }
   refreshCollection(element.Attributes, 'attributes-of-' + element.ElementID);
+  // Ledger/repeated-name attributes (e.g. multiple 'commit' entries): EA allows
+  // duplicate same-name Attributes. To preserve roundtrip content, for each graph
+  // attribute update the first same-name EA attribute not yet used this round,
+  // otherwise append a new one (keeps re-import idempotent).
+  var used = {};
   for (var i = 0; i < attributes.length; i++) {
     var data = attributes[i];
     if (!data || !isNonEmptyString(data.name)) {
       continue;
     }
-    var attr = findChildByName(element.Attributes, data.name);
+    var attr = null;
+    if (!used[data.name]) {
+      attr = findChildByName(element.Attributes, data.name);
+    }
     if (attr == null) {
       attr = element.Attributes.AddNew(data.name, 'String');
     }
-
-    // 幂等：Notes 每次按 schema 重新计算后整体写入（绝不追加，避免重复导入无限膨胀）。
+    used[data.name] = true;
     var notesParts = [];
     var attributeValue = safeString(data.value);
     if (isNonEmptyString(attributeValue)) {
@@ -578,7 +585,6 @@ function applyElementAttributes(element, attributes) {
       attr.Alias = 'content';
     }
     attr.Notes = notesParts.join('\r\n\r\n');
-
     attr.Update();
   }
 }
@@ -861,6 +867,9 @@ function applyRelationshipFields(connector, data, source, target, connectorMeta)
 }
 
 function reconcileRelationshipAttributes(importPkg, connector, relationshipData) {
+  if (!relationshipData.attributes || relationshipData.attributes.length == 0) {
+    return; // 无属性关系：与新建分支守卫一致，跳过（否则更新分支 fallback 读 null.length 崩溃）
+  }
   putJsonTag(connector.TaggedValues, 'relationship_attributes_json', relationshipData.attributes);
 
   var associationClassCreated = false;
@@ -898,7 +907,6 @@ function reconcileRelationshipAttributes(importPkg, connector, relationshipData)
 
   connector.Update();
 }
-
 function findElementByAliasInPackage(pkg, alias) {
   if (pkg == null || pkg.Elements == null) {
     return null;
