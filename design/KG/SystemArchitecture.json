@@ -1710,6 +1710,11 @@
           "name": "commit",
           "value": "eb10bfc",
           "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（SQL 通道登记 + 测试记录 41/43）"
+        },
+        {
+          "name": "commit",
+          "value": "7a599cd",
+          "description": "design/KG/SystemArchitecture.json（新增 AT-2100-OPT-04 回环验收）"
         }
       ],
       "testcases": [
