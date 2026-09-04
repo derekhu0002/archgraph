@@ -5151,13 +5151,13 @@
     {
       "attributes": [
         {
-          "description": "2026-09-04 人类解除“不改 argo/**”红线，要求像 Neo4j 投影一样在 ARGO MCP 写图**流程内**自动投影 .qea（非外部 watch）。实现：在 systemarchitecture-mcp-server 写后触发链加 workspace 级 .qea 投影步骤（config/仓库根单 *.qea 自动发现 + 调用仓库 scripts/ea-qea-sync.js，投影失败不阻断 ARGO 写入，异步同 Neo4j 模式）。",
+          "description": "2026-09-04 人类需求：argo init（initializeWorkspace）时增加一次 .qea **全量投影**——先全量清除投影自有内容再全量写入（逻辑同 Neo4j init 全量同步）。目标 .qea 解析与 init 环境一致；清除范围=投影自有（锚定）内容，不误删非投影/人类内容。",
           "name": "decision",
-          "value": "argo-in-flow-qea-projection"
+          "value": "argo-init-qea-full-projection"
         },
         {
           "name": "status",
-          "value": "COMPLETED",
+          "value": "ACTIVE",
           "description": "AT-2791-01~04 全过（架构测试 49/47，2 既有失败）；ARGO MCP 写图流程内自动投影 .qea 已生效（仓库运行时代码）。"
         },
         {
@@ -5208,29 +5208,15 @@
         {
           "Input": "tests/ea-qea-sync.test.js",
           "acceptanceCriteria": "tests/ea-qea-sync.test.js",
-          "description": "GIVEN 仓库图谱 JSON（只读）与隔离 .qea 副本；WHEN 运行 Node .qea 直写导入；THEN t_object/t_connector/t_diagram 等行与图谱内容一致（导出读回后回环比较忽略顺序相等）；重复导入幂等（无重复行）；既有 t_diagramobjects 位置不被触碰；EA 打开场景以保持 SQLite 连接模拟验证 busy_timeout/重试下写入成功。纯 Node 可测。",
-          "name": "AT-2791-01",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "tests/ea-qea-sync.test.js",
-          "acceptanceCriteria": "tests/ea-qea-sync.test.js",
-          "description": "GIVEN 观察驱动配置目标 .qea；WHEN 图谱 JSON 变化触发；THEN 增量投影（unchanged-skip 不重写未变对象），稳态重投影耗时显著低于全量（实测报告数值）；目标为隔离副本时可全程 Node 测试。",
-          "name": "AT-2791-02",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "tests/ea-qea-sync.test.js",
-          "acceptanceCriteria": "tests/ea-qea-sync.test.js",
-          "description": "GIVEN watch 观察驱动（进程内短时实例）监听图谱 JSON 并指向隔离 .qea 副本；WHEN 模拟 ARGO 写图（改写图谱 JSON 文件新增元素/改 description）；THEN 驱动器自动触发 sync：.qea 出现新增/更新，其余 unchanged-skip；无变化不写；EA 持库期间写入成功或重试后成功。",
-          "name": "AT-2791-03",
+          "description": "GIVEN Node 模块支持 full 模式；WHEN 对隔离 .qea 副本执行 full（全量清除投影自有→全量写入）；THEN 旧投影自有对象被清除、图谱全部元素/关系/图重新写入且内容一致；再次 full 幂等；非投影/人类内容不被清除（如存在则保留）。纯 Node 可测。",
+          "name": "AT-2791-05",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/argo-qea-projection.test.js",
           "acceptanceCriteria": "tests/argo-qea-projection.test.js",
-          "description": "GIVEN ARGO MCP 服务器运行于含仓库根 *.qea 且含 scripts/ea-qea-sync.js 的临时工作区；WHEN 经 applySystemArchitectureMutation 成功写入图谱；THEN 写后投影自动触发：目标 .qea 内容更新为新图谱（新增元素可见）、图谱写入成功不被投影失败阻断；无 *.qea 或投影脚本的临时工作区时写后投影为 no-op。",
-          "name": "AT-2791-04",
+          "description": "GIVEN 临时 workspace（含仓库根 *.qea + scripts/ea-qea-sync.js）执行 initializeWorkspace（argo init）；WHEN init 成功；THEN 目标 .qea 被**全量清除并全量写入**当前图谱（含 starter/既有内容），非仅增量；无 .qea/无脚本时 no-op 且 init 成功。",
+          "name": "AT-2791-06",
           "type": "Acceptance Test"
         }
       ],
