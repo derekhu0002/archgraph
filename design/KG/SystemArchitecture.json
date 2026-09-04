@@ -5151,9 +5151,9 @@
     {
       "attributes": [
         {
-          "description": "2026-09-04 人类拍板：.qea=标准 SQLite，EA 关闭/打开皆可外部直写（实测 EA 打开时写入成功；busy_timeout+重试应对同刻写锁）；仓库 EA 文件已换 archgraph.qea（feap 删除）。",
+          "description": "2026-09-04 人类需求：像 Neo4j 投影一样在 ARGO MCP 写入图谱时自动投影到 .qea。实现=观察驱动（不改 argo/**）：常驻 watch design/KG/SystemArchitecture.json（防抖+轮询兜底+single-flight）→ canonical 落盘即增量 sync archgraph.qea；稳态 ~16ms、EA 开着可写（busy_timeout+重试）。",
           "name": "decision",
-          "value": "qea-direct-sqlite"
+          "value": "qea-auto-projection-watcher"
         },
         {
           "name": "status",
@@ -5197,6 +5197,13 @@
           "acceptanceCriteria": "tests/ea-qea-sync.test.js",
           "description": "GIVEN 观察驱动配置目标 .qea；WHEN 图谱 JSON 变化触发；THEN 增量投影（unchanged-skip 不重写未变对象），稳态重投影耗时显著低于全量（实测报告数值）；目标为隔离副本时可全程 Node 测试。",
           "name": "AT-2791-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-qea-sync.test.js",
+          "acceptanceCriteria": "tests/ea-qea-sync.test.js",
+          "description": "GIVEN watch 观察驱动（进程内短时实例）监听图谱 JSON 并指向隔离 .qea 副本；WHEN 模拟 ARGO 写图（改写图谱 JSON 文件，新增一个元素/改动一个 description）；THEN 驱动器自动触发 sync：.qea 出现新增元素/更新该元素，其余 unchanged-skip 不重写；无图谱变化时无写入；EA 持库（保持连接）期间写入成功或重试后成功。纯 Node 可测。",
+          "name": "AT-2791-03",
           "type": "Acceptance Test"
         }
       ],
