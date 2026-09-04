@@ -24,7 +24,7 @@
 | **AT-acceptance-guardian-05**<br>`tests/semantic-memory-search.test.js` | `memory_search` 语义记忆检索：工具注册 / 无 query / 结果形态 | 注册于工具列表；返回紧凑摘要卡片（`max_desc_len` 默认 800）；无 query 明确失败；符合 MCP `content` 数组契约 |
 | **AT-acceptance-guardian-06**<br>`tests/argo-init-interface.test.js` | `argo-init` SKILL 功能：skill 如何驱动确定性初始化 | 通过 `initializeWorkspace` MCP 接口驱动初始化；不执行 WORKSPACE 外脚本；`buildHarnessReport` 供进程内复用 |
 | **AT-acceptance-guardian-07**<br>`tests/argo-rules-query.test.js` | RULE 交付件：规则文档行为语义 | 规则保持 KG-first / 语义优先检索等既定功能语义 |
-| **AT-acceptance-guardian-08**<br>`tests/architecture-view-context.test.js` | `getArchitectureViewContext`：已知 / 未知 / 含子视图场景 | 返回视图完整成员；未知视图明确失败；子视图可按需展开 |
+| **AT-acceptance-guardian-08**<br>`tests/architecture-view-context.test.js` | `getArchitectureViewContext`：已知 / 未知 / 含子视图 / 可选 EA 几何场景 | 返回视图完整成员；未知视图明确失败；子视图可按需展开；显式 `includeEaGeometry=true` 时返回按 schema id 对齐的 `geometry`（元素 rect + 连线路径），缺 EA 模型/图时 `present=false` 不报错；默认不开启则不触碰 EA、不返回 `geometry` |
 | **AT-acceptance-guardian-09**<br>`tests/ea-web-service-impl.test.js` | ARGO MCP 写接口族：add/update/remove + preview/apply + undo/redo | 写入生效；undo/redo 回退到真实文件状态；embedding 生命周期一致 |
 | **AT-acceptance-guardian-10**<br>`tests/argo-global-install.test.js` | 仓库外全局安装 + `validateSystemArchitecture` 校验器 | `tools/list` 暴露核心工具；`getSystemArchitecture` 无 query→`QUERY_REQUIRED`；校验通过 |
 
