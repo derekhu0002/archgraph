@@ -5434,6 +5434,20 @@
       "id": "overseer-ea-qea-projection-arc-001",
       "name": "里程碑：EA 同步收敛 .qea 直写投影（argo 写后+init 全量）",
       "type": "Business Object"
+    },
+    {
+      "id": "ea-tooling-diagram-001",
+      "name": "EA Tooling 视图图（Excalidraw）",
+      "type": "Artifact",
+      "parent": "1249",
+      "description": "EA Tooling 视图（view 1800）的可视化图，用 Excalidraw 绘制并参考 EA 布局（archgraph.qea view 1800 几何）：工作包 2758「开发EA知识图谱导入导出本地Web服务」→ Realization → 应用组件 2760「ArchGraph 本地 Web 服务」→ Realization → 五个应用服务（2761 导入/2762 导出/2763 搜索/2764 图形化查看/2765 编辑）；技能 2766「本地Web服务 UI/UX 技术洞察」→ Association → 2760；子图语义检索服务 subgraph-semantic-retrieval-001 为本视图成员但无本视图内关系。仓库产物：docs/diagrams/ea-tooling.excalidraw（源）+ docs/diagrams/ea-tooling.png（渲染）。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "10d6015",
+          "description": "docs/diagrams/ea-tooling.excalidraw; docs/diagrams/ea-tooling.png"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -6522,7 +6536,8 @@
         "2764",
         "2765",
         "2766",
-        "subgraph-semantic-retrieval-001"
+        "subgraph-semantic-retrieval-001",
+        "ea-tooling-diagram-001"
       ],
       "included_relationships": [
         "1980",
