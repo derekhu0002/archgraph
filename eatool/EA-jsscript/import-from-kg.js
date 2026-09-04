@@ -34,9 +34,43 @@ var CREATE_MISSING_SUBDIAGRAMS = true;
 var ENABLE_AUTOLAYOUT = false;
 var MAX_ATTRIBUTE_DEFAULT_LENGTH = 250;
 
-var WARNED = {};
+// WP2100 SQL 直写通道（AT-2100-OPT-03，决策 ea-projection-sql-direct）：
+//   SQL_DIRECT=true → 读侧对账 Repository.SQLQuery + 写侧核心行 Repository.Execute（比对象模型集合遍历快一个数量级）。
+//   窄对象模型例外保留（非吞吐热点、需 EA 维护一致性）：新成员入图几何（t_diagramobjects/t_diagramlinks 几何列）、
+//   元素子集合（t_attribute/t_operation/t_test/t_objectresource/…）、关系属性关联类、SupplierEnd.Aggregation 钻石。
+//   OBJECT_MODEL_FALLBACK 默认 false：保留 518c2b0 对象模型全量导入路径但不启用
+//   （理由：子集合/关联类/图上几何由 EA 内部维护，SQL 猜测列风险高于收益；需对比时可临时置 true）。
+var SQL_DIRECT = true;
+var OBJECT_MODEL_FALLBACK = false;
 
+var WARNED = {};
+var TIMINGS = [];
+
+function markTiming(label) {
+  TIMINGS.push({ label: label, atMs: new Date().getTime() });
+}
+
+function reportTimings() {
+  var prev = null;
+  for (var i = 0; i < TIMINGS.length; i++) {
+    var entry = TIMINGS[i];
+    if (prev != null) {
+      Session.Output('  ' + prev.label + ' -> ' + entry.label + ': ' + (entry.atMs - prev.atMs) + ' ms');
+    }
+    prev = entry;
+  }
+}
+
+// 通道分发：默认 SQL 直写；OBJECT_MODEL_FALLBACK=true 时走 518c2b0 对象模型全量路径。
 function main() {
+  if (SQL_DIRECT && !OBJECT_MODEL_FALLBACK) {
+    sqlImportMain();
+    return;
+  }
+  objectModelImportMain();
+}
+// 518c2b0 对象模型全量导入路径（OBJECT_MODEL_FALLBACK=true 时经 main() 分发改走本函数）。
+function objectModelImportMain() {
   Repository.EnsureOutputVisible('Script');
   Repository.EnableUIUpdates(false);
 
@@ -96,12 +130,18 @@ function main() {
   }
 
   // Single Project Browser tree refresh after import completes. Do not auto-open any diagram/view.
-  if (importPkg != null) {
-    try {
-      Repository.RefreshModelView(importPkg.PackageID);
-    } catch (e) {
-      warnOnce('refresh-tree', 'Could not refresh the Project Browser tree: ' + errorMessage(e));
-    }
+  refreshProjectBrowser(importPkg == null ? null : importPkg.PackageID);
+}
+
+// 单次树刷新收口：对象模型与 SQL 两通道共用（全文件仅此一处 Repository.RefreshModelView）。
+function refreshProjectBrowser(packageId) {
+  if (packageId == null) {
+    return;
+  }
+  try {
+    Repository.RefreshModelView(packageId);
+  } catch (e) {
+    warnOnce('refresh-tree', 'Could not refresh the Project Browser tree: ' + errorMessage(e));
   }
 }
 
@@ -1389,6 +1429,651 @@ function reconcileDeletions(importPkg, elementMap, graph) {
     }
   }
   Session.Output('Reconcile: 已删除 ' + deleted + ' 个对象（共 ' + total + ' 个候选）。');
+}
+
+// ---------------------------------------------------------------------------
+// SQL 直写通道模块（AT-2100-OPT-03）。读侧对账/写侧核心行全部经 SQL；
+// 位置红线：update-in-place 绝不 DELETE 重建；绝不对既有图上几何
+// (t_diagramobjects/t_diagramlinks 既有行) 做 UPDATE/DELETE。
+// ---------------------------------------------------------------------------
+
+function sqlImportMain() {
+  Repository.EnsureOutputVisible('Script');
+  Repository.EnableUIUpdates(false);
+  markTiming('start');
+
+  var syncPackage = null;
+  try {
+    Session.Output('Starting SystemArchitecture JSON import (SQL-direct)...');
+
+    var parentPkg = Repository.GetTreeSelectedPackage();
+    if (parentPkg == null) {
+      fail('Please select a target Package in the Project Browser before running this script.');
+      return;
+    }
+
+    SYSTEM_ARCHITECTURE_JSON_PATH = resolveKnowledgeGraphPathFromCurrentModel();
+    if (SYSTEM_ARCHITECTURE_JSON_PATH == '') {
+      fail('Could not resolve design\\KG\\SystemArchitecture.json from the current EA model path.');
+      return;
+    }
+
+    Session.Output('Reading: ' + SYSTEM_ARCHITECTURE_JSON_PATH);
+    var jsonString = readUtf8File(SYSTEM_ARCHITECTURE_JSON_PATH);
+    if (jsonString == '') {
+      fail('Input file is empty or could not be read.');
+      return;
+    }
+
+    var graph = parseJson(jsonString);
+    validateGraph(graph);
+    markTiming('graph loaded');
+
+    syncPackage = sqlEnsureSyncPackage(parentPkg, graph);
+    markTiming('sync package reconciled');
+
+    var elementDataMap = buildElementDataMap(graph.elements);
+    var elementMap = {};        // schemaId -> Object_ID
+    var relationshipMap = {};   // schemaId -> Connector_ID
+    var viewMap = {};           // schemaId -> Diagram_ID
+    var subdiagramParentMap = buildSubdiagramParentMap(graph.elements);
+
+    var elementCounts = sqlImportElements(syncPackage, graph.elements, elementDataMap, elementMap);
+    markTiming('elements reconciled');
+    var relationshipCounts = sqlImportRelationships(syncPackage, graph.relationships, elementMap, relationshipMap);
+    markTiming('relationships reconciled');
+    var viewCounts = sqlImportViews(syncPackage, graph.views, graph.elements, elementMap, relationshipMap, viewMap, subdiagramParentMap);
+    markTiming('views reconciled');
+
+    Session.Output('=======================================');
+    Session.Output('SystemArchitecture import complete.');
+    Session.Output('Elements added: ' + elementCounts.added + ', updated: ' + elementCounts.updated);
+    Session.Output('Relationships added: ' + relationshipCounts.added + ', updated: ' + relationshipCounts.updated);
+    Session.Output('Views added: ' + viewCounts.added + ', updated: ' + viewCounts.updated);
+    Session.Output('Sync package: ' + syncPackage.Name + ' (PackageID ' + syncPackage.PackageID + ')');
+
+    sqlReconcileDeletions(syncPackage, graph);
+    markTiming('deletion reconcile done');
+    reportTimings();
+  } catch (e) {
+    fail('Import failed: ' + errorMessage(e));
+    reportTimings();
+  } finally {
+    Repository.EnableUIUpdates(true);
+  }
+
+  refreshProjectBrowser(syncPackage == null ? null : syncPackage.PackageID);
+}
+
+function sqlEscape(value) {
+  return ('' + value).replace(/'/g, "''");
+}
+
+function newEaGuid() {
+  var s = '';
+  var i;
+  for (i = 0; i < 32; i++) {
+    var r = Math.floor(Math.random() * 16);
+    var c = r < 10 ? String.fromCharCode(48 + r) : String.fromCharCode(97 + r - 10);
+    s += c;
+  }
+  return '{' + s.substring(0, 8) + '-' + s.substring(8, 12) + '-' + s.substring(12, 16) + '-' + s.substring(16, 20) + '-' + s.substring(20) + '}';
+}
+
+// Repository.SQLQuery 返回 XML 字符串；用 MSXML 解析为行数组 [{列名: 文本}]。
+function sqlRows(sqlText) {
+  var xml = '';
+  try {
+    xml = '' + Repository.SQLQuery(sqlText);
+  } catch (e) {
+    warnOnce('sqlquery', 'SQLQuery failed: ' + errorMessage(e) + ' :: ' + sqlText.slice(0, 200));
+    return [];
+  }
+  if (xml == '' || xml.indexOf('<EADATA') < 0) {
+    return [];
+  }
+  var doc = null;
+  try {
+    doc = new ActiveXObject('MSXML2.DOMDocument');
+    doc.async = false;
+  } catch (e) {
+    warnOnce('msxml', 'MSXML2.DOMDocument unavailable: ' + errorMessage(e));
+    return [];
+  }
+  if (!doc.loadXML(xml)) {
+    warnOnce('sqlxml', 'Could not parse SQLQuery XML result.');
+    return [];
+  }
+  var out = [];
+  var rows = null;
+  try { rows = doc.selectNodes('/EADATA/Dataset_0/Data/Row'); } catch (e) { rows = null; }
+  if (rows == null) { return out; }
+  for (var i = 0; i < rows.length; i++) {
+    var rowNode = rows.item(i);
+    var record = {};
+    var children = rowNode.childNodes;
+    for (var j = 0; j < children.length; j++) {
+      var child = children.item(j);
+      if (child != null && child.nodeName != null && child.nodeName != '#text') {
+        record[child.nodeName] = child.text;
+      }
+    }
+    out.push(record);
+  }
+  return out;
+}
+
+function sqlExec(sqlText, label) {
+  try {
+    var ok = Repository.Execute(sqlText);
+    if (!ok) {
+      warnOnce('sqlexec-' + (label || 'sql'), 'Execute returned false: ' + sqlText.slice(0, 200));
+    }
+    return !!ok;
+  } catch (e) {
+    warnOnce('sqlexec-' + (label || 'sql'), 'Execute failed: ' + errorMessage(e) + ' :: ' + sqlText.slice(0, 200));
+    return false;
+  }
+}
+
+function sqlFindPackage(parentPackageId, name) {
+  var rows = sqlRows('SELECT Package_ID FROM t_package WHERE Parent_ID=' + Number(parentPackageId)
+    + " AND Name='" + sqlEscape(name) + "'");
+  return rows.length > 0 ? Number(rows[0].Package_ID) : null;
+}
+
+function sqlEnsureSyncPackage(parentPkg, graph) {
+  var parentPackageId = Number(parentPkg.PackageID);
+  var existingId = sqlFindPackage(parentPackageId, IMPORT_PACKAGE_NAME);
+  if (existingId != null) {
+    Session.Output('Reusing existing sync package: ' + IMPORT_PACKAGE_NAME + ' (PackageID ' + existingId + ')');
+    return { PackageID: existingId, Name: IMPORT_PACKAGE_NAME };
+  }
+  var guid = newEaGuid();
+  sqlExec("INSERT INTO t_package (Name, Parent_ID, ea_guid, Notes) VALUES ('"
+    + sqlEscape(IMPORT_PACKAGE_NAME) + "', " + Number(parentPackageId) + ", '" + sqlEscape(guid) + "', '"
+    + sqlEscape(safeString(graph.description)) + "')", 'insert-sync-package');
+  var readback = sqlRows("SELECT Package_ID FROM t_package WHERE ea_guid='" + sqlEscape(guid) + "'");
+  if (readback.length == 0) {
+    throw new Error('Sync package insert failed; could not read back Package_ID by ea_guid.');
+  }
+  var newId = Number(readback[0].Package_ID);
+  Session.Output('Created sync package: ' + IMPORT_PACKAGE_NAME + ' (PackageID ' + newId + ')');
+  return { PackageID: newId, Name: IMPORT_PACKAGE_NAME };
+}
+
+function sqlObjectByAlias(syncPackageId, schemaId) {
+  var rows = sqlRows('SELECT Object_ID FROM t_object WHERE Package_ID=' + Number(syncPackageId)
+    + " AND Alias='" + sqlEscape(schemaId) + "'");
+  return rows.length > 0 ? Number(rows[0].Object_ID) : null;
+}
+
+function sqlConnectorByAlias(syncPackageId, schemaId) {
+  var rows = sqlRows('SELECT c.Connector_ID FROM t_connector c INNER JOIN t_object o ON c.Start_Object_ID=o.Object_ID'
+    + ' WHERE o.Package_ID=' + Number(syncPackageId) + " AND c.Alias='" + sqlEscape(schemaId) + "'");
+  return rows.length > 0 ? Number(rows[0].Connector_ID) : null;
+}
+
+function sqlDiagramByViewId(syncPackageId, viewId) {
+  var rows = sqlRows('SELECT Diagram_ID, StyleEx FROM t_diagram WHERE Package_ID=' + Number(syncPackageId));
+  for (var i = 0; i < rows.length; i++) {
+    if (getStyleToken(safeString(rows[i].StyleEx), 'schema_view_id') == viewId) {
+      return Number(rows[i].Diagram_ID);
+    }
+  }
+  return null;
+}
+
+function sqlImportElements(syncPackage, elements, elementDataMap, elementMap) {
+  var counts = { added: 0, updated: 0 };
+  var syncPackageId = Number(syncPackage.PackageID);
+  for (var i = 0; i < elements.length; i++) {
+    var elementData = elements[i];
+    if (!elementData || !isNonEmptyString(elementData.id)) { continue; }
+    var outcome = sqlEnsureElement(syncPackageId, elementData.id, elementDataMap, elementMap);
+    if (outcome == 'added') { counts.added++; }
+    else if (outcome == 'updated') { counts.updated++; }
+  }
+  return counts;
+}
+
+function sqlEnsureElement(syncPackageId, schemaId, elementDataMap, elementMap) {
+  if (elementMap[schemaId]) { return 'already-mapped'; }
+  var elementData = elementDataMap[schemaId];
+  if (!elementData) {
+    warnOnce('missing-element-' + schemaId, 'Element data not found for id: ' + schemaId);
+    return 'skipped';
+  }
+  var parentObjectId = 0;
+  if (isNonEmptyString(elementData.parent) && elementData.parent != '0' && elementDataMap[elementData.parent]) {
+    sqlEnsureElement(syncPackageId, elementData.parent, elementDataMap, elementMap);
+    if (elementMap[elementData.parent]) { parentObjectId = Number(elementMap[elementData.parent]); }
+  }
+
+  var existingObjectId = sqlObjectByAlias(syncPackageId, schemaId);
+  if (existingObjectId != null) {
+    elementMap[schemaId] = existingObjectId;
+    sqlUpdateElementRow(existingObjectId, elementData);
+    sqlWriteElementTags(existingObjectId, elementData);
+    sqlApplyElementChildren(existingObjectId, elementData);
+    Session.Output('Updated element [' + safeString(elementData.type) + ']: ' + elementData.name + ' (' + schemaId + ')');
+    return 'updated';
+  }
+
+  var guid = newEaGuid();
+  var baseType = mapElementTypeToEa(elementData.type);
+  var alias = isNonEmptyString(elementData.alias) ? elementData.alias : schemaId;
+  sqlExec("INSERT INTO t_object (Object_Type, ea_guid, Name, Type, Stereotype, Note, Alias, Package_ID, ParentID, Status) VALUES ('Object', '"
+    + sqlEscape(guid) + "', '" + sqlEscape(safeName(elementData.name, schemaId)) + "', '" + sqlEscape(baseType) + "', '"
+    + sqlEscape(mapElementTypeToEaStereotype(elementData.type)) + "', '" + sqlEscape(safeString(elementData.description)) + "', '"
+    + sqlEscape(alias) + "', " + Number(syncPackageId) + ', ' + Number(parentObjectId || 0) + ", '"
+    + sqlEscape(safeString(elementData.status)) + "')", 'insert-element');
+
+  var readback = sqlRows("SELECT Object_ID FROM t_object WHERE ea_guid='" + sqlEscape(guid) + "'");
+  if (readback.length == 0) {
+    warnOnce('element-readback-' + schemaId, 'Could not read back Object_ID for element ' + schemaId);
+    return 'skipped';
+  }
+  var newObjectId = Number(readback[0].Object_ID);
+  elementMap[schemaId] = newObjectId;
+  sqlWriteElementTags(newObjectId, elementData);
+  sqlApplyElementChildren(newObjectId, elementData);
+  Session.Output('Created element [' + safeString(elementData.type) + ']: ' + elementData.name + ' (' + schemaId + ')');
+  return 'added';
+}
+
+// 仅 UPDATE 内容列；Type 对既有元素不可变。
+function sqlUpdateElementRow(objectId, data) {
+  var alias = isNonEmptyString(data.alias) ? data.alias : data.id;
+  sqlExec("UPDATE t_object SET Name='" + sqlEscape(safeName(data.name, data.id)) + "', Note='"
+    + sqlEscape(safeString(data.description)) + "', Alias='" + sqlEscape(alias) + "', Stereotype='"
+    + sqlEscape(mapElementTypeToEaStereotype(data.type)) + "', Status='" + sqlEscape(safeString(data.status))
+    + "' WHERE Object_ID=" + Number(objectId), 'update-element');
+}
+
+function sqlUpsertTag(tableName, ownerColumn, ownerId, name, value) {
+  var text = safeString(value);
+  var shortValue = text;
+  var memoNotes = '';
+  if (text.length > 250) { shortValue = '<memo>'; memoNotes = text; }
+  var found = sqlRows('SELECT PropertyID FROM ' + tableName + ' WHERE ' + ownerColumn + '=' + Number(ownerId)
+    + " AND Property='" + sqlEscape(name) + "'");
+  if (found.length > 0) {
+    sqlExec("UPDATE " + tableName + " SET Value='" + sqlEscape(shortValue) + "', Notes='" + sqlEscape(memoNotes)
+      + "' WHERE PropertyID=" + Number(found[0].PropertyID), 'update-tag-' + name);
+  } else {
+    sqlExec("INSERT INTO " + tableName + " (" + ownerColumn + ", Property, Value, Notes) VALUES (" + Number(ownerId)
+      + ", '" + sqlEscape(name) + "', '" + sqlEscape(shortValue) + "', '" + sqlEscape(memoNotes) + "')", 'insert-tag-' + name);
+  }
+}
+
+function sqlWriteElementTags(objectId, data) {
+  sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'schema_id', data.id);
+  sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'schema_parent', safeString(data.parent));
+  sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'archimate_type', canonicalArchimateType(data.type));
+  sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'schema_alias', safeString(data.alias));
+  sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'schema_classifier', safeString(data.classifier));
+  sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'schema_element_json', jsonOr(data));
+  sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'testcases_json', jsonOr(data.testcases || []));
+  sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'project_info_json', jsonOr(data.project_info || {}));
+  sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'subdiagram_views_json', jsonOr(data.subdiagram_views || []));
+}
+
+function jsonOr(value) {
+  try { return JSON.stringify(value); } catch (e) { return safeString(value); }
+}
+
+// 元素内容子集合窄对象模型例外（EA 内部维护 t_attribute/t_operation/t_test/t_objectresource 等子表）。
+function sqlApplyElementChildren(objectId, data) {
+  var needsObject = (data.attributes && data.attributes.length > 0)
+    || isNonEmptyString(data.code_file) || isNonEmptyString(data.condition_file) || isNonEmptyString(data.prompts_file)
+    || (data.project_info && (data.project_info.summary || data.project_info.resources || data.project_info.tasks))
+    || (data.testcases && data.testcases.length > 0)
+    || (data.subdiagram_views && data.subdiagram_views.length > 0);
+  if (!needsObject) { return; }
+  var element = null;
+  try { element = Repository.GetElementByID(Number(objectId)); } catch (e) { element = null; }
+  if (element == null) { return; }
+  try { element.Update(); } catch (e) { }
+  applyElementAttributes(element, data.attributes);
+  applyElementSpecialMethods(element, data);
+  applyProjectInfo(element, data.project_info);
+  applyTestcases(element, data.testcases);
+  if (data.subdiagram_views && data.subdiagram_views.length > 0) {
+    applySubdiagramViewTags(element, data.subdiagram_views);
+  }
+  try { element.Update(); } catch (e) { }
+}
+
+function sqlImportRelationships(syncPackage, relationships, elementMap, relationshipMap) {
+  var counts = { added: 0, updated: 0 };
+  var syncPackageId = Number(syncPackage.PackageID);
+  for (var i = 0; i < relationships.length; i++) {
+    var data = relationships[i];
+    if (!data || !isNonEmptyString(data.id)) { continue; }
+    var sourceObjectId = elementMap[data.source_id] ? Number(elementMap[data.source_id]) : null;
+    var targetObjectId = elementMap[data.target_id] ? Number(elementMap[data.target_id]) : null;
+    if (sourceObjectId == null || targetObjectId == null) {
+      warnOnce('missing-rel-end-' + data.id, 'Skipping relationship ' + data.id + ' because source or target element is missing.');
+      continue;
+    }
+    var connectorMeta = mapRelationshipTypeToEa(data.type);
+    warnIfUnknownSchemaRelationshipType(data.type);
+
+    var existingConnectorId = sqlConnectorByAlias(syncPackageId, data.id);
+    if (existingConnectorId != null) {
+      relationshipMap[data.id] = existingConnectorId;
+      sqlUpdateConnectorRow(existingConnectorId, data, sourceObjectId, targetObjectId, connectorMeta);
+      sqlWriteConnectorTags(existingConnectorId, data);
+      sqlApplyAggregationDiamond(existingConnectorId, connectorMeta);
+      counts.updated++;
+      Session.Output('Updated relationship [' + safeString(data.type) + '] ' + safeString(data.name) + ': ' + data.id);
+      continue;
+    }
+
+    var guid = newEaGuid();
+    var direction = connectorMeta.directed ? 'Source -> Destination' : '';
+    sqlExec("INSERT INTO t_connector (Name, Connector_Type, Start_Object_ID, End_Object_ID, Stereotype, Notes, Direction, Alias, ea_guid) VALUES ('"
+      + sqlEscape(safeString(data.name)) + "', '" + sqlEscape(connectorMeta.connectorType) + "', " + Number(sourceObjectId)
+      + ', ' + Number(targetObjectId) + ", '" + sqlEscape(mapRelationshipTypeToEaStereotype(data.type)) + "', '"
+      + sqlEscape(safeString(data.description)) + "', '" + sqlEscape(direction) + "', '" + sqlEscape(data.id) + "', '"
+      + sqlEscape(guid) + "')", 'insert-connector');
+
+    var readback = sqlRows("SELECT Connector_ID FROM t_connector WHERE ea_guid='" + sqlEscape(guid) + "'");
+    if (readback.length == 0) {
+      warnOnce('connector-readback-' + data.id, 'Could not read back Connector_ID for relationship ' + data.id);
+      continue;
+    }
+    var newConnectorId = Number(readback[0].Connector_ID);
+    relationshipMap[data.id] = newConnectorId;
+    sqlWriteConnectorTags(newConnectorId, data);
+    sqlApplyAggregationDiamond(newConnectorId, connectorMeta);
+    counts.added++;
+    Session.Output('Created relationship [' + safeString(data.type) + '] ' + safeString(data.name) + ': ' + data.id);
+  }
+  return counts;
+}
+
+// update-in-place：只写关系内容列与两端/方向；绝不 DELETE 重建。
+function sqlUpdateConnectorRow(connectorId, data, sourceObjectId, targetObjectId, connectorMeta) {
+  var direction = connectorMeta.directed ? 'Source -> Destination' : '';
+  sqlExec("UPDATE t_connector SET Name='" + sqlEscape(safeString(data.name)) + "', Start_Object_ID=" + Number(sourceObjectId)
+    + ', End_Object_ID=' + Number(targetObjectId) + ", Stereotype='" + sqlEscape(mapRelationshipTypeToEaStereotype(data.type))
+    + "', Notes='" + sqlEscape(safeString(data.description)) + "', Direction='" + sqlEscape(direction) + "', Alias='"
+    + sqlEscape(data.id) + "' WHERE Connector_ID=" + Number(connectorId), 'update-connector');
+}
+
+function sqlWriteConnectorTags(connectorId, data) {
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'schema_id', data.id);
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'schema_name', safeString(data.name));
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'schema_statement', safeString(data.statement));
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'archimate_relationship_type', canonicalArchimateType(data.type));
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'document', safeString(data.document));
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'source_schema_id', safeString(data.source_id));
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'target_schema_id', safeString(data.target_id));
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'source_name', safeString(data.source_name));
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'target_name', safeString(data.target_name));
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'schema_relationship_json', jsonOr(data));
+  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'relationship_attributes_json',
+    jsonOr(data.attributes || []));
+  if (data.attributes) {
+    for (var i = 0; i < data.attributes.length; i++) {
+      var attr = data.attributes[i];
+      if (!attr) { continue; }
+      sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId,
+        'relattr_' + sanitizeTagName(attr.name), safeString(attr.description));
+    }
+  }
+}
+
+// Composition/Aggregation 钻石（SupplierEnd.Aggregation）由 EA 对象模型维护 → 窄例外。
+function sqlApplyAggregationDiamond(connectorId, connectorMeta) {
+  if (!connectorMeta || connectorMeta.aggregationKind < 0) { return; }
+  var connector = null;
+  try { connector = Repository.GetConnectorByID(Number(connectorId)); } catch (e) { connector = null; }
+  if (connector == null) { return; }
+  try {
+    connector.SupplierEnd.Aggregation = connectorMeta.aggregationKind;
+    connector.Update();
+  } catch (e) {
+    warnOnce('aggregation-' + connectorId, 'Could not apply aggregation kind: ' + errorMessage(e));
+  }
+}
+
+function sqlImportViews(syncPackage, views, elements, elementMap, relationshipMap, viewMap, subdiagramParentMap) {
+  var counts = { added: 0, updated: 0 };
+  var syncPackageId = Number(syncPackage.PackageID);
+  for (var i = 0; i < views.length; i++) {
+    var viewData = views[i];
+    if (!viewData || !isNonEmptyString(viewData.view_id)) { continue; }
+    var outcome = sqlEnsureDiagram(syncPackageId, viewData, elementMap, viewMap, subdiagramParentMap);
+    if (viewMap[viewData.view_id]) {
+      sqlPopulateDiagram(syncPackageId, viewMap[viewData.view_id], viewData, elementMap, relationshipMap);
+    }
+    if (outcome == 'added') { counts.added++; }
+    else if (outcome == 'updated') { counts.updated++; }
+  }
+  return counts;
+}
+
+function sqlStyleExFor(viewData) {
+  var styleEx = '';
+  styleEx = setStyleToken(styleEx, 'schema_view_id', viewData.view_id);
+  styleEx = setStyleToken(styleEx, 'schema_parent_element_id', safeString(viewData.parent_element_id));
+  styleEx = setStyleToken(styleEx, 'schema_parent_element_name', safeString(viewData.parent_element_name));
+  styleEx = setStyleJsonToken(styleEx, 'schema_included_elements_json', viewData.included_elements || []);
+  styleEx = setStyleJsonToken(styleEx, 'schema_included_relationships_json', viewData.included_relationships || []);
+  return styleEx;
+}
+
+function sqlEnsureDiagram(syncPackageId, viewData, elementMap, viewMap, subdiagramParentMap) {
+  if (viewMap[viewData.view_id]) { return 'already-mapped'; }
+  var parentElementId = 0;
+  if (isNonEmptyString(viewData.parent_element_id) && elementMap[viewData.parent_element_id]) {
+    parentElementId = Number(elementMap[viewData.parent_element_id]);
+  } else if (subdiagramParentMap[viewData.view_id] && elementMap[subdiagramParentMap[viewData.view_id]]) {
+    parentElementId = Number(elementMap[subdiagramParentMap[viewData.view_id]]);
+  }
+
+  var existingDiagramId = sqlDiagramByViewId(syncPackageId, viewData.view_id);
+  if (existingDiagramId != null) {
+    viewMap[viewData.view_id] = existingDiagramId;
+    sqlExec("UPDATE t_diagram SET Name='" + sqlEscape(safeName(viewData.view_name, viewData.view_id)) + "', Notes='"
+      + sqlEscape(safeString(viewData.description)) + "', StyleEx='" + sqlEscape(sqlStyleExFor(viewData)) + "' WHERE Diagram_ID="
+      + Number(existingDiagramId), 'update-diagram');
+    Session.Output('Updated view: ' + safeName(viewData.view_name, viewData.view_id) + ' (' + viewData.view_id + ')');
+    return 'updated';
+  }
+
+  var guid = newEaGuid();
+  sqlExec("INSERT INTO t_diagram (Name, Diagram_Type, Package_ID, ParentID, ea_guid, StyleEx, Notes) VALUES ('"
+    + sqlEscape(safeName(viewData.view_name, viewData.view_id)) + "', '" + sqlEscape(DIAGRAM_TYPE) + "', " + Number(syncPackageId)
+    + ', ' + Number(parentElementId || 0) + ", '" + sqlEscape(guid) + "', '" + sqlEscape(sqlStyleExFor(viewData)) + "', '"
+    + sqlEscape(safeString(viewData.description)) + "')", 'insert-diagram');
+  var readback = sqlRows("SELECT Diagram_ID FROM t_diagram WHERE ea_guid='" + sqlEscape(guid) + "'");
+  if (readback.length == 0) {
+    warnOnce('diagram-readback-' + viewData.view_id, 'Could not read back Diagram_ID for view ' + viewData.view_id);
+    return 'skipped';
+  }
+  var diagramId = Number(readback[0].Diagram_ID);
+  viewMap[viewData.view_id] = diagramId;
+  Session.Output('Created view: ' + safeName(viewData.view_name, viewData.view_id) + ' (' + viewData.view_id + ')');
+  return 'added';
+}
+
+// 成员增补：只补缺失（既有 t_diagramobjects/t_diagramlinks 行与几何绝不动）；新增成员几何由对象模型窄例外写入。
+function sqlPopulateDiagram(syncPackageId, diagramId, viewData, elementMap, relationshipMap) {
+  if (diagramId == null) { return; }
+  var placedElementIds = {};
+  var existingObjects = sqlRows('SELECT Object_ID FROM t_diagramobjects WHERE Diagram_ID=' + Number(diagramId));
+  for (var i = 0; i < existingObjects.length; i++) {
+    placedElementIds[Number(existingObjects[i].Object_ID)] = true;
+  }
+  var placedConnectorIds = {};
+  var existingLinks = sqlRows('SELECT ConnectorID FROM t_diagramlinks WHERE Diagram_ID=' + Number(diagramId));
+  for (var l = 0; l < existingLinks.length; l++) {
+    placedConnectorIds[Number(existingLinks[l].ConnectorID)] = true;
+  }
+
+  var diagram = null;
+  try { diagram = Repository.GetDiagramByID(Number(diagramId)); } catch (e) { diagram = null; }
+
+  var nextObjectIndex = existingObjects.length;
+  var includedElements = viewData.included_elements || [];
+  for (var k = 0; k < includedElements.length; k++) {
+    var schemaId = includedElements[k];
+    var objectId = elementMap[schemaId] ? Number(elementMap[schemaId]) : null;
+    if (objectId == null) {
+      warnOnce('view-missing-element-' + viewData.view_id + '-' + schemaId, 'View ' + viewData.view_id + ' references missing element ' + schemaId + '.');
+      continue;
+    }
+    if (!placedElementIds[objectId]) {
+      if (diagram != null) {
+        addObjectToDiagramByID(diagram, objectId, nextObjectIndex);
+        placedElementIds[objectId] = true;
+        nextObjectIndex++;
+      } else {
+        warnOnce('diagram-object-add-' + viewData.view_id + '-' + schemaId, 'Could not obtain diagram object to add missing member ' + schemaId + '.');
+      }
+    }
+  }
+  var includedRelationships = viewData.included_relationships || [];
+  for (var m = 0; m < includedRelationships.length; m++) {
+    var relId = includedRelationships[m];
+    var connectorId = relationshipMap[relId] ? Number(relationshipMap[relId]) : null;
+    if (connectorId == null) {
+      warnOnce('view-missing-relationship-' + viewData.view_id + '-' + relId, 'View ' + viewData.view_id + ' references missing relationship ' + relId + '.');
+      continue;
+    }
+    if (!placedConnectorIds[connectorId]) {
+      if (diagram != null) {
+        addConnectorToDiagramByID(diagram, connectorId);
+        placedConnectorIds[connectorId] = true;
+      } else {
+        warnOnce('diagram-link-add-' + viewData.view_id + '-' + relId, 'Could not obtain diagram object to add missing link ' + relId + '.');
+      }
+    }
+  }
+  if (diagram != null) {
+    try { diagram.Update(); } catch (e) { }
+  }
+}
+
+function addObjectToDiagramByID(diagram, objectId, index) {
+  try {
+    var col = index % 5;
+    var row = Math.floor(index / 5);
+    var left = 40 + (col * 260);
+    var top = 40 + (row * 150);
+    var right = left + 180;
+    var bottom = top + 80;
+    var geometry = 'l=' + left + ';r=' + right + ';t=' + top + ';b=' + bottom + ';';
+    var diagramObject = diagram.DiagramObjects.AddNew(geometry, '');
+    diagramObject.ElementID = Number(objectId);
+    try { diagramObject.Style = setStyleToken(diagramObject.Style, 'UCRect', '0'); } catch (e) { }
+    diagramObject.Update();
+  } catch (e) {
+    warnOnce('diagram-object-' + diagram.DiagramID + '-' + objectId, 'Could not add element to diagram: ' + errorMessage(e));
+  }
+}
+
+function addConnectorToDiagramByID(diagram, connectorId) {
+  try {
+    var link = diagram.DiagramLinks.AddNew('', '');
+    link.ConnectorID = Number(connectorId);
+    link.Update();
+  } catch (e) {
+    warnOnce('diagram-link-' + diagram.DiagramID + '-' + connectorId, 'Could not add connector to diagram: ' + errorMessage(e));
+  }
+}
+
+// 删除对账（SQL DELETE）：先列清单（元素/关系 + 所在图）→ 人工键入 delete 确认 → 先关系后元素。
+function sqlReconcileDeletions(syncPackage, graph) {
+  if (syncPackage == null) { return; }
+  var syncPackageId = Number(syncPackage.PackageID);
+  var expectedElements = {};
+  var expectedRelationships = {};
+  var i;
+  for (i = 0; i < graph.elements.length; i++) {
+    if (graph.elements[i] && isNonEmptyString(graph.elements[i].id)) { expectedElements[graph.elements[i].id] = true; }
+  }
+  for (i = 0; i < graph.relationships.length; i++) {
+    if (graph.relationships[i] && isNonEmptyString(graph.relationships[i].id)) { expectedRelationships[graph.relationships[i].id] = true; }
+  }
+
+  var elements = sqlRows('SELECT Object_ID, Name, Type, Alias, ParentID FROM t_object WHERE Package_ID=' + Number(syncPackageId)
+    + " AND Object_Type='Object'");
+  var elementCandidates = [];
+  var connectorCandidates = [];
+  var objectIds = [];
+  for (i = 0; i < elements.length; i++) {
+    var alias = safeString(elements[i].Alias);
+    objectIds.push(Number(elements[i].Object_ID));
+    if (/_attributes$/.test(alias)) { continue; } // 关系属性关联类托管对象除外
+    if (alias != '' && expectedElements[alias]) { continue; }
+    elementCandidates.push(elements[i]);
+  }
+  var whereIds = objectIds.length > 0 ? objectIds.join(',') : '0';
+  var connectors = sqlRows('SELECT Connector_ID, Name, Alias FROM t_connector WHERE Start_Object_ID IN (' + whereIds + ')');
+  for (i = 0; i < connectors.length; i++) {
+    var cAlias = safeString(connectors[i].Alias);
+    if (cAlias != '' && expectedRelationships[cAlias]) { continue; }
+    connectorCandidates.push(connectors[i]);
+  }
+
+  var total = connectorCandidates.length + elementCandidates.length;
+  if (total == 0) {
+    Session.Output('Reconcile: 同步根包与图谱完全一致，无删除候选。');
+    return;
+  }
+  Session.Output('Reconcile: 以下对象在同步根包 "' + IMPORT_PACKAGE_NAME + '" 中存在但图谱已没有 —— 删除候选清单：');
+  for (i = 0; i < connectorCandidates.length; i++) {
+    Session.Output('  [Connector] name=' + safeString(connectorCandidates[i].Name) + ' schema_id=' + (safeString(connectorCandidates[i].Alias) || '(none)'));
+  }
+  for (i = 0; i < elementCandidates.length; i++) {
+    var el = elementCandidates[i];
+    var usage = sqlDiagramNamesUsingElement(syncPackageId, Number(el.Object_ID));
+    Session.Output('  [Element] name=' + safeString(el.Name) + ' type=' + safeString(el.Type)
+      + ' schema_id=' + (safeString(el.Alias) || '(none)') + ' used_in_diagrams=' + (usage.join(', ') || '(none)'));
+  }
+
+  if (!askDeletionConfirmation(total)) {
+    Session.Output('Reconcile: 用户未确认，跳过删除。');
+    return;
+  }
+  var deleted = 0;
+  for (i = 0; i < connectorCandidates.length; i++) {
+    if (sqlExec('DELETE FROM t_connector WHERE Connector_ID=' + Number(connectorCandidates[i].Connector_ID), 'delete-connector')) { deleted++; }
+  }
+  elementCandidates.sort(function (a, b) {
+    return sqlElementDepth(Number(b.Object_ID)) - sqlElementDepth(Number(a.Object_ID));
+  });
+  for (i = 0; i < elementCandidates.length; i++) {
+    if (sqlExec('DELETE FROM t_object WHERE Object_ID=' + Number(elementCandidates[i].Object_ID), 'delete-element')) { deleted++; }
+  }
+  Session.Output('Reconcile: 已删除 ' + deleted + ' 个对象（共 ' + total + ' 个候选）。');
+}
+
+function sqlDiagramNamesUsingElement(syncPackageId, elementId) {
+  var names = [];
+  var rows = sqlRows('SELECT d.Name FROM t_diagram d INNER JOIN t_diagramobjects o ON d.Diagram_ID=o.Diagram_ID'
+    + ' WHERE d.Package_ID=' + Number(syncPackageId) + ' AND o.Object_ID=' + Number(elementId));
+  for (var i = 0; i < rows.length; i++) { names.push(safeString(rows[i].Name)); }
+  return names;
+}
+
+function sqlElementDepth(objectId) {
+  var depth = 0;
+  var guard = 0;
+  var currentId = Number(objectId);
+  while (currentId != 0 && guard < 200) {
+    depth++;
+    guard++;
+    var parents = sqlRows('SELECT ParentID FROM t_object WHERE Object_ID=' + Number(currentId));
+    if (parents.length == 0) { break; }
+    currentId = Number(parents[0].ParentID || 0);
+  }
+  return depth;
 }
 
 function mapElementTypeToEaStereotype(archimateType) {

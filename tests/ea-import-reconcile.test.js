@@ -146,3 +146,85 @@ test('ea-import-reconcile: 只写库不刷 UI——无逐对象/逐集合 Refres
   const treeRefreshIndex = content.indexOf('Repository.RefreshModelView');
   assert.ok(reEnableIndex >= 0 && treeRefreshIndex > reEnableIndex, '树刷新应发生在 UI 恢复之后（仅最后单次）');
 });
+
+test('ea-import-reconcile (AT-2100-OPT-03): SQL 直写通道——读侧 SQLQuery + 写侧 Execute，核心表覆盖', () => {
+  // GIVEN 决策 ea-projection-sql-direct：SQL 直写通道加入 import-from-kg.js
+  // WHEN 检查脚本中的 SQL 路径
+  // THEN SQL_DIRECT 默认开启；读侧对账用 Repository.SQLQuery（sqlRows），写侧用 Repository.Execute（sqlExec）；
+  //       SQL 覆盖核心投影表 t_package/t_object/t_connector/t_diagram 与 tag 表 t_objectproperties/t_connectorproperties
+  const content = readScript();
+
+  assert.match(content, /var\s+SQL_DIRECT\s*=\s*true/, 'SQL 直写通道默认开启');
+  assert.match(content, /var\s+OBJECT_MODEL_FALLBACK\s*=\s*false/, '对象模型全量回退默认关闭');
+  assert.match(content, /function\s+sqlRows\s*\(/, '应定义 SQLQuery 读侧（sqlRows）');
+  assert.match(content, /Repository\.SQLQuery\s*\(/, '应调用 Repository.SQLQuery');
+  assert.match(content, /function\s+sqlExec\s*\(/, '应定义 Execute 写侧（sqlExec）');
+  assert.match(content, /Repository\.Execute\s*\(/, '应调用 Repository.Execute');
+  assert.match(content, /function\s+sqlImportMain\s*\(/, '应定义 SQL 导入主流程');
+  assert.match(content, /function\s+sqlImportElements\s*\(/, 'SQL 应覆盖元素导入');
+  assert.match(content, /function\s+sqlImportRelationships\s*\(/, 'SQL 应覆盖关系导入');
+  assert.match(content, /function\s+sqlImportViews\s*\(/, 'SQL 应覆盖视图导入');
+  assert.match(content, /INSERT INTO t_package/, 'SQL 应能写 t_package');
+  assert.match(content, /INSERT INTO t_object\b/, 'SQL 应能写 t_object');
+  assert.match(content, /INSERT INTO t_connector/, 'SQL 应能写 t_connector');
+  assert.match(content, /INSERT INTO t_diagram\b/, 'SQL 应能写 t_diagram');
+  assert.match(content, /t_objectproperties/, '元素锚 tag 应写 t_objectproperties');
+  assert.match(content, /t_connectorproperties/, '关系锚 tag 应写 t_connectorproperties');
+});
+
+test('ea-import-reconcile (AT-2100-OPT-03): 幂等——按 Alias 先查后插（ea_guid 唯一 + 读回 id），绝不删除重建', () => {
+  // GIVEN 同一图谱重复导入
+  // WHEN 检查 SQL 路径的对象对账
+  // THEN 按 Alias=schemaId 先查（sqlObjectByAlias/sqlConnectorByAlias/sqlDiagramByViewId），已存在仅 UPDATE，
+  //       新建带唯一 ea_guid 并经 SELECT by ea_guid 读回 Object_ID/Connector_ID/Diagram_ID
+  const content = readScript();
+
+  assert.match(content, /function\s+sqlObjectByAlias\s*\(/, '元素应按 Alias 先查');
+  assert.match(content, /function\s+sqlConnectorByAlias\s*\(/, '关系应按 Alias 先查');
+  assert.match(content, /function\s+sqlDiagramByViewId\s*\(/, '图应按 StyleEx schema_view_id 先查');
+  assert.match(content, /function\s+newEaGuid\s*\(/, '应生成唯一 ea_guid');
+  assert.match(content, /SELECT Object_ID FROM t_object WHERE ea_guid='/, '元素 INSERT 后应经 ea_guid 读回 Object_ID');
+  assert.match(content, /SELECT Connector_ID FROM t_connector WHERE ea_guid='/, '关系 INSERT 后应经 ea_guid 读回 Connector_ID');
+  assert.match(content, /SELECT Diagram_ID FROM t_diagram WHERE ea_guid='/, '图 INSERT 后应经 ea_guid 读回 Diagram_ID');
+
+  const elementSqlBody = sectionBetween(content, 'function sqlEnsureElement(', 'function sqlUpdateElementRow');
+  assert.match(elementSqlBody, /existingObjectId != null/, '元素应先查已存在分支');
+  assert.match(elementSqlBody, /sqlUpdateElementRow\s*\(existingObjectId/, '已存在元素仅 UPDATE');
+  assert.match(elementSqlBody, /INSERT INTO t_object\b/, '图谱独有元素 INSERT');
+  const relSqlBody = sectionBetween(content, 'function sqlImportRelationships(', 'function sqlUpdateConnectorRow');
+  assert.match(relSqlBody, /existingConnectorId != null/, '关系应先查已存在分支');
+  assert.doesNotMatch(relSqlBody, /DELETE FROM/, '关系导入热路径不应含 SQL DELETE 重建');
+});
+
+test('ea-import-reconcile (AT-2100-OPT-03): 位置红线——绝不 UPDATE/DELETE 既有图上几何（t_diagramobjects/t_diagramlinks 只读补缺）', () => {
+  // GIVEN 人类布局位置红线
+  // WHEN 检查 SQL 路径对图成员的处理
+  // THEN t_diagramobjects/t_diagramlinks 仅 SELECT 定位缺失成员，且新增成员入图走窄对象模型例外；
+  //       全文件不得出现对这两表既有行的 UPDATE t_diagramobjects / DELETE FROM t_diagramobjects(t_diagramlinks)
+  const content = readScript();
+
+  assert.doesNotMatch(content, /UPDATE\s+t_diagramobjects/i, '绝不允许 UPDATE 既有图上几何');
+  assert.doesNotMatch(content, /DELETE\s+FROM\s+t_diagramobjects/i, '绝不允许 DELETE 既有图上几何');
+  assert.doesNotMatch(content, /DELETE\s+FROM\s+t_diagramlinks/i, '绝不允许 DELETE 既有图链接');
+  assert.doesNotMatch(content, /UPDATE\s+t_diagramlinks/i, '绝不允许 UPDATE 既有图链接');
+
+  const populateSqlBody = sectionBetween(content, 'function sqlPopulateDiagram(', 'function addObjectToDiagramByID');
+  assert.match(populateSqlBody, /SELECT Object_ID FROM t_diagramobjects/, '读侧用 SQL 定位既有图上成员');
+  assert.match(populateSqlBody, /SELECT ConnectorID FROM t_diagramlinks/, '读侧用 SQL 定位既有图链接');
+  assert.match(populateSqlBody, /placedElementIds\[Number\(existingObjects\[i\]\.Object_ID\)\]/, '仅记录既有成员防重复补入');
+});
+
+test('ea-import-reconcile (AT-2100-OPT-03): 删除分支——删除清单 + 人工确认后才 SQL DELETE', () => {
+  // GIVEN 对账包内图谱已没有的对象
+  // WHEN 检查 SQL 删除流程
+  // THEN sqlReconcileDeletions 先列清单、askDeletionConfirmation 确认通过后才出现 DELETE FROM；未确认跳过
+  const content = readScript();
+  assert.match(content, /function\s+sqlReconcileDeletions\s*\(/, '应定义 SQL 删除对账入口');
+  const body = sectionBetween(content, 'function sqlReconcileDeletions(', 'function sqlDiagramNamesUsingElement');
+  assert.match(body, /Session\.Output\s*\([^)]*删除候选清单/, '应先在输出列出删除清单');
+  const confirmIndex = body.indexOf('askDeletionConfirmation(');
+  const firstDelete = body.search(/DELETE FROM t_connector|DELETE FROM t_object/);
+  assert.ok(confirmIndex >= 0, 'SQL 删除前应调用人工确认');
+  assert.ok(firstDelete > confirmIndex, 'DELETE FROM 必须出现在人工确认之后');
+  assert.match(body, /用户未确认，跳过删除/, '未确认时应跳过删除');
+});
