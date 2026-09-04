@@ -4956,7 +4956,8 @@
         },
         {
           "name": "status",
-          "value": "COMPLETED"
+          "value": "PARKED",
+          "description": "2026-09-04 人类伙伴换向：放弃 MCP 实时同步桥方向，回到 eatool/EA-jsscript 脚本导入导出并优化（只写库不刷 UI + 幂等对账）。本 WP（R-S1/R-S2' 系列）暂停 PARKED：保留驱动器 scripts/ea-sync-driver.js、tests/ea-sync-r1.test.js、环境升级（MCP 3.0.1 x86 + .NET 10.0.11）与全部经验（审计 CSV 正斜杠、geometrySnapshot、位置不变性）；未来如需实时桥可复用。"
         },
         {
           "name": "commit",
