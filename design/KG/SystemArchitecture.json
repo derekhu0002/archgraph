@@ -1635,7 +1635,7 @@
       "name": "开发不保留原ID的EA导入脚本",
       "parent": "1249",
       "type": "Work Package",
-      "description": "基于 eatool/EA-jsscript/import_system_architecture_json_to_ea.js 开发新脚本 import_system_architecture_json_to_ea_new.js：不保留原 schema id，所有导入元素按新元素处理；执行时必须由用户提供导入文件路径。",
+      "description": "EA 导入脚本优化（eatool/EA-jsscript 路径；本 WP 由「开发不保留原ID的EA导入脚本」演进重开）：人类决策 EA 为主设计界面、方向回到 EA 脚本导入导出，导入脚本需优化：① **固定同步根包**：在树选中父包下建/复用固定名包（ArchGraph Sync），不再每轮建时间戳新包；② **幂等对账**：EA 中已有（按 schema_id tag/Alias 匹配）→ 仅更新不重建；图谱有 EA 无 → 新建；**图谱无 EA 有（对账包内全部，含无 schema_id 人类手绘）→ 删除，但删除前先列删除清单供人类确认**；③ **速度优化**：只写库不刷 UI——导入全程不刷新浏览器/不逐集合 Refresh（仅必要写），完成后单次刷新或提示人工手动刷新。复用 import-from-kg.js 的映射/锚 tag（schema_id/schema_alias/archimate_type）/占位与类型表；保持位置安全（更新只动字段不触碰 DiagramObject 几何）。不触碰图谱 JSON；不做 EA→图谱自动回写。",
       "attributes": [
         {
           "description": "design/KG/SystemArchitecture.json; tests/architecture-view-context.test.js",
@@ -1654,7 +1654,8 @@
         },
         {
           "name": "status",
-          "value": "COMPLETED"
+          "value": "ACTIVE",
+          "description": "2026-09-04 人类伙伴决策：方向回到 eatool/EA 脚本导入导出；本 WP 重开承接导入脚本优化——① 固定同步根包（树选中父包下建/复用 ArchGraph Sync，不再每轮时间戳新包）；② 幂等对账：EA 有(schema_id)→仅更新；图谱有 EA 无→新建；图谱无 EA 有（对账包内全部）→删除但先列清单人工确认；③ 速度：只写库不刷 UI（导入全程不逐个集合刷新）。EA 反向自动回写不在此范围（人工导出导入流程不变）。"
         },
         {
           "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-perf.test.js; design/KG/SystemArchitecture.json",
@@ -1674,9 +1675,29 @@
           "name": "commit",
           "value": "00d831d",
           "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-direction.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "decision",
+          "value": "ea-import-reconcile-opt",
+          "description": "2026-09-04 人类拍板：对账目标=固定同步根包（ArchGraph Sync）；删除范围=对账包内全删（含无 schema_id 手绘）但删除前列清单人工确认。"
         }
       ],
-      "testcases": []
+      "testcases": [
+        {
+          "Input": "tests/ea-import-reconcile.test.js",
+          "acceptanceCriteria": "tests/ea-import-reconcile.test.js",
+          "description": "GIVEN 导入脚本（静态审查 import-from-kg.js）：WHEN 解析其逻辑；THEN ①目标包为固定名同步根包（不存在则先建、复用不再时间戳新包）；②幂等分支：按 schema_id 匹配已存在→update 不重建、图谱独有→add；③删除分支：对账包内图谱缺失对象收集删除清单且需人类确认后才执行；④UI 刷新只在最后或省略（无逐对象/逐集合 Refresh 刷屏）。",
+          "name": "AT-2100-OPT-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-import-perf.test.js",
+          "acceptanceCriteria": "tests/ea-import-perf.test.js",
+          "description": "GIVEN 既有/扩展的导入性能断言基线；WHEN 对比优化前后导入关键路径；THEN 导入避免每对象 Update 后立即全集合 Refresh 等已知慢操作（静态断言辅助）+ 结构级不变性：重复导入同一图谱不产生重复对象（update-in-place 幂等）。",
+          "name": "AT-2100-OPT-02",
+          "type": "Acceptance Test"
+        }
+      ]
     },
     {
       "id": "2732",
