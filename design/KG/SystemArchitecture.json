@@ -1705,6 +1705,11 @@
           "name": "commit",
           "value": "89aded9",
           "description": "eatool/EA-jsscript/import-from-kg.js; tests/ea-import-reconcile.test.js（SQL 直写通道：SQLQuery 对账 + Repository.Execute 批量写；Alias 匹配/e_guid 读回/位置红线不碰 t_diagramobjects/删除清单确认；ea-import 全族 19/19）"
+        },
+        {
+          "name": "commit",
+          "value": "eb10bfc",
+          "description": "design/KG/SystemArchitecture.json; design/KG/test-failure-records.json（SQL 通道登记 + 测试记录 41/43）"
         }
       ],
       "testcases": [
