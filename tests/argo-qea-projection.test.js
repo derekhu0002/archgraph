@@ -83,6 +83,71 @@ test('argo-qea-projection (AT-2791-04): apply write also projects the new elemen
   }
 });
 
+test('argo-qea-projection (AT-2791-06): initializeWorkspace runs a .qea full projection (clear + rewrite, human rows kept)', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-init-qea-'));
+  try {
+    const wsName = path.basename(dir);
+    const qea = path.join(dir, 'archgraph.qea');
+    fs.copyFileSync(QEA_TEMPLATE, qea);
+    fs.mkdirSync(path.join(dir, 'scripts'), { recursive: true });
+    fs.copyFileSync(path.join(ROOT, 'scripts', 'ea-qea-sync.js'), path.join(dir, 'scripts', 'ea-qea-sync.js'));
+    fs.copyFileSync(path.join(ROOT, 'scripts', 'ea-qea-sync-lib.js'), path.join(dir, 'scripts', 'ea-qea-sync-lib.js'));
+
+    const graphPath = path.join(dir, 'design', 'KG', 'SystemArchitecture.json');
+    fs.mkdirSync(path.dirname(graphPath), { recursive: true });
+    // phase 1: a stale projection of an OLD graph (module-level sync establishes sync pkg)
+    const oldGraph = { name: 'old', description: 'x', elements: [{ id: 'z1', name: 'ZOld', type: 'Business Actor', description: 'old' }], relationships: [], views: [] };
+    const qeaSync = require(path.join(ROOT, 'scripts', 'ea-qea-sync-lib.js'));
+    qeaSync.syncGraphToQea(oldGraph, qea, { dryRun: false });
+    fs.writeFileSync(graphPath, JSON.stringify(oldGraph), 'utf8');
+    // human row outside the sync package must survive a full projection
+    const db = new DatabaseSync(qea);
+    const humanPkg = db.prepare("SELECT Package_ID FROM t_package WHERE Name='Package1'").get().Package_ID;
+    db.prepare("INSERT INTO t_object (Object_Type,Name,Alias,ea_guid,Package_ID,ParentID) VALUES ('Class','HumanKeep','human_keep','{human-0000-9999}',?,0)").run(Number(humanPkg));
+    db.close();
+
+    // phase 2: canonical graph is REPLACED before init
+    const newGraph = { name: 'new', description: 'x', elements: [
+      { id: 'b1', name: 'B One', type: 'Business Actor', description: 'b1' },
+      { id: 'b2', name: 'B Two', type: 'Business Role', description: 'b2' },
+    ], relationships: [], views: [] };
+    fs.writeFileSync(graphPath, JSON.stringify(newGraph), 'utf8');
+
+    // call the real argo init bootstrap path (does graph/EA-template copy + qea FULL projection)
+    const argoMcp = require(path.join(ROOT, 'argo', 'scripts', 'argo-mcp-server.js'));
+    const init = await argoMcp.initializeWorkspace(dir);
+    assert.equal(init.status, 'ok', 'workspace init should succeed regardless of qea step');
+    assert.equal(init.qeaFullProjection && init.qeaFullProjection.status, 'ok', 'init qea full projection should pass: ' + JSON.stringify(init.qeaFullProjection));
+
+    const db2 = new DatabaseSync(qea);
+    assert.equal(!!db2.prepare("SELECT 1 FROM t_object WHERE Alias='z1'").get(), false, 'stale graph element must be cleared by full projection');
+    assert.equal(!!db2.prepare("SELECT 1 FROM t_object WHERE Alias='b1'").get(), true, 'new canonical element b1 present');
+    assert.equal(!!db2.prepare("SELECT 1 FROM t_object WHERE Alias='b2'").get(), true, 'new canonical element b2 present');
+    assert.equal(!!db2.prepare("SELECT 1 FROM t_object WHERE Alias='human_keep'").get(), true, 'human row preserved across init full projection');
+    db2.close();
+
+    assert.equal(fs.existsSync(path.join(dir, wsName + '.feap')), true, 'init still bootstraps the EA template feap');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('argo-qea-projection (no qea): workspace without .qea/script -> initializeWorkspace succeeds with noop qea step', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-init-noqea-'));
+  try {
+    const graphPath = path.join(dir, 'design', 'KG', 'SystemArchitecture.json');
+    fs.mkdirSync(path.dirname(graphPath), { recursive: true });
+    const g = { name: 'n', description: 'x', elements: [{ id: 'a1', name: 'Actor One', type: 'Business Actor', description: 'd' }], relationships: [], views: [] };
+    fs.writeFileSync(graphPath, JSON.stringify(g), 'utf8');
+    const argoMcp = require(path.join(ROOT, 'argo', 'scripts', 'argo-mcp-server.js'));
+    const init = await argoMcp.initializeWorkspace(dir);
+    assert.equal(init.status, 'ok');
+    assert.equal(init.qeaFullProjection && init.qeaFullProjection.status, 'noop', 'no qea target -> noop');
+    assert.equal(fs.existsSync(path.join(dir, 'archgraph.qea')), false, 'no stray qea created');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
 test('argo-qea-projection (AT-2791-04): no .qea / no script in workspace -> apply succeeds with no qea side effect', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-qea-none-'));
   try {

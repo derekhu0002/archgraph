@@ -2,10 +2,11 @@
 'use strict';
 
 // WP2791 Node direct .qea projection CLI (no EA, no third-party deps).
-//   node scripts/ea-qea-sync.js --graph <json> --qea <file.qea> --mode import|sync|export|watch
+//   node scripts/ea-qea-sync.js --graph <json> --qea <file.qea> --mode import|sync|full|export|watch
 //   [--delete-confirm-file <f> | -y] [--dry-run] [--snapshot-dir <dir>] [--out <file>] [--no-backup]
 //
 // import/sync : project design/KG graph into the .qea (update-in-place, batch INSERT,
+// full        : clear projection-owned content (kg_sync_meta + ArchGraph Sync subtree) then
 //               unchanged fingerprint skip, opt-in EA-only delete with confirmation).
 // export      : read .qea back into graph-shaped JSON (roundtrip comparable).
 // watch       : on graph JSON change, run sync (fs.watch + polling fallback).
@@ -95,7 +96,9 @@ function runOnce(args, graphPath, qeaPath) {
   if (!args.dryRun && !args.noBackup) {
     snapshot = lib.snapshotQea(qeaPath, args.snapshotDir || undefined);
   }
-  const res = lib.syncGraphToQea(graph, qeaPath, { dryRun: args.dryRun, allowDelete: confirmDelete(args) });
+  const res = args.mode === 'full'
+    ? lib.fullProjection(graph, qeaPath, { dryRun: args.dryRun })
+    : lib.syncGraphToQea(graph, qeaPath, { dryRun: args.dryRun, allowDelete: confirmDelete(args) });
   const mode = args.dryRun ? 'dry-run' : 'sync';
   console.log(JSON.stringify({ mode, graph: graphPath, qea: qeaPath, snapshot, result: res }, null, 2));
 }

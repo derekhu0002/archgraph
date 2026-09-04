@@ -96,6 +96,44 @@ test('ea-qea-sync (AT-2791-02): concurrent open SQLite connection does not block
   }
 });
 
+test('ea-qea-sync (AT-2791-05): full projection clears projection-owned content, keeps human rows, idempotent', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-full-'));
+  try {
+    const qea = tmpQea(dir);
+    const graph = copyGraphTo(path.join(dir, 'graph.json'));
+    lib.syncGraphToQea(graph, qea, { dryRun: false });
+
+    const db = new DatabaseSync(qea);
+    const syncId = db.prepare("SELECT Package_ID FROM t_package WHERE Name='ArchGraph Sync'").get().Package_ID;
+    const humanPkg = db.prepare("SELECT Package_ID FROM t_package WHERE Name='Package1'").get().Package_ID;
+    db.prepare("INSERT INTO t_object (Object_Type,Name,Alias,ea_guid,Package_ID,ParentID) VALUES ('Class','Stale','stale_x','{stale-xxxx-0000}',?,0)").run(Number(syncId));
+    db.prepare("INSERT INTO t_object (Object_Type,Name,Alias,ea_guid,Package_ID,ParentID) VALUES ('Class','HumanKeep','human_keep','{human-0000-0000}',?,0)").run(Number(humanPkg));
+    db.prepare("INSERT INTO t_objectproperties (Object_ID, Property, Value) VALUES ((SELECT Object_ID FROM t_object WHERE Alias='human_keep'),'note','keepme')").run();
+    db.close();
+
+    const full = lib.fullProjection(graph, qea, { dryRun: false });
+    assert.ok(full.cleared.elements >= 1, 'projection-owned stale row cleared');
+    assert.equal(full.sync.added.elements, graph.elements.length, 'full re-writes the whole graph');
+
+    const db2 = new DatabaseSync(qea);
+    assert.equal(!!db2.prepare("SELECT 1 FROM t_object WHERE Alias='stale_x'").get(), false, 'stale projection row must be gone');
+    assert.equal(!!db2.prepare("SELECT 1 FROM t_object WHERE Alias='human_keep'").get(), true, 'non-projection human row must be preserved');
+    assert.equal(db2.prepare("SELECT COUNT(*) c FROM t_objectproperties WHERE Object_ID=(SELECT Object_ID FROM t_object WHERE Alias='human_keep')").get().c, 1, 'human row properties preserved');
+    const inSync = db2.prepare("SELECT COUNT(*) c FROM t_object WHERE Package_ID=(SELECT Package_ID FROM t_package WHERE Name='ArchGraph Sync')").get().c;
+    assert.equal(inSync, graph.elements.length, 'sync package holds exactly the graph after full');
+    db2.close();
+
+    const full2 = lib.fullProjection(graph, qea, { dryRun: false });
+    assert.equal(full2.sync.added.elements, graph.elements.length, '2nd full rewrites everything again');
+    const db3 = new DatabaseSync(qea);
+    assert.equal(db3.prepare("SELECT COUNT(*) c FROM t_object WHERE Package_ID=(SELECT Package_ID FROM t_package WHERE Name='ArchGraph Sync')").get().c, graph.elements.length, 'no duplicates after 2nd full');
+    assert.equal(!!db3.prepare("SELECT 1 FROM t_object WHERE Alias='human_keep'").get(), true, 'human row survives 2nd full');
+    db3.close();
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('ea-qea-sync (incremental): single element change updates only that element; steady-state timing', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-'));
   try {

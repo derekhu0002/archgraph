@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const readline = require('node:readline');
 const { AsyncLocalStorage } = require('node:async_hooks');
+const { spawnSync } = require('node:child_process');
 
 const validatorMcp = require('./validator-mcp-server.js');
 const systemArchitectureMcp = require('./systemarchitecture-mcp-server.js');
@@ -396,6 +397,7 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
       systemArchitecture: report.systemArchitecture,
       subdiagramViews: report.subdiagramViews,
       neo4j: report.neo4j,
+      qeaFullProjection: workspace.qeaFullProjection,
       semanticLifecycle: report.semanticLifecycle,
       semanticState: report.semanticLifecycle && report.semanticLifecycle.state,
       alignment: report.semanticLifecycle && report.semanticLifecycle.alignment,
@@ -416,6 +418,58 @@ async function withCanonicalSemanticInitTestComposition(composition, callback) {
     throw new TypeError('Canonical semantic init composition and callback are required');
   }
   return canonicalSemanticInitStorage.run(Object.freeze({ ...composition }), callback);
+}
+
+function resolveQeaProjectionTarget(workspaceRoot) {
+  try {
+    if (!workspaceRoot || !fs.existsSync(workspaceRoot)) { return null; }
+    const pick = (p) => (p && fs.existsSync(p) ? path.resolve(p) : null);
+    let qeaPath = pick(process.env.ARGO_EA_QEA);
+    if (!qeaPath) {
+      const cfgPath = path.join(workspaceRoot, 'design', 'KG', 'ea-qea.json');
+      if (fs.existsSync(cfgPath)) {
+        try {
+          const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+          if (cfg && cfg.enabled !== false && cfg.qeaPath) { qeaPath = pick(path.resolve(workspaceRoot, cfg.qeaPath)); }
+        } catch { /* fallthrough */ }
+      }
+    }
+    if (!qeaPath) {
+      let qeas = [];
+      try { qeas = fs.readdirSync(workspaceRoot).filter((n) => n.toLowerCase().endsWith('.qea')); } catch { /* ignore */ }
+      if (qeas.length === 1) { qeaPath = pick(path.join(workspaceRoot, qeas[0])); }
+    }
+    if (!qeaPath) { return null; }
+    const script = path.join(workspaceRoot, 'scripts', 'ea-qea-sync.js');
+    if (!fs.existsSync(script)) { return null; }
+    return { qeaPath, script, workspaceRoot };
+  } catch (error) {
+    return null;
+  }
+}
+
+// argo init .qea FULL projection (mirrors Neo4j initial full sync): clears projection-owned
+// content then re-writes the whole graph. Non-fatal by contract; no target/script -> noop.
+function runQeaFullProjection(workspaceRoot, graphTargetPath) {
+  const target = resolveQeaProjectionTarget(workspaceRoot);
+  if (!target) {
+    return { status: 'noop', reason: 'no .qea target or scripts/ea-qea-sync.js in workspace' };
+  }
+  const snapshotDir = path.join(workspaceRoot, '.argo', 'temp', 'qea-backups');
+  const args = ['scripts/ea-qea-sync.js', '--mode', 'full', '--graph', graphTargetPath, '--qea', target.qeaPath, '--snapshot-dir', snapshotDir];
+  const started = Date.now();
+  try {
+    const res = spawnSync(process.execPath, args, { cwd: workspaceRoot, encoding: 'utf8', windowsHide: true, timeout: 120000 });
+    const ok = res.status === 0;
+    return {
+      status: ok ? 'ok' : 'failed',
+      qea: target.qeaPath,
+      ms: Date.now() - started,
+      ...(ok ? {} : { error: String((res.stderr || '').slice(0, 600) || ('exit ' + res.status)) }),
+    };
+  } catch (error) {
+    return { status: 'failed', qea: target.qeaPath, ms: Date.now() - started, error: String(error && error.message ? error.message : error) };
+  }
 }
 
 async function initializeWorkspace(workspaceRoot) {
@@ -454,8 +508,17 @@ async function initializeWorkspace(workspaceRoot) {
     }
   }
 
+  // WP2791: init .qea FULL projection (parallel to Neo4j initial full sync in the harness
+  // report). Non-fatal: a qea failure must never fail workspace init.
+  let qeaFullProjection = null;
+  try {
+    qeaFullProjection = runQeaFullProjection(workspaceRoot, graphTargetPath);
+  } catch (error) {
+    qeaFullProjection = { status: 'failed', error: String(error && error.message ? error.message : error) };
+  }
   return {
     workspaceRoot,
+    qeaFullProjection,
     targetFeapName,
     createdFiles,
     updatedFiles,

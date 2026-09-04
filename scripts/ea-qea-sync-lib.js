@@ -570,6 +570,81 @@ function syncGraphToQea(graph, qeaPath, opts) {
 }
 
 // ---------------------------------------------------------------------------
+// Full projection (argo init): clear projection-owned content then re-write everything
+// ---------------------------------------------------------------------------
+function findSyncPackageId(db) {
+  const rows = db.prepare("SELECT Package_ID FROM t_package WHERE Name=?").all(SYNC_PACKAGE_NAME);
+  return rows.length > 0 ? Number(rows[0].Package_ID) : null;
+}
+// clearProjectionOwned deletes ONLY content owned by the projection:
+//   - kg_sync_meta is entirely ours (truncated)
+//   - the 'ArchGraph Sync' package subtree (elements, their objectproperties,
+//     diagrams + diagramobjects/diagramlinks, connectors whose endpoints are our
+//     elements + their connectortag rows) — dependency order links->objects->tags->
+//     connectors->props->diagrams->elements. Human / non-projection content in other
+//     packages is never touched.
+function clearProjectionOwned(db) {
+  const cleared = { elements: 0, relationships: 0, diagrams: 0, diagramObjects: 0, diagramLinks: 0, tags: 0, meta: 0 };
+  ensureMetaTable(db);
+  const syncId = findSyncPackageId(db);
+  if (syncId == null) {
+    const metaCount = db.prepare('SELECT COUNT(*) AS c FROM ' + META_TABLE).get().c;
+    db.exec('DELETE FROM ' + META_TABLE);
+    cleared.meta = metaCount;
+    return cleared;
+  }
+  const elementIds = db.prepare('SELECT Object_ID FROM t_object WHERE Package_ID=?').all(syncId).map((r) => Number(r.Object_ID));
+  const diagramIds = db.prepare('SELECT Diagram_ID FROM t_diagram WHERE Package_ID=?').all(syncId).map((r) => Number(r.Diagram_ID));
+  const connectorIds = [];
+  if (elementIds.length > 0) {
+    for (let i = 0; i < elementIds.length; i += 500) {
+      const marks = elementIds.slice(i, i + 500).map(() => '?').join(',');
+      const rows = db.prepare('SELECT Connector_ID FROM t_connector WHERE Start_Object_ID IN (' + marks + ')').all(...elementIds.slice(i, i + 500));
+      connectorIds.push(...rows.map((r) => Number(r.Connector_ID)));
+    }
+  }
+  const del = (sql, id) => { db.prepare(sql).run(id); };
+  for (const id of diagramIds) {
+    const c1 = db.prepare('SELECT COUNT(*) AS c FROM t_diagramlinks WHERE DiagramID=?').get(id).c;
+    const c2 = db.prepare('SELECT COUNT(*) AS c FROM t_diagramobjects WHERE Diagram_ID=?').get(id).c;
+    del('DELETE FROM t_diagramlinks WHERE DiagramID=?', id); cleared.diagramLinks += c1;
+    del('DELETE FROM t_diagramobjects WHERE Diagram_ID=?', id); cleared.diagramObjects += c2;
+  }
+  for (const id of connectorIds) {
+    const c = db.prepare('SELECT COUNT(*) AS c FROM t_connectortag WHERE ElementID=?').get(id).c;
+    del('DELETE FROM t_connectortag WHERE ElementID=?', id); cleared.tags += c;
+    del('DELETE FROM t_connector WHERE Connector_ID=?', id); cleared.relationships++;
+  }
+  for (const id of elementIds) {
+    const c = db.prepare('SELECT COUNT(*) AS c FROM t_objectproperties WHERE Object_ID=?').get(id).c;
+    del('DELETE FROM t_objectproperties WHERE Object_ID=?', id); cleared.tags += c;
+    del('DELETE FROM t_object WHERE Object_ID=?', id); cleared.elements++;
+  }
+  for (const id of diagramIds) { del('DELETE FROM t_diagram WHERE Diagram_ID=?', id); cleared.diagrams++; }
+  const metaCount = db.prepare('SELECT COUNT(*) AS c FROM ' + META_TABLE).get().c;
+  db.exec('DELETE FROM ' + META_TABLE);
+  cleared.meta = metaCount;
+  return cleared;
+}
+function fullProjection(graph, qeaPath, opts) {
+  const o = opts || {};
+  const t0 = nowMs();
+  let cleared = null;
+  let db;
+  try {
+    db = openQea(qeaPath);
+    ensureMetaTable(db);
+    db.exec('BEGIN IMMEDIATE');
+    cleared = clearProjectionOwned(db);
+    db.exec('COMMIT');
+  } finally {
+    if (db) { try { db.close(); } catch { /* ignore */ } }
+  }
+  const sync = syncGraphToQea(graph, qeaPath, { dryRun: o.dryRun, allowDelete: false });
+  return { ok: true, cleared, sync: sync.stats, ms: { clear: nowMs() - t0 - (sync.stats.ms ? sync.stats.ms.total : 0), sync: sync.stats.ms ? sync.stats.ms.total : 0, total: nowMs() - t0 } };
+}
+
+// ---------------------------------------------------------------------------
 // Export
 // ---------------------------------------------------------------------------
 function exportQeaToGraph(qeaPath) {
@@ -613,4 +688,7 @@ module.exports = {
   exportQeaToGraph,
   snapshotQea,
   readMetaKind,
+  fullProjection,
+  clearProjectionOwned,
+  findSyncPackageId,
 };
