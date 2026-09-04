@@ -4962,6 +4962,11 @@
           "name": "commit",
           "value": "470c32c",
           "description": "scripts/ea-sync-driver.js（mcpArgPath 正斜杠修复 + geometrySnapshot 重写取真实几何）——AC-01/AC-02 真实执行全绿：元素 1249 x337,y273,w180,h80 Notes 更新前后逐字节一致；审计 CSV 正常追加变更记录"
+        },
+        {
+          "name": "commit",
+          "value": "9060ffd",
+          "description": "design/KG/SystemArchitecture.json（R-S1 交付完成登记）"
         }
       ],
       "description": "EA 同步桥 R-S1（环境对齐与 MCP 连通验证）交付完成（COMPLETED）：环境升级为本机 EA Trial 15.2 x86 + MCP Server 3.0.1 x86（add-in MCP_EA.dll 3.0.1.0 装入 EA Trial 目录）+ .NET Desktop Runtime 10.0.11（x64/x86，官方 SHA512 校验）。同步驱动器 scripts/ea-sync-driver.js（env/tools/read/probe-edit，退出码分级，安全门：非 scratch 拒写/硬编码不 -enableDelete）+ tests/ea-sync-r1.test.js。验收真实执行全绿：AC-01 连通（只读 19 工具 + enableEdit 写组 + 无删除工具，会话日志无 80070005/管道中断）；AC-02 位置不变性（元素 1249 几何 x337,y273,w180,h80，仅改 Notes 前后逐字节一致）+ 审计 CSV（正斜杠路径修复后正常追加变更记录）。关键坑（已记录）：① -modifiedInfoPath 反斜杠路径被 EA add-in 二次 JSON 解析报 80070057（反斜杠 U 被当非法转义序列）→ 必须正斜杠；② MCP 3.0.1 响应几何在 holder 的 position in the current diagram 嵌套对象，解析须下钻。D9 已确认：create_or_update_elements 受 elementID（0=create/现有=update）。人类拍板定位：EA MCP 不开放给 AGENT，作为 ARGO 写图下游投影同步到本仓库 archgraph.feap。下一步：R-S2（add/update 差异应用 + ID 账本 + 审计轮转），开发/测试仍用 scratch 副本，生产同步目标=仓库 archgraph.feap。",
