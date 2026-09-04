@@ -70,6 +70,49 @@ function main() {
   objectModelImportMain();
 }
 // 518c2b0 对象模型全量导入路径（OBJECT_MODEL_FALLBACK=true 时经 main() 分发改走本函数）。
+
+// 无头覆盖：EA_HEADLESS_GRAPH（EA 脚本运行在 cscript+EA.Repository COM 时，由
+// headless/run-headless.ps1 注入），优先于按当前模型路径推断。
+function resolveImportGraphPath() {
+  try {
+    if (typeof EA_HEADLESS_GRAPH != 'undefined' && EA_HEADLESS_GRAPH != '') {
+      return '' + EA_HEADLESS_GRAPH;
+    }
+  } catch (e) { /* fallthrough */ }
+  return resolveKnowledgeGraphPathFromCurrentModel();
+}
+
+// 无头覆盖：EA_HEADLESS_PARENT_PKG 存在时（注入即视为无头）选同名根模型，否则首个根模型；
+// 未注入（真实 EA 交互运行）保持 GetTreeSelectedPackage 原语义。
+function resolveHeadlessParentPackage() {
+  var overrideSet = false;
+  var parentOverride = '';
+  try {
+    if (typeof EA_HEADLESS_PARENT_PKG != 'undefined') {
+      parentOverride = '' + EA_HEADLESS_PARENT_PKG;
+      overrideSet = true;
+    }
+  } catch (e) { overrideSet = false; }
+  if (!overrideSet) {
+    return Repository.GetTreeSelectedPackage();
+  }
+  try {
+    var models = Repository.Models;
+    for (var i = 0; i < models.Count; i++) {
+      var model = models.GetAt(i);
+      if (model != null && safeString(model.Name) == parentOverride) {
+        return model;
+      }
+    }
+    if (models.Count > 0) {
+      return models.GetAt(0);
+    }
+  } catch (e) {
+    /* fallthrough */
+  }
+  return null;
+}
+
 function objectModelImportMain() {
   Repository.EnsureOutputVisible('Script');
   Repository.EnableUIUpdates(false);
@@ -79,13 +122,13 @@ function objectModelImportMain() {
   try {
     Session.Output('Starting SystemArchitecture JSON import...');
 
-    var parentPkg = Repository.GetTreeSelectedPackage();
+    var parentPkg = resolveHeadlessParentPackage();
     if (parentPkg == null) {
       fail('Please select a target Package in the Project Browser before running this script.');
       return;
     }
 
-    SYSTEM_ARCHITECTURE_JSON_PATH = resolveKnowledgeGraphPathFromCurrentModel();
+    SYSTEM_ARCHITECTURE_JSON_PATH = resolveImportGraphPath();
     if (SYSTEM_ARCHITECTURE_JSON_PATH == '') {
       fail('Could not resolve design\\KG\\SystemArchitecture.json from the current EA model path.');
       return;
@@ -1446,13 +1489,13 @@ function sqlImportMain() {
   try {
     Session.Output('Starting SystemArchitecture JSON import (SQL-direct)...');
 
-    var parentPkg = Repository.GetTreeSelectedPackage();
+    var parentPkg = resolveHeadlessParentPackage();
     if (parentPkg == null) {
       fail('Please select a target Package in the Project Browser before running this script.');
       return;
     }
 
-    SYSTEM_ARCHITECTURE_JSON_PATH = resolveKnowledgeGraphPathFromCurrentModel();
+    SYSTEM_ARCHITECTURE_JSON_PATH = resolveImportGraphPath();
     if (SYSTEM_ARCHITECTURE_JSON_PATH == '') {
       fail('Could not resolve design\\KG\\SystemArchitecture.json from the current EA model path.');
       return;
@@ -1555,21 +1598,76 @@ function sqlRows(sqlText) {
     for (var j = 0; j < children.length; j++) {
       var child = children.item(j);
       if (child != null && child.nodeName != null && child.nodeName != '#text') {
-        record[child.nodeName] = child.text;
+        // EA 返回的列名是大写（PACKAGE_ID/EA_GUID/NAME/…）；统一按小写键存取，并补齐
+        // 脚本内使用的混合大小写别名（Object_ID/Package_ID/Connector_ID/Diagram_ID/…）。
+        var rawName = '' + child.nodeName;
+        record[rawName.toLowerCase()] = child.text;
+        record[rawName] = child.text;
       }
     }
+    applyColumnAliases(record);
     out.push(record);
   }
   return out;
 }
 
+var COLUMN_ALIASES = {
+  object_id: 'Object_ID',
+  package_id: 'Package_ID',
+  connector_id: 'Connector_ID',
+  diagram_id: 'Diagram_ID',
+  propertyid: 'PropertyID',
+  start_object_id: 'Start_Object_ID',
+  end_object_id: 'End_Object_ID',
+  connectorid: 'ConnectorID',
+  parentid: 'ParentID',
+  ea_guid: 'ea_guid',
+  name: 'Name',
+  alias: 'Alias',
+  type: 'Type',
+  stereotype: 'Stereotype',
+  styleex: 'StyleEx',
+  note: 'Note',
+  notes: 'Notes',
+  status: 'Status',
+  sequence: 'Sequence',
+  direction: 'Direction',
+  diagram_type: 'Diagram_Type',
+  object_type: 'Object_Type',
+  connection: 'Connection'
+};
+
+function applyColumnAliases(record) {
+  for (var k in COLUMN_ALIASES) {
+    if (COLUMN_ALIASES.hasOwnProperty(k) && record.hasOwnProperty(k)) {
+      var alias = COLUMN_ALIASES[k];
+      if (!record.hasOwnProperty(alias)) {
+        record[alias] = record[k];
+      }
+    }
+  }
+}
+
+// 大小写不敏感取列（兼容 EA 返回大写列名与 SQL 别名大小写差异）。
+function col(row, name) {
+  if (row == null) { return undefined; }
+  var lower = ('' + name).toLowerCase();
+  if (row.hasOwnProperty(lower)) { return row[lower]; }
+  for (var k in row) {
+    if (row.hasOwnProperty(k) && ('' + k).toLowerCase() == lower) { return row[k]; }
+  }
+  return undefined;
+}
+
 function sqlExec(sqlText, label) {
   try {
     var ok = Repository.Execute(sqlText);
-    if (!ok) {
+    // 实测：本环境（EA Trial 15.2 .feap/Firebird）成功执行返回 undefined/null；
+    // 仅当明确返回 false 才视为失败（异常路径另按失败处理）。
+    if (ok === false) {
       warnOnce('sqlexec-' + (label || 'sql'), 'Execute returned false: ' + sqlText.slice(0, 200));
     }
-    return !!ok;
+    return ok !== false;
   } catch (e) {
     warnOnce('sqlexec-' + (label || 'sql'), 'Execute failed: ' + errorMessage(e) + ' :: ' + sqlText.slice(0, 200));
     return false;

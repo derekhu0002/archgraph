@@ -804,6 +804,26 @@ function getDiagramIdentifier(diagram) {
 	return "" + diagram.DiagramID;
 }
 
+// 无头覆盖（headless/run-headless.ps1 注入 EA_HEADLESS_DIAGRAM_ID）：自动化下直接按图 ID
+// 取当前导出根图；未注入时返回 null，由 main() 走 Repository.GetCurrentDiagram()。
+function resolveHeadlessDiagram() {
+	try {
+		var overrideId = 0;
+		if (typeof EA_HEADLESS_DIAGRAM_ID != "undefined") {
+			overrideId = parseInt(EA_HEADLESS_DIAGRAM_ID, 10) || 0;
+		}
+		if (overrideId != 0) {
+			var diagram = Repository.GetDiagramByID(overrideId);
+			if (diagram != null) {
+				return diagram;
+			}
+		}
+	} catch (e) {
+		/* fallthrough */
+	}
+	return null;
+}
+
 function saveRtfAsPdf(rtfContent, pdfFileName, baseFolderPath) {
     var pdfFilePath = "";
     var fso = null;
@@ -1346,7 +1366,10 @@ function main() {
 
     // Get the currently open diagram
     var currentDiagram as EA.Diagram;
-    currentDiagram = Repository.GetCurrentDiagram();
+    currentDiagram = resolveHeadlessDiagram();
+    if (currentDiagram == null) {
+        currentDiagram = Repository.GetCurrentDiagram();
+    }
 
     if (!currentDiagram) {
         Session.Output("Error: No diagram is currently open. Aborting script.");
@@ -1361,9 +1384,14 @@ function main() {
 	var timestamp = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate() +
 					"_" + now.getHours() + "_" + now.getMinutes() + "_" + now.getSeconds();
     var defaultFilename = currentDiagram.Name.replace(/[\s\/\\:*?"<>|]/g, '_') + ".json";
-    var filePath = projectPath;
-	filePath += "design\\KG\\";
-	filePath += defaultFilename;
+    var filePath = "";
+    if (typeof EA_HEADLESS_OUTPUT != "undefined" && EA_HEADLESS_OUTPUT != "") {
+        filePath = "" + EA_HEADLESS_OUTPUT; // 无头覆盖：直接写指定导出文件
+    } else {
+        filePath = projectPath;
+        filePath += "design\\KG\\";
+        filePath += defaultFilename;
+    }
 	Session.Output("filePath:" + filePath);
     // If the user cancelled the dialog, filePath will be empty.
     if (filePath == "") {
