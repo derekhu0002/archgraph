@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { spawn } = require('node:child_process');
 const readline = require('node:readline');
 const crypto = require('node:crypto');
 
@@ -1615,6 +1616,25 @@ async function buildMutationResult(context, mutations, write) {
   writeGraph(context.graphPath.absolutePath, mutationResult.document);
   result.written = true;
 
+  // WP2791: .qea projection parallel to the Neo4j trigger — non-fatal, best-effort.
+  {
+    const qeaTarget = resolveQeaProjectionTarget(context);
+    if (qeaTarget) {
+      try {
+        const projection = await runQeaProjection(qeaTarget);
+        if (projection.ok) {
+          result.qeaProjection = { status: 'passed', qea: qeaTarget.qeaPath, ms: projection.ms };
+        } else {
+          result.qeaProjection = { status: 'failed', qea: qeaTarget.qeaPath, error: projection.error || ('exit ' + projection.code), ms: projection.ms };
+          result.warnings = addUnique(result.warnings || [], ['ea-qea projection failed (non-fatal): ' + (projection.error || ('exit code ' + projection.code))]);
+        }
+      } catch (error) {
+        result.qeaProjection = { status: 'failed', error: String(error && error.message ? error.message : error) };
+        result.warnings = addUnique(result.warnings || [], ['ea-qea projection error (non-fatal): ' + String(error && error.message ? error.message : error)]);
+      }
+    }
+  }
+
   if (shouldSyncCanonicalGraphToNeo4j(context.graphPath.relativePath)) {
     try {
       const syncResult = await syncArchitectureToNeo4j({
@@ -1810,6 +1830,59 @@ function summarizeDocument(document) {
     relationshipCount: Array.isArray(document.relationships) ? document.relationships.length : 0,
     viewCount: Array.isArray(document.views) ? document.views.length : 0,
   };
+}
+
+// --- WP2791: post-canonical-write .qea projection (parallel to Neo4j sync, non-fatal) ---
+function resolveQeaProjectionTarget(context) {
+  try {
+    const workspaceRoot = String(context && context.workspaceRoot ? context.workspaceRoot : '');
+    if (!workspaceRoot || !fs.existsSync(workspaceRoot)) { return null; }
+    const graphAbsolute = context.graphPath && context.graphPath.absolutePath ? context.graphPath.absolutePath : null;
+    if (!graphAbsolute || !fs.existsSync(graphAbsolute)) { return null; }
+    const pick = (p) => (p && fs.existsSync(p) ? path.resolve(p) : null);
+    let qeaPath = pick(process.env.ARGO_EA_QEA);
+    if (!qeaPath) {
+      const cfgPath = path.join(workspaceRoot, 'design', 'KG', 'ea-qea.json');
+      if (fs.existsSync(cfgPath)) {
+        try {
+          const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+          if (cfg && cfg.enabled !== false && cfg.qeaPath) { qeaPath = pick(path.resolve(workspaceRoot, cfg.qeaPath)); }
+        } catch { /* fallthrough */ }
+      }
+    }
+    if (!qeaPath) {
+      let qeas = [];
+      try { qeas = fs.readdirSync(workspaceRoot).filter((n) => n.toLowerCase().endsWith('.qea')); } catch { /* ignore */ }
+      if (qeas.length === 1) { qeaPath = pick(path.join(workspaceRoot, qeas[0])); }
+    }
+    if (!qeaPath) { return null; }
+    const script = path.join(workspaceRoot, 'scripts', 'ea-qea-sync.js');
+    if (!fs.existsSync(script)) { return null; }
+    return { qeaPath, graphPath: graphAbsolute, script, workspaceRoot };
+  } catch (error) {
+    return null;
+  }
+}
+
+function runQeaProjection(target) {
+  return new Promise((resolve) => {
+    const snapshotDir = path.join(target.workspaceRoot, '.argo', 'temp', 'qea-backups');
+    const args = ['scripts/ea-qea-sync.js', '--mode', 'sync', '--graph', target.graphPath, '--qea', target.qeaPath, '--snapshot-dir', snapshotDir];
+    const started = Date.now();
+    let stderr = '';
+    let child;
+    try {
+      child = spawn(process.execPath, args, { cwd: target.workspaceRoot, windowsHide: true });
+    } catch (error) {
+      resolve({ ok: false, error: String(error && error.message ? error.message : error), ms: Date.now() - started });
+      return;
+    }
+    child.stderr.on('data', (d) => { stderr += String(d); });
+    child.on('error', (err) => resolve({ ok: false, error: String(err && err.message ? err.message : err), ms: Date.now() - started, stderr: stderr.slice(0, 600) }));
+    child.on('close', (code) => {
+      resolve({ ok: code === 0, code, ms: Date.now() - started, stderr: stderr.slice(0, 600) });
+    });
+  });
 }
 
 function writeGraph(graphPath, document) {
