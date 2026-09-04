@@ -21,7 +21,11 @@
 
 var SYSTEM_ARCHITECTURE_JSON_RELATIVE_PATH = 'design\\KG\\SystemArchitecture.json';
 var SYSTEM_ARCHITECTURE_JSON_PATH = '';
-var IMPORT_PACKAGE_SUFFIX = ' EA Import';
+// WP2100 优化：固定名同步根包。树选中父包下存在则复用（幂等对账），不存在则先创建；
+// 不再每轮新建"时间戳新包"全量导入。
+var IMPORT_PACKAGE_NAME = 'ArchGraph Sync';
+// 删除对账分支要求人工键入的确认词（大小写不敏感）；留空/取消 = 跳过删除。
+var DELETE_CONFIRMATION_KEYWORD = 'delete';
 var DIAGRAM_TYPE = 'Logical';
 var CREATE_MISSING_SUBDIAGRAMS = true;
 // Auto-layout invokes LayoutDiagramEx for every diagram, which opens each view one
@@ -63,7 +67,7 @@ function main() {
     var graph = parseJson(jsonString);
     validateGraph(graph);
 
-    importPkg = createImportPackage(parentPkg, graph);
+    importPkg = reconcileSyncPackage(parentPkg, graph);
     applyRootMetadata(importPkg, graph);
 
     var elementDataMap = buildElementDataMap(graph.elements);
@@ -72,16 +76,19 @@ function main() {
     var viewMap = {};
     var subdiagramParentMap = buildSubdiagramParentMap(graph.elements);
 
-    var elementCount = importElements(importPkg, graph.elements, elementDataMap, elementMap);
-    var relationshipCount = importRelationships(importPkg, graph.relationships, elementMap, relationshipMap);
-    var viewCount = importViews(importPkg, graph.views, graph.elements, elementMap, relationshipMap, viewMap, subdiagramParentMap);
+    var elementCounts = importElements(importPkg, graph.elements, elementDataMap, elementMap);
+    var relationshipCounts = importRelationships(importPkg, graph.relationships, elementMap, relationshipMap);
+    var viewCounts = importViews(importPkg, graph.views, graph.elements, elementMap, relationshipMap, viewMap, subdiagramParentMap);
 
     Session.Output('=======================================');
     Session.Output('SystemArchitecture import complete.');
-    Session.Output('Elements created: ' + elementCount);
-    Session.Output('Relationships created: ' + relationshipCount);
-    Session.Output('Views created: ' + viewCount);
-    Session.Output('Package: ' + importPkg.Name);
+    Session.Output('Elements added: ' + elementCounts.added + ', updated: ' + elementCounts.updated);
+    Session.Output('Relationships added: ' + relationshipCounts.added + ', updated: ' + relationshipCounts.updated);
+    Session.Output('Views added: ' + viewCounts.added + ', updated: ' + viewCounts.updated);
+    Session.Output('Sync package: ' + importPkg.Name);
+
+    // WP2100 幂等对账：删除分支（同步根包内图谱没有的对象）→ 先列清单、人工确认后才执行。
+    reconcileDeletions(importPkg, elementMap, graph);
   } catch (e) {
     fail('Import failed: ' + errorMessage(e));
   } finally {
@@ -153,26 +160,46 @@ function requireArray(value, where) {
   }
 }
 
-function createImportPackage(parentPkg, graph) {
-  var packageName = safeName(graph.name, 'SystemArchitecture') + IMPORT_PACKAGE_SUFFIX + ' ' + formatTimestamp(new Date());
-  var pkg = parentPkg.Packages.AddNew(packageName, 'Package');
-  pkg.Notes = buildPackageNotes(graph);
-  pkg.Update();
-  parentPkg.Packages.Refresh();
-  Session.Output('Created package: ' + pkg.Name);
-  return pkg;
+// 集合刷新统一收口（WP2100 速度优化：避免热循环里逐对象逐集合 Refresh 刷屏）。
+// 仅在两轮结构扫描/批次结束时按需调用，绝不放在逐对象创建的循环体内。
+function refreshCollection(collection, label) {
+  try {
+    collection.Refresh();
+  } catch (e) {
+    warnOnce('refresh-' + label, 'Could not refresh ' + label + ': ' + errorMessage(e));
+  }
 }
 
-function buildPackageNotes(graph) {
-  var lines = [];
-  lines.push(safeString(graph.description));
-
-  if (graph.attributes && graph.attributes.length > 0) {
-    lines.push('');
-    lines.push('Root attributes:');
-    appendAttributeLines(lines, graph.attributes);
+function findChildPackageByName(parentPkg, packageName) {
+  if (parentPkg == null || parentPkg.Packages == null) {
+    return null;
   }
-  return lines.join('\r\n');
+  refreshCollection(parentPkg.Packages, 'packages-of-' + safeName(parentPkg.Name, 'parent'));
+  for (var i = 0; i < parentPkg.Packages.Count; i++) {
+    var candidate = null;
+    try {
+      candidate = parentPkg.Packages.GetAt(i);
+    } catch (e) {
+      candidate = null;
+    }
+    if (candidate != null && safeString(candidate.Name) == packageName) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+// WP2100：固定名同步根包——已存在则复用（对账），不存在则新建。绝不生成时间戳新包。
+function reconcileSyncPackage(parentPkg, graph) {
+  var pkg = findChildPackageByName(parentPkg, IMPORT_PACKAGE_NAME);
+  if (pkg != null) {
+    Session.Output('Reusing existing sync package: ' + pkg.Name + ' (PackageID ' + pkg.PackageID + ')');
+    return pkg;
+  }
+  pkg = parentPkg.Packages.AddNew(IMPORT_PACKAGE_NAME, 'Package');
+  pkg.Update();
+  Session.Output('Created sync package: ' + pkg.Name);
+  return pkg;
 }
 
 function applyRootMetadata(pkg, graph) {
@@ -224,44 +251,143 @@ function buildSubdiagramParentMap(elements) {
 }
 
 function importElements(importPkg, elements, elementDataMap, elementMap) {
-  var count = 0;
+  var counts = { added: 0, updated: 0 };
+  // WP2100 幂等对账：先一次性扫描同步根包内全部既有元素（按 schema_id 锚 tag 建索引），
+  // 之后的循环只查内存映射，不再逐对象扫集合。
+  var existingBySchemaId = indexExistingElementsBySchemaId(importPkg);
   for (var i = 0; i < elements.length; i++) {
     var elementData = elements[i];
     if (!elementData || !isNonEmptyString(elementData.id)) {
       continue;
     }
-    if (ensureElement(importPkg, elementData.id, elementDataMap, elementMap) != null) {
-      count++;
+    var outcome = ensureElement(importPkg, elementData.id, elementDataMap, elementMap, existingBySchemaId);
+    if (outcome == 'added') {
+      counts.added++;
+    } else if (outcome == 'updated') {
+      counts.updated++;
     }
   }
-  importPkg.Elements.Refresh();
-  return count;
+  return counts;
 }
 
-function ensureElement(importPkg, schemaId, elementDataMap, elementMap) {
+// 递归收集同步根包整棵子树上的既有 EA 元素（含嵌套在父元素下的）。
+function collectElementsUnderPackage(pkg) {
+  var out = [];
+  if (pkg == null || pkg.Elements == null) {
+    return out;
+  }
+  refreshCollection(pkg.Elements, 'elements-of-' + safeName(pkg.Name, 'pkg'));
+  function visitPackageElementContainer(container) {
+    for (var i = 0; i < container.Count; i++) {
+      var element = null;
+      try {
+        element = container.GetAt(i);
+      } catch (e) {
+        element = null;
+      }
+      if (element == null) {
+        continue;
+      }
+      out.push(element);
+      try {
+        refreshCollection(element.Elements, 'children-of-' + element.ElementID);
+      } catch (e) {
+        continue;
+      }
+      visitElementChildren(element.Elements);
+    }
+  }
+  function visitElementChildren(children) {
+    for (var j = 0; j < children.Count; j++) {
+      var child = null;
+      try {
+        child = children.GetAt(j);
+      } catch (e) {
+        child = null;
+      }
+      if (child == null) {
+        continue;
+      }
+      out.push(child);
+      try {
+        refreshCollection(child.Elements, 'children-of-' + child.ElementID);
+      } catch (e) {
+        continue;
+      }
+      visitElementChildren(child.Elements);
+    }
+  }
+  visitPackageElementContainer(pkg.Elements);
+  return out;
+}
+
+// 读取既有元素的 schema_id 锚 tag；无则返回 ''（用于判定是否为图谱派生对象）。
+function schemaIdOfElement(element) {
+  if (element == null || element.TaggedValues == null) {
+    return '';
+  }
+  try {
+    var tag = element.TaggedValues.GetByName('schema_id');
+    if (tag != null) {
+      var value = trimString(tag.Value);
+      if (value != '' && value != '<memo>') {
+        return value;
+      }
+    }
+  } catch (e) {
+    return '';
+  }
+  return '';
+}
+
+function indexExistingElementsBySchemaId(importPkg) {
+  var index = {};
+  var all = collectElementsUnderPackage(importPkg);
+  for (var i = 0; i < all.length; i++) {
+    var schemaId = schemaIdOfElement(all[i]);
+    if (schemaId != '') {
+      index[schemaId] = all[i];
+    }
+  }
+  return index;
+}
+
+function ensureElement(importPkg, schemaId, elementDataMap, elementMap, existingBySchemaId) {
   if (elementMap[schemaId]) {
-    return elementMap[schemaId];
+    return 'already-mapped';
   }
 
   var elementData = elementDataMap[schemaId];
   if (!elementData) {
     warnOnce('missing-element-' + schemaId, 'Element data not found for id: ' + schemaId);
-    return null;
+    return 'skipped';
   }
 
   var parentElement = null;
   if (isNonEmptyString(elementData.parent) && elementData.parent != '0' && elementDataMap[elementData.parent]) {
-    parentElement = ensureElement(importPkg, elementData.parent, elementDataMap, elementMap);
+    ensureElement(importPkg, elementData.parent, elementDataMap, elementMap, existingBySchemaId);
+    parentElement = elementMap[elementData.parent] || null;
   }
 
+  // 幂等分支①：按 schema_id 已存在 → 原地仅字段更新，绝不删除重建
+  // （删除重建会重置该元素的 DiagramObject 与用户布局）。
+  var existing = existingBySchemaId[schemaId] || null;
+  if (existing != null) {
+    elementMap[schemaId] = existing;
+    updateElementFields(existing, elementData);
+    Session.Output('Updated element [' + safeString(elementData.type) + ']: ' + elementData.name + ' (' + schemaId + ')');
+    return 'updated';
+  }
+
+  // 幂等分支②：图谱独有 → 新建（含全部锚 tag）。
   var baseType = mapElementTypeToEa(elementData.type);
   var element = addElementToOwner(importPkg, parentElement, elementData.name, baseType);
 
   elementMap[schemaId] = element;
 
-  applyElementCoreFields(element, elementData);
+  // 字段/锚 tag 写入（新建与更新共用同一写入函数）。
+  updateElementFields(element, elementData);
   // EA child collections are safest to mutate after owner field changes are persisted.
-  element.Update();
   applyElementAttributes(element, elementData.attributes);
   applyElementSpecialMethods(element, elementData);
   applyProjectInfo(element, elementData.project_info);
@@ -269,9 +395,8 @@ function ensureElement(importPkg, schemaId, elementDataMap, elementMap) {
   applySubdiagramViewTags(element, elementData.subdiagram_views);
 
   element.Update();
-  refreshElementOwner(importPkg, parentElement);
   Session.Output('Created element [' + safeString(elementData.type) + ']: ' + elementData.name + ' (' + schemaId + ')');
-  return element;
+  return 'added';
 }
 
 function addElementToOwner(importPkg, parentElement, name, baseType) {
@@ -280,7 +405,6 @@ function addElementToOwner(importPkg, parentElement, name, baseType) {
     try {
       element = parentElement.Elements.AddNew(safeName(name, 'Unnamed Element'), baseType);
       element.Update();
-      parentElement.Elements.Refresh();
       return element;
     } catch (e) {
       warnOnce('nested-element-fallback', 'Could not create nested element under parent; using package-level element fallback. ' + errorMessage(e));
@@ -289,22 +413,11 @@ function addElementToOwner(importPkg, parentElement, name, baseType) {
 
   element = importPkg.Elements.AddNew(safeName(name, 'Unnamed Element'), baseType);
   element.Update();
-  importPkg.Elements.Refresh();
   return element;
 }
 
-function refreshElementOwner(importPkg, parentElement) {
-  try {
-    if (parentElement != null) {
-      parentElement.Elements.Refresh();
-    } else {
-      importPkg.Elements.Refresh();
-    }
-  } catch (ignore) {
-  }
-}
-
-function applyElementCoreFields(element, data) {
+// 幂等更新：仅写字段与锚 tag；绝不触碰元素在本体的 DiagramObject 几何。
+function updateElementFields(element, data) {
   warnIfUnknownSchemaElementType(data.type);
 
   element.Name = safeName(data.name, data.id);
@@ -326,50 +439,64 @@ function applyElementCoreFields(element, data) {
   putTag(element.TaggedValues, 'schema_alias', safeString(data.alias));
   putTag(element.TaggedValues, 'schema_classifier', safeString(data.classifier));
   putJsonTag(element.TaggedValues, 'schema_element_json', data);
-  element.TaggedValues.Refresh();
+  element.Update();
+}
+
+// 在子集合中按名称查找既有对象（幂等对账：存在则更新，不存在才 AddNew，避免重复导入产生重复子对象）。
+function findChildByName(collection, childName) {
+  if (collection == null) {
+    return null;
+  }
+  var target = safeName(childName, '');
+  for (var i = 0; i < collection.Count; i++) {
+    var candidate = null;
+    try {
+      candidate = collection.GetAt(i);
+    } catch (e) {
+      candidate = null;
+    }
+    if (candidate != null && safeString(candidate.Name) == target) {
+      return candidate;
+    }
+  }
+  return null;
 }
 
 function applyElementAttributes(element, attributes) {
   if (!attributes || attributes.length == 0) {
     return;
   }
-
+  refreshCollection(element.Attributes, 'attributes-of-' + element.ElementID);
   for (var i = 0; i < attributes.length; i++) {
     var data = attributes[i];
     if (!data || !isNonEmptyString(data.name)) {
       continue;
     }
-    var attr = element.Attributes.AddNew(data.name, 'String');
+    var attr = findChildByName(element.Attributes, data.name);
+    if (attr == null) {
+      attr = element.Attributes.AddNew(data.name, 'String');
+    }
 
+    // 幂等：Notes 每次按 schema 重新计算后整体写入（绝不追加，避免重复导入无限膨胀）。
+    var notesParts = [];
     var attributeValue = safeString(data.value);
     if (isNonEmptyString(attributeValue)) {
       if (attributeValue.length <= MAX_ATTRIBUTE_DEFAULT_LENGTH) {
         attr.Default = attributeValue;
       } else {
-        appendAttributeNotes(attr, attributeValue);
+        notesParts.push(attributeValue);
       }
     }
-
-    appendAttributeNotes(attr, safeString(data.description));
+    if (isNonEmptyString(safeString(data.description))) {
+      notesParts.push(safeString(data.description));
+    }
     if (isNonEmptyString(data.content)) {
-      appendAttributeNotes(attr, safeString(data.content));
+      notesParts.push(safeString(data.content));
       attr.Alias = 'content';
     }
+    attr.Notes = notesParts.join('\r\n\r\n');
 
     attr.Update();
-  }
-  element.Attributes.Refresh();
-}
-
-function appendAttributeNotes(attr, text) {
-  if (!isNonEmptyString(text)) {
-    return;
-  }
-  var current = safeString(attr.Notes);
-  if (isNonEmptyString(current)) {
-    attr.Notes = current + '\r\n\r\n' + text;
-  } else {
-    attr.Notes = text;
   }
 }
 
@@ -383,10 +510,12 @@ function addMethodIfPresent(element, methodName, notes) {
   if (!isNonEmptyString(notes)) {
     return;
   }
-  var method = element.Methods.AddNew(methodName, '');
+  var method = findChildByName(element.Methods, methodName);
+  if (method == null) {
+    method = element.Methods.AddNew(methodName, '');
+  }
   method.Notes = notes;
   method.Update();
-  element.Methods.Refresh();
 }
 
 function applyProjectInfo(element, projectInfo) {
@@ -422,7 +551,10 @@ function addResource(element, data) {
     return;
   }
   try {
-    var resource = element.Resources.AddNew(data.owner, safeString(data.role));
+    var resource = findChildByName(element.Resources, data.owner);
+    if (resource == null) {
+      resource = element.Resources.AddNew(data.owner, safeString(data.role));
+    }
     resource.Role = safeString(data.role);
     resource.Notes = safeString(data.description);
     assignIfPresent(resource, 'DateStart', data.start_date);
@@ -435,7 +567,6 @@ function addResource(element, data) {
     }
     resource.History = safeString(data.history);
     resource.Update();
-    element.Resources.Refresh();
   } catch (e) {
     warnOnce('resource-import', 'Could not import resource for element ' + element.Name + ': ' + errorMessage(e));
   }
@@ -446,7 +577,10 @@ function addIssue(element, name, type, status, notes, startDate, endDate, report
     return;
   }
   try {
-    var issue = element.Issues.AddNew(name, safeString(type));
+    var issue = findChildByName(element.Issues, name);
+    if (issue == null) {
+      issue = element.Issues.AddNew(name, safeString(type));
+    }
     issue.Type = safeString(type);
     issue.Status = safeString(status);
     issue.Notes = safeString(notes);
@@ -457,7 +591,6 @@ function addIssue(element, name, type, status, notes, startDate, endDate, report
     issue.Resolver = safeString(assignedTo);
     issue.ResolverNotes = safeString(progress);
     issue.Update();
-    element.Issues.Refresh();
   } catch (e) {
     warnOnce('issue-import', 'Could not import issue/task for element ' + element.Name + ': ' + errorMessage(e));
   }
@@ -476,14 +609,16 @@ function applyTestcases(element, testcases) {
       continue;
     }
     try {
-      var test = element.Tests.AddNew(data.name, safeString(data.type));
+      var test = findChildByName(element.Tests, data.name);
+      if (test == null) {
+        test = element.Tests.AddNew(data.name, safeString(data.type));
+      }
       test.Notes = safeString(data.description);
       test.Class = mapTestTypeToEaClass(data.type);
       test.Input = safeString(data.Input);
       test.AcceptanceCriteria = safeString(data.acceptanceCriteria);
       test.TestResults = safeString(data.TestResults);
       test.Update();
-      element.Tests.Refresh();
     } catch (e) {
       warnOnce('test-import', 'Could not import testcase for element ' + element.Name + ': ' + errorMessage(e));
     }
@@ -497,8 +632,58 @@ function applySubdiagramViewTags(element, subdiagramViews) {
   putJsonTag(element.TaggedValues, 'subdiagram_views_json', subdiagramViews);
 }
 
+function schemaIdOfConnector(connector) {
+  if (connector == null || connector.TaggedValues == null) {
+    return '';
+  }
+  try {
+    var tag = connector.TaggedValues.GetByName('schema_id');
+    if (tag != null) {
+      var value = trimString(tag.Value);
+      if (value != '' && value != '<memo>') {
+        return value;
+      }
+    }
+  } catch (e) {
+    return '';
+  }
+  return '';
+}
+
+// 对同步根包既有元素逐一扫描其 Connectors 集合，建立 schema_id → connector 索引
+// （connector 归属在源元素下；索引仅在导入前扫描一次，热循环内不再逐关系刷集合）。
+function indexExistingConnectorsBySchemaId(importPkg) {
+  var index = {};
+  var all = collectElementsUnderPackage(importPkg);
+  for (var i = 0; i < all.length; i++) {
+    var element = all[i];
+    try {
+      refreshCollection(element.Connectors, 'connectors-of-' + element.ElementID);
+    } catch (e) {
+      continue;
+    }
+    for (var j = 0; j < element.Connectors.Count; j++) {
+      var connector = null;
+      try {
+        connector = element.Connectors.GetAt(j);
+      } catch (e2) {
+        connector = null;
+      }
+      if (connector == null) {
+        continue;
+      }
+      var schemaId = schemaIdOfConnector(connector);
+      if (schemaId != '' && !index[schemaId]) {
+        index[schemaId] = connector;
+      }
+    }
+  }
+  return index;
+}
+
 function importRelationships(importPkg, relationships, elementMap, relationshipMap) {
-  var count = 0;
+  var counts = { added: 0, updated: 0 };
+  var existingBySchemaId = indexExistingConnectorsBySchemaId(importPkg);
   for (var i = 0; i < relationships.length; i++) {
     var data = relationships[i];
     if (!data || !isNonEmptyString(data.id)) {
@@ -517,77 +702,100 @@ function importRelationships(importPkg, relationships, elementMap, relationshipM
     var connectorMeta = mapRelationshipTypeToEa(relationshipType);
     warnIfUnknownSchemaRelationshipType(relationshipType);
 
+    // 幂等分支①：按 schema_id 已存在 → 原地字段更新（不重建，保留既有 DiagramLink）。
+    var existing = existingBySchemaId[data.id] || null;
+    if (existing != null) {
+      relationshipMap[data.id] = existing;
+      applyRelationshipFields(existing, data, source, target, connectorMeta);
+      reconcileRelationshipAttributes(importPkg, existing, data);
+      counts.updated++;
+      Session.Output('Updated relationship [' + relationshipType + '] ' + relationshipName + ': ' + data.id);
+      continue;
+    }
+
+    // 幂等分支②：图谱独有 → 新建（含全部锚 tag）。
     var connector = source.Connectors.AddNew(relationshipName, connectorMeta.connectorType);
     connector.SupplierID = target.ElementID;
-    connector.Name = relationshipName;
-    connector.Alias = data.id;
-    connector.StereotypeEx = mapRelationshipTypeToEaStereotype(relationshipType);
-    connector.Notes = safeString(data.description);
-    if (isNonEmptyString(data.sequence)) {
-      connector.SequenceNo = data.sequence;
-    }
-
-    if (connectorMeta.aggregationKind >= 0) {
-      connector.SupplierEnd.Aggregation = connectorMeta.aggregationKind;
-    }
-
-    // EA only draws an arrowhead at the target (supplier) end when the connector carries an
-    // explicit direction. Directed ArchiMate relationships are therefore stored with
-    // Direction = "Source -> Destination" so the generated views show the relationship
-    // direction (source -> target); undirected Association and structural
-    // Composition/Aggregation keep Direction = Unspecified on purpose.
-    if (connectorMeta.directed) {
-      connector.Direction = 'Source -> Destination';
-    }
+    applyRelationshipFields(connector, data, source, target, connectorMeta);
 
     // Persist the connector core fields before attaching tagged values. Tagged values
     // require a saved connector (with a valid ConnectorID), otherwise EA silently drops
     // them and the original schema id would be lost on the next export.
     connector.Update();
-    source.Connectors.Refresh();
-
-    putTag(connector.TaggedValues, 'schema_id', data.id);
-    putTag(connector.TaggedValues, 'schema_name', relationshipName);
-    putTag(connector.TaggedValues, 'schema_statement', safeString(data.statement));
-    putTag(connector.TaggedValues, 'archimate_relationship_type', canonicalArchimateType(relationshipType));
-    putTag(connector.TaggedValues, 'document', safeString(data.document));
-    putTag(connector.TaggedValues, 'source_schema_id', safeString(data.source_id));
-    putTag(connector.TaggedValues, 'target_schema_id', safeString(data.target_id));
-    putTag(connector.TaggedValues, 'source_name', safeString(data.source_name));
-    putTag(connector.TaggedValues, 'target_name', safeString(data.target_name));
-    putJsonTag(connector.TaggedValues, 'schema_relationship_json', data);
-
-    connector.TaggedValues.Refresh();
-    connector.Update();
-    source.Connectors.Refresh();
 
     if (data.attributes && data.attributes.length > 0) {
-      importRelationshipAttributes(importPkg, connector, data);
+      reconcileRelationshipAttributes(importPkg, connector, data);
     }
 
     relationshipMap[data.id] = connector;
-    count++;
+    counts.added++;
     Session.Output('Created relationship [' + relationshipType + '] ' + relationshipName + ': ' + data.id + ' (' + data.source_id + ' -> ' + data.target_id + ')');
   }
-  return count;
+  return counts;
 }
 
-function importRelationshipAttributes(importPkg, connector, relationshipData) {
+// 关系字段写入（新建与更新共用；更新时绝不删建，仅在原 connector 上写字段与锚 tag）。
+function applyRelationshipFields(connector, data, source, target, connectorMeta) {
+  connector.SupplierID = target.ElementID;
+  connector.Name = safeString(data.name);
+  connector.Alias = data.id;
+  connector.StereotypeEx = mapRelationshipTypeToEaStereotype(data.type);
+  connector.Notes = safeString(data.description);
+  if (isNonEmptyString(data.sequence)) {
+    connector.SequenceNo = data.sequence;
+  }
+
+  if (connectorMeta.aggregationKind >= 0) {
+    try {
+      connector.SupplierEnd.Aggregation = connectorMeta.aggregationKind;
+    } catch (e) {
+      // SupplierEnd 不可达时忽略，字段级尽力而为
+    }
+  }
+
+  // EA only draws an arrowhead at the target (supplier) end when the connector carries an
+  // explicit direction. Directed ArchiMate relationships are therefore stored with
+  // Direction = "Source -> Destination" so the generated views show the relationship
+  // direction (source -> target); undirected Association and structural
+  // Composition/Aggregation keep Direction = Unspecified on purpose.
+  if (connectorMeta.directed) {
+    connector.Direction = 'Source -> Destination';
+  }
+
+  connector.Update();
+
+  putTag(connector.TaggedValues, 'schema_id', data.id);
+  putTag(connector.TaggedValues, 'schema_name', safeString(data.name));
+  putTag(connector.TaggedValues, 'schema_statement', safeString(data.statement));
+  putTag(connector.TaggedValues, 'archimate_relationship_type', canonicalArchimateType(data.type));
+  putTag(connector.TaggedValues, 'document', safeString(data.document));
+  putTag(connector.TaggedValues, 'source_schema_id', safeString(data.source_id));
+  putTag(connector.TaggedValues, 'target_schema_id', safeString(data.target_id));
+  putTag(connector.TaggedValues, 'source_name', safeString(data.source_name));
+  putTag(connector.TaggedValues, 'target_name', safeString(data.target_name));
+  putJsonTag(connector.TaggedValues, 'schema_relationship_json', data);
+  connector.Update();
+}
+
+function reconcileRelationshipAttributes(importPkg, connector, relationshipData) {
   putJsonTag(connector.TaggedValues, 'relationship_attributes_json', relationshipData.attributes);
 
   var associationClassCreated = false;
   if (connector.Type == 'Association') {
     try {
-      var assocClass = importPkg.Elements.AddNew(safeName(relationshipData.name + ' Attributes', 'Relationship Attributes'), 'Class');
-      assocClass.Name = safeName(relationshipData.name + ' Attributes', 'Relationship Attributes');
-      assocClass.Alias = relationshipData.id + '_attributes';
-      assocClass.StereotypeEx = 'SchemaRelationshipAttributes';
-      assocClass.Notes = safeString(relationshipData.description);
-      assocClass.Update();
+      // 幂等：优先复用既有关联类（按 Alias = <id>_attributes 找），不存在才新建。
+      var assocClass = findElementByAliasInPackage(importPkg, relationshipData.id + '_attributes');
+      if (assocClass == null) {
+        assocClass = importPkg.Elements.AddNew(safeName(relationshipData.name + ' Attributes', 'Relationship Attributes'), 'Class');
+        assocClass.Name = safeName(relationshipData.name + ' Attributes', 'Relationship Attributes');
+        assocClass.Alias = relationshipData.id + '_attributes';
+        assocClass.StereotypeEx = 'SchemaRelationshipAttributes';
+        assocClass.Notes = safeString(relationshipData.description);
+        assocClass.Update();
+        assocClass.CreateAssociationClass(connector.ConnectorID);
+        assocClass.Update();
+      }
       addRelationshipAttributesToClass(assocClass, relationshipData.attributes);
-      assocClass.CreateAssociationClass(connector.ConnectorID);
-      assocClass.Update();
-      importPkg.Elements.Refresh();
       putTag(connector.TaggedValues, 'relationship_attributes_element', assocClass.Name);
       associationClassCreated = true;
     } catch (e) {
@@ -605,42 +813,74 @@ function importRelationshipAttributes(importPkg, connector, relationshipData) {
     }
   }
 
-  connector.TaggedValues.Refresh();
   connector.Update();
 }
 
+function findElementByAliasInPackage(pkg, alias) {
+  if (pkg == null || pkg.Elements == null) {
+    return null;
+  }
+  refreshCollection(pkg.Elements, 'elements-of-' + safeName(pkg.Name, 'pkg'));
+  for (var i = 0; i < pkg.Elements.Count; i++) {
+    var candidate = null;
+    try {
+      candidate = pkg.Elements.GetAt(i);
+    } catch (e) {
+      candidate = null;
+    }
+    if (candidate != null && safeString(candidate.Alias) == alias) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
 function addRelationshipAttributesToClass(assocClass, attributes) {
+  if (assocClass == null || !attributes) {
+    return;
+  }
+  refreshCollection(assocClass.Attributes, 'attributes-of-assoc-' + assocClass.ElementID);
   for (var i = 0; i < attributes.length; i++) {
     var data = attributes[i];
     if (!data || !isNonEmptyString(data.name)) {
       continue;
     }
-    var attr = assocClass.Attributes.AddNew(data.name, 'String');
+    var attr = findChildByName(assocClass.Attributes, data.name);
+    if (attr == null) {
+      attr = assocClass.Attributes.AddNew(data.name, 'String');
+    }
     attr.Notes = safeString(data.description);
     attr.Update();
   }
-  assocClass.Attributes.Refresh();
 }
 
 function importViews(importPkg, views, elements, elementMap, relationshipMap, viewMap, subdiagramParentMap) {
   var viewDataMap = buildViewDataMap(views);
-  var count = 0;
+  var counts = { added: 0, updated: 0 };
+  // WP2100 幂等：先按 schema_view_id 索引既有图（含包级与元素子图），循环内不再逐图扫集合。
+  var existingByViewId = indexExistingDiagramsByViewId(importPkg);
 
   for (var i = 0; i < views.length; i++) {
     var viewData = views[i];
     if (!viewData || !isNonEmptyString(viewData.view_id)) {
       continue;
     }
-    var diagram = ensureDiagram(importPkg, viewData, elementMap, viewMap, subdiagramParentMap);
-    populateDiagram(diagram, viewData, elementMap, relationshipMap);
-    count++;
+    var outcome = ensureDiagram(importPkg, viewData, elementMap, viewMap, subdiagramParentMap, existingByViewId);
+    populateDiagram(viewMap[viewData.view_id], viewData, elementMap, relationshipMap);
+    if (outcome == 'added') {
+      counts.added++;
+    } else if (outcome == 'updated') {
+      counts.updated++;
+    }
   }
 
   if (CREATE_MISSING_SUBDIAGRAMS) {
-    count += createMissingSubdiagrams(importPkg, elements, viewDataMap, elementMap, relationshipMap, viewMap);
+    var extra = createMissingSubdiagrams(importPkg, elements, viewDataMap, elementMap, relationshipMap, viewMap, existingByViewId);
+    counts.added += extra.added;
+    counts.updated += extra.updated;
   }
 
-  return count;
+  return counts;
 }
 
 function buildViewDataMap(views) {
@@ -654,9 +894,55 @@ function buildViewDataMap(views) {
   return map;
 }
 
-function ensureDiagram(importPkg, viewData, elementMap, viewMap, subdiagramParentMap) {
+function getStyleToken(styleText, key) {
+  var source = safeString(styleText);
+  var pattern = new RegExp('(?:^|;)' + escapeRegExp(key) + '=([^;]*)', 'i');
+  var match = source.match(pattern);
+  if (match && match.length > 1) {
+    return match[1];
+  }
+  return '';
+}
+
+// 索引同步根包整棵子树上的既有图（包级图 + 元素子图），键 = StyleEx 的 schema_view_id。
+function indexExistingDiagramsByViewId(importPkg) {
+  var index = {};
+  function addFromCollection(collection, ownerLabel) {
+    if (collection == null) {
+      return;
+    }
+    try {
+      refreshCollection(collection, 'diagrams-of-' + ownerLabel);
+    } catch (e) {
+      return;
+    }
+    for (var i = 0; i < collection.Count; i++) {
+      var diagram = null;
+      try {
+        diagram = collection.GetAt(i);
+      } catch (e2) {
+        diagram = null;
+      }
+      if (diagram == null) {
+        continue;
+      }
+      var viewId = getStyleToken(safeString(diagram.StyleEx), 'schema_view_id');
+      if (viewId != '' && !index[viewId]) {
+        index[viewId] = diagram;
+      }
+    }
+  }
+  addFromCollection(importPkg.Diagrams, 'pkg');
+  var all = collectElementsUnderPackage(importPkg);
+  for (var j = 0; j < all.length; j++) {
+    addFromCollection(all[j].Diagrams, 'element-' + all[j].ElementID);
+  }
+  return index;
+}
+
+function ensureDiagram(importPkg, viewData, elementMap, viewMap, subdiagramParentMap, existingByViewId) {
   if (viewMap[viewData.view_id]) {
-    return viewMap[viewData.view_id];
+    return 'already-mapped';
   }
 
   var parentElement = null;
@@ -666,6 +952,23 @@ function ensureDiagram(importPkg, viewData, elementMap, viewMap, subdiagramParen
     parentElement = elementMap[subdiagramParentMap[viewData.view_id]];
   }
 
+  // 幂等分支①：按 schema_view_id 已存在 → 仅字段/标记更新（图本体与用户布局不动）。
+  var existing = existingByViewId ? existingByViewId[viewData.view_id] : null;
+  if (existing != null) {
+    try {
+      existing.Name = safeName(viewData.view_name, viewData.view_id);
+    } catch (e) {
+      // 图名只读场景下忽略
+    }
+    existing.Notes = safeString(viewData.description);
+    putDiagramTags(existing, viewData);
+    existing.Update();
+    viewMap[viewData.view_id] = existing;
+    Session.Output('Updated view: ' + existing.Name + ' (' + viewData.view_id + ')');
+    return 'updated';
+  }
+
+  // 幂等分支②：图谱独有 → 新建。
   var diagram = addDiagramToOwner(importPkg, parentElement, safeName(viewData.view_name, viewData.view_id));
   diagram.Notes = safeString(viewData.description);
   putDiagramTags(diagram, viewData);
@@ -673,7 +976,7 @@ function ensureDiagram(importPkg, viewData, elementMap, viewMap, subdiagramParen
   diagram.Update();
   viewMap[viewData.view_id] = diagram;
   Session.Output('Created view: ' + diagram.Name + ' (' + viewData.view_id + ')');
-  return diagram;
+  return 'added';
 }
 
 function storeDiagramViewIdFallback(parentElement, viewId, viewName) {
@@ -716,7 +1019,6 @@ function addDiagramToOwner(importPkg, parentElement, diagramName) {
     try {
       diagram = parentElement.Diagrams.AddNew(diagramName, DIAGRAM_TYPE);
       diagram.Update();
-      parentElement.Diagrams.Refresh();
       return diagram;
     } catch (e) {
       warnOnce('nested-diagram-fallback', 'Could not create diagram under element; using package-level diagram fallback. ' + errorMessage(e));
@@ -725,7 +1027,6 @@ function addDiagramToOwner(importPkg, parentElement, diagramName) {
 
   diagram = importPkg.Diagrams.AddNew(diagramName, DIAGRAM_TYPE);
   diagram.Update();
-  importPkg.Diagrams.Refresh();
   return diagram;
 }
 
@@ -741,32 +1042,64 @@ function putDiagramTags(diagram, viewData) {
 }
 
 function populateDiagram(diagram, viewData, elementMap, relationshipMap) {
+  if (diagram == null) {
+    return;
+  }
   var includedElements = viewData.included_elements || [];
   var includedRelationships = viewData.included_relationships || [];
-  var placedElements = {};
 
-  for (var i = 0; i < includedElements.length; i++) {
-    var schemaId = includedElements[i];
+  // 幂等：仅补缺失成员（保留用户手动加入的 DiagramObject/布局；绝不整图清空重画）。
+  var placedElementIds = {};
+  refreshCollection(diagram.DiagramObjects, 'diagram-objects-of-' + diagram.DiagramID);
+  var nextObjectIndex = diagram.DiagramObjects.Count;
+  for (var i = 0; i < diagram.DiagramObjects.Count; i++) {
+    var obj = null;
+    try {
+      obj = diagram.DiagramObjects.GetAt(i);
+    } catch (e) {
+      obj = null;
+    }
+    if (obj != null) {
+      placedElementIds[obj.ElementID] = true;
+    }
+  }
+  for (var k = 0; k < includedElements.length; k++) {
+    var schemaId = includedElements[k];
     var element = elementMap[schemaId];
     if (element) {
-      addElementToDiagram(diagram, element, i);
-      placedElements[schemaId] = true;
+      if (!placedElementIds[element.ElementID]) {
+        addElementToDiagram(diagram, element, nextObjectIndex);
+        nextObjectIndex++;
+      }
     } else {
       warnOnce('view-missing-element-' + viewData.view_id + '-' + schemaId, 'View ' + viewData.view_id + ' references missing element ' + schemaId + '.');
     }
   }
-  diagram.DiagramObjects.Refresh();
 
-  for (var j = 0; j < includedRelationships.length; j++) {
-    var relId = includedRelationships[j];
+  var placedConnectorIds = {};
+  refreshCollection(diagram.DiagramLinks, 'diagram-links-of-' + diagram.DiagramID);
+  for (var l = 0; l < diagram.DiagramLinks.Count; l++) {
+    var link = null;
+    try {
+      link = diagram.DiagramLinks.GetAt(l);
+    } catch (e) {
+      link = null;
+    }
+    if (link != null) {
+      placedConnectorIds[link.ConnectorID] = true;
+    }
+  }
+  for (var m = 0; m < includedRelationships.length; m++) {
+    var relId = includedRelationships[m];
     var connector = relationshipMap[relId];
     if (connector) {
-      addConnectorToDiagram(diagram, connector);
+      if (!placedConnectorIds[connector.ConnectorID]) {
+        addConnectorToDiagram(diagram, connector);
+      }
     } else {
       warnOnce('view-missing-relationship-' + viewData.view_id + '-' + relId, 'View ' + viewData.view_id + ' references missing relationship ' + relId + '.');
     }
   }
-  diagram.DiagramLinks.Refresh();
   diagram.Update();
 
   if (ENABLE_AUTOLAYOUT) {
@@ -802,10 +1135,10 @@ function addConnectorToDiagram(diagram, connector) {
   }
 }
 
-function createMissingSubdiagrams(importPkg, elements, viewDataMap, elementMap, relationshipMap, viewMap) {
-  var count = 0;
+function createMissingSubdiagrams(importPkg, elements, viewDataMap, elementMap, relationshipMap, viewMap, existingByViewId) {
+  var counts = { added: 0, updated: 0 };
   if (!elements) {
-    return count;
+    return counts;
   }
 
   for (var i = 0; i < elements.length; i++) {
@@ -827,13 +1160,235 @@ function createMissingSubdiagrams(importPkg, elements, viewDataMap, elementMap, 
         included_elements: [],
         included_relationships: []
       };
-      var diagram = ensureDiagram(importPkg, syntheticView, elementMap, viewMap, {});
-      populateDiagram(diagram, syntheticView, elementMap, relationshipMap);
-      count++;
+      var outcome = ensureDiagram(importPkg, syntheticView, elementMap, viewMap, {}, existingByViewId);
+      if (viewMap[syntheticView.view_id]) {
+        populateDiagram(viewMap[syntheticView.view_id], syntheticView, elementMap, relationshipMap);
+      }
+      if (outcome == 'added') {
+        counts.added++;
+      } else if (outcome == 'updated') {
+        counts.updated++;
+      }
     }
   }
 
-  return count;
+  return counts;
+}
+
+// ---------------------------------------------------------------------------
+// WP2100 删除对账分支：同步根包内存在但图谱没有的对象 → 先列清单、人工明确确认后才删除。
+// 删除范围：包内元素与关系（含无 schema_id 的人工手绘）；绝不删除图本体（DiagramObject 布局
+// 由 populateDiagram 增补式维护，人工加入的成员与布局原样保留）。
+// ---------------------------------------------------------------------------
+
+function isManagedAssociationClass(element) {
+  return element != null && safeString(element.StereotypeEx) == 'SchemaRelationshipAttributes';
+}
+
+function collectDeleteCandidates(importPkg, graph) {
+  var expectedElements = {};
+  var expectedRelationships = {};
+  var i;
+  for (i = 0; i < graph.elements.length; i++) {
+    if (graph.elements[i] && isNonEmptyString(graph.elements[i].id)) {
+      expectedElements[graph.elements[i].id] = true;
+    }
+  }
+  for (i = 0; i < graph.relationships.length; i++) {
+    if (graph.relationships[i] && isNonEmptyString(graph.relationships[i].id)) {
+      expectedRelationships[graph.relationships[i].id] = true;
+    }
+  }
+
+  var elementCandidates = [];
+  var connectorCandidates = [];
+  var all = collectElementsUnderPackage(importPkg);
+  for (var k = 0; k < all.length; k++) {
+    var element = all[k];
+    if (isManagedAssociationClass(element)) {
+      continue; // 关系属性关联类是脚本管理产物，随关系导入对账，不列入删除
+    }
+    var schemaId = schemaIdOfElement(element);
+    if (schemaId != '' && expectedElements[schemaId]) {
+      continue; // 图谱仍有 → 保留
+    }
+    elementCandidates.push(element);
+
+    // 收集该元素下图谱已没有的关系（无 schema_id 或 id 不在图谱）
+    try {
+      refreshCollection(element.Connectors, 'connectors-of-' + element.ElementID);
+    } catch (e) {
+      continue;
+    }
+    for (var c = 0; c < element.Connectors.Count; c++) {
+      var connector = null;
+      try {
+        connector = element.Connectors.GetAt(c);
+      } catch (e2) {
+        connector = null;
+      }
+      if (connector == null) {
+        continue;
+      }
+      var connectorSchemaId = schemaIdOfConnector(connector);
+      if (connectorSchemaId != '' && expectedRelationships[connectorSchemaId]) {
+        continue;
+      }
+      connectorCandidates.push(connector);
+    }
+  }
+  return { elements: elementCandidates, connectors: connectorCandidates };
+}
+
+function collectAllDiagramsUnderPackage(importPkg) {
+  var out = [];
+  function addFrom(collection) {
+    if (collection == null) {
+      return;
+    }
+    for (var i = 0; i < collection.Count; i++) {
+      try {
+        out.push(collection.GetAt(i));
+      } catch (e) {
+        // 忽略单个不可读图
+      }
+    }
+  }
+  addFrom(importPkg.Diagrams);
+  var all = collectElementsUnderPackage(importPkg);
+  for (var j = 0; j < all.length; j++) {
+    try {
+      addFrom(all[j].Diagrams);
+    } catch (e) {
+      // 忽略
+    }
+  }
+  return out;
+}
+
+function diagramNamesUsingElement(importPkg, elementID) {
+  var names = [];
+  var diagrams = collectAllDiagramsUnderPackage(importPkg);
+  for (var i = 0; i < diagrams.length; i++) {
+    var diagram = diagrams[i];
+    try {
+      refreshCollection(diagram.DiagramObjects, 'diagram-objects-of-' + diagram.DiagramID);
+    } catch (e) {
+      continue;
+    }
+    for (var j = 0; j < diagram.DiagramObjects.Count; j++) {
+      var obj = null;
+      try {
+        obj = diagram.DiagramObjects.GetAt(j);
+      } catch (e2) {
+        obj = null;
+      }
+      if (obj != null && obj.ElementID == elementID) {
+        names.push(safeString(diagram.Name));
+        break;
+      }
+    }
+  }
+  return names;
+}
+
+function askDeletionConfirmation(totalCount) {
+  var promptText = '同步根包 "' + IMPORT_PACKAGE_NAME + '" 中存在 ' + totalCount
+    + ' 个图谱里已没有的对象（详见上方输出）。删除后不可撤销。\r\n'
+    + '如确认删除请输入 "' + DELETE_CONFIRMATION_KEYWORD + '" 并回车；留空或取消则跳过删除。';
+  var answer = '';
+  try {
+    answer = Session.Input(promptText, '');
+  } catch (e) {
+    answer = '';
+  }
+  return trimString(answer).toLowerCase() == DELETE_CONFIRMATION_KEYWORD;
+}
+
+function elementNestingDepth(element) {
+  var depth = 0;
+  var guard = 0;
+  var parentId = 0;
+  try {
+    parentId = element.ParentID;
+  } catch (e) {
+    parentId = 0;
+  }
+  while (parentId != 0 && guard < 200) {
+    depth++;
+    guard++;
+    try {
+      var parent = Repository.GetElementByID(parentId);
+      if (parent == null) {
+        break;
+      }
+      parentId = parent.ParentID;
+    } catch (e) {
+      break;
+    }
+  }
+  return depth;
+}
+
+function reconcileDeletions(importPkg, elementMap, graph) {
+  if (importPkg == null) {
+    return;
+  }
+  var candidates = collectDeleteCandidates(importPkg, graph);
+  var connectorsToDelete = candidates.connectors;
+  var elementsToDelete = candidates.elements;
+  var total = connectorsToDelete.length + elementsToDelete.length;
+  if (total == 0) {
+    Session.Output('Reconcile: 同步根包与图谱完全一致，无删除候选。');
+    return;
+  }
+
+  // 1) 先输出删除清单（名称/类型/schema_id/在哪些图使用），供人类审阅。
+  Session.Output('Reconcile: 以下对象在同步根包 "' + IMPORT_PACKAGE_NAME + '" 中存在但图谱已没有 —— 删除候选清单：');
+  for (var i = 0; i < connectorsToDelete.length; i++) {
+    var connector = connectorsToDelete[i];
+    Session.Output('  [Connector] name=' + safeString(connector.Name) + ' schema_id=' + (schemaIdOfConnector(connector) || '(none)'));
+  }
+  for (var j = 0; j < elementsToDelete.length; j++) {
+    var element = elementsToDelete[j];
+    var schemaId = schemaIdOfElement(element);
+    var usage = diagramNamesUsingElement(importPkg, element.ElementID);
+    Session.Output('  [Element] name=' + safeString(element.Name) + ' type=' + safeString(element.Type)
+      + ' schema_id=' + (schemaId || '(none)') + ' used_in_diagrams=' + (usage.join(', ') || '(none)'));
+  }
+
+  // 2) 仅当人类明确确认后才执行删除。
+  if (!askDeletionConfirmation(total)) {
+    Session.Output('Reconcile: 用户未确认，跳过删除。');
+    return;
+  }
+
+  // 3) 执行：先删关系，再按嵌套深度从深到浅删元素（避免父先删导致子引用失效）。
+  var deleted = 0;
+  for (var c = 0; c < connectorsToDelete.length; c++) {
+    var con = connectorsToDelete[c];
+    try {
+      con.Delete();
+      con.Update();
+      deleted++;
+    } catch (e) {
+      warnOnce('delete-connector-' + safeString(con.Name), 'Could not delete connector ' + safeString(con.Name) + ': ' + errorMessage(e));
+    }
+  }
+  elementsToDelete.sort(function (a, b) {
+    return elementNestingDepth(b) - elementNestingDepth(a);
+  });
+  for (var e = 0; e < elementsToDelete.length; e++) {
+    var el = elementsToDelete[e];
+    try {
+      el.Delete();
+      el.Update();
+      deleted++;
+    } catch (err) {
+      warnOnce('delete-element-' + el.ElementID, 'Could not delete element ' + safeString(el.Name) + ': ' + errorMessage(err));
+    }
+  }
+  Session.Output('Reconcile: 已删除 ' + deleted + ' 个对象（共 ' + total + ' 个候选）。');
 }
 
 function mapElementTypeToEaStereotype(archimateType) {
@@ -1153,26 +1708,6 @@ function mapTestTypeToEaClass(testType) {
   }
 }
 
-function appendAttributeLines(lines, attributes) {
-  for (var i = 0; i < attributes.length; i++) {
-    var attr = attributes[i];
-    if (!attr) {
-      continue;
-    }
-    var line = '- ' + safeString(attr.name);
-    if (isNonEmptyString(attr.value)) {
-      line += ' = ' + safeString(attr.value);
-    }
-    if (isNonEmptyString(attr.description)) {
-      line += ' :: ' + safeString(attr.description);
-    }
-    if (isNonEmptyString(attr.content)) {
-      line += ' :: content length ' + safeString(attr.content).length;
-    }
-    lines.push(line);
-  }
-}
-
 function putTag(tags, key, value) {
   if (tags == null || !isNonEmptyString(key)) {
     return;
@@ -1365,14 +1900,6 @@ function isNonEmptyString(value) {
 
 function isArray(value) {
   return Object.prototype.toString.apply(value) == '[object Array]';
-}
-
-function formatTimestamp(date) {
-  return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate()) + '_' + pad2(date.getHours()) + '-' + pad2(date.getMinutes()) + '-' + pad2(date.getSeconds());
-}
-
-function pad2(value) {
-  return value < 10 ? '0' + value : '' + value;
 }
 
 function warnOnce(key, message) {

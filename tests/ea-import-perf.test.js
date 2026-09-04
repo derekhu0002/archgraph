@@ -10,10 +10,20 @@ const SCRIPTS = [
   path.join(ROOT, 'eatool', 'EA-jsscript', 'import-from-kg.js'),
   path.join(ROOT, 'eatool', 'EA-jsscript', 'import-from-external-package.js'),
 ];
+// WP2100 优化断言的目标脚本：import-from-kg.js（EA 导入脚本）。
+const KG_SCRIPT = path.join(ROOT, 'eatool', 'EA-jsscript', 'import-from-kg.js');
 
 function readScript(file) {
   assert.ok(existsSync(file), `script should exist: ${file}`);
   return readFileSync(file, 'utf8');
+}
+
+function sectionBetween(content, startMarker, endMarker) {
+  const start = content.indexOf(startMarker);
+  assert.ok(start >= 0, `section start marker not found: ${startMarker}`);
+  const end = content.indexOf(endMarker, start + startMarker.length);
+  assert.ok(end > start, `section end marker not found after ${startMarker}`);
+  return content.slice(start, end);
 }
 
 test('ea-import-perf: UI updates are disabled during import and re-enabled after', () => {
@@ -77,4 +87,54 @@ test('ea-import-perf: auto-layout is disabled so diagrams are not opened one by 
       `${label} should keep auto-layout off (LayoutDiagramEx opens diagrams one by one)`
     );
   }
+});
+
+test('ea-import-perf (AT-2100-OPT-02): import-from-kg avoids the per-object update-then-full-collection-Refresh slow pattern', () => {
+  // GIVEN the WP2100 speed-optimised import-from-kg.js
+  // WHEN scanning its hot loops (element / relationship / view import paths)
+  // THEN collection refresh is centralized in the refreshCollection helper and the per-object
+  //      import loops contain no direct .Refresh() call; total direct .Refresh() stays tiny
+  const content = readScript(KG_SCRIPT).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const label = path.basename(KG_SCRIPT);
+
+  assert.match(content, /function\s+refreshCollection\s*\(/, `${label} should centralize collection refresh`);
+  const directRefreshCount = (content.match(/\.Refresh\s*\(/g) || []).length;
+  assert.ok(directRefreshCount <= 4, `${label} should keep direct .Refresh() calls ≤4 (actual ${directRefreshCount})`);
+
+  // 元素导入热路径（ensureElement 到 findChildByName 区间）：无直接集合刷新
+  const elementHot = sectionBetween(content, 'function ensureElement(', 'function findChildByName');
+  assert.doesNotMatch(elementHot, /\.Refresh\s*\(/, `${label} element hot path must not refresh collections per object`);
+
+  // 关系导入热路径（importRelationships 到 applyRelationshipFields 区间）：无直接集合刷新
+  const relHot = sectionBetween(content, 'function importRelationships(', 'function applyRelationshipFields');
+  assert.doesNotMatch(relHot, /\.Refresh\s*\(/, `${label} relationship hot path must not refresh collections per object`);
+});
+
+test('ea-import-perf (AT-2100-OPT-02): import-from-kg is structurally idempotent (update-in-place by schema_id, no duplicate on re-import)', () => {
+  // GIVEN importing the same knowledge graph twice
+  // WHEN inspecting the import key paths of import-from-kg.js
+  // THEN objects are looked up by schema_id (elements / relationships / views) before creation and
+  //      updated in place; child collections are find-or-add by name; no recreate/delete-anywhere
+  const content = readScript(KG_SCRIPT).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const label = path.basename(KG_SCRIPT);
+
+  // 元素：先查（existingBySchemaId）后建（addElementToOwner），已有元素仅 updateElementFields
+  const elementHot = sectionBetween(content, 'function ensureElement(', 'function findChildByName');
+  assert.match(elementHot, /existingBySchemaId\[schemaId\]/, `${label} elements must be looked up by schema_id first`);
+  assert.match(elementHot, /updateElementFields\s*\(existing/, `${label} existing elements must be updated in place`);
+  assert.doesNotMatch(elementHot, /\.Delete\s*\(/, `${label} element path must never delete-then-recreate`);
+
+  // 关系：按 schema_id 查既有 connector，更新走 applyRelationshipFields
+  const relHot = sectionBetween(content, 'function importRelationships(', 'function applyRelationshipFields');
+  assert.match(relHot, /existingBySchemaId\[data\.id\]/, `${label} relationships must be looked up by schema_id first`);
+  assert.doesNotMatch(relHot, /\.Delete\s*\(/, `${label} relationship path must never delete-then-recreate`);
+
+  // 视图：按 schema_view_id 查既有图，复用分支更新字段
+  const viewHot = sectionBetween(content, 'function ensureDiagram(', 'function storeDiagramViewIdFallback');
+  assert.match(viewHot, /existingByViewId\[viewData\.view_id\]/, `${label} views must be looked up by schema_view_id first`);
+  assert.match(viewHot, /return\s+'updated'/, `${label} reused diagrams must return updated`);
+  assert.doesNotMatch(viewHot, /\.Delete\s*\(/, `${label} view path must never delete-then-recreate`);
+
+  // 子集合（属性/方法/测试/资源/Issue）按名先查后建，避免重复导入产生重复子对象
+  assert.match(content, /function\s+findChildByName\s*\(/, `${label} should define a find-or-add-by-name child helper`);
 });
