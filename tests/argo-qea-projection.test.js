@@ -163,3 +163,58 @@ test('argo-qea-projection (no qea): initializeWorkspace with only a legacy .feap
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('argo-qea-projection (AT-2791-09): apply always reports the EA .qea projection status (passed / noop+reason / warning) — never silent', async () => {
+  async function applyIn(dir) {
+    const architecturePath = writeGraphFile(dir, 'ea-graph.json');
+    const result = await systemArchitectureMcp.callTool('applySystemArchitectureMutation', {
+      workspaceRoot: dir,
+      architecturePath,
+      mutations: [{ type: 'addElement', element: NEW_ELEMENT, view_ids: ['sys'] }],
+    });
+    const payload = JSON.parse(result.content[0].text);
+    assert.equal(payload.status, 'passed', 'apply must succeed regardless of EA projection state');
+    assert.equal(payload.written, true);
+    return payload;
+  }
+
+  // 1) exactly one root .qea -> projection actually runs and reports passed
+  const dirPass = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-qea-pass-'));
+  try {
+    fs.copyFileSync(QEA_TEMPLATE, path.join(dirPass, 'archgraph.qea'));
+    const payload = await applyIn(dirPass);
+    assert.ok(payload.qeaProjection, 'qeaProjection must be present on a successful apply (not stripped by compact response)');
+    assert.equal(payload.qeaProjection.status, 'passed', 'single root .qea must project: ' + JSON.stringify(payload.qeaProjection));
+    const db = new DatabaseSync(path.join(dirPass, 'archgraph.qea'));
+    const row = db.prepare("SELECT Object_ID FROM t_object WHERE Alias='a2'").get();
+    db.close();
+    assert.ok(row, 'new element must be present in the EA .qea after a passed projection');
+  } finally {
+    fs.rmSync(dirPass, { recursive: true, force: true });
+  }
+
+  // 2) legacy .feap only -> explicit noop reason + warning (direct projection cannot write Firebird)
+  const dirFeap = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-qea-feap-'));
+  try {
+    fs.writeFileSync(path.join(dirFeap, 'archgraph.feap'), 'legacy sentinel', 'utf8');
+    const payload = await applyIn(dirFeap);
+    assert.ok(payload.qeaProjection, 'qeaProjection must be present even when no .qea target exists');
+    assert.equal(payload.qeaProjection.status, 'noop', 'legacy .feap only -> noop');
+    assert.match(String(payload.qeaProjection.reason), /legacy|\.feap/i, 'noop reason must explain the legacy EA model');
+    assert.ok(Array.isArray(payload.warnings) && payload.warnings.some((w) => /ea-qea projection not run/i.test(w)), 'noop with EA signals must surface a warning');
+    assert.equal(fs.existsSync(path.join(dirFeap, 'archgraph.qea')), false, 'no stray qea created');
+  } finally {
+    fs.rmSync(dirFeap, { recursive: true, force: true });
+  }
+
+  // 3) no EA file at all -> explicit noop reason still present (no EA-signal warning needed)
+  const dirNone = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-qea-none2-'));
+  try {
+    const payload = await applyIn(dirNone);
+    assert.ok(payload.qeaProjection, 'qeaProjection must be present when the workspace has no EA model');
+    assert.equal(payload.qeaProjection.status, 'noop');
+    assert.match(String(payload.qeaProjection.reason), /\.qea target/i, 'noop reason must guide to ARGO_EA_QEA / root *.qea');
+  } finally {
+    fs.rmSync(dirNone, { recursive: true, force: true });
+  }
+});

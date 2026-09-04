@@ -1616,9 +1616,12 @@ async function buildMutationResult(context, mutations, write) {
   writeGraph(context.graphPath.absolutePath, mutationResult.document);
   result.written = true;
 
-  // WP2791: .qea projection parallel to the Neo4j trigger — non-fatal, best-effort.
+  // WP2791: .qea projection parallel to the Neo4j trigger — non-fatal, best-effort,
+  // but ALWAYS reported on the result (passed / failed / noop+reason) so a missing EA
+  // update is never silent.
   {
-    const qeaTarget = resolveQeaProjectionTarget(context);
+    const resolved = resolveQeaProjectionTarget(context);
+    const qeaTarget = resolved && resolved.target;
     if (qeaTarget) {
       try {
         const projection = await runQeaProjection(qeaTarget);
@@ -1631,6 +1634,15 @@ async function buildMutationResult(context, mutations, write) {
       } catch (error) {
         result.qeaProjection = { status: 'failed', error: String(error && error.message ? error.message : error) };
         result.warnings = addUnique(result.warnings || [], ['ea-qea projection error (non-fatal): ' + String(error && error.message ? error.message : error)]);
+      }
+    } else {
+      result.qeaProjection = {
+        status: 'noop',
+        reason: (resolved && resolved.reason) || 'no .qea target',
+        workspaceRoot: context.workspaceRoot,
+      };
+      if (resolved && resolved.hasEaSignals) {
+        result.warnings = addUnique(result.warnings || [], ['ea-qea projection not run: ' + ((resolved && resolved.reason) || 'no .qea target')]);
       }
     }
   }
@@ -1838,24 +1850,44 @@ function summarizeDocument(document) {
 // Projection script runs from argo/scripts (same package as the MCP runtime), so a workspace
 // does not need to ship its own projection script (bundled argo/scripts module).
 function resolveQeaProjectionTarget(context) {
+  const none = (reason, hasEaSignals) => ({ target: null, reason, hasEaSignals: !!hasEaSignals });
   try {
     const workspaceRoot = String(context && context.workspaceRoot ? context.workspaceRoot : '');
-    if (!workspaceRoot || !fs.existsSync(workspaceRoot)) { return null; }
+    if (!workspaceRoot || !fs.existsSync(workspaceRoot)) { return none('workspace root unavailable: ' + workspaceRoot, true); }
     const graphAbsolute = context.graphPath && context.graphPath.absolutePath ? context.graphPath.absolutePath : null;
-    if (!graphAbsolute || !fs.existsSync(graphAbsolute)) { return null; }
+    if (!graphAbsolute || !fs.existsSync(graphAbsolute)) { return none('canonical graph not found under ' + workspaceRoot, false); }
     const pick = (p) => (p && fs.existsSync(p) ? path.resolve(p) : null);
-    let qeaPath = pick(process.env.ARGO_EA_QEA);
-    if (qeaPath) { return { qeaPath, graphPath: graphAbsolute, workspaceRoot }; }
+    const envTarget = process.env.ARGO_EA_QEA;
+    let qeaPath = pick(envTarget);
+    if (qeaPath) { return { target: { qeaPath, graphPath: graphAbsolute, workspaceRoot } }; }
     let qeas = [];
-    try { qeas = fs.readdirSync(workspaceRoot).filter((n) => n.toLowerCase().endsWith('.qea')); } catch { /* ignore */ }
+    try { qeas = fs.readdirSync(workspaceRoot).filter((n) => n.toLowerCase().endsWith('.qea')).sort(); } catch { /* ignore */ }
     if (qeas.length === 1) {
-      return { qeaPath: path.resolve(workspaceRoot, qeas[0]), graphPath: graphAbsolute, workspaceRoot };
+      return { target: { qeaPath: path.resolve(workspaceRoot, qeas[0]), graphPath: graphAbsolute, workspaceRoot } };
     }
-    console.log('[ea-qea] projection target: none' + (qeas.length > 1 ? ' (' + qeas.length + ' *.qea found; expected exactly one or ARGO_EA_QEA)' : '') + ' in ' + workspaceRoot);
-    return null;
+    let eaFiles = [];
+    try { eaFiles = fs.readdirSync(workspaceRoot).filter((n) => /\.(qea|feap|eap)$/i.test(n)).sort(); } catch { /* ignore */ }
+    if (qeas.length > 1) {
+      const reason = `${qeas.length} *.qea files found at the workspace root (${qeas.join(', ')}); expected exactly one or set ARGO_EA_QEA`;
+      console.log('[ea-qea] projection target: none (' + reason + ') in ' + workspaceRoot);
+      return none(reason, true);
+    }
+    const legacy = eaFiles.filter((n) => /\.(feap|eap)$/i.test(n));
+    if (legacy.length > 0) {
+      const reason = `EA model is a legacy ${legacy.join(', ')} (Firebird/Jet); the direct .qea projection cannot write it — convert to .qea (EA 17.2+) or set ARGO_EA_QEA to a .qea target`;
+      console.log('[ea-qea] projection target: none (' + reason + ') in ' + workspaceRoot);
+      return none(reason, true);
+    }
+    if (envTarget) {
+      const reason = 'ARGO_EA_QEA points to a missing .qea file: ' + envTarget;
+      console.log('[ea-qea] projection target: none (' + reason + ')');
+      return none(reason, true);
+    }
+    console.log('[ea-qea] projection target: none in ' + workspaceRoot);
+    return none('no .qea target found (set ARGO_EA_QEA or place exactly one *.qea at the workspace root)', false);
   } catch (error) {
     console.log('[ea-qea] projection target resolution failed: ' + String(error && error.message ? error.message : error));
-    return null;
+    return none('EA .qea target resolution failed: ' + String(error && error.message ? error.message : error), true);
   }
 }
 
@@ -2166,6 +2198,26 @@ function compactMutationResponse(payload) {
   };
   if (payload && payload.embeddingLifecycle && payload.embeddingLifecycle.state) {
     compact.embeddingLifecycle = { state: payload.embeddingLifecycle.state };
+  }
+  // Successful writes stay compact but downstream projection side effects (EA .qea,
+  // Neo4j) and non-fatal warnings must stay observable — a caller deciding whether
+  // "the EA file reflects this write" relies on qeaProjection.status (passed /
+  // failed / noop + reason), never on silence.
+  if (payload && payload.qeaProjection) {
+    const q = payload.qeaProjection;
+    if (q.status === 'passed') {
+      compact.qeaProjection = { status: 'passed', ms: q.ms };
+    } else if (q.status === 'noop') {
+      compact.qeaProjection = { status: 'noop', reason: q.reason };
+    } else {
+      compact.qeaProjection = { status: q.status, error: q.error || q.reason };
+    }
+  }
+  if (payload && payload.neo4jSync) {
+    compact.neo4jSync = { status: payload.neo4jSync.status };
+  }
+  if (Array.isArray(payload && payload.warnings) && payload.warnings.length > 0) {
+    compact.warnings = payload.warnings;
   }
   // Failed actual writes must retain business diagnostics (e.g. View15 maximum/observed)
   // so callers can distinguish reject reasons; successful writes stay compact.

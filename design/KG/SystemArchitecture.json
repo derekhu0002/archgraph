@@ -5307,6 +5307,13 @@
           "description": "GIVEN 同步 Node 模块 syncGraphToQea/fullProjection；WHEN 元素带 attributes（含同名 ledger 重复）与 testcases 投影到隔离 .qea 副本；THEN attributes 逐条写入 EA t_attribute（同名允许多行、短值入 Default、长值/描述入 Notes、ea_guid 唯一）、testcases 写入 t_objecttests（TestClass=Acceptance Test、Notes/InputData/AcceptanceCriteria 与 canonical 一致）；再次 sync 幂等不新增行；改值 update-in-place；full 整库重建后同样携带。纯 Node 可测。",
           "name": "AT-2791-08",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/argo-qea-projection.test.js",
+          "acceptanceCriteria": "tests/argo-qea-projection.test.js",
+          "description": "GIVEN 在临时 workspace 执行 applySystemArchitectureMutation（ARGO MCP 写图真实写入）；WHEN 工作区为单一根 *.qea / 仅遗留 .feap / 无 EA 文件；THEN 返回结果（即使 compact 成功响应）都显式携带 qeaProjection：单 .qea 时 status=passed 且 EA 出现新元素；仅 .feap 时 status=noop 且 reason 说明 legacy 不可直写并出现 ea-qea warning；无 EA 文件时 status=noop 且 reason 指引 ARGO_EA_QEA/根 *.qea——绝不静默。",
+          "name": "AT-2791-09",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package"
