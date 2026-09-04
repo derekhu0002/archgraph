@@ -75,6 +75,10 @@
         {
           "view_id": "diagram-skills-view-001",
           "view_name": "Diagram Skills（架构图生成技能）"
+        },
+        {
+          "view_id": "ea-tooling-wps-001",
+          "view_name": "EA 工具链工作包（EA Tooling WPs）"
         }
       ]
     },
@@ -5143,6 +5147,40 @@
           "description": "design/KG/SystemArchitecture.json（反向 EA→图谱设计里程碑 + T1 摘要）"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "2026-09-04 人类拍板：.qea=标准 SQLite，EA 关闭/打开皆可外部直写（实测 EA 打开时写入成功；busy_timeout+重试应对同刻写锁）；仓库 EA 文件已换 archgraph.qea（feap 删除）。",
+          "name": "decision",
+          "value": "qea-direct-sqlite"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "ARGO 写图 → 下游直写 .qea 投影（Node + node:sqlite，标准批量 SQL）。背景与结论：Repository.Execute 仅 DBMS 库可用（.feap 内嵌 Firebird 单条可用、.qea/SQLite 完全禁用）；.qea 是标准 SQLite，外部直写最符“一把 SQL 写库”诉求，EA 开/关皆可写（实测）；仓库 EA 文件已换 archgraph.qea。本 WP：① Node 模块直接对 .qea 做图谱⇄SQLite 批量读写（t_object/t_connector/t_diagram/t_objectproperties/t_connectortag/t_diagramobjects/t_diagramlinks），对账语义沿用 2100（固定同步根包/update-in-place 不动几何/删除清单确认/幂等）；② ARGO MCP 写图下游投影：观察 design/KG/SystemArchitecture.json 落盘→投影到 archgraph.qea（不改 argo/**）；③ 并发 busy_timeout+短事务+重试，EA 开着也能写；EA 缓存需人工刷新可见；④ unchanged-skip 变更检测使稳态增量快；⑤ .feap(Firebird) 旧路径保留。在本项目验证：真实图谱投影到 archgraph.qea + 回环一致 + 幂等 + 测速。",
+      "id": "2791",
+      "name": "ARGO写图下游直写.qea投影（Node:sqlite）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/ea-qea-sync.test.js",
+          "acceptanceCriteria": "tests/ea-qea-sync.test.js",
+          "description": "GIVEN 仓库图谱 JSON（只读）与隔离 .qea 副本；WHEN 运行 Node .qea 直写导入；THEN t_object/t_connector/t_diagram 等行与图谱内容一致（导出读回后回环比较忽略顺序相等）；重复导入幂等（无重复行）；既有 t_diagramobjects 位置不被触碰；EA 打开场景以保持 SQLite 连接模拟验证 busy_timeout/重试下写入成功。纯 Node 可测。",
+          "name": "AT-2791-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-qea-sync.test.js",
+          "acceptanceCriteria": "tests/ea-qea-sync.test.js",
+          "description": "GIVEN 观察驱动配置目标 .qea；WHEN 图谱 JSON 变化触发；THEN 增量投影（unchanged-skip 不重写未变对象），稳态重投影耗时显著低于全量（实测报告数值）；目标为隔离副本时可全程 Node 测试。",
+          "name": "AT-2791-02",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -6155,6 +6193,16 @@
       "target_id": "2760",
       "target_name": "ArchGraph 本地 Web 服务",
       "type": "Realization"
+    },
+    {
+      "id": "2791-assoc-2100",
+      "name": "Association",
+      "source_id": "2791",
+      "source_name": "ARGO写图下游直写.qea投影（Node:sqlite）",
+      "statement": "ARGO写图下游直写.qea投影（Node:sqlite） --(Association)--> 开发不保留原ID的EA导入脚本",
+      "target_id": "2100",
+      "target_name": "开发不保留原ID的EA导入脚本",
+      "type": "Association"
     }
   ],
   "views": [
@@ -6213,7 +6261,6 @@
       "parent_element_name": "Implementation and Migration Viewpoint",
       "description": "EA 导入/导出工具链视图：SystemArchitecture.json 导入 EA 的 JScript 脚本，以及本地 Web 服务导入/导出知识图谱（面向无 EA 经验用户）。",
       "included_elements": [
-        "2100",
         "2758",
         "2760",
         "2761",
@@ -6222,12 +6269,7 @@
         "2764",
         "2765",
         "2766",
-        "subgraph-semantic-retrieval-001",
-        "2785",
-        "2786",
-        "2787",
-        "2788",
-        "2789"
+        "subgraph-semantic-retrieval-001"
       ],
       "included_relationships": [
         "1980",
@@ -6236,11 +6278,7 @@
         "1983",
         "1984",
         "1985",
-        "1986",
-        "2785-realizes-2760",
-        "2786-realizes-2760",
-        "2787-realizes-2760",
-        "2788-realizes-2760"
+        "1986"
       ]
     },
     {
@@ -7038,6 +7076,29 @@
         "insight-lead-milestone-reverse-ea2kg-001"
       ],
       "included_relationships": []
+    },
+    {
+      "description": "EA 工具链的 Work Package 工作区（原 EA Tooling 1800 容量满 15，按分层拆出）：2100 导入优化、2785 画布/侧车、2786 部署、2787 手动项目、2788 画布内核、2789 同步桥、2791 .qea 直写投影（2760 亦属本视图以承载 realize 关系端点）。",
+      "included_elements": [
+        "2100",
+        "2760",
+        "2785",
+        "2786",
+        "2787",
+        "2788",
+        "2789",
+        "2791"
+      ],
+      "included_relationships": [
+        "2785-realizes-2760",
+        "2786-realizes-2760",
+        "2787-realizes-2760",
+        "2788-realizes-2760",
+        "2791-assoc-2100"
+      ],
+      "parent_element_id": "1249",
+      "view_id": "ea-tooling-wps-001",
+      "view_name": "EA 工具链工作包（EA Tooling WPs）"
     }
   ]
 }
