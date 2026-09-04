@@ -3846,7 +3846,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管 工作记忆（2026-09-04 压缩版，含本日两次 EA 相关修复收尾）。主线：人类要 EA 类工具，人类在 EA 设计、AGENT 经 ARGO MCP 写图同步到 EA 且不破坏位置。关键演进：1) Web 路线冻结。2) EA 为主设计界面（EA17.2+.qea）。3) 主线 WP2791：.qea=标准 SQLite，argo/scripts/ea-qea-sync.js+lib（node:sqlite 直写：sync/full、写前快照、verify）；ARGO MCP 写后增量 + init full；目标解析 ARGO_EA_QEA > 仓库根唯一 *.qea（无配置）；canonical↔archgraph.qea 一致 214/102/57。发布 0.11→0.12.2（0.12.5 bump 在 package.json 未提交，发布待人类）。**本日两次修复（均 Tier 2）：①7674cba bootstrap .feap→.qea**（缺 EA 文件生成 <project>.qea、已有 .qea/.feap/.eap 不重复补建、移除 Argo.feap 遗留模板候选、targetFeapName→targetEaName；AT-2791-07）；**②e456897 元素 attributes/testcases→EA 可见层**（attributes→t_attribute：同名 ledger 多行幂等、短值 Default/长值+描述 Notes、ea_guid 唯一；testcases→t_objecttests：TestClass=4=Acceptance、Notes/InputData/AcceptanceCriteria；更新不覆盖 EA 运行态 Status/Results；真实图谱 620 attr/49 test 行==canonical；AT-2791-08；本地 archgraph.qea 已 full 重建可 EA 验证）。其他决策：坐标侧车独立正式资产随 commit；EA=投影可重建；EA MCP 不开放给 AGENT。可复用经验：.qea 直写最快通道；EA Execute 仅 DBMS；t_attribute 无 Alias 列（EA 对象模型 Attribute.Alias 不落此表）、t_objecttests PK=(Object_ID,Test,TestClass)、t_testtypes 仅 Load/Regression/Standard（Acceptance 用 TestClass=4 镜像 import-from-kg）；runArchitectureTests 会刷 delivery/failure-records，无关/环境失败污染 diff（登记前 git checkout 还原）；Windows sqlite 句柄释放延迟（测试 rm 前 retry）；ea-web-maxgraph 偶发崩溃 0xC0000409（重跑即过=环境 flake）。未完成/TODO：package.json 0.12.5 发布待人类；archgraph.qea 入库待人类定；全局副本/其它仓库同步 0.12.x；既有 2 失败（memory-eval-run-03、architecture-view-context-08）未修；Experience 层未实施；eatool .feap 与 MCP 桥 WP2789 PARKED 保留。",
+      "description": "项目总管 工作记忆（2026-09-04 压缩版，含本日三次 EA 相关修复收尾）。主线：人类要 EA 类工具，人类在 EA 设计、AGENT 经 ARGO MCP 写图同步到 EA 且不破坏位置。关键演进：1) Web 冻结。2) EA 为主设计界面（EA17.2+.qea）。3) 主线 WP2791：.qea=标准 SQLite，argo/scripts/ea-qea-sync.js+lib（node:sqlite 直写：sync/full、写前快照、verify）；ARGO MCP 写后增量 + init full；目标解析 ARGO_EA_QEA > 仓库根唯一 *.qea（无配置）；canonical↔archgraph.qea 一致 214/102/57。发布 0.11→0.12.2（0.12.5 bump 在 package.json 未提交，发布待人类）。**本日三次修复（均 Tier 2）：①7674cba bootstrap .feap→.qea**（缺 EA 生成 <project>.qea、已有不补建、移除 Argo.feap 候选、targetEaName；AT-2791-07）；**②e456897 attributes/testcases→EA 可见层**（attributes→t_attribute 同名 ledger 幂等/短值 Default 长值 Notes、testcases→t_objecttests TestClass=4+Notes/InputData/AcceptanceCriteria、不覆盖 EA 运行态；AT-2791-08）；**③5cdec8f EA 投影状态显式上报**（其他项目症状=NEO4J 投影成功但 EA 不见；根因=compactMutationResponse 成功写入丢弃 qeaProjection/neo4jSync/warnings + 无目标时 buildMutationResult 全静默仅 console.log；修复=compact 恒带 qeaProjection(passed/failed/noop+reason)/neo4jSync.status/warnings；无 .qea 目标附加 noop，有 EA 信号(遗留 .feap/.eap/多 .qea/ARGO_EA_QEA 缺失)给 warning 指引转 .qea 或设 env，无 EA 文件仅 noop 不 warning；AT-2791-09）。其他决策：坐标侧车独立随 commit；EA=投影可重建；EA MCP 不开放给 AGENT。可复用经验/坑：.qea 直写最快通道；EA Execute 仅 DBMS；t_attribute 无 Alias 列、t_objecttests PK=(Object_ID,Test,TestClass)、Acceptance=TestClass 4；**ARGO MCP 变更类工具成功响应是 compact 的——下游投影/警告必须显式加入 compact，否则静默（写后核对 qeaProjection 字段）**；EA GUI 外部直写后需刷新/重开项目才可见（EA 开着写并不报错）；runArchitectureTests 会刷 delivery/failure-records（登记前 git checkout 还原）；Windows sqlite 句柄释放延迟（测试 rm retry）；ea-web-maxgraph 偶发崩溃 0xC0000409（环境 flake 重跑过）。未完成/TODO：package.json 0.12.5 发布待人类；archgraph.qea 入库待人类定；全局副本/其它仓库同步 0.12.x；既有 2 失败（memory-eval-run-03、architecture-view-context-08）未修；Experience 层未实施；eatool .feap 与 MCP 桥 WP2789 PARKED。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3868,8 +3868,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-04T19:00:00.000Z",
-          "description": "2026-09-04 bootstrap .feap→.qea + attributes/testcases→EA 投影 修复会话收尾"
+          "value": "2026-09-04T20:00:00.000Z",
+          "description": "2026-09-04 EA 投影静默缺陷修复收尾（三连修）"
         },
         {
           "name": "commit",
