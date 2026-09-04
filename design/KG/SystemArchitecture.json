@@ -1654,8 +1654,8 @@
         },
         {
           "name": "status",
-          "value": "ACTIVE",
-          "description": "2026-09-04 对象模型版已完成（518c2b0）；现重开做 SQL 直写通道：读侧对账 Repository.SQLQuery + 写侧批量 Repository.Execute，幂等语义（固定同步根包 update-in-place/add/删除清单确认）不变。"
+          "value": "AWAITING_EA_VALIDATION",
+          "description": "SQL 直写通道已交付（89aded9，默认 SQL_DIRECT=true；对象模型全量路径保留但 OBJECT_MODEL_FALLBACK=false）。真实 EA 回归待人类在 scratch 项目实测（SQL 方言/Repository 行为无法 CI 验证）。"
         },
         {
           "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-perf.test.js; design/KG/SystemArchitecture.json",
@@ -1700,6 +1700,11 @@
           "name": "commit",
           "value": "245f19e",
           "description": "design/KG/SystemArchitecture.json（重开：SQL 直写通道 + AT-2100-OPT-03）"
+        },
+        {
+          "name": "commit",
+          "value": "89aded9",
+          "description": "eatool/EA-jsscript/import-from-kg.js; tests/ea-import-reconcile.test.js（SQL 直写通道：SQLQuery 对账 + Repository.Execute 批量写；Alias 匹配/e_guid 读回/位置红线不碰 t_diagramobjects/删除清单确认；ea-import 全族 19/19）"
         }
       ],
       "testcases": [
