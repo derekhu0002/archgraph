@@ -4491,6 +4491,11 @@
           "name": "commit",
           "value": "0f8dbd5",
           "description": "design/KG/SystemArchitecture.json（多项目/EA开关复核里程碑 + T1 摘要）"
+        },
+        {
+          "name": "commit",
+          "value": "3120121",
+          "description": "design/KG/SystemArchitecture.json（反向 EA→图谱设计里程碑 + T1 摘要）"
         }
       ]
     },
@@ -5030,6 +5035,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "3120121",
+          "description": "design/KG/SystemArchitecture.json（反向 EA→图谱设计里程碑 + T1 摘要）"
         }
       ]
     }
