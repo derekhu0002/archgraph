@@ -5151,9 +5151,9 @@
     {
       "attributes": [
         {
-          "description": "2026-09-04 人类需求：argo init（initializeWorkspace）时增加一次 .qea **全量投影**——先全量清除投影自有内容再全量写入（逻辑同 Neo4j init 全量同步）。目标 .qea 解析与 init 环境一致；清除范围=投影自有（锚定）内容，不误删非投影/人类内容。",
+          "description": "2026-09-04 人类方向修正：① full 模式=**整 .qea 文件清空后重建**（EA 为投影，全库以 canonical 图谱为准；不局限于同步根包子树）；② qea 投影脚本（ea-qea-sync/lib）**迁入 argo/scripts**（与 MCP/运行时同包，全环境可用）；③ **移除 design/KG/ea-qea.json 配置**——目标解析仅 ARGO_EA_QEA 环境变量 > 仓库根唯一 *.qea，保证本仓 canonical 与本仓 .qea 一致。",
           "name": "decision",
-          "value": "argo-init-qea-full-projection"
+          "value": "qea-full-wholefile-argo-scripts-no-config"
         },
         {
           "name": "status",
