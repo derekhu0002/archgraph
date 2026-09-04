@@ -4453,7 +4453,7 @@
       "id": "insight-lead-wm-summary-001",
       "name": "洞察Lead工作记忆摘要",
       "type": "Business Object",
-      "description": "洞察Lead T1 工作记忆摘要（2026-09-03，方案修订会话）：1) 本轮=人类问『能否主动经 MCP 同步到 EA』，修订 AGENT→EA 同步桥方案。结论=能：Sparx Japan 官方 MCP Server for EA v3.0.0（免费可商用）即原设计 b) 通道的官方化（MCP3.exe STDIO + EA 进程内 MCP_EA.dll add-in），推荐混合形态=同步驱动器为主（观察进程+diff+命令队列保留，Node stdio MCP client 驱动 MCP3.exe 确定性应用，复用 ea-web-service callStdio 先例；不经 LLM→无漂移），AGENT 直驱=可选。JScript 执行器降级兜底；审计双轨(CSV+侧车账本)；定位=名称/包路径/ID 账本(无 GUID，schema_id tag 仅回查锚点)；位置安全=只用 place 做新增补位、禁 layout/reset 工具、实测 create_or_update 几何不变性；删除=-enableDelete+先 create_baseline。2) 本机探测关键：EA=15.2 Trial x86 在 Program Files (x86)\\Sparx Systems\\EA Trial；MCP Server 2.8.2 x64 误装无 EA 的 Program Files\\Sparx Systems\\EA → bitness/目录错配（日志 80070005 管道中断）；.NET Desktop Runtime 10 缺失（3.0.0 需要），2.8.2 用 .NET9 可跑且已含 ArchiMate3.1 prompt/delete/审计→可先用。3) 交付：修订报告=最后消息；未实施未立项。4) 经验：官方 MCP 把『进程内写库』标准化后，原自研 JScript 执行器价值下降但仍是最稳兜底；『官方工具按名称自然定位+无 GUID』对确定性同步是短板→驱动器必须自建 ID 账本；EA Trial 环境不能代表生产授权环境，bitness 错配是环境修复第一顺位。",
+      "description": "洞察Lead T1 工作记忆摘要（2026-09-04，多项目/EA开关可行性复核会话）：1) 本轮=人类新增需求（多项目并行 + EA 或开或关均要投影 + .feap 按仓库自动发现），做聚焦复核与修订（只设计不实施）。核心结论→LTM milestone multiproject-ea-feasibility-001。关键实测：.feap=EA 私有封装（非 Jet 非 SQLite，Jet.OLEDB.4.0 拒开，含明文 t_*@10.2MB），EA 关时不可外部直写→安全默认=队列暂存+EA 打开自动补放（打开即最新）；真离线=可选自动拉起 EA 经 add-in。多实例：MCP_EA.log pid 前缀可辨实例，MCP3 路由未文档化→应用前校验 FileOpen 路径匹配。架构=多根 watch+每仓库独立 ea-sync-state+唯一 *.feap 自动绑定+串行单实例。2) 上下文：EA洞察→drawio评估→AGENT→EA方案→MCP主通道修订(R-S1 落地全绿)→本轮多项目复核。3) 交付：聚焦报告=最后消息；未实施代码、未立项、未改仓库文件。4) 经验：判定『能否离线直写』=读文件头+真实 provider 连接实测，勿猜；EA 平台『实例路由』无文档时，设计以『写入前项目身份强校验+宁可拒写』兜底；日志 pid 前缀是 EA 多实例区分的现成信号。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4465,7 +4465,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-03"
+          "value": "2026-09-04"
         },
         {
           "name": "commit",
@@ -4990,6 +4990,22 @@
         }
       ],
       "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "里程碑（2026-09-04，多项目并行+EA开关两态可行性复核）：核心裁决：①.feaP 格式实测（读头+Jet OLEDB 真连）=archgraph.feap/模板均非 Standard Jet（Jet.OLEDB.4.0 报 Unrecognized database format）非 SQLite（无魔数），但含明文 t_object/t_connector/t_diagram@~10.2MB（两文件同偏移）→ EA 私有封装/带数据页映射的格式，本机无 ACE 驱动→EA 关闭时外部直写不可行（安全结论：宁可暂存不碰文件）。EAExample.eap 对照=Standard Jet DB。②EA 开关两态=EA 开→add-in 通道（R-S1 已验证）；EA 关→不可直写→两策略：A 暂存+驱动器检测到该实例打开目标项目即刻自动补放（打开即最新，推荐默认）；B 驱动器自动拉起 EA（EA.exe <feap> / COM）经 add-in 补放后再退（真离线投影，弹 GUI/授权依赖，可选）。③多实例路由=未文档化；MCP_EA.log 行前缀=EA pid（63312/37084/37808 共存一文件）可区分实例；MCP3 连哪个 add-in 未知→策略：应用前强制校验『当前连接实例最近 EA_FileOpen 路径==目标 .feap』否则拒绝（防写错项目），多实例彻底路由列实验(R-S1.5)。④修订架构=多根 watch（每仓库 design/KG/ea-sync-state/ 独立队列/账本/checkpoint）+ 每项目 .feap 自动发现（仓库根唯一 *.feap 绑定，多/零则显式配置）+ 驱动器多项目串行单实例循环 + CLI(--root 可多/项目清单文件)。⑤决策点新增：D10 feap 绑定策略、D11 多实例策略（单活动实例假设/冲突报错）、D12 真离线（自动拉 EA vs 接受『打开即补放』语义）。本机新增探测：.NET Desktop 10.0.11 已装、MCP3.0.1 x86@EA Trial、EA 进程运行中、R-S1 AC-02 位置不变性+审计 CSV 已实测通过。",
+      "id": "insight-lead-milestone-multiproject-ea-feasibility-001",
+      "name": "里程碑：多项目+EA开关两态可行性复核与修订",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -6880,7 +6896,8 @@
         "insight-lead-milestone-ea-tool-frontend-001",
         "insight-lead-milestone-drawio-eval-001",
         "insight-lead-milestone-agent2ea-sync-001",
-        "insight-lead-milestone-agent2ea-mcp-revision-001"
+        "insight-lead-milestone-agent2ea-mcp-revision-001",
+        "insight-lead-milestone-multiproject-ea-feasibility-001"
       ],
       "included_relationships": []
     }
