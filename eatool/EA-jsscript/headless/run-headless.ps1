@@ -37,20 +37,19 @@ if (Get-Process EA -ErrorAction SilentlyContinue) {
 $log = Join-Path ([IO.Path]::GetTempPath()) ("ea-headless-" + $Mode + "-" + [guid]::NewGuid().ToString('N') + ".log")
 $scriptJs = if ($Mode -eq 'import') { Join-Path $PSScriptRoot '..\import-from-kg.js' } else { Join-Path $PSScriptRoot '..\export-to-kg.js' }
 
-# bootstrap positional: feap script mode [graph] [output] [diagram] [response] [log]
-$argsList = New-Object System.Collections.Generic.List[string]
-$argsList.Add('//nologo')
-$argsList.Add($bootstrap)
-$argsList.Add($Feap)
-$argsList.Add($scriptJs)
-$argsList.Add($Mode)
-if ($Graph)    { $argsList.Add($Graph) }
-if ($Output)   { $argsList.Add($Output) }
-if ($Diagram)  { $argsList.Add([string]$Diagram) }
-if ($Response) { $argsList.Add($Response) }
-$argsList.Add($log)
-
-$proc = Start-Process -FilePath $cs -ArgumentList $argsList -WindowStyle Hidden -PassThru `
+# bootstrap positional: feap script mode graph output diagram response log
+$argList = New-Object System.Collections.Generic.List[string]
+$argList.Add('//nologo')
+$argList.Add($bootstrap)
+$argList.Add($Feap)
+$argList.Add($scriptJs)
+$argList.Add($Mode)
+$argList.Add($(if ($Graph) { $Graph } else { "-" }))
+$argList.Add($(if ($Output) { $Output } else { "-" }))
+$argList.Add($(if ($Diagram -gt 0) { [string]$Diagram } else { "" }))
+$argList.Add($(if ($Response) { $Response } else { "-" }))
+$argList.Add($log)
+$proc = Start-Process -FilePath $cs -ArgumentList $argList -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput ($log + '.out') -RedirectStandardError ($log + '.err')
 $timedOut = $false
 if (-not $proc.WaitForExit(($TimeoutSec * 1000))) {

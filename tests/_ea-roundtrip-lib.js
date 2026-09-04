@@ -23,6 +23,30 @@ function normScalar(value, opts) {
   return value;
 }
 
+// 数组/对象深度规范化：叶子标量走 normScalar，对象键排序，数组元素排序（忽略顺序）。
+// 用于 included_*、subdiagram_views、testcases 等“数组元素可能是对象”的字段比较。
+function canonicalOf(value, opts) {
+  const o = opts || {};
+  if (value === null || value === undefined) { return JSON.stringify(normScalar(value, o)); }
+  if (Array.isArray(value)) {
+    const items = value.map((x) => canonicalOf(x, o)).sort();
+    return '[' + items.join(',') + ']';
+  }
+  if (isPlainObject(value)) {
+    const keys = Object.keys(value).sort();
+    const parts = [];
+    for (const k of keys) {
+      const v = value[k];
+      if (v === undefined || v === null || (typeof v === 'string' && normScalar(v, o) === '')) {
+        continue; // null/缺失/空串等价 → 跳过
+      }
+      parts.push(JSON.stringify(k) + ':' + canonicalOf(v, o));
+    }
+    return '{' + parts.join(',') + '}';
+  }
+  return JSON.stringify(normScalar(value, o));
+}
+
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
@@ -111,17 +135,17 @@ function diffObjectField(kind, key, field, origObj, expObj, opts, out) {
     return;
   }
   if (Array.isArray(o) || Array.isArray(e)) {
-    // 集合类（如 included_elements/included_relationships）：忽略顺序，按值集合比较。
-    const setA = new Set((o || []).map((x) => normScalar(x, opts)).filter((x) => x !== ''));
-    const setB = new Set((e || []).map((x) => normScalar(x, opts)).filter((x) => x !== ''));
+    // 数组（含“数组元素为对象”的字段，如 subdiagram_views/testcases）：深度规范化后按集合比较。
+    const setA = new Set((o || []).map((x) => canonicalOf(x, opts)));
+    const setB = new Set((e || []).map((x) => canonicalOf(x, opts)));
     for (const v of setA) {
       if (!setB.has(v)) {
-        out.push({ kind: 'collection', where, issue: 'missing-in-export', orig: v });
+        out.push({ kind: 'collection', where, issue: 'missing-in-export', orig: v.slice(0, 160) });
       }
     }
     for (const v of setB) {
       if (!setA.has(v)) {
-        out.push({ kind: 'collection', where, issue: 'extra-in-export', exp: v });
+        out.push({ kind: 'collection', where, issue: 'extra-in-export', exp: v.slice(0, 120) });
       }
     }
     return;

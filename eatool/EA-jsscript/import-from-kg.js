@@ -40,7 +40,7 @@ var MAX_ATTRIBUTE_DEFAULT_LENGTH = 250;
 //   元素子集合（t_attribute/t_operation/t_test/t_objectresource/…）、关系属性关联类、SupplierEnd.Aggregation 钻石。
 //   OBJECT_MODEL_FALLBACK 默认 false：保留 518c2b0 对象模型全量导入路径但不启用
 //   （理由：子集合/关联类/图上几何由 EA 内部维护，SQL 猜测列风险高于收益；需对比时可临时置 true）。
-var SQL_DIRECT = true;
+var SQL_DIRECT = false; // 实测 .feap/Firebird 下 Repository.Execute 直插 t_object 挂起 -> 默认走对象模型写路径（SQLQuery 读侧保留可用）
 var OBJECT_MODEL_FALLBACK = false;
 
 var WARNED = {};

@@ -12,7 +12,7 @@ var FSO = new ActiveXObject('Scripting.FileSystemObject');
 function posArg(i, dflt) {
   try {
     var v = WScript.Arguments(i);
-    if (v !== null && typeof v != 'undefined' && v != '') { return '' + v; }
+    if (v !== null && typeof v != 'undefined' && v != '' && v != '-') { return '' + v; }
   } catch (e) { }
   return dflt;
 }
@@ -121,7 +121,7 @@ function readTextFile(p) {
 
 function parseRowNums(xml, tag) {
   var out = [];
-  var re = new RegExp('<' + tag + '>(\\d+)</' + tag + '>', 'g');
+  var re = new RegExp('<' + tag + '>(\\d+)</' + tag + '>', 'gi');
   var m;
   while ((m = re.exec(xml)) != null) { out.push(parseInt(m[1], 10)); }
   return out;
@@ -134,23 +134,34 @@ function pickSyncDiagram() {
     pkgIds = parseRowNums('' + Repository.SQLQuery("SELECT Package_ID FROM t_package WHERE Name='ArchGraph Sync'"), 'Package_ID');
   } catch (e) { pkgIds = []; }
   var pkgId = pkgIds.length > 0 ? pkgIds[0] : 0;
+  var where = pkgId != 0 ? ' WHERE Package_ID=' + pkgId : '';
+  var target = scanDiagrams(where, '429');
+  if (target != 0) { return target; }
+  // fallback 1: any diagram in the package
+  target = scanDiagrams(where, '');
+  if (target != 0) { return target; }
+  // fallback 2: any diagram in the model (root-level preferred)
+  target = scanDiagrams('', '429');
+  if (target != 0) { return target; }
+  return scanDiagrams('', '');
+}
+
+function scanDiagrams(where, prefViewId) {
   var listXml = '';
   try {
-    listXml = '' + Repository.SQLQuery('SELECT Diagram_ID, StyleEx FROM t_diagram'
-      + (pkgId != 0 ? ' WHERE Package_ID=' + pkgId : ''));
+    listXml = '' + Repository.SQLQuery('SELECT Diagram_ID, StyleEx FROM t_diagram' + where);
   } catch (e) { listXml = ''; }
   var fallback = 0;
-  var target = 0;
-  var rowRe = /<Row>([\s\S]*?)<\/Row>/g;
+  var rowRe = /<Row>([\s\S]*?)<\/Row>/gi;
   var rm;
   while ((rm = rowRe.exec(listXml)) != null) {
-    var didM = /<Diagram_ID>(\d+)<\/Diagram_ID>/.exec(rm[1]);
+    var didM = /<DIAGRAM_ID>(\d+)<\/DIAGRAM_ID>/i.exec(rm[1]);
     if (!didM) { continue; }
     var id = parseInt(didM[1], 10);
     if (fallback == 0) { fallback = id; }
-    if (/schema_view_id=429/.test(rm[1])) { target = id; break; }
+    if (prefViewId != '' && rm[1].indexOf('schema_view_id=' + prefViewId) >= 0) { return id; }
   }
-  return target != 0 ? target : fallback;
+  return fallback;
 }
 
 function run() {

@@ -154,7 +154,7 @@ test('ea-import-reconcile (AT-2100-OPT-03): SQL 直写通道——读侧 SQLQuer
   //       SQL 覆盖核心投影表 t_package/t_object/t_connector/t_diagram 与 tag 表 t_objectproperties/t_connectorproperties
   const content = readScript();
 
-  assert.match(content, /var\s+SQL_DIRECT\s*=\s*true/, 'SQL 直写通道默认开启');
+  assert.match(content, /var\s+SQL_DIRECT\s*=\s*false/, 'SQL 直写通道默认关闭（本机 .feap/Firebird 下 Repository.Execute 直插核心表挂起 → 默认对象模型写路径；SQLQuery 读侧保留可用）');
   assert.match(content, /var\s+OBJECT_MODEL_FALLBACK\s*=\s*false/, '对象模型全量回退默认关闭');
   assert.match(content, /function\s+sqlRows\s*\(/, '应定义 SQLQuery 读侧（sqlRows）');
   assert.match(content, /Repository\.SQLQuery\s*\(/, '应调用 Repository.SQLQuery');
