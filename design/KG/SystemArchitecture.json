@@ -1071,6 +1071,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "ef2a4f9",
+          "description": "package.json（版本 0.13.1->0.13.2；npm publish 发布 archgraph-argo@0.13.2，含 EA .qea 投影每条关系写 Direction 修复 + AT-2791-11）。"
         }
       ],
       "testcases": [
