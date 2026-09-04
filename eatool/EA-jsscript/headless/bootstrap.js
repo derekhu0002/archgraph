@@ -27,6 +27,7 @@ var DIAGRAM = posArg(5, '');
 var RESPONSE = posArg(6, '');
 var LOG = posArg(7, '');
 var PARENT = posArg(8, '');
+var SQLDIRECT = posArg(9, '');
 
 var LOG_LINES = [];
 function writeLog(msg) {
@@ -195,10 +196,12 @@ function run() {
   var Repository = repo;
 
   // Headless override globals consumed by import/export patches.
+  EA_HEADLESS = 1; // 无头标记：import 默认对象模型，除非显式 EA_SQL_DIRECT=1
   if (GRAPH != '') { EA_HEADLESS_GRAPH = GRAPH; }
   if (PARENT != '') { EA_HEADLESS_PARENT_PKG = PARENT; }
   if (OUTPUT != '') { EA_HEADLESS_OUTPUT = OUTPUT; }
   if (DIAGRAM != '') { EA_HEADLESS_DIAGRAM_ID = parseInt(DIAGRAM, 10) || 0; }
+  if (SQLDIRECT != '') { EA_SQL_DIRECT = (SQLDIRECT == '0') ? 0 : 1; }
 
   if (MODE == 'export') {
     var diagramId = 0;

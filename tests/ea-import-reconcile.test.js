@@ -150,12 +150,15 @@ test('ea-import-reconcile: 只写库不刷 UI——无逐对象/逐集合 Refres
 test('ea-import-reconcile (AT-2100-OPT-03): SQL 直写通道——读侧 SQLQuery + 写侧 Execute，核心表覆盖', () => {
   // GIVEN 决策 ea-projection-sql-direct：SQL 直写通道加入 import-from-kg.js
   // WHEN 检查脚本中的 SQL 路径
-  // THEN SQL_DIRECT 默认开启；读侧对账用 Repository.SQLQuery（sqlRows），写侧用 Repository.Execute（sqlExec）；
-  //       SQL 覆盖核心投影表 t_package/t_object/t_connector/t_diagram 与 tag 表 t_objectproperties/t_connectorproperties
+  // THEN SQL_DIRECT 默认开启（Firebird .feap 列名已按实测 schema 修正：OBJECT_TYPE/ea_guid/NOTE/STEREOTYPE；
+  //      无头默认回退对象模型，交互默认 SQL，运行期 EA_SQL_DIRECT=0 可强制回退）；
+  //       读侧对账用 Repository.SQLQuery（sqlRows），写侧用 Repository.Execute（sqlExec）；
+  //       SQL 覆盖核心投影表 t_package/t_object/t_connector/t_diagram 与 tag 表 t_objectproperties/t_connectortag
   const content = readScript();
 
-  assert.match(content, /var\s+SQL_DIRECT\s*=\s*false/, 'SQL 直写通道默认关闭（本机 .feap/Firebird 下 Repository.Execute 直插核心表挂起 → 默认对象模型写路径；SQLQuery 读侧保留可用）');
+  assert.match(content, /var\s+SQL_DIRECT\s*=\s*true/, 'SQL 直写通道默认开启（列名修正后 Execute 可用；无头由 sqlDirectEnabled 依 EA_HEADLESS 回退对象模型）');
   assert.match(content, /var\s+OBJECT_MODEL_FALLBACK\s*=\s*false/, '对象模型全量回退默认关闭');
+  assert.match(content, /function\s+sqlDirectEnabled\s*\(/, '应定义 sqlDirectEnabled（交互默认 SQL / 无头默认对象模型 / EA_SQL_DIRECT 覆盖）');
   assert.match(content, /function\s+sqlRows\s*\(/, '应定义 SQLQuery 读侧（sqlRows）');
   assert.match(content, /Repository\.SQLQuery\s*\(/, '应调用 Repository.SQLQuery');
   assert.match(content, /function\s+sqlExec\s*\(/, '应定义 Execute 写侧（sqlExec）');
@@ -169,7 +172,7 @@ test('ea-import-reconcile (AT-2100-OPT-03): SQL 直写通道——读侧 SQLQuer
   assert.match(content, /INSERT INTO t_connector/, 'SQL 应能写 t_connector');
   assert.match(content, /INSERT INTO t_diagram\b/, 'SQL 应能写 t_diagram');
   assert.match(content, /t_objectproperties/, '元素锚 tag 应写 t_objectproperties');
-  assert.match(content, /t_connectorproperties/, '关系锚 tag 应写 t_connectorproperties');
+  assert.match(content, /t_connectortag/, '关系锚 tag 应写 t_connectortag（Firebird 无 t_connectorproperties）');
 });
 
 test('ea-import-reconcile (AT-2100-OPT-03): 幂等——按 Alias 先查后插（ea_guid 唯一 + 读回 id），绝不删除重建', () => {

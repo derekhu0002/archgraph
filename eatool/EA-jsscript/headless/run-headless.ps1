@@ -15,9 +15,12 @@ param(
     [int]$Diagram = 0,
     [string]$Response = '',
     [int]$TimeoutSec = 300,
+    [string]$SqlDirect = '',
     [switch]$KillEA
 )
 
+# EA_SQL_DIRECT passthrough: headless default = object model; SqlDirect 1 forces SQL, 0 forces object model
+$sqlPos = if ($SqlDirect -eq '1' -or $SqlDirect -eq '0') { $SqlDirect } else { '-' }
 $ErrorActionPreference = 'Stop'
 $bootstrap = Join-Path $PSScriptRoot 'bootstrap.js'
 $cs = 'C:\Windows\SysWOW64\cscript.exe'
@@ -49,6 +52,7 @@ $argList.Add($(if ($Output) { $Output } else { "-" }))
 $argList.Add($(if ($Diagram -gt 0) { [string]$Diagram } else { "-" }))
 $argList.Add($(if ($Response) { $Response } else { "-" }))
 $argList.Add($log)
+$argList.Add($sqlPos)
 $proc = Start-Process -FilePath $cs -ArgumentList $argList -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput ($log + '.out') -RedirectStandardError ($log + '.err')
 $timedOut = $false

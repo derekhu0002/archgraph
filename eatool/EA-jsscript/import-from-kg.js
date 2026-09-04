@@ -35,13 +35,27 @@ var ENABLE_AUTOLAYOUT = false;
 var MAX_ATTRIBUTE_DEFAULT_LENGTH = 250;
 
 // WP2100 SQL 直写通道（AT-2100-OPT-03，决策 ea-projection-sql-direct）：
-//   SQL_DIRECT=true → 读侧对账 Repository.SQLQuery + 写侧核心行 Repository.Execute（比对象模型集合遍历快一个数量级）。
-//   窄对象模型例外保留（非吞吐热点、需 EA 维护一致性）：新成员入图几何（t_diagramobjects/t_diagramlinks 几何列）、
-//   元素子集合（t_attribute/t_operation/t_test/t_objectresource/…）、关系属性关联类、SupplierEnd.Aggregation 钻石。
-//   OBJECT_MODEL_FALLBACK 默认 false：保留 518c2b0 对象模型全量导入路径但不启用
-//   （理由：子集合/关联类/图上几何由 EA 内部维护，SQL 猜测列风险高于收益；需对比时可临时置 true）。
-var SQL_DIRECT = false; // 实测 .feap/Firebird 下 Repository.Execute 直插 t_object 挂起 -> 默认走对象模型写路径（SQLQuery 读侧保留可用）
+//   写侧核心行 Repository.Execute + 读侧对账 Repository.SQLQuery。列名按 EA Firebird(.feap) 实测 schema 修正
+//   （OBJECT_TYPE/ea_guid/STEREOTYPE/NOTE/...；连接 tag 表为 t_connectortag(ElementID/VALUE)；标签 Value 列大小写见 sqlTagSchema）。
+//   默认启用 SQL 直写：交互与无头 Repository.Execute 均可用（此前无头直插 t_object 曾挂起，根因系非法 Type 列名被 ODBC 阻塞）。
+//   交互默认 SQL；无头默认对象模型（SQL 全图耗时 165s~500s+ 随 EA 状态波动，300s 门控预算下不稳）；可注入 EA_SQL_DIRECT=0|1 覆盖。
+var SQL_DIRECT = true;
 var OBJECT_MODEL_FALLBACK = false;
+
+// 默认 SQL 直写（交互 EA 实测 Execute 返回真实 ODBC 错误而非挂起；Firebird 列修正后无头 INSERT 亦成功）。
+// 运行期可注入全局 EA_SQL_DIRECT=0|false|no 强制回退对象模型路径（无头/异常环境切换）。
+function sqlDirectEnabled() {
+
+  var headless = typeof EA_HEADLESS != 'undefined';
+  if (OBJECT_MODEL_FALLBACK) { return false; }
+  if (typeof EA_SQL_DIRECT != 'undefined') {
+    var v = ('' + EA_SQL_DIRECT).toLowerCase();
+    if (v == '0' || v == 'false' || v == 'no') { return false; }
+    return true;
+  }
+  // 交互 EA 默认 SQL 直写（Execute 可用且列名已按 Firebird 修正）；无头默认对象模型：SQL 全图耗时随 EA 状态 165s~500s+ 波动，300s 门控预算下不稳。
+  return (!headless) && SQL_DIRECT;
+}
 
 var WARNED = {};
 var TIMINGS = [];
@@ -63,7 +77,7 @@ function reportTimings() {
 
 // 通道分发：默认 SQL 直写；OBJECT_MODEL_FALLBACK=true 时走 518c2b0 对象模型全量路径。
 function main() {
-  if (SQL_DIRECT && !OBJECT_MODEL_FALLBACK) {
+  if (sqlDirectEnabled()) {
     sqlImportMain();
     return;
   }
@@ -1769,8 +1783,8 @@ function sqlEnsureElement(syncPackageId, schemaId, elementDataMap, elementMap) {
   var guid = newEaGuid();
   var baseType = mapElementTypeToEa(elementData.type);
   var alias = isNonEmptyString(elementData.alias) ? elementData.alias : schemaId;
-  sqlExec("INSERT INTO t_object (Object_Type, ea_guid, Name, Type, Stereotype, Note, Alias, Package_ID, ParentID, Status) VALUES ('Object', '"
-    + sqlEscape(guid) + "', '" + sqlEscape(safeName(elementData.name, schemaId)) + "', '" + sqlEscape(baseType) + "', '"
+  sqlExec("INSERT INTO t_object (Object_Type, ea_guid, Name, Stereotype, Note, Alias, Package_ID, ParentID, Status) VALUES ('"
+    + sqlEscape(baseType) + "', '" + sqlEscape(guid) + "', '" + sqlEscape(safeName(elementData.name, schemaId)) + "', '"
     + sqlEscape(mapElementTypeToEaStereotype(elementData.type)) + "', '" + sqlEscape(safeString(elementData.description)) + "', '"
     + sqlEscape(alias) + "', " + Number(syncPackageId) + ', ' + Number(parentObjectId || 0) + ", '"
     + sqlEscape(safeString(elementData.status)) + "')", 'insert-element');
@@ -1798,21 +1812,34 @@ function sqlUpdateElementRow(objectId, data) {
 }
 
 function sqlUpsertTag(tableName, ownerColumn, ownerId, name, value) {
+  var sch = sqlTagSchema(tableName);
   var text = safeString(value);
   var shortValue = text;
   var memoNotes = '';
   if (text.length > 250) { shortValue = '<memo>'; memoNotes = text; }
-  var found = sqlRows('SELECT PropertyID FROM ' + tableName + ' WHERE ' + ownerColumn + '=' + Number(ownerId)
+  var found = sqlRows('SELECT ' + sch.idColumn + ' FROM ' + tableName + ' WHERE ' + sch.ownerColumn + '=' + Number(ownerId)
     + " AND Property='" + sqlEscape(name) + "'");
   if (found.length > 0) {
-    sqlExec("UPDATE " + tableName + " SET Value='" + sqlEscape(shortValue) + "', Notes='" + sqlEscape(memoNotes)
-      + "' WHERE PropertyID=" + Number(found[0].PropertyID), 'update-tag-' + name);
+    sqlExec('UPDATE ' + tableName + ' SET ' + sch.valueColumn + "='" + sqlEscape(shortValue) + "', " + sch.notesColumn + "='" + sqlEscape(memoNotes)
+      + "' WHERE " + sch.idColumn + '=' + Number(found[0].PropertyID), 'update-tag-' + name);
   } else {
-    sqlExec("INSERT INTO " + tableName + " (" + ownerColumn + ", Property, Value, Notes) VALUES (" + Number(ownerId)
+    sqlExec('INSERT INTO ' + tableName + ' (' + sch.ownerColumn + ", Property, " + sch.valueColumn + ', ' + sch.notesColumn + ') VALUES (' + Number(ownerId)
       + ", '" + sqlEscape(name) + "', '" + sqlEscape(shortValue) + "', '" + sqlEscape(memoNotes) + "')", 'insert-tag-' + name);
   }
 }
 
+function sqlTagSchema(tableName) {
+  // Firebird .feap tag 表与 Jet 不同：t_objectproperties(元素) 的 Value 列混合大小写需双引号；
+  // 连接 tag 表为 t_connectortag（owner ElementID, VALUE 大写）；Jet 的 t_connectorproperties 不存在。
+  var sch = SQL_TAG_SCHEMAS[tableName];
+  if (sch) { return sch; }
+  return { ownerColumn: 'ElementID', valueColumn: 'VALUE', notesColumn: 'NOTES', idColumn: 'PropertyID' };
+}
+
+var SQL_TAG_SCHEMAS = {
+  t_objectproperties: { ownerColumn: 'Object_ID', valueColumn: '"Value"', notesColumn: 'NOTES', idColumn: 'PropertyID' },
+  t_connectortag: { ownerColumn: 'ElementID', valueColumn: 'VALUE', notesColumn: 'NOTES', idColumn: 'PropertyID' }
+};
 function sqlWriteElementTags(objectId, data) {
   sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'schema_id', data.id);
   sqlUpsertTag('t_objectproperties', 'Object_ID', objectId, 'schema_parent', safeString(data.parent));
@@ -1910,23 +1937,23 @@ function sqlUpdateConnectorRow(connectorId, data, sourceObjectId, targetObjectId
 }
 
 function sqlWriteConnectorTags(connectorId, data) {
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'schema_id', data.id);
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'schema_name', safeString(data.name));
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'schema_statement', safeString(data.statement));
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'archimate_relationship_type', canonicalArchimateType(data.type));
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'document', safeString(data.document));
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'source_schema_id', safeString(data.source_id));
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'target_schema_id', safeString(data.target_id));
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'source_name', safeString(data.source_name));
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'target_name', safeString(data.target_name));
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'schema_relationship_json', jsonOr(data));
-  sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId, 'relationship_attributes_json',
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'schema_id', data.id);
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'schema_name', safeString(data.name));
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'schema_statement', safeString(data.statement));
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'archimate_relationship_type', canonicalArchimateType(data.type));
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'document', safeString(data.document));
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'source_schema_id', safeString(data.source_id));
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'target_schema_id', safeString(data.target_id));
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'source_name', safeString(data.source_name));
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'target_name', safeString(data.target_name));
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'schema_relationship_json', jsonOr(data));
+  sqlUpsertTag('t_connectortag', 'ElementID', connectorId, 'relationship_attributes_json',
     jsonOr(data.attributes || []));
   if (data.attributes) {
     for (var i = 0; i < data.attributes.length; i++) {
       var attr = data.attributes[i];
       if (!attr) { continue; }
-      sqlUpsertTag('t_connectorproperties', 'ConnectorID', connectorId,
+      sqlUpsertTag('t_connectortag', 'ElementID', connectorId,
         'relattr_' + sanitizeTagName(attr.name), safeString(attr.description));
     }
   }
@@ -2107,8 +2134,8 @@ function sqlReconcileDeletions(syncPackage, graph) {
     if (graph.relationships[i] && isNonEmptyString(graph.relationships[i].id)) { expectedRelationships[graph.relationships[i].id] = true; }
   }
 
-  var elements = sqlRows('SELECT Object_ID, Name, Type, Alias, ParentID FROM t_object WHERE Package_ID=' + Number(syncPackageId)
-    + " AND Object_Type='Object'");
+  var elements = sqlRows('SELECT Object_ID, Name, Alias, ParentID, Object_Type FROM t_object WHERE Package_ID=' + Number(syncPackageId)
+    + " 1=1");
   var elementCandidates = [];
   var connectorCandidates = [];
   var objectIds = [];
@@ -2139,7 +2166,7 @@ function sqlReconcileDeletions(syncPackage, graph) {
   for (i = 0; i < elementCandidates.length; i++) {
     var el = elementCandidates[i];
     var usage = sqlDiagramNamesUsingElement(syncPackageId, Number(el.Object_ID));
-    Session.Output('  [Element] name=' + safeString(el.Name) + ' type=' + safeString(el.Type)
+    Session.Output('  [Element] name=' + safeString(el.Name) + ' ea_type=' + safeString(el.Object_Type)
       + ' schema_id=' + (safeString(el.Alias) || '(none)') + ' used_in_diagrams=' + (usage.join(', ') || '(none)'));
   }
 
