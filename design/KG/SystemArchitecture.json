@@ -1654,8 +1654,8 @@
         },
         {
           "name": "status",
-          "value": "AWAITING_EA_VALIDATION",
-          "description": "SQL 直写通道已交付（89aded9，默认 SQL_DIRECT=true；对象模型全量路径保留但 OBJECT_MODEL_FALLBACK=false）。真实 EA 回归待人类在 scratch 项目实测（SQL 方言/Repository 行为无法 CI 验证）。"
+          "value": "ACTIVE",
+          "description": "2026-09-04 人类新增硬性验收：导入后导出（eatool/EA-jsscript/export-to-kg.js）内容须与初始图谱一致（内容一致即可，JSON 内顺序/键序不要求一致）。需回环比较器（content-equal、忽略顺序、字段级 diff）+ 真实 EA 回环验证与迭代修失配。"
         },
         {
           "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-perf.test.js; design/KG/SystemArchitecture.json",
@@ -1732,6 +1732,13 @@
           "acceptanceCriteria": "tests/ea-import-reconcile.test.js",
           "description": "GIVEN 导入脚本含 SQL 直写通道（静态审查）：WHEN 检查其 SQL 路径；THEN 读侧对账用 Repository.SQLQuery、写侧用 Repository.Execute 批量（Insert/Update/Delete 单语句逐条执行或分批）；update 按 schema 键匹配且不触碰 t_diagramobjects 几何（无 DELETE/重建、无对已有元素图上几何的 UPDATE）；新增保证 ea_guid 唯一并读回对象 id；删除分支保留删除清单+人工确认；同图重复导入幂等不产生重复行。",
           "name": "AT-2100-OPT-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-roundtrip.test.js",
+          "acceptanceCriteria": "tests/ea-roundtrip.test.js",
+          "description": "GIVEN 初始图谱 JSON（默认 design/KG/SystemArchitecture.json）与经 import-from-kg.js 导入 EA 后再经 export-to-kg.js 导出的 JSON（路径经 EA_ROUNDTRIP_EXPORT 或参数指定）；WHEN 规范化比较；THEN 元素/关系/视图的内容字段按集合相等（忽略 JSON 内部顺序/键序），任何失配字段级报告；导出文件缺失时显式消息 skip 计通过。",
+          "name": "AT-2100-OPT-04",
           "type": "Acceptance Test"
         }
       ]
