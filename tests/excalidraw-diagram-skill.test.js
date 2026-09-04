@@ -4,11 +4,13 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { readFileSync, existsSync } = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
 
-const ROOT = path.resolve(__dirname, '..');
+const HOME = os.homedir();
+// The skill is deployed to the user-level harness skill roots (not in-repo).
 const SKILL_DIRS = [
-  path.join(ROOT, '.opencode', 'skills', 'excalidraw-diagram'),
-  path.join(ROOT, '.github', 'skills', 'excalidraw-diagram'),
+  path.join(HOME, '.copilot', 'skills', 'excalidraw-diagram'),
+  path.join(HOME, '.config', 'opencode', 'skills', 'excalidraw-diagram'),
 ];
 const REFERENCES = [
   'color-palette.md',
@@ -19,11 +21,11 @@ const REFERENCES = [
   'pyproject.toml',
 ];
 
-test('excalidraw-diagram-skill: verbatim upstream skill is installed', () => {
-  // GIVEN the mainstream coleam00/excalidraw-diagram-skill is installed verbatim
-  // WHEN a developer or agent inspects the repository
-  // THEN the SKILL.md and its references live under .opencode/skills/excalidraw-diagram/
-  //    AND .github/skills/excalidraw-diagram/
+test('excalidraw-diagram-skill: verbatim upstream skill is deployed at user level', () => {
+  // GIVEN the mainstream coleam00/excalidraw-diagram-skill is deployed verbatim
+  // WHEN a developer or agent checks the user-level harness skill roots
+  // THEN the SKILL.md and its references live under ~/.copilot/skills/excalidraw-diagram/
+  //    AND ~/.config/opencode/skills/excalidraw-diagram/
   for (const dir of SKILL_DIRS) {
     const skillMd = path.join(dir, 'SKILL.md');
     assert.ok(existsSync(skillMd), `${dir}/SKILL.md must exist`);

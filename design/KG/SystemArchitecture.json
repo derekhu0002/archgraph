@@ -475,7 +475,7 @@
       "name": "diagram-draw",
       "parent": "1249",
       "type": "Skill",
-      "description": "Excalidraw diagram skill (verbatim upstream coleam00/excalidraw-diagram-skill). Create .excalidraw diagram JSON that argues visually, render to PNG via references/render_excalidraw.py for visual validation. Installed in-repo at .opencode/skills/excalidraw-diagram/ and .github/skills/excalidraw-diagram/; deployed to user-level skill roots ~/.copilot/skills/excalidraw-diagram/ and ~/.config/opencode/skills/excalidraw-diagram/. Use when the user asks to visualize workflows, architectures, or concepts.",
+      "description": "Excalidraw diagram skill (verbatim upstream coleam00/excalidraw-diagram-skill). Create .excalidraw diagram JSON that argues visually, render to PNG via references/render_excalidraw.py for visual validation. Deployed to user-level harness skill roots ~/.copilot/skills/excalidraw-diagram/ and ~/.config/opencode/skills/excalidraw-diagram/ (not kept in the repository). Use when the user asks to visualize workflows, architectures, or concepts.",
       "attributes": [
         {
           "name": "commit",
