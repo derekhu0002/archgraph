@@ -36,6 +36,13 @@ const EA_LOG_PATH = path.join(os.homedir(), 'AppData', 'Roaming', 'Sparx Systems
 const DEFAULT_SCRATCH_ROOT = path.join(os.tmpdir(), 'ea-scratch');
 const PROD_FORBIDDEN_BASENAME = 'archgraph.feap';
 
+// MCP3 的 -modifiedInfoPath 等参数会被 EA add-in 二次 JSON 反序列化，反斜杠（\U/\a/\T 等）
+// 会被当作非法转义序列（80070057 无法解析路径）。传给 MCP3 的路径一律用正斜杠；
+// Node fs 在 Windows 上读写正斜杠路径同样有效，故 MCP3 参数与本地 fs 可用同一字符串。
+function mcpArgPath(p) {
+  return String(p).replace(/\\/g, '/');
+}
+
 const EXIT = Object.freeze({
   OK: 0,
   ERROR: 1,
@@ -303,7 +310,7 @@ async function openSession(opts, { requireEdit } = {}) {
   }
   args.push('-setTimeout', String(opts.timeoutSec));
   if (opts.modifiedInfoPath) {
-    args.push('-modifiedInfoPath', opts.modifiedInfoPath);
+    args.push('-modifiedInfoPath', mcpArgPath(opts.modifiedInfoPath));
   }
   const session = new McpSession(mcp3, args);
   try {
@@ -485,24 +492,73 @@ function geometrySnapshot(diagramInfoParsed, elementID) {
     Object.values(value).forEach(visit);
   };
   visit(diagramInfoParsed);
-  const geoParts = holders.map((holder) => {
-    const pick = (source) => {
-      if (!source || typeof source !== 'object') {
-        return null;
+
+  // 数值几何键（x/y/width/height/left/top/right/bottom），键名规范化小写。
+  const GEOM_KEYS = /^(x|y|width|height|left|top|right|bottom)$/i;
+  // EA 响应中可能承载 DiagramObject 几何的容器键（实测：元素条目内的
+  // "position in the current diagram" 嵌套对象）。
+  const CONTAINER_KEYS = ['position in the current diagram', 'position', 'geometry', 'bounds', 'rect', 'diagramObject', 'DiagramObject'];
+
+  const pickGeom = (node) => {
+    if (!node || typeof node !== 'object' || Array.isArray(node)) {
+      return {};
+    }
+    const out = {};
+    for (const [key, val] of Object.entries(node)) {
+      if (typeof val === 'number' && GEOM_KEYS.test(key)) {
+        out[key.toLowerCase()] = val;
       }
-      const keys = Object.keys(source).filter((key) => /left|top|right|bottom|width|height|cx|cy|diagramobject|geometry/i.test(key));
-      if (keys.length === 0) {
-        return null;
+    }
+    return out;
+  };
+
+  // 深度收集子树上全部几何数值键（确定性：首次遇到即收集，键序稳定）。
+  const deepPickGeom = (node, out) => {
+    if (!node || typeof node !== 'object' || Array.isArray(node)) {
+      return out;
+    }
+    for (const [key, val] of Object.entries(node)) {
+      if (typeof val === 'number' && GEOM_KEYS.test(key)) {
+        const k = key.toLowerCase();
+        if (!(k in out)) {
+          out[k] = val;
+        }
+      } else if (val && typeof val === 'object') {
+        deepPickGeom(val, out);
       }
-      const picked = {};
-      for (const key of keys.sort()) {
-        picked[key] = source[key];
+    }
+    return out;
+  };
+
+  const snapshots = holders.map((holder) => {
+    // 1) holder 自身若已带 ≥2 个几何键（如 x+y 或 width+height），直接采用。
+    const direct = pickGeom(holder);
+    if (Object.keys(direct).length >= 2) {
+      return { elementID, ...direct };
+    }
+    // 2) 依次查已知容器键（优先 "position in the current diagram" 等）。
+    let geom = null;
+    for (const containerKey of CONTAINER_KEYS) {
+      const container = holder[containerKey];
+      if (!container || typeof container !== 'object') {
+        continue;
       }
-      return picked;
-    };
-    return pick(holder) || pick(holder.diagramObject) || pick(holder.DiagramObject);
-  }).filter(Boolean);
-  return JSON.stringify(geoParts);
+      const picked = pickGeom(container);
+      if (Object.keys(picked).length >= 2) {
+        geom = picked;
+        break;
+      }
+    }
+    // 3) 仍无 → 整树深度收集（保证取到真实坐标而非空）。
+    if (!geom) {
+      const deep = deepPickGeom(holder, {});
+      if (Object.keys(deep).length >= 2) {
+        geom = deep;
+      }
+    }
+    return { elementID, ...(geom || {}) };
+  });
+  return JSON.stringify(snapshots);
 }
 
 /** 安全门：最近打开的项目必须位于 scratch 根下，且绝不位于仓库目录、绝不为生产文件。 */
@@ -541,7 +597,10 @@ async function cmdProbeEdit(opts) {
   }
 
   const scratchDir = path.dirname(gate.lastOpen);
-  const modifiedInfoPath = opts.modifiedInfoPath || path.join(scratchDir, 'modified-info.csv');
+  // 默认审计 CSV 放 scratch 目录；路径正斜杠化（Node fs 兼容正斜杠，且与 MCP3 参数一致）。
+  const modifiedInfoPath = opts.modifiedInfoPath
+    ? mcpArgPath(opts.modifiedInfoPath)
+    : mcpArgPath(path.join(scratchDir, 'modified-info.csv'));
   const probeOpts = { ...opts, enableEdit: true, modifiedInfoPath };
   const { session, serverInfo } = await openSession(probeOpts, { requireEdit: true });
   const report = { serverInfo, safetyGate: gate, modifiedInfoPath };
