@@ -5157,8 +5157,8 @@
         },
         {
           "name": "status",
-          "value": "ACTIVE",
-          "description": "AT-2791-01/02 通过（隔离副本回环 equal + 幂等 + 几何不动 + 并发模拟 + 增量）；仓库 archgraph.qea 真实投影完成（EA 未持有文件时写入，写前自动备份）。"
+          "value": "COMPLETED",
+          "description": "AT-2791-01~04 全过（架构测试 49/47，2 既有失败）；ARGO MCP 写图流程内自动投影 .qea 已生效（仓库运行时代码）。"
         },
         {
           "name": "commit",
@@ -5188,6 +5188,11 @@
           "name": "commit",
           "value": "af17735",
           "description": "design/KG/SystemArchitecture.json（解除 argo 红线 + 流程内投影 + AT-2791-04）"
+        },
+        {
+          "name": "commit",
+          "value": "fda5e47",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js（写后 buildMutationResult 插 .qea 投影：env ARGO_EA_QEA>design/KG/ea-qea.json>仓库根单 *.qea 自动发现；spawn scripts/ea-qea-sync.js sync；失败仅 warnings 不阻断）；tests/argo-qea-projection.test.js（AT-2791-04 真跑 2/2：apply 后 .qea 出现新元素；无目标/无脚本 no-op）"
         }
       ],
       "description": "ARGO 写图 → 下游直写 .qea 投影（Node + node:sqlite，标准批量 SQL）。背景与结论：Repository.Execute 仅 DBMS 库可用（.feap 内嵌 Firebird 单条可用、.qea/SQLite 完全禁用）；.qea 是标准 SQLite，外部直写最符“一把 SQL 写库”诉求，EA 开/关皆可写（实测）；仓库 EA 文件已换 archgraph.qea。本 WP：① Node 模块直接对 .qea 做图谱⇄SQLite 批量读写（t_object/t_connector/t_diagram/t_objectproperties/t_connectortag/t_diagramobjects/t_diagramlinks），对账语义沿用 2100（固定同步根包/update-in-place 不动几何/删除清单确认/幂等）；② ARGO MCP 写图下游投影：观察 design/KG/SystemArchitecture.json 落盘→投影到 archgraph.qea（不改 argo/**）；③ 并发 busy_timeout+短事务+重试，EA 开着也能写；EA 缓存需人工刷新可见；④ unchanged-skip 变更检测使稳态增量快；⑤ .feap(Firebird) 旧路径保留。在本项目验证：真实图谱投影到 archgraph.qea + 回环一致 + 幂等 + 测速。",
