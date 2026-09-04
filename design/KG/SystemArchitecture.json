@@ -4486,6 +4486,11 @@
           "name": "commit",
           "value": "d358357",
           "description": "design/KG/SystemArchitecture.json（MCP 主通道修订里程碑 + T1 摘要）"
+        },
+        {
+          "name": "commit",
+          "value": "0f8dbd5",
+          "description": "design/KG/SystemArchitecture.json（多项目/EA开关复核里程碑 + T1 摘要）"
         }
       ]
     },
@@ -5000,6 +5005,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "0f8dbd5",
+          "description": "design/KG/SystemArchitecture.json（多项目/EA开关复核里程碑 + T1 摘要）"
         }
       ],
       "description": "里程碑（2026-09-04，多项目并行+EA开关两态可行性复核）：核心裁决：①.feaP 格式实测（读头+Jet OLEDB 真连）=archgraph.feap/模板均非 Standard Jet（Jet.OLEDB.4.0 报 Unrecognized database format）非 SQLite（无魔数），但含明文 t_object/t_connector/t_diagram@~10.2MB（两文件同偏移）→ EA 私有封装/带数据页映射的格式，本机无 ACE 驱动→EA 关闭时外部直写不可行（安全结论：宁可暂存不碰文件）。EAExample.eap 对照=Standard Jet DB。②EA 开关两态=EA 开→add-in 通道（R-S1 已验证）；EA 关→不可直写→两策略：A 暂存+驱动器检测到该实例打开目标项目即刻自动补放（打开即最新，推荐默认）；B 驱动器自动拉起 EA（EA.exe <feap> / COM）经 add-in 补放后再退（真离线投影，弹 GUI/授权依赖，可选）。③多实例路由=未文档化；MCP_EA.log 行前缀=EA pid（63312/37084/37808 共存一文件）可区分实例；MCP3 连哪个 add-in 未知→策略：应用前强制校验『当前连接实例最近 EA_FileOpen 路径==目标 .feap』否则拒绝（防写错项目），多实例彻底路由列实验(R-S1.5)。④修订架构=多根 watch（每仓库 design/KG/ea-sync-state/ 独立队列/账本/checkpoint）+ 每项目 .feap 自动发现（仓库根唯一 *.feap 绑定，多/零则显式配置）+ 驱动器多项目串行单实例循环 + CLI(--root 可多/项目清单文件)。⑤决策点新增：D10 feap 绑定策略、D11 多实例策略（单活动实例假设/冲突报错）、D12 真离线（自动拉 EA vs 接受『打开即补放』语义）。本机新增探测：.NET Desktop 10.0.11 已装、MCP3.0.1 x86@EA Trial、EA 进程运行中、R-S1 AC-02 位置不变性+审计 CSV 已实测通过。",
