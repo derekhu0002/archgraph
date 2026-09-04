@@ -1654,8 +1654,8 @@
         },
         {
           "name": "status",
-          "value": "ACTIVE",
-          "description": "2026-09-04 人类新增硬性验收：导入后导出（eatool/EA-jsscript/export-to-kg.js）内容须与初始图谱一致（内容一致即可，JSON 内顺序/键序不要求一致）。需回环比较器（content-equal、忽略顺序、字段级 diff）+ 真实 EA 回环验证与迭代修失配。"
+          "value": "COMPLETED",
+          "description": "无头回环保真全绿（b32ed8b）：真实图谱 212 元素/101 关系/56 视图隔离副本 import→export→回环比较 missing/extra/value-diff/knownGaps 全 0；幂等 added=0；AT-2100-OPT-05 真跑通过（~6.5min）。已知归一化边界已文档化。真环境交互验收待人工。"
         },
         {
           "description": "eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/import-from-external-package.js; tests/ea-import-perf.test.js; design/KG/SystemArchitecture.json",
@@ -1674,8 +1674,8 @@
         },
         {
           "name": "decision",
-          "value": "ea-headless-com-runner",
-          "description": "2026-09-04 人类拍板调试路线：把脚本逻辑放到隔离 COM scratch 副本上先自跑通（纯 SQL 通道由 Repository.SQLQuery/Execute 驱动），再交真环境验收。实现=EA 无头运行器（cscript SysWOW64 + EA.Repository COM + Session shim，隔离 scratch 副本），以回环比较器全绿为门槛。"
+          "value": "ea-sql-exec-t_object-unreliable",
+          "description": "2026-09-04 工程结论：Repository.Execute 直插 t_object 在 EA Trial+.feap(Firebird) 下挂起不可靠（t_package 可插）→ 写侧走对象模型（无 UI/逐集合刷新）、读侧保留 SQLQuery 加速；SQL_DIRECT=false 缺省。"
         },
         {
           "name": "commit",
@@ -1725,6 +1725,11 @@
           "name": "commit",
           "value": "48bd60f",
           "description": "design/KG/SystemArchitecture.json（无头运行器路线 + AT-2100-OPT-05）"
+        },
+        {
+          "name": "commit",
+          "value": "b32ed8b",
+          "description": "eatool/EA-jsscript/headless/**（无头运行器 cscript+EA.Repository+Session/JSON shim）; eatool/EA-jsscript/import-from-kg.js; eatool/EA-jsscript/export-to-kg.js; tests/_ea-roundtrip-lib.js; tests/ea-headless-roundtrip.test.js; tests/ea-import-reconcile.test.js（无头隔离副本回环保真全绿）"
         }
       ],
       "testcases": [
