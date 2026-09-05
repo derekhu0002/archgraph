@@ -1843,6 +1843,11 @@
         {
           "name": "sessionId",
           "value": "4080fecb-0190-488c-83d7-9bc2c9cf72ba"
+        },
+        {
+          "name": "commit",
+          "value": "3bd701c",
+          "description": "design/KG/SystemArchitecture.json（补 Business Actor adam/2733 描述）"
         }
       ],
       "subdiagram_views": [
