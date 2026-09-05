@@ -1850,7 +1850,8 @@
           "view_id": "1804",
           "view_name": "Reviewer工作记录"
         }
-      ]
+      ],
+      "description": "ArchGraph AgentOrganization/DevelopmentTeam 的个体成员 Business Actor：被 Assignment 到 Reviewer（Business Role 2732）承担代码检视职责（含架构与安全性检视，并把检视结论告知对方），是「开发者社区开发交付」工作包（WP 2751）的检视执行者；历次代码检视（如 ea-web-service MVP、dsh-plugin bundle）的报告与结论登记在其长期记忆子视图「Reviewer工作记录」（view 1804）。"
     },
     {
       "id": "2734",
