@@ -37,12 +37,6 @@ $argoDir = Join-Path $repoRoot 'argo'
 # verbatim across Copilot / Cursor / OpenCode (and DSH presets), so the original
 # model binding must stay untouched there. OpenCode has no Qwen provider
 # configured, so 'alibaba-cn/qwen3.7-plus' cannot resolve; only the OpenCode
-# deployment artifact remaps that binding to a model id OpenCode knows
-# (deepseek/deepseek-v4-flash-vision-exp). All other targets keep the shared
-# source binding unchanged.
-$OpenCodeModelRemap = @{
-    'alibaba-cn/qwen3.7-plus' = 'deepseek/deepseek-v4-flash-vision-exp'
-}
 
 function Copy-Tree {
     param([string]$Source, [string]$Destination)
@@ -102,9 +96,7 @@ function Convert-AgentFile {
         $newFront = "---`r`n"
         if ($desc) { $newFront += "description: `"$($desc -replace '"','\"')`"`r`n" }
         if ($model) {
-            $deployModel = $model
-            if ($OpenCodeModelRemap.ContainsKey($deployModel)) { $deployModel = $OpenCodeModelRemap[$deployModel] }
-            $newFront += "model: `"$deployModel`"`r`n"
+            $newFront += "model: `"$model`"`r`n"
         }
         $newFront += "mode: all`r`n---`r`n"
     } else {

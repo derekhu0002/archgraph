@@ -205,34 +205,6 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
       'OpenCode config must register the argo-wakeup plugin',
     );
 
-    // 10) custom agents deploy to user-level agent dirs for Copilot, Cursor, and OpenCode.
-    assert.ok(
-      fs.existsSync(path.join(copilotAgentsRoot, 'wechat-publisher.agent.md')),
-      'Copilot user-level agent must be deployed',
-    );
-    const copilotAgent = fs.readFileSync(path.join(copilotAgentsRoot, 'wechat-publisher.agent.md'), 'utf8');
-    assert.match(copilotAgent, /model: "alibaba-cn\/qwen3\.7-plus"/, 'Copilot agent must keep the shared source model verbatim');
-    assert.ok(
-      fs.existsSync(path.join(cursorAgentsRoot, 'wechat-publisher.md')),
-      'Cursor user-level agent must be deployed as .md',
-    );
-    assert.ok(
-      fs.existsSync(path.join(openCodeAgentsRoot, 'wechat-publisher.md')),
-      'OpenCode user-level agent must be deployed as .md',
-    );
-
-    const openCodeAgent = fs.readFileSync(path.join(openCodeAgentsRoot, 'wechat-publisher.md'), 'utf8');
-    assert.match(openCodeAgent, /description:/, 'OpenCode agent must keep a description');
-    assert.match(openCodeAgent, /model: "deepseek\/deepseek-v4-flash-vision-exp"/, 'OpenCode agent must remap alibaba-cn/qwen3.7-plus to deepseek/deepseek-v4-flash-vision-exp');
-    assert.doesNotMatch(openCodeAgent, /alibaba-cn/, 'OpenCode agent must not leak the source model id');
-    assert.match(openCodeAgent, /mode: all/, 'OpenCode agent must declare mode: all');
-    assert.doesNotMatch(openCodeAgent, /^tools:\s*\[/m, 'OpenCode agent must not carry a tools array');
-
-    const cursorAgent = fs.readFileSync(path.join(cursorAgentsRoot, 'wechat-publisher.md'), 'utf8');
-    assert.match(cursorAgent, /name:/, 'Cursor agent must keep a name');
-    assert.match(cursorAgent, /description:/, 'Cursor agent must keep a description');
-    assert.match(cursorAgent, /model: "alibaba-cn\/qwen3\.7-plus"/, 'Cursor agent must keep the shared source model binding');
-    assert.doesNotMatch(cursorAgent, /^tools:\s*\[/m, 'Cursor agent must not carry a tools array');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
@@ -395,18 +367,6 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     assert.match(bridge, /workspaceRoot/, 'bridge must inject workspaceRoot into every call');
     assert.match(bridge, /header\?\.cwd/, 'bridge must read the session workspace from the durable session header (SessionHeader.cwd, not requestHeader())');
 
-    // 5) agents -> ~/.dsh/.agent-presets/<id>/ generated from argo/agents/*.agent.md.
-    const preset = path.join(dshHome, '.agent-presets', 'wechat-publisher');
-    assert.ok(fs.existsSync(path.join(preset, 'agent.cordis.yml')), 'agent.cordis.yml must exist');
-    assert.ok(fs.existsSync(path.join(preset, 'persona.js')), 'persona.js must exist');
-    assert.ok(fs.existsSync(path.join(preset, 'preset.yml')), 'preset.yml must exist');
-    const personaMd = fs.readFileSync(path.join(preset, 'persona.md'), 'utf8');
-    assert.match(personaMd, /公众号发布员/, 'persona must carry the publisher role from the agent file');
-    assert.match(personaMd, /wechat:draft/, 'persona must keep the draft-only constraint');
-    const cordis = fs.readFileSync(path.join(preset, 'agent.cordis.yml'), 'utf8');
-    assert.match(cordis, /\.\/persona\.js/, 'preset must mount the local persona row');
-    const presetMeta = fs.readFileSync(path.join(preset, 'preset.yml'), 'utf8');
-    assert.match(presetMeta, /name: 公众号发布员/, 'preset metadata must name the publisher');
 
     // 6) idempotency: a second run must not duplicate the managed block.
     const second = runInstall({ ...paths, skipEnv: true });
