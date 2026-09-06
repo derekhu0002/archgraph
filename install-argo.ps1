@@ -35,12 +35,13 @@ $argoDir = Join-Path $repoRoot 'argo'
 
 # OpenCode-only model-id remap. argo/agents/*.agent.md is a single source shared
 # verbatim across Copilot / Cursor / OpenCode (and DSH presets), so the original
-# model binding must stay untouched there. OpenCode's model registry does not
-# resolve 'alibaba-cn/qwen3.7-plus'; only the OpenCode deployment artifact
-# remaps that binding to the model id OpenCode knows ('qwen3.7-plus'). All other
-# targets keep the shared source binding unchanged.
+# model binding must stay untouched there. OpenCode has no Qwen provider
+# configured, so 'alibaba-cn/qwen3.7-plus' cannot resolve; only the OpenCode
+# deployment artifact remaps that binding to a model id OpenCode knows
+# (deepseek/deepseek-v4-flash-vision-exp). All other targets keep the shared
+# source binding unchanged.
 $OpenCodeModelRemap = @{
-    'alibaba-cn/qwen3.7-plus' = 'qwen3.7-plus'
+    'alibaba-cn/qwen3.7-plus' = 'deepseek/deepseek-v4-flash-vision-exp'
 }
 
 function Copy-Tree {

@@ -223,7 +223,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
 
     const openCodeAgent = fs.readFileSync(path.join(openCodeAgentsRoot, 'wechat-publisher.md'), 'utf8');
     assert.match(openCodeAgent, /description:/, 'OpenCode agent must keep a description');
-    assert.match(openCodeAgent, /model: "qwen3\.7-plus"/, 'OpenCode agent must remap alibaba-cn/qwen3.7-plus to qwen3.7-plus');
+    assert.match(openCodeAgent, /model: "deepseek\/deepseek-v4-flash-vision-exp"/, 'OpenCode agent must remap alibaba-cn/qwen3.7-plus to deepseek/deepseek-v4-flash-vision-exp');
     assert.doesNotMatch(openCodeAgent, /alibaba-cn/, 'OpenCode agent must not leak the source model id');
     assert.match(openCodeAgent, /mode: all/, 'OpenCode agent must declare mode: all');
     assert.doesNotMatch(openCodeAgent, /^tools:\s*\[/m, 'OpenCode agent must not carry a tools array');
