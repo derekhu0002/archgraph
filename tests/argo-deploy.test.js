@@ -210,6 +210,8 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
       fs.existsSync(path.join(copilotAgentsRoot, 'wechat-publisher.agent.md')),
       'Copilot user-level agent must be deployed',
     );
+    const copilotAgent = fs.readFileSync(path.join(copilotAgentsRoot, 'wechat-publisher.agent.md'), 'utf8');
+    assert.match(copilotAgent, /model: "alibaba-cn\/qwen3\.7-plus"/, 'Copilot agent must keep the shared source model verbatim');
     assert.ok(
       fs.existsSync(path.join(cursorAgentsRoot, 'wechat-publisher.md')),
       'Cursor user-level agent must be deployed as .md',
@@ -221,14 +223,15 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
 
     const openCodeAgent = fs.readFileSync(path.join(openCodeAgentsRoot, 'wechat-publisher.md'), 'utf8');
     assert.match(openCodeAgent, /description:/, 'OpenCode agent must keep a description');
-    assert.match(openCodeAgent, /model: "alibaba-cn\/qwen3\.7-plus"/, 'OpenCode agent must keep its pinned model');
+    assert.match(openCodeAgent, /model: "qwen3\.7-plus"/, 'OpenCode agent must remap alibaba-cn/qwen3.7-plus to qwen3.7-plus');
+    assert.doesNotMatch(openCodeAgent, /alibaba-cn/, 'OpenCode agent must not leak the source model id');
     assert.match(openCodeAgent, /mode: all/, 'OpenCode agent must declare mode: all');
     assert.doesNotMatch(openCodeAgent, /^tools:\s*\[/m, 'OpenCode agent must not carry a tools array');
 
     const cursorAgent = fs.readFileSync(path.join(cursorAgentsRoot, 'wechat-publisher.md'), 'utf8');
     assert.match(cursorAgent, /name:/, 'Cursor agent must keep a name');
     assert.match(cursorAgent, /description:/, 'Cursor agent must keep a description');
-    assert.match(cursorAgent, /model: "alibaba-cn\/qwen3\.7-plus"/, 'Cursor agent must keep its pinned model');
+    assert.match(cursorAgent, /model: "alibaba-cn\/qwen3\.7-plus"/, 'Cursor agent must keep the shared source model binding');
     assert.doesNotMatch(cursorAgent, /^tools:\s*\[/m, 'Cursor agent must not carry a tools array');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });

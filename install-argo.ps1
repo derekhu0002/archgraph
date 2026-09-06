@@ -33,6 +33,16 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = $PSScriptRoot
 $argoDir = Join-Path $repoRoot 'argo'
 
+# OpenCode-only model-id remap. argo/agents/*.agent.md is a single source shared
+# verbatim across Copilot / Cursor / OpenCode (and DSH presets), so the original
+# model binding must stay untouched there. OpenCode's model registry does not
+# resolve 'alibaba-cn/qwen3.7-plus'; only the OpenCode deployment artifact
+# remaps that binding to the model id OpenCode knows ('qwen3.7-plus'). All other
+# targets keep the shared source binding unchanged.
+$OpenCodeModelRemap = @{
+    'alibaba-cn/qwen3.7-plus' = 'qwen3.7-plus'
+}
+
 function Copy-Tree {
     param([string]$Source, [string]$Destination)
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
@@ -90,7 +100,11 @@ function Convert-AgentFile {
         # argument-hint) which OpenCode rejects.
         $newFront = "---`r`n"
         if ($desc) { $newFront += "description: `"$($desc -replace '"','\"')`"`r`n" }
-        if ($model) { $newFront += "model: `"$model`"`r`n" }
+        if ($model) {
+            $deployModel = $model
+            if ($OpenCodeModelRemap.ContainsKey($deployModel)) { $deployModel = $OpenCodeModelRemap[$deployModel] }
+            $newFront += "model: `"$deployModel`"`r`n"
+        }
         $newFront += "mode: all`r`n---`r`n"
     } else {
         # Cursor markdown agent: name + description + model; drop VS Code-only fields.
