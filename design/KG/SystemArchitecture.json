@@ -2163,6 +2163,26 @@
         {
           "name": "deliveryStatus",
           "value": "not_delivered"
+        },
+        {
+          "name": "commit",
+          "value": "35f8b84",
+          "description": "install-argo.ps1; tests/argo-deploy.test.js — OpenCode-only model remap alibaba-cn/qwen3.7-plus -> qwen3.7-plus (single-source argo/agents/*.agent.md untouched; Copilot/Cursor keep source binding)"
+        },
+        {
+          "name": "commit",
+          "value": "b33286f",
+          "description": "package.json — release(archgraph-argo): 0.13.4"
+        },
+        {
+          "name": "commit",
+          "value": "3a933c5",
+          "description": "install-argo.ps1; tests/argo-deploy.test.js — retarget OpenCode-only model remap to deepseek/deepseek-v4-flash-vision-exp (opencode has no Qwen provider; source alibaba-cn/qwen3.7-plus untouched)"
+        },
+        {
+          "name": "commit",
+          "value": "e427876",
+          "description": "package.json — release(archgraph-argo): 0.13.5 (published to npm registry as dereckhu)"
         }
       ],
       "testcases": [],
@@ -5480,6 +5500,22 @@
           "description": "design/KG/SystemArchitecture.json"
         }
       ]
+    },
+    {
+      "id": "wpp-mem-opencode-model-remap-001",
+      "name": "SessionNote-OpenCodeModelRemap",
+      "type": "Business Object",
+      "description": "会话记录（2026-09-06，终态更新）：委派 wechat-publisher 报 Model not found: alibaba-cn/qwen3.7-plus。根因（用户确认）：opencode 未添加 Qwen 作为 provider，所有 qwen model id 均不可用。决策：不改共享源文件 argo/agents/wechat-publisher.agent.md（保持 alibaba-cn/qwen3.7-plus，多平台共享安全），在 install-argo.ps1 增加 OpenCode-only 模型重映射 $OpenCodeModelRemap，目标为 deepseek/deepseek-v4-flash-vision-exp（opencode 已知的 deepseek 视觉模型）。commit：3a933c5（install-argo.ps1 + tests/argo-deploy.test.js）+ e427876（package.json release archgraph-argo 0.13.5）。回归：tests/argo-deploy.test.js 6/6 通过。已重跑 install-argo.ps1 → ~/.config/opencode/agents/wechat-publisher.md model=\"deepseek/deepseek-v4-flash-vision-exp\"；源文件与 ~/.copilot、~/.cursor 产物保持 alibaba-cn/qwen3.7-plus。发布：NPM_CONFIG_USERCONFIG=C:\\Users\\admin\\.npmrc 用 admin 账号 dereckhu 执行 npm publish --access public → + archgraph-argo@0.13.5 成功。Pitfall 1：当前 opencode 会话启动时已缓存旧 agent model 绑定，磁盘修复需重启 opencode（新会话）后才在委派中生效。Pitfall 2：npm 本机默认账号未登录（ENEEDAUTH），需以 NPM_CONFIG_USERCONFIG 指向带 publish 权限的 .npmrc。可复用：opencode 无 Qwen provider → 部署给 opencode 的 agent 模型必须映射到 deepseek provider；进程启动即缓存 frontmatter model。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -7076,7 +7112,8 @@
         "wpp-mem-openclaw-001",
         "wpp-mem-multi-role-001",
         "wpp-mem-skill-coev-001",
-        "wpp-mem-mem-eval-article-001"
+        "wpp-mem-mem-eval-article-001",
+        "wpp-mem-opencode-model-remap-001"
       ],
       "included_relationships": []
     },

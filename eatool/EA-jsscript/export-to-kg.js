@@ -1,5 +1,5 @@
 !INC Local Scripts.EAConstants-JScript
-!INC JSON-Parser
+!INC UTILITY.JSON-Parser
 
 /*
  * Script Name: Export Diagram to JSON File
