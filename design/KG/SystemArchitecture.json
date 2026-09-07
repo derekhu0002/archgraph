@@ -5528,6 +5528,57 @@
           "value": "COMPLETED"
         }
       ]
+    },
+    {
+      "id": "2792",
+      "name": "人类EA草稿→语义diff→agent写回canonical（draft-proposal收敛）",
+      "parent": "1249",
+      "type": "Work Package",
+      "description": "人类专家参与建图的收敛工作流（2026-09-08 立项；语义优先、删除纳入提议、产物 JSON+Markdown）。核心思路：把 EA 当草稿纸——人类在 agent 空闲间隙用 EA 直接改 archgraph.qea，改动不直接写回，而是提取成『语义 diff 提议』交给 agent 经 ARGO 写入 canonical，避免有损的全自动 EA→JSON 反向投影。①基线纪律：archgraph.qea 随每次 agent 写图后增量投影并一并 commit，保证基线恒新（人类开改前断言 qea clean）；②人类编辑：draft 占用标记守卫，避免 agent 写图触发投影静默覆盖人类改动；③语义 diff：比较工作区 .qea 与 HEAD .qea 的 EA 可见对象模型（t_object/t_connector/t_diagramobjects，按 schema_id 锚 tag 对齐；人类改动不进 kg_sync_meta 镜像，故不比镜像），归类为 addElement/updateElement/removeElement/addRelationship/updateRelationship/removeRelationship/updateView 提议；纯几何（t_diagramobjects 坐标）不进 canonical——v1 只统计不产出；④还原：git restore .qea 回 HEAD（单文件 SQLite 无 WAL，前提 EA 已关闭）；⑤写回：diff 建议（JSON+Markdown，含 EA guid 溯源）交 agent 经 ARGO preview/apply 入 canonical JSON → MCP 增量投影回 .qea → commit。落地：argo/scripts/ea-human-diff.js（node:sqlite 直读两 .qea，无需 EA；复用 ea-qea-sync-lib 锚定 helpers）。",
+      "testcases": [
+        {
+          "name": "AT-2792-01",
+          "type": "Acceptance Test",
+          "description": "GIVEN 基线 .qea（经 fullProjection 投影）与工作区 .qea（在 EA 可见对象模型把某带 schema_id 锚元素的 Name/Note 改为人类值）；WHEN 运行 ea-human-diff 语义 diff 比较两 .qea；THEN 提议集恰含一条 updateElement（id=该 canonical id，fields 含改后 name/description，sourceEa 含 EA guid），其余未变元素零噪声。",
+          "Input": "tests/ea-human-diff.test.js",
+          "acceptanceCriteria": "tests/ea-human-diff.test.js"
+        },
+        {
+          "name": "AT-2792-02",
+          "type": "Acceptance Test",
+          "description": "GIVEN 工作区 .qea 相对基线在某个 canonical 图（schema_view_id 锚）上新增一个无 schema_id 锚的元素（含 Name/Note/类型）并摆放；WHEN 运行语义 diff；THEN 提议集含 addElement（id 未赋留给 agent、携带 EA guid/字段/类型/所属 view 候选），且不含对既有元素的 update 噪声。",
+          "Input": "tests/ea-human-diff.test.js",
+          "acceptanceCriteria": "tests/ea-human-diff.test.js"
+        },
+        {
+          "name": "AT-2792-03",
+          "type": "Acceptance Test",
+          "description": "GIVEN 工作区 .qea 相对基线删除了某带 schema_id 锚的元素与某带锚的关系（t_object/t_connector 行消失）；WHEN 运行语义 diff；THEN 提议集含 removeElement 与 removeRelationship（id=canonical id，sourceEa 含被删 EA guid），交由 agent 确认后写入。",
+          "Input": "tests/ea-human-diff.test.js",
+          "acceptanceCriteria": "tests/ea-human-diff.test.js"
+        },
+        {
+          "name": "AT-2792-04",
+          "type": "Acceptance Test",
+          "description": "GIVEN 工作区 .qea 相对基线仅移动某 t_diagramobjects 坐标（几何变、成员与内容字段全不变）；WHEN 运行语义 diff；THEN 无 canonical 提议产出（几何不进 canonical），报告仅统计 layoutOnly 计数并在 Markdown 注明被排除。",
+          "Input": "tests/ea-human-diff.test.js",
+          "acceptanceCriteria": "tests/ea-human-diff.test.js"
+        },
+        {
+          "name": "AT-2792-05",
+          "type": "Acceptance Test",
+          "description": "GIVEN 一次含多类变化的语义 diff；WHEN 以 --out <stem> 运行；THEN 产出 <stem>.json（机器提议集：source/baseline/extractedAt/proposals[]，每条 op/kind/id/sourceEa）与 <stem>.md（人读表格/列表呈现同一内容、含操作计数与排除说明），两者提议一一对应。",
+          "Input": "tests/ea-human-diff.test.js",
+          "acceptanceCriteria": "tests/ea-human-diff.test.js"
+        },
+        {
+          "name": "AT-2792-06",
+          "type": "Acceptance Test",
+          "description": "GIVEN 工作区与基线 kg_sync_meta 镜像完全相同、但可见对象模型被人类改动（只改 t_object 不改镜像）；WHEN 运行语义 diff；THEN 仍能捕获改动（证明 diff 以可见对象模型为准而非镜像）；反向：仅镜像差异不作为提议信号。",
+          "Input": "tests/ea-human-diff.test.js",
+          "acceptanceCriteria": "tests/ea-human-diff.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -6550,6 +6601,16 @@
       "target_id": "2100",
       "target_name": "开发不保留原ID的EA导入脚本",
       "type": "Association"
+    },
+    {
+      "id": "2792-assoc-2791",
+      "name": "Association",
+      "type": "Association",
+      "source_id": "2792",
+      "source_name": "人类EA草稿→语义diff→agent写回canonical（draft-proposal收敛）",
+      "target_id": "2791",
+      "target_name": "ARGO写图下游直写.qea投影（Node:sqlite）",
+      "statement": "人类EA草稿→语义diff→agent写回canonical（draft-proposal收敛） --(Association)--> ARGO写图下游直写.qea投影（Node:sqlite）"
     }
   ],
   "views": [
@@ -7437,14 +7498,16 @@
         "2787",
         "2788",
         "2789",
-        "2791"
+        "2791",
+        "2792"
       ],
       "included_relationships": [
         "2785-realizes-2760",
         "2786-realizes-2760",
         "2787-realizes-2760",
         "2788-realizes-2760",
-        "2791-assoc-2100"
+        "2791-assoc-2100",
+        "2792-assoc-2791"
       ],
       "parent_element_id": "1249",
       "view_id": "ea-tooling-wps-001",
