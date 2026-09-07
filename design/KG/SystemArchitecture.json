@@ -5578,6 +5578,13 @@
           "Input": "tests/ea-human-diff.test.js",
           "acceptanceCriteria": "tests/ea-human-diff.test.js"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "429151f",
+          "description": "argo/scripts/ea-human-diff.js; tests/ea-human-diff.test.js; design/KG/SystemArchitecture.json; archgraph.qea（立项 WP2792 + ea-human-diff 工具与 AT-2792-01..06 实现：可见对象模型语义 diff → 提议 JSON+Markdown；纯 Node 7/7 绿；ea-qea-sync/argo-qea-projection 回归 14/14）"
+        }
       ]
     }
   ],
