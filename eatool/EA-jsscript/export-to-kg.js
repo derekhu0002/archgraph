@@ -1358,11 +1358,66 @@ function logGlobalRuntimeConfig() {
 	Session.Output("===============================");
 }
 
+// ---------------------------------------------------------------------------
+// ARGO projection mirror export (kg_sync_meta)
+// 背景（WP2791）：当前 QEA（archgraph.qea）由 MCP 写图后经 syncGraphToQea 实时投影，
+// 投影同时维护两层数据：
+//   ① kg_sync_meta —— 无损 canonical 镜像：每个 element/relationship/view 存一行，
+//      payload = JSON.stringify(该 canonical 节点)，内容与 design/KG/SystemArchitecture.json
+//      逐字节等价（exportQeaToGraph 的读取源）；
+//   ② EA 可见对象模型 —— 有损渲染（EA 重写 StyleEx 丢弃 schema_view_id、图 Notes 不保留、
+//      archimate_type 存无空格形式等），export-to-kg.js 旧逻辑读它必然 ≠ JSON。
+// 因此：当模型存在投影镜像（kg_sync_meta 有 element/relationship/view 行）时，导出直接读取
+// 镜像 payload —— 内容 == JSON 由构造保证（无打开图依赖，整个仓库 QEA 输出即 canonical）。
+// 当镜像缺失（如开发者社区手绘 EA 子图、旧 .feap 模型）时回退到 EA 对象模型导出。
+// ---------------------------------------------------------------------------
+function qeaXmlDecode(s) {
+	var t = '' + (s == null ? '' : s);
+	t = t.replace(/&lt;/g, '<');
+	t = t.replace(/&gt;/g, '>');
+	t = t.replace(/&quot;/g, '"');
+	t = t.replace(/&apos;/g, "'");
+	t = t.replace(/&#x([0-9a-fA-F]+);/g, function (m, h) { return String.fromCharCode(parseInt(h, 16)); });
+	t = t.replace(/&#(\d+);/g, function (m, n) { return String.fromCharCode(parseInt(n, 10)); });
+	t = t.replace(/&amp;/g, '&'); // &amp; 最后解，防止 &amp;lt; 被提前误解
+	return t;
+}
+
+function qeaSqlQueryTexts(sql, tag) {
+	var out = [];
+	try {
+		var xml = '' + Repository.SQLQuery(sql);
+		var re = new RegExp('<' + tag + '>([\\s\\S]*?)</' + tag + '>', 'g');
+		var m;
+		while ((m = re.exec(xml)) != null) {
+			out.push(qeaXmlDecode(m[1]));
+		}
+	} catch (e) {
+		return null;
+	}
+	return out;
+}
+
+// 读取投影镜像；无镜像/查询失败返回 null（调用方回退对象模型导出）。
+function loadProjectionMirror() {
+	var els = qeaSqlQueryTexts("SELECT payload FROM kg_sync_meta WHERE kind='element' ORDER BY key", 'payload');
+	if (els == null || els.length === 0) { return null; }
+	var rels = qeaSqlQueryTexts("SELECT payload FROM kg_sync_meta WHERE kind='relationship' ORDER BY key", 'payload');
+	var views = qeaSqlQueryTexts("SELECT payload FROM kg_sync_meta WHERE kind='view' ORDER BY key", 'payload');
+	if (rels == null || rels.length === 0 || views == null || views.length === 0) { return null; }
+	return { elements: els, relationships: rels, views: views };
+}
+
 function main() {
     // Show the script output window
     Repository.EnsureOutputVisible("Script");
     Session.Output("Starting diagram to JSON export...");
 	logGlobalRuntimeConfig();
+
+    // 投影镜像优先：整图 canonical 导出（内容 == JSON）不依赖“当前打开图”；
+    // 对象模型路径（镜像缺失时的旧流程/手绘子图导出）仍需当前图。
+    var mirror = loadProjectionMirror();
+    var useMirror = mirror != null;
 
     // Get the currently open diagram
     var currentDiagram as EA.Diagram;
@@ -1371,8 +1426,8 @@ function main() {
         currentDiagram = Repository.GetCurrentDiagram();
     }
 
-    if (!currentDiagram) {
-        Session.Output("Error: No diagram is currently open. Aborting script.");
+    if (!currentDiagram && !useMirror) {
+        Session.Output("Error: No diagram is currently open (and no projection mirror). Aborting script.");
         return;
     }
 
@@ -1383,7 +1438,8 @@ function main() {
 	var now = new Date();
 	var timestamp = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate() +
 					"_" + now.getHours() + "_" + now.getMinutes() + "_" + now.getSeconds();
-    var defaultFilename = currentDiagram.Name.replace(/[\s\/\\:*?"<>|]/g, '_') + ".json";
+    var defaultName = (currentDiagram != null && currentDiagram.Name != "") ? currentDiagram.Name : "SystemArchitecture";
+    var defaultFilename = defaultName.replace(/[\s\/\\:*?"<>|]/g, '_') + ".json";
     var filePath = "";
     if (typeof EA_HEADLESS_OUTPUT != "undefined" && EA_HEADLESS_OUTPUT != "") {
         filePath = "" + EA_HEADLESS_OUTPUT; // 无头覆盖：直接写指定导出文件
@@ -1399,113 +1455,128 @@ function main() {
         return;
     }
 	var loadedElements = {}; // Map to track elements by name
-    //Session.Output("User selected file path: " + filePath);
-	var ppkg as EA.Package;
-	ppkg = Repository.GetPackageByID(currentDiagram.PackageID);
-	var ppele as EA.Element;
-	ppele = null;
-	//Session.Output("currentDiagram.ParentID:" + currentDiagram.ParentID);
-	if (currentDiagram.ParentID != 0) {
-		ppele = Repository.GetElementByID(currentDiagram.ParentID);
-	}
-	
+
 	var finalJsonString = '{\n';
-	var packageElement = null;
 	var rootRelationshipsJson = "";
 	var rootViewsJson = "";
-	
-	if (ppele == null) {
-		try {
-			packageElement = ppkg.Element;
-		} catch (ignore) {
-			packageElement = null;
-		}
-		var rootName = packageElement != null ? getElementTag(packageElement, "schema_root_name") : "";
-		var rootDescription = packageElement != null ? getElementTag(packageElement, "schema_root_description") : "";
-		if (rootName == "") {
-			rootName = ppkg.Name;
-		}
-		if (rootDescription == "") {
-			rootDescription = safeSchemaString(ppkg.Notes, "Exported from EA package " + ppkg.Name);
-		}
-		finalJsonString += '"name": "' + jsonEscape(rootName) + '",\n';
-		finalJsonString += '"description": "' + jsonEscape(rootDescription) + '",\n';
-		var rootAttributesJson = packageElement != null ? getElementTag(packageElement, "schema_root_attributes_json") : "";
-		if (rootAttributesJson != "" && rootAttributesJson != "[]") {
-			finalJsonString += '"attributes": ' + rootAttributesJson + ',\n';
-		}
-		rootRelationshipsJson = packageElement != null ? getElementTag(packageElement, "schema_relationships_json") : "";
-		rootViewsJson = packageElement != null ? getElementTag(packageElement, "schema_views_json") : "";
+
+	if (useMirror) {
+		// --- 投影镜像路径（WP2791）---
+		// kg_sync_meta 是无损 canonical 镜像（syncGraphToQea 写入 JSON.stringify(节点)），
+		// 导出其 payload 即内容 == design/KG/SystemArchitecture.json（整图、不依赖打开图）。
+		Session.Output("Projection mirror found (kg_sync_meta): exporting canonical content ("
+			+ mirror.elements.length + "/" + mirror.relationships.length + "/" + mirror.views.length + ").");
+		finalJsonString += '"name": "' + jsonEscape('ArchGraph (from archgraph.qea)') + '",\n';
+		finalJsonString += '"description": "",\n';
+		finalJsonString += '"elements": [\n' + mirror.elements.join(',\n') + '\n],\n';
+		finalJsonString += '"relationships": [\n' + mirror.relationships.join(',\n') + '\n],\n';
+		finalJsonString += '"views": [\n' + mirror.views.join(',\n') + '\n]\n';
+		finalJsonString += '}';
 	} else {
-		finalJsonString += '"name": "' + jsonEscape(ppele.Name) + '",\n';
-		finalJsonString += '"description": "' + jsonEscape(safeSchemaString(ppele.Notes, "Exported from EA element " + ppele.Name)) + '",\n';
-		
-		var attrs as EA.Collection;
-		attrs = ppele.AttributesEx;
-		var attributesJsonStrings = [];
-		//Session.Output("ppele attrs: \n");
-		for (var j = 0; j < attrs.Count; j++) {
-			var attr as EA.Attribute;
-			attr = attrs.GetAt(j);
-			//Session.Output("attr: \n" + attr.Name);
-			if (attr.Alias == "notpub") {
-				continue;
+		// --- 旧路径（无镜像：手绘 EA 子图 / 遗留模型）---
+		var ppkg as EA.Package;
+		ppkg = Repository.GetPackageByID(currentDiagram.PackageID);
+		var ppele as EA.Element;
+		ppele = null;
+		//Session.Output("currentDiagram.ParentID:" + currentDiagram.ParentID);
+		if (currentDiagram.ParentID != 0) {
+			ppele = Repository.GetElementByID(currentDiagram.ParentID);
+		}
+
+		var packageElement = null;
+		if (ppele == null) {
+			try {
+				packageElement = ppkg.Element;
+			} catch (ignore) {
+				packageElement = null;
 			}
-			if ((attr.Alias == "content") && needContent) {
-				//Session.Output(ppele.Name + " - find content:" + attr.Notes + " needContent:" + needContent);
-				var content = "";
-				if (attr.Notes != "") {
-					content = getCode(resolveContentPath(attr.Notes));
+			var rootName = packageElement != null ? getElementTag(packageElement, "schema_root_name") : "";
+			var rootDescription = packageElement != null ? getElementTag(packageElement, "schema_root_description") : "";
+			if (rootName == "") {
+				rootName = ppkg.Name;
+			}
+			if (rootDescription == "") {
+				rootDescription = safeSchemaString(ppkg.Notes, "Exported from EA package " + ppkg.Name);
+			}
+			finalJsonString += '"name": "' + jsonEscape(rootName) + '",\n';
+			finalJsonString += '"description": "' + jsonEscape(rootDescription) + '",\n';
+			var rootAttributesJson = packageElement != null ? getElementTag(packageElement, "schema_root_attributes_json") : "";
+			if (rootAttributesJson != "" && rootAttributesJson != "[]") {
+				finalJsonString += '"attributes": ' + rootAttributesJson + ',\n';
+			}
+			rootRelationshipsJson = packageElement != null ? getElementTag(packageElement, "schema_relationships_json") : "";
+			rootViewsJson = packageElement != null ? getElementTag(packageElement, "schema_views_json") : "";
+		} else {
+			finalJsonString += '"name": "' + jsonEscape(ppele.Name) + '",\n';
+			finalJsonString += '"description": "' + jsonEscape(safeSchemaString(ppele.Notes, "Exported from EA element " + ppele.Name)) + '",\n';
+
+			var attrs as EA.Collection;
+			attrs = ppele.AttributesEx;
+			var attributesJsonStrings = [];
+			//Session.Output("ppele attrs: \n");
+			for (var j = 0; j < attrs.Count; j++) {
+				var attr as EA.Attribute;
+				attr = attrs.GetAt(j);
+				//Session.Output("attr: \n" + attr.Name);
+				if (attr.Alias == "notpub") {
+					continue;
 				}
-				if (content != "" && needContent) {
-					attributesJsonStrings.push(
-						'{\n' +
-						'"name": "' + jsonEscape(attr.Name) + '",\n' +
-						'"content": "' + jsonEscape(content) + '"\n' +
-						'}'
-					);
+				if ((attr.Alias == "content") && needContent) {
+					//Session.Output(ppele.Name + " - find content:" + attr.Notes + " needContent:" + needContent);
+					var content = "";
+					if (attr.Notes != "") {
+						content = getCode(resolveContentPath(attr.Notes));
+					}
+					if (content != "" && needContent) {
+						attributesJsonStrings.push(
+							'{\n' +
+							'"name": "' + jsonEscape(attr.Name) + '",\n' +
+							'"content": "' + jsonEscape(content) + '"\n' +
+							'}'
+						);
+					}
+				} else {
+					var attbbbjss = '{\n"name": "' + jsonEscape(attr.Name) + '"\n';
+					var attributeValue = attr.Notes != "" ? attr.Notes : attr.Default;
+					if (attributeValue != "") {
+						attbbbjss += ',"value": "' + jsonEscape(attributeValue) + '"\n';
+					}
+					attbbbjss += '}';
+					attributesJsonStrings.push(attbbbjss);
 				}
-			} else {
-				var attbbbjss = '{\n"name": "' + jsonEscape(attr.Name) + '"\n';
-				var attributeValue = attr.Notes != "" ? attr.Notes : attr.Default;
-				if (attributeValue != "") {
-					attbbbjss += ',"value": "' + jsonEscape(attributeValue) + '"\n';
-				}
-				attbbbjss += '}';
-				attributesJsonStrings.push(attbbbjss);
+			}
+
+			var attrsjsstr = attributesJsonStrings.join(',\n');
+			if (attrsjsstr != "") {
+				finalJsonString += '"attributes": [\n' + attrsjsstr + '\n],\n';
 			}
 		}
-		
-		var attrsjsstr = attributesJsonStrings.join(',\n');
-		if (attrsjsstr != "") {
-			finalJsonString += '"attributes": [\n' + attrsjsstr + '\n],\n';
+
+		extractFromDiagram(currentDiagram);
+
+		var elementsArray = [];
+		for (var key in globalElements) {
+			if (globalElements.hasOwnProperty(key)) {
+				elementsArray.push(globalElements[key]);
+			}
 		}
-	}
 
-    extractFromDiagram(currentDiagram);
-
-	var elementsArray = [];
-	for (var key in globalElements) {
-		if (globalElements.hasOwnProperty(key)) {
-			elementsArray.push(globalElements[key]);
+		var relationshipsArray = [];
+		for (var key in globalRelationships) {
+			if (globalRelationships.hasOwnProperty(key)) {
+				relationshipsArray.push(globalRelationships[key]);
+			}
 		}
-	}
+		var relationshipsJson = '[\n' + relationshipsArray.join(',\n') + '\n]';
+		relationshipsJson = selectCurrentEaJson(relationshipsJson, relationshipsArray.length, rootRelationshipsJson);
+		var viewsJson = '[\n' + globalViews.join(',\n') + '\n]';
+		viewsJson = selectCurrentEaJson(viewsJson, globalViews.length, rootViewsJson);
 
-	var relationshipsArray = [];
-	for (var key in globalRelationships) {
-		if (globalRelationships.hasOwnProperty(key)) {
-			relationshipsArray.push(globalRelationships[key]);
-		}
+		finalJsonString += '"elements": [\n' + elementsArray.join(',\n') + '\n],\n';
+		finalJsonString += '"relationships": ' + relationshipsJson + ',\n';
+		finalJsonString += '"views": ' + viewsJson + '\n';
+		finalJsonString += '}';
 	}
-	var relationshipsJson = '[\n' + relationshipsArray.join(',\n') + '\n]';
-	relationshipsJson = selectCurrentEaJson(relationshipsJson, relationshipsArray.length, rootRelationshipsJson);
-	var viewsJson = '[\n' + globalViews.join(',\n') + '\n]';
-	viewsJson = selectCurrentEaJson(viewsJson, globalViews.length, rootViewsJson);
-
-	finalJsonString += '"elements": [\n' + elementsArray.join(',\n') + '\n],\n';
-	finalJsonString += '"relationships": ' + relationshipsJson + ',\n';
-	finalJsonString += '"views": ' + viewsJson + '\n';
-    finalJsonString += '}';
     // --- FILE WRITING (UTF-8 WITHOUT BOM) ---
     try {
         // Ensure directory exists

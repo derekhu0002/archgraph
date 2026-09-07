@@ -5427,6 +5427,13 @@
           "description": "GIVEN 图谱含无向（Association/Composition/Aggregation）与有向关系投影到隔离 .qea 副本；WHEN 读回每条投影连接（t_connector.ea_guid 匹配确定性 rel guid）；THEN 每条关系都显式写入 Direction='Source -> Destination'（无空/Unspecified，EA 视图渲染 source→target 箭头、不丢方向）。纯 Node 可测。",
           "name": "AT-2791-11",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-export-mirror.test.js",
+          "acceptanceCriteria": "tests/ea-export-mirror.test.js",
+          "description": "GIVEN EA 无头运行器可用且隔离 .qea 经 fullProjection 投影（kg_sync_meta 无损 canonical 镜像）；WHEN 无头运行 export-to-kg.js 导出；THEN 导出内容与 SystemArchitecture.json 内容一致（compareRoundtrip equal=true）；镜像缺失时回退对象模型导出不回归（不再仅依赖有损 EA 对象模型导致 type/视图描述/视图id 不一致）。",
+          "name": "AT-2791-12",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package"
