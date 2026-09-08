@@ -17,7 +17,7 @@ const fs = require('node:fs');
 const lib = require(path.join(__dirname, 'ea-qea-sync-lib.js'));
 
 function parseArgs(argv) {
-  const args = { mode: 'sync', graph: '', qea: '', allowDelete: false, deleteConfirmFile: '', dryRun: false, snapshotDir: '', out: '', noBackup: false, intervalMs: 2000 };
+  const args = { mode: 'sync', graph: '', qea: '', allowDelete: false, deleteConfirmFile: '', dryRun: false, snapshotDir: '', out: '', noBackup: false, intervalMs: 2000, pruneMembership: true };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const next = () => (i + 1 < argv.length ? argv[++i] : '');
@@ -30,6 +30,7 @@ function parseArgs(argv) {
     else if (a === '--snapshot-dir') { args.snapshotDir = next(); }
     else if (a === '--out') { args.out = next(); }
     else if (a === '--no-backup') { args.noBackup = true; }
+    else if (a === '--no-prune') { args.pruneMembership = false; }
     else if (a === '--interval') { args.intervalMs = Number(next()) || 2000; }
     else if (a.startsWith('-')) { /* ignore unknown */ }
     else if (args.modeSet === undefined) { /* positional not used */ }
@@ -98,7 +99,7 @@ function runOnce(args, graphPath, qeaPath) {
   }
   const res = args.mode === 'full'
     ? lib.fullProjection(graph, qeaPath, { dryRun: args.dryRun })
-    : lib.syncGraphToQea(graph, qeaPath, { dryRun: args.dryRun, allowDelete: confirmDelete(args) });
+    : lib.syncGraphToQea(graph, qeaPath, { dryRun: args.dryRun, allowDelete: confirmDelete(args), pruneMembership: args.pruneMembership });
   const mode = args.dryRun ? 'dry-run' : 'sync';
   console.log(JSON.stringify({ mode, graph: graphPath, qea: qeaPath, snapshot, result: res }, null, 2));
 }

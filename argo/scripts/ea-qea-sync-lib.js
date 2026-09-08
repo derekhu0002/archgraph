@@ -11,8 +11,10 @@
 //     transactions with a bounded busy retry. Keep EA's own SQLite handle open is fine —
 //     SQLite only locks during active transactions, an idle open connection does not block.
 //   - Rows are matched by Alias (schema id) / deterministic ea_guid, update-in-place only;
-//     existing t_diagramobjects/t_diagramlinks geometry is NEVER updated or deleted, only
-//     missing members are INSERTed.
+//     existing t_diagramobjects/t_diagramlinks geometry of STILL-VISIBLE members is never
+//     rewritten; the membership reconcile only INSERTs missing members and PRUNES stale
+//     schema-anchored members whose element/relationship is no longer in the view
+//     (pruneMembership, default true). Human-drawn (un-anchored) shapes are never pruned.
 
 const { DatabaseSync } = require('node:sqlite');
 const DEBUG = !!process.env.EA_QEA_DEBUG;
@@ -290,14 +292,21 @@ function setStyleToken(styleEx, key, value) {
 // ---------------------------------------------------------------------------
 // Core sync
 // ---------------------------------------------------------------------------
-// opts: { dryRun, allowDelete, snapshotDir }
+// opts: { dryRun, allowDelete, snapshotDir, pruneMembership }
+//   pruneMembership (default true): the incremental membership reconcile is
+//   authoritative for schema-anchored members — a shape/connector whose canonical
+//   element/relationship is no longer in the view's included_elements/included_relationships
+//   is pruned from that diagram. Human-drawn shapes (no schema_id anchor) are never
+//   pruned, and still-in-view members keep their geometry untouched.
 function syncGraphToQea(graph, qeaPath, opts) {
   const o = opts || {};
+  const pruneMembership = o.pruneMembership !== false;
   const stages = {};
   const stats = {
     added: { elements: 0, relationships: 0, diagrams: 0, diagramObjects: 0, diagramLinks: 0 },
     updated: { elements: 0, relationships: 0, diagrams: 0 },
     skipped: { elements: 0, relationships: 0, diagrams: 0 },
+    removed: { diagramObjects: 0, diagramLinks: 0 },
     deleteCandidates: 0, deleted: 0,
   };
   const t0 = nowMs();
@@ -450,6 +459,7 @@ function syncGraphToQea(graph, qeaPath, opts) {
     const existingRels = db.prepare('SELECT Connector_ID, ea_guid, Name, Connector_Type, Stereotype, Notes, Direction, Start_Object_ID, End_Object_ID FROM t_connector').all();
     for (const r of existingRels) { if (r.ea_guid) { relByGuid.set(String(r.ea_guid), r); } }
     const newRels = [];
+    const relAliasToId = new Map();
     for (const rel of graph.relationships || []) {
       if (!rel || rel.id === undefined || rel.id === null) { continue; }
       const alias = String(rel.id);
@@ -475,6 +485,7 @@ function syncGraphToQea(graph, qeaPath, opts) {
         End_Object_ID: Number(end),
       };
       if (existing) {
+        relAliasToId.set(alias, Number(existing.Connector_ID));
         const changed = intended.Name !== (existing.Name || '') || (intended.Connector_Type || '') !== (existing.Connector_Type || '') ||
           (intended.Stereotype || '') !== (existing.Stereotype || '') || intended.Notes !== (existing.Notes || '') ||
           intended.Direction !== (existing.Direction || '') || Number(intended.Start_Object_ID) !== Number(existing.Start_Object_ID || 0) ||
@@ -488,7 +499,6 @@ function syncGraphToQea(graph, qeaPath, opts) {
         stats.added.relationships++;
       }
     }
-    const relAliasToId = new Map();
     if (!o.dryRun) {
       if (newRels.length > 0) {
         insertMany(db, 't_connector', ['Name', 'Connector_Type', 'Stereotype', 'Notes', 'Direction', 'Start_Object_ID', 'End_Object_ID', 'ea_guid'], newRels);
@@ -608,18 +618,43 @@ function syncGraphToQea(graph, qeaPath, opts) {
         if (view && view.view_id !== undefined && view.view_id !== null) { upsertMeta(db, 'view', view.view_id, view); }
       }
     }
-    // memberships: only INSERT missing; never touch existing geometry
+    // memberships: insert missing members, and prune stale schema-anchored members
+    // whose element/relationship is no longer in the view (authoritative canonical
+    // membership reconcile). Still-in-view members keep their geometry untouched;
+    // human-drawn shapes (no schema anchor) are never pruned.
+    const canonicalElemObjIds = new Set(
+      [...elemIdByAliasAll.values()].filter((v) => v >= 0).map((v) => Number(v))
+    );
+    const canonicalRelCids = new Set(
+      [...relAliasToId.values()].filter((v) => v >= 0).map((v) => Number(v))
+    );
     for (const view of graph.views || []) {
       if (!view || view.view_id === undefined || view.view_id === null) { continue; }
       const viewId = String(view.view_id);
       const diagramId = diagIdForView(viewId);
       if (diagramId === null) { continue; }
+      const incl = view.included_elements || [];
       const placedObjs = new Set();
       const objs = db.prepare('SELECT Object_ID FROM t_diagramobjects WHERE Diagram_ID=?').all(diagramId);
       for (const r of objs) { placedObjs.add(Number(r.Object_ID)); }
+
+      if (pruneMembership) {
+        const wantedObjs = new Set();
+        for (const elId of incl) {
+          const oid = elemIdByAliasAll.get(String(elId));
+          if (oid !== undefined) { wantedObjs.add(Number(oid)); }
+        }
+        const stale = [...placedObjs].filter((oid) => !wantedObjs.has(oid) && canonicalElemObjIds.has(oid));
+        if (stale.length > 0 && !o.dryRun) {
+          const del = db.prepare('DELETE FROM t_diagramobjects WHERE Diagram_ID=? AND Object_ID=?');
+          for (const oid of stale) { del.run(diagramId, oid); }
+        }
+        stats.removed.diagramObjects += stale.length;
+        for (const oid of stale) { placedObjs.delete(oid); }
+      }
+
       const nextSeq = objs.length;
       const newObjs = [];
-      const incl = view.included_elements || [];
       let seq = nextSeq;
       for (const elId of incl) {
         const oid = elemIdByAliasAll.get(String(elId));
@@ -640,11 +675,28 @@ function syncGraphToQea(graph, qeaPath, opts) {
       }
       stats.added.diagramObjects += newObjs.length;
 
+      const relIncl = view.included_relationships || [];
       const placedLinks = new Set();
       const links = db.prepare('SELECT ConnectorID FROM t_diagramlinks WHERE DiagramID=?').all(diagramId);
       for (const r of links) { placedLinks.add(Number(r.ConnectorID)); }
+
+      if (pruneMembership) {
+        const wantedRelCids = new Set();
+        for (const relId of relIncl) {
+          const cid = relAliasToId.get(String(relId));
+          if (cid !== undefined && cid >= 0) { wantedRelCids.add(Number(cid)); }
+        }
+        const staleLinks = [...placedLinks].filter((cid) => !wantedRelCids.has(cid) && canonicalRelCids.has(cid));
+        if (staleLinks.length > 0 && !o.dryRun) {
+          const del = db.prepare('DELETE FROM t_diagramlinks WHERE DiagramID=? AND ConnectorID=?');
+          for (const cid of staleLinks) { del.run(diagramId, cid); }
+        }
+        stats.removed.diagramLinks += staleLinks.length;
+        for (const cid of staleLinks) { placedLinks.delete(cid); }
+      }
+
       const newLinks = [];
-      for (const relId of view.included_relationships || []) {
+      for (const relId of relIncl) {
         const cid = relAliasToId.get(String(relId));
         if (cid === undefined || cid < 0) { continue; }
         if (placedLinks.has(Number(cid))) { continue; }

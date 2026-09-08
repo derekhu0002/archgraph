@@ -380,6 +380,84 @@ test('ea-qea-sync (AT-2791-13): every projected diagram defaults to Freeze Visib
   }
 });
 
+test('ea-qea-sync (AT-2791-14): membership removal prunes stale canonical shapes/links (pruneMembership default ON), preserves live members + human-drawn (un-anchored), supports --no-prune and is idempotent', () => {
+  // GIVEN a graph with elements A/B + a relationship, projected into an isolated .qea,
+  //   plus a human-drawn shape (no schema anchor) and a live member with edited geometry
+  // WHEN a member element and a member relationship are removed from the view and re-synced
+  // THEN the stale canonical shape + link are pruned, the still-in-view member keeps its
+  //   geometry, the human-drawn shape is preserved; with pruneMembership:false the stale
+  //   shape stays; and a repeated sync is idempotent (no further removals).
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-prune-'));
+  try {
+    const qea = tmpQea(dir);
+    const g = {
+      name: 'prune', description: 'x', elements: [
+        { id: 'soc-os-core', name: 'Soc Os Core', type: 'Business Object', description: 'd', attributes: [], testcases: [] },
+        { id: 'keep', name: 'Keep', type: 'Business Object', description: 'd', attributes: [], testcases: [] },
+      ], relationships: [
+        { id: 'r1', source_id: 'soc-os-core', target_id: 'keep', type: 'Association', description: 'rel', attributes: [] },
+      ], views: [
+        { view_id: 'v1', view_name: 'V1', description: '', parent_element_name: '', included_elements: ['soc-os-core', 'keep'], included_relationships: ['r1'] },
+      ],
+    };
+    const r1 = lib.syncGraphToQea(g, qea, { dryRun: false });
+    assert.equal(r1.stats.added.diagrams, 1);
+    assert.equal(r1.stats.added.diagramObjects, 2, 'two element shapes placed');
+    assert.equal(r1.stats.added.diagramLinks, 1, 'one connector line placed');
+
+    let db = new DatabaseSync(qea);
+    const diag = db.prepare("SELECT Diagram_ID FROM t_diagram WHERE StyleEx LIKE '%schema_view_id=v1;%'").get();
+    assert.ok(diag);
+    const keepRow = db.prepare("SELECT d.Object_ID, d.RectLeft FROM t_diagramobjects d JOIN t_object o ON o.Object_ID=d.Object_ID WHERE d.Diagram_ID=? AND o.Alias='keep'").get(Number(diag.Diagram_ID));
+    db.prepare('UPDATE t_diagramobjects SET RectLeft=5555 WHERE Diagram_ID=? AND Object_ID=?').run(Number(diag.Diagram_ID), Number(keepRow.Object_ID));
+
+    // a human-drawn shape: a t_object with NO schema anchor (empty Alias), placed on the diagram
+    db.prepare("INSERT INTO t_object (Object_Type, Name, Note, Package_ID, ParentID, Alias, ea_guid) VALUES ('Class','Human Drawn','',2,0,'','{h1h1h1h1-h1h1-h1h1-h1h1-h1h1h1h1h111}')").run();
+    const human = db.prepare("SELECT Object_ID FROM t_object WHERE ea_guid='{h1h1h1h1-h1h1-h1h1-h1h1-h1h1h1h1h111}'").get();
+    db.prepare('INSERT INTO t_diagramobjects (Diagram_ID, Object_ID, RectLeft, RectTop, RectRight, RectBottom, Sequence) VALUES (?,?,1,1,100,80,99)').run(Number(diag.Diagram_ID), Number(human.Object_ID));
+    db.close();
+
+    // remove soc-os-core (member) AND r1 (member relationship) from the view
+    const g2 = JSON.parse(JSON.stringify(g));
+    g2.views[0].included_elements = ['keep'];
+    g2.views[0].included_relationships = [];
+    const r2 = lib.syncGraphToQea(g2, qea, { dryRun: false });
+    assert.equal(r2.stats.removed.diagramObjects, 1, 'stale shape pruned');
+    assert.equal(r2.stats.removed.diagramLinks, 1, 'stale link pruned');
+
+    const db2 = new DatabaseSync(qea);
+    const after = db2.prepare("SELECT o.Alias, d.RectLeft FROM t_diagramobjects d JOIN t_object o ON o.Object_ID=d.Object_ID WHERE d.Diagram_ID=?").all(Number(diag.Diagram_ID));
+    const aliasSet = new Set(after.map((r) => r.Alias));
+    assert.ok(!aliasSet.has('soc-os-core'), 'removed member shape pruned');
+    assert.ok(aliasSet.has('keep'), 'still-in-view member kept');
+    assert.ok(after.some((r) => r.Alias === '' && r.RectLeft === 1), 'human-drawn shape preserved');
+    const keepAfter = after.find((r) => r.Alias === 'keep');
+    assert.equal(keepAfter.RectLeft, 5555, 'live member geometry untouched');
+    const linkCount = db2.prepare('SELECT COUNT(*) AS c FROM t_diagramlinks WHERE DiagramID=?').get(Number(diag.Diagram_ID)).c;
+    assert.equal(linkCount, 0, 'removed relationship link pruned');
+    db2.close();
+
+    // off-switch: pruneMembership:false leaves the stale shape in place
+    db = new DatabaseSync(qea);
+    db.prepare("INSERT INTO t_diagramobjects (Diagram_ID, Object_ID, RectLeft, RectTop, RectRight, RectBottom, Sequence) SELECT ?, Object_ID, 10,10,180,90,100 FROM t_object WHERE Alias='soc-os-core'").run(Number(diag.Diagram_ID));
+    db.close();
+    const r3 = lib.syncGraphToQea(g2, qea, { dryRun: false, pruneMembership: false });
+    assert.equal(r3.stats.removed.diagramObjects, 0, 'pruneMembership:false does not remove stale shape');
+    db = new DatabaseSync(qea);
+    const withPruneOff = db.prepare("SELECT COUNT(*) AS c FROM t_diagramobjects d JOIN t_object o ON o.Object_ID=d.Object_ID WHERE d.Diagram_ID=? AND o.Alias='soc-os-core'").get(Number(diag.Diagram_ID)).c;
+    assert.equal(withPruneOff, 1, 'stale shape remains when pruning disabled');
+    db.close();
+
+    // idempotent: default ON removes the shape once, then stays stable
+    const r4 = lib.syncGraphToQea(g2, qea, { dryRun: false });
+    assert.equal(r4.stats.removed.diagramObjects, 1, 're-pruned on next sync');
+    const r5 = lib.syncGraphToQea(g2, qea, { dryRun: false });
+    assert.equal(r5.stats.removed.diagramObjects, 0, 'idempotent after prune');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('ea-qea-sync (incremental): single element change updates only that element; steady-state timing', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-'));
   try {
