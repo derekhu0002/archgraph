@@ -274,6 +274,34 @@ test('ea-human-diff (AT-2792-06): reads visible object model, not kg_sync_meta',
   }
 });
 
+test('ea-human-diff (AT-2792-08): --work is auto-discovered to the project root single *.qea (no hardcoded filename)', () => {
+  const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ehm-base-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ehm-auto-'));
+  try {
+    const base = buildBase(baseDir);
+    // a single .qea (the human-edited project model) at the workspace root
+    const work = path.join(dir, 'sysmodel.qea');
+    fs.copyFileSync(base, work);
+    const db = dbWrite(work);
+    const e1 = objectRow(db, 'e1');
+    db.prepare('UPDATE t_object SET Name=? WHERE Object_ID=?').run('Auto discovered', e1.Object_ID);
+    db.exec('COMMIT');
+    db.close();
+
+    const outStem = path.join(dir, 'autoout');
+    const script = path.join(ROOT, 'argo', 'scripts', 'ea-human-diff.js');
+    // No --work: the tool must resolve the workspace root's single *.qea on its own.
+    // --base is given explicitly so the auto-baseline (git HEAD) is not required.
+    execFileSync(process.execPath, [script, '--base', base, '--out', outStem, '--no-md'], { encoding: 'utf8', cwd: dir });
+    const json = JSON.parse(fs.readFileSync(outStem + '.json', 'utf8'));
+    assert.equal(path.resolve(json.source.work), path.resolve(work), '--work auto-resolved to the project root single *.qea');
+    assert.ok(json.proposals.some((p) => p.op === 'updateElement' && p.id === 'e1' && p.fields.name === 'Auto discovered'), 'change captured via the auto-discovered work file');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(baseDir, { recursive: true, force: true });
+  }
+});
+
 test('ea-human-diff (extra): anchored relationship content edit -> updateRelationship', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ehm-'));
   try {

@@ -18,11 +18,13 @@
 // canonical proposal — it is only counted (layoutOnly) and excluded.
 //
 // Zero third-party deps, no EA required: node:sqlite via the shared lib helper.
-//   node argo/scripts/ea-human-diff.js --base <base.qea> --work <work.qea> [--graph <json>]
+//   node argo/scripts/ea-human-diff.js [--work <work.qea>] [--base <base.qea>] [--graph <json>]
 //        [--out <stem>] [--no-md] [--baseline-commit <sha>]
+//   --work defaults to the CURRENT PROJECT's root single *.qea (ARGO_EA_QEA > 仓库根唯一 *.qea),
+//   never a hardcoded filename — the flow works in any ArchGraph workspace.
 //   --base is optional: when omitted and --work is a tracked file inside the git repo,
 //   the committed (HEAD) version of --work is extracted automatically as the baseline —
-//   the day-to-day "human edited archgraph.qea" flow is then a single command.
+//   the day-to-day "human edited <project>.qea" flow is then a single command.
 
 const path = require('node:path');
 const fs = require('node:fs');
@@ -523,6 +525,24 @@ function gitShowHeadBlob(relPath) {
   const { execFileSync } = require('node:child_process');
   return execFileSync('git', ['cat-file', 'blob', 'HEAD:' + relPath], { maxBuffer: 512 * 1024 * 1024 });
 }
+function gitToplevel() {
+  const { execFileSync } = require('node:child_process');
+  try {
+    return execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch { return ''; }
+}
+// Resolve the CURRENT PROJECT's .qea (same convention as the projection):
+//   ARGO_EA_QEA env > exactly one *.qea at the git top-level (else cwd).
+// Called when --work is omitted so the day-to-day command never hardcodes a filename.
+function resolveProjectQea() {
+  if (process.env.ARGO_EA_QEA) { return process.env.ARGO_EA_QEA; }
+  const root = gitToplevel() || process.cwd();
+  let qeas = [];
+  try { qeas = fs.readdirSync(root).filter((f) => f.toLowerCase().endsWith('.qea')); } catch { qeas = []; }
+  if (qeas.length === 1) { return path.join(root, qeas[0]); }
+  return '';
+}
+
 function resolveAutoBase(workPath) {
   const { execFileSync } = require('node:child_process');
   const workAbs = path.resolve(process.cwd(), workPath);
@@ -551,9 +571,13 @@ function resolveAutoBase(workPath) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (!args.work) {
+    const auto = resolveProjectQea();
+    if (auto) { args.work = auto; }
+  }
   if (!args.base && !args.work) {
-    console.error('usage: node argo/scripts/ea-human-diff.js --base <base.qea> --work <work.qea> [--graph <json>] [--out <stem>] [--baseline-commit <sha>] [--no-md]');
-    console.error('       (--base optional: when omitted the committed HEAD version of --work is used as baseline)');
+    console.error('usage: node argo/scripts/ea-human-diff.js [--base <base.qea>] [--work <work.qea>] [--graph <json>] [--out <stem>] [--baseline-commit <sha>] [--no-md]');
+    console.error('       (--work optional: defaults to the current project root single *.qea; --base optional: the committed HEAD version of --work is the baseline)');
     process.exit(2);
   }
   if (args.base === '' && args.work) {

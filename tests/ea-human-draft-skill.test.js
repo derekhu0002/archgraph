@@ -35,7 +35,7 @@ test('ea-human-draft-skill (AT-2792-07): independent skill wraps assert -> diff 
   // wraps: assertion, diff extraction (tool), revert, ARGO write-back handoff
   assert.ok(fs.existsSync(TOOL), 'referenced diff tool must exist in-repo');
   assert.match(skill, /ea-human-diff\.js/, 'skill must invoke the ea-human-diff tool');
-  assert.match(skill, /git restore archgraph\.qea/, 'skill must revert the .qea to the committed baseline');
+  assert.match(skill, /git restore <项目\.qea>/, 'skill must revert the project .qea to the committed baseline (no hardcoded filename)');
   assert.match(skill, /previewSystemArchitectureMutation/, 'skill must write back through ARGO preview');
   assert.match(skill, /applySystemArchitectureMutation/, 'skill must write back through ARGO apply');
   assert.match(skill, /kg_sync_meta/, 'skill must state it reads the visible object model, not the mirror');
