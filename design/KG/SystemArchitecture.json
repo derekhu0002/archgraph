@@ -5240,9 +5240,9 @@
     {
       "attributes": [
         {
-          "description": "2026-09-04 人类方向修正：① full 模式=**整 .qea 文件清空后重建**（EA 为投影，全库以 canonical 图谱为准；不局限于同步根包子树）；② qea 投影脚本（ea-qea-sync/lib）**迁入 argo/scripts**（与 MCP/运行时同包，全环境可用）；③ **移除 design/KG/ea-qea.json 配置**——目标解析仅 ARGO_EA_QEA 环境变量 > 仓库根唯一 *.qea，保证本仓 canonical 与本仓 .qea 一致。",
+          "description": "2026-09-08 工程结论（实测反推）：EA 图的 Connectors 分组「Freeze Visible」复选框在 .qea 里存于 t_diagram.StyleEx 的 DLKO 令牌——勾选=DLKO=1、未勾选=不写该令牌（非 PDATA 令牌、非 ShowDetails、0 值只在被显式置为 0 时出现）。官方文档 403 反爬、PDATA/StyleEx 令牌池均无 freeze 关键词，靠用户勾选一张图保存后 diff t_diagram 行才确认。投影默认勾选=每次投影强制 DLKO=1（setStyleToken 替换/前置，保留 EA 格式化 token 与 schema_view_id 锚）。",
           "name": "decision",
-          "value": "qea-full-wholefile-argo-scripts-no-config"
+          "value": "ea-diagram-freeze-visible-dlko-styleex"
         },
         {
           "name": "status",
