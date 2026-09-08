@@ -275,6 +275,17 @@ function ensureStyleToken(styleEx, keyValue) {
   const token = String(keyValue).indexOf('=') >= 0 ? String(keyValue) + ';' : String(keyValue) + '=;';
   return text ? token + text : token;
 }
+// Force a StyleEx token to a value (replaces an existing one, else prepends).
+// Used for DLKO=1 (the "Freeze Visible" connector-display flag EA persists in the
+// diagram's StyleEx): every projected diagram must default to Freeze Visible ON, even
+// if EA previously stored DLKO=0 / dropped it after a human unchecked the box.
+function setStyleToken(styleEx, key, value) {
+  const text = String(styleEx === null || styleEx === undefined ? '' : styleEx);
+  const re = new RegExp('(^|;|\\s)' + key + '=[^;]*', 'i');
+  if (re.test(text)) { return text.replace(re, (m, pre) => pre + key + '=' + value); }
+  const token = key + '=' + value + ';';
+  return text ? token + text : token;
+}
 
 // ---------------------------------------------------------------------------
 // Core sync
@@ -530,7 +541,7 @@ function syncGraphToQea(graph, qeaPath, opts) {
     for (const view of graph.views || []) {
       if (!view || view.view_id === undefined || view.view_id === null) { continue; }
       const viewId = String(view.view_id);
-      const styleEx = 'schema_view_id=' + viewId + ';';
+      const styleEx = 'schema_view_id=' + viewId + ';DLKO=1;';
       const parentObjectId = (function () {
         if (view.parent_element_id !== undefined && view.parent_element_id !== null && view.parent_element_id !== '') {
           const pid = elemIdByAliasAll.get(String(view.parent_element_id));
@@ -550,8 +561,12 @@ function syncGraphToQea(graph, qeaPath, opts) {
       if (existing) {
         diagViewRows.set(viewId, existing);
         // EA may have rewritten StyleEx and dropped the anchor — re-inject it while
-        // preserving EA's own formatting tokens so identity stays discoverable.
-        const anchoredStyleEx = ensureStyleToken(existing.StyleEx, 'schema_view_id=' + viewId);
+        // preserving EA's own formatting tokens so identity stays discoverable. Also
+        // force DLKO=1 so every diagram defaults to "Freeze Visible" checked.
+        const anchoredStyleEx = ensureStyleToken(
+          setStyleToken(existing.StyleEx, 'DLKO', '1'),
+          'schema_view_id=' + viewId
+        );
         const changed = intended.Name !== (existing.Name || '') || (existing.StyleEx || '') !== anchoredStyleEx;
         if (DEBUG && changed) { console.error('DEBUG diagram chg', viewId, JSON.stringify({n:[intended.Name,(existing.Name||'')], style: !!parseStyleToken(existing.StyleEx,'schema_view_id')})); }
         if (changed && !o.dryRun) {

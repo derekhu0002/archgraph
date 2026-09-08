@@ -315,6 +315,71 @@ test('ea-qea-sync (AT-2791-10): incremental sync survives EA-rewritten diagram S
   }
 });
 
+test('ea-qea-sync (AT-2791-13): every projected diagram defaults to Freeze Visible ON (StyleEx DLKO=1), survives an EA rewrite, and is re-forced after a human unchecked it', () => {
+  // GIVEN a canonical graph with views projected into an isolated .qea
+  // WHEN the diagram StyleEx tokens are read back; and again after EA rewrites StyleEx;
+  //   and again after a human unchecks Freeze Visible (DLKO dropped/zeroed)
+  // THEN every diagram carries DLKO=1 (Freeze Visible checked) in StyleEx on every passthrough,
+  //   EA-formatting tokens are preserved, and re-sync is idempotent.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-freeze-'));
+  try {
+    const qea = tmpQea(dir);
+    const g = {
+      name: 'freeze', description: 'x', elements: [], relationships: [],
+      views: [
+        { view_id: 'v1', view_name: 'View One', description: '', parent_element_name: '', included_elements: [], included_relationships: [] },
+        { view_id: 'v2', view_name: 'View Two', description: '', parent_element_name: '', included_elements: [], included_relationships: [] },
+      ],
+    };
+    const r1 = lib.syncGraphToQea(g, qea, { dryRun: false });
+    assert.equal(r1.stats.added.diagrams, 2, 'two diagrams created');
+
+    let db = new DatabaseSync(qea);
+    const own = db.prepare("SELECT Diagram_ID, StyleEx FROM t_diagram WHERE StyleEx LIKE '%schema_view_id%'").all();
+    assert.equal(own.length, 2);
+    for (const d of own) {
+      assert.match(d.StyleEx, /DLKO=1(;|$)/, `diagram ${d.Diagram_ID} must default Freeze Visible ON`);
+      assert.match(d.StyleEx, /schema_view_id=[^;]+;/, 'schema_view_id anchor present');
+    }
+    const syncId = db.prepare("SELECT Package_ID FROM t_package WHERE Name='ArchGraph Sync'").get().Package_ID;
+    const v1 = db.prepare("SELECT Diagram_ID FROM t_diagram WHERE StyleEx LIKE '%schema_view_id=v1;%'").get();
+    assert.ok(v1, 'v1 diagram present');
+    db.close();
+
+    // Simulate EA having rewritten StyleEx with its own formatting tokens (keeps DLKO=1,
+    // drops our schema_view_id anchor).
+    db = new DatabaseSync(qea);
+    db.prepare("UPDATE t_diagram SET StyleEx='ExcludeRTF=0;SaveTag=034DF09E;Theme=:119;DLKO=1;' WHERE Diagram_ID=?").run(Number(v1.Diagram_ID));
+    db.close();
+    const r2 = lib.syncGraphToQea(g, qea, { dryRun: false });
+    assert.equal(r2.stats.added.diagrams, 0, 'no re-insert after EA rewrite');
+    assert.equal(r2.stats.updated.diagrams, 1, 'v1 re-anchored');
+    db = new DatabaseSync(qea);
+    const v1b = db.prepare("SELECT StyleEx FROM t_diagram WHERE Diagram_ID=?").get(Number(v1.Diagram_ID));
+    assert.match(v1b.StyleEx, /schema_view_id=v1;/, 'anchor re-injected');
+    assert.ok(v1b.StyleEx.includes('SaveTag=034DF09E'), 'EA formatting tokens preserved');
+    assert.match(v1b.StyleEx, /DLKO=1(;|$)/, 'Freeze Visible stays ON after EA rewrite');
+    db.close();
+
+    // Simulate a human unchecking Freeze Visible (EA zeroes DLKO).
+    db = new DatabaseSync(qea);
+    db.prepare("UPDATE t_diagram SET StyleEx='schema_view_id=v1;DLKO=0;' WHERE Diagram_ID=?").run(Number(v1.Diagram_ID));
+    db.close();
+    const r3 = lib.syncGraphToQea(g, qea, { dryRun: false });
+    db = new DatabaseSync(qea);
+    const v1c = db.prepare("SELECT StyleEx FROM t_diagram WHERE Diagram_ID=?").get(Number(v1.Diagram_ID));
+    assert.match(v1c.StyleEx, /DLKO=1(;|$)/, 'Freeze Visible re-forced ON after human unchecked');
+    db.close();
+
+    // idempotent: forcing an already-DLKO=1 diagram is a no-op
+    const r4 = lib.syncGraphToQea(g, qea, { dryRun: false });
+    assert.equal(r4.stats.added.diagrams, 0);
+    assert.equal(r4.stats.updated.diagrams, 0, 'stable after freeze forced on');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('ea-qea-sync (incremental): single element change updates only that element; steady-state timing', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-'));
   try {
