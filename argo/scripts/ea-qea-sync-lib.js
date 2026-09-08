@@ -22,6 +22,10 @@ const crypto = require('node:crypto');
 
 const SYNC_PACKAGE_NAME = 'ArchGraph Sync';
 const DIAGRAM_TYPE = 'Logical';
+// Attributes/Operations "Show Compartments" (Elements tab) default unchecked: EA stores
+// these in t_diagram.PDATA as HideAtts / HideOps (hide compartment = 1). Projected
+// diagrams hide both compartments by default while preserving EA's other PDATA tokens.
+const DIAGRAM_DISPLAY_DEFAULT = 'HideAtts=1;HideOps=1;';
 const META_TABLE = 'kg_sync_meta'; // {kind,key,sha,payload} — Node export/reconcile store
 const BUSY_TIMEOUT_MS = 15000;
 const CHUNK = 200;
@@ -538,7 +542,7 @@ function syncGraphToQea(graph, qeaPath, opts) {
     // it touches an open project and DROPS unknown tokens like schema_view_id — if we
     // only matched by the token we would re-INSERT the same deterministic ea_guid and
     // crash on t_diagram's UNIQUE(ea_guid) (projection failure: Neo4j ok, EA stale).
-    const existingDiags = db.prepare('SELECT Diagram_ID, Package_ID, Name, StyleEx, ea_guid FROM t_diagram WHERE Package_ID=?').all(syncId);
+    const existingDiags = db.prepare('SELECT Diagram_ID, Package_ID, Name, StyleEx, PDATA, ea_guid FROM t_diagram WHERE Package_ID=?').all(syncId);
     const diagByView = new Map();
     const diagByGuid = new Map();
     for (const d of existingDiags) {
@@ -567,6 +571,7 @@ function syncGraphToQea(graph, qeaPath, opts) {
         ParentID: parentObjectId,
         Notes: '', // EA .qea 不保留多段 Notes；视图内容经 kg_sync_meta 保真
         StyleEx: styleEx,
+        PDATA: DIAGRAM_DISPLAY_DEFAULT,
       };
       if (existing) {
         diagViewRows.set(viewId, existing);
@@ -577,11 +582,17 @@ function syncGraphToQea(graph, qeaPath, opts) {
           setStyleToken(existing.StyleEx, 'DLKO', '1'),
           'schema_view_id=' + viewId
         );
-        const changed = intended.Name !== (existing.Name || '') || (existing.StyleEx || '') !== anchoredStyleEx;
+        // Default Attributes/Operations compartments unchecked: force HideAtts=1 /
+        // HideOps=1 into PDATA while preserving EA's other display tokens.
+        const anchoredPdata = setStyleToken(
+          setStyleToken(existing.PDATA, 'HideAtts', '1'),
+          'HideOps', '1'
+        );
+        const changed = intended.Name !== (existing.Name || '') || (existing.StyleEx || '') !== anchoredStyleEx || (existing.PDATA || '') !== anchoredPdata;
         if (DEBUG && changed) { console.error('DEBUG diagram chg', viewId, JSON.stringify({n:[intended.Name,(existing.Name||'')], style: !!parseStyleToken(existing.StyleEx,'schema_view_id')})); }
         if (changed && !o.dryRun) {
-          db.prepare('UPDATE t_diagram SET Name=?, StyleEx=? WHERE Diagram_ID=?')
-            .run(intended.Name, anchoredStyleEx, Number(existing.Diagram_ID));
+          db.prepare('UPDATE t_diagram SET Name=?, StyleEx=?, PDATA=? WHERE Diagram_ID=?')
+            .run(intended.Name, anchoredStyleEx, anchoredPdata, Number(existing.Diagram_ID));
         }
         stats[changed ? 'updated' : 'skipped'].diagrams++;
       } else {
@@ -592,7 +603,7 @@ function syncGraphToQea(graph, qeaPath, opts) {
     const diagAliasToId = new Map();
     if (!o.dryRun) {
       if (newDiags.length > 0) {
-        insertMany(db, 't_diagram', ['Name', 'Diagram_Type', 'Package_ID', 'ParentID', 'StyleEx', 'ea_guid'], newDiags);
+        insertMany(db, 't_diagram', ['Name', 'Diagram_Type', 'Package_ID', 'ParentID', 'StyleEx', 'PDATA', 'ea_guid'], newDiags);
       }
       for (let i = 0; i < newDiags.length; i += 200) {
         const part = newDiags.slice(i, i + 200);

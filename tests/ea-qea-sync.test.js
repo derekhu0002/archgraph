@@ -458,6 +458,52 @@ test('ea-qea-sync (AT-2791-14): membership removal prunes stale canonical shapes
   }
 });
 
+test('ea-qea-sync (AT-2791-15): every projected diagram defaults Attributes/Operations compartments hidden (PDATA HideAtts=1;HideOps=1), survives an EA rewrite, and is idempotent', () => {
+  // GIVEN a canonical graph with a view projected into an isolated .qea
+  // WHEN the diagram PDATA is read back; and again after EA rewrites PDATA (re-enabling
+  //   the compartments to HideAtts=0/HideOps=0)
+  // THEN the diagram PDATA carries HideAtts=1;HideOps=1 on every pass (Attributes and
+  //   Operations "Show Compartments" unchecked), other EA display tokens are preserved,
+  //   and a third sync is idempotent.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-display-'));
+  try {
+    const qea = tmpQea(dir);
+    const g = {
+      name: 'display', description: 'x', elements: [], relationships: [],
+      views: [
+        { view_id: 'v1', view_name: 'View One', description: '', parent_element_name: '', included_elements: [], included_relationships: [] },
+      ],
+    };
+    const r1 = lib.syncGraphToQea(g, qea, { dryRun: false });
+    assert.equal(r1.stats.added.diagrams, 1);
+
+    let db = new DatabaseSync(qea);
+    const d = db.prepare("SELECT Diagram_ID, PDATA FROM t_diagram WHERE StyleEx LIKE '%schema_view_id=v1;%'").get();
+    assert.match(d.PDATA, /HideAtts=1(;|$)/, 'Attributes compartment hidden by default');
+    assert.match(d.PDATA, /HideOps=1(;|$)/, 'Operations compartment hidden by default');
+    db.close();
+
+    // Simulate EA re-enabling the compartments (HideAtts/HideOps=0) with its own tokens
+    db = new DatabaseSync(qea);
+    db.prepare("UPDATE t_diagram SET PDATA='HideRel=0;SaveTag=034DF09E;HideAtts=0;HideOps=0;' WHERE Diagram_ID=?").run(Number(d.Diagram_ID));
+    db.close();
+    const r2 = lib.syncGraphToQea(g, qea, { dryRun: false });
+    assert.equal(r2.stats.updated.diagrams, 1, 'diagram re-updated to re-apply the display default');
+    db = new DatabaseSync(qea);
+    const d2 = db.prepare("SELECT PDATA FROM t_diagram WHERE Diagram_ID=?").get(Number(d.Diagram_ID));
+    assert.match(d2.PDATA, /HideAtts=1(;|$)/, 'Attributes hidden re-forced');
+    assert.match(d2.PDATA, /HideOps=1(;|$)/, 'Operations hidden re-forced');
+    assert.ok(d2.PDATA.includes('SaveTag=034DF09E'), 'EA display tokens preserved');
+    db.close();
+
+    // idempotent third sync
+    const r3 = lib.syncGraphToQea(g, qea, { dryRun: false });
+    assert.equal(r3.stats.updated.diagrams, 0, 'stable after display default applied');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('ea-qea-sync (incremental): single element change updates only that element; steady-state timing', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-'));
   try {
