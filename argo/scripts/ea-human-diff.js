@@ -20,6 +20,9 @@
 // Zero third-party deps, no EA required: node:sqlite via the shared lib helper.
 //   node argo/scripts/ea-human-diff.js --base <base.qea> --work <work.qea> [--graph <json>]
 //        [--out <stem>] [--no-md] [--baseline-commit <sha>]
+//   --base is optional: when omitted and --work is a tracked file inside the git repo,
+//   the committed (HEAD) version of --work is extracted automatically as the baseline —
+//   the day-to-day "human edited archgraph.qea" flow is then a single command.
 
 const path = require('node:path');
 const fs = require('node:fs');
@@ -514,11 +517,54 @@ function parseArgs(argv) {
   return args;
 }
 
+// Auto-baseline: extract the committed (HEAD) version of the working .qea as the baseline.
+// Lets the day-to-day flow be a single command when --work is a tracked repo file.
+function gitShowHeadBlob(relPath) {
+  const { execFileSync } = require('node:child_process');
+  return execFileSync('git', ['cat-file', 'blob', 'HEAD:' + relPath], { maxBuffer: 512 * 1024 * 1024 });
+}
+function resolveAutoBase(workPath) {
+  const { execFileSync } = require('node:child_process');
+  const workAbs = path.resolve(process.cwd(), workPath);
+  let root;
+  try {
+    root = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
+  } catch {
+    throw new Error('--base omitted but git toplevel unavailable; pass --base <baseline.qea> explicitly');
+  }
+  const rel = path.relative(root, workAbs).split(path.sep).join('/');
+  if (rel.startsWith('..')) {
+    throw new Error('--work (' + workAbs + ') is outside the git repo; pass --base <baseline.qea> explicitly');
+  }
+  let blob;
+  try {
+    blob = gitShowHeadBlob(rel);
+  } catch {
+    throw new Error('git HEAD has no tracked file "' + rel + '"; pass --base <baseline.qea> explicitly');
+  }
+  const tmp = path.join(require('node:os').tmpdir(), 'ea-human-diff-base-' + process.pid + '.qea');
+  fs.writeFileSync(tmp, blob);
+  let short = '';
+  try { short = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { /* ignore */ }
+  return { base: tmp, baselineCommit: short };
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
-  if (!args.base || !args.work) {
+  if (!args.base && !args.work) {
     console.error('usage: node argo/scripts/ea-human-diff.js --base <base.qea> --work <work.qea> [--graph <json>] [--out <stem>] [--baseline-commit <sha>] [--no-md]');
+    console.error('       (--base optional: when omitted the committed HEAD version of --work is used as baseline)');
     process.exit(2);
+  }
+  if (args.base === '' && args.work) {
+    try {
+      const auto = resolveAutoBase(args.work);
+      args.base = auto.base;
+      if (!args.baselineCommit) { args.baselineCommit = auto.baselineCommit; }
+    } catch (err) {
+      console.error('ea-human-diff: ' + err.message);
+      process.exit(2);
+    }
   }
   for (const f of [args.base, args.work]) {
     if (!fs.existsSync(f)) { console.error('file not found: ' + f); process.exit(2); }
