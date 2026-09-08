@@ -5577,6 +5577,13 @@
           "description": "GIVEN 工作区与基线 kg_sync_meta 镜像完全相同、但可见对象模型被人类改动（只改 t_object 不改镜像）；WHEN 运行语义 diff；THEN 仍能捕获改动（证明 diff 以可见对象模型为准而非镜像）；反向：仅镜像差异不作为提议信号。",
           "Input": "tests/ea-human-diff.test.js",
           "acceptanceCriteria": "tests/ea-human-diff.test.js"
+        },
+        {
+          "name": "AT-2792-07",
+          "type": "Acceptance Test",
+          "description": "GIVEN 独立技能 argo/skills/ea-human-draft/SKILL.md 与其打包/部署接线；WHEN 从外部审阅其内容与接线；THEN SKILL.md 存在且 frontmatter name=ea-human-draft，封装完整收敛流程（断言→ea-human-diff 提取语义 diff→git restore 还原 .qea→经 ARGO preview/apply 写回交接）、声明以可见对象模型为准不读 kg_sync_meta、含 MUST NOT；package.json files 含 argo/skills/ea-human-draft；install-argo.ps1 将其部署到 copilot/cursor/opencode/dsh/openclaw 技能根，且既有 22 个编号部署步及标记不被破坏。",
+          "Input": "tests/ea-human-draft-skill.test.js",
+          "acceptanceCriteria": "tests/ea-human-draft-skill.test.js"
         }
       ],
       "attributes": [
