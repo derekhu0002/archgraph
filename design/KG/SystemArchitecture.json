@@ -5596,6 +5596,11 @@
           "name": "commit",
           "value": "0a526a6",
           "description": "argo/scripts/ea-human-diff.js（--base 可选：省略时自动提取 git HEAD 版本作基线，日常单命令用法；测试 7/7 绿）"
+        },
+        {
+          "name": "commit",
+          "value": "b055c95",
+          "description": "argo/skills/ea-human-draft/SKILL.md; package.json; install-argo.ps1; tests/ea-human-draft-skill.test.js; design/KG/SystemArchitecture.json; archgraph.qea（ea-human-draft 独立技能封装 断言→语义diff→git restore→ARGO 写回交接；随 npm 包发布并部署到 copilot/cursor/opencode/dsh/openclaw 技能根；AT-2792-07 1/1 绿、argo-deploy 6/6）"
         }
       ]
     }
