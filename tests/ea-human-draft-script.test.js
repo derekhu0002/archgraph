@@ -86,10 +86,21 @@ test('ea-human-draft-script (AT-2792-07): EA-internal extractor wraps canonical 
   assert.match(content, /fields\.testcases/, 'script must emit testcases into updateElement fields');
   assert.match(content, /fields\.type/, 'script must emit type into updateElement/updateRelationship fields');
 
-  // classify all seven canonical ops
-  for (const op of ['addElement', 'updateElement', 'removeElement', 'addRelationship', 'updateRelationship', 'removeRelationship', 'updateView']) {
+  // classify all canonical ops (incl. view add/remove/update)
+  for (const op of ['addElement', 'updateElement', 'removeElement', 'addRelationship', 'updateRelationship', 'removeRelationship', 'addView', 'updateView', 'removeView']) {
     assert.match(content, new RegExp('op' + '.*' + op), `script must classify ${op}`);
   }
+
+  // view add/remove/update detection
+  assert.match(content, /extraDiagrams/, 'script must collect unmatched/human-drawn diagrams for addView detection');
+  assert.match(content, /op: 'addView'/, 'script must emit addView for a user-added diagram');
+  assert.match(content, /op: 'removeView'/, 'script must emit removeView for a canonical view absent from EA');
+  assert.match(content, /knownViewNames/, 'script must match EA diagrams to canonical views by view_name (anchor fallback)');
+  assert.match(content, /\.description/, 'script must read diagram Notes as the view description for updateView');
+
+  // the Markdown embeds the machine JSON (one proposal per line), not verbose per-item prose
+  assert.match(content, /## 提议集（JSON）/, 'script must embed the proposal JSON in the Markdown');
+  assert.match(content, /function\s+compactJson\s*\(/, 'script must define a compact JSON helper for the Markdown body');
 
   // geometry-only is counted and excluded, never a proposal
   assert.match(content, /layoutOnly/, 'script must count layoutOnly (geometry-only, non-canonical)');
@@ -324,6 +335,59 @@ test('ea-human-draft-script (AT-2792-10/R): a brand-new relationship carries its
     assert.ok(add, `expected an addRelationship for the human-drawn connector, got ${result.proposals.map((p) => p.op).join(',')}`);
     assert.equal(add.proposed.description, 'human-typed description',
       'addRelationship.proposed.description must carry the EA Notes of the new relationship');
+  } finally {
+    if (db) { try { db.close(); } catch { /* ignore */ } }
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+});
+
+test('ea-human-draft-script (AT-2792-11/R): view add/remove/update (name+description) are detected, and the Markdown embeds the proposal JSON', (t) => {
+  if (process.env.EA_RUN_HEADLESS !== '1') { t.skip('EA headless not enabled'); return; }
+  if (!fs.existsSync(TEMPLATE_QEA)) { t.skip(`template missing: ${TEMPLATE_QEA}`); return; }
+  if (!fs.existsSync(RUNNER)) { t.skip(`headless runner missing: ${RUNNER}`); return; }
+
+  const graph = {
+    name: 'view-diff', description: '', elements: [
+      { id: 'e1', name: 'One', type: 'Business Object', description: 'd1' },
+      { id: 'e2', name: 'Two', type: 'Business Object', description: 'd2' },
+    ],
+    relationships: [],
+    views: [
+      { view_id: 'v1', view_name: 'View One', parent_element_id: 'e1', included_elements: ['e1'], included_relationships: [], description: 'original desc' },
+      { view_id: 'v2', view_name: 'View Two', parent_element_id: 'e1', included_elements: [], included_relationships: [], description: '' },
+    ],
+  };
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-view-'));
+  let db = null;
+  try {
+    const { workQea, graphPath, outStem } = projectFixture(graph, tmp);
+    db = lib.openQea(workQea);
+    db.exec('BEGIN IMMEDIATE');
+    // remove v2 diagram entirely (simulate view deleted) + change v1 description (Notes)
+    const v2guid = lib.deterministicGuid('diag:v2');
+    const v1guid = lib.deterministicGuid('diag:v1');
+    db.prepare('DELETE FROM t_diagram WHERE ea_guid=?').run(v2guid);
+    db.prepare('UPDATE t_diagram SET Notes=? WHERE ea_guid=?').run('edited desc', v1guid);
+    // drop the schema_view_id Anchor from StyleEx on v1 to simulate an EA rewrite that
+    // removes the token (the view must still be matched by Name).
+    const v1row = db.prepare('SELECT Diagram_ID, StyleEx FROM t_diagram WHERE ea_guid=?').get(v1guid);
+    let style = (v1row.StyleEx || '').split(';').filter((tok) => tok.indexOf('schema_view_id=') < 0).join(';');
+    db.prepare('UPDATE t_diagram SET StyleEx=? WHERE Diagram_ID=?').run(style, Number(v1row.Diagram_ID));
+    db.exec('COMMIT');
+    db.close(); db = null;
+
+    const { json } = runHeadlessDraft(workQea, graphPath, outStem);
+    assert.ok(json && json.ok && json.exitCode === 0, `draft run failed: ${JSON.stringify(json || '').slice(0, 500)}`);
+    const result = JSON.parse(fs.readFileSync(outStem + '.json', 'utf8').replace(/^\uFEFF/, ''));
+    const ops = result.proposals.map((p) => p.op);
+    const upd = result.proposals.find((p) => p.op === 'updateView' && p.viewId === 'v1');
+    assert.ok(upd && upd.description === 'edited desc', `expected updateView v1 with edited description, got ${JSON.stringify(result.proposals)}`);
+    assert.ok(ops.includes('removeView'), `expected removeView for v2, got ${ops.join(',')}`);
+    // Markdown must embed the proposal JSON
+    const md = fs.readFileSync(outStem + '.md', 'utf8').replace(/^\uFEFF/, '');
+    assert.match(md, /提议集（JSON）/, 'Markdown must embed the proposal JSON heading');
+    assert.match(md, /```json/, 'Markdown must include a JSON code block');
+    assert.match(md, /removeView/, 'Markdown JSON must contain removeView');
   } finally {
     if (db) { try { db.close(); } catch { /* ignore */ } }
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }

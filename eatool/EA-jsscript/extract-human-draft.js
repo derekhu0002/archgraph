@@ -305,6 +305,8 @@ function readCanonical(graphPath) {
 		var v = g.views[k];
 		if (v && v.view_id !== undefined && v.view_id !== null) {
 			base.viewById[String(v.view_id)] = {
+				view_name: v.view_name || '',
+				description: v.description || '',
 				included_elements: arrayMap(v.included_elements || [], function (x) { return String(x); }),
 				included_relationships: arrayMap(v.included_relationships || [], function (x) { return String(x); })
 			};
@@ -316,7 +318,7 @@ function readCanonical(graphPath) {
 // ---------------------------------------------------------------------------
 // Work snapshot (from the live EA visible object model, anchored via schema_id)
 // ---------------------------------------------------------------------------
-function readWork() {
+function readWork(knownViews) {
 	var syncPackageId = 0;
 	var roots = eaRows('SELECT Package_ID FROM t_package WHERE Parent_ID=0 ORDER BY Package_ID LIMIT 1');
 	if (roots.length > 0) {
@@ -324,16 +326,39 @@ function readWork() {
 		if (pkgs.length > 0) { syncPackageId = parseInt(pkgs[0].package_id, 10) || 0; }
 	}
 
+	// Match EA diagrams to canonical views. Preferred anchor: the schema_view_id StyleEx token
+	// the projector writes. EA rewrites StyleEx and drops unknown tokens, so also match by the
+	// diagram Name == canonical view_name (the projector names each diagram after the view).
+	// A diagram with neither is a human-drawn / user-added view.
+	var knownViewNames = {};
+	var viewsCatalog = knownViews || {};
+	for (var bvId in viewsCatalog) { if (viewsCatalog.hasOwnProperty(bvId)) { knownViewNames[normText(viewsCatalog[bvId].view_name)] = bvId; } }
+
 	var diagramsByView = {};
 	var viewByDiagram = {};
-	var diags = eaRows('SELECT Diagram_ID, Package_ID, Name, StyleEx, ea_guid FROM t_diagram');
+	var extraDiagrams = [];
+	var diags = eaRows('SELECT Diagram_ID, Package_ID, Name, Notes, StyleEx, ea_guid FROM t_diagram');
 	for (var i = 0; i < diags.length; i++) {
 		var d = diags[i];
+		var diagramId = parseInt(d.diagram_id, 10);
+		var diagName = String(d.name || '');
+		var ref = {
+			diagramId: diagramId,
+			view_name: diagName,
+			description: String(d.notes === null || d.notes === undefined ? '' : d.notes),
+			eaGuid: String(d.ea_guid || '')
+		};
 		var viewId = parseStyleToken(d.styleex, 'schema_view_id');
 		if (viewId) {
-			var diagramId = parseInt(d.diagram_id, 10);
-			diagramsByView[viewId] = { diagramId: diagramId, name: String(d.name || ''), eaGuid: String(d.ea_guid || '') };
+			diagramsByView[viewId] = ref;
 			viewByDiagram[diagramId] = viewId;
+		} else if (knownViewNames.hasOwnProperty(normText(diagName))) {
+			var matchedId = knownViewNames[normText(diagName)];
+			diagramsByView[matchedId] = ref;
+			viewByDiagram[diagramId] = matchedId;
+		} else {
+			// no schema_view_id anchor and Name not in canonical -> human-drawn / user-added view
+			extraDiagrams.push(ref);
 		}
 	}
 
@@ -457,6 +482,7 @@ function readWork() {
 		syncPackageId: syncPackageId,
 		diagramsByView: diagramsByView,
 		viewByDiagram: viewByDiagram,
+		extraDiagrams: extraDiagrams,
 		elementBySchema: elementBySchema,
 		elementByGuid: elementByGuid,
 		relBySchema: relBySchema,
@@ -576,6 +602,16 @@ function summarizeTestcases(list) {
 	return names.join(', ');
 }
 
+// One proposal per line, compact (no pretty-print) — keeps the Markdown body small while
+// staying machine-readable. Uses JSON.stringify (provided by the JSON-Parser include / shim).
+function compactJson(proposals) {
+	var out = [];
+	for (var i = 0; i < (proposals || []).length; i++) {
+		out.push(JSON.stringify(proposals[i]));
+	}
+	return out.join('\n');
+}
+
 // ---------------------------------------------------------------------------
 // Semantic diff: baseline (canonical) vs work (live EA visible object model)
 // ---------------------------------------------------------------------------
@@ -584,7 +620,7 @@ function semanticDiff(base, work) {
 	var summary = {
 		addElement: 0, updateElement: 0, removeElement: 0,
 		addRelationship: 0, updateRelationship: 0, removeRelationship: 0,
-		updateView: 0,
+		addView: 0, updateView: 0, removeView: 0,
 		layoutOnly: 0, outOfScopeNew: 0, removedUnanchored: 0, orphanAnchored: 0
 	};
 	function push(p) { proposals.push(p); summary[p.op] = (summary[p.op] || 0) + 1; }
@@ -751,15 +787,50 @@ function semanticDiff(base, work) {
 		});
 	}
 
-	// --- view membership (anchored objects only, still in the model) --------
+	// --- views: add / remove / update(name+description) / membership -------------
+	// human-drawn diagrams with no canonical view_id (no schema_view_id anchor, Name not in
+	// canonical) are NEW views the user added in EA.
+	for (var ed = 0; ed < (work.extraDiagrams || []).length; ed++) {
+		var exDiag = work.extraDiagrams[ed];
+		push({
+			op: 'addView', kind: 'view', id: null,
+			proposed: {
+				view_name: exDiag.view_name,
+				description: exDiag.description === '' ? undefined : exDiag.description
+			},
+			sourceEa: { guid: exDiag.eaGuid, diagramId: exDiag.diagramId }
+		});
+	}
 	var allViewIds = {};
-	for (var bv in base.viewById) { if (base.viewById.hasOwnProperty(bv)) { allViewIds[bv] = true; } }
-	for (var wv in work.diagramsByView) { if (work.diagramsByView.hasOwnProperty(wv)) { allViewIds[wv] = true; } }
-	for (var viewId in allViewIds) {
-		if (!allViewIds.hasOwnProperty(viewId)) { continue; }
-		var baseView = base.viewById[viewId];
-		var wDiagram = work.diagramsByView[viewId];
+	for (var bv0 in base.viewById) { if (base.viewById.hasOwnProperty(bv0)) { allViewIds[bv0] = true; } }
+	for (var wv0 in work.diagramsByView) { if (work.diagramsByView.hasOwnProperty(wv0)) { allViewIds[wv0] = true; } }
+	for (var vid in allViewIds) {
+		if (!allViewIds.hasOwnProperty(vid)) { continue; }
+		var baseView = base.viewById[vid];
+		var wDiagram = work.diagramsByView[vid];
+		if (!baseView && wDiagram) {
+			// new view present in EA, absent in canonical -> addView
+			push({
+				op: 'addView', kind: 'view', id: null,
+				proposed: {
+					view_name: wDiagram.view_name,
+					description: wDiagram.description === '' ? undefined : wDiagram.description
+				},
+				sourceEa: { guid: wDiagram.eaGuid, diagramId: wDiagram.diagramId }
+			});
+			continue;
+		}
+		if (baseView && !wDiagram) {
+			// canonical view absent in EA -> removeView (confirm-first)
+			push({ op: 'removeView', kind: 'view', id: vid, sourceEa: {} });
+			continue;
+		}
 		if (!baseView || !wDiagram) { continue; }
+		// view name / description changed
+		var vfields = {};
+		if (normText(baseView.view_name) !== normText(wDiagram.view_name)) { vfields.view_name = wDiagram.view_name; }
+		if (normText(baseView.description) !== normText(wDiagram.description)) { vfields.description = wDiagram.description; }
+		// membership (anchored objects only, still in the model)
 		var baseMembers = baseView.included_elements;
 		var workMembersIds = [];
 		var wdiag = wDiagram.diagramId;
@@ -782,14 +853,14 @@ function semanticDiff(base, work) {
 				if (work.elementBySchema.hasOwnProperty(bId)) { removeMembers.push(bId); }
 			}
 		}
-		if (addMembers.length > 0 || removeMembers.length > 0) {
-			push({
-				op: 'updateView', kind: 'view', viewId: viewId,
-				addMembers: addMembers.length > 0 ? addMembers : undefined,
-				removeMembers: removeMembers.length > 0 ? removeMembers : undefined,
-				sourceEa: {}
-			});
-		}
+		// build a single updateView carrying every detected change
+		var updView = { op: 'updateView', kind: 'view', viewId: vid, sourceEa: {} };
+		var vChanged = false;
+		if (vfields.view_name) { updView.view_name = vfields.view_name; vChanged = true; }
+		if (vfields.description) { updView.description = vfields.description; vChanged = true; }
+		if (addMembers.length > 0) { updView.addMembers = addMembers; vChanged = true; }
+		if (removeMembers.length > 0) { updView.removeMembers = removeMembers; vChanged = true; }
+		if (vChanged) { push(updView); }
 	}
 
 	summary.metaUnchanged = true; // canonical is the mirror source; diff never reads kg_sync_meta
@@ -845,10 +916,11 @@ function renderMarkdown(result) {
 	lines.push('');
 	lines.push('| 操作 | 数量 |');
 	lines.push('| --- | --- |');
-	var opOrder = ['addElement', 'updateElement', 'removeElement', 'addRelationship', 'updateRelationship', 'removeRelationship', 'updateView'];
+	var opOrder = ['addElement', 'updateElement', 'removeElement', 'addRelationship', 'updateRelationship', 'removeRelationship', 'addView', 'updateView', 'removeView'];
 	var labels = {
 		addElement: '新增元素', updateElement: '更新元素', removeElement: '删除元素',
-		addRelationship: '新增关系', updateRelationship: '更新关系', removeRelationship: '删除关系', updateView: '视图成员'
+		addRelationship: '新增关系', updateRelationship: '更新关系', removeRelationship: '删除关系',
+		addView: '新增视图', updateView: '更新视图', removeView: '删除视图'
 	};
 	for (var i = 0; i < opOrder.length; i++) {
 		var op = opOrder[i];
@@ -862,50 +934,13 @@ function renderMarkdown(result) {
 	if (result.proposals.length === 0) {
 		lines.push('> 未检测到 canonical 语义提议（纯几何/超出作用域改动不计）。');
 		lines.push('');
-	}
-	var groups = {
-		addElement: '新增元素提议', updateElement: '更新元素提议', removeElement: '删除元素提议',
-		addRelationship: '新增关系提议', updateRelationship: '更新关系提议', removeRelationship: '删除关系提议',
-		updateView: '视图成员提议'
-	};
-	for (var g = 0; g < opOrder.length; g++) {
-		var opg = opOrder[g];
-		var items = [];
-		for (var pi = 0; pi < result.proposals.length; pi++) {
-			if (result.proposals[pi].op === opg) { items.push(result.proposals[pi]); }
-		}
-		if (items.length === 0) { continue; }
-		lines.push('## ' + groups[opg] + '（' + items.length + '）');
+	} else {
+		// Machine-readable proposal set, embedded verbatim — compact, no per-item prose.
+		lines.push('## 提议集（JSON）');
 		lines.push('');
-		for (var ip = 0; ip < items.length; ip++) {
-			var p = items[ip];
-			if (opg === 'addElement') {
-				lines.push('- **' + p.proposed.name + '** — id 待 agent 分配；EA 类型 `' + p.proposed.eaType.objectType + '`/`' + (p.proposed.eaType.stereotype || '') + '`' + (p.proposed.viewIds ? '；视图候选 ' + p.proposed.viewIds.join(', ') : '') + (p.proposed.description ? '；描述：' + p.proposed.description.slice(0, 120) : '') + '；EA `' + p.sourceEa.guid + '`');
-			} else if (opg === 'updateElement' || opg === 'updateRelationship') {
-				var parts = [];
-				for (var fk in p.fields) {
-					if (!p.fields.hasOwnProperty(fk)) { continue; }
-					if (fk === 'attributes') {
-						parts.push('attributes[' + p.fields.attributes.length + '] ' + summarizeAttrs(p.fields.attributes));
-					} else if (fk === 'testcases') {
-						parts.push('testcases[' + p.fields.testcases.length + '] ' + summarizeTestcases(p.fields.testcases));
-					} else {
-						parts.push(fk + ' → ' + String(p.fields[fk]).slice(0, 80));
-					}
-				}
-				lines.push('- `' + p.id + '` — ' + parts.join('；') + (p.sourceEa.guid ? '；EA `' + p.sourceEa.guid + '`' : ''));
-			} else if (opg === 'removeElement' || opg === 'removeRelationship') {
-				lines.push('- `' + p.id + '` — 待 agent 确认后删除' + (p.sourceEa.guid ? '；EA `' + p.sourceEa.guid + '`' : ''));
-			} else if (opg === 'addRelationship') {
-				var src = typeof p.proposed.sourceRef === 'object' ? ('新元素 ' + p.proposed.sourceRef.newGuid) : p.proposed.sourceRef;
-				var tgt = typeof p.proposed.targetRef === 'object' ? ('新元素 ' + p.proposed.targetRef.newGuid) : p.proposed.targetRef;
-				lines.push('- ' + (p.proposed.name ? '**' + p.proposed.name + '** ' : '') + src + ' → ' + tgt + '；EA 类型 `' + p.proposed.eaType.connectorType + '`/`' + (p.proposed.eaType.stereotype || '') + '`' + (p.proposed.description ? '；描述：' + p.proposed.description.slice(0, 120) : '') + '；EA `' + p.sourceEa.guid + '`');
-			} else if (opg === 'updateView') {
-				var a = p.addMembers ? ('加入：' + p.addMembers.join(', ')) : '';
-				var r = p.removeMembers ? ('移除：' + p.removeMembers.join(', ')) : '';
-				lines.push('- 视图 `' + p.viewId + '` — ' + arrayNonEmpty([a, r]).join('；'));
-			}
-		}
+		lines.push('```json');
+		lines.push(compactJson(result.proposals));
+		lines.push('```');
 		lines.push('');
 	}
 	// Object.filter may be absent in JScript 5.8; the above uses manual join. Guard:
@@ -954,7 +989,7 @@ function main() {
 	Session.Output('extract-human-draft: baseline elements=' + ObjectKeysCount(base.elementById)
 		+ ' relationships=' + ObjectKeysCount(base.relById) + ' views=' + ObjectKeysCount(base.viewById));
 
-	var work = readWork();
+	var work = readWork(base.viewById);
 	Session.Output('extract-human-draft: live model elements(schema=' + ObjectKeysCount(work.elementBySchema)
 		+ ' total=' + ObjectKeysCount(work.elementByGuid) + ') relationships(schema=' + ObjectKeysCount(work.relBySchema)
 		+ ' total=' + ObjectKeysCount(work.relByGuid) + ') diagrams=' + ObjectKeysCount(work.diagramsByView));
