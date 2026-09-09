@@ -5593,7 +5593,7 @@
       "testcases": [
         {
           "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN EA 内提取脚本 eatool/EA-jsscript/extract-human-draft.js 与其 headless 接线（bootstrap.js/run-headless.ps1 支持 draft 模式）；WHEN 从外部审阅其内容与接线；THEN 脚本存在且含 main()、读 canonical JSON（design/KG/SystemArchitecture.json）为基线、经 Repository.SQLQuery 读 EA 可见对象模型（t_object/t_connector/t_diagramobjects/t_attribute/t_objecttests + schema_id/schema_view_id/relationship_attributes_json 锚）、分类九类提议（add/update/remove element+relationship+view）、纯几何不计入（layoutOnly）、产出 results/human-draft.json + .md；且旧 node 工具 argo/scripts/ea-human-diff.js 与其测试已删除、原 ea-human-draft 技能已移除（package.json files 不再含 argo/skills/ea-human-draft、install-argo.ps1 不再部署该技能、既有 22 个编号部署步及标记不被破坏）。",
+          "description": "GIVEN EA 内提取脚本 eatool/EA-jsscript/extract-human-draft.js 与其 headless 接线（bootstrap.js/run-headless.ps1 支持 draft 模式）；WHEN 从外部审阅其内容与接线；THEN 脚本存在且含 main()、读 canonical JSON（design/KG/SystemArchitecture.json）为基线、经 Repository.SQLQuery 读 EA 可见对象模型（t_object/t_connector/t_diagramobjects/t_attribute/t_objecttests + schema_id/schema_view_id/relationship_attributes_json 锚）、分类九类提议（add/update/remove element+relationship+view）、纯几何不计入（layoutOnly）、产出 results/human-draft.md（内嵌提议 JSON，无独立 .json）；且旧 node 工具 argo/scripts/ea-human-diff.js 与其测试已删除、原 ea-human-draft 技能已移除（package.json files 不再含 argo/skills/ea-human-draft、install-argo.ps1 不再部署该技能、既有 22 个编号部署步及标记不被破坏）。",
           "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-07",
           "type": "Acceptance Test"
@@ -5624,6 +5624,13 @@
           "description": "GIVEN 人类在 EA 增加/删除一个 VIEW 并修改某 VIEW 的描述（且 EA 重写丢掉了 schema_view_id 锚）；WHEN 运行语义 diff；THEN 提议含 addView（新增图，无 canonical 对应）、removeView（canonical 有但 EA 无）、updateView（view_name/description 变化，描述来自 diagram Notes）；且生成的 .md 以简短摘要表+内嵌机器 JSON（compactJson 每提议一行）呈现，去掉逐条散文本。",
           "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-11",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/ea-human-reconcile-skill.test.js",
+          "description": "GIVEN 全局 skill argo/skills/ea-human-reconcile/SKILL.md 与其打包/部署接线（如 argo-init）；WHEN 从外部审阅其内容与接线；THEN SKILL.md 存在且 frontmatter name=ea-human-reconcile，声明分工（人类交 draft→Agent 结合全局分析给建议→人类裁决）、MUST NOT 未经人类裁决就 apply 写图、以 canonical 图+ARGO 语义上下文为分析依据而非仅 draft 字段、枚举九类提议并标记删除类需确认、含逐条建议+整体风险+待裁决项输出；package.json files 含 argo/skills/ea-human-reconcile；install-argo.ps1 部署到 copilot/cursor/opencode/dsh/openclaw 技能根，且既有 22 个编号部署步及标记不被破坏。",
+          "Input": "tests/ea-human-reconcile-skill.test.js",
+          "name": "AT-2792-12",
           "type": "Acceptance Test"
         }
       ],
@@ -5687,6 +5694,11 @@
           "name": "commit",
           "value": "fb2dbd9",
           "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js; design/KG/SystemArchitecture.json（不再生成 .json——提议 JSON 内嵌 .md 栅栏块；去掉 md 末尾『本 diff 仅作提取…』说明行；测试改从 .md 解析提议集并断言无独立 .json；my-army 真实 EA 验证仅产 .md；回归 ea-human-draft-script EA 5/5、ea-qea-sync 13/13、guardian 4/4）"
+        },
+        {
+          "name": "commit",
+          "value": "7f6f55e",
+          "description": "argo/skills/ea-human-reconcile/SKILL.md; install-argo.ps1; package.json; tests/ea-human-reconcile-skill.test.js; tests/argo-deploy.test.js; tests/argo-openclaw.test.js（新增全局 skill：EA 提取 draft→Agent 结合全局分析给建议→人类裁决；Agent 未经人类裁决 MUST NOT apply；如 argo-init 一样打包/部署到 copilot/cursor/opencode/dsh/openclaw 全部宿主（非编号 Copy-Tree 行，22 编号部署步不变）；AT-2792-12；live 部署至 5 宿主；回归 1/1+6/6+6/6+guardian 4/4）"
         }
       ]
     },
