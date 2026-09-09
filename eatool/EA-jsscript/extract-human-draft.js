@@ -58,6 +58,10 @@ function decodeXml(s) {
 }
 
 // Parse EA Repository.SQLQuery XML into an array of row objects keyed by column name.
+// EA returns column tags with the table's physical column-name case (e.g. t_connectortag
+// is VALUE/NOTES, t_objectproperties is Value/Notes). Normalize every key to lower case so
+// reads are case-insensitive — a case mismatch silently yields undefined, which corrupted
+// schema_id / archimate_relationship_type reads on t_connectortag.
 function eaRows(sql) {
 	var out = [];
 	var xml = '';
@@ -69,7 +73,11 @@ function eaRows(sql) {
 		var colRe = /<([A-Za-z_][A-Za-z0-9_]*)>([\s\S]*?)<\/\1>/gi;
 		var cm;
 		while ((cm = colRe.exec(rm[1])) != null) {
-			rec[cm[1]] = decodeXml(cm[2]);
+			// 'default' is a JScript reserved word; it cannot be used as a property name via
+			// dotted access (.default) in the ES3 engine. Map the column to a safe key.
+			var key = cm[1].toLowerCase();
+			if (key === 'default') { key = 'defaultval'; }
+			rec[key] = decodeXml(cm[2]);
 		}
 		out.push(rec);
 	}
@@ -311,8 +319,8 @@ function readWork() {
 	var syncPackageId = 0;
 	var roots = eaRows('SELECT Package_ID FROM t_package WHERE Parent_ID=0 ORDER BY Package_ID LIMIT 1');
 	if (roots.length > 0) {
-		var pkgs = eaRows("SELECT Package_ID FROM t_package WHERE Parent_ID=" + roots[0].Package_ID + " AND Name='ArchGraph Sync' LIMIT 1");
-		if (pkgs.length > 0) { syncPackageId = parseInt(pkgs[0].Package_ID, 10) || 0; }
+		var pkgs = eaRows("SELECT Package_ID FROM t_package WHERE Parent_ID=" + roots[0].package_id + " AND Name='ArchGraph Sync' LIMIT 1");
+		if (pkgs.length > 0) { syncPackageId = parseInt(pkgs[0].package_id, 10) || 0; }
 	}
 
 	var diagramsByView = {};
@@ -320,10 +328,10 @@ function readWork() {
 	var diags = eaRows('SELECT Diagram_ID, Package_ID, Name, StyleEx, ea_guid FROM t_diagram');
 	for (var i = 0; i < diags.length; i++) {
 		var d = diags[i];
-		var viewId = parseStyleToken(d.StyleEx, 'schema_view_id');
+		var viewId = parseStyleToken(d.styleex, 'schema_view_id');
 		if (viewId) {
-			var diagramId = parseInt(d.Diagram_ID, 10);
-			diagramsByView[viewId] = { diagramId: diagramId, name: String(d.Name || ''), eaGuid: String(d.ea_guid || '') };
+			var diagramId = parseInt(d.diagram_id, 10);
+			diagramsByView[viewId] = { diagramId: diagramId, name: String(d.name || ''), eaGuid: String(d.ea_guid || '') };
 			viewByDiagram[diagramId] = viewId;
 		}
 	}
@@ -331,11 +339,11 @@ function readWork() {
 	var elemTags = {};
 	var props = eaRows("SELECT Object_ID, Property, Value FROM t_objectproperties WHERE Property IN ('schema_id','archimate_type')");
 	for (var p = 0; p < props.length; p++) {
-		var oid = parseInt(props[p].Object_ID, 10);
+		var oid = parseInt(props[p].object_id, 10);
 		if (!elemTags[oid]) { elemTags[oid] = {}; }
 		var t = elemTags[oid];
-		if (props[p].Property == 'schema_id') { t.schemaId = String(props[p].Value); }
-		if (props[p].Property == 'archimate_type') { t.archimateType = String(props[p].Value); }
+		if (props[p].property == 'schema_id') { t.schemaId = String(props[p].value); }
+		if (props[p].property == 'archimate_type') { t.archimateType = String(props[p].value); }
 	}
 
 	var elementBySchema = {};
@@ -346,32 +354,32 @@ function readWork() {
 	var attrsByObject = {};
 	var arows = eaRows('SELECT ID, Object_ID, Name, "Default", Notes, Pos FROM t_attribute');
 	for (var ar = 0; ar < arows.length; ar++) {
-		var attrObjId = parseInt(arows[ar].Object_ID, 10);
+		var attrObjId = parseInt(arows[ar].object_id, 10);
 		if (!attrsByObject[attrObjId]) { attrsByObject[attrObjId] = []; }
-		attrsByObject[attrObjId].push({ name: String(arows[ar].Name || ''), value: String(arows[ar].Default === null || arows[ar].Default === undefined ? '' : arows[ar].Default), description: String(arows[ar].Notes === null || arows[ar].Notes === undefined ? '' : arows[ar].Notes) });
+		attrsByObject[attrObjId].push({ name: String(arows[ar].name || ''), value: String(arows[ar].defaultval === null || arows[ar].defaultval === undefined ? '' : arows[ar].defaultval), description: String(arows[ar].notes === null || arows[ar].notes === undefined ? '' : arows[ar].notes) });
 	}
 	var testsByObject = {};
 	var trows = eaRows('SELECT Object_ID, Test, Notes, InputData, AcceptanceCriteria FROM t_objecttests');
 	for (var tr = 0; tr < trows.length; tr++) {
-		var testObjId = parseInt(trows[tr].Object_ID, 10);
+		var testObjId = parseInt(trows[tr].object_id, 10);
 		if (!testsByObject[testObjId]) { testsByObject[testObjId] = []; }
-		testsByObject[testObjId].push({ name: String(trows[tr].Test || ''), description: String(trows[tr].Notes || ''), Input: String(trows[tr].InputData || ''), acceptanceCriteria: String(trows[tr].AcceptanceCriteria || '') });
+		testsByObject[testObjId].push({ name: String(trows[tr].test || ''), description: String(trows[tr].notes || ''), Input: String(trows[tr].inputdata || ''), acceptanceCriteria: String(trows[tr].acceptancecriteria || '') });
 	}
 
 	for (var e = 0; e < elems.length; e++) {
 		var x = elems[e];
 		var rec = {
-			objectId: parseInt(x.Object_ID, 10),
-			alias: x.Alias || '',
+			objectId: parseInt(x.object_id, 10),
+			alias: x.alias || '',
 			eaGuid: String(x.ea_guid || ''),
-			objectType: String(x.Object_Type || ''),
-			stereotype: String(x.Stereotype || ''),
-			name: String(x.Name || ''),
-			description: String(x.Note === null || x.Note === undefined ? '' : x.Note),
-			status: String(x.Status || ''),
-			packageId: parseInt(x.Package_ID || 0, 10),
-			attributes: attrsByObject[parseInt(x.Object_ID, 10)] || [],
-			testcases: testsByObject[parseInt(x.Object_ID, 10)] || []
+			objectType: String(x.object_type || ''),
+			stereotype: String(x.stereotype || ''),
+			name: String(x.name || ''),
+			description: String(x.note === null || x.note === undefined ? '' : x.note),
+			status: String(x.status || ''),
+			packageId: parseInt(x.package_id || 0, 10),
+			attributes: attrsByObject[parseInt(x.object_id, 10)] || [],
+			testcases: testsByObject[parseInt(x.object_id, 10)] || []
 		};
 		var tg = elemTags[rec.objectId];
 		if (tg && tg.schemaId) {
@@ -385,12 +393,12 @@ function readWork() {
 	var relTags = {};
 	var rprops = eaRows("SELECT ElementID, Property, Value FROM t_connectortag WHERE Property IN ('schema_id','archimate_relationship_type','relationship_attributes_json')");
 	for (var q = 0; q < rprops.length; q++) {
-		var cid = parseInt(rprops[q].ElementID, 10);
+		var cid = parseInt(rprops[q].elementid, 10);
 		if (!relTags[cid]) { relTags[cid] = {}; }
 		var rt = relTags[cid];
-		if (rprops[q].Property == 'schema_id') { rt.schemaId = String(rprops[q].Value); }
-		if (rprops[q].Property == 'archimate_relationship_type') { rt.archimateType = String(rprops[q].Value); }
-		if (rprops[q].Property == 'relationship_attributes_json') { rt.attrsJson = String(rprops[q].Value); }
+		if (rprops[q].property == 'schema_id') { rt.schemaId = String(rprops[q].value); }
+		if (rprops[q].property == 'archimate_relationship_type') { rt.archimateType = String(rprops[q].value); }
+		if (rprops[q].property == 'relationship_attributes_json') { rt.attrsJson = String(rprops[q].value); }
 	}
 
 	function parseRelAttrs(rt) {
@@ -410,16 +418,16 @@ function readWork() {
 	for (var c = 0; c < conns.length; c++) {
 		var y = conns[c];
 		var rrec = {
-			connectorId: parseInt(y.Connector_ID, 10),
+			connectorId: parseInt(y.connector_id, 10),
 			eaGuid: String(y.ea_guid || ''),
-			name: String(y.Name || ''),
-			connectorType: String(y.Connector_Type || ''),
-			stereotype: String(y.Stereotype || ''),
-			description: String(y.Notes === null || y.Notes === undefined ? '' : y.Notes),
-			direction: String(y.Direction || ''),
-			sourceObjectId: parseInt(y.Start_Object_ID || 0, 10),
-			targetObjectId: parseInt(y.End_Object_ID || 0, 10),
-			attributes: parseRelAttrs(relTags[parseInt(y.Connector_ID, 10)])
+			name: String(y.name || ''),
+			connectorType: String(y.connector_type || ''),
+			stereotype: String(y.stereotype || ''),
+			description: String(y.notes === null || y.notes === undefined ? '' : y.notes),
+			direction: String(y.direction || ''),
+			sourceObjectId: parseInt(y.start_object_id || 0, 10),
+			targetObjectId: parseInt(y.end_object_id || 0, 10),
+			attributes: parseRelAttrs(relTags[parseInt(y.connector_id, 10)])
 		};
 		var rct = relTags[rrec.connectorId];
 		if (rct && rct.schemaId) {
@@ -433,13 +441,13 @@ function readWork() {
 	var placements = {};
 	var objs = eaRows('SELECT Diagram_ID, Object_ID, Sequence, RectLeft, RectTop, RectRight, RectBottom FROM t_diagramobjects');
 	for (var o = 0; o < objs.length; o++) {
-		var od = parseInt(objs[o].Diagram_ID, 10);
+		var od = parseInt(objs[o].diagram_id, 10);
 		if (!placements[od]) { placements[od] = {}; }
-		placements[od][parseInt(objs[o].Object_ID, 10)] = {
-			left: parseInt(objs[o].RectLeft || 0, 10),
-			top: parseInt(objs[o].RectTop || 0, 10),
-			right: parseInt(objs[o].RectRight || 0, 10),
-			bottom: parseInt(objs[o].RectBottom || 0, 10)
+		placements[od][parseInt(objs[o].object_id, 10)] = {
+			left: parseInt(objs[o].rectleft || 0, 10),
+			top: parseInt(objs[o].recttop || 0, 10),
+			right: parseInt(objs[o].rectright || 0, 10),
+			bottom: parseInt(objs[o].rectbottom || 0, 10)
 		};
 	}
 
