@@ -5649,11 +5649,22 @@
           "name": "commit",
           "value": "aef5a0c",
           "description": "argo/scripts/ea-human-diff.js; argo/skills/ea-human-draft/SKILL.md; tests/ea-human-diff.test.js; tests/ea-human-draft-skill.test.js（--work 默认自动发现当前项目根唯一 *.qea，去掉写死的 archgraph.qea；SKILL 改为当前项目 .qea 泛化写法；AT-2792-08）"
+        },
+        {
+          "name": "commit",
+          "value": "bbe9309",
+          "description": "eatool/EA-jsscript/extract-human-draft.js; argo/skills/ea-human-draft (removed); tests/ea-human-draft-script.test.js; eatool/EA-jsscript/headless/bootstrap.js + run-headless.ps1; package.json; install-argo.ps1; design/KG/SystemArchitecture.json; archgraph.qea（移除 ea-human-draft 技能改由 EA 内脚本提取 DRAFT：脚本读 canonical JSON 作基线 + 当前模型可见对象模型作工作区，产生同 node 工具一致的七类语义 diff 提议（几何仅布局），产出 results/human-draft.json+md；headless 支持 draft 模式；AT-2792-07 改为静态审查 + 真跑 2/2；验收守卫 4/4；argo-deploy 6/6）"
         }
       ]
     },
     {
-      "attributes": [],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "bbe9309",
+          "description": "eatool/EA-jsscript/extract-human-draft.js; eatool/EA-jsscript/headless/bootstrap.js + run-headless.ps1; tests/ea-human-draft-script.test.js; design/KG/SystemArchitecture.json（EA 内提取脚本落地 + headless draft 接线；AT-2792-07 静态审查 + AT-2792-07/R 真跑 2/2）"
+        }
+      ],
       "description": "在 Sparx EA 内部运行的 JScript（eatool/EA-jsscript/extract-human-draft.js），把人类在 EA 里对当前项目模型的草稿改动提取为『语义 diff 提议』：基线=canonical JSON（design/KG/SystemArchitecture.json，真源；投影保证已提交 .qea == canonical，故 live-EA vs canonical 与 node 工具 base=committed.qea vs work=live.qea 语义等价），工作区=EA 可见对象模型（经 Repository.SQLQuery 读 t_object/t_connector/t_diagram/t_diagramobjects，按 schema_id / schema_view_id 锚 tag 对齐；绝不读 kg_sync_meta 镜像），归类为 addElement/updateElement/removeElement/addRelationship/updateRelationship/removeRelationship/updateView 提议，纯几何（t_diagramobjects 坐标）只统计 layoutOnly 不产出；运行即写 results/human-draft.json + results/human-draft.md，交 agent 经 ARGO preview/apply 写回 canonical。与 node 工具 argo/scripts/ea-human-diff.js（需 EA 关闭、读两个 .qea）互补：本脚本在 EA 打开模型时直接可用，无需关闭 EA/无需 git restore。可经 headless 自动化（bootstrap.js/run-headless.ps1 支持 draft 模式，设 EA_HEADLESS_GRAPH/EA_HEADLESS_OUTPUT）。",
       "id": "ea-human-draft-script-001",
       "name": "EA 人类草稿提取脚本（extract-human-draft）",
