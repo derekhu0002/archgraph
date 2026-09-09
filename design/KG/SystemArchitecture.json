@@ -5599,6 +5599,20 @@
           "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-08",
           "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
+          "description": "GIVEN canonical 有一条关系（如 1161）其连接器在 EA 里仍存在但 schema_id 锚 tag 丢失；WHEN 运行语义 diff；THEN 不把它误报为 removeRelationship，而是 updateRelationship 且 fields.reAnchor 带提示；且该连接器不被重复报为 addRelationship。",
+          "Input": "tests/ea-human-draft-script.test.js",
+          "name": "AT-2792-09",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
+          "description": "GIVEN 人类在 EA 画了一条新的连接（无 schema_id 锚）并填了 Notes 描述；WHEN 运行语义 diff；THEN 提议为 addRelationship 且 proposed.description 携带该 EA Notes（不再丢描述）。",
+          "Input": "tests/ea-human-draft-script.test.js",
+          "name": "AT-2792-10",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
@@ -5631,6 +5645,11 @@
           "name": "commit",
           "value": "a093ab8",
           "description": "argo/scripts/ea-human-diff.js (removed); tests/ea-human-diff.test.js (removed); eatool/EA-jsscript/extract-human-draft.js; argo/scripts/ea-qea-sync-lib.js; tests/ea-human-draft-script.test.js; tests/ea-qea-sync.test.js; design/KG/SystemArchitecture.json; archgraph.qea（移除 node 工具，EA 内脚本为唯一实现；readWork 补读 t_attribute/t_objecttests/relationship_attributes_json，diff 补 type/attributes/testcases；投影镜像关系属性关系_attributes_json 标签；AT-2792-07 重写 + AT-2792-08 新增 + AT-2791-16；ea-qea-sync 13/13、EA headless 2/2、guardian 4/4）"
+        },
+        {
+          "name": "commit",
+          "value": "aac1b8a",
+          "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js; design/KG/SystemArchitecture.json（修复：锚丢失的连接器不再误报 removeRelationship，改 updateRelationship + reAnchor 提示；新增关系携带描述 description；AT-2792-09/R + AT-2792-10/R，EA 无头 4/4）"
         }
       ]
     },
