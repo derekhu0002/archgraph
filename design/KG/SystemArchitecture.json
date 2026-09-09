@@ -3191,6 +3191,10 @@
         {
           "view_id": "overseer-archive-001",
           "view_name": "项目总管档案"
+        },
+        {
+          "view_id": "overseer-release-001",
+          "view_name": "项目总管发布记录"
         }
       ],
       "attributes": [
@@ -3973,6 +3977,11 @@
           "name": "commit",
           "value": "ae9e3a4",
           "description": "design/KG/SystemArchitecture.json（登记 WP2792 + ea-human-draft-script-001 commit）"
+        },
+        {
+          "name": "commit",
+          "value": "ac0a88f",
+          "description": "package.json（发布 archgraph-argo@0.15.3 + 登记）"
         }
       ],
       "testcases": [
@@ -5642,6 +5651,27 @@
       "id": "ea-human-draft-script-001",
       "name": "EA 人类草稿提取脚本（extract-human-draft）",
       "type": "Artifact"
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（发布 archgraph-argo@0.15.3：移除 ea-human-diff node 工具 + ea-human-draft 技能；ea-human-draft 改为 EA 内脚本；投影镜像关系属性 relationship_attributes_json；AT-2791-16）",
+          "name": "commit",
+          "value": "ac0a88f"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "发布里程碑（2026-09-09）：archgraph-argo@0.15.3 发布并部署。内容：①移除旧 node 工具 argo/scripts/ea-human-diff.js + tests/ea-human-diff.test.js（EA 内脚本 extract-human-draft.js 为唯一实现，图谱 AT-2792-01..06/08 删除改为 AT-2792-07 重写 + AT-2792-08 属性）；②移除 ea-human-draft 技能（argo/skills/ea-human-draft，打包/部署接线 package.json files + install-argo.ps1 5 处，22 编号部署步未动）；③ea-qea-sync-lib.js 镜像关系属性→t_connectortag relationship_attributes_json（幂等 update-in-place，AT-2791-16）；④extract-human-draft.js readWork 补读 t_attribute/t_objecttests/relationship_attributes_json，diff 补 type/attributes/testcases。部署：npm 全局安装 archgraph-argo@0.15.3，argo-deploy 跑 install-argo.ps1 22/22（Copilot/Cursor/OpenCode/DSH/OpenClaw 多宿主），MCP 配置/规则/技能已更新。坑：npm publish 后 registry 读取延迟（约 60s 才可见，install 会 ETARGET）；install-argo.ps1 用 Copy-Tree 只增不删——部署位 .argo/scripts/ea-human-diff.js 需手动清。特别记录：EA Repository.SQLQuery 查不存在的列会『挂起不报错』（如 t_objecttests 无 Name 列，列名是 Test），必须用真实列名，否则无头运行死锁。验证：validateSystemArchitecture passed、qeaProjection/neo4jSync Aligned；ea-qea-sync 13/13、ea-human-draft-script 静态+EA真跑 2/2、acceptance-guardian 4/4、argo-deploy 6/6。",
+      "id": "overseer-argo-0-15-3-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.15.3（EA 内草稿脚本 + 属性提取）",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -7576,6 +7606,15 @@
       "parent_element_id": "1249",
       "view_id": "ea-tooling-wps-001",
       "view_name": "EA 工具链工作包（EA Tooling WPs）"
+    },
+    {
+      "description": "项目总管发布的 ArchGraph npm 版本里程碑记录（分层子视图，避免 overseer-ltm-001 达 15 上限）。",
+      "parent_element_id": "project-overseer-001",
+      "view_id": "overseer-release-001",
+      "view_name": "项目总管发布记录",
+      "included_elements": [
+        "overseer-argo-0-15-3-release-001"
+      ]
     }
   ]
 }
