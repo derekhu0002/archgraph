@@ -3982,6 +3982,11 @@
           "name": "commit",
           "value": "ac0a88f",
           "description": "package.json（发布 archgraph-argo@0.15.3 + 登记）"
+        },
+        {
+          "name": "commit",
+          "value": "66c67f8",
+          "description": "design/KG/SystemArchitecture.json（登记 66c67f8 EA 列名大小写修复）"
         }
       ],
       "testcases": [
@@ -5650,6 +5655,11 @@
           "name": "commit",
           "value": "aac1b8a",
           "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js; design/KG/SystemArchitecture.json（修复：锚丢失的连接器不再误报 removeRelationship，改 updateRelationship + reAnchor 提示；新增关系携带描述 description；AT-2792-09/R + AT-2792-10/R，EA 无头 4/4）"
+        },
+        {
+          "name": "commit",
+          "value": "66c67f8",
+          "description": "eatool/EA-jsscript/extract-human-draft.js（根因修复：EA Repository.SQLQuery 返回列标签为表物理列名大小写——t_connectortag 是 VALUE/NOTES、t_objectproperties 是 Value/Notes；旧 eaRows 按键的原名存导致 rprops[q].Value 读到 undefined，静默丢弃 schema_id/archimate_relationship_type/relationship_attributes_json，使 1161 看似无锚→误报 drift updateRelationship(type=undefined)；且 default 是 JScript 保留字不能作 .default。eaRows 现把列 key 全小写归一 + default→defaultval；所有行读取改用归一化 key。在用户 my-army 项目真实 EA 无头验证：1161 不再误报 updateRelationship/drift、removeRelationship=0、4 条新关系提议带 description。回归：ea-human-draft-script EA 无头 4/4、ea-qea-sync 13/13、acceptance-guardian 4/4）"
         }
       ]
     },
