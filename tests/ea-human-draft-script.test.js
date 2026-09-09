@@ -8,8 +8,10 @@
 // classifies the human's changes into the semantic-diff proposal set (addElement/
 // updateElement/removeElement / addRelationship/updateRelationship/removeRelationship /
 // updateView), excluding pure geometry (layoutOnly).
-//   - key fields compared: name / description / status / type for elements; name /
-//     description / type / source / target for relationships
+//   - key fields compared: name / description / type for elements (status is NOT a top-level
+//     canonical element field — an element's state lives in attributes[].name=='status', so it
+//     is only compared through the attributes diff, never as a top-level fields.status);
+//     name / description / type / source / target for relationships
 //   - element attributes (t_attribute) and element testcases (t_objecttests) are read and
 //     diffed into updateElement.fields.attributes / .testcases
 //   - relationship attributes (relationship_attributes_json connector tag) are read and
@@ -92,6 +94,11 @@ test('ea-human-draft-script (AT-2792-07): EA-internal extractor wraps canonical 
   // geometry-only is counted and excluded, never a proposal
   assert.match(content, /layoutOnly/, 'script must count layoutOnly (geometry-only, non-canonical)');
   assert.match(content, /geometry/i, 'script must reference geometry');
+
+  // status is NOT a top-level canonical element field: the script must never emit a
+  // top-level fields.status (it lives in attributes[].name=='status', handled by diffAttrs)
+  assert.doesNotMatch(content, /fields\.status/, 'script must not emit a top-level fields.status (status is an attribute, not a canonical element property)');
+  assert.match(content, /no top-level status field/, 'script must document why status is not compared as a top-level field');
 
   // new additions carry their semantics: element/relationship descriptions + attrs; a drained
   // anchor-lost relationship is not misreported as a deletion

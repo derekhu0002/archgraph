@@ -615,7 +615,11 @@ function semanticDiff(base, work) {
 		var fields = {};
 		if (normText(baseRec.name) !== normText(workRec.name)) { fields.name = workRec.name; }
 		if (normText(baseRec.description) !== normText(workRec.description)) { fields.description = workRec.description; }
-		if (normText(baseRec.status) !== normText(workRec.status)) { fields.status = workRec.status; }
+		// NOTE: no top-level status field — the canonical schema element has no `.status`
+		// property; an element's state lives in attributes[].name=='status'. Comparing EA's
+		// t_object.Status (default 'Proposed') against a nonexistent canonical top-level status
+		// produced a spurious updateElement {status:'Proposed'} for every element. State changes
+		// are captured via the attributes diff below.
 		if (normText(baseRec.type) !== normText(workRec.archimateType)) { fields.type = workRec.archimateType; }
 		var eaAttrDiff = diffAttrs(baseRec.attributes || [], workRec.attributes || []);
 		if (eaAttrDiff.changed) { fields.attributes = workRec.attributes; }
