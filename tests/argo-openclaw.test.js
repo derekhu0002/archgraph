@@ -102,6 +102,7 @@ test('install-argo.ps1 deploys OpenClaw rules, skill, and MCP registration', () 
     // AT-2780-02: skill -> ~/.openclaw/skills/argo-init (managed/shared root).
     const skill = fs.readFileSync(path.join(openClawHome, 'skills', 'argo-init', 'SKILL.md'), 'utf8');
     assert.match(skill, /name: argo-init/, 'skill must keep its OpenClaw-compatible frontmatter');
+    assert.ok(fs.existsSync(path.join(openClawHome, 'skills', 'ea-human-reconcile', 'SKILL.md')), 'OpenClaw ea-human-reconcile skill must be deployed');
 
     // AT-2780-03: MCP -> ~/.openclaw/openclaw.json mcp.servers.argo.
     // OpenClaw is a fixed-workspace host; the workspace is pinned explicitly

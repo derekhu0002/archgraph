@@ -105,8 +105,9 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     // 2b) defaults (workspace bootstrap templates)
     assert.ok(fs.existsSync(path.join(argoRoot, 'defaults', 'design', 'KG', 'SystemArchitecture.json')));
     assert.ok(fs.existsSync(path.join(argoRoot, 'defaults', 'EA-model-template.qea')));
-    // 3) argo-init skill
+    // 3) argo-init skill (+ global ea-human-reconcile skill)
     assert.ok(fs.existsSync(path.join(skillsRoot, 'argo-init', 'SKILL.md')));
+    assert.ok(fs.existsSync(path.join(skillsRoot, 'ea-human-reconcile', 'SKILL.md')), 'Copilot ea-human-reconcile skill must be deployed');
     // 4) global rule
     assert.ok(fs.existsSync(path.join(promptsRoot, 'archgraph.instructions.md')));
 
@@ -143,6 +144,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
 
     // 7) Cursor skill + MCP config.
     assert.ok(fs.existsSync(path.join(cursorSkillsRoot, 'argo-init', 'SKILL.md')), 'Cursor skill must be deployed');
+    assert.ok(fs.existsSync(path.join(cursorSkillsRoot, 'ea-human-reconcile', 'SKILL.md')), 'Cursor ea-human-reconcile skill must be deployed');
     assert.ok(fs.existsSync(cursorMcpPath), 'Cursor MCP config must be written');
     const cursorMcp = JSON.parse(fs.readFileSync(cursorMcpPath, 'utf8'));
     assert.ok(cursorMcp.mcpServers && cursorMcp.mcpServers.argo);
@@ -178,6 +180,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
 
     // 8) OpenCode skill + global rule.
     assert.ok(fs.existsSync(path.join(openCodeSkillsRoot, 'argo-init', 'SKILL.md')), 'OpenCode skill must be deployed');
+    assert.ok(fs.existsSync(path.join(openCodeSkillsRoot, 'ea-human-reconcile', 'SKILL.md')), 'OpenCode ea-human-reconcile skill must be deployed');
     assert.ok(fs.existsSync(openCodeAgentsPath), 'OpenCode global AGENTS.md must be written');
     assert.match(fs.readFileSync(openCodeAgentsPath, 'utf8'), /ArchGraph ARGO Workflow Rules/);
 
@@ -324,6 +327,7 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     // 2) skill -> ~/.dsh/skills/argo-init (same single source as the others).
     const skill = fs.readFileSync(path.join(dshHome, 'skills', 'argo-init', 'SKILL.md'), 'utf8');
     assert.match(skill, /name: argo-init/, 'skill must keep its DSH-compatible frontmatter');
+    assert.ok(fs.existsSync(path.join(dshHome, 'skills', 'ea-human-reconcile', 'SKILL.md')), 'DSH ea-human-reconcile skill must be deployed');
 
     // 3+4) bridge + wakeup rows -> ~/.dsh/cordis.patch.yml (managed block).
     // The dsh-argo-workspace bridge connects directly to the argo server; no
