@@ -5660,6 +5660,11 @@
           "name": "commit",
           "value": "66c67f8",
           "description": "eatool/EA-jsscript/extract-human-draft.js（根因修复：EA Repository.SQLQuery 返回列标签为表物理列名大小写——t_connectortag 是 VALUE/NOTES、t_objectproperties 是 Value/Notes；旧 eaRows 按键的原名存导致 rprops[q].Value 读到 undefined，静默丢弃 schema_id/archimate_relationship_type/relationship_attributes_json，使 1161 看似无锚→误报 drift updateRelationship(type=undefined)；且 default 是 JScript 保留字不能作 .default。eaRows 现把列 key 全小写归一 + default→defaultval；所有行读取改用归一化 key。在用户 my-army 项目真实 EA 无头验证：1161 不再误报 updateRelationship/drift、removeRelationship=0、4 条新关系提议带 description。回归：ea-human-draft-script EA 无头 4/4、ea-qea-sync 13/13、acceptance-guardian 4/4）"
+        },
+        {
+          "name": "commit",
+          "value": "cf62f4b",
+          "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js（修复：不再输出顶层 fields.status——canonical schema 元素无顶层 status 属性（元素状态存活在 attributes[].name=='status'），旧逻辑拿不存在的顶层 status 与 EA t_object.Status（默认 Proposed）比较，导致每个元素虚报 {status:'Proposed'}（如 my-army 1240/1249）；现改为仅经 diffAttrs 通道比较；my-army 真实 EA 验证 updateElement 2→1、1249 仅剩真实 description:'ssss'、1240 不再报；回归 ea-human-draft-script EA 4/4、ea-qea-sync 17/17、guardian 4/4）"
         }
       ]
     },
