@@ -31,25 +31,26 @@ test('ea-human-reconcile-skill (AT-2792-12): global skill wraps analyze-vs-whole
   assert.ok(name, 'frontmatter must carry name');
   assert.equal(name[1].trim(), 'ea-human-reconcile', 'skill name must equal its folder');
 
-  // division of labor: human hands draft -> agent analyzes+advises -> human decides
+  // division of labor: agent analyzes the draft against the whole architecture -> advises -> human decides
   assert.match(skill, /human-draft\.md/, 'skill must consume the EA human-draft extraction output');
-  assert.match(skill, /交给 Agent|交给 agent|交给 Agent/, 'skill must state the draft is handed to the agent');
+  assert.match(skill, /结合全局分析|全局分析|结合.*全局/, 'skill must state the agent analyzes against the whole architecture');
   assert.match(skill, /人类裁决|由人类裁决|人类.*拍板/, 'skill must state the human is the final decision maker');
+  assert.match(skill, /disable-model-invocation:\s*true/, 'skill must not be auto-invoked by the model (human-triggered only)');
 
-  // MUST NOT apply without human decision
+  // MUST NOT apply without human decision; write-back goes through preview then apply
   assert.match(skill, /MUST NOT[\s\S]*applySystemArchitectureMutation/, 'skill must forbid applying without human decision');
   assert.match(skill, /MUST NOT[\s\S]*未经人类裁决/, 'skill must forbid applying before the human rules');
+  assert.match(skill, /previewSystemArchitectureMutation[\s\S]*applySystemArchitectureMutation/, 'skill must preview before applying after the human agrees');
 
   // analyze the whole architecture, not just the draft fields
   assert.match(skill, /design[\/\\\\]KG[\/\\\\]SystemArchitecture\.json/, 'skill must reference the canonical graph as the analysis basis');
-  assert.match(skill, /getIntentElementContext|getSystemArchitecture/, 'skill must use ARGO semantic context to see dependencies');
-  assert.match(skill, /结合.*全局|全局.*分析/, 'skill must state it analyzes against the whole architecture');
+  assert.match(skill, /getIntentElementContext|getSystemArchitecture|queryNeo4jGraph/, 'skill must give the agent concrete query methods (semantic context + Cypher)');
+  assert.match(skill, /queryNeo4jGraph/, 'skill must mention neo4j cypher as an analysis query path');
 
-  // enumerate all proposal ops + flag destructive ones
-  for (const op of ['addElement', 'updateElement', 'removeElement', 'addRelationship', 'updateRelationship', 'removeRelationship', 'addView', 'updateView', 'removeView']) {
-    assert.match(skill, new RegExp(op), `skill must reference the ${op} proposal op`);
-  }
+  // categorize proposals: destructive (remove*), add/update, and views
   assert.match(skill, /removeElement|removeRelationship|removeView/, 'skill must flag destructive (remove*) proposals');
+  assert.match(skill, /删除\/破坏性/, 'skill must group destructive proposals for confirmation');
+  assert.match(skill, /新增\/更新/, 'skill must cover add/update proposals');
   assert.match(skill, /级联|引用|依赖|悬空/, 'skill must reason about cascading/in-dependents/lingering references');
 
   // package.json ships it
