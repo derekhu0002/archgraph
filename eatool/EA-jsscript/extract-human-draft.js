@@ -512,6 +512,21 @@ function schemaOfObject(work, objectId) {
 	return null;
 }
 
+// Find a connector (in the full relByGuid set) whose source/target objects match the given
+// object ids. Used to detect an anchor-drifted relationship: it still EXISTS in EA but lost
+// its schema_id tag, so it must NOT be reported as a deletion.
+function connectorByEndpoints(work, srcObjectId, tgtObjectId) {
+	var match = null;
+	for (var g in work.relByGuid) {
+		if (!work.relByGuid.hasOwnProperty(g)) { continue; }
+		var r = work.relByGuid[g];
+		if (r.sourceObjectId === srcObjectId && r.targetObjectId === tgtObjectId) {
+			if (!match) { match = r; }
+		}
+	}
+	return match;
+}
+
 function arrayContains(arr, v) {
 	for (var i = 0; i < arr.length; i++) { if (arr[i] === v) { return true; } }
 	return false;
@@ -633,12 +648,37 @@ function semanticDiff(base, work) {
 	// --- relationships ------------------------------------------------------
 	var baseRelIds = [];
 	for (var rid in base.relById) { if (base.relById.hasOwnProperty(rid)) { baseRelIds.push(rid); } }
+	// connectors that were matched as an anchor-drift of an existing canonical relationship —
+	// they must NOT be double-reported as brand-new addRelationship proposals.
+	var driftedConnectorGuids = {};
 
 	for (var rb = 0; rb < baseRelIds.length; rb++) {
 		var relSchemaId = baseRelIds[rb];
 		var baseRel = base.relById[relSchemaId];
 		var workRel = work.relBySchema[relSchemaId];
 		if (!workRel) {
+			// The canonical relationship has no schema-anchored connector in the work model.
+			// Before declaring it REMOVED, check whether a connector with the same endpoints is
+			// still present but lost its schema_id anchor (EA rewrites / re-draws connectors and
+			// drops the anchor). If so, this is an anchor-drift, NOT a deletion: keep it as an
+			// updateRelationship carrying a reAnchor hint so the agent re-binds rather than deletes.
+			var srcObj = work.elementBySchema[String(baseRel.sourceId)];
+			var tgtObj = work.elementBySchema[String(baseRel.targetId)];
+			var drifted = (srcObj && tgtObj) ? connectorByEndpoints(work, srcObj.objectId, tgtObj.objectId) : null;
+			if (drifted) {
+				var driftFields = {};
+				if (normText(baseRel.name) !== normText(drifted.name)) { driftFields.name = drifted.name; }
+				if (normText(baseRel.description) !== normText(drifted.description)) { driftFields.description = drifted.description; }
+				if (normText(baseRel.type) !== normText(drifted.archimateType)) { driftFields.type = drifted.archimateType; }
+				var driftAttrDiff = diffAttrs(baseRel.attributes || [], drifted.attributes || []);
+				if (driftAttrDiff.changed) { driftFields.attributes = drifted.attributes; }
+				driftFields.sourceId = String(baseRel.sourceId);
+				driftFields.targetId = String(baseRel.targetId);
+				driftFields.reAnchor = { note: 'relationship connector exists in EA but its schema_id anchor was lost; re-anchor to ' + relSchemaId, eaGuid: drifted.eaGuid };
+				driftedConnectorGuids[String(drifted.eaGuid)] = true;
+				push({ op: 'updateRelationship', kind: 'relationship', id: relSchemaId, fields: driftFields, sourceEa: { guid: drifted.eaGuid } });
+				continue;
+			}
 			push({ op: 'removeRelationship', kind: 'relationship', id: relSchemaId, sourceEa: {} });
 			continue;
 		}
@@ -670,6 +710,7 @@ function semanticDiff(base, work) {
 		if (!work.relByGuid.hasOwnProperty(cg)) { continue; }
 		var recRel = work.relByGuid[cg];
 		if (recRel.schemaId) { continue; }
+		if (driftedConnectorGuids[String(recRel.eaGuid)]) { continue; }
 		var srcE = work.elementByGuid[guidOfObject(work, recRel.sourceObjectId)];
 		var tgtE = work.elementByGuid[guidOfObject(work, recRel.targetObjectId)];
 		var srcContext = srcE ? elementCanonicalContext(work, srcE) : false;
@@ -687,6 +728,7 @@ function semanticDiff(base, work) {
 			op: 'addRelationship', kind: 'relationship', id: null,
 			proposed: {
 				name: recRel.name === '' ? undefined : recRel.name,
+				description: recRel.description === '' ? undefined : recRel.description,
 				sourceRef: srcRef, targetRef: tgtRef,
 				eaType: { connectorType: recRel.connectorType, stereotype: recRel.stereotype },
 				viewIds: relViewIds.length > 0 ? relViewIds : undefined,
@@ -844,7 +886,7 @@ function renderMarkdown(result) {
 			} else if (opg === 'addRelationship') {
 				var src = typeof p.proposed.sourceRef === 'object' ? ('新元素 ' + p.proposed.sourceRef.newGuid) : p.proposed.sourceRef;
 				var tgt = typeof p.proposed.targetRef === 'object' ? ('新元素 ' + p.proposed.targetRef.newGuid) : p.proposed.targetRef;
-				lines.push('- ' + (p.proposed.name ? '**' + p.proposed.name + '** ' : '') + src + ' → ' + tgt + '；EA 类型 `' + p.proposed.eaType.connectorType + '`/`' + (p.proposed.eaType.stereotype || '') + '`；EA `' + p.sourceEa.guid + '`');
+				lines.push('- ' + (p.proposed.name ? '**' + p.proposed.name + '** ' : '') + src + ' → ' + tgt + '；EA 类型 `' + p.proposed.eaType.connectorType + '`/`' + (p.proposed.eaType.stereotype || '') + '`' + (p.proposed.description ? '；描述：' + p.proposed.description.slice(0, 120) : '') + '；EA `' + p.sourceEa.guid + '`');
 			} else if (opg === 'updateView') {
 				var a = p.addMembers ? ('加入：' + p.addMembers.join(', ')) : '';
 				var r = p.removeMembers ? ('移除：' + p.removeMembers.join(', ')) : '';

@@ -93,6 +93,13 @@ test('ea-human-draft-script (AT-2792-07): EA-internal extractor wraps canonical 
   assert.match(content, /layoutOnly/, 'script must count layoutOnly (geometry-only, non-canonical)');
   assert.match(content, /geometry/i, 'script must reference geometry');
 
+  // new additions carry their semantics: element/relationship descriptions + attrs; a drained
+  // anchor-lost relationship is not misreported as a deletion
+  assert.match(content, /op: 'addRelationship'[\s\S]*description: recRel\.description/, 'addRelationship.proposed must carry the EA Notes as description');
+  assert.match(content, /connectorByEndpoints/, 'script must detect an anchor-lost (still-present) connector to avoid misreporting deletion');
+  assert.match(content, /reAnchor/, 'script must emit a reAnchor hint for a drifted connection');
+  assert.match(content, /driftedConnectorGuids/, 'script must not double-report a drifted connector as addRelationship');
+
   // output artifacts
   assert.match(content, /results\\human-draft/, 'script must default output to results/human-draft');
   assert.match(content, /\.json/, 'script must write the machine proposal JSON');
@@ -126,6 +133,29 @@ test('ea-human-draft-script (AT-2792-07): EA-internal extractor wraps canonical 
   assert.match(runner, /extract-human-draft\.js/, 'headless runner must map draft mode to extract-human-draft.js');
 });
 
+function runHeadlessDraft(workQea, graphPath, outStem) {
+  const r = spawnSync('powershell.exe', [
+    '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', RUNNER,
+    '-Feap', workQea, '-Mode', 'draft', '-Graph', graphPath, '-Output', outStem, '-KillEA', '-TimeoutSec', '300',
+  ], { encoding: 'utf8', timeout: 600000 });
+  let json = null;
+  try { json = JSON.parse(r.stdout); } catch { /* ignore */ }
+  return { json, r };
+}
+
+function projectFixture(graph, dir) {
+  const baseQea = path.join(dir, 'base.qea');
+  const workQea = path.join(dir, 'work.qea');
+  const graphPath = path.join(dir, 'graph.json');
+  const outStem = path.join(dir, 'human-draft');
+  fs.copyFileSync(TEMPLATE_QEA, baseQea);
+  fs.writeFileSync(graphPath, JSON.stringify(graph, null, 2), 'utf8');
+  const proj = lib.fullProjection(graph, baseQea, {});
+  assert.ok(proj.ok, 'fullProjection of fixture failed');
+  fs.copyFileSync(baseQea, workQea);
+  return { workQea, graphPath, outStem, baseQea };
+}
+
 test('ea-human-draft-script (AT-2792-07/R): headless draft run on an edited model yields the visible-object-model semantic diff', (t) => {
   // GIVEN EA headless runner + an isolated .qea projected from a fixture, edited in the
   // visible object model by a human (name/description change + a new unanchored object)
@@ -155,20 +185,9 @@ test('ea-human-draft-script (AT-2792-07/R): headless draft run on an edited mode
   };
 
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-draft-'));
-  const baseQea = path.join(tmp, 'base.qea');
-  const workQea = path.join(tmp, 'work.qea');
-  const graphPath = path.join(tmp, 'graph.json');
-  const outStem = path.join(tmp, 'human-draft');
-  fs.copyFileSync(TEMPLATE_QEA, baseQea);
-  fs.writeFileSync(graphPath, JSON.stringify(FIXTURE, null, 2), 'utf8');
-
   let db = null;
   try {
-    // project baseline
-    const proj = lib.fullProjection(FIXTURE, baseQea, {});
-    assert.ok(proj.ok, 'fullProjection of fixture failed');
-    // copy to work model then human-edit the visible object model directly
-    fs.copyFileSync(baseQea, workQea);
+    const { workQea, graphPath, outStem } = projectFixture(FIXTURE, tmp);
     db = lib.openQea(workQea);
     db.exec('BEGIN IMMEDIATE');
     const root = db.prepare('SELECT Package_ID FROM t_package WHERE Parent_ID=0 ORDER BY Package_ID LIMIT 1').get();
@@ -191,15 +210,9 @@ test('ea-human-draft-script (AT-2792-07/R): headless draft run on an edited mode
     db.exec('COMMIT');
     db.close(); db = null;
 
-    // run extract-human-draft headlessly
-    const r = spawnSync('powershell.exe', [
-      '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', RUNNER,
-      '-Feap', workQea, '-Mode', 'draft', '-Graph', graphPath, '-Output', outStem, '-KillEA', '-TimeoutSec', '300',
-    ], { encoding: 'utf8', timeout: 600000 });
-    let json = null;
-    try { json = JSON.parse(r.stdout); } catch { /* ignore */ }
+    const { json } = runHeadlessDraft(workQea, graphPath, outStem);
     assert.ok(json && json.ok && json.exitCode === 0,
-      `headless draft run failed: ${JSON.stringify(json || r.stdout).slice(0, 500)}`);
+      `headless draft run failed: ${JSON.stringify(json || '').slice(0, 500)}`);
     assert.ok(fs.existsSync(outStem + '.json'), 'draft .json must be produced');
     assert.ok(fs.existsSync(outStem + '.md'), 'draft .md must be produced');
 
@@ -217,6 +230,93 @@ test('ea-human-draft-script (AT-2792-07/R): headless draft run on an edited mode
     assert.ok(noteAttr && noteAttr.value === 'v2', 'updateElement attributes must reflect the human value change');
     const add = result.proposals.find((p) => p.op === 'addElement');
     assert.ok(add && add.proposed.name === 'Human Doodled Box', 'addElement carries the human-doodled object');
+  } finally {
+    if (db) { try { db.close(); } catch { /* ignore */ } }
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+});
+
+test('ea-human-draft-script (AT-2792-09/R): an relationship whose connector lost its schema_id anchor is NOT misreported as removeRelationship; it becomes updateRelationship with a reAnchor hint', (t) => {
+  if (process.env.EA_RUN_HEADLESS !== '1') { t.skip('EA headless not enabled'); return; }
+  if (!fs.existsSync(TEMPLATE_QEA)) { t.skip(`template missing: ${TEMPLATE_QEA}`); return; }
+  if (!fs.existsSync(RUNNER)) { t.skip(`headless runner missing: ${RUNNER}`); return; }
+
+  const graph = {
+    name: 'anchor-drift', description: '', elements: [
+      { id: 'e1', name: 'One', type: 'Business Object', description: 'd1' },
+      { id: 'e2', name: 'Two', type: 'Business Object', description: 'd2' },
+    ],
+    relationships: [
+      { id: '1161', name: 'Association', type: 'Association', source_id: 'e1', target_id: 'e2', description: 'rel-desc' },
+    ],
+    views: [],
+  };
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-drift-'));
+  let db = null;
+  try {
+    const { workQea, graphPath, outStem } = projectFixture(graph, tmp);
+    // simulate EA dropping the connector's schema_id anchor (connector still present)
+    db = lib.openQea(workQea);
+    db.exec('BEGIN IMMEDIATE');
+    const cid = db.prepare("SELECT ElementID AS cid FROM t_connectortag WHERE Property='schema_id' AND VALUE='1161'").get().cid;
+    db.prepare("DELETE FROM t_connectortag WHERE ElementID=? AND Property='schema_id'").run(Number(cid));
+    db.exec('COMMIT');
+    db.close(); db = null;
+
+    const { json } = runHeadlessDraft(workQea, graphPath, outStem);
+    assert.ok(json && json.ok && json.exitCode === 0, `draft run failed: ${JSON.stringify(json || '').slice(0, 500)}`);
+    const result = JSON.parse(fs.readFileSync(outStem + '.json', 'utf8').replace(/^\uFEFF/, ''));
+    const ops = result.proposals.map((p) => p.op);
+    assert.ok(!ops.includes('removeRelationship'),
+      `anchor-lost connector must NOT be reported as removeRelationship, got ${ops.join(',')}`);
+    const upd = result.proposals.find((p) => p.op === 'updateRelationship' && p.id === '1161');
+    assert.ok(upd && upd.fields.reAnchor, `expected updateRelationship with reAnchor hint for 1161, got ${ops.join(',')}`);
+    assert.ok(!result.proposals.some((p) => p.op === 'addRelationship'),
+      `anchor-lost connector must not be double-reported as addRelationship, got ${ops.join(',')}`);
+  } finally {
+    if (db) { try { db.close(); } catch { /* ignore */ } }
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+});
+
+test('ea-human-draft-script (AT-2792-10/R): a brand-new relationship carries its EA description (Notes) in addRelationship.proposed.description', (t) => {
+  if (process.env.EA_RUN_HEADLESS !== '1') { t.skip('EA headless not enabled'); return; }
+  if (!fs.existsSync(TEMPLATE_QEA)) { t.skip(`template missing: ${TEMPLATE_QEA}`); return; }
+  if (!fs.existsSync(RUNNER)) { t.skip(`headless runner missing: ${RUNNER}`); return; }
+
+  const graph = {
+    name: 'new-rel-desc', description: '', elements: [
+      { id: 'e1', name: 'One', type: 'Business Object', description: 'd1' },
+      { id: 'e2', name: 'Two', type: 'Business Object', description: 'd2' },
+    ],
+    relationships: [],
+    views: [],
+  };
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-newrel-'));
+  let db = null;
+  try {
+    const { workQea, graphPath, outStem, baseQea } = projectFixture(graph, tmp);
+    db = lib.openQea(workQea);
+    db.exec('BEGIN IMMEDIATE');
+    const root = db.prepare('SELECT Package_ID FROM t_package WHERE Parent_ID=0 ORDER BY Package_ID LIMIT 1').get();
+    const pkg = db.prepare('SELECT Package_ID FROM t_package WHERE Parent_ID=? AND Name=? LIMIT 1').get(Number(root.Package_ID), lib.SYNC_PACKAGE_NAME);
+    const syncPkg = Number(pkg.Package_ID);
+    // human draws a brand-new connector between e1->e2 with a Notes description, no schema_id anchor
+    const sObj = db.prepare('SELECT Object_ID FROM t_object WHERE Alias=?').get('e1').Object_ID;
+    const tObj = db.prepare('SELECT Object_ID FROM t_object WHERE Alias=?').get('e2').Object_ID;
+    const newConnGuid = '{aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee}';
+    db.prepare("INSERT INTO t_connector (Name, Connector_Type, Stereotype, Notes, Direction, Start_Object_ID, End_Object_ID, ea_guid) VALUES (?,?,?,?,?,?,?,?)")
+      .run('Brand New Rel', 'Association', 'Association', 'human-typed description', 'Source -> Destination', sObj, tObj, newConnGuid);
+    db.exec('COMMIT');
+    db.close(); db = null;
+
+    const { json } = runHeadlessDraft(workQea, graphPath, outStem);
+    assert.ok(json && json.ok && json.exitCode === 0, `draft run failed: ${JSON.stringify(json || '').slice(0, 500)}`);
+    const result = JSON.parse(fs.readFileSync(outStem + '.json', 'utf8').replace(/^\uFEFF/, ''));
+    const add = result.proposals.find((p) => p.op === 'addRelationship');
+    assert.ok(add, `expected an addRelationship for the human-drawn connector, got ${result.proposals.map((p) => p.op).join(',')}`);
+    assert.equal(add.proposed.description, 'human-typed description',
+      'addRelationship.proposed.description must carry the EA Notes of the new relationship');
   } finally {
     if (db) { try { db.close(); } catch { /* ignore */ } }
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
