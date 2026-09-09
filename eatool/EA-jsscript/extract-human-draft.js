@@ -4,8 +4,8 @@
 /*
  * Script Name: Extract Human Draft (extract-human-draft)
  * Purpose: Runs INSIDE Sparx EA and extracts the human's DRAFT from the currently-open
- *          model as a semantic-diff proposal set, using the same classification logic
- *          as argo/scripts/ea-human-diff.js:
+ *          model as a semantic-diff proposal set (this replaced the removed node tool
+ *          argo/scripts/ea-human-diff.js; it is now the only implementation):
  *            - baseline = the canonical graph design/KG/SystemArchitecture.json (source of
  *              truth; the committed .qea is its projection, so live-EA vs canonical is
  *              semantically equivalent to the node tool's base=committed.qea vs work=live)
@@ -15,11 +15,12 @@
  *            - pure geometry (t_diagramobjects coords) never becomes a canonical proposal,
  *              only counted (layoutOnly)
  *          Then writes results/human-draft.json (machine proposal set) + results/human-draft.md
- *          (human-readable summary) for the agent/human to review and write back via ARGO.
+ *          (human-readable summary). The script ONLY extracts the draft — it never writes back
+ *          to the graph; applying the proposal to the canonical graph is done by whoever runs it.
  *
  * Why in-EA: the node tool needs the model closed + two .qea files (base=committed, work=live).
  * A script in EA sees the live model directly and always has the canonical JSON on disk, so the
- * human needs only: make EA edits -> save -> run this script -> hand the proposal to the agent.
+ * human needs only: make EA edits -> save -> run this script -> hand the proposal out.
  *
  * Run interactively: Scripts -> Run (EA Script window). No current diagram needed.
  * Headless (bootstrap.js drives it): set EA_HEADLESS_GRAPH (baseline json) + EA_HEADLESS_OUTPUT
@@ -908,7 +909,7 @@ function renderMarkdown(result) {
 		lines.push('');
 	}
 	// Object.filter may be absent in JScript 5.8; the above uses manual join. Guard:
-	lines.push('> 本 diff 基于 EA 可见对象模型（schema_id 锚 tag 对齐），基线为 canonical JSON（未读 kg_sync_meta）；几何不进 canonical。交由 agent 经 ARGO preview/apply 写入图谱。');
+	lines.push('> 本 diff 仅作提取：基于 EA 可见对象模型（schema_id 锚 tag 对齐），基线为 canonical JSON（未读 kg_sync_meta）；几何不进 canonical；status 不进顶层字段（经 attributes 通道）。');
 	lines.push('');
 	return lines.join('\n');
 }
