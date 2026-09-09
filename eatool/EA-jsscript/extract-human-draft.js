@@ -174,6 +174,93 @@ function repoRoot() {
 // ---------------------------------------------------------------------------
 // Baseline snapshot (from canonical JSON — source of truth)
 // ---------------------------------------------------------------------------
+function cloneAttr(a) {
+	if (!a) { return null; }
+	return { name: a.name || '', value: a.value || '', description: a.description || '', content: a.content || '' };
+}
+
+function cloneTestcase(t) {
+	if (!t) { return null; }
+	return {
+		name: t.name || '',
+		description: t.description || '',
+		type: t.type || '',
+		Input: t.Input || '',
+		acceptanceCriteria: t.acceptanceCriteria || ''
+	};
+}
+
+// Stable per-attribute comparison key: normalized name+value (a human editing an EA
+// attribute value changes the value; a rename changes the name).
+function attrKey(attr) {
+	return normText(attr.name) + '\u0001' + normText(attr.value);
+}
+
+// Count a human's attribute diff as add/update/remove by comparing baselines against EA.
+function diffAttrs(baseList, workList) {
+	var add = [];
+	var update = [];
+	var remove = [];
+	var baseByKey = {};
+	var workByKey = {};
+	var i;
+	for (i = 0; i < baseList.length; i++) { baseByKey[attrKey(baseList[i])] = baseList[i]; }
+	for (i = 0; i < workList.length; i++) { workByKey[attrKey(workList[i])] = workList[i]; }
+	// present in work but not baseline -> added
+	for (var wk in workByKey) {
+		if (workByKey.hasOwnProperty(wk)) {
+			if (!baseByKey.hasOwnProperty(wk)) { add.push(workByKey[wk]); }
+		}
+	}
+	// present in baseline but not work -> removed
+	for (var bk in baseByKey) {
+		if (baseByKey.hasOwnProperty(bk)) {
+			if (!workByKey.hasOwnProperty(bk)) { remove.push(baseByKey[bk]); }
+		}
+	}
+	// same key -> compare description/content -> updated
+	for (var uk in baseByKey) {
+		if (baseByKey.hasOwnProperty(uk) && workByKey.hasOwnProperty(uk)) {
+			var bs = baseByKey[uk];
+			var ws = workByKey[uk];
+			if (normText(bs.description) !== normText(ws.description) || normText(bs.content) !== normText(ws.content)) {
+				update.push(ws);
+			}
+		}
+	}
+	var changed = add.length > 0 || remove.length > 0 || update.length > 0;
+	return { changed: changed, add: add, update: update, remove: remove };
+}
+
+// Testcase diff keyed on testcase name (unique per element); compare description/criteria.
+function diffTestcases(baseList, workList) {
+	var add = [];
+	var remove = [];
+	var update = [];
+	var baseByName = {};
+	var workByName = {};
+	var i;
+	for (i = 0; i < baseList.length; i++) { if (baseList[i] && baseList[i].name) { baseByName[normText(baseList[i].name)] = baseList[i]; } }
+	for (i = 0; i < workList.length; i++) { if (workList[i] && workList[i].name) { workByName[normText(workList[i].name)] = workList[i]; } }
+	for (var wn in workByName) {
+		if (workByName.hasOwnProperty(wn) && !baseByName.hasOwnProperty(wn)) { add.push(workByName[wn]); }
+	}
+	for (var bn in baseByName) {
+		if (baseByName.hasOwnProperty(bn) && !workByName.hasOwnProperty(bn)) { remove.push(baseByName[bn]); }
+	}
+	for (var un in baseByName) {
+		if (baseByName.hasOwnProperty(un) && workByName.hasOwnProperty(un)) {
+			var b = baseByName[un];
+			var w = workByName[un];
+			if (normText(b.description) !== normText(w.description) || normText(b.acceptanceCriteria) !== normText(w.acceptanceCriteria) || normText(b.Input) !== normText(w.Input)) {
+				update.push(w);
+			}
+		}
+	}
+	var changed = add.length > 0 || remove.length > 0 || update.length > 0;
+	return { changed: changed, add: add, update: update, remove: remove };
+}
+
 function readCanonical(graphPath) {
 	var text = readTextUtf8(graphPath);
 	if (text == '') { return null; }
@@ -182,22 +269,27 @@ function readCanonical(graphPath) {
 	for (var i = 0; i < (g.elements || []).length; i++) {
 		var e = g.elements[i];
 		if (e && e.id !== undefined && e.id !== null) {
-			base.elementById[String(e.id)] = {
-				name: e.name || '',
-				description: e.description || '',
-				status: e.status || ''
-			};
+		base.elementById[String(e.id)] = {
+			name: e.name || '',
+			description: e.description || '',
+			status: e.status || '',
+			type: e.type || '',
+			attributes: arrayMap(e.attributes || [], cloneAttr),
+			testcases: arrayMap(e.testcases || [], cloneTestcase)
+		};
 		}
 	}
 	for (var j = 0; j < (g.relationships || []).length; j++) {
 		var r = g.relationships[j];
 		if (r && r.id !== undefined && r.id !== null) {
-			base.relById[String(r.id)] = {
-				name: r.name || '',
-				description: r.description || '',
-				sourceId: String(r.source_id),
-				targetId: String(r.target_id)
-			};
+		base.relById[String(r.id)] = {
+			name: r.name || '',
+			description: r.description || '',
+			type: r.type || '',
+			sourceId: String(r.source_id),
+			targetId: String(r.target_id),
+			attributes: arrayMap(r.attributes || [], cloneAttr)
+		};
 		}
 	}
 	for (var k = 0; k < (g.views || []).length; k++) {
@@ -249,6 +341,23 @@ function readWork() {
 	var elementBySchema = {};
 	var elementByGuid = {};
 	var elems = eaRows('SELECT Object_ID, Alias, ea_guid, Object_Type, Stereotype, Name, Note, Status, Package_ID FROM t_object');
+
+	// element attributes (t_attribute) + testcases (t_objecttests), mapped by Object_ID
+	var attrsByObject = {};
+	var arows = eaRows('SELECT ID, Object_ID, Name, "Default", Notes, Pos FROM t_attribute');
+	for (var ar = 0; ar < arows.length; ar++) {
+		var attrObjId = parseInt(arows[ar].Object_ID, 10);
+		if (!attrsByObject[attrObjId]) { attrsByObject[attrObjId] = []; }
+		attrsByObject[attrObjId].push({ name: String(arows[ar].Name || ''), value: String(arows[ar].Default === null || arows[ar].Default === undefined ? '' : arows[ar].Default), description: String(arows[ar].Notes === null || arows[ar].Notes === undefined ? '' : arows[ar].Notes) });
+	}
+	var testsByObject = {};
+	var trows = eaRows('SELECT Object_ID, Test, Notes, InputData, AcceptanceCriteria FROM t_objecttests');
+	for (var tr = 0; tr < trows.length; tr++) {
+		var testObjId = parseInt(trows[tr].Object_ID, 10);
+		if (!testsByObject[testObjId]) { testsByObject[testObjId] = []; }
+		testsByObject[testObjId].push({ name: String(trows[tr].Test || ''), description: String(trows[tr].Notes || ''), Input: String(trows[tr].InputData || ''), acceptanceCriteria: String(trows[tr].AcceptanceCriteria || '') });
+	}
+
 	for (var e = 0; e < elems.length; e++) {
 		var x = elems[e];
 		var rec = {
@@ -260,7 +369,9 @@ function readWork() {
 			name: String(x.Name || ''),
 			description: String(x.Note === null || x.Note === undefined ? '' : x.Note),
 			status: String(x.Status || ''),
-			packageId: parseInt(x.Package_ID || 0, 10)
+			packageId: parseInt(x.Package_ID || 0, 10),
+			attributes: attrsByObject[parseInt(x.Object_ID, 10)] || [],
+			testcases: testsByObject[parseInt(x.Object_ID, 10)] || []
 		};
 		var tg = elemTags[rec.objectId];
 		if (tg && tg.schemaId) {
@@ -272,13 +383,25 @@ function readWork() {
 	}
 
 	var relTags = {};
-	var rprops = eaRows("SELECT ElementID, Property, Value FROM t_connectortag WHERE Property IN ('schema_id','archimate_relationship_type')");
+	var rprops = eaRows("SELECT ElementID, Property, Value FROM t_connectortag WHERE Property IN ('schema_id','archimate_relationship_type','relationship_attributes_json')");
 	for (var q = 0; q < rprops.length; q++) {
 		var cid = parseInt(rprops[q].ElementID, 10);
 		if (!relTags[cid]) { relTags[cid] = {}; }
 		var rt = relTags[cid];
 		if (rprops[q].Property == 'schema_id') { rt.schemaId = String(rprops[q].Value); }
 		if (rprops[q].Property == 'archimate_relationship_type') { rt.archimateType = String(rprops[q].Value); }
+		if (rprops[q].Property == 'relationship_attributes_json') { rt.attrsJson = String(rprops[q].Value); }
+	}
+
+	function parseRelAttrs(rt) {
+		var out = [];
+		if (rt && rt.attrsJson) {
+			try {
+				var parsed = JSON.parse(rt.attrsJson);
+				for (var i = 0; i < (Array.isArray(parsed) ? parsed.length : 0); i++) { out.push(cloneAttr(parsed[i])); }
+			} catch (e) { /* ignore malformed tag */ }
+		}
+		return out;
 	}
 
 	var relBySchema = {};
@@ -295,7 +418,8 @@ function readWork() {
 			description: String(y.Notes === null || y.Notes === undefined ? '' : y.Notes),
 			direction: String(y.Direction || ''),
 			sourceObjectId: parseInt(y.Start_Object_ID || 0, 10),
-			targetObjectId: parseInt(y.End_Object_ID || 0, 10)
+			targetObjectId: parseInt(y.End_Object_ID || 0, 10),
+			attributes: parseRelAttrs(relTags[parseInt(y.Connector_ID, 10)])
 		};
 		var rct = relTags[rrec.connectorId];
 		if (rct && rct.schemaId) {
@@ -408,6 +532,26 @@ function arrayNonEmpty(arr) {
 	return out;
 }
 
+// Human-readable one-line summary of an attribute list (comma-separated name:value).
+function summarizeAttrs(list) {
+	var parts = [];
+	for (var i = 0; i < (list || []).length; i++) {
+		var a = list[i];
+		var label = a.name || '(unnamed)';
+		if (a.value) { label += '=' + String(a.value).slice(0, 40); }
+		parts.push(label);
+	}
+	return parts.join(', ');
+}
+
+function summarizeTestcases(list) {
+	var names = [];
+	for (var i = 0; i < (list || []).length; i++) {
+		if (list[i] && list[i].name) { names.push(list[i].name); }
+	}
+	return names.join(', ');
+}
+
 // ---------------------------------------------------------------------------
 // Semantic diff: baseline (canonical) vs work (live EA visible object model)
 // ---------------------------------------------------------------------------
@@ -449,6 +593,11 @@ function semanticDiff(base, work) {
 		if (normText(baseRec.name) !== normText(workRec.name)) { fields.name = workRec.name; }
 		if (normText(baseRec.description) !== normText(workRec.description)) { fields.description = workRec.description; }
 		if (normText(baseRec.status) !== normText(workRec.status)) { fields.status = workRec.status; }
+		if (normText(baseRec.type) !== normText(workRec.archimateType)) { fields.type = workRec.archimateType; }
+		var eaAttrDiff = diffAttrs(baseRec.attributes || [], workRec.attributes || []);
+		if (eaAttrDiff.changed) { fields.attributes = workRec.attributes; }
+		var tcDiff = diffTestcases(baseRec.testcases || [], workRec.testcases || []);
+		if (tcDiff.changed) { fields.testcases = workRec.testcases; }
 		if (ObjectKeysCount(fields) > 0) {
 			push({ op: 'updateElement', kind: 'element', id: schemaId, fields: fields, sourceEa: { guid: workRec.eaGuid } });
 		}
@@ -474,7 +623,8 @@ function semanticDiff(base, work) {
 				name: recU.name,
 				description: recU.description === '' ? undefined : recU.description,
 				eaType: { objectType: recU.objectType, stereotype: recU.stereotype },
-				viewIds: vIds.length > 0 ? vIds : undefined
+				viewIds: vIds.length > 0 ? vIds : undefined,
+				attributes: recU.attributes.length > 0 ? recU.attributes : undefined
 			},
 			sourceEa: { guid: g, objectId: recU.objectId }
 		});
@@ -495,6 +645,9 @@ function semanticDiff(base, work) {
 		var rfields = {};
 		if (normText(baseRel.name) !== normText(workRel.name)) { rfields.name = workRel.name; }
 		if (normText(baseRel.description) !== normText(workRel.description)) { rfields.description = workRel.description; }
+		if (normText(baseRel.type) !== normText(workRel.archimateType)) { rfields.type = workRel.archimateType; }
+		var relAttrDiff = diffAttrs(baseRel.attributes || [], workRel.attributes || []);
+		if (relAttrDiff.changed) { rfields.attributes = workRel.attributes; }
 		var s = schemaOfObject(work, workRel.sourceObjectId);
 		var t = schemaOfObject(work, workRel.targetObjectId);
 		var src = (s && typeof s === 'object') ? null : s;
@@ -536,7 +689,8 @@ function semanticDiff(base, work) {
 				name: recRel.name === '' ? undefined : recRel.name,
 				sourceRef: srcRef, targetRef: tgtRef,
 				eaType: { connectorType: recRel.connectorType, stereotype: recRel.stereotype },
-				viewIds: relViewIds.length > 0 ? relViewIds : undefined
+				viewIds: relViewIds.length > 0 ? relViewIds : undefined,
+				attributes: recRel.attributes.length > 0 ? recRel.attributes : undefined
 			},
 			sourceEa: { guid: cg, connectorId: recRel.connectorId }
 		});
@@ -675,7 +829,14 @@ function renderMarkdown(result) {
 			} else if (opg === 'updateElement' || opg === 'updateRelationship') {
 				var parts = [];
 				for (var fk in p.fields) {
-					if (p.fields.hasOwnProperty(fk)) { parts.push(fk + ' → ' + String(p.fields[fk]).slice(0, 80)); }
+					if (!p.fields.hasOwnProperty(fk)) { continue; }
+					if (fk === 'attributes') {
+						parts.push('attributes[' + p.fields.attributes.length + '] ' + summarizeAttrs(p.fields.attributes));
+					} else if (fk === 'testcases') {
+						parts.push('testcases[' + p.fields.testcases.length + '] ' + summarizeTestcases(p.fields.testcases));
+					} else {
+						parts.push(fk + ' → ' + String(p.fields[fk]).slice(0, 80));
+					}
 				}
 				lines.push('- `' + p.id + '` — ' + parts.join('；') + (p.sourceEa.guid ? '；EA `' + p.sourceEa.guid + '`' : ''));
 			} else if (opg === 'removeElement' || opg === 'removeRelationship') {

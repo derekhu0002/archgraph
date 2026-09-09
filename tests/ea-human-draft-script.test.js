@@ -1,22 +1,30 @@
 'use strict';
 
 // WP2792 (AT-2792-07): extract-human-draft — an EA-internal JScript (eatool/EA-jsscript/)
-// that replaces the removed ea-human-draft argo skill. Running INSIDE the open EA model, it
-// reads the canonical JSON (design/KG/SystemArchitecture.json) as the BASELINE and the live
-// EA *visible object model* (anchored by schema_id / schema_view_id, never kg_sync_meta) as
-// the WORK, then classifies the human's changes into the same semantic-diff proposal set as
-// argo/scripts/ea-human-diff.js (addElement/updateElement/removeElement / addRelationship/
-// updateRelationship/removeRelationship / updateView), excluding pure geometry (layoutOnly).
-// Writes results/human-draft.json + results/human-draft.md for the agent/human to write back
-// via ARGO preview/apply.
+// that replaces the removed ea-human-draft argo skill and its node engine (argo/scripts/
+// ea-human-diff.js, now deleted). Running INSIDE the open EA model, it reads the canonical
+// JSON (design/KG/SystemArchitecture.json) as the BASELINE and the live EA *visible object
+// model* (anchored by schema_id / schema_view_id, never kg_sync_meta) as the WORK, then
+// classifies the human's changes into the semantic-diff proposal set (addElement/
+// updateElement/removeElement / addRelationship/updateRelationship/removeRelationship /
+// updateView), excluding pure geometry (layoutOnly).
+//   - key fields compared: name / description / status / type for elements; name /
+//     description / type / source / target for relationships
+//   - element attributes (t_attribute) and element testcases (t_objecttests) are read and
+//     diffed into updateElement.fields.attributes / .testcases
+//   - relationship attributes (relationship_attributes_json connector tag) are read and
+//     diffed into updateRelationship.fields.attributes
+// Writes results/human-draft.json + results/human-draft.md for the agent to write back via
+// ARGO preview/apply.
 //
 // External-view acceptance (static review, since EA scripts run in the JScript engine and
 // cannot be driven by the node test runner): the script exists at the expected path, carries
 // the identity markers, anchors on the visible object model (reads t_object/t_connector/
-// t_diagramobjects + schema_id tags), never reads kg_sync_meta, classifies all seven ops,
-// excludes geometry, and wraps a main() that writes the two artifacts. Plus the removed skill
-// is gone from package.json and install-argo.ps1, and the existing 22 numbered deploy steps
-// are untouched.
+// t_diagramobjects/t_attribute/t_objecttests + schema_id tags), never reads kg_sync_meta,
+// classifies all seven ops, excludes geometry, extracts attributes/testcases/type, and wraps
+// a main() that writes the two artifacts. The node tool ea-human-diff.js is gone, the removed
+// skill is gone from package.json and install-argo.ps1, and the 22 numbered deploy steps are
+// untouched.
 //
 // A gated headless runtime test (AT-2792-07/R) mirrors ea-headless-roundtrip: it only runs
 // when $env:EA_RUN_HEADLESS="1" and EA is available; otherwise it explicitly skips.
@@ -35,6 +43,8 @@ const INSTALL = path.join(ROOT, 'install-argo.ps1');
 const BOOTSTRAP = path.join(ROOT, 'eatool', 'EA-jsscript', 'headless', 'bootstrap.js');
 const RUNNER = path.join(ROOT, 'eatool', 'EA-jsscript', 'headless', 'run-headless.ps1');
 const TEMPLATE_QEA = path.join(ROOT, 'argo', 'defaults', 'EA-model-template.qea');
+const OLD_NODE_TOOL = path.join(ROOT, 'argo', 'scripts', 'ea-human-diff.js');
+const OLD_NODE_TEST = path.join(ROOT, 'tests', 'ea-human-diff.test.js');
 const lib = require(path.join(ROOT, 'argo', 'scripts', 'ea-qea-sync-lib.js'));
 
 function readScript() {
@@ -64,6 +74,16 @@ test('ea-human-draft-script (AT-2792-07): EA-internal extractor wraps canonical 
   assert.match(content, /FROM t_diagramobjects\b/, 'script must read t_diagramobjects (geometry/membership)');
   assert.match(content, /schema_id/, 'script must anchor on the schema_id tag');
 
+  // attributes + testcases are read from EA-visible tables and diffed
+  assert.match(content, /FROM t_attribute\b/, 'script must read t_attribute (element attributes)');
+  assert.match(content, /FROM t_objecttests\b/, 'script must read t_objecttests (element testcases)');
+  assert.match(content, /relationship_attributes_json/, 'script must read relationship attributes (connector tag)');
+  assert.match(content, /function\s+diffAttrs\s*\(/, 'script must define an attribute diff helper');
+  assert.match(content, /function\s+diffTestcases\s*\(/, 'script must define a testcase diff helper');
+  assert.match(content, /fields\.attributes/, 'script must emit attributes into updateElement/updateRelationship fields');
+  assert.match(content, /fields\.testcases/, 'script must emit testcases into updateElement fields');
+  assert.match(content, /fields\.type/, 'script must emit type into updateElement/updateRelationship fields');
+
   // classify all seven canonical ops
   for (const op of ['addElement', 'updateElement', 'removeElement', 'addRelationship', 'updateRelationship', 'removeRelationship', 'updateView']) {
     assert.match(content, new RegExp('op' + '.*' + op), `script must classify ${op}`);
@@ -77,6 +97,10 @@ test('ea-human-draft-script (AT-2792-07): EA-internal extractor wraps canonical 
   assert.match(content, /results\\human-draft/, 'script must default output to results/human-draft');
   assert.match(content, /\.json/, 'script must write the machine proposal JSON');
   assert.match(content, /\.md/, 'script must write the human-readable Markdown');
+
+  // the node tool (old engine) is fully removed — this EA script is now the only implementation
+  assert.ok(!fs.existsSync(OLD_NODE_TOOL), 'argo/scripts/ea-human-diff.js must be deleted');
+  assert.ok(!fs.existsSync(OLD_NODE_TEST), 'tests/ea-human-diff.test.js must be deleted');
 
   // removed skill no longer ships in the npm package
   const pkg = JSON.parse(fs.readFileSync(PKG, 'utf8'));
@@ -119,11 +143,11 @@ test('ea-human-draft-script (AT-2792-07/R): headless draft run on an edited mode
     name: 'extract-human-draft-fixture',
     description: '',
     elements: [
-      { id: 'e1', name: 'Element One', type: 'Business Object', description: 'desc one' },
+      { id: 'e1', name: 'Element One', type: 'Business Object', description: 'desc one', attributes: [{ name: 'note', value: 'v1' }, { name: 'category', value: 'c' }] },
       { id: 'e2', name: 'Element Two', type: 'Application Component', description: 'desc two' },
     ],
     relationships: [
-      { id: 'r1', name: 'rel one', type: 'Association', source_id: 'e1', target_id: 'e2', description: 'rel desc' },
+      { id: 'r1', name: 'rel one', type: 'Association', source_id: 'e1', target_id: 'e2', description: 'rel desc', attributes: [{ name: 'weight', value: 'low' }] },
     ],
     views: [
       { view_id: 'v1', view_name: 'View One', parent_element_id: 'e1', included_elements: ['e1', 'e2'], included_relationships: ['r1'] },
@@ -153,6 +177,9 @@ test('ea-human-draft-script (AT-2792-07/R): headless draft run on an edited mode
     // human edits: change e1 name (anchored) + add a brand-new unanchored element placed on v1
     const e1Guid = lib.deterministicGuid('el:e1');
     db.prepare("UPDATE t_object SET Name=? WHERE ea_guid=?").run('Element One Human Edited', e1Guid);
+    // human changes an element attribute value (note: v1 -> v2) in t_attribute
+    db.prepare("UPDATE t_attribute SET \"Default\"=? WHERE Object_ID=(SELECT Object_ID FROM t_object WHERE ea_guid=?) AND Name=?")
+      .run('v2', e1Guid, 'note');
     const newGuid = '{11111111-2222-3333-4444-555555555555}';
     const ins = db.prepare("INSERT INTO t_object (Object_Type, Name, Stereotype, Note, Status, Alias, ea_guid, Package_ID, ParentID) VALUES (?,?,?,?,?,?,?,?,0)")
       .run('Class', 'Human Doodled Box', 'BusinessObject', 'human notes', 'Proposed', '', newGuid, syncPkg);
@@ -185,6 +212,9 @@ test('ea-human-draft-script (AT-2792-07/R): headless draft run on an edited mode
       `human additions/edits must not produce spurious removeElement/updateView, got ${ops.join(',')}`);
     const upd = result.proposals.find((p) => p.op === 'updateElement' && p.id === 'e1');
     assert.ok(upd && upd.fields.name === 'Element One Human Edited', 'updateElement carries the human name');
+    assert.ok(Array.isArray(upd.fields.attributes), 'updateElement must carry the diffed attributes array');
+    const noteAttr = upd.fields.attributes && upd.fields.attributes.find((a) => a.name === 'note');
+    assert.ok(noteAttr && noteAttr.value === 'v2', 'updateElement attributes must reflect the human value change');
     const add = result.proposals.find((p) => p.op === 'addElement');
     assert.ok(add && add.proposed.name === 'Human Doodled Box', 'addElement carries the human-doodled object');
   } finally {

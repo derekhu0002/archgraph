@@ -268,6 +268,57 @@ test('ea-qea-sync (AT-2791-08): element attributes and testcases are mirrored in
   }
 });
 
+test('ea-qea-sync (AT-2791-16): relationship attributes are mirrored into the connector relationship_attributes_json tag, idempotent update-in-place', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-relattr-'));
+  try {
+    const qea = tmpQea(dir);
+    const g = {
+      name: 'relattr-fixture', description: '', elements: [
+        { id: 'e1', name: 'One', type: 'Business Object', description: 'd1' },
+        { id: 'e2', name: 'Two', type: 'Business Object', description: 'd2' },
+      ],
+      relationships: [
+        { id: 'r1', name: 'rel one', type: 'Association', source_id: 'e1', target_id: 'e2', description: 'rd', attributes: [{ name: 'weight', value: 'low' }, { name: 'kind', value: 'x' }] },
+      ],
+      views: [],
+    };
+    lib.syncGraphToQea(g, qea, { dryRun: false, allowDelete: false });
+
+    // connector carries the relationship_attributes_json tag with the canonical attrs
+    const db = new DatabaseSync(qea);
+    const cid = db.prepare("SELECT ElementID AS cid FROM t_connectortag WHERE Property='schema_id' AND VALUE='r1'").get().cid;
+    const tag = db.prepare("SELECT VALUE AS v FROM t_connectortag WHERE ElementID=? AND Property='relationship_attributes_json'").get(Number(cid));
+    assert.ok(tag, 'relationship_attributes_json tag must exist');
+    const parsed = JSON.parse(tag.v);
+    assert.equal(parsed.length, 2, 'one tag entry per canonical relationship attribute');
+    assert.equal(parsed[0].name, 'weight');
+    assert.equal(parsed[0].value, 'low');
+
+    // idempotent: re-sync keeps the tag value stable
+    lib.syncGraphToQea(g, qea, { dryRun: false, allowDelete: false });
+    const tag2 = db.prepare("SELECT VALUE AS v FROM t_connectortag WHERE ElementID=? AND Property='relationship_attributes_json'").get(Number(cid));
+    assert.equal(tag2.v, tag.v, 're-sync must not churn the tag value when unchanged');
+
+    // value change updates in place (no duplicate tag)
+    const changed = JSON.parse(JSON.stringify(g));
+    changed.relationships[0].attributes[0].value = 'high';
+    lib.syncGraphToQea(changed, qea, { dryRun: false, allowDelete: false });
+    const tags = db.prepare("SELECT COUNT(*) AS c, VALUE AS v FROM t_connectortag WHERE ElementID=? AND Property='relationship_attributes_json'").get(Number(cid));
+    assert.equal(tags.c, 1, 'relationship attribute update must not grow rows');
+    assert.equal(JSON.parse(tags.v)[0].value, 'high', 'updated attribute value applied in place');
+
+    // attribute removal prunes the tag when the list becomes empty
+    const removed = JSON.parse(JSON.stringify(g));
+    removed.relationships[0].attributes = [];
+    lib.syncGraphToQea(removed, qea, { dryRun: false, allowDelete: false });
+    const emptyTag = db.prepare("SELECT VALUE AS v FROM t_connectortag WHERE ElementID=? AND Property='relationship_attributes_json'").get(Number(cid));
+    assert.equal(emptyTag.v, '', 'empty attribute list clears the tag value');
+    db.close();
+  } finally {
+    removeTree(dir);
+  }
+});
+
 test('ea-qea-sync (AT-2791-10): incremental sync survives EA-rewritten diagram StyleEx (matched by deterministic ea_guid, no t_diagram UNIQUE crash) and is idempotent', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-styleex-'));
   try {

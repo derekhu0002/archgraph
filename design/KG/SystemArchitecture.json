@@ -5575,61 +5575,19 @@
       "name": "人类EA草稿→语义diff→agent写回canonical（draft-proposal收敛）",
       "parent": "1249",
       "type": "Work Package",
-      "description": "人类专家参与建图的收敛工作流（2026-09-08 立项；语义优先、删除纳入提议、产物 JSON+Markdown）。核心思路：把 EA 当草稿纸——人类在 agent 空闲间隙用 EA 直接改当前项目 .qea，改动不直接写回，而是提取成『语义 diff 提议』交给 agent 经 ARGO 写入 canonical，避免有损的全自动 EA→JSON 反向投影。①语义 diff：以 EA **可见对象模型**为工作区（t_object/t_connector/t_diagram/t_diagramobjects，按 schema_id / schema_view_id 锚 tag 对齐；人类改动不进 kg_sync_meta 镜像，故不比镜像），将其与 **canonical JSON（design/KG/SystemArchitecture.json）** 基线对比（投影保证 已提交 .qea == canonical，故 live-EA vs canonical 与 node 工具 base=committed.qea vs work=live.qea 语义等价），归类为 addElement/updateElement/removeElement/addRelationship/updateRelationship/removeRelationship/updateView 提议；纯几何（t_diagramobjects 坐标）不进 canonical——只统计（layoutOnly）不产出。②两条落地路径：(a) **EA 内 JScript** eatool/EA-jsscript/extract-human-draft.js——人类在 EA 打开模型直接运行，读 canonical JSON 作基线 + 当前模型作工作区，产出 results/human-draft.json+md，无需关闭 EA/无需 git restore；(b) 纯 Node 工具 argo/scripts/ea-human-diff.js——node:sqlite 直读两 .qea（base=committed, work=live），需 EA 关闭。③写回：diff 建议（JSON+Markdown，含 EA guid 溯源）交 agent 经 ARGO preview/apply 入 canonical JSON → MCP 自动增量投影回 .qea → commit。",
+      "description": "人类专家参与建图的收敛工作流（2026-09-08 立项；语义优先、删除纳入提议、产物 JSON+Markdown）。核心思路：把 EA 当草稿纸——人类在 agent 空闲间隙用 EA 直接改当前项目 .qea，改动不直接写回，而是提取成『语义 diff 提议』交给 agent 经 ARGO 写入 canonical，避免有损的全自动 EA→JSON 反向投影。①语义 diff：以 EA **可见对象模型**为工作区（t_object/t_connector/t_diagram/t_diagramobjects/t_attribute/t_objecttests/t_connectortag，按 schema_id / schema_view_id / relationship_attributes_json 锚 tag 对齐；人类改动不进 kg_sync_meta 镜像，故不比镜像），将其与 **canonical JSON（design/KG/SystemArchitecture.json）** 基线对比（投影保证 已提交 .qea == canonical，故 live-EA vs canonical 与 node 工具 base=committed.qea vs work=live.qea 语义等价），归类为 addElement/updateElement/removeElement/addRelationship/updateRelationship/removeRelationship/updateView 提议；纯几何（t_diagramobjects 坐标）不进 canonical——只统计（layoutOnly）不产出。②关键字段：元素 name/description/status/type + attributes(t_attribute) + testcases(t_objecttests)；关系 name/description/type/source/target + attributes(relationship_attributes_json tag)。③落地路径：EA 内 JScript eatool/EA-jsscript/extract-human-draft.js——人类在 EA 打开模型直接运行，读 canonical JSON 作基线 + 当前模型作工作区，产出 results/human-draft.json+md，无需关闭 EA/无需 git restore（node 工具 argo/scripts/ea-human-diff.js 已随技能一起移除，本脚本为唯一实现）。④写回：diff 建议（JSON+Markdown，含 EA guid 溯源）交 agent 经 ARGO preview/apply 入 canonical JSON → MCP 自动增量投影回 .qea → commit。",
       "testcases": [
         {
-          "acceptanceCriteria": "tests/ea-human-diff.test.js",
-          "description": "GIVEN 基线 .qea（经 fullProjection 投影）与工作区 .qea（在 EA 可见对象模型把某带 schema_id 锚元素的 Name/Note 改为人类值）；WHEN 运行 ea-human-diff 语义 diff 比较两 .qea；THEN 提议集恰含一条 updateElement（id=该 canonical id，fields 含改后 name/description，sourceEa 含 EA guid），其余未变元素零噪声。",
-          "Input": "tests/ea-human-diff.test.js",
-          "name": "AT-2792-01",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/ea-human-diff.test.js",
-          "description": "GIVEN 工作区 .qea 相对基线在某个 canonical 图（schema_view_id 锚）上新增一个无 schema_id 锚的元素（含 Name/Note/类型）并摆放；WHEN 运行语义 diff；THEN 提议集含 addElement（id 未赋留给 agent、携带 EA guid/字段/类型/所属 view 候选），且不含对既有元素的 update 噪声。",
-          "Input": "tests/ea-human-diff.test.js",
-          "name": "AT-2792-02",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/ea-human-diff.test.js",
-          "description": "GIVEN 工作区 .qea 相对基线删除了某带 schema_id 锚的元素与某带锚的关系（t_object/t_connector 行消失）；WHEN 运行语义 diff；THEN 提议集含 removeElement 与 removeRelationship（id=canonical id，sourceEa 含被删 EA guid），交由 agent 确认后写入。",
-          "Input": "tests/ea-human-diff.test.js",
-          "name": "AT-2792-03",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/ea-human-diff.test.js",
-          "description": "GIVEN 工作区 .qea 相对基线仅移动某 t_diagramobjects 坐标（几何变、成员与内容字段全不变）；WHEN 运行语义 diff；THEN 无 canonical 提议产出（几何不进 canonical），报告仅统计 layoutOnly 计数并在 Markdown 注明被排除。",
-          "Input": "tests/ea-human-diff.test.js",
-          "name": "AT-2792-04",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/ea-human-diff.test.js",
-          "description": "GIVEN 一次含多类变化的语义 diff；WHEN 以 --out <stem> 运行；THEN 产出 <stem>.json（机器提议集：source/baseline/extractedAt/proposals[]，每条 op/kind/id/sourceEa）与 <stem>.md（人读表格/列表呈现同一内容、含操作计数与排除说明），两者提议一一对应。",
-          "Input": "tests/ea-human-diff.test.js",
-          "name": "AT-2792-05",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/ea-human-diff.test.js",
-          "description": "GIVEN 工作区与基线 kg_sync_meta 镜像完全相同、但可见对象模型被人类改动（只改 t_object 不改镜像）；WHEN 运行语义 diff；THEN 仍能捕获改动（证明 diff 以可见对象模型为准而非镜像）；反向：仅镜像差异不作为提议信号。",
-          "Input": "tests/ea-human-diff.test.js",
-          "name": "AT-2792-06",
-          "type": "Acceptance Test"
-        },
-        {
           "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN EA 内提取脚本 eatool/EA-jsscript/extract-human-draft.js 与其 headless 接线（bootstrap.js/run-headless.ps1 支持 draft 模式）；WHEN 从外部审阅其内容与接线；THEN 脚本存在且含 main()、读 canonical JSON（design/KG/SystemArchitecture.json）为基线、经 Repository.SQLQuery 读 EA 可见对象模型（t_object/t_connector/t_diagramobjects + schema_id/schema_view_id 锚）、分类七类提议（addElement/updateElement/removeElement/addRelationship/updateRelationship/removeRelationship/updateView）、纯几何不计入（layoutOnly）、产出 results/human-draft.json + .md；且原 ea-human-draft 技能已移除（package.json files 不再含 argo/skills/ea-human-draft、install-argo.ps1 不再部署该技能、既有 22 个编号部署步及标记不被破坏）。",
+          "description": "GIVEN EA 内提取脚本 eatool/EA-jsscript/extract-human-draft.js 与其 headless 接线（bootstrap.js/run-headless.ps1 支持 draft 模式）；WHEN 从外部审阅其内容与接线；THEN 脚本存在且含 main()、读 canonical JSON（design/KG/SystemArchitecture.json）为基线、经 Repository.SQLQuery 读 EA 可见对象模型（t_object/t_connector/t_diagramobjects/t_attribute/t_objecttests + schema_id/schema_view_id/relationship_attributes_json 锚）、分类七类提议（addElement/updateElement/removeElement/addRelationship/updateRelationship/removeRelationship/updateView）、纯几何不计入（layoutOnly）、产出 results/human-draft.json + .md；且旧 node 工具 argo/scripts/ea-human-diff.js 与其测试已删除、原 ea-human-draft 技能已移除（package.json files 不再含 argo/skills/ea-human-draft、install-argo.ps1 不再部署该技能、既有 22 个编号部署步及标记不被破坏）。",
           "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-07",
           "type": "Acceptance Test"
         },
         {
-          "acceptanceCriteria": "tests/ea-human-diff.test.js",
-          "description": "GIVEN 一个含单个 *.qea（人类改过）的工作目录与另一处的基线 .qea；WHEN 不传 --work（仅 --base/--out）从该目录运行 ea-human-diff；THEN --work 被自动解析为工作目录根唯一 *.qea，并基于可读可见对象模型产出对应提议（不再要求写死文件名）；显式 --work 仍优先。纯 Node 可测。",
-          "Input": "tests/ea-human-diff.test.js",
+          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
+          "description": "GIVEN EA 内提取脚本 readWork 读 t_attribute（元素属性，含值变化）与 t_connectortag relationship_attributes_json（关系属性）与 t_objecttests（元素测试用例）；WHEN 人类在 EA 可见对象模型改某带 schema_id 锚元素的属性值/加属性，或改关系属性；THEN 提议含 updateElement（fields.attributes=改后属性数组）或 updateRelationship（fields.attributes），并 diff 出 add/update/remove；且字段 type/testcases 变化亦被捕获。",
+          "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-08",
           "type": "Acceptance Test"
         }

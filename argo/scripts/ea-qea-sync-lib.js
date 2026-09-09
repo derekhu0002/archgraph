@@ -410,7 +410,7 @@ function syncGraphToQea(graph, qeaPath, opts) {
     stages.elements = nowMs();
 
     // element anchors + meta (idempotent, fingerprint-skipped)
-    let tagStats = { propsNew: 0, propsSkip: 0 };
+    let tagStats = { propsNew: 0, propsSkip: 0, attributesUpdated: 0, attributesAdded: 0, testsUpdated: 0, testsAdded: 0, relationshipAttributesUpdated: 0, relationshipAttributesAdded: 0 };
     if (!o.dryRun) {
       // minimal EA-facing anchors for compatibility with the legacy object-model exporter
       const anchorRows = [];
@@ -531,6 +531,25 @@ function syncGraphToQea(graph, qeaPath, opts) {
             .run(Number(id), 'schema_id', rel.id, '');
           db.prepare('INSERT INTO t_connectortag (ElementID, Property, VALUE, NOTES) VALUES (?,?,?,?)')
             .run(Number(id), 'archimate_relationship_type', canonicalArchimateType(rel.type), '');
+        }
+        // Mirror relationship attributes into the connector's relationship_attributes_json
+        // tag so the human-edited EA model surfaces them (the EA-internal draft extractor
+        // diffs this visible field). Idempotent: update-in-place on the canonical value.
+        const relAttrs = (Array.isArray(rel.attributes) ? rel.attributes : []).filter(isPersistedAttribute);
+        const attrsJson = relAttrs.length > 0 ? JSON.stringify(relAttrs) : '';
+        const tagCt = db.prepare('SELECT PropertyID FROM t_connectortag WHERE ElementID=? AND Property=?').get(Number(id), 'relationship_attributes_json');
+        if (tagCt) {
+          const cur = db.prepare('SELECT VALUE AS v FROM t_connectortag WHERE PropertyID=?').get(Number(tagCt.PropertyID));
+          const curV = (cur && cur.v) || '';
+          if (curV !== attrsJson) {
+            db.prepare('UPDATE t_connectortag SET VALUE=?, NOTES=? WHERE PropertyID=?')
+              .run(attrsJson, '', Number(tagCt.PropertyID));
+            tagStats.relationshipAttributesUpdated++;
+          }
+        } else if (relAttrs.length > 0) {
+          db.prepare('INSERT INTO t_connectortag (ElementID, Property, VALUE, NOTES) VALUES (?,?,?,?)')
+            .run(Number(id), 'relationship_attributes_json', attrsJson, '');
+          tagStats.relationshipAttributesAdded++;
         }
       }
     }
