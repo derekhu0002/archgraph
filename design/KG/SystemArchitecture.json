@@ -5665,6 +5665,11 @@
           "name": "commit",
           "value": "cf62f4b",
           "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js（修复：不再输出顶层 fields.status——canonical schema 元素无顶层 status 属性（元素状态存活在 attributes[].name=='status'），旧逻辑拿不存在的顶层 status 与 EA t_object.Status（默认 Proposed）比较，导致每个元素虚报 {status:'Proposed'}（如 my-army 1240/1249）；现改为仅经 diffAttrs 通道比较；my-army 真实 EA 验证 updateElement 2→1、1249 仅剩真实 description:'ssss'、1240 不再报；回归 ea-human-draft-script EA 4/4、ea-qea-sync 17/17、guardian 4/4）"
+        },
+        {
+          "name": "commit",
+          "value": "c950b58",
+          "description": "eatool/EA-jsscript/extract-human-draft.js（脚本定位改为纯提取：移除 md 末尾『交由 agent 经 ARGO preview/apply 写入图谱』声明，脚本只提取不写回；头部注释去引用已删的 node 工具，改为 it is now the only implementation；my-army 真实 EA 验证生成 md 已无 ARGO/preview/apply/写入图谱）"
         }
       ]
     },
