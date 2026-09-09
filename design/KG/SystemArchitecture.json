@@ -5682,6 +5682,11 @@
           "name": "commit",
           "value": "19da973",
           "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js; design/KG/SystemArchitecture.json（视图增删改提取 + md 融 JSON：readWork 按 view_name 匹配被 EA 重写丢失 schema_view_id 锚的 canonical 视图（anchor 兜底），extraDiagrams 收集无锚且不在 canonical 的新图→addView；semanticDiff 增 removeView（canonical有/EA无）与 updateView（name/description，读 diagram Notes）；renderMarkdown 改简短摘要表+内嵌机器 JSON（compactJson 每提议一行）；AT-2792-11/R；my-army 验证 addView 1/updateView 2/removeView 1；回归 ea-human-draft-script EA 5/5、ea-qea-sync 13/13、guardian 4/4）"
+        },
+        {
+          "name": "commit",
+          "value": "fb2dbd9",
+          "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js; design/KG/SystemArchitecture.json（不再生成 .json——提议 JSON 内嵌 .md 栅栏块；去掉 md 末尾『本 diff 仅作提取…』说明行；测试改从 .md 解析提议集并断言无独立 .json；my-army 真实 EA 验证仅产 .md；回归 ea-human-draft-script EA 5/5、ea-qea-sync 13/13、guardian 4/4）"
         }
       ]
     },
