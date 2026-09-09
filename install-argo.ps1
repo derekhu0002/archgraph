@@ -762,10 +762,6 @@ $skillDest = Join-Path $SkillsRoot 'argo-init'
 Write-Host "[4/22] argo\skills\argo-init -> $skillDest"
 Copy-Tree -Source $skillSrc -Destination $skillDest
 
-$draftSkillSrc = Join-Path $argoDir 'skills\ea-human-draft'
-Write-Host '  argo\skills\ea-human-draft -> $SkillsRoot\ea-human-draft (ea-human-draft skill)'
-Copy-Tree -Source $draftSkillSrc -Destination (Join-Path $SkillsRoot 'ea-human-draft')
-
 $ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
 $ruleDest = Join-Path $PromptsRoot 'archgraph.instructions.md'
 Write-Host "[5/22] argo\rules\archgraph.instructions.md -> $ruleDest"
@@ -780,8 +776,6 @@ Copy-Item -Force -Path $depsSrc -Destination $depsDest
 $cursorSkillDest = Join-Path $CursorSkillsRoot 'argo-init'
 Write-Host "[7/22] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
 Copy-Tree -Source $skillSrc -Destination $cursorSkillDest
-Write-Host '  argo\skills\ea-human-draft -> $CursorSkillsRoot\ea-human-draft (Cursor)'
-Copy-Tree -Source $draftSkillSrc -Destination (Join-Path $CursorSkillsRoot 'ea-human-draft')
 
 $mcpBridgeSrc = Join-Path $argoDir 'mcp-bridges'
 $mcpBridgeDest = Join-Path $CursorMcpBridgesRoot ''
@@ -791,8 +785,6 @@ Copy-Tree -Source $mcpBridgeSrc -Destination $mcpBridgeDest
 $openCodeSkillDest = Join-Path $OpenCodeSkillsRoot 'argo-init'
 Write-Host "[8/22] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
 Copy-Tree -Source $skillSrc -Destination $openCodeSkillDest
-Write-Host '  argo\skills\ea-human-draft -> $OpenCodeSkillsRoot\ea-human-draft (OpenCode)'
-Copy-Tree -Source $draftSkillSrc -Destination (Join-Path $OpenCodeSkillsRoot 'ea-human-draft')
 
 Write-Host "[9/22] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
 Add-AgentsRule -AgentsPath $OpenCodeAgentsPath -RulePath $ruleSrc
@@ -830,9 +822,6 @@ if ($SkipDsh) {
 
     Write-Host "[16/22] argo\skills\argo-init -> $dshSkillDest (DeepSeek Harness skill)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $dshSkillDest
-
-    Write-Host '  argo\skills\ea-human-draft -> $DshHome\skills\ea-human-draft (DeepSeek Harness skill)'
-    Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-draft') -Destination (Join-Path (Join-Path $DshHome 'skills') 'ea-human-draft')
 
     Write-Host "[17/22] argo\rules\<WakeupGuideline> -> $DshHome\plugins\dsh-argo-wakeup\index.js (DeepSeek Harness wakeup plugin)"
     $wakeupDshPath = New-DshWakeupPlugin -DshHome $DshHome -RuleText $ruleSrcContent
@@ -894,9 +883,6 @@ if ($SkipOpenClaw) {
 
     Write-Host "[21/22] argo\skills\argo-init -> $openClawSkillDest (OpenClaw managed skill, all agents)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $openClawSkillDest
-
-    Write-Host '  argo\skills\ea-human-draft -> $OpenClawHome\skills\ea-human-draft (OpenClaw managed skill, all agents)'
-    Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-draft') -Destination (Join-Path (Join-Path $OpenClawHome 'skills') 'ea-human-draft')
 
     Write-Host '  OpenClaw injects AGENTS.md into Project Context on every session, so the wakeup'
     Write-Host '  gate (UNCONDITIONAL STARTUP GATE) is active on the next OpenClaw session; restart'

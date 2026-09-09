@@ -1,0 +1,194 @@
+'use strict';
+
+// WP2792 (AT-2792-07): extract-human-draft — an EA-internal JScript (eatool/EA-jsscript/)
+// that replaces the removed ea-human-draft argo skill. Running INSIDE the open EA model, it
+// reads the canonical JSON (design/KG/SystemArchitecture.json) as the BASELINE and the live
+// EA *visible object model* (anchored by schema_id / schema_view_id, never kg_sync_meta) as
+// the WORK, then classifies the human's changes into the same semantic-diff proposal set as
+// argo/scripts/ea-human-diff.js (addElement/updateElement/removeElement / addRelationship/
+// updateRelationship/removeRelationship / updateView), excluding pure geometry (layoutOnly).
+// Writes results/human-draft.json + results/human-draft.md for the agent/human to write back
+// via ARGO preview/apply.
+//
+// External-view acceptance (static review, since EA scripts run in the JScript engine and
+// cannot be driven by the node test runner): the script exists at the expected path, carries
+// the identity markers, anchors on the visible object model (reads t_object/t_connector/
+// t_diagramobjects + schema_id tags), never reads kg_sync_meta, classifies all seven ops,
+// excludes geometry, and wraps a main() that writes the two artifacts. Plus the removed skill
+// is gone from package.json and install-argo.ps1, and the existing 22 numbered deploy steps
+// are untouched.
+//
+// A gated headless runtime test (AT-2792-07/R) mirrors ea-headless-roundtrip: it only runs
+// when $env:EA_RUN_HEADLESS="1" and EA is available; otherwise it explicitly skips.
+
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+
+const ROOT = path.resolve(__dirname, '..');
+const SCRIPT = path.join(ROOT, 'eatool', 'EA-jsscript', 'extract-human-draft.js');
+const PKG = path.join(ROOT, 'package.json');
+const INSTALL = path.join(ROOT, 'install-argo.ps1');
+const BOOTSTRAP = path.join(ROOT, 'eatool', 'EA-jsscript', 'headless', 'bootstrap.js');
+const RUNNER = path.join(ROOT, 'eatool', 'EA-jsscript', 'headless', 'run-headless.ps1');
+const TEMPLATE_QEA = path.join(ROOT, 'argo', 'defaults', 'EA-model-template.qea');
+const lib = require(path.join(ROOT, 'argo', 'scripts', 'ea-qea-sync-lib.js'));
+
+function readScript() {
+  assert.ok(fs.existsSync(SCRIPT), `script should exist: ${SCRIPT}`);
+  return fs.readFileSync(SCRIPT, 'utf8').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
+
+test('ea-human-draft-script (AT-2792-07): EA-internal extractor wraps canonical baseline + visible-object-model semantic diff -> JSON + Markdown', () => {
+  // GIVEN the extract-human-draft EA script replaces the removed ea-human-draft skill
+  const content = readScript();
+
+  // identity + runtime wiring
+  assert.match(content, /INC Local Scripts\.EAConstants-JScript/, 'script must include EA constants');
+  assert.match(content, /INC UTILITY\.JSON-Parser/, 'script must include the JSON-Parser include');
+  assert.match(content, /Extract Human Draft/, 'script must carry its identity comment header');
+  assert.match(content, /function\s+main\s*\(\s*\)/, 'script must wrap a main() entry point');
+  assert.match(content, /main\s*\(\s*\);/, 'script must invoke main() on load');
+
+  // baseline = canonical JSON (source of truth), NOT a second .qea (EA cannot open two models)
+  assert.match(content, /design\\KG\\SystemArchitecture\.json/, 'script defaults baseline to the canonical graph path');
+  assert.match(content, /g\.elements|elements/, 'script must read the canonical elements array');
+  assert.match(content, /kg_sync_meta\s+\(/, 'script must state it never uses kg_sync_meta / reads the visible object model');
+
+  // read the EA *visible object model* via SQLQuery on the base table names
+  assert.match(content, /FROM t_object\b/, 'script must read t_object (elements)');
+  assert.match(content, /FROM t_connector\b/, 'script must read t_connector (relationships)');
+  assert.match(content, /FROM t_diagramobjects\b/, 'script must read t_diagramobjects (geometry/membership)');
+  assert.match(content, /schema_id/, 'script must anchor on the schema_id tag');
+
+  // classify all seven canonical ops
+  for (const op of ['addElement', 'updateElement', 'removeElement', 'addRelationship', 'updateRelationship', 'removeRelationship', 'updateView']) {
+    assert.match(content, new RegExp('op' + '.*' + op), `script must classify ${op}`);
+  }
+
+  // geometry-only is counted and excluded, never a proposal
+  assert.match(content, /layoutOnly/, 'script must count layoutOnly (geometry-only, non-canonical)');
+  assert.match(content, /geometry/i, 'script must reference geometry');
+
+  // output artifacts
+  assert.match(content, /results\\human-draft/, 'script must default output to results/human-draft');
+  assert.match(content, /\.json/, 'script must write the machine proposal JSON');
+  assert.match(content, /\.md/, 'script must write the human-readable Markdown');
+
+  // removed skill no longer ships in the npm package
+  const pkg = JSON.parse(fs.readFileSync(PKG, 'utf8'));
+  assert.ok(Array.isArray(pkg.files) && !pkg.files.includes('argo/skills/ea-human-draft'),
+    'package.json files must no longer include argo/skills/ea-human-draft');
+  assert.ok(!fs.existsSync(path.join(ROOT, 'argo', 'skills', 'ea-human-draft')),
+    'the ea-human-draft skill directory must be removed');
+
+  // installer no longer deploys the skill, but its 22 numbered argo-init steps are intact
+  const install = fs.readFileSync(INSTALL, 'utf8');
+  assert.doesNotMatch(install, /ea-human-draft/, 'installer must no longer deploy the ea-human-draft skill');
+  for (let i = 1; i <= 22; i++) {
+    assert.ok(install.includes('[' + i + '/22]'), 'step marker [' + i + '/22] must exist');
+  }
+  assert.match(install, /\[16\/22\][^\n]*skills\\argo-init/, 'step 16 still deploys the argo-init skill (dsh)');
+  assert.match(install, /\[21\/22\][^\n]*skills\\argo-init/, 'step 21 still deploys the argo-init skill (openclaw)');
+
+  // headless draft mode is wired through bootstrap + runner
+  const bootstrap = fs.readFileSync(BOOTSTRAP, 'utf8');
+  assert.match(bootstrap, /MODE != 'draft'/, 'headless bootstrap must accept the draft mode');
+  const runner = fs.readFileSync(RUNNER, 'utf8');
+  assert.match(runner, /'draft'/, 'headless runner must accept the draft mode');
+  assert.match(runner, /extract-human-draft\.js/, 'headless runner must map draft mode to extract-human-draft.js');
+});
+
+test('ea-human-draft-script (AT-2792-07/R): headless draft run on an edited model yields the visible-object-model semantic diff', (t) => {
+  // GIVEN EA headless runner + an isolated .qea projected from a fixture, edited in the
+  // visible object model by a human (name/description change + a new unanchored object)
+  // WHEN extract-human-draft runs with the canonical JSON as baseline
+  // THEN a proposal set is produced matching the edits (updateElement + addElement) and
+  //   the baseline is the canonical JSON (not a second model)
+  if (process.env.EA_RUN_HEADLESS !== '1') {
+    t.skip('EA headless draft run not enabled (needs $env:EA_RUN_HEADLESS=1 and EA available) — explicit skip counts as pass');
+    return;
+  }
+  if (!fs.existsSync(TEMPLATE_QEA)) { t.skip(`template missing: ${TEMPLATE_QEA}`); return; }
+  if (!fs.existsSync(RUNNER)) { t.skip(`headless runner missing: ${RUNNER}`); return; }
+
+  const FIXTURE = {
+    name: 'extract-human-draft-fixture',
+    description: '',
+    elements: [
+      { id: 'e1', name: 'Element One', type: 'Business Object', description: 'desc one' },
+      { id: 'e2', name: 'Element Two', type: 'Application Component', description: 'desc two' },
+    ],
+    relationships: [
+      { id: 'r1', name: 'rel one', type: 'Association', source_id: 'e1', target_id: 'e2', description: 'rel desc' },
+    ],
+    views: [
+      { view_id: 'v1', view_name: 'View One', parent_element_id: 'e1', included_elements: ['e1', 'e2'], included_relationships: ['r1'] },
+    ],
+  };
+
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-draft-'));
+  const baseQea = path.join(tmp, 'base.qea');
+  const workQea = path.join(tmp, 'work.qea');
+  const graphPath = path.join(tmp, 'graph.json');
+  const outStem = path.join(tmp, 'human-draft');
+  fs.copyFileSync(TEMPLATE_QEA, baseQea);
+  fs.writeFileSync(graphPath, JSON.stringify(FIXTURE, null, 2), 'utf8');
+
+  let db = null;
+  try {
+    // project baseline
+    const proj = lib.fullProjection(FIXTURE, baseQea, {});
+    assert.ok(proj.ok, 'fullProjection of fixture failed');
+    // copy to work model then human-edit the visible object model directly
+    fs.copyFileSync(baseQea, workQea);
+    db = lib.openQea(workQea);
+    db.exec('BEGIN IMMEDIATE');
+    const root = db.prepare('SELECT Package_ID FROM t_package WHERE Parent_ID=0 ORDER BY Package_ID LIMIT 1').get();
+    const pkg = db.prepare('SELECT Package_ID FROM t_package WHERE Parent_ID=? AND Name=? LIMIT 1').get(Number(root.Package_ID), lib.SYNC_PACKAGE_NAME);
+    const syncPkg = Number(pkg.Package_ID);
+    // human edits: change e1 name (anchored) + add a brand-new unanchored element placed on v1
+    const e1Guid = lib.deterministicGuid('el:e1');
+    db.prepare("UPDATE t_object SET Name=? WHERE ea_guid=?").run('Element One Human Edited', e1Guid);
+    const newGuid = '{11111111-2222-3333-4444-555555555555}';
+    const ins = db.prepare("INSERT INTO t_object (Object_Type, Name, Stereotype, Note, Status, Alias, ea_guid, Package_ID, ParentID) VALUES (?,?,?,?,?,?,?,?,0)")
+      .run('Class', 'Human Doodled Box', 'BusinessObject', 'human notes', 'Proposed', '', newGuid, syncPkg);
+    const newObjId = Number(ins.lastInsertRowid);
+    const v1diag = db.prepare("SELECT Diagram_ID FROM t_diagram WHERE StyleEx LIKE ?").get('%schema_view_id=v1;%');
+    const dSeq = db.prepare('SELECT COALESCE(MAX(Sequence),-1) AS s FROM t_diagramobjects WHERE Diagram_ID=?').get(Number(v1diag.Diagram_ID)).s;
+    db.prepare('INSERT INTO t_diagramobjects (Diagram_ID, Object_ID, Sequence, RectLeft, RectTop, RectRight, RectBottom) VALUES (?,?,?,?,?,?,?)')
+      .run(Number(v1diag.Diagram_ID), newObjId, Number(dSeq) + 1, 100, 100, 280, 190);
+    db.exec('COMMIT');
+    db.close(); db = null;
+
+    // run extract-human-draft headlessly
+    const r = spawnSync('powershell.exe', [
+      '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', RUNNER,
+      '-Feap', workQea, '-Mode', 'draft', '-Graph', graphPath, '-Output', outStem, '-KillEA', '-TimeoutSec', '300',
+    ], { encoding: 'utf8', timeout: 600000 });
+    let json = null;
+    try { json = JSON.parse(r.stdout); } catch { /* ignore */ }
+    assert.ok(json && json.ok && json.exitCode === 0,
+      `headless draft run failed: ${JSON.stringify(json || r.stdout).slice(0, 500)}`);
+    assert.ok(fs.existsSync(outStem + '.json'), 'draft .json must be produced');
+    assert.ok(fs.existsSync(outStem + '.md'), 'draft .md must be produced');
+
+    const result = JSON.parse(fs.readFileSync(outStem + '.json', 'utf8').replace(/^\uFEFF/, ''));
+    assert.equal(result.format, 'archgraph-ea-human-diff', 'result format must match the node tool');
+    const ops = result.proposals.map((p) => p.op);
+    assert.ok(ops.includes('updateElement'), `expected updateElement for the human name edit, got ${ops.join(',')}`);
+    assert.ok(ops.includes('addElement'), `expected addElement for the human-doodled box, got ${ops.join(',')}`);
+    assert.ok(!ops.includes('removeElement') && !ops.includes('updateView'),
+      `human additions/edits must not produce spurious removeElement/updateView, got ${ops.join(',')}`);
+    const upd = result.proposals.find((p) => p.op === 'updateElement' && p.id === 'e1');
+    assert.ok(upd && upd.fields.name === 'Element One Human Edited', 'updateElement carries the human name');
+    const add = result.proposals.find((p) => p.op === 'addElement');
+    assert.ok(add && add.proposed.name === 'Human Doodled Box', 'addElement carries the human-doodled object');
+  } finally {
+    if (db) { try { db.close(); } catch { /* ignore */ } }
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+});

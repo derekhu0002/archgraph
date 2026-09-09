@@ -167,7 +167,7 @@ function scanDiagrams(r, where, prefViewId) {
 
 function run() {
   writeLog('headless-bootstrap feap=' + FEAP + ' script=' + SCRIPT + ' mode=' + MODE);
-  if (FEAP == '' || SCRIPT == '' || (MODE != 'import' && MODE != 'export')) {
+  if (FEAP == '' || SCRIPT == '' || (MODE != 'import' && MODE != 'export' && MODE != 'draft')) {
     writeLog('ERROR: feap/script/mode required');
     WScript.Quit(2);
   }

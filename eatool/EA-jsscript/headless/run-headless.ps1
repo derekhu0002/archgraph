@@ -9,7 +9,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)][string]$Feap,
-    [Parameter(Mandatory=$true)][ValidateSet('import','export')][string]$Mode,
+    [Parameter(Mandatory=$true)][ValidateSet('import','export','draft')][string]$Mode,
     [string]$Graph = '',
     [string]$Output = '',
     [int]$Diagram = 0,
@@ -40,7 +40,11 @@ if (Get-Process EA -ErrorAction SilentlyContinue) {
 }
 
 $log = Join-Path ([IO.Path]::GetTempPath()) ("ea-headless-" + $Mode + "-" + [guid]::NewGuid().ToString('N') + ".log")
-$scriptJs = if ($Mode -eq 'import') { Join-Path $PSScriptRoot '..\import-from-kg.js' } else { Join-Path $PSScriptRoot '..\export-to-kg.js' }
+$scriptJs = switch ($Mode) {
+    'import' { Join-Path $PSScriptRoot '..\import-from-kg.js' }
+    'export' { Join-Path $PSScriptRoot '..\export-to-kg.js' }
+    'draft'  { Join-Path $PSScriptRoot '..\extract-human-draft.js' }
+}
 
 # bootstrap positional: feap script mode graph output diagram response log
 $argList = New-Object System.Collections.Generic.List[string]
