@@ -3920,7 +3920,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话目标：为 ARGO MCP 获取 VIEW 接口加可选参数，返回 EA 图中该 VIEW 的元素/连线 GEOMETRY（供 LLM 生成图片），默认不赋值不触碰 EA。完成：①ea-qea-sync-lib.js 新增只读 readViewDiagramGeometry(viewId)——ea_guid/schema_view_id 锚定 t_diagram，元素 rect 取自 t_diagramobjects join t_object.Alias，连线 path 取自 t_diagramlinks join t_connectortag(schema_id)，绝不写 EA；②systemarchitecture-mcp-server.js getArchitectureViewContext inputSchema 加 includeEaGeometry(默认 false,opt-in)，命中时附加 geometry{source,present,elements,relationships}，懒加载 node:sqlite 库，无 EA 模型/图 present:false 不报错；③测试 tests/architecture-view-context.test.js(端到端：真实 archgraph.qea view 176/174 对齐+默认不返回+无 EA 模型降级)、tests/ea-qea-sync.test.js(reader 精确值+null)；同步修复 429 childViews 过期列表。验证：guardian 6/6、validateSystemArchitecture passed、embedding/qeaProjection/neo4jSync Aligned；live 验证 view 169(Application Cooperation) includeEaGeometry=true 返回 present:true、9 元素/7 连线全对齐。用 geometry 生成图片：docs/diagrams/application-cooperation.png（media-artist 委派，qwen-image-plus）。commits：3c4c492(代码+测试)/a732623(图登记 AT-08+WP2791)/78d140c(docs/acceptance-testcases.md)/f9c9625(生成图)。全局 ~/.argo/scripts 已同步两份文件。关键决策：几何源=工作区 .qea(git 跟踪 archgraph.qea 是真实可用几何源)，按 schema id 对齐，连线 path 保留 EA 原始字符串；readViewDiagramGeometry 放 ea-qea-sync-lib(已导出) 以便 server 懒加载。教训/陷阱：①applySystemArchitectureMutation/preview 常被 VS Code 客户端侧禁用(错误 'disabled by the user')，重启 MCP 不恢复(允许/拒绝存客户端)，单元素更新可用 updateArchitectureElement(activate_architecture_metadata_update_tools 激活) 走同 applyMutations；②updateElement 的 testcases 是整数组替换(不在 mergeAttributesPatch 范围)，改单个 AT 描述必须带全 10 项；③updateArchitectureElement patch 顶层禁冗余字段(additionalProperties:false)；④archgraph.qea 本地改动是 EA 噪音，不随功能提交；⑤视图无 StyleEx token 但可能有 ea_guid 锚定图(如 429)，勿拿它当『无图』样例。待办提醒：生成图是否已过媒体艺术家视觉验收(尺寸<1MB/画面契合)未在本摘要确认，若未验收需补 qwen3-vl 核对。",
+      "description": "会话目标：删除 argo\\skills\\ea-human-draft 技能，改为开发一个能在 EA 内执行的 SCRIPT 提取 DRAFT，提取方式与该技能逻辑一致（语义 diff）。完成：①删除技能 argo/skills/ea-human-draft（SKILL.md+目录）及其打包/部署接线（package.json files 掉 argo/skills/ea-human-draft；install-argo.ps1 掉 5 处技能部署块，22 个编号部署步及标记未动，argo-deploy 6/6）；②新增 EA 内脚本 eatool/EA-jsscript/extract-human-draft.js——在打开的 EA 模型内运行，基线=canonical JSON（design/KG/SystemArchitecture.json，投影保证已提交 .qea==canonical，故 live-EA vs canonical 与 node 工具 base=committed.qea vs work=live.qea 语义等价），工作区=EA 可见对象模型（Repository.SQLQuery 读 t_object/t_connector/t_diagram/t_diagramobjects，按 schema_id/schema_view_id 锚对齐，绝不读 kg_sync_meta），归类同 node 工具的七类提议（add/update/remove element+relationship, updateView），纯几何仅计 layoutOnly 不产出；运行写 results/human-draft.json+md 交 agent 经 ARGO preview/apply 写回。与 node 工具（需 EA 关闭、读两个 .qea）互补；③headless 支持 draft 模式（bootstrap.js run() 放行 + run-headless.ps1 ValidateSet 加 'draft' 映射脚本，EA_HEADLESS_GRAPH/EA_HEADLESS_OUTPUT）；④测试：重命名/重写 AT-2792-07，静态审查 + AT-2792-07/R 真实 EA 无头跑 2/2（人改名→updateElement、加新无锚盒→addElement，无 spurious remove/updateView）；⑤图谱：updateElement 2792 改 AT-2792-07 指向新测试 + 扩展 WP2792 描述为双路径（EA 内脚本 vs node 工具），新增 Artifact ea-human-draft-script-001 挂 ea-tooling-wps-001，注册 commit bbe9309（功能）+ ae9e3a4（KG 登记）。关键陷阱/教训：①EA JScript 是 5.8/ES3——对象字面量尾逗号会 PARSE 失败（错误码 -2146827260，报「缺少标识符」，无行号），Array.protototype.map/filter/trim 缺失，JSON 需 !INC JSON-Parser 或 bootstrap shim；用 Node transformer + cscript eval probe（写 UTF-8 报告文件避免控制台 GBK 乱码）定位；②updateElement 的 testcases 是整数组替换（不在 mergeAttributesPatch 范围），改单个 AT 描述/路径必须带全量 8 项，否则会清掉其它 AT；③repository 里 import-from-kg.js/wechat-publisher.agent.md 等文件不在 git（预置缺失），导致相关 23 个测试为 pre-existing 失败，与本修改无关（验收守卫 4/4 / ea-human-diff 7/7 / argo-deploy 6/6）。验证：validateSystemArchitecture passed、qeaProjection/neo4jSync/Aligned。待办：无。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3942,7 +3942,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-04",
+          "value": "2026-09-09",
           "description": "2026-09-04 发布 archgraph-argo@0.12.6 收尾"
         },
         {
@@ -3968,6 +3968,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "ae9e3a4",
+          "description": "design/KG/SystemArchitecture.json（登记 WP2792 + ea-human-draft-script-001 commit）"
         }
       ],
       "testcases": [
