@@ -16,7 +16,8 @@
 //     diffed into updateElement.fields.attributes / .testcases
 //   - relationship attributes (relationship_attributes_json connector tag) are read and
 //     diffed into updateRelationship.fields.attributes
-// Writes results/human-draft.json + results/human-draft.md for the agent to write back via
+// Writes results/human-draft.md — a compact summary plus the machine proposal set embedded as
+// JSON (no standalone .json file). The agent/human reads the Markdown for both.
 // ARGO preview/apply.
 //
 // External-view acceptance (static review, since EA scripts run in the JScript engine and
@@ -118,10 +119,11 @@ test('ea-human-draft-script (AT-2792-07): EA-internal extractor wraps canonical 
   assert.match(content, /reAnchor/, 'script must emit a reAnchor hint for a drifted connection');
   assert.match(content, /driftedConnectorGuids/, 'script must not double-report a drifted connector as addRelationship');
 
-  // output artifacts
+  // output artifacts: only the Markdown is written (it embeds the proposal JSON)
   assert.match(content, /results\\human-draft/, 'script must default output to results/human-draft');
-  assert.match(content, /\.json/, 'script must write the machine proposal JSON');
-  assert.match(content, /\.md/, 'script must write the human-readable Markdown');
+  assert.match(content, /\.md/, 'script must write the Markdown (which embeds the proposal JSON)');
+  assert.doesNotMatch(content, /writeTextUtf8\(outStem \+ '\.json'/, 'script must not write a standalone .json file (JSON is embedded in the Markdown)');
+  assert.match(content, /Only the Markdown is written/, 'script must document that only Markdown is written');
 
   // the node tool (old engine) is fully removed — this EA script is now the only implementation
   assert.ok(!fs.existsSync(OLD_NODE_TOOL), 'argo/scripts/ea-human-diff.js must be deleted');
@@ -172,6 +174,23 @@ function projectFixture(graph, dir) {
   assert.ok(proj.ok, 'fullProjection of fixture failed');
   fs.copyFileSync(baseQea, workQea);
   return { workQea, graphPath, outStem, baseQea };
+}
+
+// The proposal JSON is embedded in the .md fenced block (no standalone .json file). Extract
+// each line and parse it into the proposal array plus the trailing summary (from the table).
+function readResultFromMd(outStem) {
+  const md = fs.readFileSync(outStem + '.md', 'utf8').replace(/^\uFEFF/, '');
+  const block = md.match(/```json\n([\s\S]*?)\n```/);
+  assert.ok(block, 'Markdown must contain a fenced json block with the proposal set');
+  const proposals = block[1].split('\n').filter((l) => l.trim() !== '').map((l) => JSON.parse(l));
+  let summary = {};
+  const sm = md.match(/^\| \*\*addElement\*\* \| (\d+) \|/m);
+  if (sm) { summary.addElement = +sm[1]; }
+  const counts = {};
+  const countRe = /\| ([a-zA-Z]+) \| (\d+) \|/g;
+  let m;
+  while ((m = countRe.exec(md)) !== null) { counts[m[1]] = +m[2]; }
+  return { md, proposals, summary: counts };
 }
 
 test('ea-human-draft-script (AT-2792-07/R): headless draft run on an edited model yields the visible-object-model semantic diff', (t) => {
@@ -231,22 +250,22 @@ test('ea-human-draft-script (AT-2792-07/R): headless draft run on an edited mode
     const { json } = runHeadlessDraft(workQea, graphPath, outStem);
     assert.ok(json && json.ok && json.exitCode === 0,
       `headless draft run failed: ${JSON.stringify(json || '').slice(0, 500)}`);
-    assert.ok(fs.existsSync(outStem + '.json'), 'draft .json must be produced');
+    assert.ok(!fs.existsSync(outStem + '.json'), 'no standalone .json file must be produced (JSON is embedded in the Markdown)');
     assert.ok(fs.existsSync(outStem + '.md'), 'draft .md must be produced');
 
-    const result = JSON.parse(fs.readFileSync(outStem + '.json', 'utf8').replace(/^\uFEFF/, ''));
-    assert.equal(result.format, 'archgraph-ea-human-diff', 'result format must match the node tool');
-    const ops = result.proposals.map((p) => p.op);
+    const { proposals, md } = readResultFromMd(outStem);
+    assert.match(md, /提议集（JSON）/, 'Markdown must embed the proposal JSON');
+    const ops = proposals.map((p) => p.op);
     assert.ok(ops.includes('updateElement'), `expected updateElement for the human name edit, got ${ops.join(',')}`);
     assert.ok(ops.includes('addElement'), `expected addElement for the human-doodled box, got ${ops.join(',')}`);
     assert.ok(!ops.includes('removeElement') && !ops.includes('updateView'),
       `human additions/edits must not produce spurious removeElement/updateView, got ${ops.join(',')}`);
-    const upd = result.proposals.find((p) => p.op === 'updateElement' && p.id === 'e1');
+    const upd = proposals.find((p) => p.op === 'updateElement' && p.id === 'e1');
     assert.ok(upd && upd.fields.name === 'Element One Human Edited', 'updateElement carries the human name');
     assert.ok(Array.isArray(upd.fields.attributes), 'updateElement must carry the diffed attributes array');
     const noteAttr = upd.fields.attributes && upd.fields.attributes.find((a) => a.name === 'note');
     assert.ok(noteAttr && noteAttr.value === 'v2', 'updateElement attributes must reflect the human value change');
-    const add = result.proposals.find((p) => p.op === 'addElement');
+    const add = proposals.find((p) => p.op === 'addElement');
     assert.ok(add && add.proposed.name === 'Human Doodled Box', 'addElement carries the human-doodled object');
   } finally {
     if (db) { try { db.close(); } catch { /* ignore */ } }
@@ -283,13 +302,13 @@ test('ea-human-draft-script (AT-2792-09/R): an relationship whose connector lost
 
     const { json } = runHeadlessDraft(workQea, graphPath, outStem);
     assert.ok(json && json.ok && json.exitCode === 0, `draft run failed: ${JSON.stringify(json || '').slice(0, 500)}`);
-    const result = JSON.parse(fs.readFileSync(outStem + '.json', 'utf8').replace(/^\uFEFF/, ''));
-    const ops = result.proposals.map((p) => p.op);
+    const { proposals } = readResultFromMd(outStem);
+    const ops = proposals.map((p) => p.op);
     assert.ok(!ops.includes('removeRelationship'),
       `anchor-lost connector must NOT be reported as removeRelationship, got ${ops.join(',')}`);
-    const upd = result.proposals.find((p) => p.op === 'updateRelationship' && p.id === '1161');
+    const upd = proposals.find((p) => p.op === 'updateRelationship' && p.id === '1161');
     assert.ok(upd && upd.fields.reAnchor, `expected updateRelationship with reAnchor hint for 1161, got ${ops.join(',')}`);
-    assert.ok(!result.proposals.some((p) => p.op === 'addRelationship'),
+    assert.ok(!proposals.some((p) => p.op === 'addRelationship'),
       `anchor-lost connector must not be double-reported as addRelationship, got ${ops.join(',')}`);
   } finally {
     if (db) { try { db.close(); } catch { /* ignore */ } }
@@ -330,9 +349,9 @@ test('ea-human-draft-script (AT-2792-10/R): a brand-new relationship carries its
 
     const { json } = runHeadlessDraft(workQea, graphPath, outStem);
     assert.ok(json && json.ok && json.exitCode === 0, `draft run failed: ${JSON.stringify(json || '').slice(0, 500)}`);
-    const result = JSON.parse(fs.readFileSync(outStem + '.json', 'utf8').replace(/^\uFEFF/, ''));
-    const add = result.proposals.find((p) => p.op === 'addRelationship');
-    assert.ok(add, `expected an addRelationship for the human-drawn connector, got ${result.proposals.map((p) => p.op).join(',')}`);
+    const { proposals } = readResultFromMd(outStem);
+    const add = proposals.find((p) => p.op === 'addRelationship');
+    assert.ok(add, `expected an addRelationship for the human-drawn connector, got ${proposals.map((p) => p.op).join(',')}`);
     assert.equal(add.proposed.description, 'human-typed description',
       'addRelationship.proposed.description must carry the EA Notes of the new relationship');
   } finally {
@@ -378,13 +397,12 @@ test('ea-human-draft-script (AT-2792-11/R): view add/remove/update (name+descrip
 
     const { json } = runHeadlessDraft(workQea, graphPath, outStem);
     assert.ok(json && json.ok && json.exitCode === 0, `draft run failed: ${JSON.stringify(json || '').slice(0, 500)}`);
-    const result = JSON.parse(fs.readFileSync(outStem + '.json', 'utf8').replace(/^\uFEFF/, ''));
-    const ops = result.proposals.map((p) => p.op);
-    const upd = result.proposals.find((p) => p.op === 'updateView' && p.viewId === 'v1');
-    assert.ok(upd && upd.description === 'edited desc', `expected updateView v1 with edited description, got ${JSON.stringify(result.proposals)}`);
+    const { proposals, md } = readResultFromMd(outStem);
+    const ops = proposals.map((p) => p.op);
+    const upd = proposals.find((p) => p.op === 'updateView' && p.viewId === 'v1');
+    assert.ok(upd && upd.description === 'edited desc', `expected updateView v1 with edited description, got ${JSON.stringify(proposals)}`);
     assert.ok(ops.includes('removeView'), `expected removeView for v2, got ${ops.join(',')}`);
     // Markdown must embed the proposal JSON
-    const md = fs.readFileSync(outStem + '.md', 'utf8').replace(/^\uFEFF/, '');
     assert.match(md, /提议集（JSON）/, 'Markdown must embed the proposal JSON heading');
     assert.match(md, /```json/, 'Markdown must include a JSON code block');
     assert.match(md, /removeView/, 'Markdown JSON must contain removeView');

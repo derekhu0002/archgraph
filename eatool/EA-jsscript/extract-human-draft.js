@@ -14,9 +14,9 @@
  *              kg_sync_meta (human edits never touch the mirror)
  *            - pure geometry (t_diagramobjects coords) never becomes a canonical proposal,
  *              only counted (layoutOnly)
- *          Then writes results/human-draft.json (machine proposal set) + results/human-draft.md
- *          (human-readable summary). The script ONLY extracts the draft — it never writes back
- *          to the graph; applying the proposal to the canonical graph is done by whoever runs it.
+ *          Then writes results/human-draft.md — a compact summary plus the machine proposal set
+ *          embedded as JSON (no standalone .json file). The script ONLY extracts the draft — it
+ *          never writes back to the graph; applying the proposal is done by whoever runs it.
  *
  * Why in-EA: the node tool needs the model closed + two .qea files (base=committed, work=live).
  * A script in EA sees the live model directly and always has the canonical JSON on disk, so the
@@ -943,9 +943,6 @@ function renderMarkdown(result) {
 		lines.push('```');
 		lines.push('');
 	}
-	// Object.filter may be absent in JScript 5.8; the above uses manual join. Guard:
-	lines.push('> 本 diff 仅作提取：基于 EA 可见对象模型（schema_id 锚 tag 对齐），基线为 canonical JSON（未读 kg_sync_meta）；几何不进 canonical；status 不进顶层字段（经 attributes 通道）。');
-	lines.push('');
 	return lines.join('\n');
 }
 
@@ -1014,11 +1011,10 @@ function main() {
 		proposals: out.proposals
 	});
 
-	var jsonText = JSON.stringify(result, null, 2);
+	// Only the Markdown is written (it embeds the proposal JSON). No standalone .json file.
 	var mdText = renderMarkdown(result);
-	writeTextUtf8(outStem + '.json', jsonText);
 	writeTextUtf8(outStem + '.md', mdText);
-	Session.Output('extract-human-draft: written ' + outStem + '.json + ' + outStem + '.md');
+	Session.Output('extract-human-draft: written ' + outStem + '.md');
 	Session.Output('extract-human-draft: summary ' + JSON.stringify(out.summary));
 }
 
