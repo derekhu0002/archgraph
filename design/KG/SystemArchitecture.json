@@ -5704,6 +5704,11 @@
           "name": "commit",
           "value": "7a70a89",
           "description": "argo/skills/ea-human-reconcile/SKILL.md; tests/ea-human-reconcile-skill.test.js（按人类批注优化：disable-model-invocation 改 true（触发式、不被模型自动调用）；删冗长背景/分工叙述、一句话点职责；前置补具体查询方法 getSystemArchitecture/getIntentElementContext/queryNeo4jGraph(只读 Cypher+schema:true)/preview/apply；Workflow 从步骤式改目标+原则式，保留红线：未经人类判决 MUST NOT apply、删除类单独确认、只读不泄密；测试改类别式断言+disable-model-invocation:true+preview→apply 顺序+queryNeo4jGraph；部署至 5 宿主；回归 1/1+6/6+6/6+guardian 4/4）"
+        },
+        {
+          "name": "commit",
+          "value": "f2d4225",
+          "description": "package.json（发布 archgraph-argo@0.16.0：新增 ea-human-reconcile 全局 skill——EA 草稿提取后交由 Agent 结合全局分析给建议、由人类裁决写回；disable-model-invocation:true 触发式；打包/部署到 copilot/cursor/opencode/dsh/openclaw 全部宿主；AT-2792-12）"
         }
       ]
     },
