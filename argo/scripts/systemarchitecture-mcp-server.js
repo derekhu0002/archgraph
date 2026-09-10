@@ -1948,7 +1948,11 @@ function runQeaProjection(target) {
       return;
     }
     const snapshotDir = path.join(target.workspaceRoot, '.argo', 'temp', 'qea-backups');
-    const args = [script, '--mode', 'sync', '--graph', target.graphPath, '--qea', target.qeaPath, '--snapshot-dir', snapshotDir];
+    // -y enables the projection-owned delete reconcile: objects that carry a schema anchor
+    // (t_object.Alias / t_connectortag schema_id) but are no longer in canonical are removed
+    // from the .qea, so a graph-side deletion actually disappears from EA on the next
+    // projection. Human-drawn (un-anchored) content is never a delete candidate.
+    const args = [script, '--mode', 'sync', '--graph', target.graphPath, '--qea', target.qeaPath, '--snapshot-dir', snapshotDir, '-y'];
     const started = Date.now();
     let stderr = '';
     let child;

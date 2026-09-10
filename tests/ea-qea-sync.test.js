@@ -636,6 +636,67 @@ test('ea-qea-sync (view geometry read): readViewDiagramGeometry returns stored E
   }
 });
 
+test('ea-qea-sync (AT-2791-17): allowDelete removes projection-owned elements, relationships AND views gone from canonical, cascading their tags/links; human-drawn un-anchored content is preserved', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-del-'));
+  try {
+    const qea = tmpQea(dir);
+    const g = {
+      name: 'del-fixture', description: '', elements: [
+        { id: 'e1', name: 'One', type: 'Business Object', description: 'd1' },
+        { id: 'e2', name: 'Two', type: 'Business Object', description: 'd2' },
+        { id: 'e3', name: 'Three', type: 'Application Component', description: 'd3' },
+      ],
+      relationships: [
+        { id: 'r1', name: 'R1', type: 'Association', source_id: 'e1', target_id: 'e2', description: 'rd1' },
+        { id: 'r2', name: 'R2', type: 'Association', source_id: 'e2', target_id: 'e3', description: 'rd2' },
+      ],
+      views: [
+        { view_id: 'v1', view_name: 'View One', description: '', included_elements: ['e1', 'e2'], included_relationships: ['r1'] },
+        { view_id: 'v2', view_name: 'View Two', description: '', included_elements: ['e2', 'e3'], included_relationships: ['r2'] },
+      ],
+    };
+    lib.syncGraphToQea(g, qea, { dryRun: false, allowDelete: false });
+
+    // plant a human-drawn (un-anchored) object + a human-drawn diagram that must survive
+    let db = new DatabaseSync(qea);
+    db.prepare("INSERT INTO t_object (Object_Type, Name, ea_guid) VALUES ('Class', 'Human Box', '{11111111-1111-1111-1111-111111111111}')").run();
+    db.prepare("INSERT INTO t_diagram (Name, Diagram_Type, ea_guid) VALUES ('Human Diagram', 'Logical', '{22222222-2222-2222-2222-222222222222}')").run();
+    db.close();
+
+    // remove r1 (relationship), e3 (element) and v2 (view) from canonical
+    const g2 = JSON.parse(JSON.stringify(g));
+    g2.relationships = g2.relationships.filter((r) => r.id !== 'r1');
+    g2.elements = g2.elements.filter((e) => e.id !== 'e3');
+    g2.views = g2.views.filter((v) => v.view_id !== 'v2');
+    const r = lib.syncGraphToQea(g2, qea, { dryRun: false, allowDelete: true });
+    // candidates: r1 (relationship) + e3 (element) + v2 (diagram). e3's attached connector r2 cascades.
+    assert.equal(r.stats.deleteCandidates, 3, 'removed relationship + element + view are delete candidates');
+    assert.equal(r.stats.deleted, 3, 'all three are deleted');
+
+    db = new DatabaseSync(qea);
+    const r1tag = db.prepare("SELECT ElementID FROM t_connectortag WHERE Property='schema_id' AND VALUE='r1'").get();
+    assert.ok(!r1tag, 'relationship r1 (schema_id anchor) is removed');
+    const e3row = db.prepare("SELECT Object_ID FROM t_object WHERE Alias='e3'").get();
+    assert.ok(!e3row, 'element e3 is removed');
+    // e3's connector r2 must be gone too (element deletion cascades attached connectors)
+    const r2tag = db.prepare("SELECT ElementID FROM t_connectortag WHERE Property='schema_id' AND VALUE='r2'").get();
+    assert.ok(!r2tag, 'connector attached to the deleted element is cascaded');
+    // removed view's diagram is deleted
+    const v2diag = db.prepare('SELECT Diagram_ID FROM t_diagram WHERE ea_guid=?').get(lib.deterministicGuid('diag:v2'));
+    assert.ok(!v2diag, 'removed view v2 diagram is deleted');
+    // no orphan connector-tag rows for the deleted connectors
+    assert.equal(db.prepare("SELECT COUNT(*) AS c FROM t_connectortag WHERE ElementID NOT IN (SELECT Connector_ID FROM t_connector)").get().c, 0, 'no orphan connector tags');
+    // human-drawn un-anchored object + diagram survive
+    const human = db.prepare("SELECT Object_ID FROM t_object WHERE Name='Human Box'").get();
+    assert.ok(human, 'human-drawn un-anchored object is preserved');
+    const humanDiag = db.prepare('SELECT Diagram_ID FROM t_diagram WHERE ea_guid=?').get('{22222222-2222-2222-2222-222222222222}');
+    assert.ok(humanDiag, 'human-drawn diagram is preserved');
+    db.close();
+  } finally {
+    removeTree(dir);
+  }
+});
+
 test('ea-qea-sync (migration): projection lives in argo/scripts; no top-level scripts/ea-qea-sync residue', () => {
   assert.equal(fs.existsSync(path.join(ROOT, 'scripts', 'ea-qea-sync.js')), false, 'top-level scripts/ea-qea-sync.js removed');
   assert.equal(fs.existsSync(path.join(ROOT, 'scripts', 'ea-qea-sync-lib.js')), false, 'top-level scripts/ea-qea-sync-lib.js removed');

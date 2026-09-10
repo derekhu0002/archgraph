@@ -81,6 +81,52 @@ test('argo-qea-projection (AT-2791-04): apply write projects the new element int
   }
 });
 
+test('argo-qea-projection (AT-2791-18): apply removeRelationship auto-projects the deletion out of the .qea (no manual -y needed)', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-qea-del-'));
+  try {
+    fs.copyFileSync(QEA_TEMPLATE, path.join(dir, 'archgraph.qea'));
+    // two relationships between the same endpoints so removing one keeps the graph valid
+    const graph = JSON.parse(JSON.stringify(BASE_GRAPH));
+    graph.relationships.push({
+      id: 'r2', name: 'A to B two', type: 'Association', source_id: 'a1', target_id: 'b1',
+      description: 'y', statement: 'Actor One --(Association)--> Actor Base',
+      attributes: [], source_name: 'Actor One', target_name: 'Actor Base',
+    });
+    graph.views[0].included_relationships = ['r1', 'r2'];
+    const architecturePath = 'design/KG/ea-graph.json';
+    const graphPath = path.join(dir, architecturePath);
+    fs.mkdirSync(path.dirname(graphPath), { recursive: true });
+    fs.writeFileSync(graphPath, JSON.stringify(graph, null, 2), 'utf8');
+
+    // seed the projection (contains relationships r1 + r2)
+    qeaSyncLib.syncGraphToQea(graph, path.join(dir, 'archgraph.qea'), { dryRun: false, allowDelete: false });
+    let db = new DatabaseSync(path.join(dir, 'archgraph.qea'));
+    assert.ok(db.prepare("SELECT ElementID FROM t_connectortag WHERE Property='schema_id' AND VALUE='r1'").get(), 'r1 present before');
+    assert.ok(db.prepare("SELECT ElementID FROM t_connectortag WHERE Property='schema_id' AND VALUE='r2'").get(), 'r2 present before');
+    db.close();
+
+    // apply a graph-side relationship removal; the write path must project the deletion
+    const result = await systemArchitectureMcp.callTool('applySystemArchitectureMutation', {
+      workspaceRoot: dir,
+      architecturePath,
+      mutations: [{ type: 'removeRelationship', id: 'r1' }],
+    });
+    const payload = JSON.parse(result.content[0].text);
+    assert.equal(payload.status, 'passed', 'apply should succeed');
+    assert.equal(payload.written, true, 'canonical should be written');
+
+    db = new DatabaseSync(path.join(dir, 'archgraph.qea'));
+    const gone = db.prepare("SELECT ElementID FROM t_connectortag WHERE Property='schema_id' AND VALUE='r1'").get();
+    assert.ok(!gone, 'deleted relationship r1 must be projected out of the .qea automatically');
+    const kept = db.prepare("SELECT ElementID FROM t_connectortag WHERE Property='schema_id' AND VALUE='r2'").get();
+    assert.ok(kept, 'relationship r2 must remain');
+    assert.equal(db.prepare("SELECT COUNT(*) AS c FROM t_connectortag WHERE ElementID NOT IN (SELECT Connector_ID FROM t_connector)").get().c, 0, 'no orphan connector tags left behind');
+    db.close();
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('argo-qea-projection (AT-2791-04): no .qea in workspace -> apply succeeds with no qea side effect', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-qea-none-'));
   try {

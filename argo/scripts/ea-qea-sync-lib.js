@@ -740,24 +740,66 @@ function syncGraphToQea(graph, qeaPath, opts) {
     stages.members = nowMs();
 
     // --- deletion reconcile (opt-in) ---------------------------------------
+    // Elements are anchored by t_object.Alias; relationships have NO Alias column — their
+    // canonical id lives in t_connectortag(schema_id). Using row.Alias for relationships made
+    // the candidate check always false, so deleted relationships were never projected out.
     const keepAliases = new Set();
     for (const e of graph.elements || []) { if (e && e.id !== undefined) { keepAliases.add(String(e.id)); } }
     for (const rel of graph.relationships || []) { if (rel && rel.id !== undefined) { keepAliases.add(String(rel.id)); } }
+    // connector id -> canonical relationship id (schema_id tag)
+    const relSchemaById = new Map();
+    try {
+      const relTagRows = db.prepare("SELECT ElementID, VALUE FROM t_connectortag WHERE Property='schema_id'").all();
+      for (const t of relTagRows) { relSchemaById.set(Number(t.ElementID), String(t.VALUE)); }
+    } catch { /* table may be absent on a hand-drawn model */ }
     const candidates = [];
     for (const row of existingElems) {
       if (row.Alias && !keepAliases.has(String(row.Alias))) { candidates.push({ type: 'element', id: Number(row.Object_ID), alias: row.Alias }); }
     }
     for (const row of existingRels) {
-      if (row.Alias && !keepAliases.has(String(row.Alias))) { candidates.push({ type: 'relationship', id: Number(row.Connector_ID), alias: row.Alias }); }
+      const relId = relSchemaById.get(Number(row.Connector_ID));
+      if (relId !== undefined && !keepAliases.has(relId)) { candidates.push({ type: 'relationship', id: Number(row.Connector_ID), alias: relId }); }
+    }
+    // views: a projected diagram is owned by the projector. Identify its canonical view id via
+    // the schema_view_id StyleEx token, or (when EA rewrote StyleEx and dropped the token) by
+    // matching the deterministic diagram ea_guid `diag:<viewId>` against the view-id catalog
+    // that kg_sync_meta retains. A view id no longer in canonical -> delete the diagram.
+    const canonicalViewIds = new Set();
+    for (const v of graph.views || []) { if (v && v.view_id !== undefined && v.view_id !== null) { canonicalViewIds.add(String(v.view_id)); } }
+    const guidToView = new Map();
+    try {
+      const viewMetaRows = db.prepare("SELECT key FROM kg_sync_meta WHERE kind='view'").all();
+      for (const r of viewMetaRows) { guidToView.set(deterministicGuid('diag:' + String(r.key)), String(r.key)); }
+    } catch { /* meta table may be absent */ }
+    for (const d of existingDiags) {
+      let vid = parseStyleToken(d.StyleEx, 'schema_view_id');
+      if (!vid && d.ea_guid) { vid = guidToView.get(String(d.ea_guid)) || ''; }
+      if (vid && !canonicalViewIds.has(String(vid))) { candidates.push({ type: 'diagram', id: Number(d.Diagram_ID), alias: String(vid) }); }
     }
     stats.deleteCandidates = candidates.length;
     if (candidates.length > 0 && o.allowDelete && !o.dryRun) {
       for (const c of candidates) {
         if (c.type === 'relationship') {
+          // SQLite has no FK cascade: clear the connector's tag + diagram-link rows too.
+          db.prepare('DELETE FROM t_connectortag WHERE ElementID=?').run(c.id);
+          db.prepare('DELETE FROM t_diagramlinks WHERE ConnectorID=?').run(c.id);
           db.prepare('DELETE FROM t_connector WHERE Connector_ID=?').run(c.id);
+        } else if (c.type === 'diagram') {
+          db.prepare('DELETE FROM t_diagramobjects WHERE Diagram_ID=?').run(c.id);
+          db.prepare('DELETE FROM t_diagramlinks WHERE DiagramID=?').run(c.id);
+          db.prepare('DELETE FROM t_diagram WHERE Diagram_ID=?').run(c.id);
         } else {
+          // remove connectors attached to this element (start or end) and their children
+          const attached = db.prepare('SELECT Connector_ID FROM t_connector WHERE Start_Object_ID=? OR End_Object_ID=?').all(c.id, c.id);
+          for (const a of attached) {
+            db.prepare('DELETE FROM t_connectortag WHERE ElementID=?').run(Number(a.Connector_ID));
+            db.prepare('DELETE FROM t_diagramlinks WHERE ConnectorID=?').run(Number(a.Connector_ID));
+            db.prepare('DELETE FROM t_connector WHERE Connector_ID=?').run(Number(a.Connector_ID));
+          }
           db.prepare('DELETE FROM t_diagramobjects WHERE Object_ID=?').run(c.id);
           db.prepare('DELETE FROM t_objectproperties WHERE Object_ID=?').run(c.id);
+          db.prepare('DELETE FROM t_attribute WHERE Object_ID=?').run(c.id);
+          db.prepare('DELETE FROM t_objecttests WHERE Object_ID=?').run(c.id);
           db.prepare('DELETE FROM t_object WHERE Object_ID=?').run(c.id);
         }
         stats.deleted++;
