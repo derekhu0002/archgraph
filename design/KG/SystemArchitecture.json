@@ -4049,6 +4049,16 @@
           "name": "commit",
           "value": "bde66d8",
           "description": "L1 语义去重建议：argo/scripts/systemarchitecture-mcp-server.js; argo/rules/archgraph.instructions.md; tests/architecture-dedup-semantic.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "decision",
+          "value": "rules-are-agent-facing-not-human-docs",
+          "description": "规则/AGENTS.md 是 Agent 的提示，不是给人阅读的文档：写行为契约（Agent 该做什么/怎么做），不写工具内部实现（归一化算法/键公式/阈值/环境变量/响应字段名）。GraphDeduplication 已按此改写（5ea4509）；今后新增或修订规则一律遵循。"
+        },
+        {
+          "name": "commit",
+          "value": "5ea4509",
+          "description": "GraphDeduplication 改写为 Agent 视角（行为契约）；CoreRule 9 + AT-rules-03 同步"
         }
       ],
       "testcases": [
