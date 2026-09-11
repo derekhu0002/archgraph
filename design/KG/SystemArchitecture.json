@@ -2632,7 +2632,7 @@
       "name": "ArchGraph ARGO Workflow Rules",
       "parent": "1249",
       "type": "Rule",
-      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）。2026-09-11 全量改写为 Agent 视角：规则文件是给 Agent 的提示，只写「Agent 该做什么/怎么判定」的行为契约，不写工具内部实现（算法/阈值/环境变量/字段名）与解释性论证；每个会话随上下文加载，越短越准越好。运行规则：起步闸门（WakeupGuideline STEP 0）仅载 T1 工作记忆摘要；改动前先定位元素、只经 ARGO MCP 读写图谱、验收测试先行（可执行 GIVEN-WHEN-THEN）、提交后登记 commit id+文件路径；KG-first 且语义优先检索（getSystemArchitecture query.purpose+query.intent / getIntentElementContext，queryNeo4jGraph 为次要只读结构查询）；KG-first 内容存储；写入去重（复用优先、重复被拒则复用/更新、语义近似仅建议）；三层记忆（里程碑即写为主 + 会话摘要机会式幂等覆盖 T1）；分级改动（Tier 1/2/3）。安装器 install-argo.ps1 从 <WakeupGuideline> 块生成各宿主唤醒插件，部署测试断言该锚点与 UNCONDITIONAL STARTUP GATE 文本。",
+      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）。2026-09-11 全量改写为 Agent 视角：规则文件是给 Agent 的提示，只写「Agent 该做什么/怎么判定」的行为契约，不写工具内部实现（算法/阈值/环境变量/字段名）与解释性论证；每个会话随上下文加载，越短越准越好。运行规则：起步闸门（WakeupGuideline STEP 0）仅载 T1 工作记忆摘要；改动前先定位元素、只经 ARGO MCP 读写图谱、验收测试先行（可执行 GIVEN-WHEN-THEN）、提交后登记 commit id+文件路径；KG-first 且语义优先检索（getSystemArchitecture query.purpose+query.intent / getIntentElementContext，queryNeo4jGraph 为次要只读结构查询）；KG-first 内容存储；写入去重（GraphDeduplication，2026-09-11 统一版：onConflict 去 fail、默认 reuse；精确重复→复用不新建；全图同 type 语义近似→写前拦截并返回 semanticConflicts，仅 allowDuplicate+justification 放行；update* 不受门禁）；三层记忆（里程碑即写为主 + 会话摘要机会式幂等覆盖 T1）；分级改动（Tier 1/2/3）。安装器 install-argo.ps1 从 <WakeupGuideline> 块生成各宿主唤醒插件，部署测试断言该锚点与 UNCONDITIONAL STARTUP GATE 文本。",
       "testcases": [
         {
           "Input": "tests/argo-rules-query.test.js",
@@ -2770,6 +2770,11 @@
           "name": "commit",
           "value": "a2ac65d",
           "description": "argo/rules/archgraph.instructions.md（全量 Agent 视角重写）; tests/argo-rules-memory-tiers.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "4819e02",
+          "description": "argo/rules/archgraph.instructions.md（GraphDeduplication + CoreRule 9 改为默认 reuse + 语义软门禁）; tests/argo-rules-dedup.test.js"
         }
       ]
     },
@@ -6008,7 +6013,7 @@
       "type": "Business Object"
     },
     {
-      "description": "ARGO MCP 写图路径的去重门禁（框架级），分两层。**L0 确定性**：在 addElement/addRelationship/addView 创建前按自然键精确重复检测（元素 (type, 归一化 name)、关系 (source_id, type, target_id, 归一化 name)、视图 (parent_element_id, 归一化 view_name)；归一化=NFKC+折叠空白+大小写折叠），命中按 onConflict 处理：fail（默认，拒绝并回传 duplicateConflicts 候选 id+guidance）、reuse（find-or-create，不新建、把已有对象挂到目标 view、返回 reusedId）、allowDuplicate（须带非空 justification）。**L1 语义建议（advisory、永不拒绝）**：对 addElement，在 preview/apply 回传受控作用域（同 type；给了 view_ids 时限定为这些 view 当前成员）且分数≥严格阈值（默认 0.85，ARGO_SEMANTIC_DEDUP_THRESHOLD）的语义相似候选；语义后端不可用时降级为显式 status、绝不报错（ARGO_MCP_SEMANTIC_DEDUP=0 可关闭）。update* 永不受门禁。源码：argo/scripts/systemarchitecture-mcp-server.js（applyMutations/normalizeDedupName/resolveDuplicateConflict/buildSemanticDedupAdvisory）、argo/scripts/argo-mcp-server.js（工具 schema）；规则见 argo/rules/archgraph.instructions.md <GraphDeduplication>。",
+      "description": "ARGO MCP 写图去重门禁（框架级，2026-09-11 统一版）。onConflict 只有两个值、默认 reuse：①精确重复（元素 type+归一化 name；关系 source+type+target+归一化 name；视图 parent+归一化 view name）→ 复用（把既有对象挂入目标 view_ids，不新建）；②新建元素时，若在**全图**存在**同 type** 且语义分数≥严格阈值（默认 0.85，ARGO_SEMANTIC_DEDUP_THRESHOLD；窗口每通道 topK=25）的近似候选→**写前拦截**（status failed、written false、返回 semanticConflicts 候选 + guidance），不落盘；③只有显式 onConflict:\"allowDuplicate\"+非空 justification 才放行精确/语义重复的新建；④无任何近似→正常新建；⑤update* 永不受门禁；⑥语义后端不可用时降级为显式 status，不报错（ARGO_MCP_SEMANTIC_DEDUP=0 关闭）；⑦判据=实际是否新建（selectCreatedElementAdds 依据 applyMutations 的 created 标记），不依赖调用参数。源码：argo/scripts/systemarchitecture-mcp-server.js（resolveDuplicateConflict/selectCreatedElementAdds/buildSemanticDedupAdvisory/evaluateSemanticDedupGate）、graph-rag/defaultSemanticRetrieval.js（per-request topK）；规则见 argo/rules/archgraph.instructions.md <GraphDeduplication>。",
       "id": "graph-write-dedup-gate",
       "name": "图谱写入去重门禁",
       "parent": "1961",
@@ -6016,63 +6021,63 @@
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 图谱中已存在同 type 且归一化 name 相同的元素；WHEN 用新 id 经 addElement（默认 onConflict=fail）创建；THEN 拒绝且不写入，duplicateConflicts 回传已有元素的 id/type/name，guidance 提示复用或改 onConflict。",
+          "description": "GIVEN 已存在同 type+归一化 name 的元素；WHEN addElement 未传 onConflict（默认 reuse）；THEN 不新建，复用既有 id 并挂入目标 view_ids（summary created:false/reused:true/reusedId）。",
           "name": "AT-dedup-01",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 已存在同 type+归一化 name 的元素且未在目标 view；WHEN addElement 传 onConflict=reuse；THEN 不新建，复用已有元素 id 并挂入目标 view_ids，结果标记 reused=true/reusedId。",
+          "description": "GIVEN 同型同名元素且未在目标 view；WHEN 显式 onConflict=reuse；THEN 与默认一致：不新建、复用并挂入目标 view。",
           "name": "AT-dedup-02",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 已存在同名同 type 元素；WHEN addElement 传 onConflict=allowDuplicate 但缺 justification；THEN 拒绝；WHEN 带非空 justification；THEN 创建成功且 justification 记录在结果中。",
+          "description": "GIVEN 已有同名同 type 元素；WHEN allowDuplicate 缺 justification→拒绝；带非空 justification→新建成功（既有元素保留）。",
           "name": "AT-dedup-03",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 已有 name='X' 的元素；WHEN 以仅大小写/空白/全半角差异的名称创建；THEN 视为同一自然键命中（NFKC+空白折叠+大小写折叠生效）。",
+          "description": "GIVEN 已有 name='Widget'；WHEN 以大小写/空白/全半角差异的名称创建；THEN 视为同一自然键命中（复用既有，不新建）。",
           "name": "AT-dedup-04",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 已存在 (source,type,target,name) 关系；WHEN 以相同四元组 addRelationship（默认 fail）；THEN 拒绝/按 onConflict 复用；WHEN 相同三元组但不同 name；THEN 允许创建并作为候选提示。",
+          "description": "GIVEN 已存在 (source,type,target,name) 关系；WHEN 默认创建；THEN 复用既有（不新建）；WHEN 相同三元组但不同 name；THEN 允许新建。",
           "name": "AT-dedup-05",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 同一 parent_element_id 下已有同名 view（归一化）；WHEN addView 同名（默认 fail）；THEN 拒绝；onConflict=reuse 时复用已有 view。",
+          "description": "GIVEN 同一 parent 下已有同名 view；WHEN 默认创建或显式 reuse；THEN 复用既有 view（不新建）。",
           "name": "AT-dedup-06",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 门禁仅作用于 add*；WHEN 对已存在同名元素执行 updateElement；THEN 正常通过（不受门禁约束）。",
+          "description": "GIVEN 门禁仅作用于 add*；WHEN 对存在同名元素执行 updateElement；THEN 正常通过（不受门禁约束）。",
           "name": "AT-dedup-07",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-semantic.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-semantic.test.js",
-          "description": "GIVEN 待新增元素与图中已存在元素语义相近；WHEN 经 preview/apply（或 addElement）创建；THEN 结果附带受控作用域（同 type；给定 view_ids 时限定其当前成员）且分数≥阈值（默认 0.85）的相似候选建议，status 仍 passed（仅建议、不拒绝、不阻塞写入）；语义后端不可用时降级为显式 unavailable 状态且不报错。",
+          "description": "GIVEN 待新增元素；WHEN 语义候选检索；THEN 返回全图同 type、分数≥阈值（默认 0.85；窗口每通道 topK=25）的候选，scope=whole graph same type；不同 type 与低分被过滤；in_target_views 仅作标记、不过滤。",
           "name": "AT-dedup-L1-01",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-semantic.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-semantic.test.js",
-          "description": "GIVEN onConflict='reuse'；WHEN 命中精确自然键（未新建）；THEN 不发语义建议；WHEN 未命中而落到新建（语义近似）；THEN 照常回传 semanticDedup 候选（仅建议不阻止）；选择依据为 applyMutations 的 created 标记而非调用参数。",
+          "description": "GIVEN 元素会真正新建且命中同型语义候选；WHEN 未传 allowDuplicate（默认 reuse）；THEN 写前拦截：status failed、written false、返回 semanticConflicts+guidance，不落盘；WHEN allowDuplicate+justification；THEN 放行新建；语义后端不可用降级不报错。",
           "name": "AT-dedup-L1-02",
           "type": "Acceptance Test"
         }
@@ -6097,6 +6102,11 @@
           "name": "commit",
           "value": "fc2dbff",
           "description": "argo/scripts/systemarchitecture-mcp-server.js（selectCreatedElementAdds + advisory 去 onConflict 过滤）; tests/architecture-dedup-semantic.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "4819e02",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/rules/archgraph.instructions.md; tests/architecture-dedup-gate.test.js; tests/architecture-dedup-semantic.test.js"
         }
       ]
     },
