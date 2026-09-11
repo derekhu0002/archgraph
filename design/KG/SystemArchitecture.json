@@ -2750,6 +2750,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "79c76ea",
+          "description": "argo/rules/archgraph.instructions.md（新增 <GraphDeduplication> + CoreRule 9）; tests/argo-rules-dedup.test.js（AT-rules-03）; design/KG/SystemArchitecture.json"
         }
       ]
     },
@@ -5938,6 +5943,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "79c76ea",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/architecture-dedup-gate.test.js; tests/argo-rules-dedup.test.js; design/KG/SystemArchitecture.json（L0 去重门禁 graph-write-dedup-gate 立项 + AT-dedup-01..07）"
         }
       ]
     }
