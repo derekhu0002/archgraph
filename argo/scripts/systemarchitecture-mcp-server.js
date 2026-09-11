@@ -1519,11 +1519,18 @@ function applyMutations(document, mutations) {
           requestedId: mutation.view.view_id,
         });
       } else {
-        nextDocument.views.push(clone(mutation.view));
-        upsertSubdiagramViewIntoElement(nextDocument, mutation.view.parent_element_id, mutation.view);
-        touchedViewIds.add(mutation.view.view_id);
-        viewLimitCheckIds.add(mutation.view.view_id);
-        mutationSummaries.push({ type: mutation.type, id: mutation.view.view_id });
+        const newView = clone(mutation.view);
+        if (Array.isArray(newView.included_elements)) {
+          newView.included_elements = addUnique([], newView.included_elements);
+        }
+        if (Array.isArray(newView.included_relationships)) {
+          newView.included_relationships = addUnique([], newView.included_relationships);
+        }
+        nextDocument.views.push(newView);
+        upsertSubdiagramViewIntoElement(nextDocument, newView.parent_element_id, newView);
+        touchedViewIds.add(newView.view_id);
+        viewLimitCheckIds.add(newView.view_id);
+        mutationSummaries.push({ type: mutation.type, id: newView.view_id });
       }
       continue;
     }
@@ -1538,7 +1545,14 @@ function applyMutations(document, mutations) {
       }
       const oldParentId = view.parent_element_id;
       const oldViewId = view.view_id;
-      Object.assign(view, clone(mutation.patch));
+      const patch = clone(mutation.patch);
+      if (Array.isArray(patch.included_elements)) {
+        patch.included_elements = addUnique([], patch.included_elements);
+      }
+      if (Array.isArray(patch.included_relationships)) {
+        patch.included_relationships = addUnique([], patch.included_relationships);
+      }
+      Object.assign(view, patch);
       if (oldParentId !== view.parent_element_id) {
         removeSubdiagramViewFromElement(nextDocument, oldParentId, oldViewId);
       }

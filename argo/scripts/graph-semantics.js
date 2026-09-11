@@ -116,11 +116,18 @@ function validateGraphSemantics(document, errors) {
       }
     }
     const includedElementIds = new Set(view.included_elements || []);
+    if (includedElementIds.size !== (view.included_elements || []).length) {
+      errors.push(`views '${view.view_id}' must not contain duplicate included_elements`);
+    }
     for (const elementId of view.included_elements || []) {
       elementIdsIncludedInViews.add(elementId);
       if (!elementById.has(elementId)) {
         errors.push(`views '${view.view_id}' references missing included element '${elementId}'`);
       }
+    }
+    const includedRelationshipIds = new Set(view.included_relationships || []);
+    if (includedRelationshipIds.size !== (view.included_relationships || []).length) {
+      errors.push(`views '${view.view_id}' must not contain duplicate included_relationships`);
     }
     for (const relationshipId of view.included_relationships || []) {
       relationshipIdsIncludedInViews.add(relationshipId);

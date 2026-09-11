@@ -698,6 +698,7 @@ function syncGraphToQea(graph, qeaPath, opts) {
           RectRight: 40 + col * 260 + 180, RectBottom: 40 + row * 160 + 90,
           Sequence: seq,
         });
+        placedObjs.add(Number(oid));
         seq++;
       }
       if (newObjs.length > 0 && !o.dryRun) {
@@ -731,6 +732,7 @@ function syncGraphToQea(graph, qeaPath, opts) {
         if (cid === undefined || cid < 0) { continue; }
         if (placedLinks.has(Number(cid))) { continue; }
         newLinks.push({ DiagramID: diagramId, ConnectorID: Number(cid), Style: '', Geometry: '' });
+        placedLinks.add(Number(cid));
       }
       if (newLinks.length > 0 && !o.dryRun) {
         insertMany(db, 't_diagramlinks', ['DiagramID', 'ConnectorID', 'Style', 'Geometry'], newLinks);
