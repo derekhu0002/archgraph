@@ -1757,7 +1757,7 @@ function removeEntries(existing, removals) {
   return (Array.isArray(existing) ? existing : []).filter(entry => !removalSet.has(entry));
 }
 
-async function buildMutationResult(context, mutations, write) {
+async function buildMutationResult(context, mutations, write, dependencies) {
   const beforeSummary = summarizeDocument(context.document);
   let mutationResult;
   try {
@@ -1806,6 +1806,15 @@ async function buildMutationResult(context, mutations, write) {
   };
   if (errors.length > 0) {
     result.guidance = buildFailureGuidance(errors);
+  }
+
+  // L1 advisory: semantic near-duplicate suggestions for element adds. Never
+  // blocks or fails the write; preview and apply both surface it.
+  if (errors.length === 0) {
+    const semanticDedup = await buildSemanticDedupAdvisory(context, mutations, dependencies);
+    if (semanticDedup) {
+      result.semanticDedup = semanticDedup;
+    }
   }
 
   if (errors.length > 0 || !write) {
@@ -2419,6 +2428,11 @@ function compactMutationResponse(payload) {
   if (payload && payload.neo4jSync) {
     compact.neo4jSync = { status: payload.neo4jSync.status };
   }
+  // L1 dedup advisory must survive the compact successful-write response: it is
+  // the whole point of surfacing (advisory) semantic near-duplicates to the caller.
+  if (payload && payload.semanticDedup) {
+    compact.semanticDedup = payload.semanticDedup;
+  }
   if (Array.isArray(payload && payload.warnings) && payload.warnings.length > 0) {
     compact.warnings = payload.warnings;
   }
@@ -2491,18 +2505,18 @@ async function callTool(name, args = {}, dependencies = undefined) {
 
   if (name === 'previewSystemArchitectureMutation') {
     const context = await loadContext(args);
-    return toolResult(attachContextWarnings(await buildMutationResult(context, args.mutations, false), context));
+    return toolResult(attachContextWarnings(await buildMutationResult(context, args.mutations, false, dependencies), context));
   }
 
   if (name === 'applySystemArchitectureMutation') {
     const context = await loadContext(args);
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, args.mutations, true), context), true);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, args.mutations, true, dependencies), context), true);
   }
 
   if (name === 'addArchitectureElement') {
     const context = await loadContext(args);
     const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addElement', element: args.element, view_ids: args.view_ids, onConflict: args.onConflict, justification: args.justification }], write), context), write);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addElement', element: args.element, view_ids: args.view_ids, onConflict: args.onConflict, justification: args.justification }], write, dependencies), context), write);
   }
 
   if (name === 'updateArchitectureElement') {
@@ -2641,6 +2655,119 @@ function memoryHitCard(element, maxDescLen) {
     }
   }
   return card;
+}
+
+// L1 semantic dedup advisory (GraphDeduplication item 3): for each element about
+// to be created, return semantically near elements within a CONTROLLED scope
+// (same ArchiMate type, and - when the add targets views - the union of those
+// views' current members) scoring above a strict threshold. Advisory ONLY: it
+// never rejects or blocks a write; a missing/unavailable semantic backend
+// degrades to an explicit status, never an error.
+const DEFAULT_SEMANTIC_DEDUP_THRESHOLD = 0.85;
+const SEMANTIC_DEDUP_MAX_QUERIES = 3;
+const SEMANTIC_DEDUP_MAX_MATCHES = 5;
+
+function semanticDedupThreshold() {
+  const raw = process.env.ARGO_SEMANTIC_DEDUP_THRESHOLD
+    ?? process.env.ARGO_MCP_SEMANTIC_DEDUP_THRESHOLD;
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 && value <= 1 ? value : DEFAULT_SEMANTIC_DEDUP_THRESHOLD;
+}
+
+function collectViewMemberElementIds(document, viewIds) {
+  const ids = new Set();
+  if (!Array.isArray(viewIds) || viewIds.length === 0) {
+    return ids;
+  }
+  const wanted = new Set(viewIds);
+  for (const view of Array.isArray(document && document.views) ? document.views : []) {
+    if (!view || !wanted.has(view.view_id)) {
+      continue;
+    }
+    for (const elementId of Array.isArray(view.included_elements) ? view.included_elements : []) {
+      ids.add(elementId);
+    }
+  }
+  return ids;
+}
+
+async function buildSemanticDedupAdvisory(context, mutations, dependencies) {
+  if (process.env.ARGO_MCP_SEMANTIC_DEDUP === '0') {
+    return undefined;
+  }
+  const addedElements = (Array.isArray(mutations) ? mutations : []).filter(mutation => (
+    mutation
+    && mutation.type === 'addElement'
+    && mutation.element
+    && typeof mutation.element.name === 'string'
+    && mutation.element.name.trim() !== ''
+    && mutation.onConflict !== 'reuse'
+  ));
+  if (addedElements.length === 0) {
+    return undefined;
+  }
+  const threshold = semanticDedupThreshold();
+  let journey;
+  try {
+    journey = await resolveSemanticOperatorJourney(dependencies, {
+      repositoryRoot: context.workspaceRoot,
+    });
+  } catch (error) {
+    return {
+      status: 'unavailable',
+      advisoryOnly: true,
+      threshold,
+      reason: String(error && error.category ? error.category : 'SEMANTIC_DEDUP_UNAVAILABLE'),
+      candidates: [],
+    };
+  }
+  const candidates = [];
+  for (const mutation of addedElements.slice(0, SEMANTIC_DEDUP_MAX_QUERIES)) {
+    const element = mutation.element;
+    const targetMemberIds = collectViewMemberElementIds(context.document, mutation.view_ids);
+    const requested = { id: element.id, name: element.name, type: element.type };
+    try {
+      const intent = [element.type, element.name, element.description]
+        .filter(part => typeof part === 'string' && part.trim() !== '')
+        .join(' ');
+      const retrieved = await journey.query({ purpose: 'general', intent });
+      const source = retrieved && (retrieved.result || retrieved.document) || retrieved;
+      const subset = buildCanonicalSemanticDocumentSubset(source, context.document);
+      const elements = subset && subset.status === 'passed' && subset.document
+        ? (Array.isArray(subset.document.elements) ? subset.document.elements : [])
+        : [];
+      const matches = elements
+        .filter(candidate => candidate && candidate.id !== element.id && typeof candidate.semanticScore === 'number')
+        .filter(candidate => !element.type || candidate.type === element.type)
+        .filter(candidate => candidate.semanticScore >= threshold)
+        .filter(candidate => targetMemberIds.size === 0 || targetMemberIds.has(candidate.id))
+        .sort((left, right) => right.semanticScore - left.semanticScore)
+        .slice(0, SEMANTIC_DEDUP_MAX_MATCHES)
+        .map(candidate => ({
+          id: candidate.id,
+          name: candidate.name,
+          type: candidate.type,
+          score: Number(candidate.semanticScore.toFixed(4)),
+          in_target_views: targetMemberIds.has(candidate.id),
+        }));
+      candidates.push({ requested, matches });
+    } catch (error) {
+      candidates.push({
+        requested,
+        matches: [],
+        status: 'unavailable',
+        reason: String(error && error.category ? error.category : 'SEMANTIC_DEDUP_QUERY_FAILED'),
+      });
+    }
+  }
+  return {
+    status: 'passed',
+    advisoryOnly: true,
+    threshold,
+    scope: 'same type; when view_ids are given, restricted to those views\' current members',
+    candidates,
+    has_suggestions: candidates.some(entry => entry.matches.length > 0),
+  };
 }
 
 async function queryNeo4jGraphTool(args = {}) {
@@ -3974,6 +4101,7 @@ module.exports = {
   GET_SYSTEM_ARCHITECTURE_OUTPUT_SCHEMA,
   TOOLS,
   applyMutations,
+  buildSemanticDedupAdvisory,
   callTool,
   compactMutationResponse,
   createDefaultCanonicalSemanticInitComposition,

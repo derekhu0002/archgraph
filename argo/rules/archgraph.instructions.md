@@ -63,7 +63,7 @@ Your cognitive architecture is composed of ArchiMate 3.2 elements and their exte
    - `fail` (default): reject and return `duplicateConflicts` (the existing candidate id(s)) plus guidance to reuse or override.
    - `reuse` (find-or-create): create nothing; attach the existing element/relationship/view to the requested view_ids and return `reusedId`.
    - `allowDuplicate`: proceed only with a non-empty `justification`, recorded on the result.
-3. Semantic near-duplicate candidates (L1) are ADVISORY ONLY. Semantic similarity is never identity and MUST NOT reject a write; it only informs reuse-vs-create.
+3. Semantic near-duplicate candidates (L1) are ADVISORY ONLY and are returned on preview and apply for element adds: same ArchiMate type, restricted to the requested view_ids' current members when views are given, scoring at/above a strict threshold (default 0.85, `ARGO_SEMANTIC_DEDUP_THRESHOLD`). Semantic similarity is never identity and MUST NOT reject or block a write; a missing/unavailable semantic backend degrades to an explicit status, never an error. Set `ARGO_MCP_SEMANTIC_DEDUP=0` to disable.
 4. `update*` operations are never gated — when an add is rejected as a duplicate, modify or reuse the existing object instead.
 5. Prefer `onConflict: "reuse"` (find-or-create) over a bare add whenever the identity is already known or likely to exist.
 </GraphDeduplication>

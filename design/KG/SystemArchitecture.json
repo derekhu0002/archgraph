@@ -2632,7 +2632,7 @@
       "name": "ArchGraph ARGO Workflow Rules",
       "parent": "1249",
       "type": "Rule",
-      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）：定位元素再改动、验收测试先行（可执行 GIVEN-WHEN-THEN）、仅通过 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径，并通过只读 queryNeo4jGraph 进行结构化图查询；查询优先级规则（QueryPriorityGuideline）：KG-first retrieval（任何检索优先检索KG）、Semantic-first KG retrieval（检索KG必须优先通过语义检索）（getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径，子图语义检索 scope（getSystemArchitecture 的 scope 参数：view_id 或 element_id+depth，用于限定语义检索范围避免返回过多内容）；能力委托门禁（CapabilityDelegationGuideline）：Agent 收到需查看图片/视频的任务且自身不具备识别能力时，不得猜测或静默跳过，须主动委托具备能力的 Business Actor；图谱写入去重（GraphDeduplication）：add* 前按自然键（type+归一化 name／source+type+target+归一化 name／parent+归一化 view name）做确定性去重，onConflict=fail（默认拒绝并回传候选）/reuse（find-or-create，返回 reusedId）/allowDuplicate（需非空 justification），语义相似候选仅建议、永不拒绝，update* 不受门禁。",
+      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）：定位元素再改动、验收测试先行（可执行 GIVEN-WHEN-THEN）、仅通过 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径，并通过只读 queryNeo4jGraph 进行结构化图查询；查询优先级规则（QueryPriorityGuideline）：KG-first retrieval（任何检索优先检索KG）、Semantic-first KG retrieval（检索KG必须优先通过语义检索）（getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径，子图语义检索 scope（getSystemArchitecture 的 scope 参数：view_id 或 element_id+depth，用于限定语义检索范围避免返回过多内容）；能力委托门禁（CapabilityDelegationGuideline）：Agent 收到需查看图片/视频的任务且自身不具备识别能力时，不得猜测或静默跳过，须主动委托具备能力的 Business Actor；图谱写入去重（GraphDeduplication）：add* 前按自然键（type+归一化 name／source+type+target+归一化 name／parent+归一化 view name）做确定性去重，onConflict=fail（默认拒绝并回传候选）/reuse（find-or-create，返回 reusedId）/allowDuplicate（需非空 justification）；语义相似候选（L1）仅建议、永不拒绝——对 addElement 在 preview/apply 回传受控作用域（同 type；给定 view_ids 时限定其当前成员）且分数≥严格阈值（默认 0.85，ARGO_SEMANTIC_DEDUP_THRESHOLD）的候选，后端不可用降级不报错，ARGO_MCP_SEMANTIC_DEDUP=0 关闭；update* 不受门禁。",
       "testcases": [
         {
           "Input": "tests/argo-rules-query.test.js",
@@ -5892,7 +5892,7 @@
       "type": "Business Object"
     },
     {
-      "description": "ARGO MCP 写图路径的确定性去重门禁（L0 dedup gate，框架级）：在 addElement/addRelationship/addView 创建前，按自然键做精确重复检测——元素 (type, 归一化 name)、关系 (source_id, type, target_id, 归一化 name)、视图 (parent_element_id, 归一化 view_name)；归一化 = NFKC（含全角折叠）+ 折叠空白 + 大小写折叠。命中时按调用方声明的 onConflict 策略处理：fail（默认，拒绝并回传 duplicateConflicts 已有候选 id + guidance）、reuse（find-or-create：不新建，把已有对象挂到目标 view_ids 并返回 reusedId）、allowDuplicate（必须带非空 justification 才创建）。语义相似候选（L1）仅作建议、永不拒绝写入。update* 系列不受门禁约束。源码：argo/scripts/systemarchitecture-mcp-server.js（applyMutations/normalizeDedupName/resolveDuplicateConflict）、argo/scripts/argo-mcp-server.js（工具 schema）；规则见 argo/rules/archgraph.instructions.md <GraphDeduplication>。",
+      "description": "ARGO MCP 写图路径的去重门禁（框架级），分两层。**L0 确定性**：在 addElement/addRelationship/addView 创建前按自然键精确重复检测（元素 (type, 归一化 name)、关系 (source_id, type, target_id, 归一化 name)、视图 (parent_element_id, 归一化 view_name)；归一化=NFKC+折叠空白+大小写折叠），命中按 onConflict 处理：fail（默认，拒绝并回传 duplicateConflicts 候选 id+guidance）、reuse（find-or-create，不新建、把已有对象挂到目标 view、返回 reusedId）、allowDuplicate（须带非空 justification）。**L1 语义建议（advisory、永不拒绝）**：对 addElement，在 preview/apply 回传受控作用域（同 type；给了 view_ids 时限定为这些 view 当前成员）且分数≥严格阈值（默认 0.85，ARGO_SEMANTIC_DEDUP_THRESHOLD）的语义相似候选；语义后端不可用时降级为显式 status、绝不报错（ARGO_MCP_SEMANTIC_DEDUP=0 可关闭）。update* 永不受门禁。源码：argo/scripts/systemarchitecture-mcp-server.js（applyMutations/normalizeDedupName/resolveDuplicateConflict/buildSemanticDedupAdvisory）、argo/scripts/argo-mcp-server.js（工具 schema）；规则见 argo/rules/archgraph.instructions.md <GraphDeduplication>。",
       "id": "graph-write-dedup-gate",
       "name": "图谱写入去重门禁",
       "parent": "1961",
@@ -5944,6 +5944,13 @@
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
           "description": "GIVEN 门禁仅作用于 add*；WHEN 对已存在同名元素执行 updateElement；THEN 正常通过（不受门禁约束）。",
           "name": "AT-dedup-07",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/architecture-dedup-semantic.test.js",
+          "acceptanceCriteria": "tests/architecture-dedup-semantic.test.js",
+          "description": "GIVEN 待新增元素与图中已存在元素语义相近；WHEN 经 preview/apply（或 addElement）创建；THEN 结果附带受控作用域（同 type；给定 view_ids 时限定其当前成员）且分数≥阈值（默认 0.85）的相似候选建议，status 仍 passed（仅建议、不拒绝、不阻塞写入）；语义后端不可用时降级为显式 unavailable 状态且不报错。",
+          "name": "AT-dedup-L1-01",
           "type": "Acceptance Test"
         }
       ],
