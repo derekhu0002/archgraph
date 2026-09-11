@@ -2755,6 +2755,11 @@
           "name": "commit",
           "value": "79c76ea",
           "description": "argo/rules/archgraph.instructions.md（新增 <GraphDeduplication> + CoreRule 9）; tests/argo-rules-dedup.test.js（AT-rules-03）; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "bde66d8",
+          "description": "argo/rules/archgraph.instructions.md（GraphDeduplication item 3 补 L1 契约：受控作用域+严格阈值+降级不报错）; tests/architecture-dedup-semantic.test.js"
         }
       ]
     },
@@ -3961,7 +3966,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话目标（2026-09-11）：优化 Graph 框架弱规则——抑制 Agent 写图重复（同义元素/关系/三元组膨胀，干扰语义召回与后续思考）。本次完成：落地 L0 图谱写入去重门禁 + find-or-create（方案 B）+ <GraphDeduplication> 规则（commit 79c76ea 工作 / 5c65a46 图谱回登记；已入本仓 argo，未发 npm）。机制：①addElement/addRelationship/addView 创建前按自然键精确查重（元素 type+归一化 name；关系 source_id+type+target_id+归一化 name；视图 parent_element_id+归一化 view name），归一化=NFKC+折叠空白+大小写折叠；②onConflict=fail（默认，拒绝并回传 duplicateConflicts 候选+guidance）/reuse（find-or-create，不新建、挂到目标 view、返回 reusedId）/allowDuplicate（需非空 justification）；③语义相似（L1）仅建议、永不拒绝；④update* 不受门禁；⑤门禁只在 add 分支，同名被拒仍可 update/复用。已登记 AT-dedup-01..07（tests/architecture-dedup-gate.test.js）与 AT-rules-03（tests/argo-rules-dedup.test.js）；新增 Application Component graph-write-dedup-gate。验收：新测试 10/10；runArchitectureTests 70/75（5 项为改动前既有失败：excalidraw-diagram-skill / ea-import-reconcile×2(AT-2100-OPT-01/03) / ea-import-perf / memory-eval-run）；validateSystemArchitecture 通过。关键决策与理由：语义相似≠身份，故 L1 只建议不拒绝（避免误杀如“视频制作 vs 视频制作Leader”）；find-or-create 用现有 add 加 onConflict 参数（方案 B），不新增 MCP 接口（省工具面/少改动点）；关系同三元组但不同 name 合法，故 L0 用精确四元组；L1 需接语义旅程/embedding、影响离线与性能，拆为下一增量。待办：L1 语义候选（preview/apply 回候选，scope 限定同 view/type，高阈值如 0.85+，离线降级）；评估同步 ~/.config/opencode/AGENTS.md 与 npm 发布；存量图谱去重审计（可选工具，不属框架核心）。可复用经验：改 add* 写图行为后，务必回归 architecture-*-mutation 与 ea-web-service-impl（写图回滚）；全量 runArchitectureTests 中 ea-web-service-impl 偶发原生崩溃 exitCode 0xC0000409 属环境 flake，单跑通过即忽略；LTM 视图上限 15，满则先归档（只移不删）再写。",
+      "description": "会话目标（2026-09-11）：优化 Graph 框架弱规则——抑制 Agent 写图重复（同义元素/关系/三元组膨胀，干扰语义召回与后续思考）。本次完成 L0+L1：L0 确定性去重门禁 + find-or-create（方案 B）（commits 79c76ea 工作 / 5c65a46 图谱回登记）；L1 语义去重建议（bde66d8）；规则 <GraphDeduplication> + CoreRule 9（均已入本仓 argo，未发 npm）。L0 机制：①addElement/addRelationship/addView 创建前按自然键精确查重（元素 type+归一化 name；关系 source_id+type+target_id+归一化 name；视图 parent_element_id+归一化 view name），归一化=NFKC+折叠空白+大小写；②onConflict=fail（默认，拒绝并回传 duplicateConflicts 候选+guidance）/reuse（find-or-create，不新建、挂到目标 view、返回 reusedId）/allowDuplicate（需非空 justification）；③update* 不受门禁。L1 机制：buildSemanticDedupAdvisory 复用语义 journey + buildCanonicalSemanticDocumentSubset，对 addElement 在 preview/apply 回传受控作用域（同 type；给定 view_ids 时限定其当前成员）且分数≥严格阈值（默认 0.85，ARGO_SEMANTIC_DEDUP_THRESHOLD）的候选；仅建议、永不拒绝、不阻塞写入，后端不可用降级为显式 status（ARGO_MCP_SEMANTIC_DEDUP=0 关闭）。已登记 AT-dedup-01..07（tests/architecture-dedup-gate.test.js）、AT-rules-03（tests/argo-rules-dedup.test.js）、AT-dedup-L1-01（tests/architecture-dedup-semantic.test.js）；新增 Application Component graph-write-dedup-gate。验收：L0 10/10、L1 5/5；相关回归 41/41 + ea-web-service-impl 22/22；真机 dry-run 验证 L1 passed/advisory；runArchitectureTests 70/75（5 项为改动前既有失败：excalidraw-diagram-skill / ea-import-reconcile×2 / ea-import-perf / memory-eval-run）；validateSystemArchitecture 通过。关键决策与理由：语义相似≠身份，故 L1 只建议不拒绝（避免误杀如“视频制作 vs 视频制作Leader”）；find-or-create 用现有 add 加 onConflict 参数（方案 B），不新增 MCP 接口；关系同三元组但不同 name 合法，故 L0 用精确四元组；L1 受控作用域=同 type + 指定 view 成员，阈值默认 0.85 可配。待办：npm 发布与 ~/.config/opencode/AGENTS.md 同步（评估）；存量图谱去重审计（可选工具，不属框架核心）；人工浏览器/真实 Agent 场景观察 L1 建议质量与噪声。可复用经验：改 add* 写图行为后，务必回归 architecture-*-mutation 与 ea-web-service-impl（写图回滚）；语义建议路径必须 fail-open（catch→显式降级，绝不阻塞写入）；全量 runArchitectureTests 中 ea-web-service-impl 偶发原生崩溃 exitCode 0xC0000409 属环境 flake，单跑通过即忽略；LTM 视图上限 15，满则先归档（只移不删）再写。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4034,6 +4039,11 @@
           "name": "commit",
           "value": "79c76ea",
           "description": "本次会话：L0 去重门禁 + onConflict + GraphDeduplication 规则（argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/architecture-dedup-gate.test.js; tests/argo-rules-dedup.test.js; design/KG/SystemArchitecture.json）"
+        },
+        {
+          "name": "commit",
+          "value": "bde66d8",
+          "description": "L1 语义去重建议：argo/scripts/systemarchitecture-mcp-server.js; argo/rules/archgraph.instructions.md; tests/architecture-dedup-semantic.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
@@ -5964,6 +5974,11 @@
           "name": "commit",
           "value": "79c76ea",
           "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/architecture-dedup-gate.test.js; tests/argo-rules-dedup.test.js; design/KG/SystemArchitecture.json（L0 去重门禁 graph-write-dedup-gate 立项 + AT-dedup-01..07）"
+        },
+        {
+          "name": "commit",
+          "value": "bde66d8",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js（buildSemanticDedupAdvisory + buildMutationResult 线程化 dependencies + compact 响应保留 semanticDedup）; argo/rules/archgraph.instructions.md（GraphDeduplication item 3 补 L1 契约）; tests/architecture-dedup-semantic.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     },
@@ -5991,9 +6006,14 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "bde66d8",
+          "description": "L1 语义去重建议落地：argo/scripts/systemarchitecture-mcp-server.js; argo/rules/archgraph.instructions.md; tests/architecture-dedup-semantic.test.js"
         }
       ],
-      "description": "里程碑（2026-09-11，人类伙伴发起并确认方案）：优化 Graph 框架弱规则，抑制写图重复导致的图谱臃肿（同义元素/关系过多→干扰语义召回与后续思考）。方案定稿：①L0 确定性去重门禁——addElement/addRelationship/addView 创建前按自然键精确查重（元素 type+归一化 name；关系 source_id+type+target_id+归一化 name；视图 parent_element_id+归一化 view_name），归一化=NFKC+折叠空白+大小写折叠；②find-or-create 采用方案 B（给现有 add 工具加冲突策略参数，不新增 MCP 接口）：onConflict=fail（默认，拒绝并回传 duplicateConflicts 候选 id+guidance）/reuse（不新建、把已有对象挂到目标 view、返回 reusedId）/allowDuplicate（须带非空 justification）；③L1 语义候选仅建议、永不拒绝（本增量未做，留作下一增量）；④update* 永不受门禁。落地：argo/scripts/systemarchitecture-mcp-server.js（normalizeDedupName / findDuplicateElements·Relationships·Views / resolveDuplicateConflict + add 分支 + buildMutationResult 回传 duplicateConflicts + schema）、argo/scripts/argo-mcp-server.js（镜像 schema）、argo/rules/archgraph.instructions.md（新增 <GraphDeduplication> 章节 + CoreRule 9）、测试 tests/architecture-dedup-gate.test.js + tests/argo-rules-dedup.test.js、图谱新增 Application Component graph-write-dedup-gate（AT-dedup-01..07）+ 规则元素 AT-rules-03。验收：新测试 10/10；runArchitectureTests 70/75（5 项为改动前既有失败：excalidraw / ea-import-reconcile×2 / ea-import-perf / memory-eval-run），validateSystemArchitecture 通过。关键决策/教训：语义相似≠身份，L1 只建议不拒绝（避免误杀如“视频制作 vs 视频制作Leader”）；关系同三元组不同 name 合法（先做精确四元组）；同 (type,name) 当前图无重复（已核查）；L1 需接语义旅程/embedding 故拆为下一增量。commits 79c76ea（工作）/5c65a46（图谱回登记）。",
+      "description": "里程碑（2026-09-11，人类伙伴发起并确认方案）：优化 Graph 框架弱规则，抑制写图重复导致的图谱臃肿（同义元素/关系过多→干扰语义召回与后续思考）。方案定稿：①L0 确定性去重门禁——addElement/addRelationship/addView 创建前按自然键精确查重（元素 type+归一化 name；关系 source_id+type+target_id+归一化 name；视图 parent_element_id+归一化 view name），归一化=NFKC+折叠空白+大小写折叠；②find-or-create 采用方案 B（给现有 add 工具加冲突策略参数，不新增 MCP 接口）：onConflict=fail（默认，拒绝并回传 duplicateConflicts 候选 id+guidance）/reuse（不新建、把已有对象挂到目标 view、返回 reusedId）/allowDuplicate（须带非空 justification）；③L1 语义候选已落地（bde66d8）：对 addElement 在 preview/apply 回传受控作用域（同 type；给定 view_ids 时限定其当前成员）且分数≥严格阈值（默认 0.85，ARGO_SEMANTIC_DEDUP_THRESHOLD）的相似候选，仅建议、永不拒绝、后端不可用降级不报错（ARGO_MCP_SEMANTIC_DEDUP=0 关闭），AT-dedup-L1-01 / tests/architecture-dedup-semantic.test.js（5/5）；④update* 永不受门禁。落地：argo/scripts/systemarchitecture-mcp-server.js（normalizeDedupName / findDuplicateElements·Relationships·Views / resolveDuplicateConflict / buildSemanticDedupAdvisory + add 分支 + buildMutationResult 回传 duplicateConflicts·semanticDedup + schema）、argo/scripts/argo-mcp-server.js（镜像 schema）、argo/rules/archgraph.instructions.md（新增 <GraphDeduplication> 章节 + CoreRule 9）、测试 tests/architecture-dedup-gate.test.js + tests/argo-rules-dedup.test.js + tests/architecture-dedup-semantic.test.js、图谱 Application Component graph-write-dedup-gate（AT-dedup-01..07 + AT-dedup-L1-01）+ 规则元素 AT-rules-03。验收：L0 新测试 10/10、L1 5/5；runArchitectureTests 70/75（5 项为改动前既有失败：excalidraw / ea-import-reconcile×2 / ea-import-perf / memory-eval-run）；真实语义后端 dry-run 验证 L1 返回 passed/advisory；validateSystemArchitecture 通过。关键决策/教训：语义相似≠身份，L1 只建议不拒绝（避免误杀如“视频制作 vs 视频制作Leader”）；关系同三元组不同 name 合法（先做精确四元组）；同 (type,name) 当前图无重复（已核查）；L1 复用语义 journey + buildCanonicalSemanticDocumentSubset，受控作用域=同 type + 给定 view 成员，阈值默认 0.85 可配，后端不可用降级绝不阻塞写入。commits 79c76ea（L0 工作）/5c65a46（L0 图谱回登记）/bde66d8（L1 工作，含图谱登记）。",
       "id": "overseer-graph-dedup-gate-001",
       "name": "里程碑：图谱写入去重门禁（L0 + onConflict + GraphDeduplication 规则）",
       "parent": "project-overseer-001",
