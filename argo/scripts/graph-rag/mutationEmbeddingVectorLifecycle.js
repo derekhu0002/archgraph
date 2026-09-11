@@ -16,6 +16,9 @@ const {
   createLiveEmbeddingProviderClient,
 } = require('./liveEmbeddingProviderClient.js');
 const {
+  buildSemanticRecordText,
+} = require('./semanticRecordText.js');
+const {
   createProductionSemanticNeo4jAdapter,
 } = require('./semantic-persistence/productionSemanticNeo4jAdapter.js');
 const {
@@ -218,7 +221,7 @@ function createProductionPersistentLifecycleDependencies(options = {}) {
     provider: Object.freeze({
       async embed(content) {
         const active = await requireResources();
-        return active.provider.embed(JSON.stringify(content));
+        return active.provider.embed(typeof content === 'string' ? content : JSON.stringify(content));
       },
     }),
     projectionStore: Object.freeze({
@@ -513,7 +516,8 @@ function buildPersistentWork(canonicalWrite, configuration, versions) {
   const tombstones = [];
   for (const definition of definitions) {
     for (const objectId of definition.ids) {
-      const content = definition.entries.find(entry => entry && entry[definition.idField] === objectId);
+      const object = definition.entries.find(entry => entry && entry[definition.idField] === objectId);
+      const content = object ? buildSemanticRecordText(definition.channel, object) : undefined;
       const base = {
         objectId,
         canonicalIdentity: `${definition.channel}:${objectId}`,

@@ -2,6 +2,9 @@ const crypto = require('node:crypto');
 const {
   evaluateEmbeddingQualification,
 } = require('../embeddingQualificationGate.js');
+const {
+  buildSemanticRecordText,
+} = require('../semanticRecordText.js');
 
 const CHANNELS = Object.freeze(['Element', 'ArchitectureRelationship', 'View']);
 const CHANNEL_SOURCES = Object.freeze({
@@ -152,7 +155,7 @@ async function processChannel(options) {
 
 function buildSemanticRecord(record, vector, options) {
   const contentHash = crypto.createHash('sha256')
-    .update(JSON.stringify(record.canonicalObject))
+    .update(buildSemanticRecordText(record.channel, record.canonicalObject))
     .digest('hex');
   return Object.freeze({
     canonicalIdentity: record.canonicalIdentity,

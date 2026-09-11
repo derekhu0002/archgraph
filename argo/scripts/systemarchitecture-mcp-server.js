@@ -9,6 +9,10 @@ const {
   resolveCallWorkspaceRoot,
 } = require('./argo-paths.js');
 
+const {
+  buildSemanticRecordText,
+} = require('./graph-rag/semanticRecordText.js');
+
 const DEFAULT_GRAPH_PATH = 'design/KG/SystemArchitecture.json';
 const LEGAL_QUERY_PURPOSES = new Set([
   'general',
@@ -3839,7 +3843,7 @@ async function createDefaultProductionSemanticRuntime(options = {}) {
             try {
               vectors.push(Object.freeze({
                 canonicalIdentity: record.canonicalIdentity,
-                vector: Object.freeze(await providerClient.embed(JSON.stringify(record.canonicalObject))),
+                vector: Object.freeze(await providerClient.embed(buildSemanticRecordText(record.channel, record.canonicalObject))),
               }));
             } catch (error) {
               failures.push(Object.freeze({
