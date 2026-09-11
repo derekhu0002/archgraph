@@ -4113,8 +4113,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.18.0",
-          "description": "语义检索嵌入文本由整对象 JSON 改为策展语义字段（去 id/端点 id/视图成员 id 数组/JSON）。A/B 实测：视图 recall@1 82.8%→91.9%、关系 98.1%→100%、描述类 95.6%→98.0%。全量回填 Aligned（223/103/58）。commits 0f3d924/61ee7c0/43237f7。"
+          "value": "archgraph-argo@0.18.1",
+          "description": "修复 L1 语义建议在 onConflict:reuse 下被抑制：触发条件由调用参数改为 applyMutations 的 created 标记（selectCreatedElementAdds）。commits fc2dbff/a60e04f/14cf43a。"
         },
         {
           "name": "commit",
@@ -4140,6 +4140,16 @@
           "name": "commit",
           "value": "0f3d924",
           "description": "feat(semantic): buildSemanticRecordText 策展嵌入文本 + 三处入口集成 + AT-semantic-text-01..05"
+        },
+        {
+          "name": "commit",
+          "value": "14cf43a",
+          "description": "release 0.18.1（L1 按实际新建触发）"
+        },
+        {
+          "name": "commit",
+          "value": "fc2dbff",
+          "description": "fix(dedup): selectCreatedElementAdds + advisory 去 onConflict 过滤 + AT-dedup-L1-02"
         }
       ],
       "testcases": [
@@ -6190,6 +6200,38 @@
       "name": "里程碑：发布 archgraph-argo@0.18.0（语义嵌入改策展文本）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "description": "selectCreatedElementAdds + advisory 去 onConflict 过滤 + AT-dedup-L1-02",
+          "name": "commit",
+          "value": "fc2dbff"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json（图谱回登记）",
+          "name": "commit",
+          "value": "a60e04f"
+        },
+        {
+          "description": "package.json（发布 archgraph-argo@0.18.1）",
+          "name": "commit",
+          "value": "14cf43a"
+        }
+      ],
+      "description": "发布里程碑（2026-09-11）：archgraph-argo@0.18.1 发布并部署，修复 L1 语义去重建议在 onConflict:'reuse' 下被抑制的缺口。根因：buildSemanticDedupAdvisory 以调用参数 onConflict !== 'reuse' 作为触发条件，而 reuse 只按精确自然键 find-or-create、不覆盖语义近似——导致 reuse 落到新建时语义重复被静默创建且 L1 被抑制（实测：onConflict=reuse + 近义名 → created:true 且无 semanticDedup）。修复：新增 selectCreatedElementAdds(mutations, mutationSummaries)，由 applyMutations 的 created 标记选出真正新建的元素新增再交给 advisory；advisory 去除参数过滤。效果：reuse 命中精确项（未新建）不发建议；reuse 却新建（语义近似）照常回传 semanticDedup 候选（仍仅建议不阻止）；判据由「调用参数」改为「实际是否新建」。落地：argo/scripts/systemarchitecture-mcp-server.js、tests/architecture-dedup-semantic.test.js（AT-dedup-L1-02，15/15）；写图/语义回归 38/38；validateSystemArchitecture 通过。发布流程：npm publish 0.18.1（registry 传播延迟，轮询后安装）→ npm i -g → argo-deploy 22/22；~/.argo/scripts/systemarchitecture-mcp-server.js 与仓库逐字节一致。待办：人类伙伴重启宿主加载新常驻 MCP 进程。commits fc2dbff(工作)/a60e04f(图谱登记)/14cf43a(release)。",
+      "id": "overseer-argo-0-18-1-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.18.1（L1 语义建议按实际新建触发）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -8136,7 +8178,8 @@
         "overseer-argo-0-15-3-release-001",
         "overseer-argo-0-16-2-release-001",
         "overseer-argo-0-17-1-release-001",
-        "overseer-argo-0-18-0-release-001"
+        "overseer-argo-0-18-0-release-001",
+        "overseer-argo-0-18-1-release-001"
       ]
     }
   ]
