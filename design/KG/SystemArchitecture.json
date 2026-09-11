@@ -5664,44 +5664,51 @@
       "testcases": [
         {
           "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN EA 内提取脚本 eatool/EA-jsscript/extract-human-draft.js 与其 headless 接线（bootstrap.js/run-headless.ps1 支持 draft 模式）；WHEN 从外部审阅其内容与接线；THEN 脚本存在且含 main()、读 canonical JSON（design/KG/SystemArchitecture.json）为基线、经 Repository.SQLQuery 读 EA 可见对象模型（t_object/t_connector/t_diagramobjects/t_attribute/t_objecttests + schema_id/schema_view_id/relationship_attributes_json 锚）、分类九类提议（add/update/remove element+relationship+view）、纯几何不计入（layoutOnly）、产出 results/human-draft.md（内嵌提议 JSON，无独立 .json）；且旧 node 工具 argo/scripts/ea-human-diff.js 与其测试已删除、原 ea-human-draft 技能已移除（package.json files 不再含 argo/skills/ea-human-draft、install-argo.ps1 不再部署该技能、既有 22 个编号部署步及标记不被破坏）。",
+          "description": "GIVEN EA 内提取脚本 eatool/EA-jsscript/extract-human-draft.js 与其 headless 接线；WHEN 从外部审阅其内容与接线；THEN 脚本存在且含 main()、读 canonical JSON 为基线、经 Repository.SQLQuery 读 EA 可见对象模型、分类九类提议（add/update/remove element+relationship+view）、纯几何不计入、产出 results/human-draft.md（内嵌提议 JSON，无独立 .json）；且旧 node 工具与 ea-human-draft 技能已移除、22 个编号部署步不被破坏。",
           "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-07",
           "type": "Acceptance Test"
         },
         {
           "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN EA 内提取脚本 readWork 读 t_attribute（元素属性，含值变化）与 t_connectortag relationship_attributes_json（关系属性）与 t_objecttests（元素测试用例）；WHEN 人类在 EA 可见对象模型改某带 schema_id 锚元素的属性值/加属性，或改关系属性；THEN 提议含 updateElement（fields.attributes=改后属性数组）或 updateRelationship（fields.attributes），并 diff 出 add/update/remove；且字段 type/testcases 变化亦被捕获。",
+          "description": "GIVEN readWork 读 t_attribute（元素属性）与 t_connectortag relationship_attributes_json（关系属性）与 t_objecttests；WHEN 人类改某带 schema_id 锚元素的属性值/加属性，或改关系属性；THEN 提议含 updateElement/updateRelationship（fields.attributes=改后属性数组），并 diff 出 add/update/remove；且字段 type/testcases 变化亦被捕获。",
           "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-08",
           "type": "Acceptance Test"
         },
         {
           "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN canonical 有一条关系（如 1161）其连接器在 EA 里仍存在但 schema_id 锚 tag 丢失；WHEN 运行语义 diff；THEN 不把它误报为 removeRelationship，而是 updateRelationship 且 fields.reAnchor 带提示；且该连接器不被重复报为 addRelationship。",
+          "description": "GIVEN canonical 有一条关系其连接器在 EA 里仍存在但 schema_id 锚 tag 丢失；WHEN 运行语义 diff；THEN 不误报为 removeRelationship，而是 updateRelationship 且 fields.reAnchor 带提示；且不被重复报为 addRelationship。",
           "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-09",
           "type": "Acceptance Test"
         },
         {
           "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN 人类在 EA 画了一条新的连接（无 schema_id 锚）并填了 Notes 描述；WHEN 运行语义 diff；THEN 提议为 addRelationship 且 proposed.description 携带该 EA Notes（不再丢描述）。",
+          "description": "GIVEN 人类在 EA 画了一条新的连接（无 schema_id 锚）并填了 Notes 描述；WHEN 运行语义 diff；THEN 提议为 addRelationship 且 proposed.description 携带该 EA Notes。",
           "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-10",
           "type": "Acceptance Test"
         },
         {
           "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN 人类在 EA 增加/删除一个 VIEW 并修改某 VIEW 的描述（且 EA 重写丢掉了 schema_view_id 锚）；WHEN 运行语义 diff；THEN 提议含 addView（新增图，无 canonical 对应）、removeView（canonical 有但 EA 无）、updateView（view_name/description 变化，描述来自 diagram Notes）；且生成的 .md 以简短摘要表+内嵌机器 JSON（compactJson 每提议一行）呈现，去掉逐条散文本。",
+          "description": "GIVEN 人类在 EA 增加/删除一个 VIEW 并修改某 VIEW 的描述（且 EA 重写丢 schema_view_id 锚）；WHEN 运行语义 diff；THEN 提议含 addView/removeView/updateView；且 .md 以简短摘要表+内嵌机器 JSON 呈现。",
           "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-11",
           "type": "Acceptance Test"
         },
         {
           "acceptanceCriteria": "tests/ea-human-reconcile-skill.test.js",
-          "description": "GIVEN 全局 skill argo/skills/ea-human-reconcile/SKILL.md 与其打包/部署接线（如 argo-init）；WHEN 从外部审阅其内容与接线；THEN SKILL.md 存在且 frontmatter name=ea-human-reconcile，声明分工（人类交 draft→Agent 结合全局分析给建议→人类裁决）、MUST NOT 未经人类裁决就 apply 写图、以 canonical 图+ARGO 语义上下文为分析依据而非仅 draft 字段、枚举九类提议并标记删除类需确认、含逐条建议+整体风险+待裁决项输出；package.json files 含 argo/skills/ea-human-reconcile；install-argo.ps1 部署到 copilot/cursor/opencode/dsh/openclaw 技能根，且既有 22 个编号部署步及标记不被破坏。",
+          "description": "GIVEN 全局 skill argo/skills/ea-human-reconcile/SKILL.md 与其打包/部署接线；WHEN 从外部审阅其内容与接线；THEN frontmatter name=ea-human-reconcile、声明人类裁决、MUST NOT 未经裁决 apply、以 canonical 图+ARGO 语义上下文为分析依据、枚举提议并标记删除类需确认；package.json files 含之；install-argo.ps1 部署到 5 宿主且 22 编号步不被破坏。",
           "Input": "tests/ea-human-reconcile-skill.test.js",
           "name": "AT-2792-12",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
+          "description": "GIVEN 一个经 fullProjection 新投影的模型（EA 可见对象模型与 canonical 一致，无人类编辑）；WHEN 运行 extract-human-draft；THEN draft 为空（零提议）——type（显示形 vs 归一形）、元素属性（canonical content 被投影合并进 EA Notes）、关系属性（JScript 5.8 无 Array.isArray）三处均不得产生假提议。",
+          "Input": "tests/ea-human-draft-script.test.js",
+          "name": "AT-2792-13",
           "type": "Acceptance Test"
         }
       ],
@@ -5784,6 +5791,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "301e9c4",
+          "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js（修复：新投影后无 EA 修改却产生大量假提议——①type：canonical 存显示形（Business Actor）而投影写归一形（BusinessActor）到 archimate_type tag，直接比每元素都报变更→改为 typeNorm 两侧归一比较；②元素属性：canonical 的 content 被投影合并进 EA t_attribute Notes，直接比 description/content 误报→新增 toEaAttrForm 把 canonical 属性归一为 EA Default/Notes 形后再 diff；③JScript 5.8 无 Array.isArray 导致 parseRelAttrs 抛错被 catch 吞→关系属性恒空、误报属性变更→改 Object.prototype.toString 判断。真实 SOC-DEMO 验证：draft 由 272 updateElement → 全 0；AT-2792-13/R 新增；回归 ea-human-draft-script EA 6/6）"
         }
       ]
     },
