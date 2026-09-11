@@ -2317,7 +2317,9 @@ async function callTool(name, args = {}, dependencies = undefined) {
         }
       }
 
-      const journey = await resolveSemanticOperatorJourney(dependencies);
+      const journey = await resolveSemanticOperatorJourney(dependencies, {
+        repositoryRoot: context.workspaceRoot,
+      });
       return applySemanticResponseProfile(await journey.query(query), query, contractOptions);
     }
 
@@ -2433,7 +2435,9 @@ async function memorySearchTool(args = {}, dependencies = undefined) {
   const context = await loadContext(args);
   let retrieved;
   try {
-    const journey = await resolveSemanticOperatorJourney(dependencies);
+    const journey = await resolveSemanticOperatorJourney(dependencies, {
+      repositoryRoot: context.workspaceRoot,
+    });
     retrieved = await journey.query({ purpose: 'general', intent: query });
   } catch (error) {
     return {
@@ -2585,10 +2589,21 @@ function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
   });
 }
 
-async function resolveSemanticOperatorJourney(dependencies) {
-  return dependencies && dependencies.semanticOperatorJourney
-    ? dependencies.semanticOperatorJourney
-    : createDefaultProductionSemanticOperatorJourney();
+async function resolveSemanticOperatorJourney(dependencies, options = {}) {
+  if (dependencies && dependencies.semanticOperatorJourney) {
+    return dependencies.semanticOperatorJourney;
+  }
+  // Thread the caller's already-resolved workspace root into the journey: the
+  // no-arg resolveWorkspaceRoot() fallback is process.cwd(), i.e. whatever
+  // directory the host launched this server from (a global ~/.argo installation
+  // started by the host process resolves to that host's cwd, e.g.
+  // C:\Windows\System32), never the workspace the caller asked for.
+  const repositoryRoot = options && typeof options.repositoryRoot === 'string'
+    ? options.repositoryRoot
+    : '';
+  return createDefaultProductionSemanticOperatorJourney(
+    repositoryRoot ? { repositoryRoot } : {},
+  );
 }
 
 async function executeSemanticSystemArchitectureQuery(args, dependencies) {

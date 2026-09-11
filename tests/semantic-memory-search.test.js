@@ -1,14 +1,72 @@
 'use strict';
 
+const { spawn } = require('node:child_process');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
 const systemArchitectureMcp = require('../argo/scripts/systemarchitecture-mcp-server.js');
 
+const WORKSPACE_ROOT = path.resolve(__dirname, '..');
+
 // External-view acceptance tests for the memory_search semantic-memory tool:
 // an agent should be able to discover a memory-oriented retrieval tool and call
 // it with a natural-language query (returns memory hits with content + score),
 // so the argo memory backend is discoverable/usable by arbitrary agents.
+
+// Minimal stdio MCP client for one spawned argo server process: answers the
+// server's roots/list request with an EMPTY root list on purpose (the launch
+// directory must stay the only fallback the server could accidentally use).
+function startArgoServer(serverPath, cwd, env) {
+  const child = spawn(process.execPath, [serverPath], {
+    cwd,
+    env,
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+  let buffer = '';
+  const pending = new Map();
+  let nextId = 1;
+  child.stdout.on('data', (chunk) => {
+    buffer += chunk.toString();
+    let idx;
+    while ((idx = buffer.indexOf('\n')) >= 0) {
+      const line = buffer.slice(0, idx).trim();
+      buffer = buffer.slice(idx + 1);
+      if (!line) {
+        continue;
+      }
+      const message = JSON.parse(line);
+      if (message.method === 'roots/list') {
+        child.stdin.write(`${JSON.stringify({ jsonrpc: '2.0', id: message.id, result: { roots: [] } })}\n`);
+      }
+      if (message.id !== undefined && pending.has(message.id)) {
+        pending.get(message.id)(message);
+        pending.delete(message.id);
+      }
+    }
+  });
+  return {
+    request(method, params) {
+      const id = nextId++;
+      return new Promise((resolve) => {
+        pending.set(id, resolve);
+        child.stdin.write(`${JSON.stringify({ jsonrpc: '2.0', id, method, params })}\n`);
+      });
+    },
+    notify(method, params) {
+      child.stdin.write(`${JSON.stringify({ jsonrpc: '2.0', method, params })}\n`);
+    },
+    close() {
+      child.kill();
+    },
+  };
+}
+
+function toolPayload(response) {
+  return JSON.parse(response.result.content[0].text);
+}
 
 test('AT memory_search: is registered as an agent-facing tool with a query schema', () => {
   // GIVEN the argo MCP tool list
@@ -63,4 +121,109 @@ test('AT memory_search: returns an MCP-compliant result (content array) so agent
   assert.equal(payload.error.category, 'MEMORY_QUERY_REQUIRED');
   assert.equal(result.status, 'failed', 'payload fields stay accessible at top level');
   assert.equal(result.isError, true);
+});
+
+test('AT memory_search: reads the canonical graph from the per-call workspaceRoot, never from the launch directory', async () => {
+  // GIVEN an argo MCP server in a repository-external global installation (no
+  // sibling design/KG, no ARGO_REPO_ROOT) launched from a foreign working
+  // directory whose own canonical graph is corrupt
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-memory-root-'));
+  const child = { close() {} };
+  try {
+    const installRoot = path.join(tempRoot, '.argo');
+    fs.mkdirSync(installRoot, { recursive: true });
+    fs.cpSync(
+      path.join(WORKSPACE_ROOT, 'argo', 'scripts'),
+      path.join(installRoot, 'scripts'),
+      { recursive: true },
+    );
+    fs.cpSync(
+      path.join(WORKSPACE_ROOT, 'argo', 'schema'),
+      path.join(installRoot, 'schema'),
+      { recursive: true },
+    );
+    const serverPath = path.join(installRoot, 'scripts', 'argo-mcp-server.js');
+
+    const launchDir = path.join(tempRoot, 'launch-dir');
+    fs.mkdirSync(path.join(launchDir, 'design', 'KG'), { recursive: true });
+    fs.writeFileSync(
+      path.join(launchDir, 'design', 'KG', 'SystemArchitecture.json'),
+      '{ "elements": [ { "id": "corrupt", ',
+    );
+
+    // AND a requested workspace that holds a real canonical graph
+    const requestedWorkspace = path.join(tempRoot, 'requested-workspace');
+    fs.mkdirSync(path.join(requestedWorkspace, 'design', 'KG'), { recursive: true });
+    fs.copyFileSync(
+      path.join(WORKSPACE_ROOT, 'design', 'KG', 'SystemArchitecture.json'),
+      path.join(requestedWorkspace, 'design', 'KG', 'SystemArchitecture.json'),
+    );
+
+    const env = { ...process.env };
+    delete env.ARGO_REPO_ROOT;
+    delete env.WORKSPACE_FOLDER;
+
+    const client = startArgoServer(serverPath, launchDir, env);
+    child.close = () => client.close();
+    await client.request('initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: { name: 'semantic-memory-search-root-test', version: '1' },
+    });
+    client.notify('notifications/initialized', {});
+
+    // WHEN memory_search and getSystemArchitecture are called with that per-call workspaceRoot
+    const memorySearch = toolPayload(await client.request('tools/call', {
+      name: 'memory_search',
+      arguments: {
+        query: 'Superset 与 Doris 的数据来源与数据流',
+        top_k: 3,
+        workspaceRoot: requestedWorkspace,
+      },
+    }));
+    const systemArchitecture = toolPayload(await client.request('tools/call', {
+      name: 'getSystemArchitecture',
+      arguments: {
+        query: { purpose: 'general', intent: 'Superset 与 Doris 的数据来源与数据流' },
+        workspaceRoot: requestedWorkspace,
+      },
+    }));
+
+    // THEN neither tool falls back to the launch directory's canonical graph:
+    // the requested workspaceRoot alone governs the canonical read, so no
+    // path/corruption of the launch-directory graph may leak into the result
+    const memoryMessage = (memorySearch.error && memorySearch.error.message) || '';
+    assert.ok(
+      !/design[\\/]KG[\\/]SystemArchitecture\.json/.test(memoryMessage),
+      `memory_search must not read a canonical graph outside the requested workspaceRoot: ${memoryMessage}`,
+    );
+    assert.ok(
+      !memoryMessage.includes(launchDir),
+      `memory_search must not reference the launch directory: ${memoryMessage}`,
+    );
+
+    // AND the retrieval really ran against the requested workspace's graph
+    // (it reached the semantic backend instead of failing on a graph read)
+    if (memorySearch.status !== 'passed') {
+      assert.ok(
+        /Cannot find module|neo4j|semantic/i.test(memoryMessage),
+        `memory_search should reach the semantic backend for the requested workspace, got: ${memoryMessage}`,
+      );
+    }
+
+    // AND the two semantic tools agree on which workspace they read
+    const architectureMessage = (systemArchitecture.error && systemArchitecture.error.message) || '';
+    assert.ok(
+      !architectureMessage.includes(launchDir)
+        && !/design[\\/]KG[\\/]SystemArchitecture\.json/.test(architectureMessage),
+      `getSystemArchitecture must resolve the same per-call workspaceRoot: ${architectureMessage}`,
+    );
+  } finally {
+    child.close();
+    try {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    } catch {
+      // best-effort cleanup: a just-killed child may still hold the cwd handle
+    }
+  }
 });
