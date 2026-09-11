@@ -1086,6 +1086,11 @@
           "name": "commit",
           "value": "9f3c384",
           "description": "design/KG/SystemArchitecture.json（图谱回登记：3f5b9d4 修复 + LTM pitfall + T1 摘要）"
+        },
+        {
+          "name": "commit",
+          "value": "fcebd11",
+          "description": "package.json（发布 archgraph-argo@0.16.2）; ~/.argo/scripts（argo-deploy 22/22 部署，产物与仓库逐字节一致）"
         }
       ],
       "testcases": [
@@ -3939,7 +3944,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话（2026-09-11，项目总管 project-overseer-001）目标：处理人类伙伴在 SOC 会话暴露的「KG 优先检索失效」——memory_search 报 ENOENT（MCP 服务器把工作目录当成 C:/Windows/System32，找不到 <cwd>/design/KG/SystemArchitecture.json）。①诊断（KG-first + 代码审计）：全局 ~/.argo 安装的 ARGO MCP 服务器由 dsh-argo-workspace 插件以宿主 cwd 启动且无 ARGO_REPO_ROOT；桥按 session.header.cwd 注入 per-call workspaceRoot（多数工具经 args 生效），但 memory_search 的语义 journey 走 resolveSemanticOperatorJourney(dependencies) → createDefaultProductionSemanticOperatorJourney() 无参 → 无参 resolveWorkspaceRoot() → process.cwd()，未收到已解析根；getSystemArchitecture 因入口预建 journey 未暴露（与 59e91d7/d191eaf/317a8b5 同族根因）。②修复 3f5b9d4（声明 Tier 2）：resolveSemanticOperatorJourney(dependencies, options) 透传 repositoryRoot；getSystemArchitecture/memory_search 两处传 context.workspaceRoot。③验收（先改图谱 AT 再改代码，遵守 AcceptanceTestFirst）：AT-acceptance-guardian-05 增补 workspaceRoot 条款 + 新增可执行外部视角用例（全局安装副本 + 外来 cwd + 该目录放损坏图谱 → memory_search 绝不读启动目录图谱）；修复前 1 fail（精确命中缺陷），修复后 5/5 pass；聚焦回归 30/30；validateSystemArchitecture 通过；全量 runArchitectureTests 61/66（5 项均为改动前既有失败：excalidraw skill 未部署、AT-2100-OPT-01/02/03 EA 导入环境、AT-memory-eval-run-03）；memory-eval-run 基线 2 pass/3 fail → 修复后 3 pass/2 fail（cost 用例由原生崩溃恢复）。④部署：修复文件已同步 ~/.argo/scripts（部署副本其余 42 文件本已逐字节一致）——需重启宿主（dsh web）让常驻 MCP 进程加载新代码；npm 版本发布待人类伙伴决定。⑤遗留：AT-memory-eval-run-03 数据集漂移（MH-05 期望的 4 个 overseer-* 元素已按 T3 归档策略移入 overseer-archive-001），需人类伙伴裁决改数据集还是收窄归档策略；Superset/Doris 数据来源问题经跨工作区 KG 检索确认归属 SOC-DEMO 图谱（Neo4j 库按仓库名隔离：archgraph / soc-demo）。⑥可复用经验：凡经无参 resolveWorkspaceRoot() 的语义/lifecycle 路径都会退回宿主 cwd；审查必须用「全局安装副本 + 外来 cwd」端到端复测（仓库内 embedded 回退会掩盖缺陷）。",
+      "description": "会话（2026-09-11，项目总管 project-overseer-001）目标：处理人类伙伴在 SOC 会话暴露的「KG 优先检索失效」——memory_search 报 ENOENT（MCP 服务器把工作目录当成 C:/Windows/System32）。①诊断（KG-first + 代码审计）：全局 ~/.argo 安装的服务器由 dsh-argo-workspace 插件以宿主 cwd 启动且无 ARGO_REPO_ROOT；桥按 session.header.cwd 注入 per-call workspaceRoot（多数工具经 args 生效），但 memory_search 的语义 journey 走 resolveSemanticOperatorJourney(dependencies) → createDefaultProductionSemanticOperatorJourney() 无参 → 无参 resolveWorkspaceRoot() → process.cwd()；getSystemArchitecture 因入口预建 journey 未暴露（与 59e91d7/d191eaf/317a8b5 同族根因）。②修复 3f5b9d4（Tier 2）：resolveSemanticOperatorJourney(dependencies, options) 透传 repositoryRoot。③验收：先改图谱 AT（AT-acceptance-guardian-05）再改代码；新用例修复前 1 fail（精确命中）、修复后 5/5 pass；聚焦回归 30/30；validateSystemArchitecture 通过；全量 61/66（5 项均改动前既有失败）；memory-eval-run 基线 2/3 → 3/2。④发布与部署（同一会话，人类伙伴指示）：package.json 0.16.1→0.16.2（commit fcebd11），npm publish 成功（dereckhu，shasum b968e93，67 files/1.3MB）；registry 可见延迟实测约 2 分钟（前 8 次 npm view 仍 0.16.1，第 9 次才 0.16.2）→ 轮询后 npm i -g archgraph-argo@0.16.2 → argo-deploy 22/22（Copilot/Cursor/OpenCode/DSH/OpenClaw + ~/.argo/scripts；[19/22] 无 *.agent.md 跳过 DSH agent presets 为非致命告警；neo4j-driver 由 vendor 内置 tgz 安装）。部署产物核验：~/.argo/scripts/systemarchitecture-mcp-server.js 与仓库逐字节一致（sha256 DD661C92…），并在「外来 cwd + 该 cwd 放损坏 SystemArchitecture.json」下端到端复测 memory_search → passed、命中真实记忆、未读外来 cwd 图谱。⑤待人类伙伴动作：重启 DSH（dsh web）——重启前常驻 MCP 进程仍跑旧代码，本会话 memory_search 仍复现旧错误（已实测）。⑥遗留：AT-memory-eval-run-03 数据集漂移（MH-05 期望的 4 个 overseer-* 已按 T3 归档策略移入 overseer-archive-001），待人类伙伴裁决改数据集还是收窄归档策略；Superset/Doris 问题的 KG 归属 SOC-DEMO（Neo4j 库按仓库名隔离 archgraph/soc-demo），SOC 图谱已覆盖 Doris→Superset 数据流（Flow soc-tobe-flow-doris-superset），但未覆盖 Superset 自身元数据库（结构检索 metadata/元数据/postgres/sqlite = 0 条）→ 图谱缺口，建议由 SOC-DEMO 架构师补登。⑦经验：凡经无参 resolveWorkspaceRoot() 的语义/lifecycle 路径都会退回宿主 cwd；审查必须用「全局安装副本 + 外来 cwd」端到端复测（仓库内 embedded 回退会掩盖缺陷）；发布后装包前必须 npm view 轮询等 registry 一致，否则 ETARGET。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3962,7 +3967,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-11",
-          "description": "2026-09-11 memory_search workspaceRoot 同族缺陷修复 + 跨工作区 KG 检索"
+          "description": "2026-09-11 memory_search workspaceRoot 修复 + 发布 0.16.2 + 部署"
         },
         {
           "name": "commit",
@@ -5814,6 +5819,28 @@
       "description": "发布里程碑（2026-09-09）：archgraph-argo@0.15.3 发布并部署。内容：①移除旧 node 工具 argo/scripts/ea-human-diff.js + tests/ea-human-diff.test.js（EA 内脚本 extract-human-draft.js 为唯一实现，图谱 AT-2792-01..06/08 删除改为 AT-2792-07 重写 + AT-2792-08 属性）；②移除 ea-human-draft 技能（argo/skills/ea-human-draft，打包/部署接线 package.json files + install-argo.ps1 5 处，22 编号部署步未动）；③ea-qea-sync-lib.js 镜像关系属性→t_connectortag relationship_attributes_json（幂等 update-in-place，AT-2791-16）；④extract-human-draft.js readWork 补读 t_attribute/t_objecttests/relationship_attributes_json，diff 补 type/attributes/testcases。部署：npm 全局安装 archgraph-argo@0.15.3，argo-deploy 跑 install-argo.ps1 22/22（Copilot/Cursor/OpenCode/DSH/OpenClaw 多宿主），MCP 配置/规则/技能已更新。坑：npm publish 后 registry 读取延迟（约 60s 才可见，install 会 ETARGET）；install-argo.ps1 用 Copy-Tree 只增不删——部署位 .argo/scripts/ea-human-diff.js 需手动清。特别记录：EA Repository.SQLQuery 查不存在的列会『挂起不报错』（如 t_objecttests 无 Name 列，列名是 Test），必须用真实列名，否则无头运行死锁。验证：validateSystemArchitecture passed、qeaProjection/neo4jSync Aligned；ea-qea-sync 13/13、ea-human-draft-script 静态+EA真跑 2/2、acceptance-guardian 4/4、argo-deploy 6/6。",
       "id": "overseer-argo-0-15-3-release-001",
       "name": "里程碑：发布 archgraph-argo@0.15.3（EA 内草稿脚本 + 属性提取）",
+      "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（发布 archgraph-argo@0.16.2：memory_search 语义 journey 读取 per-call workspaceRoot；npm publish + 全局安装 + argo-deploy 22/22）",
+          "name": "commit",
+          "value": "fcebd11"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "发布里程碑（2026-09-11）：archgraph-argo@0.16.2 发布 + 全局安装 + argo-deploy 22/22 部署，交付 memory_search 语义 journey 读取 per-call workspaceRoot 的修复（代码 commit 3f5b9d4）。内容：①resolveSemanticOperatorJourney(dependencies, options) 透传 repositoryRoot，getSystemArchitecture/memory_search 两处调用传 context.workspaceRoot（原缺陷：memory_search 经无参 resolveWorkspaceRoot() 退回宿主进程 cwd，DSH 下为 C:/Windows/System32 → ENOENT）；②AT-acceptance-guardian-05 增补条款 + tests/semantic-memory-search.test.js 新增外部视角可执行用例。发布流程实证：npm publish（dereckhu，shasum b968e93，67 files/1.3MB）→ registry 可见延迟约 2 分钟（第 1~8 次查询仍为 0.16.1，第 9 次才 0.16.2；npm view 轮询后安装，规避 ETARGET 坑）→ npm i -g archgraph-argo@0.16.2 → argo-deploy（packaged install-argo.ps1，22/22：schema/scripts/defaults/skills/rules/agents/plugins/mcp-bridges/宿主 MCP 配置/DSH 插件与规则/OpenClaw，[19/22] 无 *.agent.md 时跳过 DSH agent presets 为非致命告警；neo4j-driver 由 vendor 内置 tgz 安装）。部署产物核验：~/.argo/scripts/systemarchitecture-mcp-server.js 与仓库逐字节一致（sha256 DD661C92…），并在「外来 cwd（内含损坏 SystemArchitecture.json）」下端到端复测 memory_search → status passed、命中真实记忆（overseer-wm-summary-001 0.856 等）、未读取外来 cwd 图谱。待办：人类伙伴重启 DSH 使常驻 MCP 进程加载新代码（重启前 memory_search 仍走旧进程）。",
+      "id": "overseer-argo-0-16-2-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.16.2（memory_search workspaceRoot 修复）",
+      "parent": "project-overseer-001",
       "type": "Business Object"
     }
   ],
@@ -7756,7 +7783,8 @@
       "view_id": "overseer-release-001",
       "view_name": "项目总管发布记录",
       "included_elements": [
-        "overseer-argo-0-15-3-release-001"
+        "overseer-argo-0-15-3-release-001",
+        "overseer-argo-0-16-2-release-001"
       ]
     }
   ]
