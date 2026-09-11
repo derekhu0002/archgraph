@@ -280,6 +280,50 @@ test('install-argo.ps1 updates an outdated OpenCode AGENTS.md block and preserve
   }
 });
 
+test('install-argo.ps1 replaces a rule block whose final section is not </ToolsGuideline> without duplicating its tail', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-reorder-'));
+  const paths = hostPaths(tmp);
+  try {
+    fs.mkdirSync(path.dirname(paths.openCodeAgentsPath), { recursive: true });
+    // Seed the current rule layout (ToolsGuideline is NOT the last section) plus
+    // unrelated user content. The merge must replace the whole block through its
+    // real final tag (</Attention>) and keep the user content exactly once.
+    fs.writeFileSync(paths.openCodeAgentsPath, [
+      '---',
+      'description: "outdated"',
+      'name: "ArchGraph ARGO Workflow Rules"',
+      'applyTo: "**"',
+      '---',
+      '<ToolsGuideline>',
+      'stale tools',
+      '</ToolsGuideline>',
+      '<GraphQueryGuideline>',
+      'stale cypher',
+      '</GraphQueryGuideline>',
+      '<Attention>',
+      'stale attention',
+      '</Attention>',
+      '',
+      '# My OpenCode notes',
+      'keep this line',
+      '',
+    ].join('\n'), 'utf8');
+
+    const result = runInstall({ ...paths, skipEnv: true });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+
+    const agents = fs.readFileSync(paths.openCodeAgentsPath, 'utf8');
+    assert.match(agents, /Never add what the graph already has/, 'must carry the current rule');
+    assert.match(agents, /# My OpenCode notes/, 'unrelated user content must be preserved');
+    assert.match(agents, /keep this line/, 'unrelated user content must be preserved');
+    assert.equal((agents.match(/ArchGraph ARGO Workflow Rules/g) || []).length, 1, 'rules block must appear once');
+    assert.equal((agents.match(/<\/Attention>/g) || []).length, 1, 'block tail must not be duplicated');
+    assert.equal((agents.match(/<\/GraphQueryGuideline>/g) || []).length, 1, 'block tail must not be duplicated');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 test('install-argo.ps1 keeps existing .env values and skips prompts', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-env-'));
   const paths = hostPaths(tmp);

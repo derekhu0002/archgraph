@@ -215,6 +215,30 @@ function Register-OpenCodePlugin {
     [System.IO.File]::WriteAllText($ConfigPath, $json, (New-Object System.Text.UTF8Encoding $false))
 }
 
+function Get-ArchGraphRuleBlockEndIndex {
+    # Locate the end of a previously merged ArchGraph rule block. The rule's
+    # final section tag changed over versions: earlier rules ended with
+    # </ToolsGuideline>, the current layout ends with </Attention> and places
+    # <ToolsGuideline> earlier. Pick whichever final tag occurs LAST at/after
+    # the block marker, so the merge stays correct across rule reorderings and
+    # also repairs a previously duplicated tail.
+    param([string]$Text, [int]$From)
+    $idx = -1
+    foreach ($tag in @('</ToolsGuideline>', '</Attention>')) {
+        $i = $Text.LastIndexOf($tag)
+        if ($i -ge $From -and $i -gt $idx) { $idx = $i }
+    }
+    return $idx
+}
+
+function Get-ArchGraphRuleBlockEndTagLength {
+    param([string]$Text, [int]$Index)
+    if ($Index -lt 0) { return 0 }
+    if ($Text.Substring($Index).StartsWith('</ToolsGuideline>')) { return '</ToolsGuideline>'.Length }
+    if ($Text.Substring($Index).StartsWith('</Attention>')) { return '</Attention>'.Length }
+    return 0
+}
+
 function Add-AgentsRule {
     param(
         [string]$AgentsPath,
@@ -231,18 +255,18 @@ function Add-AgentsRule {
             # An existing ArchGraph rules block is present. Replace it with the
             # current rule content while preserving any unrelated content that
             # surrounds it (e.g. user-authored OpenCode instructions).
-            $endTag = '</ToolsGuideline>'
             $markerIdx = $existing.IndexOf($marker)
             if ($markerIdx -lt 0) { $markerIdx = 0 }
             $startIdx = $existing.LastIndexOf('---', $markerIdx)
             if ($startIdx -lt 0) { $startIdx = 0 }
-            $endIdx = $existing.IndexOf($endTag, $markerIdx)
+            $endIdx = Get-ArchGraphRuleBlockEndIndex -Text $existing -From $markerIdx
 
             $before = $existing.Substring(0, $startIdx).TrimEnd()
             if ($endIdx -lt 0) {
                 $combined = $ruleContent
             } else {
-                $after = $existing.Substring($endIdx + $endTag.Length)
+                $endLen = Get-ArchGraphRuleBlockEndTagLength -Text $existing -Index $endIdx
+                $after = $existing.Substring($endIdx + $endLen)
                 $combined = $before
                 if ($combined.Length -gt 0) { $combined += "`n`n" }
                 $combined += $ruleContent
@@ -301,13 +325,15 @@ function Write-ArchGraphRuleBlock {
     if (Test-Path $DestPath) {
         $existing = Get-Content $DestPath -Raw -Encoding UTF8
         if ($existing -like "*$marker*") {
-            $endTag = '</ToolsGuideline>'
             $startIdx = $existing.IndexOf($marker)
             if ($startIdx -lt 0) { $startIdx = 0 }
-            $endIdx = $existing.IndexOf($endTag, $startIdx)
+            $endIdx = Get-ArchGraphRuleBlockEndIndex -Text $existing -From $startIdx
             $before = $existing.Substring(0, $startIdx).TrimEnd()
             $after = ''
-            if ($endIdx -ge 0) { $after = $existing.Substring($endIdx + $endTag.Length).TrimStart() }
+            if ($endIdx -ge 0) {
+                $endLen = Get-ArchGraphRuleBlockEndTagLength -Text $existing -Index $endIdx
+                $after = $existing.Substring($endIdx + $endLen).TrimStart()
+            }
             $combined = $before
             if ($combined.Length -gt 0) { $combined += "`n`n" }
             $combined += $ruleContent
