@@ -4113,8 +4113,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.17.1",
-          "description": "已发布并部署：0.17.0（L0+L1 去重门禁 + 规则 Agent 视角重写）→ 0.17.1（修复 argo-deploy 合并 AGENTS.md 规则块尾部重复）。npm publish + npm i -g + argo-deploy 22/22；~/.argo/scripts 与仓库逐字节一致；5 宿主规则副本无重复。待人类伙伴重启宿主加载新常驻 MCP 进程。"
+          "value": "archgraph-argo@0.18.0",
+          "description": "语义检索嵌入文本由整对象 JSON 改为策展语义字段（去 id/端点 id/视图成员 id 数组/JSON）。A/B 实测：视图 recall@1 82.8%→91.9%、关系 98.1%→100%、描述类 95.6%→98.0%。全量回填 Aligned（223/103/58）。commits 0f3d924/61ee7c0/43237f7。"
         },
         {
           "name": "commit",
@@ -4130,6 +4130,16 @@
           "name": "commit",
           "value": "ba43307",
           "description": "release 0.17.0（L0+L1 去重门禁 + 规则全量 Agent 视角重写）"
+        },
+        {
+          "name": "commit",
+          "value": "43237f7",
+          "description": "release 0.18.0（语义嵌入改策展文本）"
+        },
+        {
+          "name": "commit",
+          "value": "0f3d924",
+          "description": "feat(semantic): buildSemanticRecordText 策展嵌入文本 + 三处入口集成 + AT-semantic-text-01..05"
         }
       ],
       "testcases": [
@@ -6136,6 +6146,38 @@
           "description": "package.json（发布 archgraph-argo@0.17.1）"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "description": "新增 buildSemanticRecordText 策展嵌入文本 + 三处入口集成 + AT-semantic-text-01..05",
+          "name": "commit",
+          "value": "0f3d924"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json（图谱回登记）",
+          "name": "commit",
+          "value": "61ee7c0"
+        },
+        {
+          "description": "package.json（发布 archgraph-argo@0.18.0）",
+          "name": "commit",
+          "value": "43237f7"
+        }
+      ],
+      "description": "发布里程碑（2026-09-11）：archgraph-argo@0.18.0 发布并部署，语义检索嵌入文本由「整条 canonical 对象 JSON」改为策展语义字段，提升检索准确性。背景：原实现把整对象 JSON（含 id、端点 id、视图 included_* 成员 id 数组、JSON 键名/标点）送入 embedding，实测结构噪声稀释语义（关系记录仅 ~24% 语义、视图 ~28%，视图成员 id 数组常盖过描述），并带来跨记录共享 id 的伪相似与长记录截断风险。A/B 实测（真实 qwen3.7-text-embedding，全图 384 记录 / 633 查询）：视图 recall@1 82.8%→91.9%、视图 top1 同通道率 84.8%→93.9%、关系 recall@1 98.1%→100%、描述类 recall@1 95.6%→98.0%；元素名称自匹配略降（79.8%→76.6%）系旧实现把唯一 id/testcase 路径当作指纹所致，非真实语义收益。落地：新增 argo/scripts/graph-rag/semanticRecordText.js（buildSemanticRecordText：元素 type/name/alias/description/attributes/testcase 意图；关系 statement/name/description/document/attributes；视图 view_name/description），全量回填（productionSemanticBackfill contentHash + systemarchitecture-mcp-server embedBatch）与增量生命周期（mutationEmbeddingVectorLifecycle buildPersistentWork + provider embed 包装）统一走该 composer；新增 AT-semantic-text-01..05（tests/semantic-record-text.test.js 5/5）。语义索引已全量回填（Element 223/ArchitectureRelationship 103/View 58，Aligned，0 失败）。发布流程：npm publish 0.18.0（registry 传播延迟，轮询后安装）→ npm i -g → argo-deploy 22/22；产物核验：~/.argo/scripts 四文件（server/lifecycle/semanticRecordText/backfill）与仓库逐字节一致。待办：人类伙伴重启宿主以加载新常驻 MCP 进程。commits 0f3d924(工作)/61ee7c0(图谱登记)/43237f7(release)。",
+      "id": "overseer-argo-0-18-0-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.18.0（语义嵌入改策展文本）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -8081,7 +8123,8 @@
       "included_elements": [
         "overseer-argo-0-15-3-release-001",
         "overseer-argo-0-16-2-release-001",
-        "overseer-argo-0-17-1-release-001"
+        "overseer-argo-0-17-1-release-001",
+        "overseer-argo-0-18-0-release-001"
       ]
     }
   ]
