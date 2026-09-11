@@ -1,9 +1,14 @@
 'use strict';
 
+const fs = require('node:fs');
+const path = require('node:path');
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { buildSemanticDedupAdvisory } = require('../argo/scripts/systemarchitecture-mcp-server.js');
+const {
+  buildSemanticDedupAdvisory,
+  selectCreatedElementAdds,
+} = require('../argo/scripts/systemarchitecture-mcp-server.js');
 
 function baseDocument() {
   return {
@@ -109,23 +114,45 @@ test('L1 advisory: below-threshold and out-of-scope candidates are filtered out'
   assert.deepEqual(advisory.candidates[0].matches, []);
 });
 
-test('L1 advisory: skipped when there is no element add, or the add is a reuse', async () => {
-  // GIVEN a reuse add and a non-add mutation
+test('L1 advisory: skipped when there is no element add', async () => {
+  // GIVEN a non-add mutation
   const journey = { query: async () => { throw new Error('must not be called'); } };
   // WHEN the advisory is built
-  const reused = await buildSemanticDedupAdvisory(
-    context(baseDocument()),
-    [addWidgetMutation({ onConflict: 'reuse' })],
-    { semanticOperatorJourney: journey },
-  );
   const nonAdd = await buildSemanticDedupAdvisory(
     context(baseDocument()),
     [{ type: 'updateElement', id: 'w1', patch: { description: 'x' } }],
     { semanticOperatorJourney: journey },
   );
   // THEN it is a no-op (undefined) and the journey is never queried
-  assert.equal(reused, undefined);
   assert.equal(nonAdd, undefined);
+});
+
+test('L1 advisory selection: by what was actually created, not by the onConflict parameter', () => {
+  // GIVEN three element adds: an exact-key reuse (created nothing), a reuse that
+  // fell through to creation, and a plain create
+  const mutations = [
+    { type: 'addElement', element: { id: 'new-a', name: 'A', type: 'Application Component' }, onConflict: 'reuse' },
+    { type: 'addElement', element: { id: 'new-b', name: 'B', type: 'Application Component' }, onConflict: 'reuse' },
+    { type: 'addElement', element: { id: 'new-c', name: 'C', type: 'Application Component' } },
+  ];
+  const summaries = [
+    { type: 'addElement', id: 'existing-w1', created: false, reused: true, reusedId: 'existing-w1' },
+    { type: 'addElement', id: 'new-b', created: true },
+    { type: 'addElement', id: 'new-c', created: true },
+  ];
+  // WHEN the created adds are selected
+  const selected = selectCreatedElementAdds(mutations, summaries).map(m => m.element.id);
+  // THEN only the actually-created adds remain (the reuse-that-reused is dropped)
+  assert.deepEqual(selected, ['new-b', 'new-c']);
+});
+
+test('L1 advisory: onConflict reuse is no longer special-cased in the advisory filter', () => {
+  const server = fs.readFileSync(
+    path.join(__dirname, '..', 'argo', 'scripts', 'systemarchitecture-mcp-server.js'),
+    'utf8',
+  );
+  assert.doesNotMatch(server, /mutation\.onConflict !== 'reuse'/);
+  assert.match(server, /selectCreatedElementAdds\(mutations, mutationResult\.mutationSummaries\)/);
 });
 
 test('L1 advisory: threshold is configurable via environment', async () => {

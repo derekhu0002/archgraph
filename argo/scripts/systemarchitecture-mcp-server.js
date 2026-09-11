@@ -1813,9 +1813,13 @@ async function buildMutationResult(context, mutations, write, dependencies) {
   }
 
   // L1 advisory: semantic near-duplicate suggestions for element adds. Never
-  // blocks or fails the write; preview and apply both surface it.
+  // blocks or fails the write; preview and apply both surface it. Only adds the
+  // applied mutation actually CREATED are advised — a reuse that found an exact
+  // natural-key match creates nothing and is skipped, while a reuse that fell
+  // through to creation is advised like any other new element.
   if (errors.length === 0) {
-    const semanticDedup = await buildSemanticDedupAdvisory(context, mutations, dependencies);
+    const createdAdds = selectCreatedElementAdds(mutations, mutationResult.mutationSummaries);
+    const semanticDedup = await buildSemanticDedupAdvisory(context, createdAdds, dependencies);
     if (semanticDedup) {
       result.semanticDedup = semanticDedup;
     }
@@ -2695,6 +2699,24 @@ function collectViewMemberElementIds(document, viewIds) {
   return ids;
 }
 
+// Only element adds that the applied mutation actually CREATED are subject to
+// the L1 advisory. A reuse that found an exact natural-key match creates nothing
+// (created:false) and is skipped; a reuse that fell through to creation
+// (created:true, id === requested id) is advised like any other new element.
+function selectCreatedElementAdds(mutations, mutationSummaries) {
+  const createdIds = new Set(
+    (Array.isArray(mutationSummaries) ? mutationSummaries : [])
+      .filter(summary => summary && summary.type === 'addElement' && summary.created === true)
+      .map(summary => summary.id),
+  );
+  return (Array.isArray(mutations) ? mutations : []).filter(mutation => (
+    mutation
+    && mutation.type === 'addElement'
+    && mutation.element
+    && createdIds.has(mutation.element.id)
+  ));
+}
+
 async function buildSemanticDedupAdvisory(context, mutations, dependencies) {
   if (process.env.ARGO_MCP_SEMANTIC_DEDUP === '0') {
     return undefined;
@@ -2705,7 +2727,6 @@ async function buildSemanticDedupAdvisory(context, mutations, dependencies) {
     && mutation.element
     && typeof mutation.element.name === 'string'
     && mutation.element.name.trim() !== ''
-    && mutation.onConflict !== 'reuse'
   ));
   if (addedElements.length === 0) {
     return undefined;
@@ -4106,6 +4127,7 @@ module.exports = {
   TOOLS,
   applyMutations,
   buildSemanticDedupAdvisory,
+  selectCreatedElementAdds,
   callTool,
   compactMutationResponse,
   createDefaultCanonicalSemanticInitComposition,
