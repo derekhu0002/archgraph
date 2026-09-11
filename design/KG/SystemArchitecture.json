@@ -4118,8 +4118,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.18.1",
-          "description": "修复 L1 语义建议在 onConflict:reuse 下被抑制：触发条件由调用参数改为 applyMutations 的 created 标记（selectCreatedElementAdds）。commits fc2dbff/a60e04f/14cf43a。"
+          "value": "archgraph-argo@0.19.0",
+          "description": "写图去重统一版：onConflict 去 fail、默认 reuse；精确重复→复用不新建；全图同 type 语义近似→写前拦截并回 semanticConflicts，仅 allowDuplicate+justification 放行。commits 4819e02/2da6539/400f210。注意：阈值 0.85 对「同类谱系」（如一系列发布里程碑）会默认拦截，需 allowDuplicate；可用 ARGO_SEMANTIC_DEDUP_THRESHOLD 调高或 ARGO_MCP_SEMANTIC_DEDUP=0 关闭。"
         },
         {
           "name": "commit",
@@ -4155,6 +4155,16 @@
           "name": "commit",
           "value": "fc2dbff",
           "description": "fix(dedup): selectCreatedElementAdds + advisory 去 onConflict 过滤 + AT-dedup-L1-02"
+        },
+        {
+          "name": "commit",
+          "value": "400f210",
+          "description": "release 0.19.0（默认 reuse + 全图同型语义软门禁）"
+        },
+        {
+          "name": "commit",
+          "value": "4819e02",
+          "description": "feat(dedup)!: 默认 reuse + 全图同型语义软门禁（resolveDuplicateConflict/public gate/schema/rule）"
         }
       ],
       "testcases": [
@@ -6242,6 +6252,38 @@
       "name": "里程碑：发布 archgraph-argo@0.18.1（L1 语义建议按实际新建触发）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "description": "默认 reuse（去 fail）+ 全图同型语义软门禁 + 规则/schema/测试",
+          "name": "commit",
+          "value": "4819e02"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json（图谱回登记）",
+          "name": "commit",
+          "value": "2da6539"
+        },
+        {
+          "description": "package.json（发布 archgraph-argo@0.19.0）",
+          "name": "commit",
+          "value": "400f210"
+        }
+      ],
+      "description": "发布里程碑（2026-09-11）：archgraph-argo@0.19.0 发布并部署，落地写图去重统一版——默认 reuse（去掉 fail）+ 全图同型语义软门禁。语义：onConflict 只有 reuse（默认）与 allowDuplicate；精确重复（元素 type+归一化 name；关系 source+type+target+归一化 name；视图 parent+归一化 view name）→复用（挂入目标 view，不新建）；新建元素时若全图存在同 type 且语义分数≥阈值（默认0.85，窗口每通道 topK=25）的近似候选→写前拦截（status failed、written false、返回 semanticConflicts+guidance），仅 allowDuplicate+justification 放行；无近似→正常新建；update* 不受门禁；语义后端不可用降级不报错。判据=实际是否新建（selectCreatedElementAdds，依据 applyMutations created 标记），不依赖调用参数，消除「靠 Agent 回头改」的不可评估性。落地：systemarchitecture-mcp-server.js（resolveDuplicateConflict/DUPLICATE_CONFLICT_POLICIES/buildSemanticDedupAdvisory 全图不再限定 view/selectCreatedElementAdds/evaluateSemanticDedupGate/compact failed 带 semanticConflicts/schema）、argo-mcp-server.js（schema）、graph-rag/defaultSemanticRetrieval.js（per-request topK）、规则 <GraphDeduplication>+CoreRule 9。验收：dedup 18/18、语义/写图/规则 88/88；本地 dry-run 验证默认拦截（failed+semanticConflicts）与 allowDuplicate 放行；validateSystemArchitecture 通过。发布流程：npm publish 0.19.0（registry 传播延迟，轮询后安装）→ npm i -g → argo-deploy 22/22；~/.argo/scripts 三文件 + OpenCode 规则与仓库逐字节一致。待办：人类伙伴重启宿主加载新常驻 MCP 进程。commits 4819e02(工作)/2da6539(图谱登记)/400f210(release)。",
+      "id": "overseer-argo-0-19-0-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.19.0（默认 reuse + 全图同型语义软门禁）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -8189,7 +8231,8 @@
         "overseer-argo-0-16-2-release-001",
         "overseer-argo-0-17-1-release-001",
         "overseer-argo-0-18-0-release-001",
-        "overseer-argo-0-18-1-release-001"
+        "overseer-argo-0-18-1-release-001",
+        "overseer-argo-0-19-0-release-001"
       ]
     }
   ]
