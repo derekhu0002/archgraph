@@ -3695,7 +3695,7 @@
       "name": "Neo4j Semantic Projection Reconciliation",
       "parent": "1961",
       "type": "Application Component",
-      "description": "将 canonical 意图图谱同步到 Neo4j 语义投影（ArgoProductionSemanticRecord + 向量索引），由 argo-init 的语义生命周期触发全量回填。① 全量回填在 upsert 之后执行 reconcileRemovals：读取已持久化的语义记录，对本地 JSON 快照中已不存在的 canonicalIdentity 执行 deleteTombstones，确保 argo init 后语义投影与 canonical 图谱完全一致（不留陈旧向量）。② approved embedding 配置跨平台 ACL 预检（win32 icacls / POSIX fs mode+uid）。③ embedding 维度 1536（与 LightRAG 对照基线一致，ARGO_EMBEDDING_DIMENSIONS 驱动；向量索引维度感知重建）。宿主已验证 argo-init Aligned @1536。源码：argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js 等",
+      "description": "将 canonical 意图图谱同步到 Neo4j 语义投影（ArgoProductionSemanticRecord + 向量索引），由 argo-init 的语义生命周期触发全量回填。① 全量回填在 upsert 之后执行 reconcileRemovals：读取已持久化的语义记录，对本地 JSON 快照中已不存在的 canonicalIdentity 执行 deleteTombstones，确保 argo init 后语义投影与 canonical 图谱完全一致（不留陈旧向量）。② approved embedding 配置跨平台 ACL 预检（win32 icacls / POSIX fs mode+uid）。③ embedding 维度 1536（与 LightRAG 对照基线一致，ARGO_EMBEDDING_DIMENSIONS 驱动；向量索引维度感知重建）。宿主已验证 argo-init Aligned @1536。④ 嵌入文本为策展语义字段（buildSemanticRecordText，argo/scripts/graph-rag/semanticRecordText.js）：元素 type/name/alias/description/attributes/testcase 意图；关系 statement/name/description/document/attributes；视图 view_name/description——不含 id、端点 id、included_* 成员 id 数组、JSON 键名/标点；全量回填与增量生命周期统一走该 composer。A/B 实测（真实 qwen3.7-text-embedding，384 记录/633 查询）：视图 recall@1 82.8%→91.9%、关系 98.1%→100%、描述类 95.6%→98.0%。源码：argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js、graph-rag/semanticRecordText.js、graph-rag/mutationEmbeddingVectorLifecycle.js、systemarchitecture-mcp-server.js。",
       "attributes": [
         {
           "name": "commit",
@@ -3720,9 +3720,50 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "0f3d924",
+          "description": "argo/scripts/graph-rag/semanticRecordText.js; graph-rag/semantic-persistence/productionSemanticBackfill.js; graph-rag/mutationEmbeddingVectorLifecycle.js; systemarchitecture-mcp-server.js; tests/semantic-record-text.test.js"
         }
       ],
-      "testcases": []
+      "testcases": [
+        {
+          "Input": "tests/semantic-record-text.test.js",
+          "acceptanceCriteria": "tests/semantic-record-text.test.js",
+          "description": "GIVEN 一个含 id/parent/attributes/testcases/subdiagram_views 的元素；WHEN 生成策展嵌入文本；THEN 保留 type/name/alias/description/attributes(name:value/description)/testcase 意图，且不含 id/parent 值、视图 id、testcase 文件路径、JSON 标点与引号。",
+          "name": "AT-semantic-text-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/semantic-record-text.test.js",
+          "acceptanceCriteria": "tests/semantic-record-text.test.js",
+          "description": "GIVEN 一个含端点 id/端点名/属性的关系；WHEN 生成策展嵌入文本；THEN 保留 statement/name/description/document/attributes，且不含关系 id 与 source_id/target_id。",
+          "name": "AT-semantic-text-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/semantic-record-text.test.js",
+          "acceptanceCriteria": "tests/semantic-record-text.test.js",
+          "description": "GIVEN 一个含 included_elements/included_relationships 的视图；WHEN 生成策展嵌入文本；THEN 仅保留 view_name/description，不含 view_id/parent_element_id 与任何成员 id。",
+          "name": "AT-semantic-text-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/semantic-record-text.test.js",
+          "acceptanceCriteria": "tests/semantic-record-text.test.js",
+          "description": "GIVEN 缺失/空字段或非对象输入；WHEN 生成策展嵌入文本；THEN 不抛错并返回空串或缺省字段。",
+          "name": "AT-semantic-text-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/semantic-record-text.test.js",
+          "acceptanceCriteria": "tests/semantic-record-text.test.js",
+          "description": "GIVEN 全量回填与增量生命周期两条写入路径；WHEN 检查源码；THEN 两者均经 buildSemanticRecordText 生成嵌入文本，且不再对整条 canonical 对象做 JSON.stringify 后嵌入/哈希。",
+          "name": "AT-semantic-text-05",
+          "type": "Acceptance Test"
+        }
+      ]
     },
     {
       "id": "navigation-eval-wp-001",
