@@ -4118,8 +4118,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.19.0",
-          "description": "写图去重统一版：onConflict 去 fail、默认 reuse；精确重复→复用不新建；全图同 type 语义近似→写前拦截并回 semanticConflicts，仅 allowDuplicate+justification 放行。commits 4819e02/2da6539/400f210。注意：阈值 0.85 对「同类谱系」（如一系列发布里程碑）会默认拦截，需 allowDuplicate；可用 ARGO_SEMANTIC_DEDUP_THRESHOLD 调高或 ARGO_MCP_SEMANTIC_DEDUP=0 关闭。"
+          "value": "archgraph-argo@0.19.1",
+          "description": "视图成员唯一性不变量（对标 EA 同一图一元素/连接仅一次）：graph-semantics 校验拒绝重复成员；updateView/addView 成员去重；qea 投影防双插。新增 graph-semantics-validation-001。commits b6c6466/204f426/393b6ff。实机证明语义软门禁：新组件默认被拦（0.8819 vs graph-write-dedup-gate），以 allowDuplicate+justification 放行；同类谱系（发布里程碑）同理需显式放行。"
         },
         {
           "name": "commit",
@@ -4165,6 +4165,16 @@
           "name": "commit",
           "value": "4819e02",
           "description": "feat(dedup)!: 默认 reuse + 全图同型语义软门禁（resolveDuplicateConflict/public gate/schema/rule）"
+        },
+        {
+          "name": "commit",
+          "value": "393b6ff",
+          "description": "release 0.19.1（视图成员唯一性不变量）"
+        },
+        {
+          "name": "commit",
+          "value": "b6c6466",
+          "description": "fix(view): graph-semantics 唯一性不变量 + updateView/addView 去重 + qea 投影防双插"
         }
       ],
       "testcases": [
@@ -6328,6 +6338,38 @@
         }
       ],
       "type": "Application Component"
+    },
+    {
+      "attributes": [
+        {
+          "description": "视图成员唯一性不变量（graph-semantics 校验 + updateView/addView 去重 + qea 投影防双插）",
+          "name": "commit",
+          "value": "b6c6466"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json（图谱回登记 + 新增 graph-semantics-validation-001）",
+          "name": "commit",
+          "value": "204f426"
+        },
+        {
+          "description": "package.json（发布 archgraph-argo@0.19.1）",
+          "name": "commit",
+          "value": "393b6ff"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "发布里程碑（2026-09-11）：archgraph-argo@0.19.1 发布并部署，强制『一个 view 内元素/关系唯一』不变量（对标 EA 同一图一元素/一连接仅一次）。① graph-semantics.js validateGraphSemantics 新增：view.included_elements/included_relationships 不得含重复 id（validateDocument + validateSystemArchitecture 均调用 → 所有写入与 argo init 拒绝重复图）；② updateView 成员 patch 与 addView 成员数组经 addUnique 去重归一；③ ea-qea-sync-lib.js 在新增成员循环内同步 placedObjs/placedLinks，防止含重复成员的图被双插 t_diagramobjects/t_diagramlinks。新增 Application Component graph-semantics-validation-001（AT-view-unique-01..04）。验收：view/EA/semantics 56/56（1 预存 skip）；validateSystemArchitecture 通过；实机演示：该组件默认被语义软门禁拦截（0.8819 vs graph-write-dedup-gate），以 allowDuplicate+justification 放行。发布流程：npm publish 0.19.1 → 全局安装 → argo-deploy 22/22；~/.argo/scripts 三文件与仓库逐字节一致。待办：人类伙伴重启宿主。commits b6c6466(工作)/204f426(图谱登记)/393b6ff(release)。",
+      "id": "overseer-argo-0-19-1-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.19.1（视图成员唯一性不变量）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -8277,7 +8319,8 @@
         "overseer-argo-0-17-1-release-001",
         "overseer-argo-0-18-0-release-001",
         "overseer-argo-0-18-1-release-001",
-        "overseer-argo-0-19-0-release-001"
+        "overseer-argo-0-19-0-release-001",
+        "overseer-argo-0-19-1-release-001"
       ]
     }
   ]
