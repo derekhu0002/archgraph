@@ -149,6 +149,8 @@ const TOOLS = [
       properties: {
         element: { type: 'object' },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
+        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject an exact (type, normalized name) duplicate and return its candidates. reuse: find-or-create — attach the existing element instead of duplicating. allowDuplicate: create anyway, requires justification.' },
+        justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
       },
       additionalProperties: false,
@@ -191,6 +193,8 @@ const TOOLS = [
       properties: {
         relationship: { type: 'object' },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
+        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject an exact (source, type, target, normalized name) duplicate and return its candidates. reuse: find-or-create — attach the existing relationship instead of duplicating. allowDuplicate: create anyway, requires justification.' },
+        justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
       },
       additionalProperties: false,
@@ -232,6 +236,8 @@ const TOOLS = [
       required: ['view'],
       properties: {
         view: { type: 'object' },
+        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject a duplicate (parent_element_id, normalized view_name) and return its candidates. reuse: attach the existing view. allowDuplicate: create anyway, requires justification.' },
+        justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
       },
       additionalProperties: false,

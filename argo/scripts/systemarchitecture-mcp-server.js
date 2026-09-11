@@ -241,6 +241,8 @@ const TOOLS = [
       properties: {
         element: { type: 'object' },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
+        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject an exact (type, normalized name) duplicate and return its candidates. reuse: find-or-create — attach the existing element instead of duplicating. allowDuplicate: create anyway, requires justification.' },
+        justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         dryRun: { type: 'boolean', description: 'When true, validates and returns the result without writing to the graph. Default: false.' },
         architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
       },
@@ -286,6 +288,8 @@ const TOOLS = [
       properties: {
         relationship: { type: 'object' },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
+        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject an exact (source, type, target, normalized name) duplicate and return its candidates. reuse: find-or-create — attach the existing relationship instead of duplicating. allowDuplicate: create anyway, requires justification.' },
+        justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         dryRun: { type: 'boolean', description: 'When true, validates and returns the result without writing to the graph. Default: false.' },
         architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
       },
@@ -330,6 +334,8 @@ const TOOLS = [
       required: ['view'],
       properties: {
         view: { type: 'object' },
+        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject a duplicate (parent_element_id, normalized view_name) and return its candidates. reuse: attach the existing view. allowDuplicate: create anyway, requires justification.' },
+        justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         dryRun: { type: 'boolean', description: 'When true, validates and returns the result without writing to the graph. Default: false.' },
         architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
       },
@@ -470,6 +476,8 @@ function mutationInputSchema() {
             view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
             element_ids: { type: 'array', items: { type: 'string' } },
             relationship_ids: { type: 'array', items: { type: 'string' } },
+            onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy for add* mutations. fail (default): reject an exact natural-key duplicate and return its candidates. reuse: find-or-create — attach the existing object instead of creating a duplicate. allowDuplicate: create a new object, requires a non-empty justification.' },
+            justification: { type: 'string', description: 'Required when onConflict is allowDuplicate; recorded as the reason a semantically-equal duplicate is intentionally created.' },
           },
           additionalProperties: false,
         },
@@ -1157,6 +1165,92 @@ function mergeAttributesPatch(existing, patchEntries) {
   return result;
 }
 
+const DUPLICATE_CONFLICT_POLICIES = new Set(['fail', 'reuse', 'allowDuplicate']);
+
+// L0 dedup gate: normalize a name to a stable natural-key component. NFKC folds
+// full-width forms, whitespace is collapsed, and case is folded, so " Widget ",
+// "widget", and "Ｗidget" all collide.
+function normalizeDedupName(value) {
+  return String(value === undefined || value === null ? '' : value)
+    .normalize('NFKC')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function findDuplicateElements(elements, element) {
+  const nameKey = normalizeDedupName(element.name);
+  return (elements || [])
+    .filter(candidate => candidate && candidate.type === element.type && normalizeDedupName(candidate.name) === nameKey)
+    .map(candidate => ({ id: candidate.id, type: candidate.type, name: candidate.name }));
+}
+
+function findDuplicateRelationships(relationships, relationship) {
+  const nameKey = normalizeDedupName(relationship.name);
+  return (relationships || [])
+    .filter(candidate => candidate
+      && candidate.source_id === relationship.source_id
+      && candidate.type === relationship.type
+      && candidate.target_id === relationship.target_id
+      && normalizeDedupName(candidate.name) === nameKey)
+    .map(candidate => ({
+      id: candidate.id,
+      type: candidate.type,
+      source_id: candidate.source_id,
+      target_id: candidate.target_id,
+      name: candidate.name,
+    }));
+}
+
+function findDuplicateViews(views, view) {
+  const parentId = view.parent_element_id || '';
+  const nameKey = normalizeDedupName(view.view_name);
+  return (views || [])
+    .filter(candidate => candidate
+      && (candidate.parent_element_id || '') === parentId
+      && normalizeDedupName(candidate.view_name) === nameKey)
+    .map(candidate => ({
+      view_id: candidate.view_id,
+      view_name: candidate.view_name,
+      parent_element_id: candidate.parent_element_id,
+    }));
+}
+
+// Resolve an add against its exact natural-key candidates under the caller's
+// onConflict policy: fail (default) rejects and returns candidates; reuse is
+// find-or-create (attach the existing object); allowDuplicate creates only with
+// a non-empty justification. Semantic similarity (L1) is never handled here.
+function resolveDuplicateConflict(options, candidates) {
+  const onConflict = options.onConflict === undefined || options.onConflict === null
+    ? 'fail'
+    : options.onConflict;
+  if (!DUPLICATE_CONFLICT_POLICIES.has(onConflict)) {
+    throw new Error(`onConflict must be one of fail, reuse, allowDuplicate (got '${onConflict}')`);
+  }
+  if (candidates.length === 0) {
+    return { action: 'create' };
+  }
+  if (onConflict === 'fail') {
+    const error = new Error(
+      `Duplicate ${options.label} already exists (${candidates.map(candidate => candidate.id).join(', ')}). ` +
+      'Reuse it with onConflict:"reuse", or pass onConflict:"allowDuplicate" with a non-empty justification to create a new one.',
+    );
+    error.duplicateConflicts = candidates;
+    throw error;
+  }
+  if (onConflict === 'reuse') {
+    return { action: 'reuse', existing: candidates[0] };
+  }
+  if (typeof options.justification !== 'string' || options.justification.trim() === '') {
+    const error = new Error(
+      `onConflict "allowDuplicate" for ${options.label} requires a non-empty justification.`,
+    );
+    error.duplicateConflicts = candidates;
+    throw error;
+  }
+  return { action: 'create', justification: options.justification };
+}
+
 function applyMutations(document, mutations) {
   const nextDocument = clone(document);
   const touchedElementIds = new Set();
@@ -1179,21 +1273,35 @@ function applyMutations(document, mutations) {
       const scopedViews = requireViewScope(nextDocument.views, mutation.view_ids, 'mutation.view_ids');
       requireId(mutation.element.id, 'mutation.element.id');
       const existingElement = findById(nextDocument.elements, mutation.element.id);
+      let targetElementId = mutation.element.id;
+      let reusedElement = false;
       if (!existingElement) {
-        nextDocument.elements.push(clone(mutation.element));
-        syncViewsToElementSubdiagramViews(nextDocument, findById(nextDocument.elements, mutation.element.id));
+        const candidates = findDuplicateElements(nextDocument.elements, mutation.element);
+        const resolution = resolveDuplicateConflict({
+          onConflict: mutation.onConflict,
+          justification: mutation.justification,
+          label: `element (type '${mutation.element.type}', name '${mutation.element.name}')`,
+        }, candidates);
+        if (resolution.action === 'reuse') {
+          targetElementId = resolution.existing.id;
+          reusedElement = true;
+        } else {
+          nextDocument.elements.push(clone(mutation.element));
+          syncViewsToElementSubdiagramViews(nextDocument, findById(nextDocument.elements, mutation.element.id));
+        }
       }
       for (const view of scopedViews) {
-        view.included_elements = addUnique(view.included_elements || [], [mutation.element.id]);
+        view.included_elements = addUnique(view.included_elements || [], [targetElementId]);
         touchedViewIds.add(view.view_id);
         viewLimitCheckIds.add(view.view_id);
       }
-      touchedElementIds.add(mutation.element.id);
+      touchedElementIds.add(targetElementId);
       mutationSummaries.push({
         type: mutation.type,
-        id: mutation.element.id,
+        id: targetElementId,
         view_ids: mutation.view_ids,
-        created: !existingElement,
+        created: !existingElement && !reusedElement,
+        ...(reusedElement ? { reused: true, reusedId: targetElementId, requestedId: mutation.element.id } : {}),
       });
       continue;
     }
@@ -1286,23 +1394,41 @@ function applyMutations(document, mutations) {
       const scopedViews = requireViewScope(nextDocument.views, mutation.view_ids, 'mutation.view_ids');
       requireId(mutation.relationship.id, 'mutation.relationship.id');
       const existingRelationship = findById(nextDocument.relationships, mutation.relationship.id);
+      let targetRelationshipId = mutation.relationship.id;
+      let sourceElementId = mutation.relationship.source_id;
+      let targetEndpointId = mutation.relationship.target_id;
+      let reusedRelationship = false;
       if (!existingRelationship) {
-        nextDocument.relationships.push(clone(mutation.relationship));
+        const candidates = findDuplicateRelationships(nextDocument.relationships, mutation.relationship);
+        const resolution = resolveDuplicateConflict({
+          onConflict: mutation.onConflict,
+          justification: mutation.justification,
+          label: `relationship (source '${mutation.relationship.source_id}', type '${mutation.relationship.type}', target '${mutation.relationship.target_id}', name '${mutation.relationship.name || ''}')`,
+        }, candidates);
+        if (resolution.action === 'reuse') {
+          targetRelationshipId = resolution.existing.id;
+          sourceElementId = resolution.existing.source_id;
+          targetEndpointId = resolution.existing.target_id;
+          reusedRelationship = true;
+        } else {
+          nextDocument.relationships.push(clone(mutation.relationship));
+        }
       }
       for (const view of scopedViews) {
         view.included_elements = addUnique(view.included_elements || [], [
-          mutation.relationship.source_id,
-          mutation.relationship.target_id,
+          sourceElementId,
+          targetEndpointId,
         ]);
-        view.included_relationships = addUnique(view.included_relationships || [], [mutation.relationship.id]);
+        view.included_relationships = addUnique(view.included_relationships || [], [targetRelationshipId]);
         touchedViewIds.add(view.view_id);
       }
-      touchedRelationshipIds.add(mutation.relationship.id);
+      touchedRelationshipIds.add(targetRelationshipId);
       mutationSummaries.push({
         type: mutation.type,
-        id: mutation.relationship.id,
+        id: targetRelationshipId,
         view_ids: mutation.view_ids,
-        created: !existingRelationship,
+        created: !existingRelationship && !reusedRelationship,
+        ...(reusedRelationship ? { reused: true, reusedId: targetRelationshipId, requestedId: mutation.relationship.id } : {}),
       });
       continue;
     }
@@ -1381,11 +1507,28 @@ function applyMutations(document, mutations) {
       if (findView(nextDocument.views, mutation.view.view_id)) {
         throw new Error(`View '${mutation.view.view_id}' already exists`);
       }
-      nextDocument.views.push(clone(mutation.view));
-      upsertSubdiagramViewIntoElement(nextDocument, mutation.view.parent_element_id, mutation.view);
-      touchedViewIds.add(mutation.view.view_id);
-      viewLimitCheckIds.add(mutation.view.view_id);
-      mutationSummaries.push({ type: mutation.type, id: mutation.view.view_id });
+      const candidates = findDuplicateViews(nextDocument.views, mutation.view);
+      const resolution = resolveDuplicateConflict({
+        onConflict: mutation.onConflict,
+        justification: mutation.justification,
+        label: `view (name '${mutation.view.view_name}')`,
+      }, candidates);
+      if (resolution.action === 'reuse') {
+        mutationSummaries.push({
+          type: mutation.type,
+          id: resolution.existing.view_id,
+          created: false,
+          reused: true,
+          reusedId: resolution.existing.view_id,
+          requestedId: mutation.view.view_id,
+        });
+      } else {
+        nextDocument.views.push(clone(mutation.view));
+        upsertSubdiagramViewIntoElement(nextDocument, mutation.view.parent_element_id, mutation.view);
+        touchedViewIds.add(mutation.view.view_id);
+        viewLimitCheckIds.add(mutation.view.view_id);
+        mutationSummaries.push({ type: mutation.type, id: mutation.view.view_id });
+      }
       continue;
     }
 
@@ -1621,7 +1764,7 @@ async function buildMutationResult(context, mutations, write) {
     mutationResult = applyMutations(context.document, mutations);
   } catch (error) {
     const errors = [String(error && error.message ? error.message : error)];
-    return {
+    const failed = {
       status: 'failed',
       written: false,
       graphPath: context.graphPath.relativePath,
@@ -1634,6 +1777,13 @@ async function buildMutationResult(context, mutations, write) {
       errors,
       guidance: buildFailureGuidance(errors),
     };
+    if (error && Array.isArray(error.duplicateConflicts) && error.duplicateConflicts.length > 0) {
+      failed.duplicateConflicts = error.duplicateConflicts;
+      failed.guidance = addUnique(failed.guidance || [], [
+        'Duplicate write blocked (L0 dedup gate): reuse the existing id with onConflict:"reuse" (find-or-create), or pass onConflict:"allowDuplicate" with a non-empty justification to create a new object.',
+      ]);
+    }
+    return failed;
   }
   const errors = validateDocument(mutationResult.document, context.schema, {
     touchedRelationshipIds: mutationResult.touchedRelationshipIds,
@@ -2352,7 +2502,7 @@ async function callTool(name, args = {}, dependencies = undefined) {
   if (name === 'addArchitectureElement') {
     const context = await loadContext(args);
     const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addElement', element: args.element, view_ids: args.view_ids }], write), context), write);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addElement', element: args.element, view_ids: args.view_ids, onConflict: args.onConflict, justification: args.justification }], write), context), write);
   }
 
   if (name === 'updateArchitectureElement') {
@@ -2370,7 +2520,7 @@ async function callTool(name, args = {}, dependencies = undefined) {
   if (name === 'addArchitectureRelationship') {
     const context = await loadContext(args);
     const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addRelationship', relationship: args.relationship, view_ids: args.view_ids }], write), context), write);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addRelationship', relationship: args.relationship, view_ids: args.view_ids, onConflict: args.onConflict, justification: args.justification }], write), context), write);
   }
 
   if (name === 'updateArchitectureRelationship') {
@@ -2388,7 +2538,7 @@ async function callTool(name, args = {}, dependencies = undefined) {
   if (name === 'addArchitectureView') {
     const context = await loadContext(args);
     const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addView', view: args.view }], write), context), write);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addView', view: args.view, onConflict: args.onConflict, justification: args.justification }], write), context), write);
   }
 
   if (name === 'updateArchitectureView') {
