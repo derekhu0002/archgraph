@@ -245,7 +245,7 @@ const TOOLS = [
       properties: {
         element: { type: 'object' },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
-        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject an exact (type, normalized name) duplicate and return its candidates. reuse: find-or-create — attach the existing element instead of duplicating. allowDuplicate: create anyway, requires justification.' },
+        onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: find-or-create — attach an existing exact (type, name) match; a same-type semantic near-duplicate also blocks creation. allowDuplicate: create anyway (even if a duplicate exists), requires a justification.' },
         justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         dryRun: { type: 'boolean', description: 'When true, validates and returns the result without writing to the graph. Default: false.' },
         architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
@@ -292,7 +292,7 @@ const TOOLS = [
       properties: {
         relationship: { type: 'object' },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
-        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject an exact (source, type, target, normalized name) duplicate and return its candidates. reuse: find-or-create — attach the existing relationship instead of duplicating. allowDuplicate: create anyway, requires justification.' },
+        onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: find-or-create — attach an existing exact (source, type, target, name) match. allowDuplicate: create anyway, requires a justification.' },
         justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         dryRun: { type: 'boolean', description: 'When true, validates and returns the result without writing to the graph. Default: false.' },
         architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
@@ -338,7 +338,7 @@ const TOOLS = [
       required: ['view'],
       properties: {
         view: { type: 'object' },
-        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject a duplicate (parent_element_id, normalized view_name) and return its candidates. reuse: attach the existing view. allowDuplicate: create anyway, requires justification.' },
+        onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: attach an existing exact (parent, view name) match. allowDuplicate: create anyway, requires a justification.' },
         justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         dryRun: { type: 'boolean', description: 'When true, validates and returns the result without writing to the graph. Default: false.' },
         architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
@@ -480,7 +480,7 @@ function mutationInputSchema() {
             view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
             element_ids: { type: 'array', items: { type: 'string' } },
             relationship_ids: { type: 'array', items: { type: 'string' } },
-            onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy for add* mutations. fail (default): reject an exact natural-key duplicate and return its candidates. reuse: find-or-create — attach the existing object instead of creating a duplicate. allowDuplicate: create a new object, requires a non-empty justification.' },
+            onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy for add* mutations. reuse (default): find-or-create — attach an existing exact-natural-key match instead of creating a duplicate; a same-type semantic near-duplicate also blocks creation unless allowDuplicate is set. allowDuplicate: create a new object even if a duplicate exists, requires a non-empty justification.' },
             justification: { type: 'string', description: 'Required when onConflict is allowDuplicate; recorded as the reason a semantically-equal duplicate is intentionally created.' },
           },
           additionalProperties: false,
@@ -1169,7 +1169,7 @@ function mergeAttributesPatch(existing, patchEntries) {
   return result;
 }
 
-const DUPLICATE_CONFLICT_POLICIES = new Set(['fail', 'reuse', 'allowDuplicate']);
+const DUPLICATE_CONFLICT_POLICIES = new Set(['reuse', 'allowDuplicate']);
 
 // L0 dedup gate: normalize a name to a stable natural-key component. NFKC folds
 // full-width forms, whitespace is collapsed, and case is folded, so " Widget ",
@@ -1221,26 +1221,18 @@ function findDuplicateViews(views, view) {
 }
 
 // Resolve an add against its exact natural-key candidates under the caller's
-// onConflict policy: fail (default) rejects and returns candidates; reuse is
-// find-or-create (attach the existing object); allowDuplicate creates only with
-// a non-empty justification. Semantic similarity (L1) is never handled here.
+// onConflict policy: reuse (default) is find-or-create (attach the existing
+// object); allowDuplicate creates only with a non-empty justification. Semantic
+// similarity is handled separately (the semantic dedup gate), never here.
 function resolveDuplicateConflict(options, candidates) {
   const onConflict = options.onConflict === undefined || options.onConflict === null
-    ? 'fail'
+    ? 'reuse'
     : options.onConflict;
   if (!DUPLICATE_CONFLICT_POLICIES.has(onConflict)) {
-    throw new Error(`onConflict must be one of fail, reuse, allowDuplicate (got '${onConflict}')`);
+    throw new Error(`onConflict must be one of reuse, allowDuplicate (got '${onConflict}')`);
   }
   if (candidates.length === 0) {
     return { action: 'create' };
-  }
-  if (onConflict === 'fail') {
-    const error = new Error(
-      `Duplicate ${options.label} already exists (${candidates.map(candidate => candidate.id).join(', ')}). ` +
-      'Reuse it with onConflict:"reuse", or pass onConflict:"allowDuplicate" with a non-empty justification to create a new one.',
-    );
-    error.duplicateConflicts = candidates;
-    throw error;
   }
   if (onConflict === 'reuse') {
     return { action: 'reuse', existing: candidates[0] };
@@ -1812,20 +1804,33 @@ async function buildMutationResult(context, mutations, write, dependencies) {
     result.guidance = buildFailureGuidance(errors);
   }
 
-  // L1 advisory: semantic near-duplicate suggestions for element adds. Never
-  // blocks or fails the write; preview and apply both surface it. Only adds the
-  // applied mutation actually CREATED are advised — a reuse that found an exact
-  // natural-key match creates nothing and is skipped, while a reuse that fell
-  // through to creation is advised like any other new element.
+  // Semantic dedup gate: a would-be element create is blocked when a same-type
+  // semantic near-duplicate exists, unless the caller explicitly passed
+  // onConflict:'allowDuplicate' (with justification). Never blocks on an
+  // unavailable semantic backend. Both preview and apply surface the outcome.
+  let semanticBlocked = false;
   if (errors.length === 0) {
     const createdAdds = selectCreatedElementAdds(mutations, mutationResult.mutationSummaries);
     const semanticDedup = await buildSemanticDedupAdvisory(context, createdAdds, dependencies);
     if (semanticDedup) {
       result.semanticDedup = semanticDedup;
+      const gate = evaluateSemanticDedupGate(semanticDedup, createdAdds);
+      if (gate.blocked) {
+        semanticBlocked = true;
+        result.status = 'failed';
+        result.after = beforeSummary;
+        result.semanticConflicts = gate.conflicts;
+        result.errors = gate.conflicts.map(entry => (
+          `Semantic duplicate for element (type '${entry.requested.type}', name '${entry.requested.name}'): `
+          + `${entry.matches.map(match => `${match.id} (score ${match.score})`).join(', ')}. `
+          + 'Reuse the existing element (re-call with that element id), or pass onConflict:"allowDuplicate" with a justification to create a new one.'
+        ));
+        result.guidance = addUnique(result.guidance || [], result.errors);
+      }
     }
   }
 
-  if (errors.length > 0 || !write) {
+  if (errors.length > 0 || semanticBlocked || !write) {
     return result;
   }
 
@@ -2453,6 +2458,9 @@ function compactMutationResponse(payload) {
     if (Array.isArray(payload.guidance)) {
       compact.guidance = payload.guidance;
     }
+    if (Array.isArray(payload.semanticConflicts)) {
+      compact.semanticConflicts = payload.semanticConflicts;
+    }
   }
   return compact;
 }
@@ -2665,15 +2673,16 @@ function memoryHitCard(element, maxDescLen) {
   return card;
 }
 
-// L1 semantic dedup advisory (GraphDeduplication item 3): for each element about
-// to be created, return semantically near elements within a CONTROLLED scope
-// (same ArchiMate type, and - when the add targets views - the union of those
-// views' current members) scoring above a strict threshold. Advisory ONLY: it
-// never rejects or blocks a write; a missing/unavailable semantic backend
-// degrades to an explicit status, never an error.
+// Semantic dedup gate (GraphDeduplication): for each element that would be
+// CREATED, search the WHOLE graph for same-type semantically near elements (a
+// large candidate window, strict threshold). A hit blocks the default create —
+// the caller must reuse an existing candidate or explicitly pass
+// onConflict:'allowDuplicate' with a justification. A missing/unavailable
+// semantic backend degrades to an explicit status, never an error.
 const DEFAULT_SEMANTIC_DEDUP_THRESHOLD = 0.85;
 const SEMANTIC_DEDUP_MAX_QUERIES = 3;
-const SEMANTIC_DEDUP_MAX_MATCHES = 5;
+const SEMANTIC_DEDUP_MAX_MATCHES = 10;
+const SEMANTIC_DEDUP_TOP_K = 25;
 
 function semanticDedupThreshold() {
   const raw = process.env.ARGO_SEMANTIC_DEDUP_THRESHOLD
@@ -2717,6 +2726,29 @@ function selectCreatedElementAdds(mutations, mutationSummaries) {
   ));
 }
 
+// Decide whether the semantic candidates block the create. A create is blocked
+// unless the caller explicitly opted into allowDuplicate (with justification).
+function evaluateSemanticDedupGate(advisory, mutations) {
+  if (!advisory || advisory.status !== 'passed' || !Array.isArray(advisory.candidates)) {
+    return { blocked: false, conflicts: [] };
+  }
+  const byId = new Map((Array.isArray(mutations) ? mutations : [])
+    .filter(mutation => mutation && mutation.type === 'addElement' && mutation.element)
+    .map(mutation => [mutation.element.id, mutation]));
+  const conflicts = [];
+  for (const entry of advisory.candidates) {
+    if (!entry || !Array.isArray(entry.matches) || entry.matches.length === 0) {
+      continue;
+    }
+    const mutation = byId.get(entry.requested && entry.requested.id);
+    const overridden = mutation && mutation.onConflict === 'allowDuplicate';
+    if (!overridden) {
+      conflicts.push(entry);
+    }
+  }
+  return { blocked: conflicts.length > 0, conflicts };
+}
+
 async function buildSemanticDedupAdvisory(context, mutations, dependencies) {
   if (process.env.ARGO_MCP_SEMANTIC_DEDUP === '0') {
     return undefined;
@@ -2755,7 +2787,7 @@ async function buildSemanticDedupAdvisory(context, mutations, dependencies) {
       const intent = [element.type, element.name, element.description]
         .filter(part => typeof part === 'string' && part.trim() !== '')
         .join(' ');
-      const retrieved = await journey.query({ purpose: 'general', intent });
+      const retrieved = await journey.query({ purpose: 'general', intent, topK: SEMANTIC_DEDUP_TOP_K });
       const source = retrieved && (retrieved.result || retrieved.document) || retrieved;
       const subset = buildCanonicalSemanticDocumentSubset(source, context.document);
       const elements = subset && subset.status === 'passed' && subset.document
@@ -2765,7 +2797,6 @@ async function buildSemanticDedupAdvisory(context, mutations, dependencies) {
         .filter(candidate => candidate && candidate.id !== element.id && typeof candidate.semanticScore === 'number')
         .filter(candidate => !element.type || candidate.type === element.type)
         .filter(candidate => candidate.semanticScore >= threshold)
-        .filter(candidate => targetMemberIds.size === 0 || targetMemberIds.has(candidate.id))
         .sort((left, right) => right.semanticScore - left.semanticScore)
         .slice(0, SEMANTIC_DEDUP_MAX_MATCHES)
         .map(candidate => ({
@@ -2789,7 +2820,7 @@ async function buildSemanticDedupAdvisory(context, mutations, dependencies) {
     status: 'passed',
     advisoryOnly: true,
     threshold,
-    scope: 'same type; when view_ids are given, restricted to those views\' current members',
+    scope: 'whole graph, same type',
     candidates,
     has_suggestions: candidates.some(entry => entry.matches.length > 0),
   };
@@ -4128,6 +4159,7 @@ module.exports = {
   applyMutations,
   buildSemanticDedupAdvisory,
   selectCreatedElementAdds,
+  evaluateSemanticDedupGate,
   callTool,
   compactMutationResponse,
   createDefaultCanonicalSemanticInitComposition,

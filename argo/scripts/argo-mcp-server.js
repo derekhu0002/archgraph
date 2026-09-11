@@ -149,7 +149,7 @@ const TOOLS = [
       properties: {
         element: { type: 'object' },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
-        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject an exact (type, normalized name) duplicate and return its candidates. reuse: find-or-create — attach the existing element instead of duplicating. allowDuplicate: create anyway, requires justification.' },
+        onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: find-or-create — attach an existing exact (type, name) match; a same-type semantic near-duplicate also blocks creation. allowDuplicate: create anyway (even if a duplicate exists), requires a justification.' },
         justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
       },
@@ -193,7 +193,7 @@ const TOOLS = [
       properties: {
         relationship: { type: 'object' },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
-        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject an exact (source, type, target, normalized name) duplicate and return its candidates. reuse: find-or-create — attach the existing relationship instead of duplicating. allowDuplicate: create anyway, requires justification.' },
+        onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: find-or-create — attach an existing exact (source, type, target, name) match. allowDuplicate: create anyway, requires a justification.' },
         justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
       },
@@ -236,7 +236,7 @@ const TOOLS = [
       required: ['view'],
       properties: {
         view: { type: 'object' },
-        onConflict: { type: 'string', enum: ['fail', 'reuse', 'allowDuplicate'], description: 'L0 dedup policy. fail (default): reject a duplicate (parent_element_id, normalized view_name) and return its candidates. reuse: attach the existing view. allowDuplicate: create anyway, requires justification.' },
+        onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: attach an existing exact (parent, view name) match. allowDuplicate: create anyway, requires a justification.' },
         justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
         architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
       },

@@ -205,7 +205,7 @@ async function executeWpP2Retrieval({
   requireQualifiedVector(vector);
   const purpose = request && typeof request.purpose === 'string' ? request.purpose : '';
   const strict = AUDIT_PURPOSES.has(purpose);
-  const topK = resolveTopK();
+  const topK = Number.isInteger(request.topK) && request.topK > 0 ? request.topK : resolveTopK();
   const seedsByType = {};
   for (const channel of CHANNELS) {
     seedsByType[channel.key] = await exhaustChannel({

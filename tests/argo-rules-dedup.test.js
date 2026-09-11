@@ -22,14 +22,12 @@ test('archgraph-rules-document-graph-deduplication', () => {
   assert.match(section[1], /[Nn]ever add what the graph already has/);
   assert.match(section[1], /reuse/i);
   assert.match(section[1], /onConflict: "reuse"/);
-  // AND it tells the Agent what to do when an add is rejected as a duplicate
-  assert.match(section[1], /rejected as a duplicate/);
-  // AND it requires a justification for an intentional duplicate
+  // AND it declares that a semantic near-duplicate blocks the create
+  assert.match(section[1], /semantically near/);
+  assert.match(section[1], /semanticConflicts/);
+  // AND it requires an explicit override with justification to create a duplicate
   assert.match(section[1], /allowDuplicate/);
   assert.match(section[1], /justification/);
-  // AND it treats semantic near-duplicates as advisory only
-  assert.match(section[1], /advisory/i);
-  assert.match(section[1], /never block/);
   // AND it exempts updates
   assert.match(section[1], /never gated/);
 });

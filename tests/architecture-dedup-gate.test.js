@@ -34,23 +34,19 @@ function viewById(document, viewId) {
 }
 
 // AT-dedup-01
-test('addElement: exact (type, normalized name) duplicate is rejected with candidates', () => {
-  // GIVEN an element of type 'Application Component' named 'Widget' already exists
-  // WHEN addElement creates a new id with the same type + name under the default policy
-  // THEN it throws and the error carries the existing candidate, and nothing is created
-  let error;
-  try {
-    applyMutations(baseDocument(), [
-      { type: 'addElement', element: { id: 'x2', name: 'Widget', type: 'Application Component' }, view_ids: ['sub'] },
-    ]);
-  } catch (caught) {
-    error = caught;
-  }
-  assert.ok(error, 'a duplicate add must be rejected');
-  assert.ok(Array.isArray(error.duplicateConflicts), 'error must carry duplicateConflicts');
-  assert.deepEqual(error.duplicateConflicts, [
-    { id: 'x1', type: 'Application Component', name: 'Widget' },
+test('addElement: default policy is reuse (an exact match is reused, never rejected)', () => {
+  // GIVEN an element of type 'Application Component' named 'Widget' exists
+  // WHEN addElement runs with no onConflict (the default) and the same type + name
+  const result = applyMutations(baseDocument(), [
+    { type: 'addElement', element: { id: 'x2', name: 'Widget', type: 'Application Component' }, view_ids: ['sub'] },
   ]);
+  // THEN nothing new is created and the existing element is reused (attached to the view)
+  assert.equal(elementById(result.document, 'x2'), undefined, 'no duplicate element may be created');
+  assert.ok(viewById(result.document, 'sub').included_elements.includes('x1'));
+  const summary = result.mutationSummaries.find(entry => entry.type === 'addElement');
+  assert.equal(summary.created, false);
+  assert.equal(summary.reused, true);
+  assert.equal(summary.reusedId, 'x1');
 });
 
 // AT-dedup-02
@@ -93,54 +89,49 @@ test('addElement: allowDuplicate requires a non-empty justification', () => {
 test('addElement: normalization folds case, whitespace, and full-width forms', () => {
   // GIVEN an element named 'Widget'
   // WHEN a new element differs only by case/whitespace/full-width
-  // THEN it collides with the same natural key
+  // THEN it collides with the same natural key (reused, not created)
   for (const name of [' widget ', 'WIDGET', 'Ｗｉｄｇｅｔ']) {
-    assert.throws(
-      () => applyMutations(baseDocument(), [
-        { type: 'addElement', element: { id: 'xN', name, type: 'Application Component' }, view_ids: ['sub'] },
-      ]),
-      /Duplicate element/,
-      `name '${name}' must collide with 'Widget'`,
-    );
+    const result = applyMutations(baseDocument(), [
+      { type: 'addElement', element: { id: 'xN', name, type: 'Application Component' }, view_ids: ['sub'] },
+    ]);
+    assert.equal(elementById(result.document, 'xN'), undefined, `name '${name}' must collide with 'Widget'`);
+    const summary = result.mutationSummaries.find(entry => entry.type === 'addElement');
+    assert.equal(summary.reusedId, 'x1', `name '${name}' must resolve to the existing 'Widget'`);
   }
 });
 
 // AT-dedup-05
-test('addRelationship: exact (source, type, target, name) is gated; a distinct name is allowed', () => {
+test('addRelationship: an exact (source, type, target, name) is reused; a distinct name is allowed', () => {
   // GIVEN a Flow a -> b named 'Flow' exists
-  // WHEN the same (source, type, target, name) is added
-  assert.throws(
-    () => applyMutations(baseDocument(), [
-      { type: 'addRelationship', relationship: { id: 'r2', name: 'Flow', type: 'Flow', source_id: 'a', target_id: 'b', source_name: 'A', target_name: 'B' }, view_ids: ['top'] },
-    ]),
-    /Duplicate relationship/,
-  );
+  // WHEN the same (source, type, target, name) is added under the default policy
+  const reused = applyMutations(baseDocument(), [
+    { type: 'addRelationship', relationship: { id: 'r2', name: 'Flow', type: 'Flow', source_id: 'a', target_id: 'b', source_name: 'A', target_name: 'B' }, view_ids: ['top'] },
+  ]);
+  assert.equal(reused.document.relationships.some(entry => entry.id === 'r2'), false, 'exact duplicate must not be created');
+  assert.equal(reused.mutationSummaries.find(entry => entry.type === 'addRelationship').reusedId, 'r1');
   // AND WHEN the same triple carries a different name
   const document = applyMutations(baseDocument(), [
     { type: 'addRelationship', relationship: { id: 'r3', name: 'Sync', type: 'Flow', source_id: 'a', target_id: 'b', source_name: 'A', target_name: 'B' }, view_ids: ['top'] },
   ]).document;
-  // THEN it is allowed (a distinct meaning between the same endpoints)
+  // THEN it is created (a distinct meaning between the same endpoints)
   assert.ok(document.relationships.some(entry => entry.id === 'r3'), 'distinct-named relationship must be created');
 });
 
 // AT-dedup-06
-test('addView: duplicate (parent, view_name) is gated, and reuse returns the existing view', () => {
+test('addView: a duplicate (parent, view_name) is reused by default', () => {
   // GIVEN a view named 'Sub' is mounted under parent 'parent'
   // WHEN another view with the same name is added under the same parent
-  assert.throws(
-    () => applyMutations(baseDocument(), [
-      { type: 'addView', view: { view_id: 'vSub2', view_name: 'Sub', parent_element_id: 'parent', parent_element_name: 'Parent', included_elements: [], included_relationships: [] } },
-    ]),
-    /Duplicate view/,
-  );
-  // AND WHEN onConflict:'reuse' is requested
   const result = applyMutations(baseDocument(), [
-    { type: 'addView', view: { view_id: 'vSub2', view_name: 'Sub', parent_element_id: 'parent', parent_element_name: 'Parent', included_elements: [], included_relationships: [] }, onConflict: 'reuse' },
+    { type: 'addView', view: { view_id: 'vSub2', view_name: 'Sub', parent_element_id: 'parent', parent_element_name: 'Parent', included_elements: [], included_relationships: [] } },
   ]);
   // THEN no new view is created and the existing one is reused
   assert.equal(result.document.views.some(view => view.view_id === 'vSub2'), false);
-  const summary = result.mutationSummaries.find(entry => entry.type === 'addView');
-  assert.equal(summary.reusedId, 'sub');
+  assert.equal(result.mutationSummaries.find(entry => entry.type === 'addView').reusedId, 'sub');
+  // AND an explicit reuse behaves the same
+  const explicit = applyMutations(baseDocument(), [
+    { type: 'addView', view: { view_id: 'vSub3', view_name: 'Sub', parent_element_id: 'parent', parent_element_name: 'Parent', included_elements: [], included_relationships: [] }, onConflict: 'reuse' },
+  ]);
+  assert.equal(explicit.mutationSummaries.find(entry => entry.type === 'addView').reusedId, 'sub');
 });
 
 // AT-dedup-07
@@ -156,11 +147,13 @@ test('updateElement is never gated (duplicate check applies to add only)', () =>
   assert.equal(elementById(document, 'x9').description, 'renamed semantics kept');
 });
 
-test('addElement: invalid onConflict policy is rejected', () => {
-  assert.throws(
-    () => applyMutations(baseDocument(), [
-      { type: 'addElement', element: { id: 'x2', name: 'Widget', type: 'Application Component' }, view_ids: ['sub'], onConflict: 'bogus' },
-    ]),
-    /onConflict must be one of/,
-  );
+test('addElement: invalid or removed onConflict policies are rejected', () => {
+  for (const onConflict of ['bogus', 'fail']) {
+    assert.throws(
+      () => applyMutations(baseDocument(), [
+        { type: 'addElement', element: { id: 'x2', name: 'Widget', type: 'Application Component' }, view_ids: ['sub'], onConflict },
+      ]),
+      /onConflict must be one of/,
+    );
+  }
 });

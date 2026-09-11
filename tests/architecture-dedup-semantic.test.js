@@ -8,6 +8,7 @@ const assert = require('node:assert/strict');
 const {
   buildSemanticDedupAdvisory,
   selectCreatedElementAdds,
+  evaluateSemanticDedupGate,
 } = require('../argo/scripts/systemarchitecture-mcp-server.js');
 
 function baseDocument() {
@@ -41,33 +42,39 @@ function addWidgetMutation(overrides = {}) {
 }
 
 // AT-dedup-L1-01
-test('L1 advisory: returns same-type, in-scope, above-threshold semantic candidates (advisory only)', async () => {
-  // GIVEN a new Application Component is about to be added to view v1
+test('semantic candidates: whole graph, same type, above threshold, large window', async () => {
+  // GIVEN a new Application Component is about to be added
   const document = baseDocument();
+  let seenTopK;
   const journey = {
-    query: async () => ({
-      result: {
-        elements: [
-          { ...document.elements[0], semanticScore: 0.93 }, // same type, in v1, high
-          { ...document.elements[1], semanticScore: 0.90 }, // same type, NOT in v1 (out of scope)
-          { ...document.elements[2], semanticScore: 0.95 }, // different type
-        ],
-      },
-    }),
+    query: async (request) => {
+      seenTopK = request.topK;
+      return {
+        result: {
+          elements: [
+            { ...document.elements[0], semanticScore: 0.93 }, // same type (in v1)
+            { ...document.elements[1], semanticScore: 0.90 }, // same type (in another view)
+            { ...document.elements[2], semanticScore: 0.95 }, // different type
+          ],
+        },
+      };
+    },
   };
-  // WHEN the advisory is built with a scoped, high-threshold contract
+  // WHEN candidates are built
   const advisory = await buildSemanticDedupAdvisory(
     context(document),
     [addWidgetMutation()],
     { semanticOperatorJourney: journey },
   );
-  // THEN it passes, is marked advisory-only, and returns only the in-scope same-type match
+  // THEN same-type matches from anywhere in the graph are returned (no view filter)
   assert.equal(advisory.status, 'passed');
-  assert.equal(advisory.advisoryOnly, true);
   assert.equal(advisory.threshold, 0.85);
+  assert.equal(advisory.scope, 'whole graph, same type');
   assert.equal(advisory.has_suggestions, true);
-  assert.deepEqual(advisory.candidates[0].matches.map(match => match.id), ['w1']);
-  assert.equal(advisory.candidates[0].matches[0].in_target_views, true);
+  assert.deepEqual(advisory.candidates[0].matches.map(match => match.id), ['w1', 'w2']);
+  assert.equal(advisory.candidates[0].matches.find(m => m.id === 'w1').in_target_views, true);
+  assert.equal(advisory.candidates[0].matches.find(m => m.id === 'w2').in_target_views, false);
+  assert.ok(Number.isInteger(seenTopK) && seenTopK >= 8, 'gate must request a large candidate window');
 });
 
 test('L1 advisory: never rejects or throws when the semantic backend fails (degrades)', async () => {
@@ -90,20 +97,20 @@ test('L1 advisory: never rejects or throws when the semantic backend fails (degr
   assert.equal(advisory.has_suggestions, false);
 });
 
-test('L1 advisory: below-threshold and out-of-scope candidates are filtered out', async () => {
-  // GIVEN only low-score / out-of-scope semantic neighbours
+test('semantic candidates: below-threshold and different-type candidates are filtered out', async () => {
+  // GIVEN only a low-score same-type neighbour and a high-score different-type neighbour
   const document = baseDocument();
   const journey = {
     query: async () => ({
       result: {
         elements: [
           { ...document.elements[0], semanticScore: 0.50 }, // below threshold
-          { ...document.elements[1], semanticScore: 0.99 }, // same type but out of scope (not in v1)
+          { ...document.elements[2], semanticScore: 0.99 }, // different type
         ],
       },
     }),
   };
-  // WHEN the advisory is built for an add into v1
+  // WHEN candidates are built
   const advisory = await buildSemanticDedupAdvisory(
     context(document),
     [addWidgetMutation()],
@@ -112,6 +119,32 @@ test('L1 advisory: below-threshold and out-of-scope candidates are filtered out'
   // THEN no suggestions are produced
   assert.equal(advisory.has_suggestions, false);
   assert.deepEqual(advisory.candidates[0].matches, []);
+});
+
+test('semantic gate: a created element is blocked unless allowDuplicate overrides it', () => {
+  const advisory = {
+    status: 'passed',
+    candidates: [
+      { requested: { id: 'n1', name: 'Widget Prime', type: 'Application Component' }, matches: [{ id: 'w1' }] },
+    ],
+  };
+  // default (reuse) is blocked
+  const blocked = evaluateSemanticDedupGate(advisory, [
+    { type: 'addElement', element: { id: 'n1' }, view_ids: ['v1'] },
+  ]);
+  assert.equal(blocked.blocked, true);
+  assert.equal(blocked.conflicts.length, 1);
+  // allowDuplicate overrides
+  const overridden = evaluateSemanticDedupGate(advisory, [
+    { type: 'addElement', element: { id: 'n1' }, onConflict: 'allowDuplicate', justification: 'distinct' },
+  ]);
+  assert.equal(overridden.blocked, false);
+  // no matches -> not blocked
+  const noMatches = evaluateSemanticDedupGate(
+    { status: 'passed', candidates: [{ requested: { id: 'n1' }, matches: [] }] },
+    [{ type: 'addElement', element: { id: 'n1' } }],
+  );
+  assert.equal(noMatches.blocked, false);
 });
 
 test('L1 advisory: skipped when there is no element add', async () => {

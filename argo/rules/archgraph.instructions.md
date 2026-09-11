@@ -22,7 +22,7 @@ Non-negotiable red lines (MUST). Never skip, simplify, or silently violate them;
 6. Continuously comply with these red lines throughout the session.
 7. Retrieve KG-first and semantic-first. See `<QueryPriorityGuideline>`.
 8. Store content KG-first. See `<ContentStoragePolicy>`.
-9. Never duplicate: reuse first, and handle duplicate rejections by reusing or updating. See `<GraphDeduplication>`.
+9. Never duplicate: reuse is the default; a create blocked as an exact or semantic duplicate must be reused, or explicitly overridden with `onConflict: "allowDuplicate"` + justification. See `<GraphDeduplication>`.
 </CoreRules>
 
 <Ontology>
@@ -54,11 +54,11 @@ Your architecture is ArchiMate 3.2 plus ARGO extensions. Reference files live un
 </ContentStoragePolicy>
 
 <GraphDeduplication>
-Never add what the graph already has. Reuse first.
-1. Before adding an element, relationship, or view, look for an existing match (an element: same type + name; a relationship: same source + type + target + name; a view: same parent + name) and reuse it — pass `onConflict: "reuse"` whenever the identity is known or likely to exist.
-2. If an add is rejected as a duplicate, act on the existing id(s) it returns — reuse or update them. Never retry to force a second copy.
-3. Add a same-name duplicate only for a genuinely distinct object, and only with `onConflict: "allowDuplicate"` plus a real `justification`.
-4. Preview/apply may return semantic near-duplicate hints: review them and reuse when appropriate, otherwise proceed. They are advisory and never block a write.
+Never add what the graph already has. Reuse is the default; there is no reject mode.
+1. `addElement` / `addRelationship` / `addView` default to `onConflict: "reuse"` (find-or-create). An exact match (element: same type + name; relationship: same source + type + target + name; view: same parent + name) is reused — the existing object is attached to the requested view(s) and nothing new is created.
+2. A new ELEMENT is also blocked when it is semantically near an existing element of the same type anywhere in the graph: the call writes nothing and returns `semanticConflicts` with the candidates.
+3. To create despite an exact or semantic duplicate you MUST pass `onConflict: "allowDuplicate"` with a real `justification`. Nothing else creates a duplicate.
+4. On a block, reuse the returned existing element: re-call `addElement` with that element's id (it is then attached to your view), or update it with `updateArchitectureElement`.
 5. Updates are never gated. Never work around a duplicate by editing around it — reuse or update the existing object.
 </GraphDeduplication>
 
