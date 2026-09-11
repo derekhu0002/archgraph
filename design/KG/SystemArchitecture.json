@@ -1076,6 +1076,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "3f5b9d4",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js（resolveSemanticOperatorJourney 透传 repositoryRoot）; tests/semantic-memory-search.test.js（AT-acceptance-guardian-05 新用例）; design/KG/SystemArchitecture.json; design/KG/test-failure-records.json; archgraph.qea"
         }
       ],
       "testcases": [
@@ -3800,6 +3805,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "3f5b9d4",
+          "description": "design/KG/SystemArchitecture.json（AT-acceptance-guardian-05 增补条款：memory_search 语义 journey 的 canonical 图读取必须由 per-call workspaceRoot 决定）"
         }
       ],
       "testcases": [
@@ -3924,7 +3934,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话目标：解决用户在其他项目（my-army）用 EA 内草稿脚本导出的两个残留问题——①未删除的关系 1161 被误报；②新增关系描述丢失。排查：在当前 archgraph 提交态找不到 user 状态（qea 干净、1161 有锚），通过真实 EA 无头 + my-army.qea 复现。①1161 误报根因：EA Repository.SQLQuery 返回的列标签是**表物理列名大小写**——t_connectortag 是 VALUE/NOTES、t_objectproperties 是 Value/Notes、t_attribute 的列名是 Default；旧 eaRows 按原始标签存 key，读取用 rprops[q].Value（VALUE vs 小写）→ 在 t_connectortag 上读到 undefined，静默丢弃 schema_id/archimate_relationship_type/relationship_attributes_json → 1161 看似无锚 → 误报 drift updateRelationship（type:\"undefined\"）。②新增关系描述丢失根因：addRelationship.proposed 漏 description（已修）。③另发现 EA 侧对象 Status 默认 'Proposed' 而 canonical 为空 → updateElement status 噪声（设计行为非 bug）。关键坑：★JScript 5.8 把 JS 保留字当保留字——对象属性名/点号访问不能用 default 等保留字（.default 直接 parse 失败「缺少标识符」）；所以 t_attribute 的 Default 列在 eaRows 统一小写 key 后会变成 'default' 保留字，必须重映射为 defaultval。★调试技巧：手拼 cscript bootstrap.js 用 ANSI 读脚本会把中文/破折号破坏导致 parse 误报，必须用 run-headless.ps1（内部 ADODB.Stream UTF-8）跑；解析定位用 cscript 直接跑无 BOM 副本（报 行:列）配合「滤 !INC + 小写列 key」最小用例。修复：eaRows 把列 key 全小写归一 + default→defaultval；readWork 所有行读取改用归一化 key；提交 66c67f8 + f2eddd8。验证：在 my-army 真实 EA 无头跑，1161 不再误报 updateRelationship/drift、removeRelationship=0、4 新关系带 description；回归 ea-human-draft-script EA 4/4、ea-qea-sync 13/13、guardian 4/4、validate passed。待办：无。",
+      "description": "会话（2026-09-11，项目总管 project-overseer-001）目标：处理人类伙伴在 SOC 会话暴露的「KG 优先检索失效」——memory_search 报 ENOENT（MCP 服务器把工作目录当成 C:/Windows/System32，找不到 <cwd>/design/KG/SystemArchitecture.json）。①诊断（KG-first + 代码审计）：全局 ~/.argo 安装的 ARGO MCP 服务器由 dsh-argo-workspace 插件以宿主 cwd 启动且无 ARGO_REPO_ROOT；桥按 session.header.cwd 注入 per-call workspaceRoot（多数工具经 args 生效），但 memory_search 的语义 journey 走 resolveSemanticOperatorJourney(dependencies) → createDefaultProductionSemanticOperatorJourney() 无参 → 无参 resolveWorkspaceRoot() → process.cwd()，未收到已解析根；getSystemArchitecture 因入口预建 journey 未暴露（与 59e91d7/d191eaf/317a8b5 同族根因）。②修复 3f5b9d4（声明 Tier 2）：resolveSemanticOperatorJourney(dependencies, options) 透传 repositoryRoot；getSystemArchitecture/memory_search 两处传 context.workspaceRoot。③验收（先改图谱 AT 再改代码，遵守 AcceptanceTestFirst）：AT-acceptance-guardian-05 增补 workspaceRoot 条款 + 新增可执行外部视角用例（全局安装副本 + 外来 cwd + 该目录放损坏图谱 → memory_search 绝不读启动目录图谱）；修复前 1 fail（精确命中缺陷），修复后 5/5 pass；聚焦回归 30/30；validateSystemArchitecture 通过；全量 runArchitectureTests 61/66（5 项均为改动前既有失败：excalidraw skill 未部署、AT-2100-OPT-01/02/03 EA 导入环境、AT-memory-eval-run-03）；memory-eval-run 基线 2 pass/3 fail → 修复后 3 pass/2 fail（cost 用例由原生崩溃恢复）。④部署：修复文件已同步 ~/.argo/scripts（部署副本其余 42 文件本已逐字节一致）——需重启宿主（dsh web）让常驻 MCP 进程加载新代码；npm 版本发布待人类伙伴决定。⑤遗留：AT-memory-eval-run-03 数据集漂移（MH-05 期望的 4 个 overseer-* 元素已按 T3 归档策略移入 overseer-archive-001），需人类伙伴裁决改数据集还是收窄归档策略；Superset/Doris 数据来源问题经跨工作区 KG 检索确认归属 SOC-DEMO 图谱（Neo4j 库按仓库名隔离：archgraph / soc-demo）。⑥可复用经验：凡经无参 resolveWorkspaceRoot() 的语义/lifecycle 路径都会退回宿主 cwd；审查必须用「全局安装副本 + 外来 cwd」端到端复测（仓库内 embedded 回退会掩盖缺陷）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -3946,8 +3956,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-09",
-          "description": "2026-09-04 发布 archgraph-argo@0.12.6 收尾"
+          "value": "2026-09-11",
+          "description": "2026-09-11 memory_search workspaceRoot 同族缺陷修复 + 跨工作区 KG 检索"
         },
         {
           "name": "commit",
@@ -4627,6 +4637,16 @@
           "name": "commit",
           "value": "76a0b5b",
           "description": "design/KG/SystemArchitecture.json（LTM 里程碑元素创建 + T1 摘要更新）"
+        },
+        {
+          "name": "commit",
+          "value": "3f5b9d4",
+          "description": "design/KG/SystemArchitecture.json（LTM 里程碑追加同族缺陷记录与 pitfall）"
+        },
+        {
+          "name": "pitfall",
+          "value": "memory_search-semantic-journey-process-cwd",
+          "description": "同族缺陷第二次复现（2026-09-11，修复 commit 3f5b9d4）：memory_search 报 ENOENT Failed to parse design/KG/SystemArchitecture.json ... C:/Windows/System32/design/KG/SystemArchitecture.json。根因：memory_search 的语义 journey 未接收 per-call workspaceRoot——resolveSemanticOperatorJourney(dependencies) → createDefaultProductionSemanticOperatorJourney()（无 options）→ 无参 resolveWorkspaceRoot() → process.cwd() = 宿主启动目录（DSH 由 dsh-argo-workspace 插件 spawn MCP 服务器，cwd 继承宿主进程 = C:/Windows/System32；全局安装时 embedded 回退 <argoRoot>/.. = 用户主目录无 design/KG，故落到 cwd）。为何只有 memory_search 暴露：getSystemArchitecture 在 tools/call 入口预建 dependencies.semanticOperatorJourney（repositoryRoot=resolveWorkspaceRoot(params.arguments)），memory_search 无该预建路径。修复：resolveSemanticOperatorJourney(dependencies, options) 透传 repositoryRoot，getSystemArchitecture/memory_search 两处调用传 context.workspaceRoot。验收：AT-acceptance-guardian-05 新增外部视角可执行用例（全局安装副本 + 外来 cwd + 该 cwd 放损坏 SystemArchitecture.json → 断言 memory_search 绝不读启动目录图谱且已推进到语义后端）；修复前 1 fail（精确命中缺陷）、修复后文件 5/5 pass；聚焦回归 30/30；全量 runArchitectureTests 61/66（5 项均改动前既有失败）；validateSystemArchitecture 通过；memory-eval-run 基线 2 pass/3 fail → 修复后 3 pass/2 fail。可复用经验：仓库内跑测试时 embedded 回退（<argoRoot>/.. 含 design/KG）恰好掩盖无参 resolveWorkspaceRoot() 缺陷，必须用「全局安装副本 + 外来 cwd」端到端复测；审查语义 journey / embedding lifecycle / Neo4j 库名推导等路径时逐点核对 resolveWorkspaceRoot() 是否收到 args。部署：修复文件已同步 ~/.argo/scripts，需重启宿主让常驻 MCP 进程加载新代码。"
         }
       ]
     },
