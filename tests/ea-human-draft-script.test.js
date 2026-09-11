@@ -112,6 +112,12 @@ test('ea-human-draft-script (AT-2792-07): EA-internal extractor wraps canonical 
   assert.doesNotMatch(content, /fields\.status/, 'script must not emit a top-level fields.status (status is an attribute, not a canonical element property)');
   assert.match(content, /no top-level status field/, 'script must document why status is not compared as a top-level field');
 
+  // normalization against the projector's forms (no false positives on a fresh projection):
+  // type display-vs-normalized, and canonical attribute content -> EA Notes merge
+  assert.match(content, /function\s+typeNorm\s*\(/, 'script must normalize ArchiMate type (display vs normalized) before comparing');
+  assert.match(content, /function\s+toEaAttrForm\s*\(/, 'script must normalize canonical attributes to their EA Default/Notes form before diffing');
+  assert.match(content, /arrayMapToEaAttrs/, 'element attribute diff must compare against the EA attribute form');
+
   // new additions carry their semantics: element/relationship descriptions + attrs; a drained
   // anchor-lost relationship is not misreported as a deletion
   assert.match(content, /op: 'addRelationship'[\s\S]*description: recRel\.description/, 'addRelationship.proposed must carry the EA Notes as description');
@@ -178,14 +184,14 @@ function projectFixture(graph, dir) {
 
 // The proposal JSON is embedded in the .md fenced block (no standalone .json file). Extract
 // each line and parse it into the proposal array plus the trailing summary (from the table).
+// When there are no proposals the script omits the JSON block (it prints an explicit "none"
+// note instead), so return an empty list in that case.
 function readResultFromMd(outStem) {
   const md = fs.readFileSync(outStem + '.md', 'utf8').replace(/^\uFEFF/, '');
-  const block = md.match(/```json\n([\s\S]*?)\n```/);
-  assert.ok(block, 'Markdown must contain a fenced json block with the proposal set');
-  const proposals = block[1].split('\n').filter((l) => l.trim() !== '').map((l) => JSON.parse(l));
-  let summary = {};
-  const sm = md.match(/^\| \*\*addElement\*\* \| (\d+) \|/m);
-  if (sm) { summary.addElement = +sm[1]; }
+  const block = md.match(/```json\r?\n([\s\S]*?)\r?\n```/);
+  const proposals = block
+    ? block[1].split(/\r?\n/).filter((l) => l.trim() !== '').map((l) => JSON.parse(l))
+    : [];
   const counts = {};
   const countRe = /\| ([a-zA-Z]+) \| (\d+) \|/g;
   let m;
@@ -408,6 +414,43 @@ test('ea-human-draft-script (AT-2792-11/R): view add/remove/update (name+descrip
     assert.match(md, /removeView/, 'Markdown JSON must contain removeView');
   } finally {
     if (db) { try { db.close(); } catch { /* ignore */ } }
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+});
+
+test('ea-human-draft-script (AT-2792-13/R): a freshly full-projected model with NO EA edits yields an empty draft (no type/attribute false positives)', (t) => {
+  // Regression: canonical element `type` is the DISPLAY form ("Business Object") while the EA
+  // archimate_type tag is NORMALIZED ("BusinessObject"); and canonical attributes carry a
+  // `content` field that the projector merges into EA t_attribute Notes. Comparing them raw
+  // made every element look changed (a 47KB false draft). After fullProjection with no edits
+  // the draft must be empty.
+  if (process.env.EA_RUN_HEADLESS !== '1') { t.skip('EA headless not enabled'); return; }
+  if (!fs.existsSync(TEMPLATE_QEA)) { t.skip(`template missing: ${TEMPLATE_QEA}`); return; }
+  if (!fs.existsSync(RUNNER)) { t.skip(`headless runner missing: ${RUNNER}`); return; }
+
+  const graph = {
+    name: 'no-edit-fixture', description: 'fresh projection',
+    elements: [
+      { id: 'e1', name: 'Business Actor One', type: 'Business Actor', description: 'd1', attributes: [{ name: 'k', value: 'v' }, { name: 'commit', value: 'abc123', content: 'repo/file.js (note)' }], subdiagram_views: [], testcases: [{ name: 'AT-X-01', type: 'Acceptance Test', description: 'x', Input: 'tests/x.test.js', acceptanceCriteria: 'tests/x.test.js' }] },
+      { id: 'e2', name: 'App Component', type: 'Application Component', description: 'd2', attributes: [], subdiagram_views: [], testcases: [] },
+      { id: 'e3', name: 'Data Obj', type: 'Data Object', description: 'd3', attributes: [], subdiagram_views: [], testcases: [] },
+    ],
+    relationships: [
+      { id: 'r1', name: 'Serving', type: 'Serving', source_id: 'e1', target_id: 'e2', description: 'rd1', statement: 'x', attributes: [], source_name: 'Business Actor One', target_name: 'App Component' },
+      { id: 'r2', name: 'Access', type: 'Access', source_id: 'e2', target_id: 'e3', description: 'rd2', statement: 'x', attributes: [{ name: 'weight', value: 'low' }], source_name: 'App Component', target_name: 'Data Obj' },
+    ],
+    views: [
+      { view_id: 'v1', view_name: 'View One', description: 'view desc', included_elements: ['e1', 'e2', 'e3'], included_relationships: ['r1', 'r2'] },
+    ],
+  };
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-noedit-'));
+  try {
+    const { workQea, graphPath, outStem } = projectFixture(graph, tmp);
+    const { json } = runHeadlessDraft(workQea, graphPath, outStem);
+    assert.ok(json && json.ok && json.exitCode === 0, `draft run failed: ${JSON.stringify(json || '').slice(0, 500)}`);
+    const { proposals } = readResultFromMd(outStem);
+    assert.equal(proposals.length, 0, `a fresh projection with no EA edits must yield an empty draft, got: ${JSON.stringify(proposals).slice(0, 400)}`);
+  } finally {
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
   }
 });

@@ -46,6 +46,38 @@ function normText(s) {
 	return trimString(s);
 }
 
+// Mirror the projector's ArchiMate-type normalization (ea-qea-sync-lib canonicalArchimateType:
+// strip the "ArchiMate_" prefix, drop '&', then all non-alphanumerics). Canonical stores the
+// DISPLAY form ("Business Actor") while the EA archimate_type tag stores this NORMALIZED form
+// ("BusinessActor"); comparing them raw made every element look type-changed.
+function typeNorm(s) {
+	var t = trimString(s).replace(/^ArchiMate[_\s-]*/i, '');
+	t = t.replace(/&/g, '').replace(/[^A-Za-z0-9]/g, '');
+	return t;
+}
+
+// Mirror the projector's element-attribute -> EA mapping (ea-qea-sync-lib mirrorElementChildren:
+// attributeDefaultValue + attributeNoteText). Canonical attributes carry {value, description,
+// content}; EA stores them as Default=value (only when short) and Notes=value(long)+description+
+// content joined by CRLFCRLF. Normalize canonical attrs to that EA shape before diffing so the
+// round-trip is not mistaken for a human edit.
+var MAX_ATTRIBUTE_DEFAULT_LENGTH = 250;
+function toEaAttrForm(a) {
+	var v = a.value === undefined || a.value === null ? '' : String(a.value);
+	var def = v.length > MAX_ATTRIBUTE_DEFAULT_LENGTH ? '' : v;
+	var parts = [];
+	if (v.length > MAX_ATTRIBUTE_DEFAULT_LENGTH) { parts.push(v); }
+	if (a.description !== undefined && a.description !== null && String(a.description) !== '') { parts.push(String(a.description)); }
+	if (a.content !== undefined && a.content !== null && String(a.content) !== '') { parts.push(String(a.content)); }
+	return { name: a.name || '', value: def, description: parts.join('\r\n\r\n'), content: '' };
+}
+
+function arrayMapToEaAttrs(list) {
+	var out = [];
+	for (var i = 0; i < (list || []).length; i++) { out[out.length] = toEaAttrForm(list[i]); }
+	return out;
+}
+
 function decodeXml(s) {
 	var t = '' + (s == null ? '' : s);
 	t = t.replace(/&lt;/g, '<');
@@ -274,7 +306,7 @@ function readCanonical(graphPath) {
 	var text = readTextUtf8(graphPath);
 	if (text == '') { return null; }
 	var g = JSON.parse(text);
-	var base = { elementById: {}, relById: {}, viewById: {} };
+	var base = { elementById: {}, relById: {}, viewById: {}, typeDisplayByNorm: {} };
 	for (var i = 0; i < (g.elements || []).length; i++) {
 		var e = g.elements[i];
 		if (e && e.id !== undefined && e.id !== null) {
@@ -286,6 +318,7 @@ function readCanonical(graphPath) {
 			attributes: arrayMap(e.attributes || [], cloneAttr),
 			testcases: arrayMap(e.testcases || [], cloneTestcase)
 		};
+		if (e.type) { base.typeDisplayByNorm[typeNorm(e.type)] = e.type; }
 		}
 	}
 	for (var j = 0; j < (g.relationships || []).length; j++) {
@@ -299,6 +332,7 @@ function readCanonical(graphPath) {
 			targetId: String(r.target_id),
 			attributes: arrayMap(r.attributes || [], cloneAttr)
 		};
+		if (r.type) { base.typeDisplayByNorm[typeNorm(r.type)] = r.type; }
 		}
 	}
 	for (var k = 0; k < (g.views || []).length; k++) {
@@ -432,7 +466,11 @@ function readWork(knownViews) {
 		if (rt && rt.attrsJson) {
 			try {
 				var parsed = JSON.parse(rt.attrsJson);
-				for (var i = 0; i < (Array.isArray(parsed) ? parsed.length : 0); i++) { out.push(cloneAttr(parsed[i])); }
+				// Array.isArray is undefined in JScript 5.8 (ES3) and would throw, silently
+				// yielding an empty list -> every relationship looked attribute-changed.
+				if (Object.prototype.toString.call(parsed) === '[object Array]') {
+					for (var i = 0; i < parsed.length; i++) { out.push(cloneAttr(parsed[i])); }
+				}
 			} catch (e) { /* ignore malformed tag */ }
 		}
 		return out;
@@ -657,8 +695,13 @@ function semanticDiff(base, work) {
 		// t_object.Status (default 'Proposed') against a nonexistent canonical top-level status
 		// produced a spurious updateElement {status:'Proposed'} for every element. State changes
 		// are captured via the attributes diff below.
-		if (normText(baseRec.type) !== normText(workRec.archimateType)) { fields.type = workRec.archimateType; }
-		var eaAttrDiff = diffAttrs(baseRec.attributes || [], workRec.attributes || []);
+		// type: canonical stores the display form ("Business Actor"); EA's archimate_type tag
+		// stores the normalized form ("BusinessActor"). Compare normalized, and emit the
+		// canonical display form for a genuine change.
+		if (typeNorm(baseRec.type) !== typeNorm(workRec.archimateType)) {
+			fields.type = base.typeDisplayByNorm[typeNorm(workRec.archimateType)] || workRec.archimateType;
+		}
+		var eaAttrDiff = diffAttrs(arrayMapToEaAttrs(baseRec.attributes || []), workRec.attributes || []);
 		if (eaAttrDiff.changed) { fields.attributes = workRec.attributes; }
 		var tcDiff = diffTestcases(baseRec.testcases || [], workRec.testcases || []);
 		if (tcDiff.changed) { fields.testcases = workRec.testcases; }
@@ -718,7 +761,9 @@ function semanticDiff(base, work) {
 				var driftFields = {};
 				if (normText(baseRel.name) !== normText(drifted.name)) { driftFields.name = drifted.name; }
 				if (normText(baseRel.description) !== normText(drifted.description)) { driftFields.description = drifted.description; }
-				if (normText(baseRel.type) !== normText(drifted.archimateType)) { driftFields.type = drifted.archimateType; }
+				if (typeNorm(baseRel.type) !== typeNorm(drifted.archimateType)) {
+					driftFields.type = base.typeDisplayByNorm[typeNorm(drifted.archimateType)] || drifted.archimateType;
+				}
 				var driftAttrDiff = diffAttrs(baseRel.attributes || [], drifted.attributes || []);
 				if (driftAttrDiff.changed) { driftFields.attributes = drifted.attributes; }
 				driftFields.sourceId = String(baseRel.sourceId);
@@ -734,7 +779,9 @@ function semanticDiff(base, work) {
 		var rfields = {};
 		if (normText(baseRel.name) !== normText(workRel.name)) { rfields.name = workRel.name; }
 		if (normText(baseRel.description) !== normText(workRel.description)) { rfields.description = workRel.description; }
-		if (normText(baseRel.type) !== normText(workRel.archimateType)) { rfields.type = workRel.archimateType; }
+		if (typeNorm(baseRel.type) !== typeNorm(workRel.archimateType)) {
+			rfields.type = base.typeDisplayByNorm[typeNorm(workRel.archimateType)] || workRel.archimateType;
+		}
 		var relAttrDiff = diffAttrs(baseRel.attributes || [], workRel.attributes || []);
 		if (relAttrDiff.changed) { rfields.attributes = workRel.attributes; }
 		var s = schemaOfObject(work, workRel.sourceObjectId);
