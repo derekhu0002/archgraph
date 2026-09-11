@@ -6058,6 +6058,13 @@
           "description": "GIVEN 待新增元素与图中已存在元素语义相近；WHEN 经 preview/apply（或 addElement）创建；THEN 结果附带受控作用域（同 type；给定 view_ids 时限定其当前成员）且分数≥阈值（默认 0.85）的相似候选建议，status 仍 passed（仅建议、不拒绝、不阻塞写入）；语义后端不可用时降级为显式 unavailable 状态且不报错。",
           "name": "AT-dedup-L1-01",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/architecture-dedup-semantic.test.js",
+          "acceptanceCriteria": "tests/architecture-dedup-semantic.test.js",
+          "description": "GIVEN onConflict='reuse'；WHEN 命中精确自然键（未新建）；THEN 不发语义建议；WHEN 未命中而落到新建（语义近似）；THEN 照常回传 semanticDedup 候选（仅建议不阻止）；选择依据为 applyMutations 的 created 标记而非调用参数。",
+          "name": "AT-dedup-L1-02",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Application Component",
@@ -6075,6 +6082,11 @@
           "name": "commit",
           "value": "bde66d8",
           "description": "argo/scripts/systemarchitecture-mcp-server.js（buildSemanticDedupAdvisory + buildMutationResult 线程化 dependencies + compact 响应保留 semanticDedup）; argo/rules/archgraph.instructions.md（GraphDeduplication item 3 补 L1 契约）; tests/architecture-dedup-semantic.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "fc2dbff",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js（selectCreatedElementAdds + advisory 去 onConflict 过滤）; tests/architecture-dedup-semantic.test.js"
         }
       ]
     },
