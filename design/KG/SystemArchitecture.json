@@ -2632,7 +2632,7 @@
       "name": "ArchGraph ARGO Workflow Rules",
       "parent": "1249",
       "type": "Rule",
-      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）：定位元素再改动、验收测试先行（可执行 GIVEN-WHEN-THEN）、仅通过 ARGO MCP 读写意图图谱、提交后登记 commit id + 文件路径，并通过只读 queryNeo4jGraph 进行结构化图查询；查询优先级规则（QueryPriorityGuideline）：KG-first retrieval（任何检索优先检索KG）、Semantic-first KG retrieval（检索KG必须优先通过语义检索）（getSystemArchitecture query.purpose+query.intent / getIntentElementContext），结构化 Cypher 查询为次要路径，子图语义检索 scope（getSystemArchitecture 的 scope 参数：view_id 或 element_id+depth，用于限定语义检索范围避免返回过多内容）；能力委托门禁（CapabilityDelegationGuideline）：Agent 收到需查看图片/视频的任务且自身不具备识别能力时，不得猜测或静默跳过，须主动委托具备能力的 Business Actor；图谱写入去重（GraphDeduplication）：add* 前按自然键（type+归一化 name／source+type+target+归一化 name／parent+归一化 view name）做确定性去重，onConflict=fail（默认拒绝并回传候选）/reuse（find-or-create，返回 reusedId）/allowDuplicate（需非空 justification）；语义相似候选（L1）仅建议、永不拒绝——对 addElement 在 preview/apply 回传受控作用域（同 type；给定 view_ids 时限定其当前成员）且分数≥严格阈值（默认 0.85，ARGO_SEMANTIC_DEDUP_THRESHOLD）的候选，后端不可用降级不报错，ARGO_MCP_SEMANTIC_DEDUP=0 关闭；update* 不受门禁。",
+      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）。2026-09-11 全量改写为 Agent 视角：规则文件是给 Agent 的提示，只写「Agent 该做什么/怎么判定」的行为契约，不写工具内部实现（算法/阈值/环境变量/字段名）与解释性论证；每个会话随上下文加载，越短越准越好。运行规则：起步闸门（WakeupGuideline STEP 0）仅载 T1 工作记忆摘要；改动前先定位元素、只经 ARGO MCP 读写图谱、验收测试先行（可执行 GIVEN-WHEN-THEN）、提交后登记 commit id+文件路径；KG-first 且语义优先检索（getSystemArchitecture query.purpose+query.intent / getIntentElementContext，queryNeo4jGraph 为次要只读结构查询）；KG-first 内容存储；写入去重（复用优先、重复被拒则复用/更新、语义近似仅建议）；三层记忆（里程碑即写为主 + 会话摘要机会式幂等覆盖 T1）；分级改动（Tier 1/2/3）。安装器 install-argo.ps1 从 <WakeupGuideline> 块生成各宿主唤醒插件，部署测试断言该锚点与 UNCONDITIONAL STARTUP GATE 文本。",
       "testcases": [
         {
           "Input": "tests/argo-rules-query.test.js",
@@ -2765,6 +2765,11 @@
           "name": "commit",
           "value": "5ea4509",
           "description": "argo/rules/archgraph.instructions.md（GraphDeduplication 改写为 Agent 视角：行为契约而非工具内部实现）; tests/argo-rules-dedup.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "a2ac65d",
+          "description": "argo/rules/archgraph.instructions.md（全量 Agent 视角重写）; tests/argo-rules-memory-tiers.test.js"
         }
       ]
     },
