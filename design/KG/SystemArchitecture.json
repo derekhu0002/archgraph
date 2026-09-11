@@ -4069,6 +4069,26 @@
           "name": "commit",
           "value": "a2ac65d",
           "description": "全量 Agent 视角重写规则（删除 ToolsGuideline 工具枚举、压缩记忆章节、去除阈值/环境变量/why），保留安装器与验收锚点；同步全局 AGENTS.md"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.17.1",
+          "description": "已发布并部署：0.17.0（L0+L1 去重门禁 + 规则 Agent 视角重写）→ 0.17.1（修复 argo-deploy 合并 AGENTS.md 规则块尾部重复）。npm publish + npm i -g + argo-deploy 22/22；~/.argo/scripts 与仓库逐字节一致；5 宿主规则副本无重复。待人类伙伴重启宿主加载新常驻 MCP 进程。"
+        },
+        {
+          "name": "commit",
+          "value": "534791b",
+          "description": "release 0.17.1（修复 argo-deploy 合并规则块尾部重复）"
+        },
+        {
+          "name": "commit",
+          "value": "251e444",
+          "description": "fix(deploy): install-argo.ps1 规则块合并取真实末节标签 + 回归用例"
+        },
+        {
+          "name": "commit",
+          "value": "ba43307",
+          "description": "release 0.17.0（L0+L1 去重门禁 + 规则全量 Agent 视角重写）"
         }
       ],
       "testcases": [
@@ -6043,6 +6063,38 @@
       "name": "里程碑：图谱写入去重门禁（L0 + onConflict + GraphDeduplication 规则）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "overseer-argo-0-17-1-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.17.0/0.17.1（图谱写入去重门禁 + 规则 Agent 视角重写 + 部署合并修复）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "发布里程碑（2026-09-11）：archgraph-argo@0.17.0 发布并部署，随即以 0.17.1 修复 argo-deploy 合并 AGENTS.md 规则块的尾部重复缺陷。内容：①L0 图谱写入去重门禁（onConflict fail/reuse/allowDuplicate；addElement/addRelationship/addView 按自然键精确查重）；②L1 语义去重建议（受控作用域=同 type + 指定 view 成员，严格阈值 0.85，仅建议不拒绝，后端不可用降级不报错）；③GraphDeduplication 规则章节 + CoreRule 9；④工作流规则全量 Agent 视角重写（136 行：删除 ToolsGuideline 工具枚举、压缩记忆机制解释与阈值/环境变量，保留安装器锚点 <WakeupGuideline>/UNCONDITIONAL STARTUP GATE 与验收断言）。0.17.1 修复：Add-AgentsRule/Write-ArchGraphRuleBlock 以第一个 </ToolsGuideline> 作为受管块结束标记，规则重排后 <ToolsGuideline> 不再是末节（末节 </Attention>），导致 after 把规则尾部重复追加到 AGENTS.md；改为取 </ToolsGuideline> 与 </Attention> 中靠后且位于标记之后的真实末节，兼容旧/新顺序并能修复已重复尾部，新增 argo-deploy 回归用例。发布流程：npm publish 0.17.0（首次全局安装遇 ETARGET，registry 传播延迟，轮询后成功）→ npm i -g → argo-deploy 22/22；随后提交修复并发布 0.17.1 → 全局安装 → argo-deploy 22/22（修复 OpenCode AGENTS.md 重复尾部）。产物核验：~/.argo/scripts/systemarchitecture-mcp-server.js 与仓库逐字节一致（sha256 63C8D383…）；5 处宿主规则副本（Copilot/Cursor/OpenCode/DSH/OpenClaw）各含 1 份去重章节、无重复尾部；DSH 唤醒插件由新规则重新生成。待办：人类伙伴重启宿主以加载新常驻 MCP 进程与新规则。commits ba43307(0.17.0 工作)/251e444(deploy 修复)/534791b(0.17.1 release)。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "ba43307",
+          "description": "package.json（发布 archgraph-argo@0.17.0）+ 去重门禁与规则重写"
+        },
+        {
+          "name": "commit",
+          "value": "251e444",
+          "description": "install-argo.ps1; tests/argo-deploy.test.js（修复 AGENTS.md 规则块合并尾部重复）"
+        },
+        {
+          "name": "commit",
+          "value": "534791b",
+          "description": "package.json（发布 archgraph-argo@0.17.1）"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -7987,7 +8039,8 @@
       "view_name": "项目总管发布记录",
       "included_elements": [
         "overseer-argo-0-15-3-release-001",
-        "overseer-argo-0-16-2-release-001"
+        "overseer-argo-0-16-2-release-001",
+        "overseer-argo-0-17-1-release-001"
       ]
     }
   ]
