@@ -18,19 +18,19 @@ test('archgraph-rules-document-graph-deduplication', () => {
   // THEN it documents the GraphDeduplication section
   const section = rules.match(/<GraphDeduplication>([\s\S]*?)<\/GraphDeduplication>/);
   assert.ok(section, 'GraphDeduplication section must exist');
-  // AND it defines the deterministic natural keys
-  assert.match(section[1], /natural key/i);
-  assert.match(section[1], /element:\s*\(type, normalizedName\)/);
-  assert.match(section[1], /relationship:\s*\(source_id, type, target_id, normalizedName\)/);
-  assert.match(section[1], /view:\s*\(parent_element_id, normalizedViewName\)/);
-  // AND it declares the three onConflict policies
-  assert.match(section[1], /`fail`/);
-  assert.match(section[1], /`reuse`/);
-  assert.match(section[1], /`allowDuplicate`/);
-  // AND it keeps semantic similarity advisory only (never a rejection)
-  assert.match(section[1], /ADVISORY ONLY/);
-  assert.match(section[1], /MUST NOT reject/);
-  // AND it exempts update* operations
+  // AND it tells the Agent to reuse rather than duplicate (behaviour, not tool internals)
+  assert.match(section[1], /[Nn]ever add what the graph already has/);
+  assert.match(section[1], /reuse/i);
+  assert.match(section[1], /onConflict: "reuse"/);
+  // AND it tells the Agent what to do when an add is rejected as a duplicate
+  assert.match(section[1], /rejected as a duplicate/);
+  // AND it requires a justification for an intentional duplicate
+  assert.match(section[1], /allowDuplicate/);
+  assert.match(section[1], /justification/);
+  // AND it treats semantic near-duplicates as advisory only
+  assert.match(section[1], /advisory/i);
+  assert.match(section[1], /never block/);
+  // AND it exempts updates
   assert.match(section[1], /never gated/);
 });
 
@@ -39,7 +39,7 @@ test('archgraph-rules-graph-deduplication-core-rule', () => {
   const rules = readRules();
   const coreRules = rules.match(/<CoreRules>([\s\S]*?)<\/CoreRules>/);
   assert.ok(coreRules, 'CoreRules section must exist');
-  // THEN the CoreRules section references the dedup gate as a red line
+  // THEN the CoreRules section references the dedup rule as a red line
   assert.match(coreRules[1], /GraphDeduplication/);
-  assert.match(coreRules[1], /deduplicated at the tool boundary/);
+  assert.match(coreRules[1], /Never duplicate/i);
 });

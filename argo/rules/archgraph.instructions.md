@@ -22,7 +22,7 @@ The following are non-negotiable red lines (MUST) for this Agent and must never 
 6. Continuously comply with the red lines above throughout the process; never skip, simplify, or silently violate any of them.
 7. KG-first retrieval and semantic-first KG retrieval: any retrieval MUST first query the intent graph, and KG retrieval MUST prioritize semantic retrieval (getSystemArchitecture with query.purpose + query.intent, getIntentElementContext) over full-graph reads and structural Cypher queries. See `<QueryPriorityGuideline>`.
 8. Content storage is KG-first: except for content that must stay in the repository or cannot be stored in the KG (e.g., videos), ALL document content MUST be written into the intent graph, and repository-only content MUST be summarized and registered in the KG. See `<ContentStoragePolicy>`.
-9. Writes MUST be deduplicated at the tool boundary: before creating (add) any element, relationship, or view, the write path enforces a deterministic natural-key check, and the caller resolves a conflict via `onConflict` (`fail` / `reuse` / `allowDuplicate`). Prefer `reuse` (find-or-create). Semantic near-duplicates are advisory only and MUST NOT reject a write. See `<GraphDeduplication>`.
+9. Never duplicate: reuse an existing element, relationship, or view instead of adding a copy (`onConflict: "reuse"`), and if a write is rejected as a duplicate, reuse or update what it returns. See `<GraphDeduplication>`.
 </CoreRules>
 
 <Ontology>
@@ -54,18 +54,12 @@ Your cognitive architecture is composed of ArchiMate 3.2 elements and their exte
 </ContentStoragePolicy>
 
 <GraphDeduplication>
-1. Before creating (add) any element, relationship, or view, the write path enforces an L0 deterministic duplicate check by natural key:
-   - element:      (type, normalizedName)
-   - relationship: (source_id, type, target_id, normalizedName)
-   - view:         (parent_element_id, normalizedViewName)
-   where normalizedName is NFKC-normalized (full-width folded), whitespace-collapsed, and case-folded.
-2. On an exact natural-key hit the add MUST NOT silently create a duplicate; it resolves by the caller-declared `onConflict` policy:
-   - `fail` (default): reject and return `duplicateConflicts` (the existing candidate id(s)) plus guidance to reuse or override.
-   - `reuse` (find-or-create): create nothing; attach the existing element/relationship/view to the requested view_ids and return `reusedId`.
-   - `allowDuplicate`: proceed only with a non-empty `justification`, recorded on the result.
-3. Semantic near-duplicate candidates (L1) are ADVISORY ONLY and are returned on preview and apply for element adds: same ArchiMate type, restricted to the requested view_ids' current members when views are given, scoring at/above a strict threshold (default 0.85, `ARGO_SEMANTIC_DEDUP_THRESHOLD`). Semantic similarity is never identity and MUST NOT reject or block a write; a missing/unavailable semantic backend degrades to an explicit status, never an error. Set `ARGO_MCP_SEMANTIC_DEDUP=0` to disable.
-4. `update*` operations are never gated — when an add is rejected as a duplicate, modify or reuse the existing object instead.
-5. Prefer `onConflict: "reuse"` (find-or-create) over a bare add whenever the identity is already known or likely to exist.
+Never add what the graph already has. Reuse first.
+1. Before adding an element, relationship, or view, look for an existing match (an element: same type + name; a relationship: same source + type + target + name; a view: same parent + name) and reuse it — pass `onConflict: "reuse"` (find-or-create) whenever the identity is known or likely to exist.
+2. If an add is rejected as a duplicate, act on the existing id(s) it returns — reuse or update them. Never retry to force a second copy.
+3. Add a same-name duplicate only for a genuinely distinct object, and only with `onConflict: "allowDuplicate"` plus a real `justification`.
+4. Preview/apply may return semantic near-duplicate hints: review them and reuse when appropriate, otherwise proceed. They are advisory and never block a write.
+5. Updates are never gated. Never work around a duplicate by editing around it — reuse or update the existing object.
 </GraphDeduplication>
 
 <IntentArchitectureFirst>
