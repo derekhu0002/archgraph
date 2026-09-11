@@ -3949,7 +3949,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话（2026-09-11，项目总管 project-overseer-001）目标：处理人类伙伴在 SOC 会话暴露的「KG 优先检索失效」——memory_search 报 ENOENT（MCP 服务器把工作目录当成 C:/Windows/System32）。①诊断（KG-first + 代码审计）：全局 ~/.argo 安装的服务器由 dsh-argo-workspace 插件以宿主 cwd 启动且无 ARGO_REPO_ROOT；桥按 session.header.cwd 注入 per-call workspaceRoot（多数工具经 args 生效），但 memory_search 的语义 journey 走 resolveSemanticOperatorJourney(dependencies) → createDefaultProductionSemanticOperatorJourney() 无参 → 无参 resolveWorkspaceRoot() → process.cwd()；getSystemArchitecture 因入口预建 journey 未暴露（与 59e91d7/d191eaf/317a8b5 同族根因）。②修复 3f5b9d4（Tier 2）：resolveSemanticOperatorJourney(dependencies, options) 透传 repositoryRoot。③验收：先改图谱 AT（AT-acceptance-guardian-05）再改代码；新用例修复前 1 fail（精确命中）、修复后 5/5 pass；聚焦回归 30/30；validateSystemArchitecture 通过；全量 61/66（5 项均改动前既有失败）；memory-eval-run 基线 2/3 → 3/2。④发布与部署（同一会话，人类伙伴指示）：package.json 0.16.1→0.16.2（commit fcebd11），npm publish 成功（dereckhu，shasum b968e93，67 files/1.3MB）；registry 可见延迟实测约 2 分钟（前 8 次 npm view 仍 0.16.1，第 9 次才 0.16.2）→ 轮询后 npm i -g archgraph-argo@0.16.2 → argo-deploy 22/22（Copilot/Cursor/OpenCode/DSH/OpenClaw + ~/.argo/scripts；[19/22] 无 *.agent.md 跳过 DSH agent presets 为非致命告警；neo4j-driver 由 vendor 内置 tgz 安装）。部署产物核验：~/.argo/scripts/systemarchitecture-mcp-server.js 与仓库逐字节一致（sha256 DD661C92…），并在「外来 cwd + 该 cwd 放损坏 SystemArchitecture.json」下端到端复测 memory_search → passed、命中真实记忆、未读外来 cwd 图谱。⑤待人类伙伴动作：重启 DSH（dsh web）——重启前常驻 MCP 进程仍跑旧代码，本会话 memory_search 仍复现旧错误（已实测）。⑥遗留：AT-memory-eval-run-03 数据集漂移（MH-05 期望的 4 个 overseer-* 已按 T3 归档策略移入 overseer-archive-001），待人类伙伴裁决改数据集还是收窄归档策略；Superset/Doris 问题的 KG 归属 SOC-DEMO（Neo4j 库按仓库名隔离 archgraph/soc-demo），SOC 图谱已覆盖 Doris→Superset 数据流（Flow soc-tobe-flow-doris-superset），但未覆盖 Superset 自身元数据库（结构检索 metadata/元数据/postgres/sqlite = 0 条）→ 图谱缺口，建议由 SOC-DEMO 架构师补登。⑦经验：凡经无参 resolveWorkspaceRoot() 的语义/lifecycle 路径都会退回宿主 cwd；审查必须用「全局安装副本 + 外来 cwd」端到端复测（仓库内 embedded 回退会掩盖缺陷）；发布后装包前必须 npm view 轮询等 registry 一致，否则 ETARGET。",
+      "description": "会话目标：调查 SOC-DEMO（D:\\Projects\\SOC-DEMO）经 argo init 全量投影后、EA 未做任何修改，却产生巨大 human-draft（47KB/272 updateElement）的原因并修复。根因：extract-human-draft.js 对 canonical 与 EA 可见对象模型的表示差异未归一，产生三类假提议：①type——canonical 存显示形（Business Actor），投影写归一形（BusinessActor，去空格）到 archimate_type tag，直接 normText 比较→每元素均报 type 变更（占 272 绝大部分）；②元素属性——canonical 属性带 content 字段，投影将 value(长)+description+content 合并进 EA t_attribute Notes（Default=短value），脚本把 EA Notes 读成 description 后与 canonical 的 description/content 分开比→2 条误报；③关系属性——JScript 5.8（ES3）无 Array.isArray，parseRelAttrs 里 Array.isArray(parsed) 抛错被 try/catch 吞→关系属性恒空。修复（commit 301e9c4）：新增 typeNorm（镜像投影 canonicalArchimateType）+ typeDisplayByNorm 反查（真变更时输出 canonical 显示形）；新增 toEaAttrForm/arrayMapToEaAttrs（把 canonical 属性归一为 EA Default/Notes 形再 diff）；Array.isArray 改 Object.prototype.toString.call=== '[object Array]'。验证：真实 SOC-DEMO 真实 EA 无头 draft 由 272 updateElement → 全 0；新增 AT-2792-13/R（新投影无编辑→空 draft）；回归 ea-human-draft-script EA 6/6、validate passed。关键教训：★凡“canonical 值 vs EA 可见对象模型值”的 diff，必须先按投影的正向映射（typeNorm/attributeDefaultValue+attributeNoteText）把两侧归一到同一表示再比，否则必然假阳性；★JScript 5.8 无 Array.isArray/Object.keys/Array.map 等 ES5，用 Object.prototype.toString 判数组；★调试法：用 Node 加载脚本纯函数 + node:sqlite 读 qea 构造 base/work 快照，快速定位假阳性。待办：无（如需让 SOC-DEMO 用户直接生效，需重发 npm 包/同步脚本）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4012,6 +4012,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "301e9c4",
+          "description": "design/KG/SystemArchitecture.json（登记 301e9c4 SOC-DEMO 假提议修复）"
         }
       ],
       "testcases": [
