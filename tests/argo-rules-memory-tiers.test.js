@@ -65,10 +65,10 @@ test('AT rules: MemoryRecallGuideline mandates two-step recall + loose/strict th
   assert.match(rules, /memory_search/, 'must reference memory_search (locate)');
   assert.match(rules, /getIntentElementContext/, 'must reference full-content retrieval');
   assert.match(rules, /compact card is a LOCATOR/, 'card is a locator, never the full memory');
-  // AND threshold layering: loose recall (0.55) / strict audit (0.8), reject only on zero hits
+  // AND threshold layering: loose recall (never reject a low-but-relevant hit) / strict audit, reject only on zero hits
   assert.match(rules, /LOOSE memory threshold/, 'must declare a loose memory threshold');
-  assert.match(rules, /0\.55/, 'must mention the loose memory threshold default');
-  assert.match(rules, /0\.8/, 'must mention the strict audit threshold');
+  assert.match(rules, /do not reject a low-but-relevant hit/, 'recall must be loose (no low-but-relevant rejection)');
+  assert.match(rules, /strict for `audit`/, 'audit must be strict');
   assert.match(rules, /Reject only when there are ZERO/, 'must reject only on zero/irrelevant hits');
 });
 
