@@ -4058,12 +4058,17 @@
         {
           "name": "decision",
           "value": "rules-are-agent-facing-not-human-docs",
-          "description": "规则/AGENTS.md 是 Agent 的提示，不是给人阅读的文档：写行为契约（Agent 该做什么/怎么做），不写工具内部实现（归一化算法/键公式/阈值/环境变量/响应字段名）。GraphDeduplication 已按此改写（5ea4509）；今后新增或修订规则一律遵循。"
+          "description": "规则/AGENTS.md 是 Agent 的提示，不是给人阅读的文档：只写行为契约（Agent 该做什么/怎么判定），不写工具内部实现（归一化算法/键公式/阈值/环境变量/字段名）与解释性论证。GraphDeduplication 已改写（5ea4509）；2026-09-11 已对 argo/rules/archgraph.instructions.md 全量 Agent 视角重写（a2ac65d）并同步 ~/.config/opencode/AGENTS.md。今后新增或修订规则一律遵循。"
         },
         {
           "name": "commit",
           "value": "5ea4509",
           "description": "GraphDeduplication 改写为 Agent 视角（行为契约）；CoreRule 9 + AT-rules-03 同步"
+        },
+        {
+          "name": "commit",
+          "value": "a2ac65d",
+          "description": "全量 Agent 视角重写规则（删除 ToolsGuideline 工具枚举、压缩记忆章节、去除阈值/环境变量/why），保留安装器与验收锚点；同步全局 AGENTS.md"
         }
       ],
       "testcases": [
