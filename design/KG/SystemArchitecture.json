@@ -1081,6 +1081,11 @@
           "name": "commit",
           "value": "3f5b9d4",
           "description": "argo/scripts/systemarchitecture-mcp-server.js（resolveSemanticOperatorJourney 透传 repositoryRoot）; tests/semantic-memory-search.test.js（AT-acceptance-guardian-05 新用例）; design/KG/SystemArchitecture.json; design/KG/test-failure-records.json; archgraph.qea"
+        },
+        {
+          "name": "commit",
+          "value": "9f3c384",
+          "description": "design/KG/SystemArchitecture.json（图谱回登记：3f5b9d4 修复 + LTM pitfall + T1 摘要）"
         }
       ],
       "testcases": [
@@ -4647,6 +4652,11 @@
           "name": "pitfall",
           "value": "memory_search-semantic-journey-process-cwd",
           "description": "同族缺陷第二次复现（2026-09-11，修复 commit 3f5b9d4）：memory_search 报 ENOENT Failed to parse design/KG/SystemArchitecture.json ... C:/Windows/System32/design/KG/SystemArchitecture.json。根因：memory_search 的语义 journey 未接收 per-call workspaceRoot——resolveSemanticOperatorJourney(dependencies) → createDefaultProductionSemanticOperatorJourney()（无 options）→ 无参 resolveWorkspaceRoot() → process.cwd() = 宿主启动目录（DSH 由 dsh-argo-workspace 插件 spawn MCP 服务器，cwd 继承宿主进程 = C:/Windows/System32；全局安装时 embedded 回退 <argoRoot>/.. = 用户主目录无 design/KG，故落到 cwd）。为何只有 memory_search 暴露：getSystemArchitecture 在 tools/call 入口预建 dependencies.semanticOperatorJourney（repositoryRoot=resolveWorkspaceRoot(params.arguments)），memory_search 无该预建路径。修复：resolveSemanticOperatorJourney(dependencies, options) 透传 repositoryRoot，getSystemArchitecture/memory_search 两处调用传 context.workspaceRoot。验收：AT-acceptance-guardian-05 新增外部视角可执行用例（全局安装副本 + 外来 cwd + 该 cwd 放损坏 SystemArchitecture.json → 断言 memory_search 绝不读启动目录图谱且已推进到语义后端）；修复前 1 fail（精确命中缺陷）、修复后文件 5/5 pass；聚焦回归 30/30；全量 runArchitectureTests 61/66（5 项均改动前既有失败）；validateSystemArchitecture 通过；memory-eval-run 基线 2 pass/3 fail → 修复后 3 pass/2 fail。可复用经验：仓库内跑测试时 embedded 回退（<argoRoot>/.. 含 design/KG）恰好掩盖无参 resolveWorkspaceRoot() 缺陷，必须用「全局安装副本 + 外来 cwd」端到端复测；审查语义 journey / embedding lifecycle / Neo4j 库名推导等路径时逐点核对 resolveWorkspaceRoot() 是否收到 args。部署：修复文件已同步 ~/.argo/scripts，需重启宿主让常驻 MCP 进程加载新代码。"
+        },
+        {
+          "name": "commit",
+          "value": "9f3c384",
+          "description": "design/KG/SystemArchitecture.json（图谱回登记：T1 摘要 + pitfall 落地）"
         }
       ]
     },
