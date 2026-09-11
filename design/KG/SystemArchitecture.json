@@ -6284,6 +6284,50 @@
       "name": "里程碑：发布 archgraph-argo@0.19.0（默认 reuse + 全图同型语义软门禁）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "argo/scripts/graph-semantics.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/ea-qea-sync-lib.js; tests/architecture-view-membership-uniqueness.test.js",
+          "name": "commit",
+          "value": "b6c6466"
+        }
+      ],
+      "description": "图谱校验 / 视图成员唯一性（对标 EA『同一图内一元素/一连接仅一次』）：① graph-semantics.js 的 validateGraphSemantics 新增不变量——每个 view 的 included_elements / included_relationships 不得含重复 id（validateDocument 与 validateSystemArchitecture 均调用，故所有写入与 argo init 均拒绝重复）；② 写入路径 addElement/addRelationship 早已用 addUnique，updateView 的成员 patch 与 addView 的成员数组也经 addUnique 去重归一；③ .qea 投影（ea-qea-sync-lib.js）在新增成员循环内同步 placedObjs/placedLinks，即使面对历史含重复成员的图也不会双插 t_diagramobjects/t_diagramlinks。与 graph-write-dedup-gate（写入去重门禁）区别：本元素负责 schema/图语义校验与视图成员唯一性不变量，不负责写入时元素/关系的重复拦截。源码：argo/scripts/graph-semantics.js、systemarchitecture-mcp-server.js、ea-qea-sync-lib.js。",
+      "id": "graph-semantics-validation-001",
+      "name": "图谱校验服务（Graph Semantics）",
+      "parent": "1961",
+      "testcases": [
+        {
+          "Input": "tests/architecture-view-membership-uniqueness.test.js",
+          "acceptanceCriteria": "tests/architecture-view-membership-uniqueness.test.js",
+          "description": "GIVEN 某 view 的 included_elements 含重复 id（included_relationships 同理）；WHEN validateGraphSemantics；THEN 报 'must not contain duplicate included_elements/relationships'（拒绝）。",
+          "name": "AT-view-unique-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/architecture-view-membership-uniqueness.test.js",
+          "acceptanceCriteria": "tests/architecture-view-membership-uniqueness.test.js",
+          "description": "GIVEN updateView patch 的 included_elements 含重复；WHEN applyMutations；THEN 去重保序写回。",
+          "name": "AT-view-unique-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/architecture-view-membership-uniqueness.test.js",
+          "acceptanceCriteria": "tests/architecture-view-membership-uniqueness.test.js",
+          "description": "GIVEN addView 的成员数组含重复；WHEN applyMutations；THEN 去重后建视图。",
+          "name": "AT-view-unique-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/architecture-view-membership-uniqueness.test.js",
+          "acceptanceCriteria": "tests/architecture-view-membership-uniqueness.test.js",
+          "description": "GIVEN .qea 投影新增成员；WHEN 同批出现重复；THEN placedObjs/placedLinks 同步，不双插 t_diagramobjects/t_diagramlinks。",
+          "name": "AT-view-unique-04",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Application Component"
     }
   ],
   "relationships": [
@@ -7740,7 +7784,8 @@
         "neo4j-sync-store",
         "neo4j-cypher-query-interface",
         "neo4j-semantic-projection-store",
-        "graph-write-dedup-gate"
+        "graph-write-dedup-gate",
+        "graph-semantics-validation-001"
       ],
       "included_relationships": []
     },
