@@ -2651,7 +2651,7 @@
         {
           "Input": "tests/argo-rules-dedup.test.js",
           "acceptanceCriteria": "tests/argo-rules-dedup.test.js",
-          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md；WHEN 检查 GraphDeduplication 章节与 CoreRules；THEN 声明确定性自然键去重、onConflict 三策略、语义候选仅建议不拒绝、update* 不受门禁，并被 CoreRules 引为红线。",
+          "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md；WHEN 检查 GraphDeduplication 章节与 CoreRules；THEN 以 Agent 视角声明行为契约：复用优先而非新增、被拒为重复时用返回的已有 id 复用或更新、仅对真正不同对象用 allowDuplicate+justification、语义近似提示仅建议不阻塞、update 不受门禁（不描述工具内部归一化算法/阈值/环境变量）。",
           "name": "AT-rules-03",
           "type": "Acceptance Test"
         }
@@ -2760,6 +2760,11 @@
           "name": "commit",
           "value": "bde66d8",
           "description": "argo/rules/archgraph.instructions.md（GraphDeduplication item 3 补 L1 契约：受控作用域+严格阈值+降级不报错）; tests/architecture-dedup-semantic.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "5ea4509",
+          "description": "argo/rules/archgraph.instructions.md（GraphDeduplication 改写为 Agent 视角：行为契约而非工具内部实现）; tests/argo-rules-dedup.test.js"
         }
       ]
     },
