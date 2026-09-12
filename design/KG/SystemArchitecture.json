@@ -4255,6 +4255,11 @@
           "name": "commit",
           "value": "8b8b9f2",
           "description": "P3 重排评测（scripts/eval-rerank.js，LLM listwise qwen-turbo，同评测集 150 样本）：vector-only recall@1 94.0 → rerank 98.7（+4.7；name 89.9→97.8、Element 91.3→98.1），recall@5 保持 100、MRR 0.968→0.992。rerank 为主要增益方向（明显优于混合检索）。仅评测，未接生产。"
+        },
+        {
+          "name": "commit",
+          "value": "2f1a3be",
+          "description": "P3 重排接入生产（graph-rag/rerankRetrieval.js + defaultSemanticRetrieval；ARGO_SEMANTIC_RERANK 默认关、fail-open、可回退；AT-rerank-01..05；新增组件 semantic-rerank-001）。启用方式：~/.argo/.env 置 ARGO_SEMANTIC_RERANK=1 并重启 MCP。评测增益：recall@1 94.0→98.7（name +7.9/Element +6.8）。待办：是否发布/部署（hybrid 与 rerank 均默认关）。"
         }
       ],
       "testcases": [
