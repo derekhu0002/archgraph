@@ -121,12 +121,12 @@ test('semantic candidates: below-threshold and different-type candidates are fil
   assert.deepEqual(advisory.candidates[0].matches, []);
 });
 
-// AT-dedup-L1-02: real Neo4j evidence carries channel-prefixed ids. The gate's
+// AT-dedup-L1-03: real Neo4j evidence carries channel-prefixed ids. The gate's
 // rank-derived score (0.80..0.99) is attached to the closure element, while the
 // fused seed (RRF) shares the same prefixed identity. The rank-derived score
 // must win for the SAME element, otherwise every real dedup score collapses to
 // the tiny RRF score and the 0.85 gate never fires.
-test('semantic candidates: prefixed evidence id surfaces the rank-derived score', async () => {
+test('AT-dedup-L1-03: prefixed evidence id surfaces the rank-derived score', async () => {
   // GIVEN a fused seed (RRF 0.05) and a semantic closure element (rank-derived 0.99)
   // that share the real channel-prefixed identity "Element:w1"
   const document = baseDocument();
