@@ -6582,6 +6582,11 @@
           "description": "P3 重排接入生产：graph-rag/rerankRetrieval.js + defaultSemanticRetrieval 集成（ARGO_SEMANTIC_RERANK 默认关，fail-open）；tests/rerank-retrieval.test.js AT-rerank-01..05",
           "name": "commit",
           "value": "2f1a3be"
+        },
+        {
+          "name": "commit",
+          "value": "243b9e1",
+          "description": "4-way 评测（eval-rerank.js）：150 样本 vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再定。"
         }
       ],
       "description": "语义二阶段重排（Rerank）：在向量/混合检索得到候选池后，用 LLM listwise 重排（chat/completions，qwen-turbo），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略与 hybrid 同范式：默认关（ARGO_SEMANTIC_RERANK=0），开关开时用更大候选池（pool=20）重排后取 topK；fail-open（任何错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆（门禁按重排后顺序、评分仍排名派生）。评测（scripts/eval-rerank.js，150 样本）：vector-only r@1 94.0 → rerank 98.7（+4.7；name +7.9、Element +6.8），r@5 100、MRR 0.968→0.992。参数：ARGO_SEMANTIC_RERANK_MODEL（默认 qwen-turbo）、ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js。",
