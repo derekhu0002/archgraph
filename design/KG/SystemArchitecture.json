@@ -3770,42 +3770,61 @@
           "name": "commit",
           "value": "0f3d924",
           "description": "argo/scripts/graph-rag/semanticRecordText.js; graph-rag/semantic-persistence/productionSemanticBackfill.js; graph-rag/mutationEmbeddingVectorLifecycle.js; systemarchitecture-mcp-server.js; tests/semantic-record-text.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "d5cf7aa",
+          "description": "argo/scripts/graph-rag/semanticAlignmentRunner.js（异步对齐 + 日志 + 启动预热 + 单飞去重）; graph-rag/defaultSemanticRetrieval.js（查询路径委托）; argo-mcp-server.js（启动预热）; tests/semantic-alignment-runner.test.js（AT-align-01/02）"
         }
       ],
       "testcases": [
         {
           "Input": "tests/semantic-record-text.test.js",
           "acceptanceCriteria": "tests/semantic-record-text.test.js",
-          "description": "GIVEN 一个含 id/parent/attributes/testcases/subdiagram_views 的元素；WHEN 生成策展嵌入文本；THEN 保留 type/name/alias/description/attributes(name:value/description)/testcase 意图，且不含 id/parent 值、视图 id、testcase 文件路径、JSON 标点与引号。",
           "name": "AT-semantic-text-01",
+          "description": "GIVEN 一个含 id/parent/attributes/testcases/subdiagram_views 的元素；WHEN 生成策展嵌入文本；THEN 保留 type/name/alias/description/attributes(name:value/description)/testcase 意图，且不含 id/parent 值、视图 id、testcase 文件路径、JSON 标点与引号。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/semantic-record-text.test.js",
           "acceptanceCriteria": "tests/semantic-record-text.test.js",
-          "description": "GIVEN 一个含端点 id/端点名/属性的关系；WHEN 生成策展嵌入文本；THEN 保留 statement/name/description/document/attributes，且不含关系 id 与 source_id/target_id。",
           "name": "AT-semantic-text-02",
+          "description": "GIVEN 一个含端点 id/端点名/属性的关系；WHEN 生成策展嵌入文本；THEN 保留 statement/name/description/document/attributes，且不含关系 id 与 source_id/target_id。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/semantic-record-text.test.js",
           "acceptanceCriteria": "tests/semantic-record-text.test.js",
-          "description": "GIVEN 一个含 included_elements/included_relationships 的视图；WHEN 生成策展嵌入文本；THEN 仅保留 view_name/description，不含 view_id/parent_element_id 与任何成员 id。",
           "name": "AT-semantic-text-03",
+          "description": "GIVEN 一个含 included_elements/included_relationships 的视图；WHEN 生成策展嵌入文本；THEN 仅保留 view_name/description，不含 view_id/parent_element_id 与任何成员 id。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/semantic-record-text.test.js",
           "acceptanceCriteria": "tests/semantic-record-text.test.js",
-          "description": "GIVEN 缺失/空字段或非对象输入；WHEN 生成策展嵌入文本；THEN 不抛错并返回空串或缺省字段。",
           "name": "AT-semantic-text-04",
+          "description": "GIVEN 缺失/空字段或非对象输入；WHEN 生成策展嵌入文本；THEN 不抛错并返回空串或缺省字段。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/semantic-record-text.test.js",
           "acceptanceCriteria": "tests/semantic-record-text.test.js",
-          "description": "GIVEN 全量回填与增量生命周期两条写入路径；WHEN 检查源码；THEN 两者均经 buildSemanticRecordText 生成嵌入文本，且不再对整条 canonical 对象做 JSON.stringify 后嵌入/哈希。",
           "name": "AT-semantic-text-05",
+          "description": "GIVEN 全量回填与增量生命周期两条写入路径；WHEN 检查源码；THEN 两者均经 buildSemanticRecordText 生成嵌入文本，且不再对整条 canonical 对象做 JSON.stringify 后嵌入/哈希。",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/semantic-alignment-runner.test.js",
+          "acceptanceCriteria": "tests/semantic-alignment-runner.test.js",
+          "name": "AT-align-01",
+          "description": "GIVEN 持久就绪记录；WHEN isSemanticReady；THEN 缺失 / Stale / 未验证 均=false，Aligned+verified=true。",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/semantic-alignment-runner.test.js",
+          "acceptanceCriteria": "tests/semantic-alignment-runner.test.js",
+          "name": "AT-align-02",
+          "description": "GIVEN 索引未就绪需重建；WHEN 检查对齐接线；THEN 用异步 spawn（非 spawnSync，不冻结 MCP）、并发去重单飞、查询路径委托 runner、MCP 启动时后台预热；不改检索内容（守召回）。",
           "type": "Acceptance Test"
         }
       ]
@@ -6919,6 +6938,16 @@
           "name": "decision",
           "value": "rerank-thinking-off-model-agnostic-env-configurable",
           "description": "换模型不必改代码：默认对所有 rerank provider 发 thinking-off 片段（可 env 覆盖 JSON 片段），并在被 provider 拒绝(400)时自动无该字段重试——既通用又不因字段不兼容丢 rerank/召回。"
+        },
+        {
+          "name": "commit",
+          "value": "d5cf7aa",
+          "description": "索引对齐改异步（不再 spawnSync 冻结 MCP）+ 日志 + MCP 启动后台预热；不改检索内容。"
+        },
+        {
+          "name": "pitfall",
+          "value": "backfill-checkpoint-keyed-by-canonical-version",
+          "description": "根因：productionSemanticBackfill.processChannel 的 resume checkpoint 以 canonicalVersion 为键（非 contentHash）——任何图身份变更（增删元素/关系/视图）→ checkpoint 失效 → 全量重嵌所有记录（~394 条 ×~0.4s ≈ 174s）。buildSemanticRecord 已生成 contentHash 且投影已持久化，故可改为按 contentHash 增量跳过未变记录（守召回：变更/新增仍重嵌）。待办修复。"
         }
       ]
     },
