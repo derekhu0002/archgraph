@@ -4230,6 +4230,11 @@
           "name": "commit",
           "value": "b33e678",
           "description": "主页按 DeepSeek Harness 风格整改（暗色/hero 终端/徽章/卡片/交替特性块/复制与滚动交互）；保留全部验收锚点"
+        },
+        {
+          "name": "commit",
+          "value": "2188dda",
+          "description": "混合检索 P0：检索评测基线（scripts/eval-retrieval.js + tests/retrieval-eval.test.js，只读）。基线 vector-only topK=8：ALL recall@1 94.6%/recall@5 99.4%/MRR 0.967；name 92.0%（元素 92.5% 弱项）、desc 98.4%、关系 100%、视图 98%。新增组件 hybrid-semantic-retrieval-001。策略：默认关 ARGO_SEMANTIC_HYBRID=0，A/B 通过后转默认开。"
         }
       ],
       "testcases": [
