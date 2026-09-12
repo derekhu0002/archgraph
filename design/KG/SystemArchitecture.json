@@ -6447,9 +6447,14 @@
           "name": "commit",
           "value": "e4414de",
           "description": "P1：语义记录 searchText + 全文索引（productionSemanticBackfill/mutationEmbeddingVectorLifecycle/productionSemanticNeo4jAdapter）; tests/semantic-search-text.test.js; tests/semantic-record-text.test.js（AT-semantic-text-05 更新）"
+        },
+        {
+          "name": "commit",
+          "value": "4fa1a90",
+          "description": "P2：词法 full-text + RRF 融合（hybridRetrieval.js + defaultSemanticRetrieval 集成，ARGO_SEMANTIC_HYBRID 默认关）；eval-retrieval.js A/B；tests/hybrid-retrieval.test.js AT-hybrid-01..05"
         }
       ],
-      "description": "语义混合检索（Hybrid Semantic Retrieval）：在现有语义（向量）检索之上，加法式引入词法/BM25 检索并按 RRF 融合，以提升精度与召回（对精确名、稀有词、id、跨语言尤佳）。策略：默认关（ARGO_SEMANTIC_HYBRID=0），纯加法式（新增 searchText 属性 + 全文索引，不改现有向量/契约），并集召回保证 recall 不回退，词法失败自动降级纯向量，保留 kill switch；A/B 指标通过后转默认开（P4）。P0（已交付）：检索评测基线 scripts/eval-retrieval.js + tests/retrieval-eval.test.js（AT-retrieval-eval-01）——vector-only topK=8：ALL recall@1 94.6%/recall@5 99.4%/MRR 0.967、name 92.0%（元素 92.5% 弱项）、desc 98.4%、Relationship 100%、View 98.0%。P1（已交付）：语义记录落 searchText（=既有策展文本 buildSemanticRecordText，与向量同源）+ 全文索引 argo_production_semantic_{element,relationship,view}_vector_fulltext（CREATE FULLTEXT ... IF NOT EXISTS ON EACH [semantic.searchText]，加法式）；幂等重跑语义回填 Aligned（Element 229/Relationship 103/View 58）；检索路径未改，零行为变化；AT-searchtext-01/02。P2 计划：词法检索 + RRF 融合（开关隔离，tests/hybrid-retrieval.test.js）；P3 金丝雀；P4 默认开。",
+      "description": "语义混合检索（Hybrid Semantic Retrieval）：在现有语义（向量）检索之上，加法式引入词法/BM25 检索并按 RRF 融合，以提升精度与召回（对精确名、稀有词、id、跨语言尤佳）。策略：默认关（ARGO_SEMANTIC_HYBRID=0），纯加法式（新增 searchText 属性 + 全文索引，不改现有向量/契约），并集召回保证 recall 不回退，词法失败自动降级纯向量，保留 kill switch；A/B 指标通过后转默认开（P4）。P0（已交付）：检索评测基线 scripts/eval-retrieval.js + tests/retrieval-eval.test.js（AT-retrieval-eval-01）。P1（已交付）：语义记录落 searchText + 全文索引 *_vector_fulltext（加法式）；幂等回填 Aligned。P2（已交付）：hybridRetrieval.js（纯函数 RRF：rrfFuse/fuseChannelSeeds/sanitizeFulltextQuery/hybridWeights；默认关）；defaultSemanticRetrieval 每通道向量之后、开关开时加同通道全文检索（kind:'semantic-lexical-query'，sanitize 转义防 Lucene 语法错/maxClauseCount）并 RRF 融合进 seedsByType；默认权重 vector:lexical=3:1（A/B 校准）；词法失败 fail-open；闭包/装配不变；AT-hybrid-01..05。A/B（同一语料、真实后端）：等权 RRF 为负（ALL -1.0、View -6.1），改用向量占优权重 3:1/lexK16 后 ALL recall@1 +0.4、name +1.2、element +0.6、desc -0.8、View 0，recall@5 基本持平——增益有限（基线已很高），故保持默认关。P3 计划：按宿主金丝雀开启 tunable env；P4/后续：如需更大提升，评估二阶段重排（rerank）。",
       "id": "hybrid-semantic-retrieval-001",
       "name": "语义混合检索（Hybrid Semantic Retrieval）",
       "parent": "1961",
@@ -6457,22 +6462,57 @@
         {
           "Input": "tests/retrieval-eval.test.js",
           "acceptanceCriteria": "tests/retrieval-eval.test.js",
-          "description": "GIVEN 检索评测脚本与基线（scripts/eval-retrieval.js）；WHEN 运行或单测 buildGolden/cosine；THEN 由 canonical 图派生带 channel 前缀 canonicalIdentity 的 name/desc 黄金集（desc 仅当描述≥24字），对现有向量索引输出 vector-only 的 recall@1/@5/MRR，只读可复现。",
+          "description": "GIVEN 检索评测脚本与基线；WHEN 运行或单测 buildGolden/cosine；THEN 由 canonical 图派生带 channel 前缀 canonicalIdentity 的 name/desc 黄金集，对现有向量索引输出 vector-only 的 recall@1/@5/MRR，只读可复现。",
           "name": "AT-retrieval-eval-01",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/semantic-search-text.test.js",
           "acceptanceCriteria": "tests/semantic-search-text.test.js",
-          "description": "GIVEN 语义投影适配器 upsertRecords；WHEN 写入含 searchText 的记录；THEN 既建（既有）VECTOR 索引也建 FULLTEXT 索引（ON EACH [semantic.searchText]），且 SET semantic=record 参数中含 searchText（加法式、不改旧字段）。",
+          "description": "GIVEN 语义投影适配器 upsertRecords；WHEN 写入含 searchText 的记录；THEN 既建 VECTOR 索引也建 FULLTEXT 索引（ON EACH [semantic.searchText]），且 SET semantic=record 参数含 searchText（加法式）。",
           "name": "AT-searchtext-01",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/semantic-search-text.test.js",
           "acceptanceCriteria": "tests/semantic-search-text.test.js",
-          "description": "GIVEN 全量回填与增量生命周期两条写入路径；WHEN 检查源码；THEN 两者均落 searchText（buildSemanticRecord 与 buildPersistentWork），供后续词法检索使用。",
+          "description": "GIVEN 全量回填与增量生命周期两条写入路径；WHEN 检查源码；THEN 两者均落 searchText。",
           "name": "AT-searchtext-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/hybrid-retrieval.test.js",
+          "acceptanceCriteria": "tests/hybrid-retrieval.test.js",
+          "description": "GIVEN 混合检索开关；WHEN 未设 ARGO_SEMANTIC_HYBRID；THEN 默认关（零行为变化）；设 1 则开；权重/阈值可 env 覆盖。",
+          "name": "AT-hybrid-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/hybrid-retrieval.test.js",
+          "acceptanceCriteria": "tests/hybrid-retrieval.test.js",
+          "description": "GIVEN 向量榜与词法榜；WHEN rrfFuse；THEN 保留并集、跨榜项 matchedLists=2 且排名高于单榜项；单榜保持顺序。",
+          "name": "AT-hybrid-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/hybrid-retrieval.test.js",
+          "acceptanceCriteria": "tests/hybrid-retrieval.test.js",
+          "description": "GIVEN 向量 seeds；WHEN fuseChannelSeeds；THEN 融合结果是向量 seeds 的超集（recall 不回退）；无词法时顺序与向量一致。",
+          "name": "AT-hybrid-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/hybrid-retrieval.test.js",
+          "acceptanceCriteria": "tests/hybrid-retrieval.test.js",
+          "description": "GIVEN 生产检索路径；WHEN 开关关；THEN 不进入词法路径（gate 为 isHybridEnabled+if(hybrid)）；词法用 semantic-lexical-query。",
+          "name": "AT-hybrid-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/hybrid-retrieval.test.js",
+          "acceptanceCriteria": "tests/hybrid-retrieval.test.js",
+          "description": "GIVEN 含 Lucene 保留字符/超长文本的查询；WHEN sanitizeFulltextQuery；THEN 转义保留字符并截断，空串返回空。",
+          "name": "AT-hybrid-05",
           "type": "Acceptance Test"
         }
       ],
