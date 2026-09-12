@@ -134,6 +134,11 @@
           "name": "commit",
           "value": "33156a1",
           "description": "index.html; tests/website.test.js（AT-website-01 增 Graph integrity 断言）"
+        },
+        {
+          "name": "commit",
+          "value": "650459d",
+          "description": "index.html; tests/website.test.js（AT-website-01 增 Capabilities 断言）"
         }
       ],
       "testcases": [
@@ -295,6 +300,11 @@
           "name": "commit",
           "value": "33156a1",
           "description": "index.html（How to use 与 Community 之间新增 Graph integrity 小节 + 导航 Integrity）; tests/website.test.js（新增 graph-integrity 断言）"
+        },
+        {
+          "name": "commit",
+          "value": "650459d",
+          "description": "index.html（About 与 Install 间新增 Capabilities 能力特性小节 + 导航；小节重编号）; tests/website.test.js（新增 capabilities 断言）"
         }
       ],
       "testcases": [
@@ -437,6 +447,11 @@
           "name": "commit",
           "value": "33156a1",
           "description": "README.md（新增 Graph integrity 小节：写入去重/单一成员/结构校验；How to use 补复用说明）; tests/readme.test.js（AT-readme-01 增断言）"
+        },
+        {
+          "name": "commit",
+          "value": "650459d",
+          "description": "README.md（What is this? 补收益：long-term memory + deduplicated writes → precise recall；移除详细 Graph integrity 小节，细节归主页，保持简洁）; tests/readme.test.js"
         }
       ],
       "testcases": [
