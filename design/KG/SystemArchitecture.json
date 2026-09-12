@@ -6467,6 +6467,11 @@
           "name": "commit",
           "value": "4a95b99",
           "description": "写入策略影响验收 AT-write-impact-01..04（tests/write-retrieval-impact.test.js）"
+        },
+        {
+          "name": "commit",
+          "value": "8b8b9f2",
+          "description": "P3 二阶段重排（rerank）评测：scripts/eval-rerank.js（LLM listwise qwen-turbo，同评测集）。150 样本：vector-only r@1 94.0 → rerank 98.7（+4.7；name +7.9、Element +6.8），r@5 保持 100、MRR 0.968→0.992。仅评测，未接生产。"
         }
       ],
       "description": "语义混合检索（Hybrid Semantic Retrieval）：在现有语义（向量）检索之上，加法式引入词法/BM25 检索并按 RRF 融合。策略：默认关（ARGO_SEMANTIC_HYBRID=0），纯加法式（searchText + 全文索引，不改现有向量/契约），词法失败 fail-open 降级纯向量，保留 kill switch；A/B 通过后转默认开。P0：检索评测基线 scripts/eval-retrieval.js（AT-retrieval-eval-01）。P1：语义记录 searchText + 全文索引 *_vector_fulltext（AT-searchtext-01/02），幂等回填 Aligned。P2：hybridRetrieval.js（RRF/sanitize/开关/权重；默认关）+ defaultSemanticRetrieval 集成（kind:'semantic-lexical-query'，向量占优权重 3:1），AT-hybrid-01..05。A/B：等权 RRF 为负（ALL -1.0/View -6.1），3:1/lexK16 后 ALL recall@1 +0.4、name +1.2、element +0.6、desc -0.8、View 0（增益有限，基线已高，故默认关）。写入策略影响验收 AT-write-impact-01..04：hybrid 开关不改 L0 精确去重；融合不缩小写入门的向量候选集；门禁判据（matches+onConflict）与评分尺度无关；门禁 semanticScore 为排名派生（0.99..0.8），hybrid 只改排序不改 0.85 阈值语义。后续：按宿主金丝雀开启 / 二阶段重排（rerank）。",
