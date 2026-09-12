@@ -83,15 +83,13 @@ test('readme: community section links the community site and graph-wiki asset re
   );
 });
 
-test('readme: graph integrity documents write dedup, single membership, and validation', () => {
-  // GIVEN the framework keeps the graph clean by construction
-  // WHEN a reader opens README.md
-  // THEN a Graph integrity section states dedup-on-write, one membership per view, and validation
-  const section = sectionAfter(README, 'Graph integrity');
-  assert.ok(section, 'README should have a Graph integrity section');
-  assert.match(section, /reuse/i, 'should state reuse/dedup on write');
-  assert.match(section, /semantically near/i, 'should state the semantic near-duplicate guard');
-  assert.match(section, /at most once per view/i, 'should state single membership per view');
-  assert.match(section, /Enterprise Architect/, 'should reference the EA single-membership convention');
-  assert.match(section, /validation/i, 'should state schema/graph-semantics validation');
+test('readme: concisely frames the graph as an agent long-term memory with deduped writes', () => {
+  // GIVEN README stays concise (goal + benefits; the feature detail lives on the home page)
+  // WHEN a reader opens the What is this? section
+  // THEN it frames the graph as a long-term memory via MCP, with deduped writes and precise recall
+  const section = sectionAfter(README, 'What is this');
+  assert.match(section, /long-term memory/, 'should frame the graph as a long-term memory for agents');
+  assert.match(section, /MCP interface/, 'should mention the read/write MCP interface');
+  assert.match(section, /deduplicat/i, 'should mention write deduplication');
+  assert.match(section, /recall stays precise/i, 'should tie dedup to precise recall');
 });

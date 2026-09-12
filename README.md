@@ -7,6 +7,10 @@ An architecture-graph driven framework for Agentic Engineering.
 ArchGraph builds a **unified language** that puts harness design and target product design into
 **one model** — so you get a single view to work and observe, and real control over your agents.
 
+It doubles as a **long-term memory for coding agents**: an ArchiMate 3.2 intent graph exposed through
+a single read/write MCP interface. Writes are deduplicated, so the graph stays clean and semantic
+recall stays precise. See the [home page](https://archgraph.org/) for the full capability set.
+
 ![alt text](docs/diagrams/image.png)
 
 ## Architecture
@@ -76,21 +80,6 @@ After installing, open your project and start a coding agent. It will:
    deduplicates by identity and flags a semantically near element of the same type.
 
 The intent architecture graph — modelled in **ArchiMate 3.2** — is the single source of truth.
-
-## Graph integrity
-
-The graph is kept clean by construction, not by convention:
-
-- **Deduplicated on write** — adding an element, relationship, or view reuses an existing match
-  (same type + name) instead of creating a copy. A new element that is semantically near an existing
-  one of the same type is blocked and returned as a candidate, so the same concept never forks into
-  two. A genuinely distinct element can still be created explicitly, with a justification.
-- **Single membership** — an element or relationship appears at most once per view, matching
-  Enterprise Architect; duplicate membership is rejected by validation and is never projected twice
-  into the EA model.
-- **Validated structure** — every write is checked against the schema and graph-semantics rules
-  (identities, cross-references, relationship endpoints, view capacity), and the commit that changed
-  an element is registered back onto it.
 
 ## Community
 

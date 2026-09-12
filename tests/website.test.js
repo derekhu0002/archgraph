@@ -111,6 +111,25 @@ test('graph-integrity: homepage documents graph integrity between How to use and
   assert.match(section, /once per view/i, 'should state single membership per view');
 });
 
+test('capabilities: homepage summarises the framework capabilities before Install', () => {
+  // GIVEN the framework has grown a broad capability set (memory, retrieval, integrity, harnesses, EA interop)
+  // WHEN a visitor opens the homepage
+  // THEN a Capabilities section appears after About and before Install and names the key features
+  assert.match(HTML, /id="capabilities"/, 'page should have a Capabilities section');
+  assert.ok(
+    HTML.indexOf('id="capabilities"') > HTML.indexOf('id="about"') &&
+    HTML.indexOf('id="capabilities"') < HTML.indexOf('id="install"'),
+    'Capabilities should appear after About and before Install'
+  );
+  const section = HTML.slice(HTML.indexOf('id="capabilities"'), HTML.indexOf('id="install"'));
+  assert.match(section, /long-term memory/i, 'should frame the graph as an agent long-term memory');
+  assert.match(section, /deduplicat/i, 'should state write deduplication keeps recall precise');
+  assert.match(section, /semantic|Graph RAG/i, 'should mention semantic retrieval');
+  assert.match(section, /Copilot|Cursor|OpenCode|OpenClaw|DeepSeek/i, 'should mention multi-harness deployment');
+  assert.match(section, /Enterprise Architect|\.qea/, 'should mention Enterprise Architect interop');
+  assert.match(section, /GIVEN-WHEN-THEN/, 'should mention executable acceptance tests');
+});
+
 test('reference-library-removed: homepage no longer exposes a KGlibrary reference library', () => {
   // GIVEN the reference library role moved to the community hub / graph-wiki
   // WHEN a visitor opens the homepage

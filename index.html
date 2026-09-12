@@ -182,6 +182,7 @@
     <span class="brand"><code>ArchGraph</code></span>
     <div class="links">
       <a href="#about">About</a>
+      <a href="#capabilities">Capabilities</a>
       <a href="#install">Install</a>
       <a href="#howto">How to use</a>
       <a href="#integrity">Integrity</a>
@@ -215,8 +216,74 @@
       />
     </section>
 
+    <section id="capabilities">
+      <h2><span class="num">01</span>Capabilities</h2>
+      <p class="lead">
+        ArchGraph has grown into a <strong>long-term memory system for coding agents</strong> &mdash; a
+        graph you can both reason over and trust, deployed into the agent harness you already use.
+      </p>
+      <div class="grid">
+        <div class="card">
+          <h3>Long-term memory for agents</h3>
+          <p>
+            A single ArchiMate 3.2 intent graph, read and written through one MCP interface. Memory is
+            tiered &mdash; a compact working memory loaded at session start, a long-term memory
+            recalled on demand, and an archive &mdash; so an agent restores context without loading
+            everything.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Clean by construction</h3>
+          <p>
+            Writes are deduplicated: adding an element, relationship, or view reuses an existing match
+            instead of copying it, and a new element semantically near an existing one of the same
+            type is blocked and returned as a candidate. A clean graph is what keeps recall precise.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Semantic + structural retrieval</h3>
+          <p>
+            Find things two ways: semantic (Graph RAG) recall over a vector index, bounded by scope,
+            plus read-only Cypher for structural queries and focused context reads. Recall is loose
+            enough not to miss; audit reads are strict.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Every change is provable</h3>
+          <p>
+            Acceptance tests come first and are executable GIVEN-WHEN-THEN, and the commit that
+            changed an element is registered back onto it &mdash; the graph carries its own history and
+            evidence.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Runs in any harness</h3>
+          <p>
+            One <code>argo-deploy</code> registers the MCP server, skills, rules, and agents into
+            GitHub Copilot, Cursor, OpenCode, DeepSeek Harness, and OpenClaw &mdash; each with a
+            session wakeup gate.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Enterprise Architect interop</h3>
+          <p>
+            The graph projects into a standard <code>.qea</code> model on write and on
+            <code>argo init</code>, and a human&rsquo;s EA edits become a semantic diff an agent
+            analyzes before anything is written back.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Model your agents too</h3>
+          <p>
+            Represent agents as Business Actors and Roles with their own memory sub-views,
+            assignments, and work packages &mdash; harness design and product design in one model.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <section id="install">
-      <h2><span class="num">01</span>Install &amp; deploy</h2>
+      <h2><span class="num">02</span>Install &amp; deploy</h2>
       <p class="lead">
         Two commands, and you&rsquo;re ready:
       </p>
@@ -262,7 +329,7 @@ argo-deploy</pre>
     </section>
 
     <section id="howto">
-      <h2><span class="num">02</span>How to use</h2>
+      <h2><span class="num">03</span>How to use</h2>
       <p class="lead">
         <strong>Step 0 &mdash; initialize the workspace.</strong> In a fresh project, ask your coding
         agent to run <code>argo init</code> (the <code>initializeWorkspace</code> MCP call). It
@@ -283,7 +350,7 @@ argo-deploy</pre>
     </section>
 
     <section id="integrity">
-      <h2><span class="num">03</span>Graph integrity</h2>
+      <h2><span class="num">04</span>Graph integrity</h2>
       <p class="lead">
         The graph is kept clean by construction, not by convention:
       </p>
@@ -317,7 +384,7 @@ argo-deploy</pre>
     </section>
 
     <section id="community">
-      <h2><span class="num">04</span>Community</h2>
+      <h2><span class="num">05</span>Community</h2>
       <p class="lead">
         ArchGraph runs on open co-building. The community shares and reuses <strong>architecture
         subgraphs</strong> across projects &mdash; so architecture knowledge is built together, not in silos.
@@ -341,7 +408,7 @@ argo-deploy</pre>
     </section>
 
     <section id="links">
-      <h2><span class="num">05</span>Links</h2>
+      <h2><span class="num">06</span>Links</h2>
       <p class="lead">
         <a href="https://github.com/derekhu0002/archgraph">GitHub repository</a>
         &nbsp;·&nbsp;
