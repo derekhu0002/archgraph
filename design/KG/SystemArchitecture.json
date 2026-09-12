@@ -6887,6 +6887,16 @@
           "name": "commit",
           "value": "7eee172",
           "description": "argo/scripts/graph-rag/rerankRetrieval.js; tests/rerank-retrieval.test.js（池 10→20 恢复，召回优先）"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.20.3",
+          "description": "npm publish shasum d824461c0132d859deb86d14f4887b6e21671f62；全局安装 + argo-deploy 22/22；~/.argo/scripts 三文件与 repo SHA256 一致；待宿主重启加载新常驻 MCP 进程"
+        },
+        {
+          "name": "commit",
+          "value": "d9a22b5",
+          "description": "package.json — release(archgraph-argo): 0.20.3"
         }
       ]
     },
