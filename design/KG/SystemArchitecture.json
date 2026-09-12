@@ -4265,6 +4265,11 @@
           "name": "commit",
           "value": "243b9e1",
           "description": "4-way 检索评测（150 样本，qwen-turbo）：vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100，MRR .997）。关键：hybrid+rerank 组合最优（+4.0），但 rerank 对提示/模型高度敏感、小样本噪声大（前次带 type 提示的 rerank(vector) 为正，本次无 type 为负）——需大样本+提示/模型调优后再启用。"
+        },
+        {
+          "name": "commit",
+          "value": "721f5fe",
+          "description": "重排 provider/model 与 embedding 解耦：新增 resolveRerankProvider——ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL 独立覆盖（可用不同 provider/模型），未设则回落 embedding 配置 + 默认模型 qwen-turbo；ARGO_RERANK_API_KEY 纳入 .env 允许键与 SECRET_KEYS。AT-rerank-06。"
         }
       ],
       "testcases": [
