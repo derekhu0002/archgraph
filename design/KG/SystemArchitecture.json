@@ -6198,71 +6198,85 @@
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 已存在同 type+归一化 name 的元素；WHEN addElement 未传 onConflict（默认 reuse）；THEN 不新建，复用既有 id 并挂入目标 view_ids（summary created:false/reused:true/reusedId）。",
           "name": "AT-dedup-01",
+          "description": "GIVEN 已存在同 type+归一化 name 的元素；WHEN addElement 未传 onConflict（默认 reuse）；THEN 不新建，复用既有 id 并挂入目标 view_ids。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 同型同名元素且未在目标 view；WHEN 显式 onConflict=reuse；THEN 与默认一致：不新建、复用并挂入目标 view。",
           "name": "AT-dedup-02",
+          "description": "GIVEN 同型同名元素且未在目标 view；WHEN 显式 onConflict=reuse；THEN 不新建、复用并挂入目标 view。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 已有同名同 type 元素；WHEN allowDuplicate 缺 justification→拒绝；带非空 justification→新建成功（既有元素保留）。",
           "name": "AT-dedup-03",
+          "description": "GIVEN 已有同名同 type 元素；WHEN allowDuplicate 缺 justification→拒绝；带非空 justification→新建成功。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 已有 name='Widget'；WHEN 以大小写/空白/全半角差异的名称创建；THEN 视为同一自然键命中（复用既有，不新建）。",
           "name": "AT-dedup-04",
+          "description": "GIVEN 已有 name=Widget；WHEN 以大小写/空白/全半角差异名称创建；THEN 视为同一自然键命中（复用）。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 已存在 (source,type,target,name) 关系；WHEN 默认创建；THEN 复用既有（不新建）；WHEN 相同三元组但不同 name；THEN 允许新建。",
           "name": "AT-dedup-05",
+          "description": "GIVEN 已存在 (source,type,target,name) 关系；WHEN 默认创建；THEN 复用；同三元组不同 name；THEN 允许新建。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 同一 parent 下已有同名 view；WHEN 默认创建或显式 reuse；THEN 复用既有 view（不新建）。",
           "name": "AT-dedup-06",
+          "description": "GIVEN 同一 parent 下已有同名 view；WHEN 默认创建或显式 reuse；THEN 复用既有 view。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-gate.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
-          "description": "GIVEN 门禁仅作用于 add*；WHEN 对存在同名元素执行 updateElement；THEN 正常通过（不受门禁约束）。",
           "name": "AT-dedup-07",
+          "description": "GIVEN 门禁仅作用于 add*；WHEN 对存在同名元素执行 updateElement；THEN 正常通过（不受门禁约束）。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-semantic.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-semantic.test.js",
-          "description": "GIVEN 待新增元素；WHEN 语义候选检索；THEN 返回全图同 type、分数≥阈值（默认 0.85；窗口每通道 topK=25）的候选，scope=whole graph same type；不同 type 与低分被过滤；in_target_views 仅作标记、不过滤。",
           "name": "AT-dedup-L1-01",
+          "description": "GIVEN 待新增元素；WHEN 语义候选检索；THEN 返回全图同 type、分数≥阈值（默认 0.85）的候选；且 advisory 关闭 rerank（排序与门禁无关）。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-semantic.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-semantic.test.js",
-          "description": "GIVEN 元素会真正新建且命中同型语义候选；WHEN 未传 allowDuplicate（默认 reuse）；THEN 写前拦截：status failed、written false、返回 semanticConflicts+guidance，不落盘；WHEN allowDuplicate+justification；THEN 放行新建；语义后端不可用降级不报错。",
           "name": "AT-dedup-L1-02",
+          "description": "GIVEN 元素会真正新建且命中同型语义候选；WHEN 未传 allowDuplicate；THEN 写前拦截：status failed、written false、返回 semanticConflicts+guidance；allowDuplicate+justification 放行；后端不可用降级不报错。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/architecture-dedup-semantic.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-semantic.test.js",
-          "description": "GIVEN 语义候选的 rank-derived 分数挂在带通道前缀的闭包元素（Element:w1），融合 seed（RRF）同 id；WHEN advisory 组装；THEN 同一元素取 rank-derived 分（0.80..0.99），不被小 RRF 分覆盖，0.85 门禁可命中。",
           "name": "AT-dedup-L1-03",
+          "description": "GIVEN 语义候选的 rank-derived 分挂在带通道前缀的闭包元素（Element:w1）、融合 seed 同 id；WHEN advisory 组装；THEN 同一元素取 rank-derived 分，不被 RRF 覆盖，0.85 门禁可命中。",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/mcp-crash-diagnostics.test.js",
+          "acceptanceCriteria": "tests/mcp-crash-diagnostics.test.js",
+          "name": "AT-crash-01",
+          "description": "GIVEN MCP 崩溃诊断；WHEN 切换阶段；THEN 同步落盘 phase 面包屑（mcp-phase.json，哪怕原生 abort 也可回溯最后阶段）；崩溃日志路径含 mcp-crash.log。",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/mcp-crash-diagnostics.test.js",
+          "acceptanceCriteria": "tests/mcp-crash-diagnostics.test.js",
+          "name": "AT-crash-02",
+          "description": "GIVEN 写入/检索路径；WHEN 检查接线；THEN mutation 各阶段（semanticDedup/qeaProjection/neo4jSync/embeddingLifecycle/done）与 retrieval(embed/rerank) 均打点；qea 投影改用同步 spawnSync（无异步子句柄竞态）；服务端安装崩溃诊断。",
           "type": "Acceptance Test"
         }
       ],
@@ -6301,6 +6315,11 @@
           "name": "commit",
           "value": "a35074c",
           "description": "argo/scripts/systemarchitecture-mcp-server.js（buildSemanticDedupAdvisory 的 journey.query 传 rerank:false：写路径去重排序与门禁无关，去掉 rerank 使写时延 ~25s→~1.2s）; tests/architecture-dedup-semantic.test.js（AT-dedup-L1-01 断言 rerank:false）"
+        },
+        {
+          "name": "commit",
+          "value": "57a8475",
+          "description": "argo/scripts/graph-rag/mcpCrashDiagnostics.js（同步 phase 面包屑 + uncaughtExceptionMonitor/exit 崩溃日志）; argo/scripts/systemarchitecture-mcp-server.js（写入路径阶段打点 + qea 投影改 spawnSync）; graph-rag/defaultSemanticRetrieval.js（retrieval 阶段打点）; argo-mcp-server.js（安装诊断）; tests/mcp-crash-diagnostics.test.js（AT-crash-01/02）"
         }
       ]
     },
@@ -6977,8 +6996,8 @@
         },
         {
           "name": "pitfall",
-          "value": "backfill-checkpoint-keyed-by-canonical-version",
-          "description": "根因：productionSemanticBackfill.processChannel 的 resume checkpoint 以 canonicalVersion 为键（非 contentHash）——任何图身份变更（增删元素/关系/视图）→ checkpoint 失效 → 全量重嵌所有记录（~394 条 ×~0.4s ≈ 174s）。buildSemanticRecord 已生成 contentHash 且投影已持久化，故可改为按 contentHash 增量跳过未变记录（守召回：变更/新增仍重嵌）。待办修复。"
+          "value": "mcp-native-crash-during-mutation-black-box",
+          "description": "现象（2026-09-13 00:09，SOC-DEMO）：argo MCP 在一次 applySystemArchitectureMutation 约 2s 后进程死亡，opencode 仅记录 \"MCP connection closed\"，无 stderr/堆栈（黑盒）。结合已知“本机 Node 长跑大数据集偶发硬挂/0 字节退出”与实测到的 Windows 原生断言 UV_HANDLE_CLOSING，疑似“异步 spawn(qea 子进程) 句柄关闭 与 后续 fetch/neo4j 异步 I/O”竞态触发原生 abort。修复：①加崩溃诊断（mcpCrashDiagnostics：同步 phase 面包屑 mcp-phase.json + uncaughtExceptionMonitor/exit 记录 mcp-crash.log；不改变默认崩溃行为、不记 secret）；②写入路径 qea 投影 spawn→spawnSync（无异步句柄）。单测 AT-crash-01/02 通过；未能稳定复现，待部署后再次发生以确诊。"
         },
         {
           "name": "commit",
@@ -6999,6 +7018,11 @@
           "name": "commit",
           "value": "f146246",
           "description": "package.json — release(archgraph-argo): 0.20.5"
+        },
+        {
+          "name": "commit",
+          "value": "57a8475",
+          "description": "崩溃可观测（phase 面包屑 + crash log）+ 写入路径 qea 投影改同步，消除异步子句柄竞态。"
         }
       ]
     },
