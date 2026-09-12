@@ -34,6 +34,18 @@ function isSemanticReady(repositoryRoot) {
   }
 }
 
+// A project is "initialized" once its canonical graph exists. The startup
+// preheat must NEVER bootstrap a brand-new project: creating files / running a
+// full backfill for an unknown workspace in the background is surprising and
+// would race an explicit `argo init`. New projects initialize explicitly.
+function isProjectInitialized(repositoryRoot) {
+  try {
+    return fs.existsSync(path.join(repositoryRoot, 'design', 'KG', 'SystemArchitecture.json'));
+  } catch {
+    return false;
+  }
+}
+
 function alignmentError() {
   const error = new Error('SEMANTIC_AUTO_ALIGNMENT_FAILED');
   error.category = 'SEMANTIC_AUTO_ALIGNMENT_FAILED';
@@ -79,7 +91,7 @@ function runSemanticAlignment(repositoryRoot = getWorkspaceRoot()) {
 // otherwise it starts the rebuild in the background so the first query rarely
 // pays for it. Safe to call repeatedly (guarded + de-duplicated).
 function preheatSemanticAlignment(repositoryRoot = getWorkspaceRoot()) {
-  if (preheated || !repositoryRoot || isSemanticReady(repositoryRoot)) {
+  if (preheated || !repositoryRoot || !isProjectInitialized(repositoryRoot) || isSemanticReady(repositoryRoot)) {
     return;
   }
   preheated = true;
@@ -91,5 +103,6 @@ module.exports = {
   runSemanticAlignment,
   preheatSemanticAlignment,
   isSemanticReady,
+  isProjectInitialized,
   readinessRecordPath,
 };

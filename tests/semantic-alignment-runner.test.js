@@ -8,8 +8,13 @@ const assert = require('node:assert/strict');
 
 const {
   isSemanticReady,
+  isProjectInitialized,
   readinessRecordPath,
 } = require('../argo/scripts/graph-rag/semanticAlignmentRunner.js');
+const {
+  withAlignmentLock,
+  alignmentLockPath,
+} = require('../argo/scripts/graph-rag/semanticAlignmentLock.js');
 
 const ROOT = path.resolve(__dirname, '..');
 
@@ -47,4 +52,46 @@ test('AT-align-02: alignment is async + de-duplicated and preheated at startup',
 
   const server = fs.readFileSync(path.join(ROOT, 'argo/scripts/argo-mcp-server.js'), 'utf8');
   assert.match(server, /preheatSemanticAlignment\(process\.env\.ARGO_REPO_ROOT\)/, 'server must preheat at startup');
+});
+
+// AT-align-03: the startup preheat must NEVER bootstrap a brand-new project --
+// only reconcile an already-initialized workspace whose readiness went stale.
+test('AT-align-03: preheat never bootstraps a brand-new project', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-align-'));
+  try {
+    assert.equal(isProjectInitialized(dir), false, 'no canonical graph -> not initialized');
+    fs.mkdirSync(path.join(dir, 'design', 'KG'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'design', 'KG', 'SystemArchitecture.json'), '{}');
+    assert.equal(isProjectInitialized(dir), true, 'canonical graph present -> initialized');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+  const runner = fs.readFileSync(path.join(ROOT, 'argo/scripts/graph-rag/semanticAlignmentRunner.js'), 'utf8');
+  assert.match(runner, /!isProjectInitialized\(repositoryRoot\)/, 'preheat must guard on project initialization');
+});
+
+// AT-align-04: the heavy alignment is serialized by a cross-process lock (preheat
+// vs query vs explicit argo init cannot rebuild concurrently), and a stale lock
+// (crashed holder) is stolen.
+test('AT-align-04: alignment lock serializes runs and steals stale locks', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-lock-'));
+  try {
+    const order = [];
+    await Promise.all([
+      withAlignmentLock(dir, async () => { order.push('a-start'); await new Promise(r => setTimeout(r, 250)); order.push('a-end'); }),
+      withAlignmentLock(dir, async () => { order.push('b'); }),
+    ]);
+    assert.deepEqual(order, ['a-start', 'a-end', 'b'], 'second acquisition must wait for the first to release');
+
+    const lock = alignmentLockPath(dir);
+    fs.writeFileSync(lock, 'stale');
+    const old = Date.now() - 20 * 60 * 1000;
+    fs.utimesSync(lock, new Date(old), new Date(old));
+    const stolen = await withAlignmentLock(dir, async () => 'ok', { waitMs: 2000, staleMs: 60 * 1000 });
+    assert.equal(stolen, 'ok', 'a stale lock must be stolen');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+  const harness = fs.readFileSync(path.join(ROOT, 'argo/scripts/ensureArgoHarnessEnvironment.js'), 'utf8');
+  assert.match(harness, /withAlignmentLock\(workspaceRoot/, 'buildHarnessReport must serialize on the lock');
 });

@@ -38,7 +38,13 @@ const REQUIRED_TOOL_NAMES = [
 // `includeBootstrap` is true for the standalone CLI (it calls initializeWorkspace
 // to bootstrap the workspace); the initializeWorkspace MCP tool passes false
 // because it already bootstrapped — avoids re-entrancy through ensureWorkspaceBootstrap.
-async function buildHarnessReport({ checkOnly = false, workspaceRoot, includeBootstrap = true }) {
+async function buildHarnessReport(options = {}) {
+  const { checkOnly = false, workspaceRoot, includeBootstrap = true } = options;
+  const { withAlignmentLock } = require('./graph-rag/semanticAlignmentLock.js');
+  return withAlignmentLock(workspaceRoot, () => runHarnessReport({ checkOnly, workspaceRoot, includeBootstrap }));
+}
+
+async function runHarnessReport({ checkOnly, workspaceRoot, includeBootstrap }) {
   const reportPath = path.join(workspaceRoot, '.argo', 'temp', 'argo-harness-init-report.json');
   const report = {
     status: 'ok',
