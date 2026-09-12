@@ -6425,6 +6425,29 @@
       "name": "里程碑：发布 archgraph-argo@0.19.1（视图成员唯一性不变量）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "scripts/eval-retrieval.js; tests/retrieval-eval.test.js（P0 检索评测基线，只读）",
+          "name": "commit",
+          "value": "2188dda"
+        }
+      ],
+      "description": "语义混合检索（Hybrid Semantic Retrieval，P0 起步）：在现有语义（向量）检索之上，加法式引入词法/BM25 检索并按 RRF 融合，以提升精度与召回（对精确名、稀有词、id、跨语言尤佳）。策略：默认关（ARGO_SEMANTIC_HYBRID=0），纯加法式（新增 searchText 属性 + 全文索引，不改现有向量/契约），并集召回保证 recall 不回退，词法失败自动降级纯向量，保留 kill switch；A/B 指标通过后转默认开（P4）。P0（已交付）：检索评测基线 scripts/eval-retrieval.js + tests/retrieval-eval.test.js（AT-retrieval-eval-01）——从 canonical 图派生黄金集，对现有向量索引跑同模型查询，报告 recall@1/@5/MRR：ALL 94.6%/99.4%/0.967、name 92.0%、desc 98.4%、Element 92.5%（弱项）、Relationship 100%、View 98.0%。P1 计划：语义记录新增 searchText + 全文索引（加法式、开关关、零行为变化）。P2 计划：词法检索 + RRF 融合（开关隔离，tests/hybrid-retrieval.test.js）。",
+      "id": "hybrid-semantic-retrieval-001",
+      "name": "语义混合检索（Hybrid Semantic Retrieval）",
+      "parent": "1961",
+      "testcases": [
+        {
+          "Input": "tests/retrieval-eval.test.js",
+          "acceptanceCriteria": "tests/retrieval-eval.test.js",
+          "description": "GIVEN 检索评测脚本与基线（scripts/eval-retrieval.js）；WHEN 运行 node scripts/eval-retrieval.js 或单测 buildGolden/cosine；THEN 能由 canonical 图派生带 channel 前缀 canonicalIdentity 的 name/desc 黄金集（desc 仅当描述≥24字），并对现有向量索引跑同模型查询输出 vector-only 的 recall@1/@5/MRR（ALL/name/desc/按通道），只读可复现。",
+          "name": "AT-retrieval-eval-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Application Component"
     }
   ],
   "relationships": [
@@ -7882,7 +7905,8 @@
         "neo4j-cypher-query-interface",
         "neo4j-semantic-projection-store",
         "graph-write-dedup-gate",
-        "graph-semantics-validation-001"
+        "graph-semantics-validation-001",
+        "hybrid-semantic-retrieval-001"
       ],
       "included_relationships": []
     },
