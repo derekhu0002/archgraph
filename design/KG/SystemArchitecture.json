@@ -139,6 +139,11 @@
           "name": "commit",
           "value": "650459d",
           "description": "index.html; tests/website.test.js（AT-website-01 增 Capabilities 断言）"
+        },
+        {
+          "name": "commit",
+          "value": "b33e678",
+          "description": "index.html; tests/website.test.js（AT-website-01 断言保持：主题改 dark）"
         }
       ],
       "testcases": [
@@ -305,6 +310,11 @@
           "name": "commit",
           "value": "650459d",
           "description": "index.html（About 与 Install 间新增 Capabilities 能力特性小节 + 导航；小节重编号）; tests/website.test.js（新增 capabilities 断言）"
+        },
+        {
+          "name": "commit",
+          "value": "b33e678",
+          "description": "index.html（主页按 DeepSeek Harness 风格全面重写：暗色 + hero 终端 + 徽章 + 卡片 + 交替特性块 + 复制/滚动交互）; tests/website.test.js（主题断言 light→dark）"
         }
       ],
       "testcases": [
