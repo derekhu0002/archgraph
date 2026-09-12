@@ -4290,6 +4290,11 @@
           "name": "commit",
           "value": "1b1619f",
           "description": "【重启后验证完成 2026-09-12】archgraph-argo@0.20.1 已生效：MCP 健康（232 元素），argo-init status=ok（Neo4j 库 archgraph=仓库名；qea 投影目标=本仓库 archgraph.qea；semantic lifecycle Aligned/verified）；hybrid + rerank 开启，rerank 解析 provider=deepseek/model=deepseek-flash（真实后端）；语义检索与 memory_search 均可用。新增：eval-rerank 现加载仓库 .env 到 process.env，使评测 provider/model 与生产一致（1b1619f）。待办：偶发 rerankFailures（fail-open）与长跑 stall 可后续调优（如重试/超时）；hybrid 单独可能略伤精度（与 rerank 组合最优）。"
+        },
+        {
+          "name": "principle",
+          "value": "retrieval-recall-first",
+          "description": "一切措施不得牺牲最终检索的检出率/召回率，只能提升；宁可消耗性能也不缩小候选池/内容/跳过重排；违背时必须明确指出。适用所有涉及检出/召回的环节（读检索、写去重检索、rerank/混合调优）。"
         }
       ],
       "testcases": [
@@ -5843,7 +5848,7 @@
         },
         {
           "name": "memoryTier",
-          "value": "T2"
+          "value": "T3"
         },
         {
           "name": "status",
@@ -5878,6 +5883,10 @@
           "name": "commit",
           "value": "e7b646a",
           "description": "发布登记 archgraph-argo@0.12.6（registry latest；含 7674cba/.e456897/5cdec8f/77d2c1d 四项修复；0.12.5 仅含 bootstrap+旧 compact，缺 attributes/testcases 与 StyleEx 崩溃修复）"
+        },
+        {
+          "name": "archivedAt",
+          "value": "2026-09-12"
         }
       ],
       "description": "里程碑（2026-09-04）：EA 同步收敛到 .qea 直写投影并发布。沿革：EA 类工具洞察→Web 冻结→EA 为主设计界面；WP2100 导入优化→SQL 直写实验（.feap Execute 单条可用批量挂、.qea Execute Internal Error）→headless COM 回环保真全绿→定论 .qea=SQLite 外部直写。交付 argo/scripts/ea-qea-sync.js+lib（node:sqlite；全量约50ms 稳态约16ms；full 整库 wipe 重建；写前快照；verify）；ARGO MCP 写后增量投影（fda5e47）+argo init full（initializeWorkspace 内，同 Neo4j init）；移除 ea-qea.json；本仓 archgraph.qea 与 canonical 213/102/57 一致。发布 0.11→0.12.0→0.12.2（0.12.1 漏 SKILL 文档教训：发布前核对 pack）；install+deploy+initializeWorkspace 验证全绿（qea 目标==本仓 .qea 246ms；neo4j db==仓库名）。SKILL.md 补 qea/neo4j 投影核验。遗留项：bootstrap 仍建 .feap 需改 .qea（已由 7674cba 修复）；archgraph.qea 入库待定。",
@@ -6878,6 +6887,27 @@
           "name": "commit",
           "value": "7eee172",
           "description": "argo/scripts/graph-rag/rerankRetrieval.js; tests/rerank-retrieval.test.js（池 10→20 恢复，召回优先）"
+        }
+      ]
+    },
+    {
+      "id": "overseer-retrieval-recall-first-001",
+      "name": "原则：检索召回/检出优先，不以性能换召回",
+      "type": "Principle",
+      "description": "原则（2026-09-12，人类伙伴确立，长期有效）：一切方案/措施都不得牺牲最终检索的检出率与召回率（recall / precision），只能持平或提升；宁可消耗性能，也绝不以\"缩小候选池、截断候选内容、跳过重排\"等手段换取速度。任何优化必须能证明不降 recall/precision（需对照/证据）。当 Agent 的回答、建议或实现与本法相悖时，必须明确指出来，不得默默执行。适用面：读检索（getSystemArchitecture / memory_search）、写路径去重检索（semantic dedup advisory）、rerank 与混合检索调优，以及所有涉及\"检出/召回\"的环节。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "29f17e6",
+          "description": "design/KG/SystemArchitecture.json（Project Overseer 原则：检索召回/检出优先）"
         }
       ]
     }
@@ -8575,10 +8605,10 @@
         "overseer-harness-workspaceroot-fix-001",
         "overseer-community-linkage-001",
         "overseer-homepage-v3-kglibrary-retire-001",
-        "overseer-ea-qea-projection-arc-001",
         "overseer-graph-dedup-gate-001",
         "overseer-semantic-seed-prefix-fix-001",
-        "overseer-rerank-latency-fix-001"
+        "overseer-rerank-latency-fix-001",
+        "overseer-retrieval-recall-first-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
@@ -8644,7 +8674,8 @@
         "overseer-subgraph-semantic-001",
         "overseer-wp2785-m1s1s2-milestone-001",
         "overseer-wp2786-deploy-milestone-001",
-        "overseer-wp2787-milestone-001"
+        "overseer-wp2787-milestone-001",
+        "overseer-ea-qea-projection-arc-001"
       ],
       "included_relationships": []
     },
