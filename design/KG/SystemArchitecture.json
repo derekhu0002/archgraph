@@ -5306,11 +5306,15 @@
         },
         {
           "name": "memoryTier",
-          "value": "T2"
+          "value": "T3"
         },
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "archivedAt",
+          "value": "2026-09-12"
         }
       ],
       "description": "WP2787 交付（2026-09-03，委派 Developer/Xiaoming，项目总管编排+验收）：WEB 手动选择项目根目录与切换。落地：手动根持久化（默认 ~/.argo/ea-tool/projects.json，projectsConfigPath 选项/EA_PROJECTS_CONFIG 覆盖）；发现合并=自动扫描∪手动根（解析后 graphPath 去重）；加法 API POST/DELETE/GET /api/roots（无 marker/不存在/空→400，重复→409，删非手动根→404，中文报错）；UI 项目栏「添加项目」绝对路径输入+失败提示、手动徽标+移除按钮，切换沿用既有联动（视图/状态/布局侧车）。验收：AT-2787-01 全场景（添加→查看→重启恢复→报错→移除）通过，回归 62/62，架构测试 36/38（2 既有失败），validate 通过。同日：真实使用产生的布局侧车正式资产登记入库（89d5553：433/1805/jlm-001）。可复用经验：凡起服务的测试必须显式传临时 projectsConfigPath，否则读到真实用户配置污染断言。待办：M2 交互壳方向待人类伙伴对 drawio 跟进评估拍板（洞察结论：不移植，维持 G6 v5 + 交互壳成熟化）。",
@@ -6233,6 +6237,11 @@
           "name": "commit",
           "value": "a27673a",
           "description": "argo/scripts/systemarchitecture-mcp-server.js（canonical-subset 评分 key 前缀鲁棒）; argo/scripts/graph-rag/defaultSemanticRetrieval.js; tests/architecture-dedup-semantic.test.js（AT-dedup-L1-03）；图谱回登记"
+        },
+        {
+          "name": "commit",
+          "value": "a35074c",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js（buildSemanticDedupAdvisory 的 journey.query 传 rerank:false：写路径去重排序与门禁无关，去掉 rerank 使写时延 ~25s→~1.2s）; tests/architecture-dedup-semantic.test.js（AT-dedup-L1-01 断言 rerank:false）"
         }
       ]
     },
@@ -6645,6 +6654,11 @@
           "name": "commit",
           "value": "1b1619f",
           "description": "1b1619f: eval-rerank 加载仓库 .env 到 process.env，使 rerank provider/model 与生产一致（冒烟确认 provider=deepseek/model=deepseek-flash，rerank_hybrid r@1 100、+16.7）。重启后运行态已验证：MCP 0.20.1、semantic lifecycle Aligned、argo-init ok（232/103/58）。"
+        },
+        {
+          "name": "commit",
+          "value": "a35074c",
+          "description": "argo/scripts/graph-rag/defaultSemanticRetrieval.js（通道重排并发 + request.rerank opt-out）; argo/scripts/graph-rag/rerankRetrieval.js（pool 20→10, timeout 8000→3500）; argo/scripts/systemarchitecture-mcp-server.js（写路径 advisory rerank:false）; tests/rerank-retrieval.test.js（AT-rerank-07）; tests/architecture-dedup-semantic.test.js"
         }
       ],
       "description": "语义二阶段重排（Rerank）：在向量/混合检索候选池后用 LLM listwise 重排（chat/completions），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略：默认关（ARGO_SEMANTIC_RERANK=0），开时用更大候选池（pool=20）重排后取 topK；fail-open（错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆。评测（scripts/eval-rerank.js，150 样本，qwen-turbo）：4-way vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优，但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再启用。provider/model 与 embedding 解耦：resolveRerankProvider 优先 ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL，未设则回落 embedding 配置（baseUrl/qwenKey/provider）与默认模型 qwen-turbo（可选 ARGO_SEMANTIC_RERANK_MODEL 仅改模型）。参数：ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js、liveEmbeddingProviderConfig.js。",
@@ -6655,43 +6669,50 @@
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
-          "description": "GIVEN 重排开关；WHEN 未设 env；THEN 默认关；设 1 则开；池/返回数可覆盖。",
           "name": "AT-rerank-01",
+          "description": "GIVEN 重排开关；WHEN 未设 env；THEN 默认关；设 1 则开；池/返回数可覆盖。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
-          "description": "GIVEN 候选 id 集；WHEN parseRerankOrder；THEN 接受 canonical/裸/后缀 id、去重、忽略未知、非法 JSON 返回空。",
           "name": "AT-rerank-02",
+          "description": "GIVEN 候选 id 集；WHEN parseRerankOrder；THEN 接受 canonical/裸/后缀 id、去重、忽略未知、非法 JSON 返回空。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
-          "description": "GIVEN seeds 与重排顺序；WHEN applyRerankOrder；THEN 重排+补集+限长；null/空顺序保持原序。",
           "name": "AT-rerank-03",
+          "description": "GIVEN seeds 与重排顺序；WHEN applyRerankOrder；THEN 重排+补集+限长；null/空顺序保持原序。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
-          "description": "GIVEN 注入 provider+transport；WHEN rerankCandidates；THEN 正常响应解析为顺序；非 ok/抛错/候选<2/缺 provider→null（不抛）。",
           "name": "AT-rerank-04",
+          "description": "GIVEN 注入 provider+transport；WHEN rerankCandidates；THEN 正常响应解析为顺序；非 ok/抛错/候选<2/缺 provider→null（不抛）。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
-          "description": "GIVEN 生产检索路径；WHEN 开关关；THEN 不进入重排；重排后再取 topK。",
           "name": "AT-rerank-05",
+          "description": "GIVEN 生产检索路径；WHEN 开关关或请求 rerank:false；THEN 不进入重排；重排后再取 topK。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
-          "description": "GIVEN embedding 配置；WHEN resolveRerankProvider 在无/有 ARGO_RERANK_* 时；THEN 默认回落 baseUrl+qwenKey+provider 且模型 qwen-turbo；ARGO_RERANK_* 可独立覆盖（不同 provider/端点/密钥/模型）。",
           "name": "AT-rerank-06",
+          "description": "GIVEN embedding 配置；WHEN resolveRerankProvider 在无/有 ARGO_RERANK_* 时；THEN 默认回落 baseUrl+qwenKey+provider 且模型 qwen-turbo；ARGO_RERANK_* 可独立覆盖（不同 provider/端点/密钥/模型）。",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js",
+          "name": "AT-rerank-07",
+          "description": "GIVEN 生产检索路径；WHEN 3 通道均需重排；THEN 通道重排并发执行（延迟≈单次而非求和），候选池 ≤10 且 ≥topK(8)，默认超时 ≤4s（可经 ARGO_SEMANTIC_RERANK_TIMEOUT_MS 覆盖）。",
           "type": "Acceptance Test"
         }
       ],
@@ -6809,6 +6830,27 @@
           "name": "commit",
           "value": "607fb0b",
           "description": "package.json — release(archgraph-argo): 0.20.2"
+        }
+      ]
+    },
+    {
+      "id": "overseer-rerank-latency-fix-001",
+      "name": "里程碑：语义检索时延优化（写路径去重去 rerank + 通道并发 + 池/超时收紧）",
+      "type": "Business Object",
+      "description": "里程碑（2026-09-12）：语义检索/图写入时延优化（Project Overseer）。背景：语义查询与图写入端到端 19–25s，不可接受（目标 <5s）。根因：rerank 对 Element/Relationship/View 3 个通道“串行”各调用一次 LLM（deepseek-flash），候选池 20–25、超时 8s。实测 deepseek HTTP 响应头 ~160ms，但响应体（模型生成）耗时可 1–8s 且方差大 → 3 次串行常见 12–24s，占端到端 95%+（embedding ~0.5s、向量/词法/闭包 ~0.8s）。修复：①写路径 semantic dedup advisory 传 rerank:false（advisory 的排序与门禁判据无关）→ 写 ~25s→~1.2s；②3 通道 rerank 并发（Promise.all）→ 端到端≈单次而非求和；③候选池 20→10（≥topK 8；实测向量召回在 top-3 已饱和，缩小池对上界近乎无损）；④默认超时 8000→3500ms（并发下 ~one timeout；慢调用 fail-open 保序；可经 ARGO_SEMANTIC_RERANK_TIMEOUT_MS 覆盖）。实测（真实 MCP）：读 ~19s→4.3–4.5s、写 ~25s→~1.2s，均 <5s；全量测试套件因时延下降 160s→42s（且 ea-web-service-impl 语义检索由超时失败转为通过）。质量影响：读检索召回/精确度不受影响（advisory 独立于读路径；池缩小的召回上界实测无变化：60 样本向量 top-3 命中 100%）；advisory 仅边界微变。可复用经验：LLM-as-reranker 的时延瓶颈在“生成”而非请求；多通道/多目标重排应并发并用超时+fail-open 兜底；写路径的“建议/门禁”类语义调用不应继承读路径的重排成本。commits a35074c（代码+测试）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "a35074c",
+          "description": "argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/graph-rag/rerankRetrieval.js; argo/scripts/systemarchitecture-mcp-server.js; tests/rerank-retrieval.test.js; tests/architecture-dedup-semantic.test.js"
         }
       ]
     }
@@ -8506,10 +8548,10 @@
         "overseer-harness-workspaceroot-fix-001",
         "overseer-community-linkage-001",
         "overseer-homepage-v3-kglibrary-retire-001",
-        "overseer-wp2787-milestone-001",
         "overseer-ea-qea-projection-arc-001",
         "overseer-graph-dedup-gate-001",
-        "overseer-semantic-seed-prefix-fix-001"
+        "overseer-semantic-seed-prefix-fix-001",
+        "overseer-rerank-latency-fix-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
@@ -8574,7 +8616,8 @@
         "overseer-query-rules-001",
         "overseer-subgraph-semantic-001",
         "overseer-wp2785-m1s1s2-milestone-001",
-        "overseer-wp2786-deploy-milestone-001"
+        "overseer-wp2786-deploy-milestone-001",
+        "overseer-wp2787-milestone-001"
       ],
       "included_relationships": []
     },
