@@ -6602,6 +6602,11 @@
           "name": "commit",
           "value": "721f5fe",
           "description": "重排 provider/model 与 embedding 解耦：resolveRerankProvider（ARGO_RERANK_BASE_URL/API_KEY/PROVIDER/MODEL 独立覆盖，未设回落 embedding+qwen-turbo）；ARGO_RERANK_API_KEY 纳入密钥白名单；AT-rerank-06"
+        },
+        {
+          "name": "commit",
+          "value": "ad4629c",
+          "description": "重排请求超时（ARGO_SEMANTIC_RERANK_TIMEOUT_MS 默认8s，fail-open）；评测进度。DeepSeek-flash 与 qwen-turbo 同样本(80)对比：DeepSeek rerank_hybrid r@1 100（+7.5，MRR 1.0，desc 不退化）远优于 qwen-turbo（rerank_hybrid 92.5、desc −7.1）。"
         }
       ],
       "description": "语义二阶段重排（Rerank）：在向量/混合检索候选池后用 LLM listwise 重排（chat/completions），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略：默认关（ARGO_SEMANTIC_RERANK=0），开时用更大候选池（pool=20）重排后取 topK；fail-open（错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆。评测（scripts/eval-rerank.js，150 样本，qwen-turbo）：4-way vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优，但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再启用。provider/model 与 embedding 解耦：resolveRerankProvider 优先 ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL，未设则回落 embedding 配置（baseUrl/qwenKey/provider）与默认模型 qwen-turbo（可选 ARGO_SEMANTIC_RERANK_MODEL 仅改模型）。参数：ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js、liveEmbeddingProviderConfig.js。",
