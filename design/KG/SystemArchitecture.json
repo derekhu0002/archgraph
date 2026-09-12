@@ -4190,6 +4190,11 @@
           "name": "commit",
           "value": "b6c6466",
           "description": "fix(view): graph-semantics 唯一性不变量 + updateView/addView 去重 + qea 投影防双插"
+        },
+        {
+          "name": "commit",
+          "value": "33156a1",
+          "description": "README.md; index.html; tests/readme.test.js; tests/website.test.js（README 与主页新增 Graph integrity 小节：写入去重/单一成员/结构校验；How to use 补复用）"
         }
       ],
       "testcases": [
