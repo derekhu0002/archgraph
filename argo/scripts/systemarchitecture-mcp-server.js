@@ -2801,7 +2801,7 @@ async function buildSemanticDedupAdvisory(context, mutations, dependencies) {
       const intent = [element.type, element.name, element.description]
         .filter(part => typeof part === 'string' && part.trim() !== '')
         .join(' ');
-      const retrieved = await journey.query({ purpose: 'general', intent, topK: SEMANTIC_DEDUP_TOP_K });
+      const retrieved = await journey.query({ purpose: 'general', intent, topK: SEMANTIC_DEDUP_TOP_K, rerank: false });
       const source = retrieved && (retrieved.result || retrieved.document) || retrieved;
       const subset = buildCanonicalSemanticDocumentSubset(source, context.document);
       const elements = subset && subset.status === 'passed' && subset.document

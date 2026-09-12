@@ -240,12 +240,12 @@ async function executeWpP2Retrieval({
   const lexicalTopK = hybridTopK();
   const fusionK = rrfK();
   const fusionWeights = hybridWeights();
-  const rerank = isRerankEnabled();
+  const rerank = isRerankEnabled() && request.rerank !== false;
   const rerankOptions = rerankConfig();
   const rerankProvider = rerank ? resolveRerankProvider(configurationEvidence.configuration) : null;
   // Rerank needs a larger candidate pool than the final top-K.
   const pool = rerank ? Math.max(topK, rerankOptions.poolSize) : topK;
-  const seedsByType = {};
+  const channelSeeds = [];
   for (const channel of CHANNELS) {
     const vectorSeeds = await exhaustChannel({
       channel,
@@ -266,17 +266,27 @@ async function executeWpP2Retrieval({
       });
       seeds = fuseChannelSeeds({ vectorSeeds, lexicalSeeds, k: fusionK, limit: Math.max(pool, lexicalTopK), weights: fusionWeights });
     }
-    if (rerank && seeds.length > 1) {
-      const ordered = await rerankCandidates({
-        query: request.intent,
-        candidates: seeds,
-        provider: rerankProvider,
-        transport: composition.transport,
-        maxReturn: rerankOptions.maxReturn,
-      });
-      // fail-open: a null/empty order keeps the original ordering
-      seeds = applyRerankOrder(seeds, ordered, topK);
-    }
+    channelSeeds.push({ channel, seeds });
+  }
+  if (rerank) {
+    // Rerank every channel CONCURRENTLY: the LLM calls dominate latency and are
+    // independent, so parallelizing turns the cost from sum(channels) into
+    // ~one call. fail-open: a null/empty order keeps the original ordering.
+    const rerankedSeeds = await Promise.all(channelSeeds.map(({ seeds }) => (
+      seeds.length > 1
+        ? rerankCandidates({
+          query: request.intent,
+          candidates: seeds,
+          provider: rerankProvider,
+          transport: composition.transport,
+          maxReturn: rerankOptions.maxReturn,
+        }).then(ordered => applyRerankOrder(seeds, ordered, topK))
+        : seeds
+    )));
+    channelSeeds.forEach((entry, index) => { entry.seeds = rerankedSeeds[index]; });
+  }
+  const seedsByType = {};
+  for (const { channel, seeds } of channelSeeds) {
     seedsByType[channel.key] = seeds;
   }
   return completeSemanticResult({

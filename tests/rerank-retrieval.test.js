@@ -11,6 +11,7 @@ const {
   DEFAULT_RERANK_RETURN,
   isRerankEnabled,
   rerankConfig,
+  rerankTimeoutMs,
   resolveRerankProvider,
   parseRerankOrder,
   applyRerankOrder,
@@ -87,11 +88,23 @@ test('AT-rerank-06: rerank provider is independent of embedding (qwen fallback +
 });
 
 // AT-rerank-05: the production retrieval only reranks when the switch is on
-// (parity guard for the default-OFF release).
-test('AT-rerank-05: production retrieval gates rerank behind the switch', () => {
+// (parity guard for the default-OFF release), and a request can opt out.
+test('AT-rerank-05: production retrieval gates rerank behind the switch + per-request opt-out', () => {
   const src = fs.readFileSync(path.join(ROOT, 'argo/scripts/graph-rag/defaultSemanticRetrieval.js'), 'utf8');
-  assert.match(src, /const rerank = isRerankEnabled\(\)/);
-  assert.match(src, /if \(rerank && seeds\.length > 1\)/);
-  assert.match(src, /applyRerankOrder\(seeds, ordered, topK\)/);
+  assert.match(src, /const rerank = isRerankEnabled\(\) && request\.rerank !== false/, 'switch AND per-request opt-out');
   assert.match(src, /rerankCandidates\(/);
+  assert.match(src, /applyRerankOrder\(seeds, ordered, topK\)/);
+});
+
+// AT-rerank-07: the per-channel reranks run CONCURRENTLY so latency is ~one LLM
+// call instead of the sum over channels; the candidate pool is bounded near the
+// final top-K (small prompt, few timeouts) while staying >= the default top-K;
+// and the per-call timeout is bounded so a slow call cannot blow the query SLA.
+test('AT-rerank-07: channel reranks are concurrent, pool + timeout are bounded', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'argo/scripts/graph-rag/defaultSemanticRetrieval.js'), 'utf8');
+  assert.match(src, /Promise\.all\(channelSeeds\.map/, 'per-channel reranks must run in parallel');
+  assert.ok(DEFAULT_RERANK_POOL >= 8, 'pool must be >= the default top-K (8) so recall is not truncated');
+  assert.ok(DEFAULT_RERANK_POOL <= 10, 'pool must stay small to bound rerank latency');
+  assert.ok(rerankTimeoutMs({}) <= 4000, 'default rerank timeout must keep the query under ~5s');
+  assert.ok(rerankTimeoutMs({ ARGO_SEMANTIC_RERANK_TIMEOUT_MS: '6000' }) === 6000, 'timeout stays env-overridable');
 });

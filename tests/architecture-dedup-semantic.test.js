@@ -46,9 +46,11 @@ test('semantic candidates: whole graph, same type, above threshold, large window
   // GIVEN a new Application Component is about to be added
   const document = baseDocument();
   let seenTopK;
+  let seenRerank;
   const journey = {
     query: async (request) => {
       seenTopK = request.topK;
+      seenRerank = request.rerank;
       return {
         result: {
           elements: [
@@ -75,6 +77,7 @@ test('semantic candidates: whole graph, same type, above threshold, large window
   assert.equal(advisory.candidates[0].matches.find(m => m.id === 'w1').in_target_views, true);
   assert.equal(advisory.candidates[0].matches.find(m => m.id === 'w2').in_target_views, false);
   assert.ok(Number.isInteger(seenTopK) && seenTopK >= 8, 'gate must request a large candidate window');
+  assert.equal(seenRerank, false, 'write-path dedup advisory must disable rerank (latency; ordering is irrelevant to the gate)');
 });
 
 test('L1 advisory: never rejects or throws when the semantic backend fails (degrades)', async () => {

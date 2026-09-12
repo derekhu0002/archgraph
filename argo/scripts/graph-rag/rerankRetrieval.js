@@ -6,9 +6,18 @@
 // the caller keeps the original ordering. Pure helpers are exported for tests.
 
 const DEFAULT_RERANK_MODEL = 'qwen-turbo';
-const DEFAULT_RERANK_POOL = 20;
+// Candidate pool size: the pool bounds the recall CEILING (a target the seed
+// stage ranks outside the pool can never be recovered by rerank). Measured on
+// the graph, vector recall is saturated well within the top few (target in
+// top-3 ≈ 100% on the golden sample), so 10 (>= the default top-K of 8) keeps
+// the ceiling while shrinking the prompt and cutting rerank latency/timeouts.
+const DEFAULT_RERANK_POOL = 10;
 const DEFAULT_RERANK_RETURN = 8;
-const DEFAULT_RERANK_TIMEOUT_MS = 8000;
+// Per-call timeout. Channel reranks run concurrently, so the end-to-end rerank
+// cost is ~one timeout, not N. 3.5s keeps the whole semantic query under ~5s
+// while still letting typical calls (1-4s) complete; slower calls fail open to
+// the pre-rerank (fused) order. Overridable via ARGO_SEMANTIC_RERANK_TIMEOUT_MS.
+const DEFAULT_RERANK_TIMEOUT_MS = 3500;
 
 function rerankTimeoutMs(env = process.env) {
   const value = Number(env && env.ARGO_SEMANTIC_RERANK_TIMEOUT_MS);
