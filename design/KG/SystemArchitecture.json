@@ -4275,6 +4275,11 @@
           "name": "commit",
           "value": "ad4629c",
           "description": "重排模型对比（同样本80，真实后端）：DeepSeek-flash rerank(hybrid) recall@1 100（+7.5、MRR 1.0、desc 不退化）>>> qwen-turbo（rerank_hybrid 92.5、desc −7.1）。结论：rerank 用 DeepSeek（ARGO_RERANK_PROVIDER=deepseek, ARGO_RERANK_BASE_URL=https://api.deepseek.com, ARGO_RERANK_MODEL=deepseek-flash；API 模型 id 是 deepseek-flash，非 opencode 别名 v4-flash）。实用：DeepSeek 未添为 .env；会话临时用用户提供的 key（未落盘）。Pitfall：本机 Node 大数据集长时跑偶发硬挂/0字节退出（尤其 150 样本）；harness 原本只在结束时打印，已加进度；rerank 已加 AbortController 超时默认8s fail-open。"
+        },
+        {
+          "name": "commit",
+          "value": "579bddd",
+          "description": "【发布 v0.20.0 待重启】hybrid 检索 + LLM 重排 + 重排 provider 解耦 + 超时防护 已发布并部署。npm publish archgraph-argo@0.20.0（shasum 6887c6ce）→ registry 传播延迟（轮询第7次可见）→ npm i -g → argo-deploy（注册 argo-wakeup 插件）。重排选定 DeepSeek（provider=deepseek/model=deepseek-flash），配置（含 ARGO_RERANK_API_KEY）已写 ~/.argo/.env，ARGO_SEMANTIC_RERANK=1。待办：人类伙伴重启宿主加载新常驻 MCP 进程；重启后重跑 argo-init（当前进程为旧内存代码，init 报告停留 09-05）。坑：长跑大数据集本机 Node 偶发硬挂/0字节退出；已加每20条进度 + rerank 8s 超时。"
         }
       ],
       "testcases": [
@@ -6663,6 +6668,38 @@
         }
       ],
       "type": "Application Component"
+    },
+    {
+      "attributes": [
+        {
+          "description": "重排请求超时（AbortController，默认8s fail-open）+ 评测进度输出",
+          "name": "commit",
+          "value": "ad4629c"
+        },
+        {
+          "description": "重排 provider 与 embedding 解耦（ARGO_RERANK_* 独立配置）",
+          "name": "commit",
+          "value": "721f5fe"
+        },
+        {
+          "description": "package.json（发布 archgraph-argo@0.20.0）",
+          "name": "commit",
+          "value": "579bddd"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "发布里程碑（2026-09-12）：archgraph-argo@0.20.0 发布并部署，交付检索质量优化三项 + 健壮性修复。内容：①检索评测基线 scripts/eval-retrieval.js（vector-only recall@1 94.6%）与 4-way 对比 scripts/eval-rerank.js；②hybrid 检索：新增 argo/scripts/graph-rag/hybridRetrieval.js（RRF、sanitizeFulltextQuery、默认权重 vector:lexical=3:1）+ searchText 全文索引（productionSemanticNeo4jAdapter 建 *_fulltext，回填 Aligned）+ defaultSemanticRetrieval 集成（kind:'semantic-lexical-query'），ARGO_SEMANTIC_HYBRID 默认关；③LLM 重排：新增 argo/scripts/graph-rag/rerankRetrieval.js + defaultSemanticRetrieval.executeWpP2Retrieval 集成（pool=max(topK,20)），ARGO_SEMANTIC_RERANK 默认关、fail-open；④重排 provider 与 embedding 解耦（ARGO_RERANK_BASE_URL/API_KEY/PROVIDER/MODEL），配置白名单新增 ARGO_RERANK_* / ARGO_SEMANTIC_RERANK_TIMEOUT_MS，SECRET_KEYS 加 ARGO_RERANK_API_KEY；⑤健壮性：rerankCandidates 增 AbortController 超时（默认 8s，超时/异常返回 null→fail-open）。实测（同样本 80，真实后端）：DeepSeek-flash rerank(hybrid) recall@1 100（+7.5、MRR 1.0、desc 不退化）优于 qwen-turbo（rerank_hybrid 92.5、desc −7.1）→ 重排选定 DeepSeek（provider=deepseek, base https://api.deepseek.com, model deepseek-flash，注意 API 模型 id 为 deepseek-flash 而非 opencode 别名 deepseek-v4-flash）；相关配置（含 ARGO_RERANK_API_KEY）已写入 ~/.argo/.env。验收：rerank/hybrid/write-impact 等 71/71；validateSystemArchitecture 通过。发布流程：npm publish archgraph-argo@0.20.0（70 files/1.3MB，shasum 6887c6ce）→ registry 传播延迟（轮询第 7 次可见，规避 ETARGET）→ npm i -g archgraph-argo@0.20.0 → argo-deploy（注册 argo-wakeup 插件，更新 OpenCode MCP 配置）。坑：本机 Node 长跑大数据集偶发硬挂/0 字节退出（150 样本评测卡在 ~40–60 条）；harness 原本仅结束时打印→已加每 20 条进度。待办：人类伙伴重启宿主加载新常驻 MCP 进程；重启后重跑 argo-init（当前运行进程仍是旧内存代码，init 报告为 09-05 陈旧件）。",
+      "id": "overseer-argo-0-20-0-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.20.0（hybrid 检索 + LLM 重排 + 重排 provider 解耦）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -8615,7 +8652,8 @@
         "overseer-argo-0-18-0-release-001",
         "overseer-argo-0-18-1-release-001",
         "overseer-argo-0-19-0-release-001",
-        "overseer-argo-0-19-1-release-001"
+        "overseer-argo-0-19-1-release-001",
+        "overseer-argo-0-20-0-release-001"
       ]
     }
   ]
