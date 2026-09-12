@@ -6664,6 +6664,11 @@
           "name": "commit",
           "value": "132cec1",
           "description": "argo/scripts/graph-rag/rerankRetrieval.js（deepseek rerank 请求 thinking:{type:\"disabled\"}，去除推理 token 时延）; tests/rerank-retrieval.test.js（AT-rerank-08）"
+        },
+        {
+          "name": "commit",
+          "value": "7eee172",
+          "description": "argo/scripts/graph-rag/rerankRetrieval.js（恢复 DEFAULT_RERANK_POOL 20：池是召回上界，不缩小）; tests/rerank-retrieval.test.js（AT-rerank-07 改为断言池 ≥20）"
         }
       ],
       "description": "语义二阶段重排（Rerank）：在向量/混合检索候选池后用 LLM listwise 重排（chat/completions），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略：默认关（ARGO_SEMANTIC_RERANK=0），开时用更大候选池（pool=20）重排后取 topK；fail-open（错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆。评测（scripts/eval-rerank.js，150 样本，qwen-turbo）：4-way vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优，但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再启用。provider/model 与 embedding 解耦：resolveRerankProvider 优先 ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL，未设则回落 embedding 配置（baseUrl/qwenKey/provider）与默认模型 qwen-turbo（可选 ARGO_SEMANTIC_RERANK_MODEL 仅改模型）。参数：ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js、liveEmbeddingProviderConfig.js。",
@@ -6717,7 +6722,7 @@
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
           "name": "AT-rerank-07",
-          "description": "GIVEN 生产检索路径；WHEN 3 通道均需重排；THEN 通道重排并发执行（延迟≈单次而非求和），候选池 ≤10 且 ≥topK(8)，默认超时 ≤4s（可经 ARGO_SEMANTIC_RERANK_TIMEOUT_MS 覆盖）。",
+          "description": "GIVEN 生产检索路径；WHEN 3 通道均需重排；THEN 通道重排并发执行（延迟≈单次而非求和），默认超时 ≤4s（可经 ARGO_SEMANTIC_RERANK_TIMEOUT_MS 覆盖），且候选池不得缩小（≥20：池是召回上界；关 thinking 后单次耗时对池大小不敏感）。",
           "type": "Acceptance Test"
         },
         {
@@ -6849,7 +6854,7 @@
       "id": "overseer-rerank-latency-fix-001",
       "name": "里程碑：语义检索时延优化（写路径去重去 rerank + 通道并发 + 池/超时收紧）",
       "type": "Business Object",
-      "description": "里程碑（2026-09-12）：语义检索时延优化（Project Overseer）。背景：语义查询与图写入端到端 19–25s，不可接受（目标 <5s）。根因1：rerank 对 3 通道串行各调 1 次 LLM（deepseek-flash），候选池 20–25、超时 8s；3 次串行常见 12–24s（占端到端 95%+）。根因2（commit 132cec1，残余 4.5s 真因）：deepseek-flash 是推理模型——listwise 重排每次产出 5k–10k reasoning tokens（3.8–12.3s，方差大，常触超时 fail-open）；缩短候选文本/仅用 name 均无效（reasoning 由任务而非输入驱动）。修复：①写路径 dedup advisory 传 rerank:false（排序与门禁无关）→ 写 25s→~1.2s；②3 通道 rerank 并发（Promise.all）；③池 20→10（≥topK 8；实测召回上界已饱和）；④默认超时 8000→3500ms；⑤deepseek provider 的 rerank 请求加 thinking:{type:\"disabled\"}（702ms、reasoning=0、JSON 正常；非 deepseek 不受影响）。最终实测（真实 MCP）：读 ~1.8–2.2s、写 ~1.0s（原 19s/25s）；全量套件 160s→~42s。质量：读检索召回/精确不受影响；memory-eval 准确率 rerank 开/关一致（0.935，≥0.85 基线）。可复用经验：LLM-as-reranker 的时延瓶颈多在\"推理/生成\"而非请求；推理型模型做简单排序任务应显式关闭 thinking；多通道重排并发 + 超时 fail-open 兜底；写路径\"建议/门禁\"类语义调用不应继承读路径的重排成本。commits a35074c（并行+池+超时+advisory去rerank）、132cec1（关闭 deepseek thinking）。",
+      "description": "里程碑（2026-09-12）：语义检索时延优化（Project Overseer）。原则：一切以检出率/召回率优先，只提升不牺牲；不靠缩小内容换速度。背景：语义查询与图写入端到端 19–25s。根因1：rerank 对 3 通道串行各调 1 次 LLM，候选池 20、超时 8s → 3 次串行 12–24s。根因2（残余 4.5s 真因）：deepseek-flash 是推理模型——listwise 重排每次产出 5k–10k reasoning tokens（3.8–12.3s，方差大，常触超时 fail-open）。修复：①写路径 dedup advisory 传 rerank:false（候选集不变，仅排序与门禁无关）；②3 通道 rerank 并发（Promise.all）；③默认超时 8000→3500ms（关 thinking 后单次 ~1s，超时几乎不触发）；④deepseek rerank 请求加 thinking:{type:\"disabled\"}（702ms、reasoning=0）；⑤候选池保持 20（不缩小——池是召回上界；实测关 thinking 后单次耗时对候选数不敏感 8→40 均 ~1s，故无需以速度换召回）。最终实测（真实 MCP）：读 ~2.0–2.5s、写 ~1.1s（原 19s/25s）。质量：读检索召回/精确不受影响；memory-eval 准确率 rerank 开/关一致（0.935）；写 advisory 候选集不变（pool=25）→ 去重召回不受影响；超时 fail-open 仅退回融合序、候选不丢。可复用经验：LLM-as-reranker 时延瓶颈多在\"推理\"；推理模型做简单排序应显式关 thinking；多通道重排并发 + 超时兜底；任何优化不得缩小候选池/内容，否则可能损召回。commits a35074c（并发+超时+advisory去rerank）、132cec1（关 thinking）、7eee172（恢复池 20、不牺牲召回）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -6868,6 +6873,11 @@
           "name": "commit",
           "value": "132cec1",
           "description": "argo/scripts/graph-rag/rerankRetrieval.js; tests/rerank-retrieval.test.js（关闭 deepseek thinking：读 4.5s→1.8–2.2s）"
+        },
+        {
+          "name": "commit",
+          "value": "7eee172",
+          "description": "argo/scripts/graph-rag/rerankRetrieval.js; tests/rerank-retrieval.test.js（池 10→20 恢复，召回优先）"
         }
       ]
     }
