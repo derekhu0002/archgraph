@@ -3462,7 +3462,11 @@ function buildCanonicalSemanticDocumentSubset(source, canonicalDocument = undefi
     if (!item) continue;
     const numericScore = Number(item.semanticScore);
     if (!Number.isFinite(numericScore)) continue;
-    const key = String(item.id !== undefined ? item.id : item.view_id);
+    // Evidence ids may still carry the channel prefix (real Neo4j shape); the
+    // seed-score map and canonical lookups are keyed on the bare canonical id,
+    // so normalize before comparing (otherwise the rank-derived score lands on
+    // a phantom prefixed key and the tiny fused RRF score wins for the element).
+    const key = String(item.id !== undefined ? item.id : item.view_id).replace(/^[^:]*:/, '');
     if (key && (!semanticScoreById.has(key) || numericScore > semanticScoreById.get(key))) {
       semanticScoreById.set(key, numericScore);
     }

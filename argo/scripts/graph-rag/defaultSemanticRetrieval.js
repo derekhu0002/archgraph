@@ -835,15 +835,26 @@ function scopeCanonicalIdentitiesForChannel(identities, channel) {
   });
 }
 
+// Semantic vector records store their canonicalIdentity channel-prefixed
+// (e.g. "Element:widget-1") so the scoped Cypher `node.canonicalIdentity IN
+// $canonicalIdentities` matches. Every consumer of a seed's `id` — purpose
+// closure anchors, provenance keys, and the canonical-subset score lookup —
+// however keys on the BARE canonical graph id. Expose the bare id as `id` and
+// keep the prefixed value as `canonicalIdentity` so a seed resolves against the
+// canonical graph instead of a phantom prefixed id.
+function bareCanonicalId(id) {
+  return String(id).replace(/^[^:]*:/, '');
+}
+
 function normalizeVectorRecord(raw, channel) {
   if (!raw || typeof raw !== 'object') return undefined;
-  const id = raw.canonicalIdentity || raw.id || raw.objectId;
+  const canonicalIdentity = raw.canonicalIdentity || raw.id || raw.objectId;
   const score = numberValue(raw.score);
-  if (!id || !Number.isFinite(score)) return undefined;
+  if (!canonicalIdentity || !Number.isFinite(score)) return undefined;
   return {
     ...raw,
-    id,
-    canonicalIdentity: id,
+    id: bareCanonicalId(canonicalIdentity),
+    canonicalIdentity,
     objectType: channel.objectType,
     channel: channel.channel,
     score,
@@ -1157,5 +1168,7 @@ module.exports = {
   auditThresholdFor,
   resolveTopK,
   scopeCanonicalIdentitiesForChannel,
+  bareCanonicalId,
+  normalizeVectorRecord,
   AUDIT_PURPOSES,
 };

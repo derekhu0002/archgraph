@@ -121,6 +121,37 @@ test('semantic candidates: below-threshold and different-type candidates are fil
   assert.deepEqual(advisory.candidates[0].matches, []);
 });
 
+// AT-dedup-L1-02: real Neo4j evidence carries channel-prefixed ids. The gate's
+// rank-derived score (0.80..0.99) is attached to the closure element, while the
+// fused seed (RRF) shares the same prefixed identity. The rank-derived score
+// must win for the SAME element, otherwise every real dedup score collapses to
+// the tiny RRF score and the 0.85 gate never fires.
+test('semantic candidates: prefixed evidence id surfaces the rank-derived score', async () => {
+  // GIVEN a fused seed (RRF 0.05) and a semantic closure element (rank-derived 0.99)
+  // that share the real channel-prefixed identity "Element:w1"
+  const document = baseDocument();
+  const journey = {
+    query: async () => ({
+      seedsByType: {
+        elements: [{ id: 'Element:w1', canonicalIdentity: 'Element:w1', score: 0.05, rrfScore: 0.05, matchedLists: 2 }],
+      },
+      closure: {
+        elements: [{ id: 'Element:w1', firstInclusionReason: 'semantic-seed', semanticScore: 0.99 }],
+      },
+    }),
+  };
+  // WHEN candidates are built
+  const advisory = await buildSemanticDedupAdvisory(
+    context(document),
+    [addWidgetMutation()],
+    { semanticOperatorJourney: journey },
+  );
+  // THEN the bare canonical element w1 is surfaced with the rank-derived score
+  assert.equal(advisory.has_suggestions, true, 'the rank-derived score must reach the gate');
+  assert.deepEqual(advisory.candidates[0].matches.map(match => match.id), ['w1']);
+  assert.equal(advisory.candidates[0].matches[0].score, 0.99);
+});
+
 test('semantic gate: a created element is blocked unless allowDuplicate overrides it', () => {
   const advisory = {
     status: 'passed',

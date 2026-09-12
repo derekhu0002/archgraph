@@ -16,6 +16,12 @@ const {
   DEFAULT_HYBRID_TOP_K,
   DEFAULT_RRF_K,
 } = require('../argo/scripts/graph-rag/hybridRetrieval.js');
+const {
+  createProductionGraphRagRuntime,
+} = require('../argo/scripts/graph-rag/productionGraphRagRuntime.js');
+const {
+  normalizeVectorRecord,
+} = require('../argo/scripts/graph-rag/defaultSemanticRetrieval.js');
 
 const ROOT = path.resolve(__dirname, '..');
 
@@ -113,4 +119,30 @@ test('AT-write-impact-04: write-gate semanticScore is rank-derived, not raw simi
   assert.match(runtime, /semanticScore: Math\.max\(0\.99 - \(index \* 0\.01\), 0\.8\)/, 'semantic seeds carry a rank-derived score');
   const server = fs.readFileSync(path.join(ROOT, 'argo/scripts/systemarchitecture-mcp-server.js'), 'utf8');
   assert.match(server, /candidate\.semanticScore >= threshold/, 'the gate compares the rank-derived score against the threshold');
+});
+
+// AT-write-impact-05: a semantic seed's `id` is the BARE canonical graph id.
+// Neo4j records carry a channel-prefixed canonicalIdentity; if that prefix leaks
+// into the seed id, purpose-closure anchors never resolve against the canonical
+// graph (only the anchor itself closes) and the rank-derived write-gate score is
+// keyed on a phantom id. The seed must expose the bare id and keep the prefixed
+// identity for Neo4j only.
+test('AT-write-impact-05: seed id is the bare canonical id (closure anchors resolve)', async () => {
+  const channel = { objectType: 'Element', channel: 'Element' };
+  const seed = normalizeVectorRecord(
+    { canonicalIdentity: 'Element:hybrid-semantic-retrieval-001', score: 0.9 },
+    channel,
+  );
+  assert.equal(seed.id, 'hybrid-semantic-retrieval-001', 'seed id must be the bare canonical graph id');
+  assert.equal(seed.canonicalIdentity, 'Element:hybrid-semantic-retrieval-001', 'prefixed Neo4j identity is preserved');
+
+  const graph = JSON.parse(fs.readFileSync(path.join(ROOT, 'design/KG/SystemArchitecture.json'), 'utf8'));
+  const runtime = createProductionGraphRagRuntime({
+    canonicalGraph: graph,
+    neo4jRetrievalBoundary: { retrieve: async () => ({}) },
+  });
+  const closure = await runtime.closePurposePolicyScope({ purpose: 'general', anchors: [seed.id] });
+  const ids = closure.closure.elements.map(element => element.id);
+  assert.ok(ids.includes('hybrid-semantic-retrieval-001'), 'the seed anchor must resolve to the canonical element');
+  assert.ok(ids.every(id => !String(id).includes(':')), 'no channel-prefixed id may leak into the closure');
 });
