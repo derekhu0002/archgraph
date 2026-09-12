@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawn } = require('node:child_process');
+const { spawn, spawnSync } = require('node:child_process');
+const { markPhase } = require('./graph-rag/mcpCrashDiagnostics.js');
 const readline = require('node:readline');
 const crypto = require('node:crypto');
 
@@ -1768,6 +1769,7 @@ function removeEntries(existing, removals) {
 }
 
 async function buildMutationResult(context, mutations, write, dependencies) {
+  markPhase('mutation:' + (write ? 'apply' : 'preview'));
   const beforeSummary = summarizeDocument(context.document);
   let mutationResult;
   try {
@@ -1855,6 +1857,7 @@ async function buildMutationResult(context, mutations, write, dependencies) {
   // but ALWAYS reported on the result (passed / failed / noop+reason) so a missing EA
   // update is never silent.
   {
+    markPhase('mutation:qeaProjection');
     const resolved = resolveQeaProjectionTarget(context);
     const qeaTarget = resolved && resolved.target;
     if (qeaTarget) {
@@ -1883,6 +1886,7 @@ async function buildMutationResult(context, mutations, write, dependencies) {
   }
 
   if (shouldSyncCanonicalGraphToNeo4j(context.graphPath.relativePath)) {
+    markPhase('mutation:neo4jSync');
     try {
       const syncResult = await syncArchitectureToNeo4j({
         architecturePath: context.graphPath.relativePath,
@@ -1907,7 +1911,9 @@ async function buildMutationResult(context, mutations, write, dependencies) {
     }
   }
 
+  markPhase('mutation:embeddingLifecycle');
   await attachMutationEmbeddingLifecycle(context, result, mutationResult.document);
+  markPhase('mutation:done');
 
   return result;
 }
@@ -2127,33 +2133,35 @@ function resolveQeaProjectionTarget(context) {
 }
 
 function runQeaProjection(target) {
-  return new Promise((resolve) => {
-    const script = path.join(__dirname, 'ea-qea-sync.js');
-    if (!fs.existsSync(script)) {
-      resolve({ ok: false, error: 'argo/scripts/ea-qea-sync.js missing', ms: 0 });
-      return;
-    }
-    const snapshotDir = path.join(target.workspaceRoot, '.argo', 'temp', 'qea-backups');
-    // -y enables the projection-owned delete reconcile: objects that carry a schema anchor
-    // (t_object.Alias / t_connectortag schema_id) but are no longer in canonical are removed
-    // from the .qea, so a graph-side deletion actually disappears from EA on the next
-    // projection. Human-drawn (un-anchored) content is never a delete candidate.
-    const args = [script, '--mode', 'sync', '--graph', target.graphPath, '--qea', target.qeaPath, '--snapshot-dir', snapshotDir, '-y'];
-    const started = Date.now();
-    let stderr = '';
-    let child;
-    try {
-      child = spawn(process.execPath, args, { cwd: target.workspaceRoot, windowsHide: true });
-    } catch (error) {
-      resolve({ ok: false, error: String(error && error.message ? error.message : error), ms: Date.now() - started });
-      return;
-    }
-    child.stderr.on('data', (d) => { stderr += String(d); });
-    child.on('error', (err) => resolve({ ok: false, error: String(err && err.message ? err.message : err), ms: Date.now() - started, stderr: stderr.slice(0, 600) }));
-    child.on('close', (code) => {
-      resolve({ ok: code === 0, code, ms: Date.now() - started, stderr: stderr.slice(0, 600) });
-    });
-  });
+  // Synchronous child: this runs right before the async Neo4j sync + embedding
+  // lifecycle. An async child leaves a libuv handle closing while subsequent
+  // async I/O (fetch / neo4j-driver) proceeds, which on Windows can trip a
+  // native `UV_HANDLE_CLOSING` assertion and abort the whole MCP. spawnSync has
+  // no lingering handle (~150ms, bounded); the caller's `await` still applies.
+  const script = path.join(__dirname, 'ea-qea-sync.js');
+  const started = Date.now();
+  if (!fs.existsSync(script)) {
+    return { ok: false, error: 'argo/scripts/ea-qea-sync.js missing', ms: 0 };
+  }
+  const snapshotDir = path.join(target.workspaceRoot, '.argo', 'temp', 'qea-backups');
+  // -y enables the projection-owned delete reconcile: objects that carry a schema anchor
+  // (t_object.Alias / t_connectortag schema_id) but are no longer in canonical are removed
+  // from the .qea, so a graph-side deletion actually disappears from EA on the next
+  // projection. Human-drawn (un-anchored) content is never a delete candidate.
+  const args = [script, '--mode', 'sync', '--graph', target.graphPath, '--qea', target.qeaPath, '--snapshot-dir', snapshotDir, '-y'];
+  try {
+    const res = spawnSync(process.execPath, args, { cwd: target.workspaceRoot, windowsHide: true, encoding: 'utf8', timeout: 120000 });
+    const ok = res.status === 0;
+    return {
+      ok,
+      code: res.status,
+      ms: Date.now() - started,
+      stderr: String(res.stderr || '').slice(0, 600),
+      ...(ok ? {} : { error: String((res.stderr || '').slice(0, 600) || ('exit ' + res.status)) }),
+    };
+  } catch (error) {
+    return { ok: false, error: String(error && error.message ? error.message : error), ms: Date.now() - started };
+  }
 }
 
 function writeGraph(graphPath, document) {
@@ -2764,6 +2772,7 @@ function evaluateSemanticDedupGate(advisory, mutations) {
 }
 
 async function buildSemanticDedupAdvisory(context, mutations, dependencies) {
+  markPhase('mutation:semanticDedup');
   if (process.env.ARGO_MCP_SEMANTIC_DEDUP === '0') {
     return undefined;
   }

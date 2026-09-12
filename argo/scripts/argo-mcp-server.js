@@ -369,6 +369,13 @@ function resolveWorkspaceRoot(args) {
 
 async function callTool(name, args = {}, progressToken = null, dependencies = undefined) {
   loadRepositoryArgoEnvironment(resolveWorkspaceRoot(args));
+  try {
+    const crash = require('./graph-rag/mcpCrashDiagnostics.js');
+    crash.installCrashDiagnostics(resolveWorkspaceRoot(args));
+    crash.markPhase('tool:' + name);
+  } catch {
+    // diagnostics are best-effort; never block a tool call
+  }
   if (name === 'initializeWorkspace') {
     const workspace = await initializeWorkspace(resolveWorkspaceRoot(args));
     // Deterministic argo-init harness report (Neo4j structural sync, semantic
@@ -777,6 +784,12 @@ async function main() {
   // server starts, rebuild the index in the BACKGROUND (async, logged) so the
   // first query rarely pays the multi-second reconstruction. No-op when aligned.
   if (process.env.ARGO_REPO_ROOT && process.env.ARGO_REPO_ROOT.trim() !== '') {
+    try {
+      require('./graph-rag/mcpCrashDiagnostics.js')
+        .installCrashDiagnostics(process.env.ARGO_REPO_ROOT);
+    } catch {
+      // diagnostics are best-effort; never block server startup
+    }
     try {
       require('./graph-rag/semanticAlignmentRunner.js')
         .preheatSemanticAlignment(process.env.ARGO_REPO_ROOT);

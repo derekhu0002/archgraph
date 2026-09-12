@@ -32,6 +32,9 @@ const {
 const {
   runSemanticAlignment,
 } = require('./semanticAlignmentRunner.js');
+const {
+  markPhase,
+} = require('./mcpCrashDiagnostics.js');
 
 const APPROVED_SOURCE_KEYS = Object.freeze([
   'ARGO_EMBEDDING_BASE_URL',
@@ -233,6 +236,7 @@ async function executeWpP2Retrieval({
     configuration: configurationEvidence.configuration,
     transport: composition.transport,
   });
+  markPhase('retrieval:embed');
   const vector = await provider.embed(request.intent);
   requireQualifiedVector(vector);
   const purpose = request && typeof request.purpose === 'string' ? request.purpose : '';
@@ -272,6 +276,7 @@ async function executeWpP2Retrieval({
     channelSeeds.push({ channel, seeds });
   }
   if (rerank) {
+    markPhase('retrieval:rerank');
     // Rerank every channel CONCURRENTLY: the LLM calls dominate latency and are
     // independent, so parallelizing turns the cost from sum(channels) into
     // ~one call. fail-open: a null/empty order keeps the original ordering.
