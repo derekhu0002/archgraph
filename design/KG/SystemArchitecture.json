@@ -4245,6 +4245,11 @@
           "name": "commit",
           "value": "4fa1a90",
           "description": "P2 混合检索（词法 full-text + RRF，ARGO_SEMANTIC_HYBRID 默认关）已交付：hybridRetrieval.js + defaultSemanticRetrieval 集成 + A/B 评测 + AT-hybrid-01..05。A/B：等权 RRF 为负（ALL -1.0/View -6.1）；向量占优权重 3:1/lexK16 后 ALL recall@1 +0.4、name +1.2、element +0.6、desc -0.8、View 0，增益有限。建议下一步评估二阶段重排（rerank）或按宿主金丝雀开启。"
+        },
+        {
+          "name": "commit",
+          "value": "4a95b99",
+          "description": "补充写入策略影响验收 AT-write-impact-01..04：hybrid 开关不改 L0 精确去重（关/开结果一致）；融合不缩小写入门向量候选集；门禁判据（matches+onConflict）与评分尺度无关；门禁 semanticScore 为排名派生(0.99..0.8)，hybrid 只改排序不改 0.85 阈值语义。回归 57/57。"
         }
       ],
       "testcases": [
