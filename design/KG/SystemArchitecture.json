@@ -6799,6 +6799,16 @@
           "name": "commit",
           "value": "008ac26",
           "description": "design/KG/SystemArchitecture.json（图谱回登记 + AT-write-impact-05 / AT-dedup-L1-03）"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.20.2",
+          "description": "npm publish shasum b91afdc34db78ca5585630317629f73848b71ddd；全局安装 + argo-deploy 22/22；~/.argo/scripts 与 repo SHA256 一致；待宿主重启加载新常驻 MCP 进程"
+        },
+        {
+          "name": "commit",
+          "value": "607fb0b",
+          "description": "package.json — release(archgraph-argo): 0.20.2"
         }
       ]
     }
