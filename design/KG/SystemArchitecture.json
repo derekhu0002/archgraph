@@ -4250,6 +4250,11 @@
           "name": "commit",
           "value": "4a95b99",
           "description": "补充写入策略影响验收 AT-write-impact-01..04：hybrid 开关不改 L0 精确去重（关/开结果一致）；融合不缩小写入门向量候选集；门禁判据（matches+onConflict）与评分尺度无关；门禁 semanticScore 为排名派生(0.99..0.8)，hybrid 只改排序不改 0.85 阈值语义。回归 57/57。"
+        },
+        {
+          "name": "commit",
+          "value": "8b8b9f2",
+          "description": "P3 重排评测（scripts/eval-rerank.js，LLM listwise qwen-turbo，同评测集 150 样本）：vector-only recall@1 94.0 → rerank 98.7（+4.7；name 89.9→97.8、Element 91.3→98.1），recall@5 保持 100、MRR 0.968→0.992。rerank 为主要增益方向（明显优于混合检索）。仅评测，未接生产。"
         }
       ],
       "testcases": [
