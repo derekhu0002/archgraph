@@ -34,6 +34,16 @@ const RETRIEVAL_TUNING_KEYS = Object.freeze([
   'ARGO_SEMANTIC_AUDIT_THRESHOLD_RELATIONSHIP',
   'ARGO_SEMANTIC_AUDIT_THRESHOLD_VIEW',
   'ARGO_SEMANTIC_TOP_K',
+  // Rerank (P3) tuning + optional dedicated rerank provider. When the provider
+  // keys are unset the reranker falls back to the embedding provider (qwen).
+  'ARGO_SEMANTIC_RERANK',
+  'ARGO_SEMANTIC_RERANK_MODEL',
+  'ARGO_SEMANTIC_RERANK_POOL',
+  'ARGO_SEMANTIC_RERANK_RETURN',
+  'ARGO_RERANK_BASE_URL',
+  'ARGO_RERANK_API_KEY',
+  'ARGO_RERANK_PROVIDER',
+  'ARGO_RERANK_MODEL',
 ]);
 const OPT_IN_KEYS = Object.freeze({
   ARGO_LIVE_PROVIDER_E2E: 'LIVE_PROVIDER_E2E_OPT_IN_REQUIRED',
@@ -47,7 +57,7 @@ const READABLE_KEYS = Object.freeze([
 ]);
 const LEGACY_KEYS = Object.freeze(['ARGO_NEO4J_URI', 'ARGO_NEO4J_USERNAME', 'ARGO_NEO4J_PASSWORD']);
 const PROHIBITED_RUNTIME_FIELD_KEYS = Object.freeze(['neo4jUri', 'embeddingCredential']);
-const SECRET_KEYS = new Set(['ARGO_NEO4J_DATABASE_PASSWORD', 'QWEN_KEY']);
+const SECRET_KEYS = new Set(['ARGO_NEO4J_DATABASE_PASSWORD', 'QWEN_KEY', 'ARGO_RERANK_API_KEY']);
 const APPROVED = Object.freeze({
   ARGO_EMBEDDING_BASE_URL: 'https://llm-clids9mqc5o1mbvb.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
   ARGO_EMBEDDING_MODEL: 'qwen3.7-text-embedding',

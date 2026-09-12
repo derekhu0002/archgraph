@@ -13,6 +13,25 @@ function isRerankEnabled(env = process.env) {
   return String((env && env.ARGO_SEMANTIC_RERANK) || '') === '1';
 }
 
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim() !== '') return value.trim();
+  }
+  return '';
+}
+
+// Rerank provider resolution, DECOUPLED from the embedding provider:
+// - dedicated keys (ARGO_RERANK_BASE_URL / ARGO_RERANK_API_KEY / ARGO_RERANK_PROVIDER
+//   / ARGO_RERANK_MODEL) win when set, so a different provider/model can be used;
+// - otherwise it falls back to the embedding configuration (qwen by default).
+function resolveRerankProvider(configuration = {}, env = process.env) {
+  const baseUrl = firstNonEmpty(env.ARGO_RERANK_BASE_URL, configuration.embeddingBaseUrl);
+  const apiKey = firstNonEmpty(env.ARGO_RERANK_API_KEY, configuration.qwenKey);
+  const model = firstNonEmpty(env.ARGO_RERANK_MODEL, env.ARGO_SEMANTIC_RERANK_MODEL, DEFAULT_RERANK_MODEL);
+  const provider = firstNonEmpty(env.ARGO_RERANK_PROVIDER, configuration.embeddingProvider, 'qwen');
+  return { baseUrl, apiKey, model, provider };
+}
+
 function rerankConfig(env = process.env) {
   const model = (env && typeof env.ARGO_SEMANTIC_RERANK_MODEL === 'string' && env.ARGO_SEMANTIC_RERANK_MODEL.trim())
     ? env.ARGO_SEMANTIC_RERANK_MODEL.trim()
@@ -73,13 +92,16 @@ function applyRerankOrder(seeds, orderedIds, limit) {
   return Number.isInteger(limit) && limit > 0 ? out.slice(0, limit) : out;
 }
 
-async function rerankCandidates({ query, candidates, configuration, transport, model, maxReturn } = {}) {
+async function rerankCandidates({ query, candidates, provider, transport, maxReturn } = {}) {
   const list = Array.isArray(candidates) ? candidates.filter(candidate => candidate && candidate.id) : [];
   if (list.length < 2 || typeof query !== 'string' || query.trim() === '') return null;
-  if (!configuration || !transport || typeof transport.request !== 'function') return null;
-  if (typeof configuration.embeddingBaseUrl !== 'string' || typeof configuration.qwenKey !== 'string') return null;
+  if (!provider || !transport || typeof transport.request !== 'function') return null;
+  const baseUrl = typeof provider.baseUrl === 'string' ? provider.baseUrl : '';
+  const apiKey = typeof provider.apiKey === 'string' ? provider.apiKey : '';
+  if (baseUrl === '' || apiKey === '') return null;
+  const model = provider.model || DEFAULT_RERANK_MODEL;
   const body = {
-    model: model || DEFAULT_RERANK_MODEL,
+    model,
     temperature: 0,
     response_format: { type: 'json_object' },
     messages: [
@@ -88,9 +110,9 @@ async function rerankCandidates({ query, candidates, configuration, transport, m
     ],
   };
   try {
-    const response = await transport.request(`${configuration.embeddingBaseUrl}/chat/completions`, {
+    const response = await transport.request(`${baseUrl}/chat/completions`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${configuration.qwenKey}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
     if (!response || response.ok !== true || typeof response.json !== 'function') return null;
@@ -108,6 +130,7 @@ module.exports = {
   DEFAULT_RERANK_RETURN,
   isRerankEnabled,
   rerankConfig,
+  resolveRerankProvider,
   parseRerankOrder,
   applyRerankOrder,
   rerankCandidates,

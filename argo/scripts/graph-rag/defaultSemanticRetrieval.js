@@ -25,6 +25,7 @@ const {
 const {
   isRerankEnabled,
   rerankConfig,
+  resolveRerankProvider,
   rerankCandidates,
   applyRerankOrder,
 } = require('./rerankRetrieval.js');
@@ -241,6 +242,7 @@ async function executeWpP2Retrieval({
   const fusionWeights = hybridWeights();
   const rerank = isRerankEnabled();
   const rerankOptions = rerankConfig();
+  const rerankProvider = rerank ? resolveRerankProvider(configurationEvidence.configuration) : null;
   // Rerank needs a larger candidate pool than the final top-K.
   const pool = rerank ? Math.max(topK, rerankOptions.poolSize) : topK;
   const seedsByType = {};
@@ -268,9 +270,8 @@ async function executeWpP2Retrieval({
       const ordered = await rerankCandidates({
         query: request.intent,
         candidates: seeds,
-        configuration: configurationEvidence.configuration,
+        provider: rerankProvider,
         transport: composition.transport,
-        model: rerankOptions.model,
         maxReturn: rerankOptions.maxReturn,
       });
       // fail-open: a null/empty order keeps the original ordering
