@@ -4210,6 +4210,11 @@
           "name": "commit",
           "value": "33156a1",
           "description": "README.md; index.html; tests/readme.test.js; tests/website.test.js（README 与主页新增 Graph integrity 小节：写入去重/单一成员/结构校验；How to use 补复用）"
+        },
+        {
+          "name": "commit",
+          "value": "650459d",
+          "description": "主页新增 Capabilities 小节（归纳 211 commits 以来的能力：Agent 长期记忆/写入去重→精准召回/语义+结构检索/变更可证/多Harness/EA互操作/Agent组织建模）；README 改为简洁（目标+收益+安装使用），特性细节归主页"
         }
       ],
       "testcases": [
