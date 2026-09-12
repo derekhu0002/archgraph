@@ -6,12 +6,12 @@
 // the caller keeps the original ordering. Pure helpers are exported for tests.
 
 const DEFAULT_RERANK_MODEL = 'qwen-turbo';
-// Candidate pool size: the pool bounds the recall CEILING (a target the seed
-// stage ranks outside the pool can never be recovered by rerank). Measured on
-// the graph, vector recall is saturated well within the top few (target in
-// top-3 ≈ 100% on the golden sample), so 10 (>= the default top-K of 8) keeps
-// the ceiling while shrinking the prompt and cutting rerank latency/timeouts.
-const DEFAULT_RERANK_POOL = 10;
+// Candidate pool size. The pool is the recall CEILING: a target the seed stage
+// ranks outside the pool can never be recovered by rerank, so it must NOT be
+// shrunk for speed. Keep the original 20. With DeepSeek thinking disabled a
+// single rerank call is ~flat across candidate counts (8-40 all ~1s), so a
+// larger pool costs ~nothing -- never trade recall for latency here.
+const DEFAULT_RERANK_POOL = 20;
 const DEFAULT_RERANK_RETURN = 8;
 // Per-call timeout. Channel reranks run concurrently, so the end-to-end rerank
 // cost is ~one timeout, not N. 3.5s keeps the whole semantic query under ~5s

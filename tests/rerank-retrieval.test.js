@@ -97,14 +97,14 @@ test('AT-rerank-05: production retrieval gates rerank behind the switch + per-re
 });
 
 // AT-rerank-07: the per-channel reranks run CONCURRENTLY so latency is ~one LLM
-// call instead of the sum over channels; the candidate pool is bounded near the
-// final top-K (small prompt, few timeouts) while staying >= the default top-K;
-// and the per-call timeout is bounded so a slow call cannot blow the query SLA.
-test('AT-rerank-07: channel reranks are concurrent, pool + timeout are bounded', () => {
+// call instead of the sum over channels; the per-call timeout is bounded so a
+// slow call cannot blow the query SLA; and the candidate pool is NOT shrunk
+// (it is the recall ceiling) -- with DeepSeek thinking disabled the rerank
+// latency is ~flat across pool sizes, so recall must win over latency.
+test('AT-rerank-07: channel reranks are concurrent, timeout bounded, pool not shrunk', () => {
   const src = fs.readFileSync(path.join(ROOT, 'argo/scripts/graph-rag/defaultSemanticRetrieval.js'), 'utf8');
   assert.match(src, /Promise\.all\(channelSeeds\.map/, 'per-channel reranks must run in parallel');
-  assert.ok(DEFAULT_RERANK_POOL >= 8, 'pool must be >= the default top-K (8) so recall is not truncated');
-  assert.ok(DEFAULT_RERANK_POOL <= 10, 'pool must stay small to bound rerank latency');
+  assert.ok(DEFAULT_RERANK_POOL >= 20, 'pool is the recall ceiling and must not be shrunk below the original 20');
   assert.ok(rerankTimeoutMs({}) <= 4000, 'default rerank timeout must keep the query under ~5s');
   assert.ok(rerankTimeoutMs({ ARGO_SEMANTIC_RERANK_TIMEOUT_MS: '6000' }) === 6000, 'timeout stays env-overridable');
 });
