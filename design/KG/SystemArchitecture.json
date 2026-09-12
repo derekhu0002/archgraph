@@ -3775,6 +3775,11 @@
           "name": "commit",
           "value": "d5cf7aa",
           "description": "argo/scripts/graph-rag/semanticAlignmentRunner.js（异步对齐 + 日志 + 启动预热 + 单飞去重）; graph-rag/defaultSemanticRetrieval.js（查询路径委托）; argo-mcp-server.js（启动预热）; tests/semantic-alignment-runner.test.js（AT-align-01/02）"
+        },
+        {
+          "name": "commit",
+          "value": "586e264",
+          "description": "argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js（resume checkpoint 跨 canonicalVersion 时按 contentHash + provider/model/dimensions 跳过未变记录）; tests/semantic-backfill-reconcile.test.js; argo/scripts/graph-rag/ARCHITECTURE.md"
         }
       ],
       "testcases": [
@@ -3782,7 +3787,7 @@
           "Input": "tests/semantic-record-text.test.js",
           "acceptanceCriteria": "tests/semantic-record-text.test.js",
           "name": "AT-semantic-text-01",
-          "description": "GIVEN 一个含 id/parent/attributes/testcases/subdiagram_views 的元素；WHEN 生成策展嵌入文本；THEN 保留 type/name/alias/description/attributes(name:value/description)/testcase 意图，且不含 id/parent 值、视图 id、testcase 文件路径、JSON 标点与引号。",
+          "description": "GIVEN 一个含 id/parent/attributes/testcases/subdiagram_views 的元素；WHEN 生成策展嵌入文本；THEN 保留 type/name/alias/description/attributes/testcase 意图，且不含 id/parent 值、视图 id、testcase 文件路径、JSON 标点与引号。",
           "type": "Acceptance Test"
         },
         {
@@ -3824,7 +3829,14 @@
           "Input": "tests/semantic-alignment-runner.test.js",
           "acceptanceCriteria": "tests/semantic-alignment-runner.test.js",
           "name": "AT-align-02",
-          "description": "GIVEN 索引未就绪需重建；WHEN 检查对齐接线；THEN 用异步 spawn（非 spawnSync，不冻结 MCP）、并发去重单飞、查询路径委托 runner、MCP 启动时后台预热；不改检索内容（守召回）。",
+          "description": "GIVEN 索引未就绪需重建；WHEN 检查对齐接线；THEN 用异步 spawn（非 spawnSync）、并发去重单飞、查询路径委托 runner、MCP 启动时后台预热；不改检索内容（守召回）。",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/semantic-backfill-reconcile.test.js",
+          "acceptanceCriteria": "tests/semantic-backfill-reconcile.test.js",
+          "name": "AT-backfill-incremental-01",
+          "description": "GIVEN canonicalVersion 变化（增删元素/关系/视图）且某记录策展语义文本未变（contentVersion 匹配）且 provider/model/dimensions 一致；WHEN 回填运行；THEN 该记录跳过不重嵌、运行完成；而文本变更的记录仍被重嵌（召回不降）。",
           "type": "Acceptance Test"
         }
       ]
@@ -6936,8 +6948,8 @@
         },
         {
           "name": "decision",
-          "value": "rerank-thinking-off-model-agnostic-env-configurable",
-          "description": "换模型不必改代码：默认对所有 rerank provider 发 thinking-off 片段（可 env 覆盖 JSON 片段），并在被 provider 拒绝(400)时自动无该字段重试——既通用又不因字段不兼容丢 rerank/召回。"
+          "value": "backfill-contenthash-incremental-resume",
+          "description": "修复 backfill-checkpoint-keyed-by-canonical-version 坑：resume checkpoint 跨版本时，用已持久化记录的 contentVersion(contentHash)+provider/model/dimensions 匹配来 seed 已完成集，只重嵌变更/新增记录。守召回：变更内容始终重嵌。"
         },
         {
           "name": "commit",
@@ -6948,6 +6960,11 @@
           "name": "pitfall",
           "value": "backfill-checkpoint-keyed-by-canonical-version",
           "description": "根因：productionSemanticBackfill.processChannel 的 resume checkpoint 以 canonicalVersion 为键（非 contentHash）——任何图身份变更（增删元素/关系/视图）→ checkpoint 失效 → 全量重嵌所有记录（~394 条 ×~0.4s ≈ 174s）。buildSemanticRecord 已生成 contentHash 且投影已持久化，故可改为按 contentHash 增量跳过未变记录（守召回：变更/新增仍重嵌）。待办修复。"
+        },
+        {
+          "name": "commit",
+          "value": "586e264",
+          "description": "增量回填：按 contentHash 跳过未变记录，消除版本变更导致的 ~174s 全量重嵌；召回不变。"
         }
       ]
     },
