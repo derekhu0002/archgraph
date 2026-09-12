@@ -22,6 +22,12 @@ const {
   fuseChannelSeeds,
   sanitizeFulltextQuery,
 } = require('./hybridRetrieval.js');
+const {
+  isRerankEnabled,
+  rerankConfig,
+  rerankCandidates,
+  applyRerankOrder,
+} = require('./rerankRetrieval.js');
 
 const APPROVED_SOURCE_KEYS = Object.freeze([
   'ARGO_EMBEDDING_BASE_URL',
@@ -233,6 +239,10 @@ async function executeWpP2Retrieval({
   const lexicalTopK = hybridTopK();
   const fusionK = rrfK();
   const fusionWeights = hybridWeights();
+  const rerank = isRerankEnabled();
+  const rerankOptions = rerankConfig();
+  // Rerank needs a larger candidate pool than the final top-K.
+  const pool = rerank ? Math.max(topK, rerankOptions.poolSize) : topK;
   const seedsByType = {};
   for (const channel of CHANNELS) {
     const vectorSeeds = await exhaustChannel({
@@ -240,7 +250,7 @@ async function executeWpP2Retrieval({
       neo4jDriver: composition.neo4jDriver,
       vector,
       threshold: strict ? auditThresholdFor(channel) : memoryThresholdFor(channel),
-      maxSeeds: topK,
+      maxSeeds: pool,
       ...(scoped ? { canonicalIdentities } : {}),
     });
     let seeds = vectorSeeds;
@@ -252,7 +262,19 @@ async function executeWpP2Retrieval({
         maxSeeds: lexicalTopK,
         ...(scoped ? { canonicalIdentities } : {}),
       });
-      seeds = fuseChannelSeeds({ vectorSeeds, lexicalSeeds, k: fusionK, limit: lexicalTopK, weights: fusionWeights });
+      seeds = fuseChannelSeeds({ vectorSeeds, lexicalSeeds, k: fusionK, limit: Math.max(pool, lexicalTopK), weights: fusionWeights });
+    }
+    if (rerank && seeds.length > 1) {
+      const ordered = await rerankCandidates({
+        query: request.intent,
+        candidates: seeds,
+        configuration: configurationEvidence.configuration,
+        transport: composition.transport,
+        model: rerankOptions.model,
+        maxReturn: rerankOptions.maxReturn,
+      });
+      // fail-open: a null/empty order keeps the original ordering
+      seeds = applyRerankOrder(seeds, ordered, topK);
     }
     seedsByType[channel.key] = seeds;
   }
