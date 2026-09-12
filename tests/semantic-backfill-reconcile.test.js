@@ -2,10 +2,14 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 
 const {
   createProductionSemanticBackfill,
 } = require('../argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js');
+const {
+  buildSemanticRecordText,
+} = require('../argo/scripts/graph-rag/semanticRecordText.js');
 
 // External-view acceptance tests for the full semantic backfill reconciliation:
 // after `argo init` runs the semantic lifecycle, the Neo4j semantic projection
@@ -179,4 +183,56 @@ test('AT semantic backfill removes only stale records in a mixed store', async (
   assert.equal(store.calls.tombstones, 1);
   assert.equal(store.calls.tombstonesList[0], 'Element:gone1');
   assert.deepEqual([...store.records.keys()].sort(), ['Element:e1', 'Element:e2']);
+});
+
+function contentVersionFor(channel, object) {
+  const hash = crypto.createHash('sha256').update(buildSemanticRecordText(channel, object)).digest('hex');
+  return `content:${hash}`;
+}
+
+function incrementalBackfill({ elements, store, embedded }) {
+  return createProductionSemanticBackfill({
+    canonicalSource: { async readSnapshot() { return { version: 'v2', elements, relationships: [], views: [] }; } },
+    structuralProjection: { async requireComplete() { return { status: 'complete', canonicalVersion: 'v2' }; } },
+    embeddingProvider: {
+      async embedBatch(batch) { for (const r of batch) embedded.push(r.canonicalIdentity); return embedResult(batch); },
+    },
+    projectionStore: store,
+    checkpointStore: createCheckpointStore(),
+    configuration: CONFIG,
+    qualification: QUALIFICATION,
+    batchSize: 2,
+  });
+}
+
+// AT semantic backfill resume is contentHash-incremental: when the graph's
+// canonicalVersion changes (any add/remove), records whose curated semantic text
+// is UNCHANGED must NOT be re-embedded (recall is preserved: changed content is
+// always re-embedded). This is what turns a ~174s full re-embed into seconds.
+test('AT semantic backfill resume skips unchanged records across canonical versions', async () => {
+  // GIVEN a persisted record for e1 whose semantic text is byte-identical (contentVersion matches)
+  const e1 = { id: 'e1', name: 'one' };
+  const unchanged = {
+    ...record('Element:e1', 'Element'),
+    canonicalVersion: 'v1',
+    contentVersion: contentVersionFor('Element', e1),
+  };
+  const store = createInMemoryStore([unchanged]);
+  const embedded = [];
+  const backfill = incrementalBackfill({ elements: [e1], store, embedded });
+
+  // WHEN the backfill runs at a NEW canonical version
+  const result = await backfill.execute({ explicitOptIn: true });
+
+  // THEN the unchanged record is skipped (not embedded) and the run completes
+  assert.equal(result.status, 'passed');
+  assert.deepEqual(embedded, [], 'unchanged content must be skipped (incremental resume)');
+
+  // AND a changed element IS re-embedded (no recall loss)
+  const changed = { id: 'e1', name: 'one-changed' };
+  const store2 = createInMemoryStore([unchanged]);
+  const embedded2 = [];
+  const backfill2 = incrementalBackfill({ elements: [changed], store: store2, embedded: embedded2 });
+  await backfill2.execute({ explicitOptIn: true });
+  assert.ok(embedded2.includes('Element:e1'), 'changed content must be re-embedded');
 });

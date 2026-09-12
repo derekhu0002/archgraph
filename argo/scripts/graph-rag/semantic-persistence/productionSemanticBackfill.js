@@ -90,7 +90,7 @@ async function processChannel(options) {
   const stored = await options.checkpointStore.readCheckpoint(options.channel);
   const checkpoint = stored && stored.canonicalVersion === options.canonicalVersion
     ? mutableCheckpoint(stored, canonicalRecords.length)
-    : emptyCheckpoint(options.channel, options.canonicalVersion, canonicalRecords.length);
+    : await resumeCheckpointByContent(options, canonicalRecords);
   const attempts = new Map();
 
   while (checkpoint.completedCanonicalIdentities.length < canonicalRecords.length) {
@@ -151,6 +151,61 @@ async function processChannel(options) {
     retries: checkpoint.retries,
     isolatedFailures: Object.freeze(checkpoint.isolatedFailures.map(failure => Object.freeze({ ...failure }))),
   });
+}
+
+// Cross-version incremental resume. The resume checkpoint is keyed by
+// canonicalVersion, but ANY add/remove of an element/relationship/view changes
+// that version. Re-embedding every record on every such change is wasteful and
+// slow (~hundreds of provider calls: measured ~174s). Instead, when the stored
+// checkpoint is for a different version, seed the completed set from the
+// persisted records whose curated semantic text (contentHash) AND embedding
+// provider/model/dimensions already match the current graph; only changed/new
+// records get embedded. Recall is unchanged: changed content is ALWAYS
+// re-embedded, only byte-identical text is skipped.
+async function resumeCheckpointByContent(options, canonicalRecords) {
+  const checkpoint = emptyCheckpoint(options.channel, options.canonicalVersion, canonicalRecords.length);
+  let persisted = [];
+  try {
+    const stored = await options.projectionStore.readRecords();
+    persisted = Array.isArray(stored) ? stored : [];
+  } catch {
+    persisted = [];
+  }
+  const byIdentity = new Map();
+  for (const record of persisted) {
+    if (record && record.channel === options.channel && isNonBlankString(record.canonicalIdentity)) {
+      byIdentity.set(record.canonicalIdentity, record);
+    }
+  }
+  const completed = [];
+  for (const record of canonicalRecords) {
+    const existing = byIdentity.get(record.canonicalIdentity);
+    if (existing && persistedRecordMatches(existing, record, options.qualification)) {
+      completed.push(record.canonicalIdentity);
+    }
+  }
+  checkpoint.completedCanonicalIdentities = completed;
+  checkpoint.completedCount = completed.length;
+  checkpoint.cursor = completed.length;
+  checkpoint.status = completed.length === canonicalRecords.length ? 'complete' : 'pending';
+  return checkpoint;
+}
+
+function persistedRecordMatches(existing, canonicalRecord, qualification) {
+  if (!Array.isArray(existing.vector)) {
+    return false;
+  }
+  const searchText = buildSemanticRecordText(canonicalRecord.channel, canonicalRecord.canonicalObject);
+  const contentHash = crypto.createHash('sha256').update(searchText).digest('hex');
+  return existing.contentVersion === `content:${contentHash}`
+    && existing.provider === qualification.provider
+    && existing.model === qualification.model
+    && existing.modelVersion === qualification.version
+    && toNumber(existing.dimensions) === toNumber(qualification.dimensions);
+}
+
+function toNumber(value) {
+  return value && typeof value.toNumber === 'function' ? value.toNumber() : Number(value);
 }
 
 function buildSemanticRecord(record, vector, options) {
