@@ -82,3 +82,16 @@ test('readme: community section links the community site and graph-wiki asset re
     'should link the graph-wiki asset repository'
   );
 });
+
+test('readme: graph integrity documents write dedup, single membership, and validation', () => {
+  // GIVEN the framework keeps the graph clean by construction
+  // WHEN a reader opens README.md
+  // THEN a Graph integrity section states dedup-on-write, one membership per view, and validation
+  const section = sectionAfter(README, 'Graph integrity');
+  assert.ok(section, 'README should have a Graph integrity section');
+  assert.match(section, /reuse/i, 'should state reuse/dedup on write');
+  assert.match(section, /semantically near/i, 'should state the semantic near-duplicate guard');
+  assert.match(section, /at most once per view/i, 'should state single membership per view');
+  assert.match(section, /Enterprise Architect/, 'should reference the EA single-membership convention');
+  assert.match(section, /validation/i, 'should state schema/graph-semantics validation');
+});

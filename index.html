@@ -184,6 +184,7 @@
       <a href="#about">About</a>
       <a href="#install">Install</a>
       <a href="#howto">How to use</a>
+      <a href="#integrity">Integrity</a>
       <a href="#community">Community</a>
       <a href="docs/insights.html">Insights</a>
       <a class="gh-btn" href="https://github.com/derekhu0002/archgraph">GitHub</a>
@@ -272,7 +273,8 @@ argo-deploy</pre>
       <p class="lead">
         Then open your project and start a coding agent. It will locate the architecture element
         behind the task, arm itself with that element&rsquo;s Skills and Rules, work test-first
-        (GIVEN-WHEN-THEN), and trace every commit back to the graph.
+        (GIVEN-WHEN-THEN), trace every commit back to the graph, and reuse an existing element
+        instead of duplicating it.
       </p>
       <p class="lead">
         The intent architecture graph &mdash; modelled in <strong>ArchiMate 3.2</strong> &mdash; is the
@@ -280,8 +282,42 @@ argo-deploy</pre>
       </p>
     </section>
 
+    <section id="integrity">
+      <h2><span class="num">03</span>Graph integrity</h2>
+      <p class="lead">
+        The graph is kept clean by construction, not by convention:
+      </p>
+      <div class="grid">
+        <div class="card">
+          <h3>Deduplicated on write</h3>
+          <p>
+            Adding an element, relationship, or view reuses an existing match instead of creating a
+            copy. A new element semantically near an existing one of the same type is blocked and
+            returned as a candidate &mdash; so the same concept never forks into two. Distinct
+            elements can still be created explicitly, with a justification.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Single membership</h3>
+          <p>
+            An element or relationship appears at most once per view, matching Enterprise Architect.
+            Duplicate membership is rejected by validation and is never projected twice into the EA
+            model.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Validated structure</h3>
+          <p>
+            Every write is checked against the schema and graph-semantics rules (identities,
+            cross-references, relationship endpoints, view capacity), and the commit that changed an
+            element is registered back onto it.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <section id="community">
-      <h2><span class="num">03</span>Community</h2>
+      <h2><span class="num">04</span>Community</h2>
       <p class="lead">
         ArchGraph runs on open co-building. The community shares and reuses <strong>architecture
         subgraphs</strong> across projects &mdash; so architecture knowledge is built together, not in silos.
@@ -305,7 +341,7 @@ argo-deploy</pre>
     </section>
 
     <section id="links">
-      <h2><span class="num">04</span>Links</h2>
+      <h2><span class="num">05</span>Links</h2>
       <p class="lead">
         <a href="https://github.com/derekhu0002/archgraph">GitHub repository</a>
         &nbsp;·&nbsp;

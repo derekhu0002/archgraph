@@ -95,6 +95,22 @@ test('readme-sync: home page mirrors README how-to-use', () => {
   assert.match(HTML, /single source of truth/, 'How to use should state the graph is the single source of truth');
 });
 
+test('graph-integrity: homepage documents graph integrity between How to use and Community', () => {
+  // GIVEN the framework keeps the graph clean by construction
+  // WHEN a visitor opens the homepage
+  // THEN a Graph integrity section sits between How to use and Community and states dedup + single membership
+  assert.match(HTML, /id="integrity"/, 'page should have a Graph integrity section');
+  assert.ok(
+    HTML.indexOf('id="integrity"') > HTML.indexOf('id="howto"') &&
+    HTML.indexOf('id="integrity"') < HTML.indexOf('id="community"'),
+    'Graph integrity should appear after How to use and before Community'
+  );
+  const section = HTML.slice(HTML.indexOf('id="integrity"'), HTML.indexOf('id="community"'));
+  assert.match(section, /reuse/i, 'should state reuse/dedup on write');
+  assert.match(section, /semantically near/i, 'should state the semantic near-duplicate guard');
+  assert.match(section, /once per view/i, 'should state single membership per view');
+});
+
 test('reference-library-removed: homepage no longer exposes a KGlibrary reference library', () => {
   // GIVEN the reference library role moved to the community hub / graph-wiki
   // WHEN a visitor opens the homepage

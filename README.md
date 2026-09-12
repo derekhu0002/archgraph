@@ -71,9 +71,26 @@ After installing, open your project and start a coding agent. It will:
 
 1. locate the architecture element behind the task before changing anything,
 2. arm itself with that element's Skills and Rules,
-3. work test-first (GIVEN-WHEN-THEN), and trace every commit back to the graph.
+3. work test-first (GIVEN-WHEN-THEN), and trace every commit back to the graph,
+4. reuse an existing element, relationship, or view instead of creating a duplicate — the write path
+   deduplicates by identity and flags a semantically near element of the same type.
 
 The intent architecture graph — modelled in **ArchiMate 3.2** — is the single source of truth.
+
+## Graph integrity
+
+The graph is kept clean by construction, not by convention:
+
+- **Deduplicated on write** — adding an element, relationship, or view reuses an existing match
+  (same type + name) instead of creating a copy. A new element that is semantically near an existing
+  one of the same type is blocked and returned as a candidate, so the same concept never forks into
+  two. A genuinely distinct element can still be created explicitly, with a justification.
+- **Single membership** — an element or relationship appears at most once per view, matching
+  Enterprise Architect; duplicate membership is rejected by validation and is never projected twice
+  into the EA model.
+- **Validated structure** — every write is checked against the schema and graph-semantics rules
+  (identities, cross-references, relationship endpoints, view capacity), and the commit that changed
+  an element is registered back onto it.
 
 ## Community
 
