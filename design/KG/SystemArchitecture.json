@@ -4270,6 +4270,11 @@
           "name": "commit",
           "value": "721f5fe",
           "description": "重排 provider/model 与 embedding 解耦：新增 resolveRerankProvider——ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL 独立覆盖（可用不同 provider/模型），未设则回落 embedding 配置 + 默认模型 qwen-turbo；ARGO_RERANK_API_KEY 纳入 .env 允许键与 SECRET_KEYS。AT-rerank-06。"
+        },
+        {
+          "name": "commit",
+          "value": "ad4629c",
+          "description": "重排模型对比（同样本80，真实后端）：DeepSeek-flash rerank(hybrid) recall@1 100（+7.5、MRR 1.0、desc 不退化）>>> qwen-turbo（rerank_hybrid 92.5、desc −7.1）。结论：rerank 用 DeepSeek（ARGO_RERANK_PROVIDER=deepseek, ARGO_RERANK_BASE_URL=https://api.deepseek.com, ARGO_RERANK_MODEL=deepseek-flash；API 模型 id 是 deepseek-flash，非 opencode 别名 v4-flash）。实用：DeepSeek 未添为 .env；会话临时用用户提供的 key（未落盘）。Pitfall：本机 Node 大数据集长时跑偶发硬挂/0字节退出（尤其 150 样本）；harness 原本只在结束时打印，已加进度；rerank 已加 AbortController 超时默认8s fail-open。"
         }
       ],
       "testcases": [
