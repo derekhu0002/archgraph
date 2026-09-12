@@ -6678,6 +6678,11 @@
           "name": "commit",
           "value": "7eee172",
           "description": "argo/scripts/graph-rag/rerankRetrieval.js（恢复 DEFAULT_RERANK_POOL 20：池是召回上界，不缩小）; tests/rerank-retrieval.test.js（AT-rerank-07 改为断言池 ≥20）"
+        },
+        {
+          "name": "commit",
+          "value": "618098f",
+          "description": "argo/scripts/graph-rag/rerankRetrieval.js（thinking 关闭改为对所有 provider 生效 + ARGO_RERANK_DISABLE_THINKING / ARGO_RERANK_THINKING_PARAM + 被拒自动重试）；liveEmbeddingProviderConfig.js（两键入 .env 白名单）；argo/.env.example；tests/rerank-retrieval.test.js（AT-rerank-08/09）"
         }
       ],
       "description": "语义二阶段重排（Rerank）：在向量/混合检索候选池后用 LLM listwise 重排（chat/completions），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略：默认关（ARGO_SEMANTIC_RERANK=0），开时用更大候选池（pool=20）重排后取 topK；fail-open（错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆。评测（scripts/eval-rerank.js，150 样本，qwen-turbo）：4-way vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优，但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再启用。provider/model 与 embedding 解耦：resolveRerankProvider 优先 ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL，未设则回落 embedding 配置（baseUrl/qwenKey/provider）与默认模型 qwen-turbo（可选 ARGO_SEMANTIC_RERANK_MODEL 仅改模型）。参数：ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js、liveEmbeddingProviderConfig.js。",
@@ -6731,14 +6736,21 @@
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
           "name": "AT-rerank-07",
-          "description": "GIVEN 生产检索路径；WHEN 3 通道均需重排；THEN 通道重排并发执行（延迟≈单次而非求和），默认超时 ≤4s（可经 ARGO_SEMANTIC_RERANK_TIMEOUT_MS 覆盖），且候选池不得缩小（≥20：池是召回上界；关 thinking 后单次耗时对池大小不敏感）。",
+          "description": "GIVEN 生产检索路径；WHEN 3 通道均需重排；THEN 通道重排并发执行（延迟≈单次而非求和），默认超时 ≤4s（可经 ARGO_SEMANTIC_RERANK_TIMEOUT_MS 覆盖），候选池不得缩小（≥20：池是召回上界）。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
           "name": "AT-rerank-08",
-          "description": "GIVEN deepseek 重排 provider；WHEN 组装 rerank 请求；THEN 请求体含 thinking:{type:\"disabled\"}（去掉推理 token，deepseek-flash 6–12s→~0.7s）；非 deepseek provider 不受影响。",
+          "description": "GIVEN 任意 rerank provider；WHEN 组装 rerank 请求；THEN 默认对所有 provider 关闭 thinking（不再限定 deepseek），换模型仍走快速路径。",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js",
+          "name": "AT-rerank-09",
+          "description": "GIVEN thinking-off 配置；WHEN ARGO_RERANK_DISABLE_THINKING=0 或 ARGO_RERANK_THINKING_PARAM=<json> 自定义；THEN 可关闭/替换为任意 provider 所需字段（如 reasoning_effort=none）；且当 provider 拒绝该字段(400)时自动去掉重试一次，rerank 不因不兼容而丢失（守召回）。",
           "type": "Acceptance Test"
         }
       ],
@@ -6897,6 +6909,16 @@
           "name": "commit",
           "value": "d9a22b5",
           "description": "package.json — release(archgraph-argo): 0.20.3"
+        },
+        {
+          "name": "commit",
+          "value": "618098f",
+          "description": "模型无关/env 可配的 thinking 关闭：默认对所有 provider 生效；ARGO_RERANK_DISABLE_THINKING + ARGO_RERANK_THINKING_PARAM（换模型可用不同字段）；provider 拒绝该字段时自动去掉重试一次（守召回）。"
+        },
+        {
+          "name": "decision",
+          "value": "rerank-thinking-off-model-agnostic-env-configurable",
+          "description": "换模型不必改代码：默认对所有 rerank provider 发 thinking-off 片段（可 env 覆盖 JSON 片段），并在被 provider 拒绝(400)时自动无该字段重试——既通用又不因字段不兼容丢 rerank/召回。"
         }
       ]
     },
