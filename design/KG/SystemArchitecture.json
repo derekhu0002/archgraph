@@ -4235,6 +4235,11 @@
           "name": "commit",
           "value": "2188dda",
           "description": "混合检索 P0：检索评测基线（scripts/eval-retrieval.js + tests/retrieval-eval.test.js，只读）。基线 vector-only topK=8：ALL recall@1 94.6%/recall@5 99.4%/MRR 0.967；name 92.0%（元素 92.5% 弱项）、desc 98.4%、关系 100%、视图 98%。新增组件 hybrid-semantic-retrieval-001。策略：默认关 ARGO_SEMANTIC_HYBRID=0，A/B 通过后转默认开。"
+        },
+        {
+          "name": "commit",
+          "value": "e4414de",
+          "description": "P1（语义记录 searchText + 全文索引，加法式，零检索行为变化）；幂等回填 Aligned（Element 229/Relationship 103/View 58）；实测 3 个 FULLTEXT 索引、全文查询命中目标 #1。下一步 P2：词法检索 + RRF 融合（ARGO_SEMANTIC_HYBRID 默认关）。"
         }
       ],
       "testcases": [
