@@ -6933,8 +6933,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.20.3",
-          "description": "npm publish shasum d824461c0132d859deb86d14f4887b6e21671f62；全局安装 + argo-deploy 22/22；~/.argo/scripts 三文件与 repo SHA256 一致；待宿主重启加载新常驻 MCP 进程"
+          "value": "archgraph-argo@0.20.4",
+          "description": "npm publish shasum 5beab4ec806b95b6319933661e7c2f37d17a7448；全局安装 + argo-deploy 22/22；~/.argo/scripts 六文件与 repo SHA256 一致（含 thinking-off 模型无关化、异步对齐+日志+启动预热、增量回填）；待宿主重启加载新常驻 MCP 进程"
         },
         {
           "name": "commit",
@@ -6965,6 +6965,11 @@
           "name": "commit",
           "value": "586e264",
           "description": "增量回填：按 contentHash 跳过未变记录，消除版本变更导致的 ~174s 全量重嵌；召回不变。"
+        },
+        {
+          "name": "commit",
+          "value": "a480f5f",
+          "description": "package.json — release(archgraph-argo): 0.20.4"
         }
       ]
     },
