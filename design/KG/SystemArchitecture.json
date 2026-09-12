@@ -5238,27 +5238,6 @@
     {
       "attributes": [
         {
-          "description": "package.json; install-argo.ps1; tests/argo-deploy.test.js; tests/argo-openclaw.test.js; tests/ea-web-deploy.test.js",
-          "name": "commit",
-          "value": "417b0e5"
-        },
-        {
-          "name": "memoryTier",
-          "value": "T2"
-        },
-        {
-          "name": "status",
-          "value": "COMPLETED"
-        }
-      ],
-      "description": "WP2786 交付（2026-09-03，委派 Developer/Xiaoming，项目总管编排+验收）：EA 本地 Web 服务纳入 archgraph-argo npm 部署包并随 argo-deploy 后台启动。落地：package.json files +（scripts/ea-web-service.js、scripts/ea-layout-store.js、web）；install-argo.ps1 新增 [23/23] 步（分母 22→23 重编号）：服务脚本→<ArgoRoot>/scripts/、web→<ArgoRoot>/web/，端口探测幂等跳过，否则后台拉起，日志 <ArgoRoot>/ea-web-service.log；参数 -SkipEaWeb/-EaWebPort(8787)/-EaWebRoot($PWD)。关键偏差（实证）：后台拉起用 WMI Win32_Process.Create + cmd /S /c 重定向包装替代 Start-Process——Start-Process 孙进程继承安装器 stdio 管道句柄会使所有 spawnSync 调用方（含 argo-deploy bin）阻塞挂起（实测 >180s），WMI 经 WMI 服务建进程零句柄继承（AT-2786-02 182s→5.5s）；cmd 引号坑：带重定向多引号命令行直传被 cmd 剥引号静默失败（rc=0），必须 /S+外层引号形式，含空格路径已端到端验证。验收：AT-2786-01（npm pack --dry-run 含 6 必需条目，71 文件 2.6MB）/AT-2786-02（部署+拉起+幂等+SkipEaWeb）全过，架构测试 35/37（2 既有失败），validate 通过，测试进程零残留。待办：npm publish 时机与版本 bump 由人类伙伴决定（本轮未 bump）；浏览器人工走查未做。",
-      "id": "overseer-wp2786-deploy-milestone-001",
-      "name": "里程碑：WP2786 EA Web 服务纳入 npm 部署包并随 argo-deploy 后台启动",
-      "type": "Business Object"
-    },
-    {
-      "attributes": [
-        {
           "name": "status",
           "value": "COMPLETED"
         },
@@ -6771,6 +6750,57 @@
       "name": "里程碑：发布 archgraph-argo@0.20.1（全量 .env.example + hybrid 可配置 + 部署保留额外 .env）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "overseer-wp2786-deploy-milestone-001",
+      "name": "里程碑：WP2786 EA Web 服务纳入 npm 部署包并随 argo-deploy 后台启动",
+      "type": "Business Object",
+      "description": "WP2786 交付（2026-09-03，委派 Developer/Xiaoming，项目总管编排+验收）：EA 本地 Web 服务纳入 archgraph-argo npm 部署包并随 argo-deploy 后台启动。落地：package.json files +（scripts/ea-web-service.js、scripts/ea-layout-store.js、web）；install-argo.ps1 新增 [23/23] 步（分母 22→23 重编号）：服务脚本→<ArgoRoot>/scripts/、web→<ArgoRoot>/web/，端口探测幂等跳过，否则后台拉起，日志 <ArgoRoot>/ea-web-service.log；参数 -SkipEaWeb/-EaWebPort(8787)/-EaWebRoot($PWD)。关键偏差（实证）：后台拉起用 WMI Win32_Process.Create + cmd /S /c 重定向包装替代 Start-Process——Start-Process 孙进程继承安装器 stdio 管道句柄会使所有 spawnSync 调用方（含 argo-deploy bin）阻塞挂起（实测 >180s），WMI 经 WMI 服务建进程零句柄继承（AT-2786-02 182s→5.5s）；cmd 引号坑：带重定向多引号命令行直传被 cmd 剥引号静默失败（rc=0），必须 /S+外层引号形式，含空格路径已端到端验证。验收：AT-2786-01（npm pack --dry-run 含 6 必需条目，71 文件 2.6MB）/AT-2786-02（部署+拉起+幂等+SkipEaWeb）全过，架构测试 35/37（2 既有失败），validate 通过，测试进程零残留。待办：npm publish 时机与版本 bump 由人类伙伴决定（本轮未 bump）；浏览器人工走查未做。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "417b0e5",
+          "description": "package.json; install-argo.ps1; tests/argo-deploy.test.js; tests/argo-openclaw.test.js; tests/ea-web-deploy.test.js"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T3"
+        },
+        {
+          "name": "archivedAt",
+          "value": "2026-09-12"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ]
+    },
+    {
+      "id": "overseer-semantic-seed-prefix-fix-001",
+      "name": "里程碑：语义 seed id 前缀泄漏修复（bare canonical id + 门禁评分 key）",
+      "type": "Business Object",
+      "description": "里程碑（2026-09-12）：修复语义检索 seed id 通道前缀泄漏（根因 bug，非运行 build 与源码不一致）。现象：运行态 getSystemArchitecture 返回 semanticScore 为 RRF 量级(~0.05)而非 AT-write-impact-04 预期的排名派生(0.99..0.8)；写入门禁 semanticDedup 阈值 0.85 实测 matches=[]（L1 语义去重空转）。排查：repo / ~/.argo/scripts / 全局 npm archgraph-argo@0.20.1 六文件 SHA256 完全一致 → 非版本不一致。根因：①种子 canonicalIdentity 形如 \"Element:x\"（productionSemanticBackfill.js:86 / mutationEmbeddingVectorLifecycle.js:523），defaultSemanticRetrieval.completeSemanticResult 直接以 seed.id 作 anchors → purpose 闭包锚点匹配不到 bare canonical 图（实测 232 元素中 85 个闭包退化，例 1317 前缀=2 vs bare=10）；②buildCanonicalSemanticDocumentSubset 第二段评分 key 用原始 item.id（前缀），与 seeds 段/withSemanticScore 的 bare key 不一致 → 排名派生 0.99 落到幻影键，RRF 0.05 胜出。修复：defaultSemanticRetrieval.normalizeVectorRecord 令 id=bare canonical id、canonicalIdentity 保留前缀；systemarchitecture-mcp-server canonical-subset 评分 key bare 归一。验收：AT-write-impact-05（seed id=bare+闭包锚点可解析）、AT-dedup-L1-03（带前缀证据 id 的 rank-derived 分生效，0.85 门禁可命中）；相关回归 83/83、validateSystemArchitecture 通过；全量 400 pass/24 fail(均改动前既有)/12 skip（ea-web-service-impl 语义检索=rerank 延迟 vs 15s 超时既有 flake，baseline 实测同 19.9s）。可复用经验：语义记录键为 \"<channel>:<bare>\"，凡进入图/闭包/评分计算的 id 必须 bare 化；判断 run≠source 先比 SHA256 再看逻辑；RRF 分与阈值/排名派生分不可混用尺度。Pitfall：ARGO MCP removeArchitectureElement 带 view_ids 时，若元素因此不在任何 view → 会被整个从图中删除（非仅卸载）。归档 T2→T3 应先把元素挂入 archive view，再从其 T2 view 移除（或 updateView 直接替换成员）。已按此恢复误删的 wp2786。commits a27673a（代码+测试）/008ac26（图谱回登记）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "a27673a",
+          "description": "argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/systemarchitecture-mcp-server.js; tests/write-retrieval-impact.test.js; tests/architecture-dedup-semantic.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "008ac26",
+          "description": "design/KG/SystemArchitecture.json（图谱回登记 + AT-write-impact-05 / AT-dedup-L1-03）"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -8466,10 +8496,10 @@
         "overseer-harness-workspaceroot-fix-001",
         "overseer-community-linkage-001",
         "overseer-homepage-v3-kglibrary-retire-001",
-        "overseer-wp2786-deploy-milestone-001",
         "overseer-wp2787-milestone-001",
         "overseer-ea-qea-projection-arc-001",
-        "overseer-graph-dedup-gate-001"
+        "overseer-graph-dedup-gate-001",
+        "overseer-semantic-seed-prefix-fix-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
@@ -8519,7 +8549,8 @@
       "description": "T1 工作记忆视图（<actor>-wm-001 约定）：会话开始时只加载进上下文的紧凑摘要——身份+职责、当前任务、最近记忆卡片、会话钩子。幂等覆盖不追加（SessionMemorySummarization）。",
       "included_elements": [
         "overseer-wm-summary-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "overseer-archive-001",
@@ -8532,8 +8563,10 @@
         "overseer-content-storage-001",
         "overseer-query-rules-001",
         "overseer-subgraph-semantic-001",
-        "overseer-wp2785-m1s1s2-milestone-001"
-      ]
+        "overseer-wp2785-m1s1s2-milestone-001",
+        "overseer-wp2786-deploy-milestone-001"
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "insight-team-001",
@@ -8577,7 +8610,8 @@
       "description": "问题界定师 Business Actor 的 T1 工作记忆视图（wm-001 约定）：会话开始时只加载进上下文的紧凑摘要。幂等覆盖不追加。",
       "included_elements": [
         "insight-definer-wm-summary-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "insight-definer-ltm-001",
@@ -8586,7 +8620,8 @@
       "description": "问题界定师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含问题界定工作产物与里程碑。",
       "included_elements": [
         "insight-definer-problem-statement-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "insight-decomposer-wm-001",
@@ -8595,7 +8630,8 @@
       "description": "问题拆解师 Business Actor 的 T1 工作记忆视图（wm-001 约定）：会话开始时只加载进上下文的紧凑摘要。幂等覆盖不追加。",
       "included_elements": [
         "insight-decomposer-wm-summary-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "insight-decomposer-ltm-001",
@@ -8604,7 +8640,8 @@
       "description": "问题拆解师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含拆解工作产物与里程碑。",
       "included_elements": [
         "insight-decomposer-issue-tree-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "insight-hypothesis-wm-001",
@@ -8613,7 +8650,8 @@
       "description": "假设提出师 Business Actor 的 T1 工作记忆视图（wm-001 约定）：会话开始时只加载进上下文的紧凑摘要。幂等覆盖不追加。",
       "included_elements": [
         "insight-hypothesis-wm-summary-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "insight-hypothesis-ltm-001",
@@ -8622,7 +8660,8 @@
       "description": "假设提出师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含假设清单产物与里程碑。",
       "included_elements": [
         "insight-hypothesis-list-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "description": "验证分析师（insight-validator-001）的 T1 工作记忆视图（麦肯锡五步法第4步执行者）。",
@@ -8631,7 +8670,8 @@
       "view_name": "验证分析师工作记忆",
       "included_elements": [
         "insight-validator-wm-summary-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "insight-synthesizer-wm-001",
@@ -8640,7 +8680,8 @@
       "description": "综合汇报师（insight-synthesizer-001）的 T1 工作记忆视图（麦肯锡五步法第5步执行者），含会话摘要。",
       "included_elements": [
         "insight-synthesizer-wm-summary-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "insight-synthesizer-ltm-001",
@@ -8649,7 +8690,8 @@
       "description": "综合汇报师 Business Actor 的 T2 长期记忆视图（ltm-001 约定）：按需回忆的历史工作信息，含综合建议报告产物与里程碑。",
       "included_elements": [
         "insight-synthesizer-report-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "diagram-skills-view-001",
@@ -8658,7 +8700,8 @@
       "description": "承载架构图生成类 Skill 的子视图：diagram-draw（Excalidraw）与 architecture-diagram（Cocoon-AI 暗色 HTML）。",
       "included_elements": [
         "architecture-diagram-skill-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "insight-lead-wm-001",
@@ -8726,7 +8769,8 @@
         "overseer-argo-0-19-1-release-001",
         "overseer-argo-0-20-0-release-001",
         "overseer-argo-0-20-1-release-001"
-      ]
+      ],
+      "included_relationships": []
     }
   ]
 }
