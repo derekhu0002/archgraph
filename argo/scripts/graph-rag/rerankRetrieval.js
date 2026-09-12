@@ -60,6 +60,32 @@ function rerankConfig(env = process.env) {
   };
 }
 
+// Model-agnostic "disable thinking/reasoning" body fragment. Reasoning models
+// spend seconds on hidden reasoning tokens for a simple listwise ranking with no
+// accuracy gain, so disable it by default for EVERY rerank provider (not just
+// deepseek), so switching models keeps the same behaviour. Providers use
+// different field names, so it is fully overridable:
+//   ARGO_RERANK_DISABLE_THINKING=0      -> send nothing
+//   ARGO_RERANK_THINKING_PARAM='{...}'  -> send this exact JSON fragment
+// rerankCandidates retries WITHOUT the fragment if the provider rejects it, so an
+// unsupported field can never break rerank (recall-first: never lose rerank to a
+// 400).
+const DEFAULT_RERANK_THINKING_OFF = Object.freeze({ thinking: { type: 'disabled' } });
+
+function resolveRerankThinkingOff(env = process.env) {
+  if (String((env && env.ARGO_RERANK_DISABLE_THINKING) || '') === '0') return null;
+  const raw = env && env.ARGO_RERANK_THINKING_PARAM;
+  if (typeof raw === 'string' && raw.trim() !== '') {
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+  return DEFAULT_RERANK_THINKING_OFF;
+}
+
 function candidateText(record) {
   const raw = record && (record.searchText || record.description || record.name || '');
   return String(raw).replace(/\s+/g, ' ').slice(0, 160);
@@ -115,37 +141,46 @@ async function rerankCandidates({ query, candidates, provider, transport, maxRet
   const apiKey = typeof provider.apiKey === 'string' ? provider.apiKey : '';
   if (baseUrl === '' || apiKey === '') return null;
   const model = provider.model || DEFAULT_RERANK_MODEL;
-  const body = {
+  const thinkingOff = resolveRerankThinkingOff();
+  const baseBody = {
     model,
     temperature: 0,
     response_format: { type: 'json_object' },
-    // DeepSeek's default is a "thinking" model: for a listwise ranking it spends
-    // 5k-10k reasoning tokens per call (measured 6-12s, highly variable) with no
-    // accuracy gain. Disable thinking for a fast, deterministic rerank
-    // (deepseek-flash: ~6s -> ~0.7s, reasoning tokens -> 0).
-    ...(provider.provider === 'deepseek' ? { thinking: { type: 'disabled' } } : {}),
     messages: [
       { role: 'system', content: 'You rank architecture elements by relevance to a query. Return ONLY JSON {"order":[ids best-first]} using only the candidate ids.' },
       { role: 'user', content: `Query: ${query}\n\nCandidates (id\\ttext):\n${list.map(candidate => `${candidate.id}\t${candidateText(candidate)}`).join('\n')}\n\nReturn up to ${Math.min(maxReturn || DEFAULT_RERANK_RETURN, list.length)} ids best-first.` },
     ],
   };
-  const controller = typeof AbortController === 'function' ? new AbortController() : null;
-  const timer = controller ? setTimeout(() => controller.abort(), timeoutMs || rerankTimeoutMs()) : null;
+  const timeout = timeoutMs || rerankTimeoutMs();
+  const send = async (extra) => {
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), timeout) : null;
+    try {
+      return await transport.request(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...baseBody, ...extra }),
+        ...(controller ? { signal: controller.signal } : {}),
+      });
+    } catch {
+      return null;
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  };
   try {
-    const response = await transport.request(`${baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      ...(controller ? { signal: controller.signal } : {}),
-    });
+    let response = await send(thinkingOff || {});
+    // A provider may reject the thinking-off fragment (unknown field -> 400).
+    // Retry WITHOUT it so rerank still works: never lose rerank/recall to a 400.
+    if ((!response || response.ok !== true) && thinkingOff) {
+      response = await send({});
+    }
     if (!response || response.ok !== true || typeof response.json !== 'function') return null;
     const payload = await response.json();
     const content = payload && payload.choices && payload.choices[0] && payload.choices[0].message && payload.choices[0].message.content;
     return parseRerankOrder(content, list.map(candidate => candidate.id));
   } catch {
     return null;
-  } finally {
-    if (timer) clearTimeout(timer);
   }
 }
 
@@ -158,6 +193,8 @@ module.exports = {
   rerankConfig,
   rerankTimeoutMs,
   resolveRerankProvider,
+  resolveRerankThinkingOff,
+  DEFAULT_RERANK_THINKING_OFF,
   parseRerankOrder,
   applyRerankOrder,
   rerankCandidates,

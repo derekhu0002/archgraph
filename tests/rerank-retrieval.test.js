@@ -13,6 +13,7 @@ const {
   rerankConfig,
   rerankTimeoutMs,
   resolveRerankProvider,
+  resolveRerankThinkingOff,
   parseRerankOrder,
   applyRerankOrder,
   rerankCandidates,
@@ -109,10 +110,9 @@ test('AT-rerank-07: channel reranks are concurrent, timeout bounded, pool not sh
   assert.ok(rerankTimeoutMs({ ARGO_SEMANTIC_RERANK_TIMEOUT_MS: '6000' }) === 6000, 'timeout stays env-overridable');
 });
 
-// AT-rerank-08: for a DeepSeek rerank provider the request must disable
-// "thinking" — reasoning tokens dominate latency (6-12s) with no ranking gain;
-// other providers are left untouched.
-test('AT-rerank-08: deepseek rerank disables thinking (fast, no reasoning)', async () => {
+// AT-rerank-08: thinking is disabled by DEFAULT for EVERY rerank provider (not
+// just deepseek) so a future model swap keeps the same fast path.
+test('AT-rerank-08: rerank disables thinking by default for any provider', async () => {
   const candidates = [{ id: 'Element:a', searchText: 'A' }, { id: 'Element:b', searchText: 'B' }];
   let captured;
   const capture = { request: async (url, options) => { captured = JSON.parse(options.body); return { ok: true, json: async () => ({ choices: [{ message: { content: '{"order":["b","a"]}' } }] }) }; } };
@@ -120,5 +120,30 @@ test('AT-rerank-08: deepseek rerank disables thinking (fast, no reasoning)', asy
   assert.deepEqual(captured.thinking, { type: 'disabled' }, 'deepseek rerank must disable thinking');
   captured = undefined;
   await rerankCandidates({ query: 'q', candidates, provider: { baseUrl: 'https://other/v1', apiKey: 'k', model: 'x', provider: 'qwen' }, transport: capture, maxReturn: 2 });
-  assert.equal('thinking' in captured, false, 'non-deepseek providers are untouched');
+  assert.deepEqual(captured.thinking, { type: 'disabled' }, 'the default applies to any provider (model-agnostic)');
+});
+
+// AT-rerank-09: the thinking-off fragment is env-switchable/overridable, and a
+// provider that REJECTS it is retried WITHOUT it so rerank (and thus recall) is
+// never lost to an unsupported field.
+test('AT-rerank-09: thinking-off is configurable and never breaks rerank on rejection', async () => {
+  assert.deepEqual(resolveRerankThinkingOff({}), { thinking: { type: 'disabled' } });
+  assert.equal(resolveRerankThinkingOff({ ARGO_RERANK_DISABLE_THINKING: '0' }), null, 'master switch can turn it off');
+  assert.deepEqual(resolveRerankThinkingOff({ ARGO_RERANK_THINKING_PARAM: '{"reasoning_effort":"none"}' }), { reasoning_effort: 'none' }, 'custom fragment for another model');
+  assert.equal(resolveRerankThinkingOff({ ARGO_RERANK_THINKING_PARAM: 'not json' }), null, 'invalid override degrades to no fragment');
+
+  const candidates = [{ id: 'Element:a', searchText: 'A' }, { id: 'Element:b', searchText: 'B' }];
+  const provider = { baseUrl: 'https://x/v1', apiKey: 'k', model: 'm', provider: 'custom' };
+  const seen = [];
+  const rejecting = {
+    request: async (url, options) => {
+      const body = JSON.parse(options.body);
+      seen.push('thinking' in body);
+      if ('thinking' in body) return { ok: false, status: 400, json: async () => ({ error: { message: 'unknown field thinking' } }) };
+      return { ok: true, json: async () => ({ choices: [{ message: { content: '{"order":["b","a"]}' } }] }) };
+    },
+  };
+  const order = await rerankCandidates({ query: 'q', candidates, provider, transport: rejecting, maxReturn: 2 });
+  assert.deepEqual(order, ['Element:b', 'Element:a'], 'rerank must still succeed after dropping the unsupported field');
+  assert.deepEqual(seen, [true, false], 'attempt with the field, then one retry without it');
 });
