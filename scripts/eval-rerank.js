@@ -16,6 +16,12 @@ const path = require('node:path');
 
 const repo = path.resolve(__dirname, '..');
 const {
+  loadRepositoryArgoEnvironment,
+} = require(path.join(repo, 'argo/scripts/repositoryArgoEnvironment.js'));
+// Load the approved env file into process.env (same as the MCP runtime) so the
+// rerank provider/model resolve from the live configuration, not just defaults.
+loadRepositoryArgoEnvironment(repo);
+const {
   resolveApprovedLiveConfiguration,
 } = require(path.join(repo, 'argo/scripts/graph-rag/liveEmbeddingProviderConfig.js'));
 const {
