@@ -154,8 +154,9 @@ async function processChannel(options) {
 }
 
 function buildSemanticRecord(record, vector, options) {
+  const searchText = buildSemanticRecordText(record.channel, record.canonicalObject);
   const contentHash = crypto.createHash('sha256')
-    .update(buildSemanticRecordText(record.channel, record.canonicalObject))
+    .update(searchText)
     .digest('hex');
   return Object.freeze({
     canonicalIdentity: record.canonicalIdentity,
@@ -167,6 +168,7 @@ function buildSemanticRecord(record, vector, options) {
     model: options.qualification.model,
     modelVersion: options.qualification.version,
     dimensions: options.qualification.dimensions,
+    searchText,
     vector: Object.freeze([...vector]),
   });
 }

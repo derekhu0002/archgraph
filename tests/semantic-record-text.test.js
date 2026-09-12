@@ -97,6 +97,7 @@ test('AT-semantic-text-05: backfill and incremental lifecycle embed curated text
   assert.match(lifecycle, /buildSemanticRecordText\(definition\.channel, object\)/);
 
   const backfill = fs.readFileSync(path.join(ROOT, 'argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js'), 'utf8');
-  assert.match(backfill, /\.update\(buildSemanticRecordText\(record\.channel, record\.canonicalObject\)\)/);
+  assert.match(backfill, /const searchText = buildSemanticRecordText\(record\.channel, record\.canonicalObject\)/);
+  assert.match(backfill, /\.update\(searchText\)/);
   assert.doesNotMatch(backfill, /JSON\.stringify\(record\.canonicalObject\)/);
 });

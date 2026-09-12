@@ -30,6 +30,7 @@ function createProductionSemanticNeo4jAdapter(dependencies = {}) {
       }
       return withSession(driver, dependencies.configuration, async session => {
         await ensureVectorIndexes(session);
+        await ensureFulltextIndexes(session);
         const results = [];
         for (const [channel, definition] of Object.entries(CHANNEL_INDEXES)) {
           const channelRecords = records.filter(record => record.channel === channel).map(cloneRecord);
@@ -115,6 +116,19 @@ async function ensureVectorIndexes(session) {
         `CREATE VECTOR INDEX ${definition.indexName} IF NOT EXISTS`,
         `FOR (semantic:${definition.label}) ON (semantic.vector)`,
         `OPTIONS { indexConfig: { \`vector.dimensions\`: ${EMBEDDING_DIMENSIONS}, \`vector.similarity_function\`: "cosine" } }`,
+      ].join('\n'),
+      {},
+    );
+  }
+}
+
+async function ensureFulltextIndexes(session) {
+  for (const definition of Object.values(CHANNEL_INDEXES)) {
+    await executeWrite(
+      session,
+      [
+        `CREATE FULLTEXT INDEX ${definition.indexName}_fulltext IF NOT EXISTS`,
+        `FOR (semantic:${definition.label}) ON EACH [semantic.searchText]`,
       ].join('\n'),
       {},
     );

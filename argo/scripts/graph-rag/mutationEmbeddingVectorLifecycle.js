@@ -531,6 +531,7 @@ function buildPersistentWork(canonicalWrite, configuration, versions) {
           contentVersion: `content:${fingerprint(content)}`,
           indexVersion: `index:${fingerprint({ objectId, content, canonicalVersion: versions.canonicalVersion })}`,
           content,
+          searchText: content,
         }));
       } else {
         tombstones.push(Object.freeze(base));
