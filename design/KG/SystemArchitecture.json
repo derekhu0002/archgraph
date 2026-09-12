@@ -4260,6 +4260,11 @@
           "name": "commit",
           "value": "2f1a3be",
           "description": "P3 重排接入生产（graph-rag/rerankRetrieval.js + defaultSemanticRetrieval；ARGO_SEMANTIC_RERANK 默认关、fail-open、可回退；AT-rerank-01..05；新增组件 semantic-rerank-001）。启用方式：~/.argo/.env 置 ARGO_SEMANTIC_RERANK=1 并重启 MCP。评测增益：recall@1 94.0→98.7（name +7.9/Element +6.8）。待办：是否发布/部署（hybrid 与 rerank 均默认关）。"
+        },
+        {
+          "name": "commit",
+          "value": "243b9e1",
+          "description": "4-way 检索评测（150 样本，qwen-turbo）：vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100，MRR .997）。关键：hybrid+rerank 组合最优（+4.0），但 rerank 对提示/模型高度敏感、小样本噪声大（前次带 type 提示的 rerank(vector) 为正，本次无 type 为负）——需大样本+提示/模型调优后再启用。"
         }
       ],
       "testcases": [
