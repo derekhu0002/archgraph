@@ -6592,9 +6592,14 @@
           "name": "commit",
           "value": "243b9e1",
           "description": "4-way 评测（eval-rerank.js）：150 样本 vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再定。"
+        },
+        {
+          "name": "commit",
+          "value": "721f5fe",
+          "description": "重排 provider/model 与 embedding 解耦：resolveRerankProvider（ARGO_RERANK_BASE_URL/API_KEY/PROVIDER/MODEL 独立覆盖，未设回落 embedding+qwen-turbo）；ARGO_RERANK_API_KEY 纳入密钥白名单；AT-rerank-06"
         }
       ],
-      "description": "语义二阶段重排（Rerank）：在向量/混合检索得到候选池后，用 LLM listwise 重排（chat/completions，qwen-turbo），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略与 hybrid 同范式：默认关（ARGO_SEMANTIC_RERANK=0），开关开时用更大候选池（pool=20）重排后取 topK；fail-open（任何错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆（门禁按重排后顺序、评分仍排名派生）。评测（scripts/eval-rerank.js，150 样本）：vector-only r@1 94.0 → rerank 98.7（+4.7；name +7.9、Element +6.8），r@5 100、MRR 0.968→0.992。参数：ARGO_SEMANTIC_RERANK_MODEL（默认 qwen-turbo）、ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js。",
+      "description": "语义二阶段重排（Rerank）：在向量/混合检索候选池后用 LLM listwise 重排（chat/completions），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略：默认关（ARGO_SEMANTIC_RERANK=0），开时用更大候选池（pool=20）重排后取 topK；fail-open（错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆。评测（scripts/eval-rerank.js，150 样本，qwen-turbo）：4-way vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优，但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再启用。provider/model 与 embedding 解耦：resolveRerankProvider 优先 ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL，未设则回落 embedding 配置（baseUrl/qwenKey/provider）与默认模型 qwen-turbo（可选 ARGO_SEMANTIC_RERANK_MODEL 仅改模型）。参数：ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js、liveEmbeddingProviderConfig.js。",
       "id": "semantic-rerank-001",
       "name": "语义二阶段重排（Rerank）",
       "parent": "1961",
@@ -6602,7 +6607,7 @@
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
-          "description": "GIVEN 重排开关；WHEN 未设 env；THEN 默认关（零行为变化）；设 1 则开；模型/池/返回数可 env 覆盖。",
+          "description": "GIVEN 重排开关；WHEN 未设 env；THEN 默认关；设 1 则开；池/返回数可覆盖。",
           "name": "AT-rerank-01",
           "type": "Acceptance Test"
         },
@@ -6616,22 +6621,29 @@
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
-          "description": "GIVEN seeds 与重排顺序；WHEN applyRerankOrder；THEN 重排+补集（不丢 seed）+限长；null/空顺序时保持原序（fail-open）。",
+          "description": "GIVEN seeds 与重排顺序；WHEN applyRerankOrder；THEN 重排+补集+限长；null/空顺序保持原序。",
           "name": "AT-rerank-03",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
-          "description": "GIVEN 注入 transport；WHEN rerankCandidates；THEN 正常响应解析为顺序；非 ok/抛错/候选<2/缺配置→null（不抛）。",
+          "description": "GIVEN 注入 provider+transport；WHEN rerankCandidates；THEN 正常响应解析为顺序；非 ok/抛错/候选<2/缺 provider→null（不抛）。",
           "name": "AT-rerank-04",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/rerank-retrieval.test.js",
           "acceptanceCriteria": "tests/rerank-retrieval.test.js",
-          "description": "GIVEN 生产检索路径；WHEN 开关关；THEN 不进入重排（isRerankEnabled+if(rerank&&seeds.length>1)），且重排后再取 topK。",
+          "description": "GIVEN 生产检索路径；WHEN 开关关；THEN 不进入重排；重排后再取 topK。",
           "name": "AT-rerank-05",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js",
+          "description": "GIVEN embedding 配置；WHEN resolveRerankProvider 在无/有 ARGO_RERANK_* 时；THEN 默认回落 baseUrl+qwenKey+provider 且模型 qwen-turbo；ARGO_RERANK_* 可独立覆盖（不同 provider/端点/密钥/模型）。",
+          "name": "AT-rerank-06",
           "type": "Acceptance Test"
         }
       ],
