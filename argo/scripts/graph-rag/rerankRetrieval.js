@@ -8,6 +8,12 @@
 const DEFAULT_RERANK_MODEL = 'qwen-turbo';
 const DEFAULT_RERANK_POOL = 20;
 const DEFAULT_RERANK_RETURN = 8;
+const DEFAULT_RERANK_TIMEOUT_MS = 8000;
+
+function rerankTimeoutMs(env = process.env) {
+  const value = Number(env && env.ARGO_SEMANTIC_RERANK_TIMEOUT_MS);
+  return Number.isFinite(value) && value > 0 ? value : DEFAULT_RERANK_TIMEOUT_MS;
+}
 
 function isRerankEnabled(env = process.env) {
   return String((env && env.ARGO_SEMANTIC_RERANK) || '') === '1';
@@ -92,7 +98,7 @@ function applyRerankOrder(seeds, orderedIds, limit) {
   return Number.isInteger(limit) && limit > 0 ? out.slice(0, limit) : out;
 }
 
-async function rerankCandidates({ query, candidates, provider, transport, maxReturn } = {}) {
+async function rerankCandidates({ query, candidates, provider, transport, maxReturn, timeoutMs } = {}) {
   const list = Array.isArray(candidates) ? candidates.filter(candidate => candidate && candidate.id) : [];
   if (list.length < 2 || typeof query !== 'string' || query.trim() === '') return null;
   if (!provider || !transport || typeof transport.request !== 'function') return null;
@@ -109,11 +115,14 @@ async function rerankCandidates({ query, candidates, provider, transport, maxRet
       { role: 'user', content: `Query: ${query}\n\nCandidates (id\\ttext):\n${list.map(candidate => `${candidate.id}\t${candidateText(candidate)}`).join('\n')}\n\nReturn up to ${Math.min(maxReturn || DEFAULT_RERANK_RETURN, list.length)} ids best-first.` },
     ],
   };
+  const controller = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), timeoutMs || rerankTimeoutMs()) : null;
   try {
     const response = await transport.request(`${baseUrl}/chat/completions`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      ...(controller ? { signal: controller.signal } : {}),
     });
     if (!response || response.ok !== true || typeof response.json !== 'function') return null;
     const payload = await response.json();
@@ -121,6 +130,8 @@ async function rerankCandidates({ query, candidates, provider, transport, maxRet
     return parseRerankOrder(content, list.map(candidate => candidate.id));
   } catch {
     return null;
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 
@@ -128,8 +139,10 @@ module.exports = {
   DEFAULT_RERANK_MODEL,
   DEFAULT_RERANK_POOL,
   DEFAULT_RERANK_RETURN,
+  DEFAULT_RERANK_TIMEOUT_MS,
   isRerankEnabled,
   rerankConfig,
+  rerankTimeoutMs,
   resolveRerankProvider,
   parseRerankOrder,
   applyRerankOrder,

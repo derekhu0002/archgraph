@@ -30,6 +30,10 @@ const {
   DEFAULT_HYBRID_TOP_K,
 } = require(path.join(repo, 'argo/scripts/graph-rag/hybridRetrieval.js'));
 const { buildGolden, CHANNELS } = require('./eval-retrieval.js');
+const {
+  resolveRerankProvider,
+  rerankCandidates,
+} = require(path.join(repo, 'argo/scripts/graph-rag/rerankRetrieval.js'));
 
 function arg(name, fallback) {
   const idx = process.argv.indexOf(name);
@@ -66,7 +70,8 @@ function mergeReranked(order, pool) {
 async function main() {
   const limit = Number(arg('--limit', '150'));
   const pool = Number(arg('--pool', '20'));
-  const model = arg('--model', 'qwen-turbo');
+  const modelArg = arg('--model', '');
+  if (modelArg) process.env.ARGO_RERANK_MODEL = modelArg;
 
   const graph = JSON.parse(fs.readFileSync(path.join(repo, 'design/KG/SystemArchitecture.json'), 'utf8'));
   const graphById = new Map();
@@ -83,6 +88,8 @@ async function main() {
   const evidence = await resolveApprovedLiveConfiguration({ repositoryRoot: repo, useCase: 'production-semantic-query' });
   const config = evidence.configuration;
   const client = createLiveEmbeddingProviderClient({ configuration: config, transport: { request: (url, options) => fetch(url, options) } });
+  const rerankProvider = resolveRerankProvider(config, process.env);
+  const transport = { request: (url, options) => fetch(url, options) };
 
   const neo4j = require(path.join(repo, 'node_modules', 'neo4j-driver'));
   const driver = neo4j.driver(config.neo4jDatabaseUrl, neo4j.auth.basic(config.neo4jDatabaseUsername, config.neo4jDatabasePassword));
@@ -100,27 +107,9 @@ async function main() {
   }
   async function rerank(query, ids) {
     if (ids.length < 2) return ids.slice();
-    const lines = ids.map(id => `${id}\t${String(graphById.get(id) || id).replace(/\s+/g, ' ').slice(0, 150)}`).join('\n');
-    const body = {
-      model, temperature: 0, response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: 'You rank architecture elements by relevance to a query. Return ONLY JSON {"order":[ids best-first]} using ONLY candidate ids.' },
-        { role: 'user', content: `Query: ${query}\n\nCandidates (id\\ttext):\n${lines}\n\nReturn up to ${Math.min(8, ids.length)} ids best-first.` },
-      ],
-    };
-    try {
-      const res = await fetch(`${config.embeddingBaseUrl}/chat/completions`, { method: 'POST', headers: { Authorization: `Bearer ${config.qwenKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      if (!res.ok) return null;
-      const json = await res.json();
-      const content = json && json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content;
-      const parsed = JSON.parse(content);
-      const raw = Array.isArray(parsed && parsed.order) ? parsed.order : [];
-      const byKey = new Map();
-      for (const id of ids) { const t = String(id); byKey.set(t, id); byKey.set(t.split(':').slice(1).join(':'), id); byKey.set(t.split(':').pop(), id); }
-      const seen = new Set(); const order = [];
-      for (const v of raw) { const c = byKey.get(String(v)); if (c && !seen.has(c)) { seen.add(c); order.push(c); } }
-      return mergeReranked(order, ids);
-    } catch { return null; }
+    const candidates = ids.map(id => ({ id, searchText: String(graphById.get(id) || id) }));
+    const order = await rerankCandidates({ query, candidates, provider: rerankProvider, transport, maxReturn: 8 });
+    return order === null ? null : mergeReranked(order, ids);
   }
 
   const rows = [];
@@ -151,6 +140,7 @@ async function main() {
         rerankV: rankOf(rerankedV, item.target),
         rerankH: rankOf(rerankedH, item.target),
       });
+      if (rows.length % 20 === 0) process.stderr.write(`progress ${rows.length}/${queries.length}\n`);
     }
   } finally {
     await session.close();
@@ -163,7 +153,7 @@ async function main() {
   const rh = metrics(rows, 'rerankH');
   const d = (a, b) => +(a.ALL.recall1 - b.ALL.recall1).toFixed(1);
   const report = {
-    config: { limit, pool, model, sampled: rows.length, rerankFailures },
+    config: { limit, pool, model: rerankProvider.model, provider: rerankProvider.provider, sampled: rows.length, rerankFailures },
     recall1: {
       vector: vs.ALL.recall1, hybrid: hy.ALL.recall1, rerank_vector: rv.ALL.recall1, rerank_hybrid: rh.ALL.recall1,
       name_vector: vs.name.recall1, name_rerank_hybrid: rh.name.recall1,
