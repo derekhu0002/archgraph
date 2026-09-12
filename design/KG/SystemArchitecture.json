@@ -4225,6 +4225,11 @@
           "name": "commit",
           "value": "650459d",
           "description": "主页新增 Capabilities 小节（归纳 211 commits 以来的能力：Agent 长期记忆/写入去重→精准召回/语义+结构检索/变更可证/多Harness/EA互操作/Agent组织建模）；README 改为简洁（目标+收益+安装使用），特性细节归主页"
+        },
+        {
+          "name": "commit",
+          "value": "b33e678",
+          "description": "主页按 DeepSeek Harness 风格整改（暗色/hero 终端/徽章/卡片/交替特性块/复制与滚动交互）；保留全部验收锚点"
         }
       ],
       "testcases": [
