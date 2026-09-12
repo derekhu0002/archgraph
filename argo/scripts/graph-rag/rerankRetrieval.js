@@ -119,6 +119,11 @@ async function rerankCandidates({ query, candidates, provider, transport, maxRet
     model,
     temperature: 0,
     response_format: { type: 'json_object' },
+    // DeepSeek's default is a "thinking" model: for a listwise ranking it spends
+    // 5k-10k reasoning tokens per call (measured 6-12s, highly variable) with no
+    // accuracy gain. Disable thinking for a fast, deterministic rerank
+    // (deepseek-flash: ~6s -> ~0.7s, reasoning tokens -> 0).
+    ...(provider.provider === 'deepseek' ? { thinking: { type: 'disabled' } } : {}),
     messages: [
       { role: 'system', content: 'You rank architecture elements by relevance to a query. Return ONLY JSON {"order":[ids best-first]} using only the candidate ids.' },
       { role: 'user', content: `Query: ${query}\n\nCandidates (id\\ttext):\n${list.map(candidate => `${candidate.id}\t${candidateText(candidate)}`).join('\n')}\n\nReturn up to ${Math.min(maxReturn || DEFAULT_RERANK_RETURN, list.length)} ids best-first.` },

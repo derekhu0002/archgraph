@@ -108,3 +108,17 @@ test('AT-rerank-07: channel reranks are concurrent, pool + timeout are bounded',
   assert.ok(rerankTimeoutMs({}) <= 4000, 'default rerank timeout must keep the query under ~5s');
   assert.ok(rerankTimeoutMs({ ARGO_SEMANTIC_RERANK_TIMEOUT_MS: '6000' }) === 6000, 'timeout stays env-overridable');
 });
+
+// AT-rerank-08: for a DeepSeek rerank provider the request must disable
+// "thinking" — reasoning tokens dominate latency (6-12s) with no ranking gain;
+// other providers are left untouched.
+test('AT-rerank-08: deepseek rerank disables thinking (fast, no reasoning)', async () => {
+  const candidates = [{ id: 'Element:a', searchText: 'A' }, { id: 'Element:b', searchText: 'B' }];
+  let captured;
+  const capture = { request: async (url, options) => { captured = JSON.parse(options.body); return { ok: true, json: async () => ({ choices: [{ message: { content: '{"order":["b","a"]}' } }] }) }; } };
+  await rerankCandidates({ query: 'q', candidates, provider: { baseUrl: 'https://api.deepseek.com', apiKey: 'k', model: 'deepseek-flash', provider: 'deepseek' }, transport: capture, maxReturn: 2 });
+  assert.deepEqual(captured.thinking, { type: 'disabled' }, 'deepseek rerank must disable thinking');
+  captured = undefined;
+  await rerankCandidates({ query: 'q', candidates, provider: { baseUrl: 'https://other/v1', apiKey: 'k', model: 'x', provider: 'qwen' }, transport: capture, maxReturn: 2 });
+  assert.equal('thinking' in captured, false, 'non-deepseek providers are untouched');
+});
