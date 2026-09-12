@@ -348,6 +348,39 @@ test('install-argo.ps1 keeps existing .env values and skips prompts', () => {
   }
 });
 
+test('install-argo.ps1 preserves extra .env keys outside the prompt list', () => {
+  // GIVEN a live .env that also carries tuning keys the installer does not
+  // prompt for (semantic retrieval tuning such as ARGO_SEMANTIC_HYBRID /
+  // ARGO_RERANK_*)
+  // WHEN install-argo.ps1 regenerates .env (non-interactive, all prompted keys
+  // already non-empty)
+  // THEN the extra keys and their values survive (a re-deploy must not wipe them)
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-env-extra-'));
+  const paths = hostPaths(tmp);
+  fs.mkdirSync(paths.argoRoot, { recursive: true });
+
+  const seeded = ENV_KEYS.map(key => `${key}=existing-${key}`).join('\n');
+  const extras = [
+    'ARGO_SEMANTIC_HYBRID=1',
+    'ARGO_SEMANTIC_HYBRID_VECTOR_WEIGHT=3',
+    'ARGO_RERANK_MODEL=deepseek-flash',
+    'ARGO_RERANK_API_KEY=extra-secret-keep-me',
+  ];
+  fs.writeFileSync(path.join(paths.argoRoot, '.env'), `# cfg\n${seeded}\n${extras.join('\n')}\n`);
+
+  try {
+    const result = runInstall({ ...paths, skipEnv: false, timeout: 30000 });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+    const env = fs.readFileSync(path.join(paths.argoRoot, '.env'), 'utf8');
+    for (const line of extras) {
+      const escaped = line.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      assert.match(env, new RegExp(`^${escaped}\\r?$`, 'm'), `extra ${line} must be preserved`);
+    }
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 test('install-argo.ps1 deploys DeepSeek Harness integration from the single-source artifacts', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-dsh-'));
   const paths = hostPaths(tmp);

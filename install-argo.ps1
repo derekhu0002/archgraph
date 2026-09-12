@@ -1008,6 +1008,16 @@ if ($SkipEnv) {
         $lines += "$key=$value"
     }
 
+    # Preserve any extra keys already present in .env but not part of the
+    # interactive prompt list (e.g. semantic retrieval tuning: hybrid/rerank/
+    # thresholds). Without this a re-deploy would silently drop them. They are
+    # documented in argo/.env.example.
+    foreach ($key in ($existing.Keys | Sort-Object)) {
+        if ($envKeys -notcontains $key) {
+            $lines += "$key=$($existing[$key])"
+        }
+    }
+
     [System.IO.File]::WriteAllLines(
         $envPath,
         $lines,

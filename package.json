@@ -1,6 +1,6 @@
 {
   "name": "archgraph-argo",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "description": "Deploy the ArchGraph ARGO toolchain, skills, and rules (schema, scripts, argo-init skill, global rule) with one command.",
   "license": "MIT",
   "bin": {
@@ -17,6 +17,7 @@
     "argo/skills/ea-human-reconcile",
     "argo/rules",
     "argo/package.json",
+    "argo/.env.example",
     "vendor",
     "install-argo.ps1",
     "bin",

@@ -34,6 +34,13 @@ const RETRIEVAL_TUNING_KEYS = Object.freeze([
   'ARGO_SEMANTIC_AUDIT_THRESHOLD_RELATIONSHIP',
   'ARGO_SEMANTIC_AUDIT_THRESHOLD_VIEW',
   'ARGO_SEMANTIC_TOP_K',
+  // Hybrid (vector + lexical RRF) retrieval (P2). Off unless
+  // ARGO_SEMANTIC_HYBRID=1; weights/k/top-K tune the fusion.
+  'ARGO_SEMANTIC_HYBRID',
+  'ARGO_SEMANTIC_HYBRID_VECTOR_WEIGHT',
+  'ARGO_SEMANTIC_HYBRID_LEXICAL_WEIGHT',
+  'ARGO_SEMANTIC_HYBRID_RRF_K',
+  'ARGO_SEMANTIC_HYBRID_TOP_K',
   // Rerank (P3) tuning + optional dedicated rerank provider. When the provider
   // keys are unset the reranker falls back to the embedding provider (qwen).
   'ARGO_SEMANTIC_RERANK',
@@ -525,4 +532,10 @@ module.exports = {
   resolveApprovedLiveConfiguration,
   withApprovedLiveConfigurationTestComposition,
   posixModeIsSecretSafe,
+  // The authoritative set of keys an approved `.env` file may carry. The
+  // committed `.env.example` must document exactly this set (see
+  // tests/env-example.test.js); SECRET_KEYS marks the subset that must be
+  // preflighted as secrets.
+  ENV_FILE_KEYS: READABLE_KEYS,
+  ENV_FILE_SECRET_KEYS: Object.freeze(Array.from(SECRET_KEYS)),
 };
