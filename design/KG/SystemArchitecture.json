@@ -3780,6 +3780,11 @@
           "name": "commit",
           "value": "586e264",
           "description": "argo/scripts/graph-rag/semantic-persistence/productionSemanticBackfill.js（resume checkpoint 跨 canonicalVersion 时按 contentHash + provider/model/dimensions 跳过未变记录）; tests/semantic-backfill-reconcile.test.js; argo/scripts/graph-rag/ARCHITECTURE.md"
+        },
+        {
+          "name": "commit",
+          "value": "24bce1c",
+          "description": "argo/scripts/graph-rag/semanticAlignmentLock.js（跨进程对齐锁）; graph-rag/semanticAlignmentRunner.js（预热仅限已初始化项目）; ensureArgoHarnessEnvironment.js（buildHarnessReport 串行化）; tests/semantic-alignment-runner.test.js（AT-align-03/04）"
         }
       ],
       "testcases": [
@@ -3829,14 +3834,28 @@
           "Input": "tests/semantic-alignment-runner.test.js",
           "acceptanceCriteria": "tests/semantic-alignment-runner.test.js",
           "name": "AT-align-02",
-          "description": "GIVEN 索引未就绪需重建；WHEN 检查对齐接线；THEN 用异步 spawn（非 spawnSync）、并发去重单飞、查询路径委托 runner、MCP 启动时后台预热；不改检索内容（守召回）。",
+          "description": "GIVEN 索引未就绪需重建；WHEN 检查对齐接线；THEN 用异步 spawn（非 spawnSync）、并发去重单飞、查询路径委托 runner、MCP 启动时后台预热；不改检索内容。",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/semantic-alignment-runner.test.js",
+          "acceptanceCriteria": "tests/semantic-alignment-runner.test.js",
+          "name": "AT-align-03",
+          "description": "GIVEN 未初始化的新工作区（无 canonical 图）；WHEN 启动预热判定；THEN 绝不后台 bootstrap 新项目（仅对已初始化但就绪过期的工作区做重建）。",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/semantic-alignment-runner.test.js",
+          "acceptanceCriteria": "tests/semantic-alignment-runner.test.js",
+          "name": "AT-align-04",
+          "description": "GIVEN 多个对齐入口（预热 / 查询自动对齐 / argo init）；WHEN 并发；THEN 经跨进程文件锁串行（<workspace>/.argo/temp/semantic-alignment.lock，崩溃残留锁可被过期夺回），不并发重建。",
           "type": "Acceptance Test"
         },
         {
           "Input": "tests/semantic-backfill-reconcile.test.js",
           "acceptanceCriteria": "tests/semantic-backfill-reconcile.test.js",
           "name": "AT-backfill-incremental-01",
-          "description": "GIVEN canonicalVersion 变化（增删元素/关系/视图）且某记录策展语义文本未变（contentVersion 匹配）且 provider/model/dimensions 一致；WHEN 回填运行；THEN 该记录跳过不重嵌、运行完成；而文本变更的记录仍被重嵌（召回不降）。",
+          "description": "GIVEN canonicalVersion 变化且某记录策展语义文本未变（contentVersion 匹配）+ provider/model/dimensions 一致；WHEN 回填；THEN 跳过不重嵌、运行完成；文本变更的记录仍重嵌（召回不降）。",
           "type": "Acceptance Test"
         }
       ]
@@ -6948,8 +6967,8 @@
         },
         {
           "name": "decision",
-          "value": "backfill-contenthash-incremental-resume",
-          "description": "修复 backfill-checkpoint-keyed-by-canonical-version 坑：resume checkpoint 跨版本时，用已持久化记录的 contentVersion(contentHash)+provider/model/dimensions 匹配来 seed 已完成集，只重嵌变更/新增记录。守召回：变更内容始终重嵌。"
+          "value": "alignment-cross-process-lock-and-preheat-guard",
+          "description": "预热只对“已初始化且就绪过期”的工作区重建（isProjectInitialized）；buildHarnessReport 在 <workspace>/.argo/temp/semantic-alignment.lock 上串行（wx 创建、过期夺回），使预热/查询自动对齐/显式 argo init（可跨进程）不并发重建。不改检索内容。"
         },
         {
           "name": "commit",
@@ -6970,6 +6989,11 @@
           "name": "commit",
           "value": "a480f5f",
           "description": "package.json — release(archgraph-argo): 0.20.4"
+        },
+        {
+          "name": "commit",
+          "value": "24bce1c",
+          "description": "启动预热不再自动初始化新项目；对齐入口（预热/查询/argo init）经跨进程文件锁串行。"
         }
       ]
     },
