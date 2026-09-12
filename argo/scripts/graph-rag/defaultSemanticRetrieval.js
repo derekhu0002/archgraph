@@ -29,6 +29,9 @@ const {
   rerankCandidates,
   applyRerankOrder,
 } = require('./rerankRetrieval.js');
+const {
+  runSemanticAlignment,
+} = require('./semanticAlignmentRunner.js');
 
 const APPROVED_SOURCE_KEYS = Object.freeze([
   'ARGO_EMBEDDING_BASE_URL',
@@ -423,25 +426,12 @@ async function attemptAutomaticAlignment({ composition, request, alignment }) {
 }
 
 function runScriptOwnedSemanticAlignment(operation) {
-  const childProcess = require('node:child_process');
-  const repositoryRoot = getWorkspaceRoot();
-  const scriptPath = resolveArgoPath('scripts', 'ensureArgoHarnessEnvironment.js');
-  const result = childProcess.spawnSync(process.execPath, [scriptPath], {
-    cwd: repositoryRoot,
-    encoding: 'utf8',
-    env: process.env,
-  });
-  if (result.status === 0) {
-    return Object.freeze({
+  return runSemanticAlignment(getWorkspaceRoot()).then(
+    () => Object.freeze({
       status: 'aligned',
       originalQuery: operation && operation.originalQuery,
-    });
-  }
-  const error = safeError('SEMANTIC_AUTO_ALIGNMENT_FAILED');
-  error.message = 'Semantic automatic alignment failed before retry.';
-  error.action = 'Repair semantic lifecycle alignment, then retry the original query.';
-  error.fullSnapshotFallback = false;
-  return Promise.reject(error);
+    }),
+  );
 }
 
 async function resolveRawTestConfiguration(sourceBehavior, sourceAdapters) {

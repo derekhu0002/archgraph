@@ -773,6 +773,17 @@ async function handleRequest(request, dependencies = undefined) {
 }
 
 async function main() {
+  // Recall-safe warm-up: if the semantic readiness record is not Aligned when the
+  // server starts, rebuild the index in the BACKGROUND (async, logged) so the
+  // first query rarely pays the multi-second reconstruction. No-op when aligned.
+  if (process.env.ARGO_REPO_ROOT && process.env.ARGO_REPO_ROOT.trim() !== '') {
+    try {
+      require('./graph-rag/semanticAlignmentRunner.js')
+        .preheatSemanticAlignment(process.env.ARGO_REPO_ROOT);
+    } catch {
+      // preheat is best-effort; never block server startup
+    }
+  }
   const rl = readline.createInterface({
     input: process.stdin,
     crlfDelay: Infinity,
