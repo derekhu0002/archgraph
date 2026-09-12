@@ -1,18 +1,18 @@
 'use strict';
 
-// Retrieval evaluation harness (P0). Read-only.
+// Retrieval evaluation harness (P0/P2). Read-only.
 //
-// Measures vector-only retrieval quality against a golden set derived from the
-// canonical graph, so the hybrid-retrieval work (P2) can be compared
-// apples-to-apples. It talks to the SAME Neo4j vector indexes and the SAME
-// embedding model the production retrieval uses, without the closure/assembly
-// layer — isolating the recall/precision of the seed stage.
+// Measures vector-only vs hybrid (vector + full-text + RRF) retrieval quality
+// against a golden set derived from the canonical graph. It talks to the SAME
+// Neo4j indexes and embedding model the production retrieval uses, without the
+// closure/assembly layer — isolating the recall/precision of the seed stage.
 //
 // Usage:
-//   node scripts/eval-retrieval.js            # report
-//   node scripts/eval-retrieval.js --json     # machine-readable
+//   node scripts/eval-retrieval.js            # compare vector-only vs hybrid
 //
-// Env (optional): ARGO_SEMANTIC_TOP_K (default 8).
+// Env (optional): ARGO_SEMANTIC_TOP_K (default 8), ARGO_SEMANTIC_HYBRID_TOP_K,
+// ARGO_SEMANTIC_HYBRID_RRF_K, ARGO_SEMANTIC_HYBRID_VECTOR_WEIGHT,
+// ARGO_SEMANTIC_HYBRID_LEXICAL_WEIGHT.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -24,6 +24,14 @@ const {
 const {
   createLiveEmbeddingProviderClient,
 } = require(path.join(repo, 'argo/scripts/graph-rag/liveEmbeddingProviderClient.js'));
+const {
+  rrfFuse,
+  sanitizeFulltextQuery,
+  DEFAULT_RRF_K,
+  DEFAULT_HYBRID_TOP_K,
+  DEFAULT_VECTOR_WEIGHT,
+  DEFAULT_LEXICAL_WEIGHT,
+} = require(path.join(repo, 'argo/scripts/graph-rag/hybridRetrieval.js'));
 
 const CHANNELS = [
   { channel: 'Element', idField: 'id', index: 'argo_production_semantic_element_vector' },
@@ -34,6 +42,18 @@ const CHANNELS = [
 function topK() {
   const k = Number(process.env.ARGO_SEMANTIC_TOP_K);
   return Number.isInteger(k) && k > 0 ? k : 8;
+}
+function lexicalTopK() {
+  const k = Number(process.env.ARGO_SEMANTIC_HYBRID_TOP_K);
+  return Number.isInteger(k) && k > 0 ? k : DEFAULT_HYBRID_TOP_K;
+}
+function fusionK() {
+  const k = Number(process.env.ARGO_SEMANTIC_HYBRID_RRF_K);
+  return Number.isFinite(k) && k > 0 ? k : DEFAULT_RRF_K;
+}
+function weight(name, fallback) {
+  const w = Number(process.env[name]);
+  return Number.isFinite(w) && w >= 0 ? w : fallback;
 }
 
 function buildGolden(graph) {
@@ -63,11 +83,44 @@ function cosine(a, b) {
   return d / (Math.sqrt(na) * Math.sqrt(nb) + 1e-12);
 }
 
+function rankOf(ids, target) {
+  const rank = ids.indexOf(target);
+  return { rank, hit1: rank === 0, hit5: rank >= 0 && rank < 5, rr: rank >= 0 ? 1 / (rank + 1) : 0 };
+}
+
+function agg(rows, pick) {
+  const sel = rows.map(pick).filter(Boolean);
+  if (sel.length === 0) return { n: 0 };
+  const m = f => sel.filter(f).length / sel.length;
+  return {
+    n: sel.length,
+    recall1: +(m(r => r.hit1) * 100).toFixed(1),
+    recall5: +(m(r => r.hit5) * 100).toFixed(1),
+    mrr: +(sel.reduce((a, r) => a + r.rr, 0) / sel.length).toFixed(3),
+  };
+}
+
+function metrics(rows, key) {
+  return {
+    ALL: agg(rows, r => r[key]),
+    name: agg(rows.filter(r => r.family === 'name'), r => r[key]),
+    desc: agg(rows.filter(r => r.family === 'desc'), r => r[key]),
+    byChannel: {
+      Element: agg(rows.filter(r => r.channel === 'Element'), r => r[key]),
+      ArchitectureRelationship: agg(rows.filter(r => r.channel === 'ArchitectureRelationship'), r => r[key]),
+      View: agg(rows.filter(r => r.channel === 'View'), r => r[key]),
+    },
+  };
+}
+
 async function main() {
-  const json = process.argv.includes('--json');
   const graph = JSON.parse(fs.readFileSync(path.join(repo, 'design/KG/SystemArchitecture.json'), 'utf8'));
   const queries = buildGolden(graph);
   const k = topK();
+  const lexK = lexicalTopK();
+  const fK = fusionK();
+  const vectorWeight = weight('ARGO_SEMANTIC_HYBRID_VECTOR_WEIGHT', DEFAULT_VECTOR_WEIGHT);
+  const lexicalWeight = weight('ARGO_SEMANTIC_HYBRID_LEXICAL_WEIGHT', DEFAULT_LEXICAL_WEIGHT);
 
   const evidence = await resolveApprovedLiveConfiguration({ repositoryRoot: repo, useCase: 'production-semantic-query' });
   const config = evidence.configuration;
@@ -83,10 +136,19 @@ async function main() {
   );
   const session = driver.session(config.neo4jDatabase === undefined ? undefined : { database: config.neo4jDatabase });
 
-  async function topIds(index, vector) {
+  async function vectorIds(index, vector) {
     const res = await session.run(
       'CALL db.index.vector.queryNodes($index, $topK, $vector) YIELD node, score RETURN node.canonicalIdentity AS id, score ORDER BY score DESC',
       { index, topK: k, vector },
+    );
+    return res.records.map(r => r.get('id'));
+  }
+  async function lexicalIds(index, queryText) {
+    const safe = sanitizeFulltextQuery(queryText);
+    if (!safe) return [];
+    const res = await session.run(
+      'CALL db.index.fulltext.queryNodes($index, $queryText, { limit: $topK }) YIELD node, score RETURN node.canonicalIdentity AS id, score ORDER BY score DESC',
+      { index: `${index}_fulltext`, queryText: safe, topK: lexK },
     );
     return res.records.map(r => r.get('id'));
   }
@@ -98,41 +160,37 @@ async function main() {
       let vector;
       try { vector = await client.embed(item.q); } catch { continue; }
       if (!Array.isArray(vector)) continue;
-      const ids = await topIds(def.index, vector);
-      const rank = ids.indexOf(item.target);
-      rows.push({ family: item.family, channel: item.channel, rank, hit1: rank === 0, hit5: rank >= 0 && rank < 5, rr: rank >= 0 ? 1 / (rank + 1) : 0 });
+      const vIds = await vectorIds(def.index, vector);
+      const lIds = await lexicalIds(def.index, item.q);
+      const toSeeds = list => list.map((id, i) => ({ id, score: list.length - i }));
+      const fused = rrfFuse([toSeeds(vIds), toSeeds(lIds)], { k: fK, weights: [vectorWeight, lexicalWeight] })
+        .slice(0, lexK)
+        .map(x => x.id);
+      rows.push({
+        family: item.family,
+        channel: item.channel,
+        vector: rankOf(vIds, item.target),
+        hybrid: rankOf(fused, item.target),
+      });
     }
   } finally {
     await session.close();
     await driver.close();
   }
 
-  function agg(filter) {
-    const sel = rows.filter(filter);
-    if (sel.length === 0) return { n: 0 };
-    const m = f => sel.filter(f).length / sel.length;
-    return {
-      n: sel.length,
-      recall1: +(m(r => r.hit1) * 100).toFixed(1),
-      recall5: +(m(r => r.hit5) * 100).toFixed(1),
-      mrr: +(sel.reduce((a, r) => a + r.rr, 0) / sel.length).toFixed(3),
-    };
-  }
-
   const report = {
-    mode: 'vector-only',
-    topK: k,
-    ALL: agg(() => true),
-    name: agg(r => r.family === 'name'),
-    desc: agg(r => r.family === 'desc'),
-    byChannel: {
-      Element: agg(r => r.channel === 'Element'),
-      ArchitectureRelationship: agg(r => r.channel === 'ArchitectureRelationship'),
-      View: agg(r => r.channel === 'View'),
-    },
+    config: { topK: k, lexicalTopK: lexK, rrfK: fK, vectorWeight, lexicalWeight },
+    vectorOnly: metrics(rows, 'vector'),
+    hybrid: metrics(rows, 'hybrid'),
   };
-
-  console.log(JSON.stringify(report, null, json ? 2 : 2));
+  report.delta = {
+    all_recall1: +(report.hybrid.ALL.recall1 - report.vectorOnly.ALL.recall1).toFixed(1),
+    name_recall1: +(report.hybrid.name.recall1 - report.vectorOnly.name.recall1).toFixed(1),
+    desc_recall1: +(report.hybrid.desc.recall1 - report.vectorOnly.desc.recall1).toFixed(1),
+    element_recall1: +(report.hybrid.byChannel.Element.recall1 - report.vectorOnly.byChannel.Element.recall1).toFixed(1),
+    view_recall1: +(report.hybrid.byChannel.View.recall1 - report.vectorOnly.byChannel.View.recall1).toFixed(1),
+  };
+  console.log(JSON.stringify(report, null, 2));
 }
 
 if (require.main === module) {

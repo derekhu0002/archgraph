@@ -14,6 +14,14 @@ const {
   getWorkspaceRoot,
   resolveArgoPath,
 } = require('../argo-paths.js');
+const {
+  isHybridEnabled,
+  hybridTopK,
+  hybridWeights,
+  rrfK,
+  fuseChannelSeeds,
+  sanitizeFulltextQuery,
+} = require('./hybridRetrieval.js');
 
 const APPROVED_SOURCE_KEYS = Object.freeze([
   'ARGO_EMBEDDING_BASE_URL',
@@ -70,6 +78,20 @@ const VECTOR_QUERY_CYPHER = [
 ].join('\n');
 const VECTOR_QUERY_CYPHER_SCOPED = [
   'CALL db.index.vector.queryNodes($indexName, $topK, $vector)',
+  'YIELD node, score',
+  'WHERE node.channel = $channel AND node.canonicalIdentity IN $canonicalIdentities',
+  'RETURN properties(node) AS record, score',
+  'ORDER BY score DESC',
+].join('\n');
+const LEXICAL_QUERY_CYPHER = [
+  'CALL db.index.fulltext.queryNodes($indexName, $queryText, { limit: $topK })',
+  'YIELD node, score',
+  'WHERE node.channel = $channel',
+  'RETURN properties(node) AS record, score',
+  'ORDER BY score DESC',
+].join('\n');
+const LEXICAL_QUERY_CYPHER_SCOPED = [
+  'CALL db.index.fulltext.queryNodes($indexName, $queryText, { limit: $topK })',
   'YIELD node, score',
   'WHERE node.channel = $channel AND node.canonicalIdentity IN $canonicalIdentities',
   'RETURN properties(node) AS record, score',
@@ -206,18 +228,33 @@ async function executeWpP2Retrieval({
   const purpose = request && typeof request.purpose === 'string' ? request.purpose : '';
   const strict = AUDIT_PURPOSES.has(purpose);
   const topK = Number.isInteger(request.topK) && request.topK > 0 ? request.topK : resolveTopK();
+  const scoped = Array.isArray(canonicalIdentities) && canonicalIdentities.length > 0;
+  const hybrid = isHybridEnabled();
+  const lexicalTopK = hybridTopK();
+  const fusionK = rrfK();
+  const fusionWeights = hybridWeights();
   const seedsByType = {};
   for (const channel of CHANNELS) {
-    seedsByType[channel.key] = await exhaustChannel({
+    const vectorSeeds = await exhaustChannel({
       channel,
       neo4jDriver: composition.neo4jDriver,
       vector,
       threshold: strict ? auditThresholdFor(channel) : memoryThresholdFor(channel),
       maxSeeds: topK,
-      ...(Array.isArray(canonicalIdentities) && canonicalIdentities.length > 0
-        ? { canonicalIdentities }
-        : {}),
+      ...(scoped ? { canonicalIdentities } : {}),
     });
+    let seeds = vectorSeeds;
+    if (hybrid) {
+      const lexicalSeeds = await exhaustLexicalChannel({
+        channel,
+        neo4jDriver: composition.neo4jDriver,
+        queryText: request.intent,
+        maxSeeds: lexicalTopK,
+        ...(scoped ? { canonicalIdentities } : {}),
+      });
+      seeds = fuseChannelSeeds({ vectorSeeds, lexicalSeeds, k: fusionK, limit: lexicalTopK, weights: fusionWeights });
+    }
+    seedsByType[channel.key] = seeds;
   }
   return completeSemanticResult({
     request: completeRequest,
@@ -303,6 +340,9 @@ async function executeProductionNeo4jOperation(configuration, operation) {
       ...record.get('record'),
       score: numberValue(record.get('score')),
     }));
+    if (operation.kind === 'semantic-lexical-query') {
+      return { records };
+    }
     const offset = operation.parameters.offset;
     const windowSize = operation.parameters.windowSize;
     const returnedCount = Math.max(0, records.length - offset);
@@ -707,6 +747,53 @@ async function exhaustChannel({
     offset = window.nextOffset;
   }
   return Object.freeze(accepted);
+}
+
+// Lexical (full-text/BM25) sibling of exhaustChannel. Additive and fail-open:
+// it returns [] when the query text is blank, when the full-text index is
+// missing, or on any error, so hybrid retrieval can never break the baseline.
+async function exhaustLexicalChannel({
+  channel,
+  neo4jDriver,
+  queryText,
+  maxSeeds,
+  canonicalIdentities,
+}) {
+  if (typeof queryText !== 'string' || queryText.trim() === '') {
+    return Object.freeze([]);
+  }
+  const safeQuery = sanitizeFulltextQuery(queryText);
+  if (safeQuery === '') {
+    return Object.freeze([]);
+  }
+  const scoped = Array.isArray(canonicalIdentities) && canonicalIdentities.length > 0;
+  const scopedCanonicalIdentities = scoped
+    ? scopeCanonicalIdentitiesForChannel(canonicalIdentities, channel)
+    : canonicalIdentities;
+  const effectiveMax = Number.isInteger(maxSeeds) && maxSeeds > 0 ? maxSeeds : INITIAL_WINDOW_SIZE;
+  const indexName = `${channel.indexName}_fulltext`;
+  try {
+    const result = await neo4jDriver.execute(Object.freeze({
+      kind: 'semantic-lexical-query',
+      channel: channel.channel,
+      indexName,
+      cypher: scoped ? LEXICAL_QUERY_CYPHER_SCOPED : LEXICAL_QUERY_CYPHER,
+      parameters: Object.freeze({
+        indexName,
+        channel: channel.channel,
+        queryText: safeQuery,
+        topK: effectiveMax,
+        ...(scoped ? { canonicalIdentities: scopedCanonicalIdentities } : {}),
+      }),
+    }));
+    const records = Array.isArray(result && result.records) ? result.records : [];
+    return Object.freeze(records
+      .map(raw => normalizeVectorRecord(raw, channel))
+      .filter(Boolean)
+      .slice(0, effectiveMax));
+  } catch {
+    return Object.freeze([]);
+  }
 }
 
 // Scope identities come from the canonical graph as BARE ids (e.g.
