@@ -4285,6 +4285,11 @@
           "name": "commit",
           "value": "2d56883",
           "description": "【发布 v0.20.1 待重启】全量 .env.example（Part1 = 35 个可写入 .env 的批准键，含 hybrid/rerank/阈值，逐项注释；Part2 = 12 个 host 级键仅注释）；hybrid 键已纳入 .env 白名单（此前 ARGO_SEMANTIC_HYBRID 无法经 .env 配置）；install-argo.ps1 修复“重新部署清空额外 .env 键”。已发布 npm archgraph-argo@0.20.1（sha 11e02085）+ 全局安装 + argo-deploy。运行态：~/.argo/.env 已置 ARGO_SEMANTIC_HYBRID=1 + ARGO_SEMANTIC_RERANK=1 + DeepSeek（deepseek-flash），preflight 通过；Neo4j 三个 *_fulltext 索引 ONLINE。坑：Running MCP 仍 0.20.0，新 .env 的 hybrid 未知键被旧白名单拒（embeddingLifecycle Failed）→ 待重启。待办：重启宿主 → 重跑 argo-init。"
+        },
+        {
+          "name": "commit",
+          "value": "1b1619f",
+          "description": "【重启后验证完成 2026-09-12】archgraph-argo@0.20.1 已生效：MCP 健康（232 元素），argo-init status=ok（Neo4j 库 archgraph=仓库名；qea 投影目标=本仓库 archgraph.qea；semantic lifecycle Aligned/verified）；hybrid + rerank 开启，rerank 解析 provider=deepseek/model=deepseek-flash（真实后端）；语义检索与 memory_search 均可用。新增：eval-rerank 现加载仓库 .env 到 process.env，使评测 provider/model 与生产一致（1b1619f）。待办：偶发 rerankFailures（fail-open）与长跑 stall 可后续调优（如重试/超时）；hybrid 单独可能略伤精度（与 rerank 组合最优）。"
         }
       ],
       "testcases": [
@@ -6632,6 +6637,11 @@
           "name": "commit",
           "value": "2d56883",
           "description": "2d56883: argo/.env.example 全量文档化（含 rerank 与 hybrid 键）；install-argo.ps1 不再清空额外 .env 键（修复重新部署丢失 rerank 配置）；live config 导出 ENV_FILE_KEYS 供测试。"
+        },
+        {
+          "name": "commit",
+          "value": "1b1619f",
+          "description": "1b1619f: eval-rerank 加载仓库 .env 到 process.env，使 rerank provider/model 与生产一致（冒烟确认 provider=deepseek/model=deepseek-flash，rerank_hybrid r@1 100、+16.7）。重启后运行态已验证：MCP 0.20.1、semantic lifecycle Aligned、argo-init ok（232/103/58）。"
         }
       ],
       "description": "语义二阶段重排（Rerank）：在向量/混合检索候选池后用 LLM listwise 重排（chat/completions），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略：默认关（ARGO_SEMANTIC_RERANK=0），开时用更大候选池（pool=20）重排后取 topK；fail-open（错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆。评测（scripts/eval-rerank.js，150 样本，qwen-turbo）：4-way vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优，但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再启用。provider/model 与 embedding 解耦：resolveRerankProvider 优先 ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL，未设则回落 embedding 配置（baseUrl/qwenKey/provider）与默认模型 qwen-turbo（可选 ARGO_SEMANTIC_RERANK_MODEL 仅改模型）。参数：ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js、liveEmbeddingProviderConfig.js。",
