@@ -6570,6 +6570,57 @@
         }
       ],
       "type": "Application Component"
+    },
+    {
+      "attributes": [
+        {
+          "description": "P3 重排接入生产：graph-rag/rerankRetrieval.js + defaultSemanticRetrieval 集成（ARGO_SEMANTIC_RERANK 默认关，fail-open）；tests/rerank-retrieval.test.js AT-rerank-01..05",
+          "name": "commit",
+          "value": "2f1a3be"
+        }
+      ],
+      "description": "语义二阶段重排（Rerank）：在向量/混合检索得到候选池后，用 LLM listwise 重排（chat/completions，qwen-turbo），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略与 hybrid 同范式：默认关（ARGO_SEMANTIC_RERANK=0），开关开时用更大候选池（pool=20）重排后取 topK；fail-open（任何错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆（门禁按重排后顺序、评分仍排名派生）。评测（scripts/eval-rerank.js，150 样本）：vector-only r@1 94.0 → rerank 98.7（+4.7；name +7.9、Element +6.8），r@5 100、MRR 0.968→0.992。参数：ARGO_SEMANTIC_RERANK_MODEL（默认 qwen-turbo）、ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js。",
+      "id": "semantic-rerank-001",
+      "name": "语义二阶段重排（Rerank）",
+      "parent": "1961",
+      "testcases": [
+        {
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js",
+          "description": "GIVEN 重排开关；WHEN 未设 env；THEN 默认关（零行为变化）；设 1 则开；模型/池/返回数可 env 覆盖。",
+          "name": "AT-rerank-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js",
+          "description": "GIVEN 候选 id 集；WHEN parseRerankOrder；THEN 接受 canonical/裸/后缀 id、去重、忽略未知、非法 JSON 返回空。",
+          "name": "AT-rerank-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js",
+          "description": "GIVEN seeds 与重排顺序；WHEN applyRerankOrder；THEN 重排+补集（不丢 seed）+限长；null/空顺序时保持原序（fail-open）。",
+          "name": "AT-rerank-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js",
+          "description": "GIVEN 注入 transport；WHEN rerankCandidates；THEN 正常响应解析为顺序；非 ok/抛错/候选<2/缺配置→null（不抛）。",
+          "name": "AT-rerank-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js",
+          "description": "GIVEN 生产检索路径；WHEN 开关关；THEN 不进入重排（isRerankEnabled+if(rerank&&seeds.length>1)），且重排后再取 topK。",
+          "name": "AT-rerank-05",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Application Component"
     }
   ],
   "relationships": [
@@ -8028,7 +8079,8 @@
         "neo4j-semantic-projection-store",
         "graph-write-dedup-gate",
         "graph-semantics-validation-001",
-        "hybrid-semantic-retrieval-001"
+        "hybrid-semantic-retrieval-001",
+        "semantic-rerank-001"
       ],
       "included_relationships": []
     },
