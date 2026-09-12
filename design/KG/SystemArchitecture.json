@@ -4280,6 +4280,11 @@
           "name": "commit",
           "value": "579bddd",
           "description": "【发布 v0.20.0 待重启】hybrid 检索 + LLM 重排 + 重排 provider 解耦 + 超时防护 已发布并部署。npm publish archgraph-argo@0.20.0（shasum 6887c6ce）→ registry 传播延迟（轮询第7次可见）→ npm i -g → argo-deploy（注册 argo-wakeup 插件）。重排选定 DeepSeek（provider=deepseek/model=deepseek-flash），配置（含 ARGO_RERANK_API_KEY）已写 ~/.argo/.env，ARGO_SEMANTIC_RERANK=1。待办：人类伙伴重启宿主加载新常驻 MCP 进程；重启后重跑 argo-init（当前进程为旧内存代码，init 报告停留 09-05）。坑：长跑大数据集本机 Node 偶发硬挂/0字节退出；已加每20条进度 + rerank 8s 超时。"
+        },
+        {
+          "name": "commit",
+          "value": "2d56883",
+          "description": "【发布 v0.20.1 待重启】全量 .env.example（Part1 = 35 个可写入 .env 的批准键，含 hybrid/rerank/阈值，逐项注释；Part2 = 12 个 host 级键仅注释）；hybrid 键已纳入 .env 白名单（此前 ARGO_SEMANTIC_HYBRID 无法经 .env 配置）；install-argo.ps1 修复“重新部署清空额外 .env 键”。已发布 npm archgraph-argo@0.20.1（sha 11e02085）+ 全局安装 + argo-deploy。运行态：~/.argo/.env 已置 ARGO_SEMANTIC_HYBRID=1 + ARGO_SEMANTIC_RERANK=1 + DeepSeek（deepseek-flash），preflight 通过；Neo4j 三个 *_fulltext 索引 ONLINE。坑：Running MCP 仍 0.20.0，新 .env 的 hybrid 未知键被旧白名单拒（embeddingLifecycle Failed）→ 待重启。待办：重启宿主 → 重跑 argo-init。"
         }
       ],
       "testcases": [
@@ -6502,6 +6507,11 @@
           "name": "commit",
           "value": "8b8b9f2",
           "description": "P3 二阶段重排（rerank）评测：scripts/eval-rerank.js（LLM listwise qwen-turbo，同评测集）。150 样本：vector-only r@1 94.0 → rerank 98.7（+4.7；name +7.9、Element +6.8），r@5 保持 100、MRR 0.968→0.992。仅评测，未接生产。"
+        },
+        {
+          "name": "commit",
+          "value": "2d56883",
+          "description": "2d56883: liveEmbeddingProviderConfig.js 将 ARGO_SEMANTIC_HYBRID{,_VECTOR_WEIGHT,_LEXICAL_WEIGHT,_RRF_K,_TOP_K} 纳入 .env 白名单（此前 hybrid 开关无法经 .env 配置）；argo/.env.example 全量文档化；install-argo.ps1 保留额外 .env 键。"
         }
       ],
       "description": "语义混合检索（Hybrid Semantic Retrieval）：在现有语义（向量）检索之上，加法式引入词法/BM25 检索并按 RRF 融合。策略：默认关（ARGO_SEMANTIC_HYBRID=0），纯加法式（searchText + 全文索引，不改现有向量/契约），词法失败 fail-open 降级纯向量，保留 kill switch；A/B 通过后转默认开。P0：检索评测基线 scripts/eval-retrieval.js（AT-retrieval-eval-01）。P1：语义记录 searchText + 全文索引 *_vector_fulltext（AT-searchtext-01/02），幂等回填 Aligned。P2：hybridRetrieval.js（RRF/sanitize/开关/权重；默认关）+ defaultSemanticRetrieval 集成（kind:'semantic-lexical-query'，向量占优权重 3:1），AT-hybrid-01..05。A/B：等权 RRF 为负（ALL -1.0/View -6.1），3:1/lexK16 后 ALL recall@1 +0.4、name +1.2、element +0.6、desc -0.8、View 0（增益有限，基线已高，故默认关）。写入策略影响验收 AT-write-impact-01..04：hybrid 开关不改 L0 精确去重；融合不缩小写入门的向量候选集；门禁判据（matches+onConflict）与评分尺度无关；门禁 semanticScore 为排名派生（0.99..0.8），hybrid 只改排序不改 0.85 阈值语义。后续：按宿主金丝雀开启 / 二阶段重排（rerank）。",
@@ -6617,6 +6627,11 @@
           "name": "commit",
           "value": "ad4629c",
           "description": "重排请求超时（ARGO_SEMANTIC_RERANK_TIMEOUT_MS 默认8s，fail-open）；评测进度。DeepSeek-flash 与 qwen-turbo 同样本(80)对比：DeepSeek rerank_hybrid r@1 100（+7.5，MRR 1.0，desc 不退化）远优于 qwen-turbo（rerank_hybrid 92.5、desc −7.1）。"
+        },
+        {
+          "name": "commit",
+          "value": "2d56883",
+          "description": "2d56883: argo/.env.example 全量文档化（含 rerank 与 hybrid 键）；install-argo.ps1 不再清空额外 .env 键（修复重新部署丢失 rerank 配置）；live config 导出 ENV_FILE_KEYS 供测试。"
         }
       ],
       "description": "语义二阶段重排（Rerank）：在向量/混合检索候选池后用 LLM listwise 重排（chat/completions），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略：默认关（ARGO_SEMANTIC_RERANK=0），开时用更大候选池（pool=20）重排后取 topK；fail-open（错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆。评测（scripts/eval-rerank.js，150 样本，qwen-turbo）：4-way vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优，但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再启用。provider/model 与 embedding 解耦：resolveRerankProvider 优先 ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL，未设则回落 embedding 配置（baseUrl/qwenKey/provider）与默认模型 qwen-turbo（可选 ARGO_SEMANTIC_RERANK_MODEL 仅改模型）。参数：ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js、liveEmbeddingProviderConfig.js。",
@@ -6698,6 +6713,28 @@
       "description": "发布里程碑（2026-09-12）：archgraph-argo@0.20.0 发布并部署，交付检索质量优化三项 + 健壮性修复。内容：①检索评测基线 scripts/eval-retrieval.js（vector-only recall@1 94.6%）与 4-way 对比 scripts/eval-rerank.js；②hybrid 检索：新增 argo/scripts/graph-rag/hybridRetrieval.js（RRF、sanitizeFulltextQuery、默认权重 vector:lexical=3:1）+ searchText 全文索引（productionSemanticNeo4jAdapter 建 *_fulltext，回填 Aligned）+ defaultSemanticRetrieval 集成（kind:'semantic-lexical-query'），ARGO_SEMANTIC_HYBRID 默认关；③LLM 重排：新增 argo/scripts/graph-rag/rerankRetrieval.js + defaultSemanticRetrieval.executeWpP2Retrieval 集成（pool=max(topK,20)），ARGO_SEMANTIC_RERANK 默认关、fail-open；④重排 provider 与 embedding 解耦（ARGO_RERANK_BASE_URL/API_KEY/PROVIDER/MODEL），配置白名单新增 ARGO_RERANK_* / ARGO_SEMANTIC_RERANK_TIMEOUT_MS，SECRET_KEYS 加 ARGO_RERANK_API_KEY；⑤健壮性：rerankCandidates 增 AbortController 超时（默认 8s，超时/异常返回 null→fail-open）。实测（同样本 80，真实后端）：DeepSeek-flash rerank(hybrid) recall@1 100（+7.5、MRR 1.0、desc 不退化）优于 qwen-turbo（rerank_hybrid 92.5、desc −7.1）→ 重排选定 DeepSeek（provider=deepseek, base https://api.deepseek.com, model deepseek-flash，注意 API 模型 id 为 deepseek-flash 而非 opencode 别名 deepseek-v4-flash）；相关配置（含 ARGO_RERANK_API_KEY）已写入 ~/.argo/.env。验收：rerank/hybrid/write-impact 等 71/71；validateSystemArchitecture 通过。发布流程：npm publish archgraph-argo@0.20.0（70 files/1.3MB，shasum 6887c6ce）→ registry 传播延迟（轮询第 7 次可见，规避 ETARGET）→ npm i -g archgraph-argo@0.20.0 → argo-deploy（注册 argo-wakeup 插件，更新 OpenCode MCP 配置）。坑：本机 Node 长跑大数据集偶发硬挂/0 字节退出（150 样本评测卡在 ~40–60 条）；harness 原本仅结束时打印→已加每 20 条进度。待办：人类伙伴重启宿主加载新常驻 MCP 进程；重启后重跑 argo-init（当前运行进程仍是旧内存代码，init 报告为 09-05 陈旧件）。",
       "id": "overseer-argo-0-20-0-release-001",
       "name": "里程碑：发布 archgraph-argo@0.20.0（hybrid 检索 + LLM 重排 + 重排 provider 解耦）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（发布 archgraph-argo@0.20.1；同 commit 含 argo/.env.example 重写 + hybrid 键白名单 + install-argo.ps1 保留额外 .env 键 + 测试）",
+          "name": "commit",
+          "value": "2d56883"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "发布里程碑（2026-09-12）：archgraph-argo@0.20.1 发布并部署，交付『全量 .env 配置文档化 + hybrid 可经 .env 配置 + 部署不再清空额外配置』。内容：① argo/.env.example 重写，完整覆盖所有受支持环境变量——Part 1 可写入 .env 的 35 个批准键（embedding 5 / neo4j 4 / secrets 3 / 语义阈值 9 / hybrid 5 / rerank 9 / opt-in 2），每项均有注释与默认值；Part 2 host 级 12 键（ARGO_ENV_FILE/ARGO_REPO_ROOT/ARGO_EA_QEA/ARGO_WORKSPACE_ROOTS/ARGO_SERVER_PATH/GRAPH_MCP_URL/EA_QEA_DEBUG/ARGO_TEST_TIMEOUT_MS/ARGO_MCP_MUTATION_RESPONSE_DEBUG/ARGO_MCP_SEMANTIC_DEDUP{,_THRESHOLD}/ARGO_SEMANTIC_DEDUP_THRESHOLD）仅以注释说明（.env 不接受未知键）；新增 tests/env-example.test.js（AT-env-example-01..06）。② liveEmbeddingProviderConfig.js 将 ARGO_SEMANTIC_HYBRID{,_VECTOR_WEIGHT,_LEXICAL_WEIGHT,_RRF_K,_TOP_K} 纳入 RETRIEVAL_TUNING_KEYS——修复『hybrid 开关根本无法经 .env 打开』（此前会触发 SECRET_FILE_UNKNOWN_KEY 拒绝整个 .env）；导出 ENV_FILE_KEYS/ENV_FILE_SECRET_KEYS。③ install-argo.ps1 生成 .env 后追加既有但不在提示列表的键，修复重新部署静默清空 rerank/hybrid 配置的缺陷（实证：0.20.0 argo-deploy 曾丢掉写入的 ARGO_RERANK_*）。部署：npm publish 0.20.1（71 files，含 .env.example，shasum 11e02085）→ registry 传播延迟（第 10 次可见）→ npm i -g → argo-deploy。运行态：~/.argo/.env 已写入 hybrid=1 + rerank=1 + DeepSeek（provider=deepseek/model=deepseek-flash/base https://api.deepseek.com）；Neo4j 全文索引三个 *_fulltext ONLINE（hybrid 可生效）。坑：Running MCP 进程仍为 0.20.0，新 .env 含 hybrid 未知键会被旧白名单拒绝（LIVE_PROVIDER_CONFIGURATION_REQUIRED / embeddingLifecycle Failed）——待重启加载 0.20.1。验收：回归 83/83 + argo-deploy 8/8；validate 通过。待办：人类伙伴重启宿主；重启后重跑 argo-init。",
+      "id": "overseer-argo-0-20-1-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.20.1（全量 .env.example + hybrid 可配置 + 部署保留额外 .env）",
       "parent": "project-overseer-001",
       "type": "Business Object"
     }
@@ -8653,7 +8690,8 @@
         "overseer-argo-0-18-1-release-001",
         "overseer-argo-0-19-0-release-001",
         "overseer-argo-0-19-1-release-001",
-        "overseer-argo-0-20-0-release-001"
+        "overseer-argo-0-20-0-release-001",
+        "overseer-argo-0-20-1-release-001"
       ]
     }
   ]
