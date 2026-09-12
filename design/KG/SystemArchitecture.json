@@ -4240,6 +4240,11 @@
           "name": "commit",
           "value": "e4414de",
           "description": "P1（语义记录 searchText + 全文索引，加法式，零检索行为变化）；幂等回填 Aligned（Element 229/Relationship 103/View 58）；实测 3 个 FULLTEXT 索引、全文查询命中目标 #1。下一步 P2：词法检索 + RRF 融合（ARGO_SEMANTIC_HYBRID 默认关）。"
+        },
+        {
+          "name": "commit",
+          "value": "4fa1a90",
+          "description": "P2 混合检索（词法 full-text + RRF，ARGO_SEMANTIC_HYBRID 默认关）已交付：hybridRetrieval.js + defaultSemanticRetrieval 集成 + A/B 评测 + AT-hybrid-01..05。A/B：等权 RRF 为负（ALL -1.0/View -6.1）；向量占优权重 3:1/lexK16 后 ALL recall@1 +0.4、name +1.2、element +0.6、desc -0.8、View 0，增益有限。建议下一步评估二阶段重排（rerank）或按宿主金丝雀开启。"
         }
       ],
       "testcases": [
