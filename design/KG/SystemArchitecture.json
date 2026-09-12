@@ -6952,8 +6952,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.20.4",
-          "description": "npm publish shasum 5beab4ec806b95b6319933661e7c2f37d17a7448；全局安装 + argo-deploy 22/22；~/.argo/scripts 六文件与 repo SHA256 一致（含 thinking-off 模型无关化、异步对齐+日志+启动预热、增量回填）；待宿主重启加载新常驻 MCP 进程"
+          "value": "archgraph-argo@0.20.5",
+          "description": "npm publish shasum 29018c9332b5c3ee34dd561943e9cf98868ba2ab；全局安装 + argo-deploy 22/22；~/.argo/scripts 与 repo SHA256 一致（含 semanticAlignmentRunner/Lock、ensureArgoHarnessEnvironment 锁包裹）；待宿主重启加载新常驻 MCP 进程"
         },
         {
           "name": "commit",
@@ -6994,6 +6994,11 @@
           "name": "commit",
           "value": "24bce1c",
           "description": "启动预热不再自动初始化新项目；对齐入口（预热/查询/argo init）经跨进程文件锁串行。"
+        },
+        {
+          "name": "commit",
+          "value": "f146246",
+          "description": "package.json — release(archgraph-argo): 0.20.5"
         }
       ]
     },
