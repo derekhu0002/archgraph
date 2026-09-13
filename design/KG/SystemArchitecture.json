@@ -4112,7 +4112,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话目标（2026-09-11）：优化 Graph 框架弱规则——抑制 Agent 写图重复（同义元素/关系/三元组膨胀，干扰语义召回与后续思考）。本次完成 L0+L1：L0 确定性去重门禁 + find-or-create（方案 B）（commits 79c76ea 工作 / 5c65a46 图谱回登记）；L1 语义去重建议（bde66d8）；规则 <GraphDeduplication> + CoreRule 9（均已入本仓 argo，未发 npm）。L0 机制：①addElement/addRelationship/addView 创建前按自然键精确查重（元素 type+归一化 name；关系 source_id+type+target_id+归一化 name；视图 parent_element_id+归一化 view name），归一化=NFKC+折叠空白+大小写；②onConflict=fail（默认，拒绝并回传 duplicateConflicts 候选+guidance）/reuse（find-or-create，不新建、挂到目标 view、返回 reusedId）/allowDuplicate（需非空 justification）；③update* 不受门禁。L1 机制：buildSemanticDedupAdvisory 复用语义 journey + buildCanonicalSemanticDocumentSubset，对 addElement 在 preview/apply 回传受控作用域（同 type；给定 view_ids 时限定其当前成员）且分数≥严格阈值（默认 0.85，ARGO_SEMANTIC_DEDUP_THRESHOLD）的候选；仅建议、永不拒绝、不阻塞写入，后端不可用降级为显式 status（ARGO_MCP_SEMANTIC_DEDUP=0 关闭）。已登记 AT-dedup-01..07（tests/architecture-dedup-gate.test.js）、AT-rules-03（tests/argo-rules-dedup.test.js）、AT-dedup-L1-01（tests/architecture-dedup-semantic.test.js）；新增 Application Component graph-write-dedup-gate。验收：L0 10/10、L1 5/5；相关回归 41/41 + ea-web-service-impl 22/22；真机 dry-run 验证 L1 passed/advisory；runArchitectureTests 70/75（5 项为改动前既有失败：excalidraw-diagram-skill / ea-import-reconcile×2 / ea-import-perf / memory-eval-run）；validateSystemArchitecture 通过。关键决策与理由：语义相似≠身份，故 L1 只建议不拒绝（避免误杀如“视频制作 vs 视频制作Leader”）；find-or-create 用现有 add 加 onConflict 参数（方案 B），不新增 MCP 接口；关系同三元组但不同 name 合法，故 L0 用精确四元组；L1 受控作用域=同 type + 指定 view 成员，阈值默认 0.85 可配。待办：npm 发布与 ~/.config/opencode/AGENTS.md 同步（评估）；存量图谱去重审计（可选工具，不属框架核心）；人工浏览器/真实 Agent 场景观察 L1 建议质量与噪声。可复用经验：改 add* 写图行为后，务必回归 architecture-*-mutation 与 ea-web-service-impl（写图回滚）；语义建议路径必须 fail-open（catch→显式降级，绝不阻塞写入）；全量 runArchitectureTests 中 ea-web-service-impl 偶发原生崩溃 exitCode 0xC0000409 属环境 flake，单跑通过即忽略；LTM 视图上限 15，满则先归档（只移不删）再写。",
+      "description": "会话目标（2026-09-13）：对人类伙伴提出的『Android 平板「一页」架构图 App 方向』做全面洞察。委派业界技术洞察团队（洞察Lead insight-lead-001 编排五步法）完成：界定→MECE 拆解（八轴：场景·JTBD/运行拓扑·数据通路/触屏范式/功能边界/实现路线/安全信任/与 EA·web 分工/评估方法）→11 条假设→验证→金字塔建议。关键结论：①平板工具定位为瘦客户端 + Hub 远程前端（复用现有 2760 本地 Web 服务，不另造后端）；②形态推荐 PWA→TWA 打包为独立 Android 应用（复用 web/ MaxGraph 内核 + 布局侧车）；③最大阻塞是可达性 + 安全（2760 仅绑 127.0.0.1，须局域网/隧道 + 认证 + Origin 校验）；④三路线分工不互斥（Sparx EA=深度权威建模桌面 / 平板=移动看·轻改·协作 / 2760=Hub 与共享画布内核）；⑤平板边界=看 + 轻改 + AI 协作，离线只读、写操作在线（经 ARGO MCP preview→apply）。交付 docs/tablet-archgraph-app-insight.md + tests/tablet-archgraph-app-insight.test.js（6/6 通过）+ 图谱里程碑 insight-lead-milestone-tablet-app-001（洞察Lead T2 长期记忆）。commits 4016590（交付）/6a97929（图谱登记回填）。关键决策：图谱写入门禁语义拦截新里程碑（0.99 vs 既有『EA 类工具人机共享前端洞察』里程碑），判定为独立新洞察交付，以 allowDuplicate + justification 显式放行。Pitfall：本会话 BAILIAN WEB MCP 未挂载到子代理，验证分析师改用 webfetch 抓 14 个一手来源（MCP 规范/MDN/Cloudflare/ngrok/Archi/Structurizr/draw.io/FigJam/Bubblewrap）并诚实声明覆盖局限（缺第三方博客/视频交叉源）。待办/未决：Q1「一页」具体交互范式、Q2 Atlas「驾驶操作工具」job、Q3 Hub 远程形态（局域网/Cloudflare Tunnel/ngrok）、Q4 TWA 的 HTTPS + assetlinks 前置、Q5 MaxGraph 触屏手势适配工作量、Q6 离线只读缓存与布局侧车失效策略；人类伙伴拍板后可据此立项。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4134,7 +4134,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-11",
+          "value": "2026-09-13",
           "description": "2026-09-11 memory_search workspaceRoot 修复 + 发布 0.16.2 + 部署"
         },
         {
