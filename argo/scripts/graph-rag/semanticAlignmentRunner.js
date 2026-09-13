@@ -46,6 +46,18 @@ function isProjectInitialized(repositoryRoot) {
   }
 }
 
+// A readiness record proves the workspace was initialized (argo init) before.
+// The preheat only RECONCILES a previously-initialized-but-now-stale workspace;
+// a never-aligned workspace (brand-new project, or a synthetic test copy) must
+// be initialized explicitly, never rebuilt in the background.
+function hasReadinessRecord(repositoryRoot) {
+  try {
+    return fs.existsSync(readinessRecordPath(repositoryRoot));
+  } catch {
+    return false;
+  }
+}
+
 function alignmentError() {
   const error = new Error('SEMANTIC_AUTO_ALIGNMENT_FAILED');
   error.category = 'SEMANTIC_AUTO_ALIGNMENT_FAILED';
@@ -57,7 +69,7 @@ function alignmentError() {
 
 // Run the alignment (once). Returns a promise resolving to { status: 'aligned' }
 // or rejecting with the SEMANTIC_AUTO_ALIGNMENT_FAILED envelope.
-function runSemanticAlignment(repositoryRoot = getWorkspaceRoot()) {
+function runSemanticAlignment(repositoryRoot = getWorkspaceRoot(), options = {}) {
   if (inFlight) {
     return inFlight;
   }
@@ -70,6 +82,11 @@ function runSemanticAlignment(repositoryRoot = getWorkspaceRoot()) {
       env: process.env,
       stdio: ['ignore', 'ignore', 'inherit'],
     });
+    if (options.unref && typeof child.unref === 'function') {
+      // Background preheat must NOT keep the MCP process alive (a spawnSync-driven
+      // caller waits for the server to exit; an attached child would hang it).
+      child.unref();
+    }
     const finish = (failed, cause) => {
       inFlight = null;
       const ms = Date.now() - startedAt;
@@ -94,9 +111,14 @@ function preheatSemanticAlignment(repositoryRoot = getWorkspaceRoot()) {
   if (preheated || !repositoryRoot || !isProjectInitialized(repositoryRoot) || isSemanticReady(repositoryRoot)) {
     return;
   }
+  // Only reconcile a workspace that was initialized before (a readiness record
+  // exists); never rebuild a never-aligned project in the background.
+  if (!hasReadinessRecord(repositoryRoot)) {
+    return;
+  }
   preheated = true;
   console.error('[argo] readiness not aligned at startup; preheating semantic alignment in background…');
-  runSemanticAlignment(repositoryRoot).catch(() => {});
+  runSemanticAlignment(repositoryRoot, { unref: true }).catch(() => {});
 }
 
 module.exports = {
@@ -104,5 +126,6 @@ module.exports = {
   preheatSemanticAlignment,
   isSemanticReady,
   isProjectInitialized,
+  hasReadinessRecord,
   readinessRecordPath,
 };

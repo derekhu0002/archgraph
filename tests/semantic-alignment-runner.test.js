@@ -68,6 +68,8 @@ test('AT-align-03: preheat never bootstraps a brand-new project', () => {
   }
   const runner = fs.readFileSync(path.join(ROOT, 'argo/scripts/graph-rag/semanticAlignmentRunner.js'), 'utf8');
   assert.match(runner, /!isProjectInitialized\(repositoryRoot\)/, 'preheat must guard on project initialization');
+  assert.match(runner, /!hasReadinessRecord\(repositoryRoot\)/, 'preheat must only reconcile a previously-initialized workspace');
+  assert.match(runner, /runSemanticAlignment\(repositoryRoot, \{ unref: true \}\)/, 'preheat child must be unref-ed so it never blocks process exit');
 });
 
 // AT-align-04: the heavy alignment is serialized by a cross-process lock (preheat
