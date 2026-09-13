@@ -6971,8 +6971,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.20.6",
-          "description": "npm publish shasum c0fe08968a00b5ddc3f06e7148a4a1880f589e86；全局安装 + argo-deploy 22/22；~/.argo/scripts 与 repo SHA256 一致（含 mcpCrashDiagnostics 崩溃诊断 + 写入路径 qea 投影改同步）；待宿主重启加载新常驻 MCP 进程"
+          "value": "archgraph-argo@0.20.7",
+          "description": "npm publish shasum 99141e1aaa523652891a131f9af22171eaf7ff19；全局安装 + argo-deploy 22/22；细化检索阶段面包屑；待宿主重启加载新常驻 MCP 进程"
         },
         {
           "name": "commit",
@@ -7033,6 +7033,11 @@
           "name": "commit",
           "value": "0136c8b",
           "description": "diag(semantic): 细化检索阶段面包屑（embed start/done、vector/lexical per channel、vector-window、rerank start/done），供下次原生 abort 精确定位。"
+        },
+        {
+          "name": "commit",
+          "value": "21824c8",
+          "description": "package.json — release(archgraph-argo): 0.20.7"
         }
       ]
     },
