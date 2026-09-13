@@ -66,3 +66,16 @@ test('AT-crash-02: phases marked + synchronous qea projection + diagnostics inst
   assert.ok(argo.includes('installCrashDiagnostics('), 'server must install crash diagnostics');
   assert.ok(argo.includes("markPhase('tool:' + name)"), 'tool entry phase must be marked');
 });
+
+// AT-crash-03: the production retrieval reuses ONE Neo4j driver+session per
+// retrieval (across every vector window) and disposes it at the end, instead of
+// creating/closing a driver per operation (the confirmed native-abort trigger)
+// or leaving a lingering handle that would keep short-lived processes alive.
+test('AT-crash-03: production Neo4j access reuses one driver/session per retrieval', () => {
+  const retrieval = fs.readFileSync(path.join(ROOT, 'argo/scripts/graph-rag/defaultSemanticRetrieval.js'), 'utf8');
+  assert.ok(retrieval.includes('ensureNeo4jSession'), 'composition must own one cached session');
+  assert.ok(retrieval.includes('async dispose()'), 'composition must expose dispose()');
+  assert.ok(retrieval.includes('runOperationOnSession('), 'operations must run on the shared session');
+  assert.ok(retrieval.includes('composition.dispose()'), 'retrieval must dispose the composition (no lingering handle)');
+  assert.ok(!retrieval.includes('executeProductionNeo4jOperation'), 'per-operation driver creation must be removed');
+});

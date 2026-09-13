@@ -154,65 +154,83 @@ function createDefaultSemanticRetrieval(dependencies = {}) {
   return Object.freeze({
     async retrieve(request = {}) {
       const composition = await resolveRetrievalComposition(dependencies);
-      const activeTestComposition = testCompositionStorage.getStore();
-      const activeReadinessBoundary = activeTestComposition
-        && activeTestComposition.useReadinessBoundary !== true
-        ? undefined
-        : readinessBoundary;
-      let configurationEvidence = await composition.resolveConfiguration();
-      let evidence = await readAndEvaluatePersistentReadiness(
-        composition,
-        canonicalGraph,
-        activeReadinessBoundary,
-      );
-      if (!evidence.alignment.aligned) {
-        await attemptAutomaticAlignment({
-          composition,
-          request,
-          alignment: evidence.alignment,
-        });
-        evidence = await readAndEvaluatePersistentReadiness(
+      try {
+        const activeTestComposition = testCompositionStorage.getStore();
+        const activeReadinessBoundary = activeTestComposition
+          && activeTestComposition.useReadinessBoundary !== true
+          ? undefined
+          : readinessBoundary;
+        let configurationEvidence = await composition.resolveConfiguration();
+        let evidence = await readAndEvaluatePersistentReadiness(
           composition,
           canonicalGraph,
           activeReadinessBoundary,
         );
         if (!evidence.alignment.aligned) {
-          throw semanticAutomaticAlignmentFailed(evidence.alignment);
+          await attemptAutomaticAlignment({
+            composition,
+            request,
+            alignment: evidence.alignment,
+          });
+          evidence = await readAndEvaluatePersistentReadiness(
+            composition,
+            canonicalGraph,
+            activeReadinessBoundary,
+          );
+          if (!evidence.alignment.aligned) {
+            throw semanticAutomaticAlignmentFailed(evidence.alignment);
+          }
+        }
+        return await executeWpP2Retrieval({
+          composition,
+          request,
+          canonicalGraph,
+          readiness: evidence.readiness,
+          configurationEvidence,
+        });
+      } finally {
+        if (typeof composition.dispose === 'function') {
+          await composition.dispose();
         }
       }
-      return executeWpP2Retrieval({
-        composition,
-        request,
-        canonicalGraph,
-        readiness: evidence.readiness,
-        configurationEvidence,
-      });
     },
     async probeQueryability(request = {}, readiness = {}) {
       const composition = await resolveRetrievalComposition(dependencies);
-      const configurationEvidence = await composition.resolveConfiguration();
-      return executeWpP2Retrieval({
-        composition,
-        request,
-        canonicalGraph,
-        readiness,
-        configurationEvidence,
-      });
+      try {
+        const configurationEvidence = await composition.resolveConfiguration();
+        return await executeWpP2Retrieval({
+          composition,
+          request,
+          canonicalGraph,
+          readiness,
+          configurationEvidence,
+        });
+      } finally {
+        if (typeof composition.dispose === 'function') {
+          await composition.dispose();
+        }
+      }
     },
     async readReadiness() {
       const composition = await resolveRetrievalComposition(dependencies);
-      const activeTestComposition = testCompositionStorage.getStore();
-      const activeReadinessBoundary = activeTestComposition
-        && activeTestComposition.useReadinessBoundary !== true
-        ? undefined
-        : readinessBoundary;
-      await composition.resolveConfiguration();
-      const evidence = await readAndEvaluatePersistentReadiness(
-        composition,
-        canonicalGraph,
-        activeReadinessBoundary,
-      );
-      return publicReadinessOutcome(evidence.alignment);
+      try {
+        const activeTestComposition = testCompositionStorage.getStore();
+        const activeReadinessBoundary = activeTestComposition
+          && activeTestComposition.useReadinessBoundary !== true
+          ? undefined
+          : readinessBoundary;
+        await composition.resolveConfiguration();
+        const evidence = await readAndEvaluatePersistentReadiness(
+          composition,
+          canonicalGraph,
+          activeReadinessBoundary,
+        );
+        return publicReadinessOutcome(evidence.alignment);
+      } finally {
+        if (typeof composition.dispose === 'function') {
+          await composition.dispose();
+        }
+      }
     },
   });
 }
@@ -333,6 +351,28 @@ async function createProductionComposition(dependencies) {
   const repositoryRoot = dependencies.repositoryRoot
     || getWorkspaceRoot();
   let configurationEvidence;
+  let neo4jHandle = null;
+  async function disposeNeo4j() {
+    const handle = neo4jHandle;
+    neo4jHandle = null;
+    if (!handle) return;
+    try { await handle.session.close(); } catch { /* ignore */ }
+    try { await handle.driver.close(); } catch { /* ignore */ }
+  }
+  function ensureNeo4jSession() {
+    if (neo4jHandle) return neo4jHandle.session;
+    const configuration = configurationEvidence.configuration;
+    const neo4j = require('neo4j-driver');
+    const driver = neo4j.driver(
+      configuration.neo4jDatabaseUrl,
+      neo4j.auth.basic(configuration.neo4jDatabaseUsername, configuration.neo4jDatabasePassword),
+    );
+    const session = driver.session(configuration.neo4jDatabase === undefined
+      ? undefined
+      : { database: configuration.neo4jDatabase });
+    neo4jHandle = { driver, session };
+    return session;
+  }
   return Object.freeze({
     async resolveConfiguration() {
       configurationEvidence = await resolveApprovedLiveConfiguration({
@@ -354,59 +394,61 @@ async function createProductionComposition(dependencies) {
         if (!configurationEvidence) {
           throw safeError('EXTERNAL_CREDENTIALS_REQUIRED');
         }
-        return executeProductionNeo4jOperation(configurationEvidence.configuration, operation);
+        if (operation && operation.kind === 'semantic-auto-alignment-attempt') {
+          return runScriptOwnedSemanticAlignment(operation);
+        }
+        try {
+          return await runOperationOnSession(ensureNeo4jSession(), operation);
+        } catch (error) {
+          // A failed run may leave the session unusable; drop the handle so the
+          // rest of this retrieval (or the next one) reconnects cleanly.
+          await disposeNeo4j();
+          throw error;
+        }
       },
     }),
+    async dispose() {
+      await disposeNeo4j();
+    },
   });
 }
 
-async function executeProductionNeo4jOperation(configuration, operation) {
-  if (operation && operation.kind === 'semantic-auto-alignment-attempt') {
-    return runScriptOwnedSemanticAlignment(operation);
+// Pure operation runner: runs one Cypher operation on a caller-owned Neo4j
+// session and maps the result. The session/driver lifecycle lives in the
+// production composition (ONE handle per retrieval, reused across every vector
+// window, then closed) -- correctly reused without leaving a lingering handle,
+// which would keep short-lived processes alive. Creating AND closing a driver
+// per operation caused the rapid handle churn that intermittently aborted the
+// MCP with a native libuv assertion on Windows (confirmed crash phase:
+// retrieval:vector-window:ArchitectureRelationship).
+async function runOperationOnSession(session, operation) {
+  const result = await session.run(operation.cypher, operation.parameters);
+  if (operation.kind === 'semantic-readiness-read') {
+    const readiness = result.records[0] && result.records[0].get('readiness');
+    return { records: readiness ? [readiness] : [] };
   }
-  const neo4j = require('neo4j-driver');
-  const driver = neo4j.driver(
-    configuration.neo4jDatabaseUrl,
-    neo4j.auth.basic(
-      configuration.neo4jDatabaseUsername,
-      configuration.neo4jDatabasePassword,
-    ),
-  );
-  const session = driver.session(configuration.neo4jDatabase === undefined
-    ? undefined
-    : { database: configuration.neo4jDatabase });
-  try {
-    const result = await session.run(operation.cypher, operation.parameters);
-    if (operation.kind === 'semantic-readiness-read') {
-      const readiness = result.records[0] && result.records[0].get('readiness');
-      return { records: readiness ? [readiness] : [] };
-    }
-    const records = result.records.map(record => ({
-      ...record.get('record'),
-      score: numberValue(record.get('score')),
-    }));
-    if (operation.kind === 'semantic-lexical-query') {
-      return { records };
-    }
-    const offset = operation.parameters.offset;
-    const windowSize = operation.parameters.windowSize;
-    const returnedCount = Math.max(0, records.length - offset);
-    const hasMore = records.length === operation.parameters.topK;
-    return {
-      records,
-      windowEvidence: {
-        offset,
-        windowSize,
-        returnedCount,
-        hasMore,
-        nextOffset: hasMore ? operation.parameters.topK : null,
-        windowExhausted: !hasMore,
-      },
-    };
-  } finally {
-    await session.close();
-    await driver.close();
+  const records = result.records.map(record => ({
+    ...record.get('record'),
+    score: numberValue(record.get('score')),
+  }));
+  if (operation.kind === 'semantic-lexical-query') {
+    return { records };
   }
+  const offset = operation.parameters.offset;
+  const windowSize = operation.parameters.windowSize;
+  const returnedCount = Math.max(0, records.length - offset);
+  const hasMore = records.length === operation.parameters.topK;
+  return {
+    records,
+    windowEvidence: {
+      offset,
+      windowSize,
+      returnedCount,
+      hasMore,
+      nextOffset: hasMore ? operation.parameters.topK : null,
+      windowExhausted: !hasMore,
+    },
+  };
 }
 
 async function attemptAutomaticAlignment({ composition, request, alignment }) {
