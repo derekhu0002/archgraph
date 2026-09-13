@@ -236,8 +236,9 @@ async function executeWpP2Retrieval({
     configuration: configurationEvidence.configuration,
     transport: composition.transport,
   });
-  markPhase('retrieval:embed');
+  markPhase('retrieval:embed:start');
   const vector = await provider.embed(request.intent);
+  markPhase('retrieval:embed:done');
   requireQualifiedVector(vector);
   const purpose = request && typeof request.purpose === 'string' ? request.purpose : '';
   const strict = AUDIT_PURPOSES.has(purpose);
@@ -254,6 +255,7 @@ async function executeWpP2Retrieval({
   const pool = rerank ? Math.max(topK, rerankOptions.poolSize) : topK;
   const channelSeeds = [];
   for (const channel of CHANNELS) {
+    markPhase('retrieval:vector:' + channel.channel);
     const vectorSeeds = await exhaustChannel({
       channel,
       neo4jDriver: composition.neo4jDriver,
@@ -264,6 +266,7 @@ async function executeWpP2Retrieval({
     });
     let seeds = vectorSeeds;
     if (hybrid) {
+      markPhase('retrieval:lexical:' + channel.channel);
       const lexicalSeeds = await exhaustLexicalChannel({
         channel,
         neo4jDriver: composition.neo4jDriver,
@@ -276,7 +279,7 @@ async function executeWpP2Retrieval({
     channelSeeds.push({ channel, seeds });
   }
   if (rerank) {
-    markPhase('retrieval:rerank');
+    markPhase('retrieval:rerank:start');
     // Rerank every channel CONCURRENTLY: the LLM calls dominate latency and are
     // independent, so parallelizing turns the cost from sum(channels) into
     // ~one call. fail-open: a null/empty order keeps the original ordering.
@@ -292,6 +295,7 @@ async function executeWpP2Retrieval({
         : seeds
     )));
     channelSeeds.forEach((entry, index) => { entry.seeds = rerankedSeeds[index]; });
+    markPhase('retrieval:rerank:done');
   }
   const seedsByType = {};
   for (const { channel, seeds } of channelSeeds) {
@@ -741,6 +745,7 @@ async function exhaustChannel({
   const effectiveMax = Number.isInteger(maxSeeds) && maxSeeds > 0 ? maxSeeds : Number.POSITIVE_INFINITY;
   let offset = 0;
   while (accepted.length < effectiveMax) {
+    markPhase('retrieval:vector-window:' + channel.channel);
     const parameters = Object.freeze({
       indexName: channel.indexName,
       channel: channel.channel,

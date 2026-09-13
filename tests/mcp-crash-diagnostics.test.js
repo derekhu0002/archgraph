@@ -50,8 +50,17 @@ test('AT-crash-02: phases marked + synchronous qea projection + diagnostics inst
   assert.doesNotMatch(qea, /new Promise/, 'qea projection must not leave an async child handle');
 
   const retrieval = fs.readFileSync(path.join(ROOT, 'argo/scripts/graph-rag/defaultSemanticRetrieval.js'), 'utf8');
-  assert.ok(retrieval.includes("markPhase('retrieval:embed')"), 'retrieval embed phase must be marked');
-  assert.ok(retrieval.includes("markPhase('retrieval:rerank')"), 'retrieval rerank phase must be marked');
+  for (const phase of [
+    'retrieval:embed:start',
+    'retrieval:embed:done',
+    'retrieval:vector:',
+    'retrieval:vector-window:',
+    'retrieval:lexical:',
+    'retrieval:rerank:start',
+    'retrieval:rerank:done',
+  ]) {
+    assert.ok(retrieval.includes(`markPhase('${phase}`), `retrieval phase ${phase} must be marked`);
+  }
 
   const argo = fs.readFileSync(path.join(ROOT, 'argo/scripts/argo-mcp-server.js'), 'utf8');
   assert.ok(argo.includes('installCrashDiagnostics('), 'server must install crash diagnostics');
