@@ -6996,8 +6996,8 @@
         },
         {
           "name": "pitfall",
-          "value": "mcp-native-crash-during-mutation-black-box",
-          "description": "现象（2026-09-13 00:09，SOC-DEMO）：argo MCP 在一次 applySystemArchitectureMutation 约 2s 后进程死亡，opencode 仅记录 \"MCP connection closed\"，无 stderr/堆栈（黑盒）。结合已知“本机 Node 长跑大数据集偶发硬挂/0 字节退出”与实测到的 Windows 原生断言 UV_HANDLE_CLOSING，疑似“异步 spawn(qea 子进程) 句柄关闭 与 后续 fetch/neo4j 异步 I/O”竞态触发原生 abort。修复：①加崩溃诊断（mcpCrashDiagnostics：同步 phase 面包屑 mcp-phase.json + uncaughtExceptionMonitor/exit 记录 mcp-crash.log；不改变默认崩溃行为、不记 secret）；②写入路径 qea 投影 spawn→spawnSync（无异步句柄）。单测 AT-crash-01/02 通过；未能稳定复现，待部署后再次发生以确诊。"
+          "value": "mcp-native-abort-at-retrieval-embed",
+          "description": "复发（2026-09-13 16:49:01，SOC-DEMO，0.20.6 已装诊断）：apply 过程中 MCP 掉线。mcp-phase.json 最后阶段=retrieval:embed（pid 36844），mcp-crash.log 无该进程条目 → 原生 abort（JS exit/uncaughtException 未触发）。即崩溃发生在语义检索的 embedding/向量窗口阶段，非 qea 子进程。已细化阶段打点以定位是 embed fetch 还是随后 Neo4j 向量窗口循环。怀疑：Node/Windows 原生 flake（undici fetch 或 neo4j-driver 每操作新建/关闭 driver+session 的句柄churn）。"
         },
         {
           "name": "commit",
@@ -7028,6 +7028,11 @@
           "name": "commit",
           "value": "65846e8",
           "description": "package.json — release(archgraph-argo): 0.20.6"
+        },
+        {
+          "name": "commit",
+          "value": "0136c8b",
+          "description": "diag(semantic): 细化检索阶段面包屑（embed start/done、vector/lexical per channel、vector-window、rerank start/done），供下次原生 abort 精确定位。"
         }
       ]
     },
