@@ -7061,6 +7061,11 @@
         {
           "name": "status",
           "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "4016590",
+          "description": "docs/tablet-archgraph-app-insight.md; tests/tablet-archgraph-app-insight.test.js; design/KG/SystemArchitecture.json（新增里程碑 insight-lead-milestone-tablet-app-001；已含 AT-tablet-app-insight-01/02）"
         }
       ],
       "description": "里程碑（2026-09-13，委派业界技术洞察团队 insight-lead-001 编排五步法）：洞察『Android 平板「一页」架构图 App 方向』——人类离开办公室时用平板触屏与 AI 共享同一张 ArchiMate 知识图谱。①界定：如何把现有 ArchGraph 本地 Web 服务（2760）演进为面向 Android 平板的「一页/画布优先/手势驱动」瘦客户端，并厘清与 Sparx EA、桌面 Web、Atlas「驾驶操作工具」的分工。②拆解：MECE 八轴（场景·JTBD / 运行拓扑·数据通路 / 触屏范式 / 功能边界 / 实现路线 / 安全信任 / 与 EA·web 分工 / 评估方法）。③假设 11 条。④验证：本会话 BAILIAN WEB MCP 未挂载（未完成全网收集，已诚实声明），改用 webfetch 抓取 14 个一手来源（MCP 传输/安全规范、MDN、Cloudflare/ngrok、Archi/Structurizr/draw.io/FigJam、Bubblewrap 仓库）逐条交叉验证。⑤核心结论：平板工具应定位为瘦客户端 + Hub 远程前端而非新后端；形态推荐 PWA→TWA 打包为独立 Android 应用（复用 web/ MaxGraph 内核 + 布局侧车）；当前最大阻塞是可达性与安全（2760 仅绑 127.0.0.1，须经局域网/隧道 + 认证 + Origin 校验）；三路线分工不互斥（EA=深度权威建模桌面、平板=移动看/轻改/协作、2760=Hub 与共享画布内核）；平板边界 = 看 + 轻改 + AI 协作，离线只读、写操作在线（写经 ARGO MCP preview→apply）。交付 docs/tablet-archgraph-app-insight.md；AT-tablet-app-insight-01/02。未决：Q1「一页」范式、Q2 Atlas 工具 job、Q3 Hub 远程形态、Q4 TWA HTTPS/assetlinks 前置、Q5 MaxGraph 触屏适配、Q6 离线缓存失效策略。",
