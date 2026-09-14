@@ -6127,6 +6127,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "dc8c250",
+          "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js; design/KG/SystemArchitecture.json（锚点图权威决定视图成员：同名无锚图不再产生假 updateView.removeMembers；AT-2792-14）"
         }
       ]
     },
@@ -6141,6 +6146,11 @@
           "name": "commit",
           "value": "a093ab8",
           "description": "eatool/EA-jsscript/extract-human-draft.js; argo/scripts/ea-qea-sync-lib.js; tests/ea-human-draft-script.test.js; tests/ea-qea-sync.test.js（readWork 补读元素属性 t_attribute / 元素测试用例 t_objecttests / 关系属性 relationship_attributes_json；diff 补 type/attributes/testcases；node 工具 ea-human-diff.js 已移除，本脚本为唯一实现；AT-2791-16）"
+        },
+        {
+          "name": "commit",
+          "value": "dc8c250",
+          "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js; design/KG/SystemArchitecture.json; archgraph.qea（修复：人类新增与 canonical 视图同名的图不再顶替锚点图决定视图成员——锚点图优先且与行序无关，消除误报 updateView.removeMembers；同名图的 placement 仍解析到该视图；新增 AT-2792-14/R，静态 AT-2792-07 绿）"
         }
       ],
       "description": "在 Sparx EA 内部运行的 JScript（eatool/EA-jsscript/extract-human-draft.js），把人类在 EA 里对当前项目模型的草稿改动提取为『语义 diff 提议』：基线=canonical JSON（design/KG/SystemArchitecture.json，真源；投影保证已提交 .qea == canonical，故 live-EA vs canonical 与 node 工具 base=committed.qea vs work=live.qea 语义等价），工作区=EA 可见对象模型（经 Repository.SQLQuery 读 t_object/t_connector/t_diagram/t_diagramobjects，按 schema_id / schema_view_id 锚 tag 对齐；绝不读 kg_sync_meta 镜像），归类为 addElement/updateElement/removeElement/addRelationship/updateRelationship/removeRelationship/updateView 提议，纯几何（t_diagramobjects 坐标）只统计 layoutOnly 不产出；运行即写 results/human-draft.json + results/human-draft.md，交 agent 经 ARGO preview/apply 写回 canonical。与 node 工具 argo/scripts/ea-human-diff.js（需 EA 关闭、读两个 .qea）互补：本脚本在 EA 打开模型时直接可用，无需关闭 EA/无需 git restore。可经 headless 自动化（bootstrap.js/run-headless.ps1 支持 draft 模式，设 EA_HEADLESS_GRAPH/EA_HEADLESS_OUTPUT）。",
