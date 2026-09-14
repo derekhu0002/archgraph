@@ -262,7 +262,7 @@ async function executeWpP2Retrieval({
   const strict = AUDIT_PURPOSES.has(purpose);
   const topK = Number.isInteger(request.topK) && request.topK > 0 ? request.topK : resolveTopK();
   const scoped = Array.isArray(canonicalIdentities) && canonicalIdentities.length > 0;
-  const hybrid = isHybridEnabled();
+  const hybrid = isHybridEnabled() && request.hybrid !== false;
   const lexicalTopK = hybridTopK();
   const fusionK = rrfK();
   const fusionWeights = hybridWeights();

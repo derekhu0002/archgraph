@@ -2810,7 +2810,7 @@ async function buildSemanticDedupAdvisory(context, mutations, dependencies) {
       const intent = [element.type, element.name, element.description]
         .filter(part => typeof part === 'string' && part.trim() !== '')
         .join(' ');
-      const retrieved = await journey.query({ purpose: 'general', intent, topK: SEMANTIC_DEDUP_TOP_K, rerank: false });
+      const retrieved = await journey.query({ purpose: 'general', intent, topK: SEMANTIC_DEDUP_TOP_K, rerank: false, hybrid: false, scoreMode: 'similarity' });
       const source = retrieved && (retrieved.result || retrieved.document) || retrieved;
       const subset = buildCanonicalSemanticDocumentSubset(source, context.document);
       const elements = subset && subset.status === 'passed' && subset.document
@@ -3001,7 +3001,11 @@ async function executeSemanticSystemArchitectureQuery(args, dependencies) {
   try {
     const retrieved = await semanticRetrievalBoundary.retrieve(queryForRetrieval);
     if (canonicalSubsetContract) {
-      const subset = buildCanonicalSemanticDocumentSubset(retrieved, context.document);
+      // scoreMode:'similarity' (used by the write-path dedup gate) returns the
+      // true vector similarity instead of the closure rank-derived score.
+      const subset = buildCanonicalSemanticDocumentSubset(retrieved, context.document, {
+        preferSeedSimilarity: !!(query && query.scoreMode === 'similarity'),
+      });
       if (subset.status === 'failed') {
         return getSystemArchitectureResult(subset);
       }
@@ -3306,7 +3310,7 @@ function normalizeFailedSemanticResponse(payload, fallbackResponse) {
   });
 }
 
-function buildCanonicalSemanticDocumentSubset(source, canonicalDocument = undefined) {
+function buildCanonicalSemanticDocumentSubset(source, canonicalDocument = undefined, options = {}) {
   const evidence = source && typeof source === 'object' ? source : {};
   const endpointClosureRelationships = arrayAt(evidence, ['endpointClosure', 'relationships']);
   const viewClosureViews = arrayAt(evidence, ['viewClosure', 'views']);
@@ -3464,10 +3468,12 @@ function buildCanonicalSemanticDocumentSubset(source, canonicalDocument = undefi
       }
     }
   }
-  // buildCanonicalSemanticDocumentSubset may run a second time over a prior
-  // subset document (which no longer carries seedsByType); carry scores forward
-  // from evidence elements that already expose semanticScore.
-  for (const item of evidenceElements) {
+  // The closure's rank-derived score (0.99..0.8, by closure rank) must NOT
+  // overwrite a seed's TRUE similarity: when preferSeedSimilarity is set the
+  // caller needs the cosine, so this override is skipped (otherwise the dedup
+  // gate would flag every same-type seed in the top window regardless of actual
+  // similarity -- the false-positive defect).
+  if (!options.preferSeedSimilarity) for (const item of evidenceElements) {
     if (!item) continue;
     const numericScore = Number(item.semanticScore);
     if (!Number.isFinite(numericScore)) continue;

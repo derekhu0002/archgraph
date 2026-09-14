@@ -124,12 +124,25 @@ test('semantic candidates: below-threshold and different-type candidates are fil
   assert.deepEqual(advisory.candidates[0].matches, []);
 });
 
-// AT-dedup-L1-03: real Neo4j evidence carries channel-prefixed ids. The gate's
-// rank-derived score (0.80..0.99) is attached to the closure element, while the
-// fused seed (RRF) shares the same prefixed identity. The rank-derived score
-// must win for the SAME element, otherwise every real dedup score collapses to
-// the tiny RRF score and the 0.85 gate never fires.
-test('AT-dedup-L1-03: prefixed evidence id surfaces the rank-derived score', async () => {
+// AT-dedup-L1-04: the gate must score on TRUE similarity (vector cosine), not on
+// the closure's rank-derived score (0.99..0.8 by closure rank) -- the latter
+// flagged every same-type seed in the top window regardless of actual
+// similarity (a false-positive defect that blocked unrelated Grouping creates).
+// The dedup query is pure-vector (hybrid off) and requests similarity scoring;
+// the canonical-subset builder must not overwrite the seed cosine for that path.
+test('AT-dedup-L1-04: gate scores on true similarity, not the rank-derived score', () => {
+  const server = fs.readFileSync(path.join(__dirname, '..', 'argo', 'scripts', 'systemarchitecture-mcp-server.js'), 'utf8');
+  assert.ok(server.includes("hybrid: false, scoreMode: 'similarity'"), 'dedup query must be pure-vector + similarity-scored');
+  assert.ok(server.includes('preferSeedSimilarity'), 'canonical-subset builder must support similarity scoring');
+  assert.match(server, /preferSeedSimilarity:\s*!!\(query && query\.scoreMode === 'similarity'\)/);
+  const retrieval = fs.readFileSync(path.join(__dirname, '..', 'argo', 'scripts', 'graph-rag', 'defaultSemanticRetrieval.js'), 'utf8');
+  assert.ok(retrieval.includes('isHybridEnabled() && request.hybrid !== false'), 'retrieval must honor a per-request hybrid opt-out');
+});
+// AT-dedup-L1-03: the canonical-subset builder lets a closure element's
+// rank-derived score override a seed's raw score when the source carries
+// seedsByType+closure (the read-path override mechanism; the dedup path opts out
+// via preferSeedSimilarity -- see AT-dedup-L1-04).
+test('AT-dedup-L1-03: closure rank-derived score overrides the raw seed score', async () => {
   // GIVEN a fused seed (RRF 0.05) and a semantic closure element (rank-derived 0.99)
   // that share the real channel-prefixed identity "Element:w1"
   const document = baseDocument();
