@@ -6262,21 +6262,14 @@
           "Input": "tests/architecture-dedup-semantic.test.js",
           "acceptanceCriteria": "tests/architecture-dedup-semantic.test.js",
           "name": "AT-dedup-L1-03",
-          "description": "GIVEN 语义候选的 rank-derived 分挂在带通道前缀的闭包元素（Element:w1）、融合 seed 同 id；WHEN advisory 组装；THEN 同一元素取 rank-derived 分，不被 RRF 覆盖，0.85 门禁可命中。",
+          "description": "GIVEN 证据源携带 seedsByType+closure；WHEN buildCanonicalSemanticDocumentSubset；THEN 闭包元素的排名派生分（0.99..0.8）可覆盖种子的原始分（读路径覆盖机制；去重路径经 preferSeedSimilarity 退出该覆盖）。",
           "type": "Acceptance Test"
         },
         {
-          "Input": "tests/mcp-crash-diagnostics.test.js",
-          "acceptanceCriteria": "tests/mcp-crash-diagnostics.test.js",
-          "name": "AT-crash-01",
-          "description": "GIVEN MCP 崩溃诊断；WHEN 切换阶段；THEN 同步落盘 phase 面包屑（mcp-phase.json，哪怕原生 abort 也可回溯最后阶段）；崩溃日志路径含 mcp-crash.log。",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "tests/mcp-crash-diagnostics.test.js",
-          "acceptanceCriteria": "tests/mcp-crash-diagnostics.test.js",
-          "name": "AT-crash-02",
-          "description": "GIVEN 写入/检索路径；WHEN 检查接线；THEN mutation 各阶段（semanticDedup/qeaProjection/neo4jSync/embeddingLifecycle/done）与 retrieval(embed/rerank) 均打点；qea 投影改用同步 spawnSync（无异步子句柄竞态）；服务端安装崩溃诊断。",
+          "Input": "tests/architecture-dedup-semantic.test.js",
+          "acceptanceCriteria": "tests/architecture-dedup-semantic.test.js",
+          "name": "AT-dedup-L1-04",
+          "description": "GIVEN 去重门禁评分；WHEN 组装候选；THEN 使用真实相似度（向量余弦：去重查询 hybrid:false + scoreMode:similarity，canonical-subset 跳过排名派生覆盖），不得用排名派生分——否则任何进入 top 窗口的同类型 seed 都会被误判重复（Grouping 误报缺陷）。",
           "type": "Acceptance Test"
         }
       ],
@@ -6320,6 +6313,11 @@
           "name": "commit",
           "value": "57a8475",
           "description": "argo/scripts/graph-rag/mcpCrashDiagnostics.js（同步 phase 面包屑 + uncaughtExceptionMonitor/exit 崩溃日志）; argo/scripts/systemarchitecture-mcp-server.js（写入路径阶段打点 + qea 投影改 spawnSync）; graph-rag/defaultSemanticRetrieval.js（retrieval 阶段打点）; argo-mcp-server.js（安装诊断）; tests/mcp-crash-diagnostics.test.js（AT-crash-01/02）"
+        },
+        {
+          "name": "commit",
+          "value": "65f1d2d",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js（去重查询 hybrid:false + scoreMode:similarity；canonical-subset 新增 preferSeedSimilarity 跳过排名派生覆盖）; graph-rag/defaultSemanticRetrieval.js（request.hybrid 退出开关）; tests/architecture-dedup-semantic.test.js（AT-dedup-L1-04；L1-03 改述为读路径覆盖机制）。修复同类型恒被误报重复。"
         }
       ]
     },
@@ -6996,8 +6994,8 @@
         },
         {
           "name": "pitfall",
-          "value": "mcp-native-abort-at-retrieval-embed",
-          "description": "复发（2026-09-13 16:49:01，SOC-DEMO，0.20.6 已装诊断）：apply 过程中 MCP 掉线。mcp-phase.json 最后阶段=retrieval:embed（pid 36844），mcp-crash.log 无该进程条目 → 原生 abort（JS exit/uncaughtException 未触发）。即崩溃发生在语义检索的 embedding/向量窗口阶段，非 qea 子进程。已细化阶段打点以定位是 embed fetch 还是随后 Neo4j 向量窗口循环。怀疑：Node/Windows 原生 flake（undici fetch 或 neo4j-driver 每操作新建/关闭 driver+session 的句柄churn）。"
+          "value": "semantic-dedup-rank-derived-score-false-positive",
+          "description": "缺陷（FASTJSON/Grouping）：门禁比较闭包“排名派生分”（0.99 - index*0.01）而非真实相似度 → 任何进入 top-15 的同类型 seed（向量≥0.55）都被判≥0.85 而拦截，无关名字也得 0.99/0.98/0.96（=rank 0/1/3），真实余弦仅 0.50–0.54。修复：去重查询 pure-vector（hybrid:false）+scoreMode:similarity，buildCanonicalSemanticDocumentSubset 以 preferSeedSimilarity 跳过排名派生覆盖 → 门禁用真实余弦。实证：无关名通过；真近重复仍拦截（复数变体 0.9562、中文翻译 0.8763）。读路径仍为排名派生（未变）。"
         },
         {
           "name": "commit",
@@ -7053,6 +7051,11 @@
           "name": "commit",
           "value": "7ba25a9",
           "description": "package.json — release(archgraph-argo): 0.20.8"
+        },
+        {
+          "name": "commit",
+          "value": "65f1d2d",
+          "description": "修复语义去重误报：门禁改用真实余弦（去重查询 hybrid:false + scoreMode:similarity，canonical-subset 跳过排名派生覆盖）；读路径不变。"
         }
       ]
     },
