@@ -6991,8 +6991,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.20.9",
-          "description": "npm publish shasum 0e228ae6d27a8055517feb53258b33ba04c0d5a7；全局安装 + argo-deploy 22/22；含「语义去重门禁改用真实余弦」修复（去重查询 hybrid:false + scoreMode:similarity，canonical-subset preferSeedSimilarity）；待宿主重启加载新常驻 MCP 进程"
+          "value": "archgraph-argo@0.20.10",
+          "description": "npm publish shasum 72065b4703ecc36e708d140b10924d5785d4a788；全局安装 + argo-deploy 22/22；含“跨重启保留崩溃时 phase”（previous-run-phase）；待宿主重启加载新常驻 MCP 进程"
         },
         {
           "name": "commit",
@@ -7088,6 +7088,11 @@
           "name": "commit",
           "value": "5ce7747",
           "description": "diag: 跨重启保留崩溃时 phase（installCrashDiagnostics 启动时先把上一进程 mcp-phase.json 记为 crash.log 的 previous-run-phase，再覆盖）。"
+        },
+        {
+          "name": "commit",
+          "value": "9046c09",
+          "description": "package.json - release(archgraph-argo): 0.20.10"
         }
       ]
     },
