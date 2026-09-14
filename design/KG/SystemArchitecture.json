@@ -6034,6 +6034,13 @@
           "Input": "tests/ea-human-draft-script.test.js",
           "name": "AT-2792-13",
           "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
+          "description": "GIVEN 一个已被 schema_view_id 锚定的 canonical 视图（如 197）之图存在，人类又在 EA 新建了一张与 canonical 视图同名的图（无 schema_view_id 锚）并只在其上画了无锚新对象；WHEN 运行 extract-human-draft；THEN 锚点图的成员不得因同名图而被误报 updateView.removeMembers（锚点图权威决定视图成员，无论行序），同名图的 placement 仍解析到该视图（新对象 addElement.proposed.viewIds 含该视图 id）；人绘同内容不产生 addView。",
+          "Input": "tests/ea-human-draft-script.test.js",
+          "name": "AT-2792-14",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [

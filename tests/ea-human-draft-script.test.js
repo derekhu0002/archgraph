@@ -454,3 +454,66 @@ test('ea-human-draft-script (AT-2792-13/R): a freshly full-projected model with 
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
   }
 });
+
+test('ea-human-draft-script (AT-2792-14/R): a human-added diagram reusing an anchored view_name does not hijack the view membership (no spurious updateView.removeMembers)', (t) => {
+  // Regression (ThreatIntelligence): the user added a NEW EA diagram whose Name equals the
+  // canonical view_name of an already-anchored view. The old matcher let the name-matched
+  // (anchor-less) diagram overwrite the anchored diagram in `diagramsByView`, so the view's
+  // real members were read from the wrong diagram and every anchored member looked deleted ->
+  // a bogus `updateView { removeMembers: [...] }`. Anchors must win for membership; the
+  // name-matched diagram still contributes its placements to the view (for element viewIds).
+  if (process.env.EA_RUN_HEADLESS !== '1') { t.skip('EA headless not enabled'); return; }
+  if (!fs.existsSync(TEMPLATE_QEA)) { t.skip(`template missing: ${TEMPLATE_QEA}`); return; }
+  if (!fs.existsSync(RUNNER)) { t.skip(`headless runner missing: ${RUNNER}`); return; }
+
+  const graph = {
+    name: 'view-name-collision', description: '', elements: [
+      { id: 'e1', name: 'One', type: 'Business Object', description: 'd1' },
+      { id: 'e2', name: 'Two', type: 'Business Object', description: 'd2' },
+    ],
+    relationships: [],
+    views: [
+      { view_id: 'v1', view_name: 'View One', parent_element_id: 'e1', included_elements: ['e1', 'e2'], included_relationships: [], description: '' },
+    ],
+  };
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-collide-'));
+  let db = null;
+  try {
+    const { workQea, graphPath, outStem } = projectFixture(graph, tmp);
+    db = lib.openQea(workQea);
+    db.exec('BEGIN IMMEDIATE');
+    const root = db.prepare('SELECT Package_ID FROM t_package WHERE Parent_ID=0 ORDER BY Package_ID LIMIT 1').get();
+    const pkg = db.prepare('SELECT Package_ID FROM t_package WHERE Parent_ID=? AND Name=? LIMIT 1').get(Number(root.Package_ID), lib.SYNC_PACKAGE_NAME);
+    const syncPkg = Number(pkg.Package_ID);
+    // human adds a brand-new diagram that reuses the canonical view_name, with NO schema_view_id
+    // anchor, and draws one brand-new unanchored box on it (differing content from the anchored v1)
+    const diagGuid = '{99999999-8888-7777-6666-555555555555}';
+    const dIns = db.prepare("INSERT INTO t_diagram (Name, Diagram_Type, Package_ID, ParentID, StyleEx, PDATA, ea_guid) VALUES (?,?,?,?,?,?,?)")
+      .run('View One', 'Logical', syncPkg, 0, 'ExcludeRTF=0;', 'HideAtts=1;HideOps=1;', diagGuid);
+    const newDiagId = Number(dIns.lastInsertRowid);
+    const newObjGuid = '{11111111-2222-3333-4444-666666666666}';
+    const oIns = db.prepare("INSERT INTO t_object (Object_Type, Name, Stereotype, Note, Status, Alias, ea_guid, Package_ID, ParentID) VALUES (?,?,?,?,?,?,?,?,0)")
+      .run('Class', 'Collision Box', 'BusinessObject', '', 'Proposed', '', newObjGuid, syncPkg);
+    const newObjId = Number(oIns.lastInsertRowid);
+    db.prepare('INSERT INTO t_diagramobjects (Diagram_ID, Object_ID, Sequence, RectLeft, RectTop, RectRight, RectBottom) VALUES (?,?,?,?,?,?,?)')
+      .run(newDiagId, newObjId, 0, 100, 100, 280, 190);
+    db.exec('COMMIT');
+    db.close(); db = null;
+
+    const { json } = runHeadlessDraft(workQea, graphPath, outStem);
+    assert.ok(json && json.ok && json.exitCode === 0, `draft run failed: ${JSON.stringify(json || '').slice(0, 500)}`);
+    const { proposals } = readResultFromMd(outStem);
+    const ops = proposals.map((p) => p.op);
+    const upd = proposals.find((p) => p.op === 'updateView' && p.viewId === 'v1');
+    assert.ok(!upd || !(upd.removeMembers && upd.removeMembers.length),
+      `the anchored members must NOT be reported removed just because a same-named diagram exists, got ${JSON.stringify(upd)}`);
+    assert.ok(!ops.includes('removeElement'), `no element must be reported removed, got ${ops.join(',')}`);
+    const add = proposals.find((p) => p.op === 'addElement' && p.proposed.name === 'Collision Box');
+    assert.ok(add, `the human box on the colliding diagram must still be an addElement, got ${ops.join(',')}`);
+    assert.ok(add.proposed.viewIds && add.proposed.viewIds.indexOf('v1') >= 0,
+      `the colliding diagram's placements must still resolve to the canonical view, got ${JSON.stringify(add.proposed.viewIds)}`);
+  } finally {
+    if (db) { try { db.close(); } catch { /* ignore */ } }
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+});

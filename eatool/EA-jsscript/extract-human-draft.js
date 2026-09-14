@@ -364,6 +364,15 @@ function readWork(knownViews) {
 	// the projector writes. EA rewrites StyleEx and drops unknown tokens, so also match by the
 	// diagram Name == canonical view_name (the projector names each diagram after the view).
 	// A diagram with neither is a human-drawn / user-added view.
+	//
+	// Two distinct roles are kept apart:
+	//   - diagramsByView[viewId]  = the AUTHORITATIVE diagram, which supplies the view's
+	//     membership/name/description (used to detect member add/remove and updateView).
+	//   - viewByDiagram[diagramId]= every diagram that belongs to the view (anchored OR matched
+	//     by Name), so placements still resolve to the view for element/relationship viewIds.
+	// A human-added diagram that merely reuses a canonical view_name must NOT displace the
+	// anchored diagram's membership: doing so made all anchored members look deleted from the
+	// view (a spurious updateView.removeMembers). Anchors therefore win regardless of row order.
 	var knownViewNames = {};
 	var viewsCatalog = knownViews || {};
 	for (var bvId in viewsCatalog) { if (viewsCatalog.hasOwnProperty(bvId)) { knownViewNames[normText(viewsCatalog[bvId].view_name)] = bvId; } }
@@ -371,28 +380,39 @@ function readWork(knownViews) {
 	var diagramsByView = {};
 	var viewByDiagram = {};
 	var extraDiagrams = [];
+	var diagRefs = [];
 	var diags = eaRows('SELECT Diagram_ID, Package_ID, Name, Notes, StyleEx, ea_guid FROM t_diagram');
 	for (var i = 0; i < diags.length; i++) {
 		var d = diags[i];
 		var diagramId = parseInt(d.diagram_id, 10);
 		var diagName = String(d.name || '');
-		var ref = {
+		diagRefs.push({
 			diagramId: diagramId,
 			view_name: diagName,
 			description: String(d.notes === null || d.notes === undefined ? '' : d.notes),
-			eaGuid: String(d.ea_guid || '')
-		};
-		var viewId = parseStyleToken(d.styleex, 'schema_view_id');
-		if (viewId) {
-			diagramsByView[viewId] = ref;
-			viewByDiagram[diagramId] = viewId;
-		} else if (knownViewNames.hasOwnProperty(normText(diagName))) {
-			var matchedId = knownViewNames[normText(diagName)];
-			diagramsByView[matchedId] = ref;
-			viewByDiagram[diagramId] = matchedId;
+			eaGuid: String(d.ea_guid || ''),
+			anchorViewId: parseStyleToken(d.styleex, 'schema_view_id')
+		});
+	}
+	// pass 1: schema_view_id anchors are authoritative for membership (first anchored wins)
+	for (var a = 0; a < diagRefs.length; a++) {
+		var ra = diagRefs[a];
+		if (!ra.anchorViewId) { continue; }
+		viewByDiagram[ra.diagramId] = ra.anchorViewId;
+		if (!diagramsByView.hasOwnProperty(ra.anchorViewId)) { diagramsByView[ra.anchorViewId] = ra; }
+	}
+	// pass 2: recover an anchor-lost view by Name; such a diagram still contributes its
+	// placements to the view, but never displaces an anchored diagram's membership.
+	for (var b = 0; b < diagRefs.length; b++) {
+		var rb = diagRefs[b];
+		if (rb.anchorViewId) { continue; }
+		var matchedId = knownViewNames.hasOwnProperty(normText(rb.view_name)) ? knownViewNames[normText(rb.view_name)] : '';
+		if (matchedId) {
+			viewByDiagram[rb.diagramId] = matchedId;
+			if (!diagramsByView.hasOwnProperty(matchedId)) { diagramsByView[matchedId] = rb; }
 		} else {
 			// no schema_view_id anchor and Name not in canonical -> human-drawn / user-added view
-			extraDiagrams.push(ref);
+			extraDiagrams.push(rb);
 		}
 	}
 
