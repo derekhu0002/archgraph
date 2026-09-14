@@ -40,11 +40,13 @@ function appendCrash(entry) {
       at: new Date().toISOString(),
       pid: process.pid,
       uptimeMs: Date.now() - startedAt,
-      phase: currentPhase,
+      phase: entry && entry.phase !== undefined ? entry.phase : currentPhase,
       kind: entry && entry.kind,
       ...(entry && entry.origin ? { origin: entry.origin } : {}),
       ...(entry && entry.code !== undefined ? { code: entry.code } : {}),
       ...(entry && entry.signal !== undefined ? { signal: entry.signal } : {}),
+      ...(entry && entry.previousPid !== undefined ? { previousPid: entry.previousPid } : {}),
+      ...(entry && entry.previousAt !== undefined ? { previousAt: entry.previousAt } : {}),
       ...(error ? {
         category: error.category,
         message: String(error.message || error).slice(0, 1000),
@@ -57,10 +59,33 @@ function appendCrash(entry) {
   }
 }
 
+// A native abort never fires a JS handler, so the ONLY record of the crash-time
+// phase is the synchronously-written phase file. A restart would overwrite it;
+// preserve the previous run's last phase into the (append-only) crash log first.
+function capturePreviousRun() {
+  if (!phasePath || !crashLogPath) {
+    return;
+  }
+  try {
+    const previous = JSON.parse(fs.readFileSync(phasePath, 'utf8'));
+    if (previous && previous.pid !== undefined && previous.pid !== process.pid) {
+      appendCrash({
+        kind: 'previous-run-phase',
+        phase: previous.phase,
+        previousPid: previous.pid,
+        previousAt: previous.at,
+      });
+    }
+  } catch {
+    // no previous phase file
+  }
+}
+
 function installCrashDiagnostics(workspaceRoot) {
   if (workspaceRoot) {
     crashLogPath = tempPath(workspaceRoot, 'mcp-crash.log');
     phasePath = tempPath(workspaceRoot, 'mcp-phase.json');
+    capturePreviousRun();
     markPhase(currentPhase);
   }
   if (installed) {

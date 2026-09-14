@@ -67,6 +67,29 @@ test('AT-crash-02: phases marked + synchronous qea projection + diagnostics inst
   assert.ok(argo.includes("markPhase('tool:' + name)"), 'tool entry phase must be marked');
 });
 
+// AT-crash-04: a native abort never fires a JS handler, so the phase file is the
+// only record. On restart it must be preserved into the append-only crash log
+// BEFORE being overwritten, otherwise the crash-time phase is lost.
+test('AT-crash-04: previous run phase is preserved across a restart', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-crash-'));
+  try {
+    const phase = path.join(dir, '.argo', 'temp', 'mcp-phase.json');
+    fs.mkdirSync(path.dirname(phase), { recursive: true });
+    fs.writeFileSync(phase, JSON.stringify({
+      phase: 'retrieval:vector-window:Element',
+      at: '2026-01-01T00:00:00.000Z',
+      pid: 999999,
+    }), 'utf8');
+    installCrashDiagnostics(dir);
+    const log = fs.readFileSync(path.join(dir, '.argo', 'temp', 'mcp-crash.log'), 'utf8');
+    assert.ok(log.includes('previous-run-phase'), 'must record the previous run');
+    assert.ok(log.includes('retrieval:vector-window:Element'), 'must preserve the previous phase');
+    assert.ok(log.includes('999999'), 'must record the previous pid');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 // AT-crash-03: the production retrieval reuses ONE Neo4j driver+session per
 // retrieval (across every vector window) and disposes it at the end, instead of
 // creating/closing a driver per operation (the confirmed native-abort trigger)
