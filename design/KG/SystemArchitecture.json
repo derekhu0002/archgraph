@@ -6132,6 +6132,11 @@
           "name": "commit",
           "value": "dc8c250",
           "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js; design/KG/SystemArchitecture.json（锚点图权威决定视图成员：同名无锚图不再产生假 updateView.removeMembers；AT-2792-14）"
+        },
+        {
+          "name": "decision",
+          "value": "human-draft-human-view-not-autocleaned",
+          "description": "2026-09-14 决策（人类裁决）：MCP 写图后的增量 .qea 投影故意只删『投影自有』对象，人类无锚内容永不删（systemarchitecture-mcp-server.js:2150；AT-2791-14 / AT-2791-17 明文要求人绘无锚对象/图保留）。因此人类在 EA 新增的同名未锚定图（ThreatIntelligence Diagram 16 对 视图197）在 agent 写入后不会被自动清理——按设计不修。需清理时由人类手动删该图，或跑全量投影（argo init / ea-qea-sync --mode full）。本次仅修复相邻缺陷：同名无锚图不再顶替锚点图决定视图成员（避免误报 updateView.removeMembers），见 dc8c250 / AT-2792-14。"
         }
       ]
     },
