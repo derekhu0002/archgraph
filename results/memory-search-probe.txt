@@ -1,0 +1,60 @@
+[probe] questions=10
+[probe] init...
+[probe] init done
+[probe] argo-init#1: {"ok":true,"status":"ok","code":0}
+[probe] ingest A: {"view":true,"elements":10,"errors":[]}
+[probe] argo-init#2: {"ok":true,"status":"ok","code":0}
+[probe] memory_search q=gpt4_2655b836 status=passed hits=8
+[probe]   - id=lmem-a-gpt4_2655b836 score=0.6975 name=用户会话记忆 gpt4_2655b836 descLen=42139
+[probe]   - id=lmem-a-6a1eabeb score=0.6215 name=用户会话记忆 6a1eabeb descLen=33847
+[probe]   - id=1249 score=0.6191 name=Implementation and Migration Viewpoint descLen=0
+[probe]   - id=lmem-a-7161e7e2 score=0.6143 name=用户会话记忆 7161e7e2 descLen=6736
+[probe]   - id=lmem-a-0a995998 score=0.6114 name=用户会话记忆 0a995998 descLen=36607
+[probe]   - id=lmem-a-c4f10528 score=0.6061 name=用户会话记忆 c4f10528 descLen=7485
+[probe]   - id=lmem-a-118b2229 score=0.6017 name=用户会话记忆 118b2229 descLen=13137
+[probe]   - id=lmem-a-e47becba score=0.5902 name=用户会话记忆 e47becba descLen=17922
+[probe]   raw={"status":"passed","query":"What was the first issue I had with my new car after its first service?","hits":[{"id":"lmem-a-gpt4_2655b836","name":"用户会话记忆 gpt4_2655b836","type":"Business Object","score":0.6974855065345764,"description":"--- Session 1 ---\nuser: I'm thinking of getting my car detailed 
+[probe] memory_search q=gpt4_2487a7cb status=passed hits=8
+[probe]   - id=lmem-a-gpt4_2487a7cb score=0.7610 name=用户会话记忆 gpt4_2487a7cb descLen=34318
+[probe]   - id=lmem-a-e47becba score=0.6789 name=用户会话记忆 e47becba descLen=17922
+[probe]   - id=lmem-a-6d550036 score=0.6564 name=用户会话记忆 6d550036 descLen=72135
+[probe]   - id=lmem-a-7161e7e2 score=0.6535 name=用户会话记忆 7161e7e2 descLen=6736
+[probe]   - id=lmem-a-0a995998 score=0.6449 name=用户会话记忆 0a995998 descLen=36607
+[probe]   - id=lmem-a-118b2229 score=0.6335 name=用户会话记忆 118b2229 descLen=13137
+[probe]   - id=lmem-a-gpt4_2655b836 score=0.6323 name=用户会话记忆 gpt4_2655b836 descLen=42139
+[probe]   - id=1249 score=0.6319 name=Implementation and Migration Viewpoint descLen=0
+[probe]   raw={"status":"passed","query":"Which event did I attend first, the 'Effective Time Management' workshop or the 'Data Analysis using Python' webinar?","hits":[{"id":"lmem-a-gpt4_2487a7cb","name":"用户会话记忆 gpt4_2487a7cb","type":"Business Object","score":0.7609595656394958,"description":"--- Session 1 ---\n
+[probe] memory_search q=0a995998 status=passed hits=8
+[probe]   - id=lmem-a-0a995998 score=0.7828 name=用户会话记忆 0a995998 descLen=36607
+[probe]   - id=lmem-a-e47becba score=0.6684 name=用户会话记忆 e47becba descLen=17922
+[probe]   - id=lmem-a-c4f10528 score=0.6652 name=用户会话记忆 c4f10528 descLen=7485
+[probe]   - id=lmem-a-gpt4_2655b836 score=0.6367 name=用户会话记忆 gpt4_2655b836 descLen=42139
+[probe]   - id=lmem-a-7161e7e2 score=0.6324 name=用户会话记忆 7161e7e2 descLen=6736
+[probe]   - id=lmem-a-6a1eabeb score=0.6297 name=用户会话记忆 6a1eabeb descLen=33847
+[probe]   - id=lmem-a-6aeb4375 score=0.6289 name=用户会话记忆 6aeb4375 descLen=22475
+[probe]   - id=lmem-a-6d550036 score=0.6289 name=用户会话记忆 6d550036 descLen=72135
+[probe]   raw={"status":"passed","query":"How many items of clothing do I need to pick up or return from a store?","hits":[{"id":"lmem-a-0a995998","name":"用户会话记忆 0a995998","type":"Business Object","score":0.782820463180542,"description":"--- Session 1 ---\nuser: I need help organizing my closet. Can you give me s
+[probe] getSystemArchitecture q=gpt4_2655b836 raw={
+  "status": "passed",
+  "graphPath": "design/KG/SystemArchitecture.json",
+  "query": {
+    "purpose": "implementation-design",
+    "intent": "What was the first issue I had with my new car after its first service?",
+    "mode": "semantic-query",
+    "semanticRetrieval": "invoked"
+  },
+  "document": {
+    "elements": [
+      {
+        "id": "lmem-a-gpt4_2655b836",
+        "name": "用户会话记忆 gpt4_265
+[probe] --- MCP stdio path ---
+[probe] sha tarball argo-mcp-server=cb92ecf5f0b2 deployed=cb92ecf5f0b2
+[probe] sha tarball systemarch-mcp=76465e1022fd deployed=76465e1022fd
+[probe] MCP stdio memory_search id=2 -> text length=160674
+[probe] MCP stdio parsed status=passed hits=8
+[probe]   MCP-hit id=lmem-a-gpt4_2655b836 score=0.6975 descLen=42139
+[probe]   MCP-hit id=lmem-a-6a1eabeb score=0.6215 descLen=33847
+[probe]   MCP-hit id=1249 score=0.6191 descLen=0
+[probe] MCP stdio getSystemArchitecture id=3 -> text length=161870 isError=false
+[probe] MCP stdio GSA status=passed elements=8 mode=semantic-query
