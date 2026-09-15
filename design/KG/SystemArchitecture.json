@@ -2822,6 +2822,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "b29e032",
+          "description": "CriticalReasoningGuideline + CoreRule 10 + AT-rules-04；argo/rules/archgraph.instructions.md; tests/argo-rules-critical-reasoning.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
         }
       ]
     },
@@ -4119,7 +4124,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话目标（2026-09-13）：对人类伙伴提出的『Android 平板「一页」架构图 App 方向』做全面洞察。委派业界技术洞察团队（洞察Lead insight-lead-001 编排五步法）完成：界定→MECE 拆解（八轴：场景·JTBD/运行拓扑·数据通路/触屏范式/功能边界/实现路线/安全信任/与 EA·web 分工/评估方法）→11 条假设→验证→金字塔建议。关键结论：①平板工具定位为瘦客户端 + Hub 远程前端（复用现有 2760 本地 Web 服务，不另造后端）；②形态推荐 PWA→TWA 打包为独立 Android 应用（复用 web/ MaxGraph 内核 + 布局侧车）；③最大阻塞是可达性 + 安全（2760 仅绑 127.0.0.1，须局域网/隧道 + 认证 + Origin 校验）；④三路线分工不互斥（Sparx EA=深度权威建模桌面 / 平板=移动看·轻改·协作 / 2760=Hub 与共享画布内核）；⑤平板边界=看 + 轻改 + AI 协作，离线只读、写操作在线（经 ARGO MCP preview→apply）。交付 docs/tablet-archgraph-app-insight.md + tests/tablet-archgraph-app-insight.test.js（6/6 通过）+ 图谱里程碑 insight-lead-milestone-tablet-app-001（洞察Lead T2 长期记忆）。commits 4016590（交付）/6a97929（图谱登记回填）。关键决策：图谱写入门禁语义拦截新里程碑（0.99 vs 既有『EA 类工具人机共享前端洞察』里程碑），判定为独立新洞察交付，以 allowDuplicate + justification 显式放行。Pitfall：本会话 BAILIAN WEB MCP 未挂载到子代理，验证分析师改用 webfetch 抓 14 个一手来源（MCP 规范/MDN/Cloudflare/ngrok/Archi/Structurizr/draw.io/FigJam/Bubblewrap）并诚实声明覆盖局限（缺第三方博客/视频交叉源）。待办/未决：Q1「一页」具体交互范式、Q2 Atlas「驾驶操作工具」job、Q3 Hub 远程形态（局域网/Cloudflare Tunnel/ngrok）、Q4 TWA 的 HTTPS + assetlinks 前置、Q5 MaxGraph 触屏手势适配工作量、Q6 离线只读缓存与布局侧车失效策略；人类伙伴拍板后可据此立项。",
+      "description": "会话目标（2026-09-15，项目总管）：治理 AGENT 人格缺陷——测试发现 Agent 面对人类提问/提议仍百依百顺、缺独立批判。完成：全局规则新增 <CriticalReasoningGuideline> + CoreRule 10（三类证据先评估再表态：原生模型知识/仓库/意图图谱；用可证伪证据质疑人类并给修正方案；区分事实（证据裁决，须据理力争）与偏好（人类决定）；不因重复/语气/紧迫/权威改结论，点名 sycophancy 为缺陷；对不健全请求拒错误部分给合规路径，绝不静默顺从）。新增 AT-rules-04（tests/argo-rules-critical-reasoning.test.js，2 用例绿）；KG 元素 archgraph-workflow-rules 增 testcase AT-rules-04 + 更新 description；commit b29e032；已同步全局 ~/.config/opencode/AGENTS.md。架构测试 114/119，5 个失败均为既有且与本改动无关（~/.copilot 的 excalidraw skill 未部署、EA import 缺 eatool/EA-jsscript/import-from-kg.js、memory-eval-run TOOL_ERROR）。关键决策：①用全局规则而非单 Actor persona 承载（覆盖所有会话/宿主、跨 Actor 一致）；②拒绝纯靠模型默认（测试证明无效）。待办/阻塞：T2 长期记忆视图 overseer-ltm-001 已达上限 15/15，本次会话里程碑未能入 T2（仅 T1 摘要 + 规则元素登记），需后续做记忆分层（建子视图）或归档已完成元素腾位；建议再加「批判性/反谄媚」行为评测（现有导航/记忆评测未度量该维度）。沿用上一会话遗留：平板 App 洞察 Q1-Q6（交互范式/Hub 远程形态/TWA 前置/手势工作量/离线只读策略）待人类拍板。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4141,7 +4146,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-13",
+          "value": "2026-09-15",
           "description": "2026-09-11 memory_search workspaceRoot 修复 + 发布 0.16.2 + 部署"
         },
         {
@@ -4352,6 +4357,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "b29e032",
+          "description": "T1 摘要更新：新增 CriticalReasoningGuideline 会话；argo/rules/archgraph.instructions.md; tests/argo-rules-critical-reasoning.test.js; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
