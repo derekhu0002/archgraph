@@ -7389,6 +7389,28 @@
           "description": "feat(write): lossless write gate (G1-G5) + <LosslessWrite> rule"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "description": "package.json（发布 archgraph-argo@0.22.0）",
+          "name": "commit",
+          "value": "5de18f9"
+        }
+      ],
+      "description": "里程碑（2026-09-15）：发布 archgraph-argo@0.22.0。内容：无损写入门禁（组件 lossless-write-gate）——G1 结构化字段 merge（testcases/关系 attributes 按 name、视图成员 delta {add,remove}）、G2 词级相似度文本护栏（改写不算丢失，仅真删除/丢结构化 token 才拦，acknowledgeLoss + major lossJustification）、G3 破坏性删除需 ack + NDJSON 墓碑台账（O(1) 追加 + 按 2MB≈5k 条轮转）、G5 preview/apply 响应含 lossless 报告；批次级 acknowledgeLoss（一次确认整批）；规则 <LosslessWrite> + CoreRule 11。发布：npm publish（shasum fc6d0c4e418e70d544f5963f176ea504af0eda1a，75 files），registry 传播第 11 次轮询可见；npm i -g archgraph-argo@0.22.0；argo-deploy（MCP 注册 VS Code/Cursor/OpenCode/OpenClaw/DSH；~/.argo/.env 保留）。待办：宿主重启以加载新常驻 MCP + wakeup 插件，重启后重跑 argo-init。",
+      "id": "overseer-argo-0-22-0-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.22.0（无损写入门禁 + 词级判定 + 批次 ack + NDJSON 墓碑）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -9352,7 +9374,8 @@
         "overseer-argo-0-19-1-release-001",
         "overseer-argo-0-20-0-release-001",
         "overseer-argo-0-20-1-release-001",
-        "overseer-argo-0-21-0-release-001"
+        "overseer-argo-0-21-0-release-001",
+        "overseer-argo-0-22-0-release-001"
       ],
       "included_relationships": []
     },
