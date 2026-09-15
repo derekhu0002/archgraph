@@ -7534,6 +7534,39 @@
         }
       ],
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "PLANNED"
+        },
+        {
+          "name": "planningState",
+          "value": "待规划"
+        },
+        {
+          "name": "sourceInsight",
+          "value": "insight-lead-milestone-multiagent-delegation-001"
+        }
+      ],
+      "description": "待规划事项（2026-09-15，项目总管）：把人类伙伴设想的『框架级自相似递归分身机制』纳入规划、暂缓实施（其自评『还有很多没考虑清楚的地方』，故本项为 PLANNED 而非交付）。①洞察结论（依据洞察Lead里程碑 insight-lead-milestone-multiagent-delegation-001 与 docs/multi-agent-recursive-delegation-insight.md）：业界『部分有』——递归派生、委派、结果回馈重拆已成体系（Claude Code 子 Agent 默认可再派生至 3 层、CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH 可配；Anthropic orchestrator-worker 同构 worker 较单 Agent +90.2%），但『单一通用角色 + 派生权限无差别继承』非业界主流且与 least-privilege 实践冲突（权限放大 / confused deputy / privilege chaining）。②人类伙伴澄清后的目标形态：自相似（self-similar）递归 Agent，等价于分治 / fork-join / MapReduce——每个 Agent 可并行 spawn 多个『同类型的自己』（分身）去完成本属自己的工作；对外看就是一个 Agent（单例封装），对内是递归分身树。分身不可追溯、无独立身份与记忆（『它其实就是主神的一部分』）。③已达成共识的机制要点：深度上限 3 + 扇出上限（由 harness 硬计数，非提示词，防注入绕过）；分身与父同一 agent 定义（同 prompt/工具/模型）；上下文隔离（分身只拿子任务说明 + 自己 scope 的图切片，不继承父对话历史）；只回压缩摘要，父决定合并或再拆；工具集相同但权限按 scope 单调收窄 + 写图单写者锁；不引入 Work Package / Task 图元素（委派契约退化为 spawn 提示规范）。④spawn 决策三层控制：模型侧可判定判据（≥2 条命中才分——可独立切分 / 子任务仍多步多工具 / 可并行无强序 / 预计压穿单窗预算；反之命中任一则不分）+ harness 硬门禁（深度 / 扇出 / token 配额）+ fail-safe 默认不分身；每次 spawn 记录理由可审计；必须有 fallback（分身无用则父回收、退回单 Agent 执行）。⑤未决 / 待想清楚：是否要做（未决）；通用单一角色的成立范围；判据阈值如何标定；分身与既有 Actor / 记忆模型的关系（分身在图中是否占用身份）；成本-收益的适用边界。",
+      "id": "overseer-multiagent-delegation-plan-001",
+      "name": "待规划：框架级自相似递归分身机制（self-similar recursive sub-agents）",
+      "testcases": [
+        {
+          "Input": "design/KG/SystemArchitecture.json",
+          "acceptanceCriteria": "tests/overseer-multiagent-delegation-plan.test.js",
+          "description": "GIVEN 人类伙伴要求先记录洞察并把它登记为待规划事项；WHEN 检查意图图谱；THEN 存在 Business Object『待规划：框架级自相似递归分身机制（self-similar recursive sub-agents）』（id overseer-multiagent-delegation-plan-001），status=PLANNED、memoryTier=T2，位于项目总管 T2 子视图 overseer-product-001 成员中，描述含洞察结论与已达成机制的共识要点，并带 GIVEN-WHEN-THEN 验收测试。",
+          "name": "AT-overseer-multiagent-plan-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -9538,7 +9571,8 @@
       "included_elements": [
         "overseer-teamai-insight-001",
         "overseer-homepage-v3-kglibrary-retire-001",
-        "overseer-community-linkage-001"
+        "overseer-community-linkage-001",
+        "overseer-multiagent-delegation-plan-001"
       ],
       "included_relationships": []
     }
