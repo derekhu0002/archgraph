@@ -3299,6 +3299,18 @@
         {
           "view_id": "overseer-release-001",
           "view_name": "项目总管发布记录"
+        },
+        {
+          "view_id": "overseer-rules-001",
+          "view_name": "项目总管记忆·规则与工作流"
+        },
+        {
+          "view_id": "overseer-retrieval-001",
+          "view_name": "项目总管记忆·检索与评测"
+        },
+        {
+          "view_id": "overseer-product-001",
+          "view_name": "项目总管记忆·产品与团队"
         }
       ],
       "attributes": [
@@ -4095,6 +4107,13 @@
           "type": "Acceptance Test",
           "Input": "tests/memory-archive.test.js",
           "acceptanceCriteria": "tests/memory-archive.test.js"
+        },
+        {
+          "name": "AT-overseer-ltm-layering-01",
+          "description": "GIVEN 项目总管 T2 长期记忆；WHEN 单视图超 15 成员上限时；THEN T2 拆为核心 overseer-ltm-001 + 同级的主题分层子视图（overseer-rules-001/overseer-retrieval-001/overseer-product-001，均挂 actor、各 ≤15），成员无损且精确、下游评测依赖的核心成员保留在 overseer-ltm-001、且 /-ltm-/ 查找唯一指向核心视图。",
+          "type": "Acceptance Test",
+          "Input": "tests/overseer-ltm-layering.test.js",
+          "acceptanceCriteria": "tests/overseer-ltm-layering.test.js"
         }
       ],
       "attributes": [
@@ -4124,7 +4143,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话目标（2026-09-15，项目总管）：治理 AGENT 人格缺陷——测试发现 Agent 面对人类提问/提议仍百依百顺、缺独立批判。完成：全局规则新增 <CriticalReasoningGuideline> + CoreRule 10（三类证据先评估再表态：原生模型知识/仓库/意图图谱；用可证伪证据质疑人类并给修正方案；区分事实（证据裁决，须据理力争）与偏好（人类决定）；不因重复/语气/紧迫/权威改结论，点名 sycophancy 为缺陷；对不健全请求拒错误部分给合规路径，绝不静默顺从）。新增 AT-rules-04（tests/argo-rules-critical-reasoning.test.js，2 用例绿）；KG 元素 archgraph-workflow-rules 增 testcase AT-rules-04 + 更新 description；commit b29e032；已同步全局 ~/.config/opencode/AGENTS.md。架构测试 114/119，5 个失败均为既有且与本改动无关（~/.copilot 的 excalidraw skill 未部署、EA import 缺 eatool/EA-jsscript/import-from-kg.js、memory-eval-run TOOL_ERROR）。关键决策：①用全局规则而非单 Actor persona 承载（覆盖所有会话/宿主、跨 Actor 一致）；②拒绝纯靠模型默认（测试证明无效）。待办/阻塞：T2 长期记忆视图 overseer-ltm-001 已达上限 15/15，本次会话里程碑未能入 T2（仅 T1 摘要 + 规则元素登记），需后续做记忆分层（建子视图）或归档已完成元素腾位；建议再加「批判性/反谄媚」行为评测（现有导航/记忆评测未度量该维度）。沿用上一会话遗留：平板 App 洞察 Q1-Q6（交互范式/Hub 远程形态/TWA 前置/手势工作量/离线只读策略）待人类拍板。",
+      "description": "会话目标（2026-09-15，项目总管）：治理 AGENT 人格缺陷——测试发现 Agent 面对人类提问/提议仍百依百顺、缺独立批判。完成：全局规则新增 <CriticalReasoningGuideline> + CoreRule 10；AT-rules-04 绿；commit b29e032；全局 ~/.config/opencode/AGENTS.md 已同步（详见 T2 里程碑 overseer-milestone-critical-reasoning-001）。关键决策：用全局规则而非单 Actor persona；拒绝纯靠模型默认。记忆结构：T2 已分层为 overseer-ltm-001（核心）+ overseer-rules-001 / overseer-retrieval-001 / overseer-product-001。待办：建议加「批判性/反谄媚」行为评测。遗留：上一会话平板 App 洞察 Q1-Q6 待人类拍板。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4361,7 +4380,7 @@
         {
           "name": "commit",
           "value": "b29e032",
-          "description": "T1 摘要更新：新增 CriticalReasoningGuideline 会话；argo/rules/archgraph.instructions.md; tests/argo-rules-critical-reasoning.test.js; design/KG/SystemArchitecture.json"
+          "description": "T1 摘要更新：CriticalReasoningGuideline 会话 + LTM 分层（详见 T2 里程碑 overseer-milestone-critical-reasoning-001）；design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
@@ -7186,6 +7205,28 @@
         }
       ],
       "type": "Business Object"
+    },
+    {
+      "id": "overseer-milestone-critical-reasoning-001",
+      "name": "里程碑：规则新增批判性思维准则（CriticalReasoningGuideline）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "会话记录与决策（2026-09-15，项目总管）：问题——测试发现 Agent 面对人类提问/提议仍顺着用户喜好、缺独立批判、百依百顺。交付——argo/rules/archgraph.instructions.md 新增 <CriticalReasoningGuideline> + CoreRule 10；tests/argo-rules-critical-reasoning.test.js（AT-rules-04）2 用例绿；archgraph-workflow-rules 元素登记 testcase AT-rules-04 与 commit b29e032；已同步全局 ~/.config/opencode/AGENTS.md。决策与理由——用全局规则而非单 Actor persona（覆盖所有会话/宿主、跨 Actor 一致）；拒绝纯靠模型默认（测试证明无效）。被否方案——只改某 Actor persona；依赖模型自带对齐。局限与待办——提示级干预，尚无可执行评测证明行为改变；建议在导航/记忆评测之上加「批判性/反谄媚」行为维度。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "b29e032",
+          "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-critical-reasoning.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -8870,21 +8911,12 @@
       "parent_element_id": "project-overseer-001",
       "description": "项目总管 Business Actor 的长期记忆子视图：记录项目愿景、全局决策、关键进展与跨会话要点。",
       "included_elements": [
-        "overseer-vision-001",
-        "overseer-archimate-role-001",
-        "overseer-wiki-eval-001",
-        "overseer-mcp-tool-surface-001",
         "overseer-memory-tiers-001",
+        "overseer-archimate-role-001",
+        "overseer-retrieval-recall-first-001",
+        "overseer-wiki-eval-001",
         "overseer-failure-exp-concept-001",
-        "overseer-teamai-insight-001",
-        "overseer-graph-mcp-deploy-001",
-        "overseer-harness-workspaceroot-fix-001",
-        "overseer-community-linkage-001",
-        "overseer-homepage-v3-kglibrary-retire-001",
-        "overseer-graph-dedup-gate-001",
-        "overseer-semantic-seed-prefix-fix-001",
-        "overseer-rerank-latency-fix-001",
-        "overseer-retrieval-recall-first-001"
+        "overseer-vision-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
@@ -9157,6 +9189,43 @@
         "overseer-argo-0-19-1-release-001",
         "overseer-argo-0-20-0-release-001",
         "overseer-argo-0-20-1-release-001"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "overseer-rules-001",
+      "view_name": "项目总管记忆·规则与工作流",
+      "parent_element_id": "project-overseer-001",
+      "description": "项目总管 T2 长期记忆分层子视图（LTM layering，避免单视图 15 成员上限）：规则/工作流、写入去重门禁、工具面/部署、批判性思维准则等里程碑。view_id 不含 -ltm- 以保持 T2 记忆视图查找（/-ltm-/）唯一。",
+      "included_elements": [
+        "overseer-graph-dedup-gate-001",
+        "overseer-harness-workspaceroot-fix-001",
+        "overseer-graph-mcp-deploy-001",
+        "overseer-mcp-tool-surface-001",
+        "overseer-milestone-critical-reasoning-001"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "overseer-retrieval-001",
+      "view_name": "项目总管记忆·检索与评测",
+      "parent_element_id": "project-overseer-001",
+      "description": "项目总管 T2 长期记忆分层子视图（LTM layering）：语义检索种子 id 修复、检索时延/重排优化等。view_id 不含 -ltm- 以保持 T2 记忆视图查找（/-ltm-/）唯一。",
+      "included_elements": [
+        "overseer-semantic-seed-prefix-fix-001",
+        "overseer-rerank-latency-fix-001"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "overseer-product-001",
+      "view_name": "项目总管记忆·产品与团队",
+      "parent_element_id": "project-overseer-001",
+      "description": "项目总管 T2 长期记忆分层子视图（LTM layering）：teamai 业界洞察与组队、主页 v3 改版与 Reference Library 移除、社区衔接等里程碑。view_id 不含 -ltm- 以保持 T2 记忆视图查找（/-ltm-/）唯一。",
+      "included_elements": [
+        "overseer-teamai-insight-001",
+        "overseer-homepage-v3-kglibrary-retire-001",
+        "overseer-community-linkage-001"
       ],
       "included_relationships": []
     }

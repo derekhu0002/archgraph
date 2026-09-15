@@ -26,6 +26,7 @@
 - **物理分区**：T2/T3 是不同的子视图，元素归属决定层级（与现有 subdiagram_views 机制一致，导航/枚举天然支持）
 - **自动归档规则**：元素 `deliveryStatus=delivered` 且超过 N 天无引用 → 移入 `<actor>-archive-001`；或人类/主管显式归档
 - 记忆元素带辅助属性 `memoryTier: T2|T3`（可选，用于检索过滤）
+- **T2 视图分层（15 成员上限）**：单个 `<actor>-ltm-001` 受「每视图 ≤15 成员」硬约束；超出时按主题拆分为**同级分层子视图**（如 `overseer-rules-001`/`overseer-retrieval-001`/`overseer-product-001`，均挂同一 Actor）。分层视图 `view_id` **不得含 `-ltm-`**，以保证 T2 记忆视图查找（`/-ltm-/`）唯一指向核心 `<actor>-ltm-001`；核心层保留原则/愿景与下游评测依赖的成员。
 
 ### C. STEP 0 加载策略 —— 只加载 T1，绝不加载 T2/T3 全量
 - WakeupGuideline STEP 0 改为三件事：① 定位 Actor（身份）② 加载 T1 摘要（静态元素 + 最近 N 条）③ 恢复「会话钩子」（上次未完成项/关键决策指针 1~2 个）
@@ -75,3 +76,4 @@
 - **Phase 4 ✅（归档迁移）**：`scripts/memory-archive.js`（delivered/COMPLETED+年龄门；只移不删；无日期安全跳过）+ AT-memory-archive-01
 - **Phase 5 ✅（回忆两步法+阈值分层，框架级）**：规则 `<MemoryRecallGuideline>`（memory_search 宽松 0.55 定位 → getIntentElementContext 取全文；audit 严格 0.8；零命中才拒答）
 - **Phase 6 ✅（T2 回忆评测，框架级）**：memory-eval 新增维度 7 两步回忆（TR-01~03），harness 31/31（100%）；验证定位→取全文、低分相关命中召回、无关不虚构
+- **Phase 7 ✅（T2 视图分层）**：`overseer-ltm-001` 拆为核心层（6 元素，含下游评测依赖的愿景/评测口径/记忆原则）+ 三个主题层 `overseer-rules-001`/`overseer-retrieval-001`/`overseer-product-001`（均挂 `project-overseer-001`，各自 ≤15）；`tests/overseer-ltm-layering.test.js`（AT-overseer-ltm-layering-01）验证分层、成员无损、核心保留与 `/-ltm-/` 查找唯一
