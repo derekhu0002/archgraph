@@ -127,10 +127,6 @@
           "description": "tests/website.test.js; design/KG/SystemArchitecture.json（AT-website-01 描述刷新：去掉 KGlibrary 区块、新增 argo init/.env/无 Reference Library 断言）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "33156a1",
           "description": "index.html; tests/website.test.js（AT-website-01 增 Graph integrity 断言）"
@@ -144,6 +140,10 @@
           "name": "commit",
           "value": "b33e678",
           "description": "index.html; tests/website.test.js（AT-website-01 断言保持：主题改 dark）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -298,10 +298,6 @@
           "description": "index.html; tests/website.test.js; KGlibrary/（删除）; docs/kglibrary.html（删除）; design/KG/SystemArchitecture.json（主页改版：Install 补前置依赖/.env 配置键、How to use 补 argo init、去除 Reference Library 由 community 承接）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "33156a1",
           "description": "index.html（How to use 与 Community 之间新增 Graph integrity 小节 + 导航 Integrity）; tests/website.test.js（新增 graph-integrity 断言）"
@@ -315,6 +311,10 @@
           "name": "commit",
           "value": "b33e678",
           "description": "index.html（主页按 DeepSeek Harness 风格全面重写：暗色 + hero 终端 + 徽章 + 卡片 + 交替特性块 + 复制/滚动交互）; tests/website.test.js（主题断言 light→dark）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -450,10 +450,6 @@
           "description": "README.md; tests/readme.test.js; design/KG/SystemArchitecture.json（README Install 补前置依赖/.env 配置键、How to use 补 argo init，与主页同步）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "33156a1",
           "description": "README.md（新增 Graph integrity 小节：写入去重/单一成员/结构校验；How to use 补复用说明）; tests/readme.test.js（AT-readme-01 增断言）"
@@ -462,6 +458,10 @@
           "name": "commit",
           "value": "650459d",
           "description": "README.md（What is this? 补收益：long-term memory + deduplicated writes → precise recall；移除详细 Graph integrity 小节，细节归主页，保持简洁）; tests/readme.test.js"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -2672,7 +2672,7 @@
       "name": "ArchGraph ARGO Workflow Rules",
       "parent": "1249",
       "type": "Rule",
-      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）。2026-09-11 全量改写为 Agent 视角：规则文件是给 Agent 的提示，只写「Agent 该做什么/怎么判定」的行为契约，不写工具内部实现（算法/阈值/环境变量/字段名）与解释性论证；每个会话随上下文加载，越短越准越好。运行规则：起步闸门（WakeupGuideline STEP 0）仅载 T1 工作记忆摘要；改动前先定位元素、只经 ARGO MCP 读写图谱、验收测试先行（可执行 GIVEN-WHEN-THEN）、提交后登记 commit id+文件路径；KG-first 且语义优先检索（getSystemArchitecture query.purpose+query.intent / getIntentElementContext，queryNeo4jGraph 为次要只读结构查询）；KG-first 内容存储；写入去重（GraphDeduplication，2026-09-11 统一版：onConflict 去 fail、默认 reuse；精确重复→复用不新建；全图同 type 语义近似→写前拦截并返回 semanticConflicts，仅 allowDuplicate+justification 放行；update* 不受门禁）；三层记忆（里程碑即写为主 + 会话摘要机会式幂等覆盖 T1）；分级改动（Tier 1/2/3）。安装器 install-argo.ps1 从 <WakeupGuideline> 块生成各宿主唤醒插件，部署测试断言该锚点与 UNCONDITIONAL STARTUP GATE 文本。",
+      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）。2026-09-11 全量改写为 Agent 视角：规则文件是给 Agent 的提示，只写「Agent 该做什么/怎么判定」的行为契约，不写工具内部实现（算法/阈值/环境变量/字段名）与解释性论证；每个会话随上下文加载，越短越准越好。运行规则：起步闸门（WakeupGuideline STEP 0）仅载 T1 工作记忆摘要；改动前先定位元素、只经 ARGO MCP 读写图谱、验收测试先行（可执行 GIVEN-WHEN-THEN）、提交后登记 commit id+文件路径；KG-first 且语义优先检索（getSystemArchitecture query.purpose+query.intent / getIntentElementContext，queryNeo4jGraph 为次要只读结构查询）；KG-first 内容存储；写入去重（GraphDeduplication，2026-09-11 统一版：onConflict 去 fail、默认 reuse；精确重复→复用不新建；全图同 type 语义近似→写前拦截并返回 semanticConflicts，仅 allowDuplicate+justification 放行；update* 不受门禁）；三层记忆（里程碑即写为主 + 会话摘要机会式幂等覆盖 T1）；分级改动（Tier 1/2/3）。2026-09-15 新增 <CriticalReasoningGuideline> + CoreRule 10：Agent 须以三类证据（原生模型知识/仓库/意图图谱）先评估再表态、用可证伪证据质疑人类伙伴、区分事实与偏好、拒绝谄媚（sycophancy）与对不健全请求的静默顺从（AT-rules-04）。安装器 install-argo.ps1 从 <WakeupGuideline> 块生成各宿主唤醒插件，部署测试断言该锚点与 UNCONDITIONAL STARTUP GATE 文本。",
       "testcases": [
         {
           "Input": "tests/argo-rules-query.test.js",
@@ -2693,6 +2693,13 @@
           "acceptanceCriteria": "tests/argo-rules-dedup.test.js",
           "description": "GIVEN 规则文件 argo/rules/archgraph.instructions.md；WHEN 检查 GraphDeduplication 章节与 CoreRules；THEN 以 Agent 视角声明行为契约：复用优先而非新增、被拒为重复时用返回的已有 id 复用或更新、仅对真正不同对象用 allowDuplicate+justification、语义近似提示仅建议不阻塞、update 不受门禁（不描述工具内部归一化算法/阈值/环境变量）。",
           "name": "AT-rules-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/argo-rules-critical-reasoning.test.js",
+          "acceptanceCriteria": "tests/argo-rules-critical-reasoning.test.js",
+          "description": "GIVEN ARGO 工作流规则已维护；WHEN Agent 面对人类伙伴的提问或提议；THEN 规则要求先以三类证据（原生模型知识、仓库、意图图谱）评估再表态，用可证伪的证据提出质疑而非默认同意，明确禁止谄媚（sycophancy）与对不健全请求的静默顺从，且 CoreRules 引用该准则。",
+          "name": "AT-rules-04",
           "type": "Acceptance Test"
         }
       ],
@@ -2788,10 +2795,6 @@
           "description": "argo/rules/archgraph.instructions.md（新增 MemoryTierConventions：三层记忆操作机制直接放规则免 skill 加载——视图约定/memoryTier/T1 幂等覆盖/T3 只移不删）；tests/argo-rules-memory-tiers.test.js"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "79c76ea",
           "description": "argo/rules/archgraph.instructions.md（新增 <GraphDeduplication> + CoreRule 9）; tests/argo-rules-dedup.test.js（AT-rules-03）; design/KG/SystemArchitecture.json"
@@ -2815,6 +2818,10 @@
           "name": "commit",
           "value": "4819e02",
           "description": "argo/rules/archgraph.instructions.md（GraphDeduplication + CoreRule 9 改为默认 reuse + 语义软门禁）; tests/argo-rules-dedup.test.js"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -3763,10 +3770,6 @@
           "description": "argo/scripts/systemarchitecture-mcp-server.js; tests/semantic-memory-search.test.js; design/KG/SystemArchitecture.json（memory_search MCP 契约修复：toolResult 包装 content 数组，客户端可渲染；顶层 status/hits 兼容；AT-04）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "0f3d924",
           "description": "argo/scripts/graph-rag/semanticRecordText.js; graph-rag/semantic-persistence/productionSemanticBackfill.js; graph-rag/mutationEmbeddingVectorLifecycle.js; systemarchitecture-mcp-server.js; tests/semantic-record-text.test.js"
@@ -3785,6 +3788,10 @@
           "name": "commit",
           "value": "24bce1c",
           "description": "argo/scripts/graph-rag/semanticAlignmentLock.js（跨进程对齐锁）; graph-rag/semanticAlignmentRunner.js（预热仅限已初始化项目）; ensureArgoHarnessEnvironment.js（buildHarnessReport 串行化）; tests/semantic-alignment-runner.test.js（AT-align-03/04）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -4178,10 +4185,6 @@
           "description": "design/KG/SystemArchitecture.json（登记 301e9c4 SOC-DEMO 假提议修复）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "79c76ea",
           "description": "本次会话：L0 去重门禁 + onConflict + GraphDeduplication 规则（argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/architecture-dedup-gate.test.js; tests/argo-rules-dedup.test.js; design/KG/SystemArchitecture.json）"
@@ -4345,6 +4348,10 @@
           "name": "principle",
           "value": "retrieval-recall-first",
           "description": "一切措施不得牺牲最终检索的检出率/召回率，只能提升；宁可消耗性能也不缩小候选池/内容/跳过重排；违背时必须明确指出。适用所有涉及检出/召回的环节（读检索、写去重检索、rerank/混合调优）。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -6125,10 +6132,6 @@
           "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js（修复：新投影后无 EA 修改却产生大量假提议——①type：canonical 存显示形（Business Actor）而投影写归一形（BusinessActor）到 archimate_type tag，直接比每元素都报变更→改为 typeNorm 两侧归一比较；②元素属性：canonical 的 content 被投影合并进 EA t_attribute Notes，直接比 description/content 误报→新增 toEaAttrForm 把 canonical 属性归一为 EA Default/Notes 形后再 diff；③JScript 5.8 无 Array.isArray 导致 parseRelAttrs 抛错被 catch 吞→关系属性恒空、误报属性变更→改 Object.prototype.toString 判断。真实 SOC-DEMO 验证：draft 由 272 updateElement → 全 0；AT-2792-13/R 新增；回归 ea-human-draft-script EA 6/6）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "dc8c250",
           "description": "eatool/EA-jsscript/extract-human-draft.js; tests/ea-human-draft-script.test.js; design/KG/SystemArchitecture.json（锚点图权威决定视图成员：同名无锚图不再产生假 updateView.removeMembers；AT-2792-14）"
@@ -6137,6 +6140,10 @@
           "name": "decision",
           "value": "human-draft-human-view-not-autocleaned",
           "description": "2026-09-14 决策（人类裁决）：MCP 写图后的增量 .qea 投影故意只删『投影自有』对象，人类无锚内容永不删（systemarchitecture-mcp-server.js:2150；AT-2791-14 / AT-2791-17 明文要求人绘无锚对象/图保留）。因此人类在 EA 新增的同名未锚定图（ThreatIntelligence Diagram 16 对 视图197）在 agent 写入后不会被自动清理——按设计不修。需清理时由人类手动删该图，或跑全量投影（argo init / ea-qea-sync --mode full）。本次仅修复相邻缺陷：同名无锚图不再顶替锚点图决定视图成员（避免误报 updateView.removeMembers），见 dc8c250 / AT-2792-14。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -6298,10 +6305,6 @@
       "type": "Application Component",
       "attributes": [
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "79c76ea",
           "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/architecture-dedup-gate.test.js; tests/argo-rules-dedup.test.js; design/KG/SystemArchitecture.json（L0 去重门禁 graph-write-dedup-gate 立项 + AT-dedup-01..07）"
@@ -6340,6 +6343,10 @@
           "name": "commit",
           "value": "65f1d2d",
           "description": "argo/scripts/systemarchitecture-mcp-server.js（去重查询 hybrid:false + scoreMode:similarity；canonical-subset 新增 preferSeedSimilarity 跳过排名派生覆盖）; graph-rag/defaultSemanticRetrieval.js（request.hybrid 退出开关）; tests/architecture-dedup-semantic.test.js（AT-dedup-L1-04；L1-03 改述为读路径覆盖机制）。修复同类型恒被误报重复。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -6514,6 +6521,10 @@
           "description": "argo/scripts/graph-semantics.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/ea-qea-sync-lib.js; tests/architecture-view-membership-uniqueness.test.js",
           "name": "commit",
           "value": "b6c6466"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "图谱校验 / 视图成员唯一性（对标 EA『同一图内一元素/一连接仅一次』）：① graph-semantics.js 的 validateGraphSemantics 新增不变量——每个 view 的 included_elements / included_relationships 不得含重复 id（validateDocument 与 validateSystemArchitecture 均调用，故所有写入与 argo init 均拒绝重复）；② 写入路径 addElement/addRelationship 早已用 addUnique，updateView 的成员 patch 与 addView 的成员数组也经 addUnique 去重归一；③ .qea 投影（ea-qea-sync-lib.js）在新增成员循环内同步 placedObjs/placedLinks，即使面对历史含重复成员的图也不会双插 t_diagramobjects/t_diagramlinks。与 graph-write-dedup-gate（写入去重门禁）区别：本元素负责 schema/图语义校验与视图成员唯一性不变量，不负责写入时元素/关系的重复拦截。源码：argo/scripts/graph-semantics.js、systemarchitecture-mcp-server.js、ea-qea-sync-lib.js。",
@@ -6620,6 +6631,10 @@
           "name": "commit",
           "value": "a27673a",
           "description": "argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/systemarchitecture-mcp-server.js; tests/write-retrieval-impact.test.js; tests/architecture-dedup-semantic.test.js; design/KG/SystemArchitecture.json（修复：seed id 用 bare canonical id + dedup score key 前缀鲁棒；AT-write-impact-05）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "语义混合检索（Hybrid Semantic Retrieval）：在现有语义（向量）检索之上，加法式引入词法/BM25 检索并按 RRF 融合。策略：默认关（ARGO_SEMANTIC_HYBRID=0），纯加法式（searchText + 全文索引，不改现有向量/契约），词法失败 fail-open 降级纯向量，保留 kill switch；A/B 通过后转默认开。P0：检索评测基线 scripts/eval-retrieval.js（AT-retrieval-eval-01）。P1：语义记录 searchText + 全文索引 *_vector_fulltext（AT-searchtext-01/02），幂等回填 Aligned。P2：hybridRetrieval.js（RRF/sanitize/开关/权重；默认关）+ defaultSemanticRetrieval 集成（kind:'semantic-lexical-query'，向量占优权重 3:1），AT-hybrid-01..05。A/B：等权 RRF 为负（ALL -1.0/View -6.1），3:1/lexK16 后 ALL recall@1 +0.4、name +1.2、element +0.6、desc -0.8、View 0（增益有限，基线已高，故默认关）。写入策略影响验收 AT-write-impact-01..04：hybrid 开关不改 L0 精确去重；融合不缩小写入门的向量候选集；门禁判据（matches+onConflict）与评分尺度无关；门禁 semanticScore 为排名派生（0.99..0.8），hybrid 只改排序不改 0.85 阈值语义。后续：按宿主金丝雀开启 / 二阶段重排（rerank）。",
@@ -6772,6 +6787,10 @@
           "name": "commit",
           "value": "618098f",
           "description": "argo/scripts/graph-rag/rerankRetrieval.js（thinking 关闭改为对所有 provider 生效 + ARGO_RERANK_DISABLE_THINKING / ARGO_RERANK_THINKING_PARAM + 被拒自动重试）；liveEmbeddingProviderConfig.js（两键入 .env 白名单）；argo/.env.example；tests/rerank-retrieval.test.js（AT-rerank-08/09）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "语义二阶段重排（Rerank）：在向量/混合检索候选池后用 LLM listwise 重排（chat/completions），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略：默认关（ARGO_SEMANTIC_RERANK=0），开时用更大候选池（pool=20）重排后取 topK；fail-open（错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆。评测（scripts/eval-rerank.js，150 样本，qwen-turbo）：4-way vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优，但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再启用。provider/model 与 embedding 解耦：resolveRerankProvider 优先 ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL，未设则回落 embedding 配置（baseUrl/qwenKey/provider）与默认模型 qwen-turbo（可选 ARGO_SEMANTIC_RERANK_MODEL 仅改模型）。参数：ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js、liveEmbeddingProviderConfig.js。",
@@ -7131,6 +7150,10 @@
           "name": "commit",
           "value": "4016590",
           "description": "docs/tablet-archgraph-app-insight.md; tests/tablet-archgraph-app-insight.test.js; design/KG/SystemArchitecture.json（新增里程碑 insight-lead-milestone-tablet-app-001；已含 AT-tablet-app-insight-01/02）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "里程碑（2026-09-13，委派业界技术洞察团队 insight-lead-001 编排五步法）：洞察『Android 平板「一页」架构图 App 方向』——人类离开办公室时用平板触屏与 AI 共享同一张 ArchiMate 知识图谱。①界定：如何把现有 ArchGraph 本地 Web 服务（2760）演进为面向 Android 平板的「一页/画布优先/手势驱动」瘦客户端，并厘清与 Sparx EA、桌面 Web、Atlas「驾驶操作工具」的分工。②拆解：MECE 八轴（场景·JTBD / 运行拓扑·数据通路 / 触屏范式 / 功能边界 / 实现路线 / 安全信任 / 与 EA·web 分工 / 评估方法）。③假设 11 条。④验证：本会话 BAILIAN WEB MCP 未挂载（未完成全网收集，已诚实声明），改用 webfetch 抓取 14 个一手来源（MCP 传输/安全规范、MDN、Cloudflare/ngrok、Archi/Structurizr/draw.io/FigJam、Bubblewrap 仓库）逐条交叉验证。⑤核心结论：平板工具应定位为瘦客户端 + Hub 远程前端而非新后端；形态推荐 PWA→TWA 打包为独立 Android 应用（复用 web/ MaxGraph 内核 + 布局侧车）；当前最大阻塞是可达性与安全（2760 仅绑 127.0.0.1，须经局域网/隧道 + 认证 + Origin 校验）；三路线分工不互斥（EA=深度权威建模桌面、平板=移动看/轻改/协作、2760=Hub 与共享画布内核）；平板边界 = 看 + 轻改 + AI 协作，离线只读、写操作在线（写经 ARGO MCP preview→apply）。交付 docs/tablet-archgraph-app-insight.md；AT-tablet-app-insight-01/02。未决：Q1「一页」范式、Q2 Atlas 工具 job、Q3 Hub 远程形态、Q4 TWA HTTPS/assetlinks 前置、Q5 MaxGraph 触屏适配、Q6 离线缓存失效策略。",
