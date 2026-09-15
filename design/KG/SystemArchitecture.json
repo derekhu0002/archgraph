@@ -7428,6 +7428,28 @@
       "name": "里程碑：发布 archgraph-argo@0.22.0（无损写入门禁 + 词级判定 + 批次 ack + NDJSON 墓碑）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "description": "package.json（发布 archgraph-argo@0.22.1）",
+          "name": "commit",
+          "value": "20d2589"
+        }
+      ],
+      "description": "里程碑（2026-09-15）：发布 archgraph-argo@0.22.1（无损门禁误报修复）。内容：结构化 token 丢失判定改『规范化子串 + 分隔符/空白不敏感』（NFKC+去空白+小写+去分隔符），isStructuredToken 收紧（排除裸 `/` 与短纯数字）；因此 `A/B`→`A、B`、`769465c,bc7f418`→`769465c:bc7f418`、`STIX2.1`→`STIX 2.1` 等良性排版不再拦，真删（commit/版本/路径 token 消失）仍拦。离线实测两仓单行 description 良性排版误报 87/84 → 0；AT-lossless-09。发布：npm publish（shasum e6020a1a45b4177810819d2994c4fd4d38c3a523，75 files），registry 传播第 6 次轮询可见；npm i -g archgraph-argo@0.22.1；argo-deploy（MCP 注册 VS Code/Cursor/OpenCode/OpenClaw/DSH）。待办：宿主重启以加载新常驻 MCP，重启后重跑 argo-init。",
+      "id": "overseer-argo-0-22-1-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.22.1（无损门禁结构化 token 误报修复）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -9392,7 +9414,8 @@
         "overseer-argo-0-20-0-release-001",
         "overseer-argo-0-20-1-release-001",
         "overseer-argo-0-21-0-release-001",
-        "overseer-argo-0-22-0-release-001"
+        "overseer-argo-0-22-0-release-001",
+        "overseer-argo-0-22-1-release-001"
       ],
       "included_relationships": []
     },
