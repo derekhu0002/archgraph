@@ -4413,6 +4413,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "c4f0803",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-09-16 T1 会话摘要覆盖写：多 Agent 洞察 + 待规划项登记）"
         }
       ],
       "testcases": [
