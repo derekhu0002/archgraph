@@ -7450,6 +7450,85 @@
       "name": "里程碑：发布 archgraph-argo@0.22.1（无损门禁结构化 token 误报修复）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "name": "insightMethod",
+          "value": "McKinsey 5-step (define/decompose/hypothesize/validate/synthesize)"
+        },
+        {
+          "name": "retrievalChannel",
+          "value": "webfetch (BAILIAN MCP unavailable: tool not mounted, DASHSCOPE_API_KEY unset, endpoint 401)"
+        }
+      ],
+      "description": "里程碑（2026-09-15，洞察Lead insight-lead-001 编排麦肯锡新五步法）：洞察『业界是否已存在框架级、可递归派生/委派的通用 Agent 定义与协作机制』。①界定=问题陈述 Q0（目标/范围/成功标准/约束）。②拆解=MECE 七支议题树（递归派生 / 委派交接 handoff / 互操作与定义注册 / 通用角色vs角色专精 / 权限与继承 / 上下文工程依据 / 图·共享状态底座）。③假设 H1–H7。④验证=BAILIAN MCP 本会话不可用（bailian-websearch 工具未挂载 + DASHSCOPE_API_KEY 未设置 + 端点 401 Unauthorized），改用 webfetch 真实抓取 14 个一手来源（Anthropic《multi-agent research system》/《Effective context engineering》/《Building effective agents》、Claude Code subagents 官方文档、OpenAI Agents SDK Handoffs、OpenAI Swarm GitHub、AutoGen Teams、CrewAI、Google ADK Workflows、LangGraph GitHub、Google A2A v1.0.0 规范、MCP Security Best Practices、Chroma Context Rot 报告、Cognition Don't Build Multi-Agents），未以模型记忆冒充。⑤结论=『部分是』：递归派生+委派+结果回馈已成体系（Claude Code 子 Agent 默认可再派生至 3 层、可用 CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH 配置；Anthropic orchestrator-worker 多 Agent 较单 Agent 提升 90.2%），但『单一通用角色 + 派生权限一路无差别继承』非业界主流，且与 least-privilege 实践冲突（H5 被证伪）。关键证据：Claude Code 子 Agent 继承父权限但一律以 tools/disallowedTools 收窄、插件子 Agent 禁设 hooks/mcpServers/permissionMode；MCP 安全规范强制最小权限渐进 scope、把 token passthrough 列为反模式并点名 privilege chaining/confused deputy/expanded blast radius；Chroma 18 模型实证 context rot；Cognition 反证并行子 Agent 的冲突决策与 game of telephone。裁决：人类设定②递归派生、③结果回馈重拆可直接落地；①单一通用角色可落地但须以任务契约（objective/output format/tool guidance/boundaries）补足专精缺失；④派生权限继承必须改造为『继承但权限单调不放大 + 深度/数量上限 + 图谱写入 preview→apply 门禁』。建议 R1–R5（有界递归/orchestrator-worker、通用定义+任务契约、压缩交接+图谱作共享黑板、权限继承但收窄、单写者并发护栏）+ 7 条反模式。交付 docs/multi-agent-recursive-delegation-insight.md；验收 AT-multiagent-insight-01..07。",
+      "id": "insight-lead-milestone-multiagent-delegation-001",
+      "name": "里程碑：框架级可递归派生通用Agent机制业界洞察",
+      "testcases": [
+        {
+          "Input": "docs/multi-agent-recursive-delegation-insight.md",
+          "acceptanceCriteria": "tests/multi-agent-recursive-delegation-insight.test.js",
+          "description": "GIVEN 洞察团队以麦肯锡五步法产出『框架级可递归派生通用 Agent 机制』方向洞察；WHEN 检查 docs/multi-agent-recursive-delegation-insight.md；THEN 报告包含核心结论、问题陈述、MECE 议题树、假设清单、逐条验证结论、来源清单与局限章节。",
+          "name": "AT-multiagent-insight-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "docs/multi-agent-recursive-delegation-insight.md",
+          "acceptanceCriteria": "tests/multi-agent-recursive-delegation-insight.test.js",
+          "description": "GIVEN 验证阶段无法使用强制的 BAILIAN MCP；WHEN 检查报告；THEN 报告显式声明 BAILIAN 未挂载/未完成、说明实际检索通道 webfetch 与具体卡点（工具未挂载 / DASHSCOPE_API_KEY 未设 / 401），未以模型记忆冒充验证结论。",
+          "name": "AT-multiagent-insight-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "docs/multi-agent-recursive-delegation-insight.md",
+          "acceptanceCriteria": "tests/multi-agent-recursive-delegation-insight.test.js",
+          "description": "GIVEN 问题要求给出代表方案清单；WHEN 检查报告；THEN 报告覆盖并对比 Claude Code、Anthropic orchestrator-worker、OpenAI Agents SDK/Swarm、AutoGen、CrewAI、Google ADK、LangGraph、Google A2A（含 AgentCard）的 Agent 定义/委派派生方式/权限继承模型/优缺点。",
+          "name": "AT-multiagent-insight-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "docs/multi-agent-recursive-delegation-insight.md",
+          "acceptanceCriteria": "tests/multi-agent-recursive-delegation-insight.test.js",
+          "description": "GIVEN 人类伙伴的四条设定（单一通用角色、递归派生、结果回馈重拆、派生权限继承）；WHEN 检查报告；THEN 报告对每条给出支持度+证据+风险，并显式揭示 least-privilege 冲突与权限放大、confused deputy 风险。",
+          "name": "AT-multiagent-insight-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "docs/multi-agent-recursive-delegation-insight.md",
+          "acceptanceCriteria": "tests/multi-agent-recursive-delegation-insight.test.js",
+          "description": "GIVEN 综合建议须可决策；WHEN 检查报告；THEN 报告给出对 ArchGraph Graph 框架集成的可执行建议（含递归深度上限、图谱写入 preview→apply 门禁、同一状态单写者）与应规避的反模式清单。",
+          "name": "AT-multiagent-insight-05",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "design/KG/SystemArchitecture.json",
+          "acceptanceCriteria": "tests/multi-agent-recursive-delegation-insight.test.js",
+          "description": "GIVEN 洞察已登记进意图图谱；WHEN 查询；THEN 存在 Business Object『里程碑：框架级可递归派生通用Agent机制业界洞察』（id insight-lead-milestone-multiagent-delegation-001），带非空 description 与 GIVEN-WHEN-THEN testcase。",
+          "name": "AT-multiagent-insight-06",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "design/KG/SystemArchitecture.json",
+          "acceptanceCriteria": "tests/multi-agent-recursive-delegation-insight.test.js",
+          "description": "GIVEN 洞察属洞察Lead 的长期记忆；WHEN 检查视图；THEN 该里程碑元素位于视图 insight-lead-ltm-001（洞察Lead T2 长期记忆，parent_element_id=insight-lead-001）成员中。",
+          "name": "AT-multiagent-insight-07",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -9368,7 +9447,8 @@
         "insight-lead-milestone-agent2ea-mcp-revision-001",
         "insight-lead-milestone-multiproject-ea-feasibility-001",
         "insight-lead-milestone-reverse-ea2kg-001",
-        "insight-lead-milestone-tablet-app-001"
+        "insight-lead-milestone-tablet-app-001",
+        "insight-lead-milestone-multiagent-delegation-001"
       ],
       "included_relationships": []
     },
