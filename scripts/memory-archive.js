@@ -68,7 +68,12 @@ function buildMigrations({ doc, actorId, days }) {
     migrations.push({
       type: 'updateView',
       view_id: t2.view_id,
-      patch: { included_elements: (t2.included_elements || []).filter(x => x !== id) },
+      // Intentional, explicit move to T3: acknowledge the lossless write gate.
+      acknowledgeLoss: true,
+      lossJustification: 'T2 -> T3 archive migration (move-only, never deleted; recorded via memoryTier=T3 + archivedAt).',
+      patch: {
+        included_elements: (t2.included_elements || []).filter(x => x !== id),
+      },
     });
     migrations.push({
       type: 'updateView',

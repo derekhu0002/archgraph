@@ -167,6 +167,8 @@ const {
   verifyArchitectureSync,
 } = require('./neo4j-system-architecture-store.js');
 
+const losslessWriteGate = require('./lossless-write-gate.js');
+
 const HANDLED_MUTATION_TYPES = new Set([
   'addElement',
   'updateElement',
@@ -413,11 +415,32 @@ const WORKSPACE_ROOT_PARAM = Object.freeze({
   description:
     'Optional absolute workspace root for this call. When provided it is used as-is; otherwise the server launch directory is used.',
 });
+// Lossless write gate: every update/remove helper accepts an explicit loss
+// acknowledgement (see lossless-write-gate.js). add* is purely additive and is
+// left alone. Without the acknowledgement a shrinking text edit or a destructive
+// removal is blocked at the buildMutationResult funnel.
+const LOSS_ACK_INPUT_PROPS = Object.freeze({
+  acknowledgeLoss: {
+    type: 'boolean',
+    description: 'Set true to confirm an intentional content reduction: a text rewrite that drops prior segments, or a destructive removal. Without it the lossless write gate blocks the write and returns the exact removed content.',
+  },
+  lossJustification: {
+    type: 'string',
+    description: 'Required for MAJOR text loss (large removedChars or most of the value): the reason the prior content is being intentionally replaced.',
+  },
+});
+
 for (const tool of TOOLS) {
   const inputSchema = tool && tool.inputSchema;
-  if (inputSchema && inputSchema.type === 'object' && inputSchema.properties) {
-    if (!Object.prototype.hasOwnProperty.call(inputSchema.properties, 'workspaceRoot')) {
-      inputSchema.properties.workspaceRoot = WORKSPACE_ROOT_PARAM;
+  if (!inputSchema || inputSchema.type !== 'object' || !inputSchema.properties) continue;
+  if (!Object.prototype.hasOwnProperty.call(inputSchema.properties, 'workspaceRoot')) {
+    inputSchema.properties.workspaceRoot = WORKSPACE_ROOT_PARAM;
+  }
+  if (tool.name && /^(update|remove)Architecture/.test(tool.name)) {
+    for (const [key, value] of Object.entries(LOSS_ACK_INPUT_PROPS)) {
+      if (!Object.prototype.hasOwnProperty.call(inputSchema.properties, key)) {
+        inputSchema.properties[key] = value;
+      }
     }
   }
 }
@@ -483,6 +506,8 @@ function mutationInputSchema() {
             relationship_ids: { type: 'array', items: { type: 'string' } },
             onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy for add* mutations. reuse (default): find-or-create — attach an existing exact-natural-key match instead of creating a duplicate; a same-type semantic near-duplicate also blocks creation unless allowDuplicate is set. allowDuplicate: create a new object even if a duplicate exists, requires a non-empty justification.' },
             justification: { type: 'string', description: 'Required when onConflict is allowDuplicate; recorded as the reason a semantically-equal duplicate is intentionally created.' },
+            acknowledgeLoss: { type: 'boolean', description: 'Set true to confirm an intentional content reduction: a text rewrite that drops prior segments, or a destructive removal. Without it the lossless write gate blocks the write and returns the exact removed content.' },
+            lossJustification: { type: 'string', description: 'Required for MAJOR text loss (large removedChars or most of the value): the reason the prior content is being intentionally replaced.' },
           },
           additionalProperties: false,
         },
@@ -1323,6 +1348,14 @@ function applyMutations(document, mutations) {
           patch.attributes,
         );
       }
+      if (Array.isArray(patch.testcases)) {
+        // G1: merge testcases by name so an omitted testcase is preserved; only
+        // an explicit { name, op:'remove' } deletes one.
+        patch.testcases = losslessWriteGate.mergeTestcasesPatch(
+          Array.isArray(element.testcases) ? element.testcases : [],
+          patch.testcases,
+        );
+      }
       Object.assign(element, patch);
       if (patchesSubdiagramViews || patchesName) {
         reconcileSubdiagramViewsForElement(nextDocument, element);
@@ -1440,7 +1473,15 @@ function applyMutations(document, mutations) {
       requirePatchDoesNotChangeRelationshipIdentityOrType(mutation.id, mutation.patch);
       const oldSourceId = relationship.source_id;
       const oldTargetId = relationship.target_id;
-      Object.assign(relationship, clone(mutation.patch));
+      const relationshipPatch = clone(mutation.patch);
+      if (Array.isArray(relationshipPatch.attributes)) {
+        // G1: merge relationship attributes by name (unmentioned preserved).
+        relationshipPatch.attributes = losslessWriteGate.mergeRelationshipAttributesPatch(
+          Array.isArray(relationship.attributes) ? relationship.attributes : [],
+          relationshipPatch.attributes,
+        );
+      }
+      Object.assign(relationship, relationshipPatch);
       for (const view of nextDocument.views) {
         if (!(view.included_relationships || []).includes(relationship.id)) {
           continue;
@@ -1547,11 +1588,12 @@ function applyMutations(document, mutations) {
       const oldParentId = view.parent_element_id;
       const oldViewId = view.view_id;
       const patch = clone(mutation.patch);
-      if (Array.isArray(patch.included_elements)) {
-        patch.included_elements = addUnique([], patch.included_elements);
+      if (Object.prototype.hasOwnProperty.call(patch, 'included_elements')) {
+        // G1: full list (legacy replace) or lossless delta { add, remove }.
+        patch.included_elements = losslessWriteGate.applyViewMembershipPatch(view.included_elements || [], patch.included_elements).list;
       }
-      if (Array.isArray(patch.included_relationships)) {
-        patch.included_relationships = addUnique([], patch.included_relationships);
+      if (Object.prototype.hasOwnProperty.call(patch, 'included_relationships')) {
+        patch.included_relationships = losslessWriteGate.applyViewMembershipPatch(view.included_relationships || [], patch.included_relationships).list;
       }
       Object.assign(view, patch);
       if (oldParentId !== view.parent_element_id) {
@@ -1588,6 +1630,11 @@ function applyMutations(document, mutations) {
     touchedViewIds: Array.from(touchedViewIds),
     viewLimitCheckIds: Array.from(viewLimitCheckIds),
     mutationSummaries,
+    lossReport: losslessWriteGate.buildLossReport({
+      baseDocument: document,
+      mutations,
+      nextDocument,
+    }),
   };
 }
 
@@ -1846,12 +1893,51 @@ async function buildMutationResult(context, mutations, write, dependencies) {
     }
   }
 
-  if (errors.length > 0 || semanticBlocked || !write) {
+  // Lossless write gate: block any unacknowledged content reduction (text shrink,
+  // membership drop, destructive removal). Preview reports it too (status failed)
+  // so the loss is visible before writing.
+  const lossReport = mutationResult.lossReport;
+  const hasLoss = lossReport && (
+    lossReport.text.length > 0
+    || lossReport.membersRemoved.length > 0
+    || lossReport.objectsRemoved.length > 0
+    || lossReport.testcasesRemoved.length > 0
+  );
+  let losslessBlocked = false;
+  if (hasLoss) {
+    result.lossless = lossReport;
+    if (errors.length === 0 && lossReport.blocked) {
+      losslessBlocked = true;
+      result.status = 'failed';
+      result.after = beforeSummary;
+      result.errors = lossReport.reasons;
+      result.guidance = addUnique(result.guidance || [], [
+        ...lossReport.reasons,
+        'Lossless write gate: read the current value first. For an intentional text rewrite pass acknowledgeLoss:true (and lossJustification for major loss); for a destructive removal pass acknowledgeLoss:true (a tombstone snapshot is recorded). Prefer lossless forms: testcases merge by name, view membership delta { add, remove }.',
+      ]);
+    }
+  }
+
+  if (errors.length > 0 || semanticBlocked || losslessBlocked || !write) {
     return result;
   }
 
   writeGraph(context.graphPath.absolutePath, mutationResult.document);
   result.written = true;
+
+  {
+    const removedObjects = losslessWriteGate.collectRemovedObjects(context.document, mutations, mutationResult.document);
+    if (removedObjects.length > 0) {
+      try {
+        const tomb = losslessWriteGate.appendTombstones(context.graphPath.absolutePath, removedObjects);
+        result.tombstones = { status: 'passed', path: tomb.path, count: tomb.count };
+      } catch (error) {
+        const message = String(error && error.message ? error.message : error);
+        result.tombstones = { status: 'failed', error: message };
+        result.warnings = addUnique(result.warnings || [], ['tombstone snapshot failed (non-fatal): ' + message]);
+      }
+    }
+  }
 
   // WP2791: .qea projection parallel to the Neo4j trigger — non-fatal, best-effort,
   // but ALWAYS reported on the result (passed / failed / noop+reason) so a missing EA
@@ -2560,13 +2646,13 @@ async function callTool(name, args = {}, dependencies = undefined) {
   if (name === 'updateArchitectureElement') {
     const context = await loadContext(args);
     const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'updateElement', id: args.id, patch: args.patch }], write), context), write);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'updateElement', id: args.id, patch: args.patch, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
   }
 
   if (name === 'removeArchitectureElement') {
     const context = await loadContext(args);
     const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'removeElement', id: args.id, view_ids: args.view_ids }], write), context), write);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'removeElement', id: args.id, view_ids: args.view_ids, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
   }
 
   if (name === 'addArchitectureRelationship') {
@@ -2578,13 +2664,13 @@ async function callTool(name, args = {}, dependencies = undefined) {
   if (name === 'updateArchitectureRelationship') {
     const context = await loadContext(args);
     const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'updateRelationship', id: args.id, patch: args.patch }], write), context), write);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'updateRelationship', id: args.id, patch: args.patch, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
   }
 
   if (name === 'removeArchitectureRelationship') {
     const context = await loadContext(args);
     const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'removeRelationship', id: args.id, view_ids: args.view_ids }], write), context), write);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'removeRelationship', id: args.id, view_ids: args.view_ids, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
   }
 
   if (name === 'addArchitectureView') {
@@ -2596,13 +2682,13 @@ async function callTool(name, args = {}, dependencies = undefined) {
   if (name === 'updateArchitectureView') {
     const context = await loadContext(args);
     const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'updateView', view_id: args.view_id, patch: args.patch }], write), context), write);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'updateView', view_id: args.view_id, patch: args.patch, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
   }
 
   if (name === 'removeArchitectureView') {
     const context = await loadContext(args);
     const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'removeView', view_id: args.view_id }], write), context), write);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'removeView', view_id: args.view_id, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
   }
 
   if (name === 'queryNeo4jGraph') {

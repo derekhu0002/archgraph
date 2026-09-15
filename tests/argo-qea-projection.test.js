@@ -109,7 +109,7 @@ test('argo-qea-projection (AT-2791-18): apply removeRelationship auto-projects t
     const result = await systemArchitectureMcp.callTool('applySystemArchitectureMutation', {
       workspaceRoot: dir,
       architecturePath,
-      mutations: [{ type: 'removeRelationship', id: 'r1' }],
+      mutations: [{ type: 'removeRelationship', id: 'r1', acknowledgeLoss: true, lossJustification: 'test verifies .qea deletion projection' }],
     });
     const payload = JSON.parse(result.content[0].text);
     assert.equal(payload.status, 'passed', 'apply should succeed');

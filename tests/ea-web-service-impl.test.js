@@ -520,7 +520,7 @@ test('真实 MCP 写图回滚：in-process addElement + removeElement', async (t
 
   const remove = await adapter.callTool(
     'removeArchitectureElement',
-    { architecturePath: fixtureRel.join('/'), id: '900001' },
+    { architecturePath: fixtureRel.join('/'), id: '900001', acknowledgeLoss: true, lossJustification: 'test teardown of a temp element' },
     projectRoot,
   );
   assert.ok(remove.ok, 'remove 应成功');

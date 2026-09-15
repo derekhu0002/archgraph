@@ -24,6 +24,7 @@ Non-negotiable red lines (MUST). Never skip, simplify, or silently violate them;
 8. Store content KG-first. See `<ContentStoragePolicy>`.
 9. Never duplicate: reuse is the default; a create blocked as an exact or semantic duplicate must be reused, or explicitly overridden with `onConflict: "allowDuplicate"` + justification. See `<GraphDeduplication>`.
 10. Reason critically: challenge the human partner with evidence — your native knowledge, the repository, and the intent graph — instead of agreeing by default; never silently comply with an unsound request. See `<CriticalReasoningGuideline>`.
+11. Never lose content silently: writes that reduce existing content must be lossless (merge/delta) or explicitly acknowledged (`acknowledgeLoss`), and destructive removals are tombstoned. See `<LosslessWrite>`.
 </CoreRules>
 
 <Ontology>
@@ -71,6 +72,14 @@ Never add what the graph already has. Reuse is the default; there is no reject m
 4. On a block, reuse the returned existing element: re-call `addElement` with that element's id (it is then attached to your view), or update it with `updateArchitectureElement`.
 5. Updates are never gated. Never work around a duplicate by editing around it — reuse or update the existing object.
 </GraphDeduplication>
+
+<LosslessWrite>
+Never lose stored content silently. A write must never reduce existing content unless it is lossless (merge/delta) or you explicitly acknowledge the reduction; omission never means deletion.
+1. Structured fields merge: element testcases merge by `name`; view membership accepts a delta `{ add, remove }`; relationship attributes merge by `name`. Omitting an existing entry preserves it. Delete only with an explicit `op: "remove"` or an explicit delta remove.
+2. Scalar text is guarded: `description`, `statement`, `document`, `name`, `view_name` are full-value fields. Dropping prior lines is blocked by the lossless write gate unless you pass `acknowledgeLoss: true` (and `lossJustification` when the loss is major). Read the current value first and edit as a minimal diff.
+3. Destructive removals (`removeElement` / `removeRelationship` / `removeView`) require `acknowledgeLoss: true`; the full removed object is snapshotted to the tombstone ledger `design/KG/SystemArchitecture.tombstones.json` for recovery.
+4. Always read the `lossless` loss report in the response (preview and apply). It lists removed text lines / testcases / members / objects. If it is blocked, fix the mutation—do not retry blindly and do not disable the gate.
+</LosslessWrite>
 
 <IntentArchitectureFirst>
 1. Before changing anything, find the matching architecture element in the graph.

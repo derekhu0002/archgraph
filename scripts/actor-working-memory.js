@@ -94,6 +94,10 @@ async function writeWorkingMemory({ workspaceRoot, actorId, summary, timestamp, 
   const mutation = {
     type: 'updateElement',
     id: t1.id,
+    // T1 digest is an intentional idempotent rewrite (see docs/actor-memory-tiers.md):
+    // acknowledge the lossless-write gate so the overwrite is explicit, not silent.
+    acknowledgeLoss: true,
+    lossJustification: 'T1 working-memory digest is intentionally overwritten (idempotent by design); the prior digest is recoverable from git/tombstones.',
     patch: {
       description: summary,
       attributes: [

@@ -1,0 +1,377 @@
+'use strict';
+
+/**
+ * Lossless Write Gate (无损写入门禁), framework-level.
+ *
+ * Invariant: NO SILENT LOSS. A write must never reduce stored content unless the
+ * caller explicitly acknowledges it (and, for major loss, justifies it). Two
+ * mechanisms make this possible:
+ *
+ *   G1 structured fields MERGE (omission never means deletion): updateElement
+ *      .testcases (by name), updateRelationship .attributes (by name),
+ *      updateView membership (delta {add,remove}); explicit op:'remove' deletes.
+ *   G2 scalar text GUARDED: description / statement / document / name / view_name
+ *      are full-value fields; a value that drops prior segments is blocked unless
+ *      the mutation carries acknowledgeLoss:true (and lossJustification for major
+ *      loss). Pure additions/expansions are always allowed.
+ *   G3 destructive removals ACKNOWLEDGED + RECOVERABLE: removeElement /
+ *      removeRelationship / removeView require acknowledgeLoss:true and snapshot
+ *      the full removed object into a tombstone ledger (nothing is truly lost).
+ *   G5 every response carries a loss report (text/testcases/members/objects +
+ *      the removed samples), on preview as well as apply.
+ *
+ * The gate is enforced at the single funnel buildMutationResult (apply +
+ * preview + all single-object helpers), so every MCP write interface is covered.
+ */
+
+const fs = require('node:fs');
+const path = require('node:path');
+
+const LOSS_ACK_FIELD = 'acknowledgeLoss';
+const LOSS_JUSTIFICATION_FIELD = 'lossJustification';
+
+// A text loss is "major" (justification, not just acknowledgement, required)
+// when it removes this many characters or this share of the original text.
+const MAJOR_REMOVED_CHARS = 200;
+const MAJOR_REMOVED_RATIO = 0.5;
+
+// Full-value text fields per mutation type. Editing any of these can silently
+// drop prior content, so they are loss-guarded.
+const TEXT_FIELDS_BY_MUTATION = Object.freeze({
+  updateElement: Object.freeze(['description', 'name']),
+  updateRelationship: Object.freeze(['statement', 'name', 'description', 'document']),
+  updateView: Object.freeze(['view_name', 'description']),
+});
+
+function normalizeForCompare(value) {
+  return String(value === undefined || value === null ? '' : value)
+    .normalize('NFKC')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeSegments(text) {
+  return String(text === undefined || text === null ? '' : text)
+    .split(/\r?\n/)
+    .map(normalizeForCompare)
+    .filter(segment => segment.length > 0);
+}
+
+// Deterministic removal detector: which meaningful segments of the old value are
+// absent from the new value. Pure additions/expansions (old ⊆ new) report none.
+function detectTextLoss(oldText, newText) {
+  const oldSegments = normalizeSegments(oldText);
+  if (oldSegments.length === 0) {
+    return { removedSegments: [], removedChars: 0, oldChars: 0, ratio: 0 };
+  }
+  const newNormalized = normalizeForCompare(newText);
+  const removedSegments = oldSegments.filter(segment => !newNormalized.includes(segment));
+  const removedChars = removedSegments.reduce((sum, segment) => sum + segment.length, 0);
+  const oldChars = oldSegments.reduce((sum, segment) => sum + segment.length, 0);
+  return {
+    removedSegments,
+    removedChars,
+    oldChars,
+    ratio: oldChars > 0 ? removedChars / oldChars : 0,
+  };
+}
+
+// G1: merge testcases by their stable key (name). Untouched testcases survive;
+// only an explicit {name, op:'remove'} deletes one.
+function mergeTestcasesPatch(existing, patchEntries) {
+  if (!Array.isArray(patchEntries)) {
+    throw new Error('patch.testcases must be an array of { name, ... } entries');
+  }
+  const result = Array.isArray(existing) ? existing.map(entry => ({ ...entry })) : [];
+  for (const entry of patchEntries) {
+    if (!entry || typeof entry !== 'object' || typeof entry.name !== 'string' || entry.name.trim() === '') {
+      throw new Error('patch.testcases entries must have a non-empty string name (the stable merge key)');
+    }
+    const index = result.findIndex(existingEntry => existingEntry.name === entry.name);
+    if (entry.op === 'remove') {
+      if (index >= 0) result.splice(index, 1);
+      continue;
+    }
+    const next = { ...entry };
+    delete next.op;
+    if (index >= 0) result[index] = next;
+    else result.push(next);
+  }
+  return result;
+}
+
+// G1: merge relationship attributes by name ({ name, description }). Unmentioned
+// attributes survive; op:'remove' deletes by name.
+function mergeRelationshipAttributesPatch(existing, patchEntries) {
+  if (!Array.isArray(patchEntries)) {
+    throw new Error('patch.attributes must be an array of { name, ... } entries');
+  }
+  const result = Array.isArray(existing) ? existing.map(entry => ({ ...entry })) : [];
+  for (const entry of patchEntries) {
+    if (!entry || typeof entry !== 'object' || typeof entry.name !== 'string' || entry.name.trim() === '') {
+      throw new Error('patch.attributes entries must have a non-empty string name');
+    }
+    const index = result.findIndex(attr => attr.name === entry.name);
+    if (entry.op === 'remove') {
+      if (index >= 0) result.splice(index, 1);
+      continue;
+    }
+    const next = { name: entry.name };
+    for (const field of ['value', 'description', 'content']) {
+      if (Object.prototype.hasOwnProperty.call(entry, field)) next[field] = entry[field];
+    }
+    if (index >= 0) result[index] = next;
+    else result.push(next);
+  }
+  return result;
+}
+
+// G1: apply a view membership patch as either a full list (legacy replace) or a
+// lossless delta { add, remove }. Returns the resulting list.
+function applyViewMembershipPatch(current, patchValue) {
+  const base = Array.isArray(current) ? current : [];
+  if (Array.isArray(patchValue)) {
+    return { list: dedupe(patchValue), explicitRemove: null };
+  }
+  if (patchValue && typeof patchValue === 'object') {
+    const remove = Array.isArray(patchValue.remove) ? patchValue.remove : [];
+    const add = Array.isArray(patchValue.add) ? patchValue.add : [];
+    const kept = base.filter(id => !remove.includes(id));
+    return { list: dedupe([...kept, ...add]), explicitRemove: remove };
+  }
+  throw new Error('view membership patch must be an array or { add, remove }');
+}
+
+function dedupe(entries) {
+  const seen = new Set();
+  const result = [];
+  for (const entry of entries) {
+    if (seen.has(entry)) continue;
+    seen.add(entry);
+    result.push(entry);
+  }
+  return result;
+}
+
+function findById(entries, id) {
+  return Array.isArray(entries) ? entries.find(entry => entry && entry.id === id) : undefined;
+}
+
+function findView(views, viewId) {
+  return Array.isArray(views) ? views.find(view => view && view.view_id === viewId) : undefined;
+}
+
+function isAcknowledged(mutation) {
+  return Boolean(mutation) && mutation[LOSS_ACK_FIELD] === true;
+}
+
+function hasJustification(mutation) {
+  return Boolean(mutation)
+    && typeof mutation[LOSS_JUSTIFICATION_FIELD] === 'string'
+    && mutation[LOSS_JUSTIFICATION_FIELD].trim() !== '';
+}
+
+// G5+enforcement: compute every content reduction a mutation set would cause,
+// with per-item acknowledgement state, and whether the set must be blocked.
+function buildLossReport({ baseDocument, mutations, nextDocument }) {
+  const base = baseDocument || {};
+  const next = nextDocument || {};
+  const report = {
+    blocked: false,
+    acknowledged: true,
+    reasons: [],
+    text: [],
+    membersRemoved: [],
+    testcasesRemoved: [],
+    attributesRemoved: [],
+    objectsRemoved: [],
+  };
+
+  const pushReason = (reason) => {
+    report.blocked = true;
+    report.acknowledged = false;
+    if (!report.reasons.includes(reason)) report.reasons.push(reason);
+  };
+
+  const guardText = (mutation, kind, id, field, oldValue, newValue) => {
+    const loss = detectTextLoss(oldValue, newValue);
+    if (loss.removedSegments.length === 0) return;
+    // "Major" only when the removed volume is substantial; a large share of a
+    // tiny value is not major (avoids forcing justification for short edits).
+    const major = loss.removedChars > MAJOR_REMOVED_CHARS
+      || (loss.oldChars > MAJOR_REMOVED_CHARS && loss.ratio > MAJOR_REMOVED_RATIO);
+    const acknowledged = isAcknowledged(mutation) && (!major || hasJustification(mutation));
+    const item = {
+      kind,
+      id,
+      field,
+      removedChars: loss.removedChars,
+      removedLines: loss.removedSegments.length,
+      ratio: Number(loss.ratio.toFixed(3)),
+      major,
+      acknowledged,
+      removedSample: loss.removedSegments.slice(0, 3),
+    };
+    report.text.push(item);
+    if (!acknowledged) {
+      const why = major && !hasJustification(mutation)
+        ? ' (major loss requires a non-empty lossJustification)'
+        : '';
+      pushReason(
+        `Unacknowledged text loss: ${kind} '${id}' field '${field}' would remove ${loss.removedChars} char(s) / ${loss.removedSegments.length} line(s)${why}. `
+        + 'Read the current value first, then pass acknowledgeLoss:true (and lossJustification) to confirm an intentional rewrite, or use an additive edit that keeps the prior content.',
+      );
+    }
+  };
+
+  for (const mutation of mutations || []) {
+    if (mutation.type === 'updateElement' || mutation.type === 'updateRelationship') {
+      const collection = mutation.type === 'updateElement' ? 'elements' : 'relationships';
+      const kind = mutation.type === 'updateElement' ? 'element' : 'relationship';
+      const baseEntry = findById(base[collection], mutation.id);
+      const nextEntry = findById(next[collection], mutation.id);
+      if (!baseEntry || !nextEntry) continue;
+      for (const field of TEXT_FIELDS_BY_MUTATION[mutation.type]) {
+        guardText(mutation, kind, mutation.id, field, baseEntry[field], nextEntry[field]);
+      }
+      if (mutation.type === 'updateElement' && Array.isArray(baseEntry.testcases)) {
+        const nextNames = new Set((nextEntry.testcases || []).map(tc => tc && tc.name));
+        for (const tc of baseEntry.testcases) {
+          if (tc && tc.name && !nextNames.has(tc.name)) {
+            report.testcasesRemoved.push({ id: mutation.id, name: tc.name });
+          }
+        }
+      }
+    } else if (mutation.type === 'updateView') {
+      const viewId = mutation.view_id || mutation.id;
+      const baseView = findView(base.views, viewId);
+      const nextView = findView(next.views, viewId);
+      if (!baseView || !nextView) continue;
+      for (const field of TEXT_FIELDS_BY_MUTATION.updateView) {
+        guardText(mutation, 'view', viewId, field, baseView[field], nextView[field]);
+      }
+      const baseElements = new Set(baseView.included_elements || []);
+      const removedElements = [...baseElements].filter(id => !(nextView.included_elements || []).includes(id));
+      const baseRelationships = new Set(baseView.included_relationships || []);
+      const removedRelationships = [...baseRelationships].filter(id => !(nextView.included_relationships || []).includes(id));
+      if (removedElements.length > 0 || removedRelationships.length > 0) {
+        // A channel with no removals is trivially covered; a channel with removals
+        // is explicit only when patched via the delta { remove } form.
+        const elementsExplicit = removedElements.length === 0
+          || isExplicitRemovePatch(mutation.patch, 'included_elements');
+        const relationshipsExplicit = removedRelationships.length === 0
+          || isExplicitRemovePatch(mutation.patch, 'included_relationships');
+        const explicit = elementsExplicit && relationshipsExplicit;
+        const acknowledged = explicit || isAcknowledged(mutation);
+        report.membersRemoved.push({
+          view_id: viewId,
+          elements: removedElements,
+          relationships: removedRelationships,
+          explicit,
+          acknowledged,
+        });
+        if (!acknowledged) {
+          pushReason(
+            `Unacknowledged membership removal in view '${viewId}': ${removedElements.length} element(s) and ${removedRelationships.length} relationship(s) would be dropped. `
+            + 'Use the delta form included_elements:{remove:[...]} for explicit removal, or pass acknowledgeLoss:true.',
+          );
+        }
+      }
+    } else if (mutation.type === 'removeElement' || mutation.type === 'removeRelationship' || mutation.type === 'removeView') {
+      const spec = {
+        removeElement: { collection: 'elements', id: mutation.id },
+        removeRelationship: { collection: 'relationships', id: mutation.id },
+        removeView: { collection: 'views', id: mutation.view_id },
+      }[mutation.type];
+      const id = spec.id;
+      const baseEntry = mutation.type === 'removeView'
+        ? findView(base.views, id)
+        : findById(base[spec.collection], id);
+      const stillPresent = mutation.type === 'removeView'
+        ? Boolean(findView(next.views, id))
+        : Boolean(findById(next[spec.collection], id));
+      if (!baseEntry || stillPresent) continue;
+      const acknowledged = isAcknowledged(mutation);
+      report.objectsRemoved.push({
+        kind: mutation.type.replace(/^remove/, '').toLowerCase(),
+        id,
+        name: baseEntry.name || baseEntry.view_name,
+        acknowledged,
+      });
+      if (!acknowledged) {
+        pushReason(
+          `Unacknowledged destructive removal: ${mutation.type} '${id}' ('${baseEntry.name || baseEntry.view_name}') deletes the object permanently. `
+          + 'Pass acknowledgeLoss:true (a full tombstone snapshot is recorded for recovery).',
+        );
+      }
+    }
+  }
+
+  return report;
+}
+
+function isExplicitRemovePatch(patch, field) {
+  if (!patch || !Object.prototype.hasOwnProperty.call(patch, field)) return false;
+  const value = patch[field];
+  return Boolean(value) && !Array.isArray(value) && typeof value === 'object' && Array.isArray(value.remove);
+}
+
+// G3: append full removed objects to a tombstone ledger (append-only, recoverable).
+function tombstoneFilePath(graphAbsolutePath) {
+  return path.join(path.dirname(graphAbsolutePath), 'SystemArchitecture.tombstones.json');
+}
+
+function appendTombstones(graphAbsolutePath, entries) {
+  const file = tombstoneFilePath(graphAbsolutePath);
+  let ledger = { graphPath: path.basename(graphAbsolutePath), entries: [] };
+  try {
+    if (fs.existsSync(file)) {
+      const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (parsed && Array.isArray(parsed.entries)) ledger = parsed;
+    }
+  } catch {
+    // Corrupt ledger: start a fresh one rather than lose the new tombstones.
+    ledger = { graphPath: path.basename(graphAbsolutePath), entries: [] };
+  }
+  const at = new Date().toISOString();
+  for (const entry of entries || []) {
+    ledger.entries.push({ at, op: entry.op || ('remove' + entry.kind), kind: entry.kind, id: entry.id, object: entry.object });
+  }
+  fs.writeFileSync(file, `${JSON.stringify(ledger, null, 2)}\n`, 'utf8');
+  return { path: file, count: (entries || []).length };
+}
+
+// Collect the full base objects for every global removal in a mutation set.
+function collectRemovedObjects(baseDocument, mutations, nextDocument) {
+  const removed = [];
+  for (const mutation of mutations || []) {
+    if (mutation.type === 'removeElement') {
+      const obj = findById((baseDocument || {}).elements, mutation.id);
+      if (obj && !findById((nextDocument || {}).elements, mutation.id)) removed.push({ op: mutation.type, kind: 'element', id: mutation.id, object: obj });
+    } else if (mutation.type === 'removeRelationship') {
+      const obj = findById((baseDocument || {}).relationships, mutation.id);
+      if (obj && !findById((nextDocument || {}).relationships, mutation.id)) removed.push({ op: mutation.type, kind: 'relationship', id: mutation.id, object: obj });
+    } else if (mutation.type === 'removeView') {
+      const obj = findView((baseDocument || {}).views, mutation.view_id);
+      if (obj && !findView((nextDocument || {}).views, mutation.view_id)) removed.push({ op: mutation.type, kind: 'view', id: mutation.view_id, object: obj });
+    }
+  }
+  return removed;
+}
+
+module.exports = {
+  LOSS_ACK_FIELD,
+  LOSS_JUSTIFICATION_FIELD,
+  MAJOR_REMOVED_CHARS,
+  MAJOR_REMOVED_RATIO,
+  TEXT_FIELDS_BY_MUTATION,
+  normalizeSegments,
+  detectTextLoss,
+  mergeTestcasesPatch,
+  mergeRelationshipAttributesPatch,
+  applyViewMembershipPatch,
+  buildLossReport,
+  appendTombstones,
+  tombstoneFilePath,
+  collectRemovedObjects,
+};

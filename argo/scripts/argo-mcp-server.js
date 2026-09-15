@@ -291,6 +291,29 @@ for (const tool of TOOLS) {
   }
 }
 
+// Lossless write gate acknowledgement params for the update/remove helpers
+// (see lossless-write-gate.js). add* is purely additive and left alone.
+const LOSS_ACK_INPUT_PROPS = Object.freeze({
+  acknowledgeLoss: {
+    type: 'boolean',
+    description: 'Set true to confirm an intentional content reduction: a text rewrite that drops prior segments, or a destructive removal. Without it the lossless write gate blocks the write and returns the exact removed content.',
+  },
+  lossJustification: {
+    type: 'string',
+    description: 'Required for MAJOR text loss (large removedChars or most of the value): the reason the prior content is being intentionally replaced.',
+  },
+});
+for (const tool of TOOLS) {
+  if (tool && tool.name && /^(update|remove)Architecture/.test(tool.name)
+    && tool.inputSchema && tool.inputSchema.properties) {
+    for (const [key, value] of Object.entries(LOSS_ACK_INPUT_PROPS)) {
+      if (!Object.prototype.hasOwnProperty.call(tool.inputSchema.properties, key)) {
+        tool.inputSchema.properties[key] = value;
+      }
+    }
+  }
+}
+
 function intentElementContextInputSchema() {
   return {
     type: 'object',
@@ -348,6 +371,8 @@ function mutationInputSchema() {
             view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
             element_ids: { type: 'array', items: { type: 'string' } },
             relationship_ids: { type: 'array', items: { type: 'string' } },
+            acknowledgeLoss: { type: 'boolean', description: 'Set true to confirm an intentional content reduction: a text rewrite that drops prior segments, or a destructive removal. Without it the lossless write gate blocks the write and returns the exact removed content.' },
+            lossJustification: { type: 'string', description: 'Required for MAJOR text loss (large removedChars or most of the value): the reason the prior content is being intentionally replaced.' },
           },
           additionalProperties: false,
         },
