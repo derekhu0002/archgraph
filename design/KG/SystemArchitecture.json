@@ -2839,6 +2839,11 @@
           "name": "commit",
           "value": "07f85ee",
           "description": "<LosslessWrite> + CoreRule 11；argo/rules/archgraph.instructions.md; tests/argo-rules-lossless.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "8c0fd53",
+          "description": "<LosslessWrite> 口径细化：改写不算丢失 + 批次级 acknowledgeLoss；argo/rules/archgraph.instructions.md"
         }
       ]
     },
@@ -7338,6 +7343,11 @@
           "name": "commit",
           "value": "07f85ee",
           "description": "argo/scripts/lossless-write-gate.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; scripts/actor-working-memory.js; scripts/memory-archive.js; tests/lossless-write-gate.test.js; tests/argo-rules-lossless.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "8c0fd53",
+          "description": "词级相似度判定（改写不算丢失，仅真删除/结构化 token 丢失拦截）+ 批次级 ack；argo/scripts/lossless-write-gate.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/lossless-write-gate.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     },
