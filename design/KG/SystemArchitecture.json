@@ -4175,7 +4175,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话目标（2026-09-15，项目总管）：①治理 AGENT 人格缺陷——测试发现 Agent 面对人类提问/提议仍百依百顺、缺独立批判；②治理写图丢内容——Agent 改文本常删过头。完成：①全局规则新增 <CriticalReasoningGuideline> + CoreRule 10（AT-rules-04），commit b29e032；②框架级无损写入门禁（组件 lossless-write-gate）——G1 结构化字段 merge（testcases/关系 attributes 按 name、视图成员 delta 漏写≠删除）、G2 标量文本缩减拦截（acknowledgeLoss，major 加 lossJustification，纯追加放行）、G3 remove* 需 ack + 墓碑快照、G5 响应含 lossless 报告；接入唯一写漏斗 buildMutationResult 覆盖全部 MCP 写接口；规则 <LosslessWrite> + CoreRule 11（AT-rules-05）、AT-lossless-01..06；commit 07f85ee。T2 记忆已分层：overseer-ltm-001（核心）+ overseer-rules-001/overseer-retrieval-001/overseer-product-001。全局 ~/.config/opencode/AGENTS.md 已同步。待办：发布/部署（0.21.0 已发；本次改动待发新版）并重启宿主；建议加「批判性/反谄媚」行为评测。",
+      "description": "会话摘要（2026-09-16，项目总管）：目标=洞察并规划『框架级多 Agent 协作（自相似递归分身）』。完成：①委派洞察Lead（麦肯锡五步法）产出业界洞察——结论『部分有』：递归派生/委派/结果回馈重拆成熟（Claude Code 子 Agent 默认 3 层；Anthropic orchestrator-worker 同构 worker 较单 Agent +90.2%），但『单一通用角色 + 派生权限无差别继承』非主流且违 least-privilege（权限放大 / confused deputy）；BAILIAN MCP 本会话不可用，改 webfetch 抓 14 个一手来源并显式声明覆盖局限。commits c0dafe7/e07c0ac，元素 insight-lead-milestone-multiagent-delegation-001。②人类伙伴澄清目标形态=自相似递归分身（同类型分身、不可追溯、无独立身份，对外单例），去掉 Work Package/Task 图元素；确认深度 3 + 扇出、权限按 scope 单调收窄、spawn『判据 + harness 硬门禁 + fail-safe 默认不分身 + fallback』三层控制；决定暂缓实施，登记为待规划项 overseer-multiagent-delegation-plan-001（PLANNED/T2，overseer-product-001，commit df67c5f）。决策：不建跨 Actor 关联（关系进视图会级联带入端点元素、污染 T2 记忆视图），改用属性 sourceInsight 记录引用。经验：①新增项目总管 T2 记忆元素必须同步 overseer-ltm-layering 的精确成员断言（本次顺带修复 rules 视图既有漂移：overseer-milestone-lossless-write-001 未登记）；②跨 Actor 关系慎用。既有失败（与本变更无关）：ea-import-* / excalidraw / memory-eval(2) / wechat。待办：待人类伙伴决定是否推进该机制；BAILIAN MCP 需修复后可重跑验证。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4197,7 +4197,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-15",
+          "value": "2026-09-16",
           "description": "2026-09-11 memory_search workspaceRoot 修复 + 发布 0.16.2 + 部署"
         },
         {
@@ -7552,6 +7552,11 @@
         {
           "name": "sourceInsight",
           "value": "insight-lead-milestone-multiagent-delegation-001"
+        },
+        {
+          "name": "commit",
+          "value": "df67c5f",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-multiagent-delegation-plan.test.js; tests/overseer-ltm-layering.test.js（待规划项登记 + 验收测试 + LTM 分层成员同步）"
         }
       ],
       "description": "待规划事项（2026-09-15，项目总管）：把人类伙伴设想的『框架级自相似递归分身机制』纳入规划、暂缓实施（其自评『还有很多没考虑清楚的地方』，故本项为 PLANNED 而非交付）。①洞察结论（依据洞察Lead里程碑 insight-lead-milestone-multiagent-delegation-001 与 docs/multi-agent-recursive-delegation-insight.md）：业界『部分有』——递归派生、委派、结果回馈重拆已成体系（Claude Code 子 Agent 默认可再派生至 3 层、CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH 可配；Anthropic orchestrator-worker 同构 worker 较单 Agent +90.2%），但『单一通用角色 + 派生权限无差别继承』非业界主流且与 least-privilege 实践冲突（权限放大 / confused deputy / privilege chaining）。②人类伙伴澄清后的目标形态：自相似（self-similar）递归 Agent，等价于分治 / fork-join / MapReduce——每个 Agent 可并行 spawn 多个『同类型的自己』（分身）去完成本属自己的工作；对外看就是一个 Agent（单例封装），对内是递归分身树。分身不可追溯、无独立身份与记忆（『它其实就是主神的一部分』）。③已达成共识的机制要点：深度上限 3 + 扇出上限（由 harness 硬计数，非提示词，防注入绕过）；分身与父同一 agent 定义（同 prompt/工具/模型）；上下文隔离（分身只拿子任务说明 + 自己 scope 的图切片，不继承父对话历史）；只回压缩摘要，父决定合并或再拆；工具集相同但权限按 scope 单调收窄 + 写图单写者锁；不引入 Work Package / Task 图元素（委派契约退化为 spawn 提示规范）。④spawn 决策三层控制：模型侧可判定判据（≥2 条命中才分——可独立切分 / 子任务仍多步多工具 / 可并行无强序 / 预计压穿单窗预算；反之命中任一则不分）+ harness 硬门禁（深度 / 扇出 / token 配额）+ fail-safe 默认不分身；每次 spawn 记录理由可审计；必须有 fallback（分身无用则父回收、退回单 Agent 执行）。⑤未决 / 待想清楚：是否要做（未决）；通用单一角色的成立范围；判据阈值如何标定；分身与既有 Actor / 记忆模型的关系（分身在图中是否占用身份）；成本-收益的适用边界。",
