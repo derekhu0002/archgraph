@@ -377,29 +377,62 @@ function isExplicitRemovePatch(patch, field) {
   return Boolean(value) && !Array.isArray(value) && typeof value === 'object' && Array.isArray(value.remove);
 }
 
-// G3: append full removed objects to a tombstone ledger (append-only, recoverable).
+// G3: append full removed objects to an NDJSON tombstone ledger. Each append is a
+// single O(1) line write (no read/rewrite of prior content). When the active file
+// exceeds the size cap (~5k entries) it is rotated aside (rename, O(1)) so the
+// active file and its git diff stay bounded.
+const TOMBSTONE_ACTIVE_BASENAME = 'SystemArchitecture.tombstones.ndjson';
+const TOMBSTONE_ROTATE_BYTES = 2 * 1024 * 1024;
+
 function tombstoneFilePath(graphAbsolutePath) {
-  return path.join(path.dirname(graphAbsolutePath), 'SystemArchitecture.tombstones.json');
+  return path.join(path.dirname(graphAbsolutePath), TOMBSTONE_ACTIVE_BASENAME);
 }
 
-function appendTombstones(graphAbsolutePath, entries) {
+function appendTombstones(graphAbsolutePath, entries, options = {}) {
   const file = tombstoneFilePath(graphAbsolutePath);
-  let ledger = { graphPath: path.basename(graphAbsolutePath), entries: [] };
+  const rotateBytes = Number.isFinite(options.rotateBytes) ? options.rotateBytes : TOMBSTONE_ROTATE_BYTES;
+  const list = Array.isArray(entries) ? entries : [];
+  if (list.length === 0) return { path: file, count: 0, rotatedTo: null };
+  let rotatedTo = null;
   try {
-    if (fs.existsSync(file)) {
-      const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
-      if (parsed && Array.isArray(parsed.entries)) ledger = parsed;
+    if (rotateBytes > 0 && fs.statSync(file).size >= rotateBytes) {
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      rotatedTo = path.join(path.dirname(file), `SystemArchitecture.tombstones.${stamp}.ndjson`);
+      fs.renameSync(file, rotatedTo);
     }
   } catch {
-    // Corrupt ledger: start a fresh one rather than lose the new tombstones.
-    ledger = { graphPath: path.basename(graphAbsolutePath), entries: [] };
+    // No active file yet (first append) — nothing to rotate.
   }
   const at = new Date().toISOString();
-  for (const entry of entries || []) {
-    ledger.entries.push({ at, op: entry.op || ('remove' + entry.kind), kind: entry.kind, id: entry.id, object: entry.object });
+  const lines = list.map(entry => JSON.stringify({
+    at,
+    op: entry.op || ('remove' + entry.kind),
+    kind: entry.kind,
+    id: entry.id,
+    object: entry.object,
+  }));
+  fs.appendFileSync(file, `${lines.join('\n')}\n`, 'utf8');
+  return { path: file, count: list.length, rotatedTo };
+}
+
+// Read back the NDJSON tombstone ledger (recovery / audit). Malformed lines are
+// skipped rather than throwing, so a partially written tail never blocks reads.
+function readTombstones(file) {
+  try {
+    return fs.readFileSync(file, 'utf8')
+      .split(/\r?\n/)
+      .filter(line => line.trim() !== '')
+      .map(line => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
   }
-  fs.writeFileSync(file, `${JSON.stringify(ledger, null, 2)}\n`, 'utf8');
-  return { path: file, count: (entries || []).length };
 }
 
 // Collect the full base objects for every global removal in a mutation set.
@@ -433,6 +466,9 @@ module.exports = {
   applyViewMembershipPatch,
   buildLossReport,
   appendTombstones,
+  readTombstones,
   tombstoneFilePath,
+  TOMBSTONE_ACTIVE_BASENAME,
+  TOMBSTONE_ROTATE_BYTES,
   collectRemovedObjects,
 };

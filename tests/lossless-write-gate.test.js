@@ -186,9 +186,27 @@ test('AT-lossless-06: tombstone ledger records the full removed object (recovera
   const written = gate.appendTombstones(graphPath, removed);
   // THEN the ledger holds the full object for recovery
   assert.equal(written.count, 1);
-  const ledger = JSON.parse(fs.readFileSync(written.path, 'utf8'));
-  assert.equal(ledger.entries.length, 1);
-  assert.equal(ledger.entries[0].object.id, 'b');
-  assert.equal(ledger.entries[0].object.name, 'B');
+  const entries = gate.readTombstones(written.path);
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].object.id, 'b');
+  assert.equal(entries[0].object.name, 'B');
+  // AND appends accumulate one line each (O(1) append, no rewrite of prior content)
+  gate.appendTombstones(graphPath, removed);
+  assert.equal(gate.readTombstones(written.path).length, 2);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('AT-lossless-08: tombstone ledger rotates when the active file exceeds the size cap', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-tomb-rot-'));
+  const graphPath = path.join(dir, 'SystemArchitecture.json');
+  const one = [{ op: 'removeElement', kind: 'element', id: 'e1', object: { id: 'e1', name: 'E1' } }];
+  // GIVEN an active ledger already at/over the rotate cap
+  gate.appendTombstones(graphPath, one, { rotateBytes: 1 });
+  // WHEN the next append happens
+  const written = gate.appendTombstones(graphPath, one, { rotateBytes: 1 });
+  // THEN the previous file is rotated aside and a fresh active ledger starts
+  assert.ok(written.rotatedTo && fs.existsSync(written.rotatedTo), 'previous ledger must be rotated aside');
+  assert.equal(gate.readTombstones(written.path).length, 1, 'new active ledger holds only the new entry');
+  assert.equal(gate.readTombstones(written.rotatedTo).length, 1, 'rotated ledger keeps its prior content');
   fs.rmSync(dir, { recursive: true, force: true });
 });
