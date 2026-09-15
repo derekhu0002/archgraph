@@ -2834,6 +2834,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "07f85ee",
+          "description": "<LosslessWrite> + CoreRule 11；argo/rules/archgraph.instructions.md; tests/argo-rules-lossless.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     },
@@ -4155,7 +4160,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话目标（2026-09-15，项目总管）：治理 AGENT 人格缺陷——测试发现 Agent 面对人类提问/提议仍百依百顺、缺独立批判。完成：全局规则新增 <CriticalReasoningGuideline> + CoreRule 10；AT-rules-04 绿；commit b29e032；全局 ~/.config/opencode/AGENTS.md 已同步。T2 记忆已分层：overseer-ltm-001（核心 6 元素）+ overseer-rules-001 / overseer-retrieval-001 / overseer-product-001；AT-overseer-ltm-layering-01 绿；commit 5d71fd1；本次会话记录见 T2 里程碑 overseer-milestone-critical-reasoning-001。关键决策：用全局规则而非单 Actor persona；拒绝纯靠模型默认。待办：建议加「批判性/反谄媚」行为评测。遗留：上一会话平板 App 洞察 Q1-Q6 待人类拍板。",
+      "description": "会话目标（2026-09-15，项目总管）：①治理 AGENT 人格缺陷——测试发现 Agent 面对人类提问/提议仍百依百顺、缺独立批判；②治理写图丢内容——Agent 改文本常删过头。完成：①全局规则新增 <CriticalReasoningGuideline> + CoreRule 10（AT-rules-04），commit b29e032；②框架级无损写入门禁（组件 lossless-write-gate）——G1 结构化字段 merge（testcases/关系 attributes 按 name、视图成员 delta 漏写≠删除）、G2 标量文本缩减拦截（acknowledgeLoss，major 加 lossJustification，纯追加放行）、G3 remove* 需 ack + 墓碑快照、G5 响应含 lossless 报告；接入唯一写漏斗 buildMutationResult 覆盖全部 MCP 写接口；规则 <LosslessWrite> + CoreRule 11（AT-rules-05）、AT-lossless-01..06；commit 07f85ee。T2 记忆已分层：overseer-ltm-001（核心）+ overseer-rules-001/overseer-retrieval-001/overseer-product-001。全局 ~/.config/opencode/AGENTS.md 已同步。待办：发布/部署（0.21.0 已发；本次改动待发新版）并重启宿主；建议加「批判性/反谄媚」行为评测。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -7321,6 +7326,33 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "07f85ee",
+          "description": "argo/scripts/lossless-write-gate.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; scripts/actor-working-memory.js; scripts/memory-archive.js; tests/lossless-write-gate.test.js; tests/argo-rules-lossless.test.js; design/KG/SystemArchitecture.json"
+        }
+      ]
+    },
+    {
+      "id": "overseer-milestone-lossless-write-001",
+      "name": "里程碑：无损写入门禁（LosslessWrite / 全部 MCP 写接口）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "会话记录与决策（2026-09-15，项目总管）：问题——Agent 改 description/attribute/testcase 等文本时常删过头（没细看旧内容、没判断该保留）。人类要求：①所有文本修改都不得丢价值信息；②所有写入接口都要覆盖。决策：框架级『无损写入门禁』，不变量=不静默丢失（无损 merge/delta 或显式 acknowledgeLoss；破坏性删除可恢复）。机制：G1 结构化字段 merge（元素 testcases 按 name、关系 attributes 按 name、视图成员 delta {add,remove}，漏写≠删除）；G2 标量文本护栏（description/statement/document/name/view_name 缩减拦截，major 需 lossJustification，纯追加放行）；G3 removeElement/removeRelationship/removeView 需 ack + 墓碑快照 design/KG/SystemArchitecture.tombstones.json；G5 每次响应（preview/apply）含 lossless 报告。落地：单模块 argo/scripts/lossless-write-gate.js 接入唯一写漏斗 buildMutationResult（覆盖 apply/preview/全部单对象 helper）；规则 <LosslessWrite> + CoreRule 11；组件 lossless-write-gate；AT-lossless-01..06 + AT-rules-05；commit 07f85ee。被否方案：仅靠模型自觉/仅文档提醒（无护栏）；只保护 attributes（历史教训：同类缺陷会转移到文本字段）。局限/待办：标量文本硬拦——轻微改写也需 ack（按人类选择的最高安全档）；.qea/Neo4j 派生路径与 repair 脚本未纳入本版（首版范围=全部 MCP 图写入）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "07f85ee",
+          "description": "feat(write): lossless write gate (G1-G5) + <LosslessWrite> rule"
         }
       ]
     }
@@ -9300,7 +9332,8 @@
         "overseer-harness-workspaceroot-fix-001",
         "overseer-graph-mcp-deploy-001",
         "overseer-mcp-tool-surface-001",
-        "overseer-milestone-critical-reasoning-001"
+        "overseer-milestone-critical-reasoning-001",
+        "overseer-milestone-lossless-write-001"
       ],
       "included_relationships": []
     },
