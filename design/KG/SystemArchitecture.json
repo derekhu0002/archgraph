@@ -2849,6 +2849,11 @@
           "name": "commit",
           "value": "741c2ff",
           "description": "墓碑台账路径改 .ndjson（NDJSON 追加 + 轮转）；argo/rules/archgraph.instructions.md"
+        },
+        {
+          "name": "commit",
+          "value": "f1a7814",
+          "description": "<LosslessWrite> 口径修正：结构化 token 丢失用分隔符/空白不敏感判定，排除裸 / 与短数字；argo/rules/archgraph.instructions.md"
         }
       ]
     },
@@ -7372,6 +7377,11 @@
           "name": "commit",
           "value": "741c2ff",
           "description": "墓碑改 NDJSON 追加（O(1)，~0.15ms/次）+ 按大小轮转；argo/scripts/lossless-write-gate.js; argo/rules/archgraph.instructions.md; tests/lossless-write-gate.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "f1a7814",
+          "description": "结构化 token 丢失判定改『规范化子串+分隔符/空白不敏感』+ 收紧 isStructuredToken（排除裸 / 与短数字）；argo/scripts/lossless-write-gate.js; argo/rules/archgraph.instructions.md; tests/lossless-write-gate.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     },
