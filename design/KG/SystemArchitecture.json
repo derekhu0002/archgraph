@@ -4135,6 +4135,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "5d71fd1",
+          "description": "T2 LTM 分层（Phase 7）+ AT-overseer-ltm-layering-01；docs/actor-memory-tiers.md; tests/overseer-ltm-layering.test.js; design/KG/SystemArchitecture.json"
         }
       ]
     },
@@ -4143,7 +4148,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话目标（2026-09-15，项目总管）：治理 AGENT 人格缺陷——测试发现 Agent 面对人类提问/提议仍百依百顺、缺独立批判。完成：全局规则新增 <CriticalReasoningGuideline> + CoreRule 10；AT-rules-04 绿；commit b29e032；全局 ~/.config/opencode/AGENTS.md 已同步（详见 T2 里程碑 overseer-milestone-critical-reasoning-001）。关键决策：用全局规则而非单 Actor persona；拒绝纯靠模型默认。记忆结构：T2 已分层为 overseer-ltm-001（核心）+ overseer-rules-001 / overseer-retrieval-001 / overseer-product-001。待办：建议加「批判性/反谄媚」行为评测。遗留：上一会话平板 App 洞察 Q1-Q6 待人类拍板。",
+      "description": "会话目标（2026-09-15，项目总管）：治理 AGENT 人格缺陷——测试发现 Agent 面对人类提问/提议仍百依百顺、缺独立批判。完成：全局规则新增 <CriticalReasoningGuideline> + CoreRule 10；AT-rules-04 绿；commit b29e032；全局 ~/.config/opencode/AGENTS.md 已同步。T2 记忆已分层：overseer-ltm-001（核心 6 元素）+ overseer-rules-001 / overseer-retrieval-001 / overseer-product-001；AT-overseer-ltm-layering-01 绿；commit 5d71fd1；本次会话记录见 T2 里程碑 overseer-milestone-critical-reasoning-001。关键决策：用全局规则而非单 Actor persona；拒绝纯靠模型默认。待办：建议加「批判性/反谄媚」行为评测。遗留：上一会话平板 App 洞察 Q1-Q6 待人类拍板。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -7225,6 +7230,11 @@
           "name": "commit",
           "value": "b29e032",
           "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-critical-reasoning.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "commit",
+          "value": "5d71fd1",
+          "description": "会话里程碑落地并挂入 T2 分层视图 overseer-rules-001；design/KG/SystemArchitecture.json; archgraph.qea"
         }
       ]
     }
