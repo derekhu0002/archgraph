@@ -7237,6 +7237,28 @@
           "description": "会话里程碑落地并挂入 T2 分层视图 overseer-rules-001；design/KG/SystemArchitecture.json; archgraph.qea"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "description": "package.json（发布 archgraph-argo@0.21.0）",
+          "name": "commit",
+          "value": "9610748"
+        }
+      ],
+      "description": "里程碑（2026-09-15）：发布 archgraph-argo@0.21.0。内容：①新增 <CriticalReasoningGuideline> + CoreRule 10（证据驱动的批判性思维，反谄媚/反静默顺从）并补 AT-rules-04；②overseer T2 长期记忆分层（overseer-ltm-001 核心 + overseer-rules-001/overseer-retrieval-001/overseer-product-001）并补 AT-overseer-ltm-layering-01。发布：npm publish（shasum 3c98012126e19043ab5410f15a102cce683b3943，74 files），registry 传播第 6 次轮询可见；npm i -g archgraph-argo@0.21.0；argo-deploy（MCP 注册 VS Code/Cursor/OpenCode/OpenClaw/DSH；~/.argo/.env 保留既有键）。待办：宿主重启以加载新常驻 MCP + wakeup 插件，重启后重跑 argo-init。",
+      "id": "overseer-argo-0-21-0-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.21.0（批判性思维准则 + LTM 分层）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -9198,7 +9220,8 @@
         "overseer-argo-0-19-0-release-001",
         "overseer-argo-0-19-1-release-001",
         "overseer-argo-0-20-0-release-001",
-        "overseer-argo-0-20-1-release-001"
+        "overseer-argo-0-20-1-release-001",
+        "overseer-argo-0-21-0-release-001"
       ],
       "included_relationships": []
     },
