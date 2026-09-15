@@ -196,6 +196,27 @@ test('AT-lossless-06: tombstone ledger records the full removed object (recovera
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test('AT-lossless-09: structured-token loss is separator/space insensitive (formatting is not loss; real drops still block)', () => {
+  const base = baseDocument();
+  const a = base.elements.find(e => e.id === 'a');
+  a.description = '见 /status；commit 769465c,bc7f418；spec STIX2.1；see docs/guide.md';
+  const d0 = a.description;
+  const run = (next) => applyMutations(JSON.parse(JSON.stringify(base)), [
+    { type: 'updateElement', id: 'a', patch: { description: next } },
+  ]).lossReport;
+  // WHEN only separators / spacing change (same content) THEN no loss is reported
+  assert.equal(run(d0.replace('769465c,bc7f418', '769465c:bc7f418')).blocked, false, 'separator join is not a loss');
+  assert.equal(run(d0.replace('STIX2.1', 'STIX 2.1')).blocked, false, 'space insertion is not a loss');
+  assert.equal(run(d0.replace('见 /status', '见、status')).blocked, false, 'leading separator change is not a loss');
+  // AND a genuinely removed structured token still blocks
+  const droppedHash = run('见 /status；commit bc7f418；spec STIX2.1；see docs/guide.md');
+  assert.equal(droppedHash.blocked, true);
+  assert.ok(droppedHash.text[0].structuredTokensRemoved.includes('769465c'));
+  const droppedPath = run('见 /status；commit 769465c,bc7f418；spec STIX2.1；see the guide');
+  assert.equal(droppedPath.blocked, true);
+  assert.ok(droppedPath.text[0].structuredTokensRemoved.includes('docs/guide.md'));
+});
+
 test('AT-lossless-08: tombstone ledger rotates when the active file exceeds the size cap', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-tomb-rot-'));
   const graphPath = path.join(dir, 'SystemArchitecture.json');

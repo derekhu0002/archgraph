@@ -66,12 +66,38 @@ function normalizeSegments(text) {
 }
 
 function tokenize(segment) {
-  const matches = String(segment === undefined || segment === null ? '' : segment).match(TOKEN_RE);
+  const normalized = String(segment === undefined || segment === null ? '' : segment).normalize('NFKC');
+  const matches = normalized.match(TOKEN_RE);
   return matches ? matches.map(token => token.toLowerCase()) : [];
 }
 
+// A "structured identity" token whose silent loss matters: commit hashes, ids,
+// versions, dates, path-like strings. Bare separators ("/") and short plain
+// numbers are NOT structured — treating them so made benign edits false-block.
 function isStructuredToken(token) {
-  return /[0-9]/.test(token) || /[/\\]/.test(token) || /^[0-9a-f]{7,40}$/i.test(token);
+  if (!token) return false;
+  if (/^[0-9a-f]{7,40}$/i.test(token)) return true; // commit hash / long hex
+  if (/[/\\]/.test(token) && /[a-z]/i.test(token)) return true; // path-like (has a letter)
+  if (/[a-z]/i.test(token) && /\d/.test(token) && /[-_]/.test(token)) return true; // id-like AT-rules-04
+  if (/^[a-z]*\d+(?:\.\d+)+$/i.test(token)) return true; // version-like stix2.1 / v2.1 / 1.2.3
+  if (/^\d{4}-\d{2}(?:-\d{2})?$/.test(token)) return true; // date-like 2026-09-15
+  if (/^\d{5,}$/.test(token)) return true; // long numeric id
+  return false;
+}
+
+// NFKC + strip all whitespace + lowercase: tolerant haystack for the "is this
+// structured token still present anywhere in the new text?" substring check.
+// This drops false positives from separator joins (769465c:bc7f418) and spacing
+// (STIX2.1 -> STIX 2.1) while still catching a genuinely removed token.
+function normalizeForTokenSearch(value) {
+  return String(value === undefined || value === null ? '' : value).normalize('NFKC').replace(/\s+/g, '').toLowerCase();
+}
+
+// Separator-insensitive form: also drop the punctuation that joins structured
+// tokens, so "A/B" -> "A、B" or "v2.1" -> "v2 1" is still recognised as the same
+// token (same content, punctuation changed) and not mistaken for a loss.
+function comparableTokenForm(value) {
+  return normalizeForTokenSearch(value).replace(/[/\\:.\-_]/g, '');
 }
 
 // Sørensen–Dice coefficient over token sets (deterministic, no network).
@@ -97,7 +123,7 @@ function detectTextLoss(oldText, newText) {
   }
   const newSegments = normalizeSegments(newText);
   const newNormalized = normalizeForCompare(newText);
-  const newTokenSet = new Set(newSegments.flatMap(tokenize));
+  const newHaystack = comparableTokenForm(newText);
   const newSegmentTokens = newSegments.map(tokenize);
   const removedSegments = [];
   const modifiedSegments = [];
@@ -105,7 +131,7 @@ function detectTextLoss(oldText, newText) {
   for (const segment of oldSegments) {
     const segmentTokens = tokenize(segment);
     for (const token of segmentTokens) {
-      if (isStructuredToken(token) && !newTokenSet.has(token)) structuredTokensRemoved.push(token);
+      if (isStructuredToken(token) && !newHaystack.includes(comparableTokenForm(token))) structuredTokensRemoved.push(token);
     }
     if (newNormalized.includes(segment)) continue; // kept verbatim
     const best = newSegmentTokens.reduce((max, tokens) => Math.max(max, diceCoefficient(segmentTokens, tokens)), 0);
