@@ -487,6 +487,8 @@ function mutationInputSchema() {
     required: ['mutations'],
     properties: {
       architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
+      acknowledgeLoss: { type: 'boolean', description: 'Batch-level loss acknowledgement: set true to confirm every intentional content reduction in this mutation set (a text rewrite that drops prior segments, or destructive removals). Counts for all mutations — one confirmation for a whole batch.' },
+      lossJustification: { type: 'string', description: 'Batch-level justification for MAJOR text loss in this mutation set.' },
       mutations: {
         type: 'array',
         minItems: 1,
@@ -1273,7 +1275,7 @@ function resolveDuplicateConflict(options, candidates) {
   return { action: 'create', justification: options.justification };
 }
 
-function applyMutations(document, mutations) {
+function applyMutations(document, mutations, options = {}) {
   const nextDocument = clone(document);
   const touchedElementIds = new Set();
   const touchedRelationshipIds = new Set();
@@ -1634,6 +1636,7 @@ function applyMutations(document, mutations) {
       baseDocument: document,
       mutations,
       nextDocument,
+      lossAck: options.lossAck,
     }),
   };
 }
@@ -1815,12 +1818,12 @@ function removeEntries(existing, removals) {
   return (Array.isArray(existing) ? existing : []).filter(entry => !removalSet.has(entry));
 }
 
-async function buildMutationResult(context, mutations, write, dependencies) {
+async function buildMutationResult(context, mutations, write, dependencies, lossAck) {
   markPhase('mutation:' + (write ? 'apply' : 'preview'));
   const beforeSummary = summarizeDocument(context.document);
   let mutationResult;
   try {
-    mutationResult = applyMutations(context.document, mutations);
+    mutationResult = applyMutations(context.document, mutations, { lossAck });
   } catch (error) {
     const errors = [String(error && error.message ? error.message : error)];
     const failed = {
@@ -2629,12 +2632,12 @@ async function callTool(name, args = {}, dependencies = undefined) {
 
   if (name === 'previewSystemArchitectureMutation') {
     const context = await loadContext(args);
-    return toolResult(attachContextWarnings(await buildMutationResult(context, args.mutations, false, dependencies), context));
+    return toolResult(attachContextWarnings(await buildMutationResult(context, args.mutations, false, dependencies, { acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }), context));
   }
 
   if (name === 'applySystemArchitectureMutation') {
     const context = await loadContext(args);
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, args.mutations, true, dependencies), context), true);
+    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, args.mutations, true, dependencies, { acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }), context), true);
   }
 
   if (name === 'addArchitectureElement') {

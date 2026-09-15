@@ -341,6 +341,8 @@ function mutationInputSchema() {
     required: ['mutations'],
     properties: {
       architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
+      acknowledgeLoss: { type: 'boolean', description: 'Batch-level loss acknowledgement: set true to confirm every intentional content reduction in this mutation set (a text rewrite that drops prior segments, or destructive removals). Counts for all mutations — one confirmation for a whole batch.' },
+      lossJustification: { type: 'string', description: 'Batch-level justification for MAJOR text loss in this mutation set.' },
       mutations: {
         type: 'array',
         minItems: 1,

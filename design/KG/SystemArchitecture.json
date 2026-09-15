@@ -7273,7 +7273,7 @@
       "type": "Business Object"
     },
     {
-      "description": "无损写入门禁（Lossless Write Gate，框架级，2026-09-15）：写图不静默丢内容。不变量——写入不得减少已存内容，除非无损（merge/delta）或调用方显式确认；省略≠删除。机制：①结构化字段 merge——元素 testcases 按 name、视图成员支持 delta {add,remove}、关系 attributes 按 name，漏写保留、仅显式 op:remove/delta remove 删除；②标量文本护栏——description/statement/document/name/view_name 为整值字段，删除先前行被拦截，除非 acknowledgeLoss:true（重大缩减再加 lossJustification），纯追加放行；③破坏性删除 removeElement/removeRelationship/removeView 需 acknowledgeLoss:true，并把完整对象快照进墓碑台账 design/KG/SystemArchitecture.tombstones.json（可恢复）；④每次响应（preview 与 apply）返回 lossless 报告。落地：单模块 argo/scripts/lossless-write-gate.js 接入唯一写漏斗 buildMutationResult，覆盖全部 MCP 写接口（apply/preview/单对象 helper）；规则 <LosslessWrite> + CoreRule 11。区别：graph-write-dedup-gate 防重复，graph-semantics-validation-001 做结构/唯一性校验，本组件防内容丢失。",
+      "description": "无损写入门禁（Lossless Write Gate，框架级，2026-09-15）：写图不静默丢内容。不变量——写入不得减少已存内容，除非无损（merge/delta）或调用方显式确认；省略≠删除。机制：①结构化字段 merge——元素 testcases 按 name、视图成员支持 delta {add,remove}、关系 attributes 按 name，漏写保留、仅显式 op:remove/delta remove 删除；②标量文本护栏（词级相似度判定）——description/statement/document/name/view_name 为整值字段；改写（与某新段 token 重合≥阈值）不算丢失，仅真删除或丢失结构化 token（id/数字/commit/路径）拦截，除非 acknowledgeLoss:true（重大缩减再加 lossJustification），纯追加放行；③破坏性删除 removeElement/removeRelationship/removeView 需 ack（按 mutation，或 applySystemArchitectureMutation 顶层 ack 一次确认整批），完整对象快照进墓碑台账 design/KG/SystemArchitecture.tombstones.json（可恢复）；④每次响应（preview 与 apply）返回 lossless 报告（含 modifications）。落地：单模块 argo/scripts/lossless-write-gate.js 接入唯一写漏斗 buildMutationResult，覆盖全部 MCP 写接口（apply/preview/单对象 helper）；规则 <LosslessWrite> + CoreRule 11。区别：graph-write-dedup-gate 防重复，graph-semantics-validation-001 做结构/唯一性校验，本组件防内容丢失。",
       "id": "lossless-write-gate",
       "name": "无损写入门禁",
       "parent": "1961",
@@ -7302,7 +7302,7 @@
         {
           "Input": "tests/lossless-write-gate.test.js",
           "acceptanceCriteria": "tests/lossless-write-gate.test.js",
-          "description": "GIVEN 元素含多行 description；WHEN 未声明地缩水；THEN lossReport.blocked=true（含 Unacknowledged text loss）；acknowledgeLoss 放行；重大缩减需 lossJustification；纯追加不算丢失。",
+          "description": "GIVEN 元素含多行 description；WHEN 未声明地缩水；THEN blocked（含 Unacknowledged text loss）；acknowledgeLoss 放行；重大缩减需 lossJustification；纯追加不算丢失；行内改写算 modification 不算丢失。",
           "name": "AT-lossless-04",
           "type": "Acceptance Test"
         },
@@ -7318,6 +7318,13 @@
           "acceptanceCriteria": "tests/lossless-write-gate.test.js",
           "description": "GIVEN 一次删除；WHEN appendTombstones；THEN 墓碑台账写入完整被删对象（可恢复）。",
           "name": "AT-lossless-06",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/lossless-write-gate.test.js",
+          "acceptanceCriteria": "tests/lossless-write-gate.test.js",
+          "description": "GIVEN 一批 mutation（删除+文本缩水）；WHEN 无 ack；THEN 整批 blocked；顶层 lossAck={acknowledgeLoss:true} 一次确认即整批放行。",
+          "name": "AT-lossless-07",
           "type": "Acceptance Test"
         }
       ],

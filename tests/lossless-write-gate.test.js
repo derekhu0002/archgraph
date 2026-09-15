@@ -113,6 +113,13 @@ test('AT-lossless-04: unacknowledged description shrink is blocked; acknowledgeL
     { type: 'updateElement', id: 'a', patch: { description: `${elementById(base, 'a').description}\nLine four is new.` } },
   ]).lossReport;
   assert.equal(expanded.text.length, 0);
+  // AND an in-line REWORD (kept tokens dominate) is a modification, not a loss
+  const reworded = applyMutations(base, [
+    { type: 'updateElement', id: 'a', patch: { description: 'Line one keeps.\nLine two is critical.\nLine three is valuable too.' } },
+  ]).lossReport;
+  assert.equal(reworded.blocked, false);
+  assert.equal(reworded.text.length, 0);
+  assert.equal(reworded.modifications.length, 1);
   // AND a major loss requires a justification, not just acknowledgement
   const majorShrink = gate.buildLossReport({
     baseDocument: { elements: [{ id: 'd', name: 'D', type: 'Business Object', description: 'x'.repeat(400) }], relationships: [], views: [] },
@@ -146,6 +153,25 @@ test('AT-lossless-05: membership removal and object removal require an explicit 
   assert.equal(removeBlocked.objectsRemoved.length, 1);
   const removeAcked = applyMutations(base, [{ type: 'removeElement', id: 'b', acknowledgeLoss: true }]).lossReport;
   assert.equal(removeAcked.blocked, false);
+});
+
+test('AT-lossless-07: batch-level acknowledgement confirms a whole mutation set at once', () => {
+  // GIVEN a set that removes one object and shrinks another element's text
+  const base = baseDocument();
+  const mutations = [
+    { type: 'removeElement', id: 'b' },
+    { type: 'updateElement', id: 'a', patch: { description: 'rewritten without the old lines' } },
+  ];
+  // WHEN no acknowledgement is given
+  const blocked = applyMutations(base, mutations).lossReport;
+  // THEN the whole set is blocked (each mutation reported)
+  assert.equal(blocked.blocked, true);
+  assert.equal(blocked.objectsRemoved.length, 1);
+  assert.equal(blocked.text.length, 1);
+  // AND a single batch-level acknowledgement unblocks every mutation at once
+  const acked = applyMutations(base, mutations, { lossAck: { acknowledgeLoss: true } }).lossReport;
+  assert.equal(acked.blocked, false);
+  assert.equal(acked.acknowledged, true);
 });
 
 test('AT-lossless-06: tombstone ledger records the full removed object (recoverable)', () => {

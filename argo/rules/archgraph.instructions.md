@@ -76,8 +76,8 @@ Never add what the graph already has. Reuse is the default; there is no reject m
 <LosslessWrite>
 Never lose stored content silently. A write must never reduce existing content unless it is lossless (merge/delta) or you explicitly acknowledge the reduction; omission never means deletion.
 1. Structured fields merge: element testcases merge by `name`; view membership accepts a delta `{ add, remove }`; relationship attributes merge by `name`. Omitting an existing entry preserves it. Delete only with an explicit `op: "remove"` or an explicit delta remove.
-2. Scalar text is guarded: `description`, `statement`, `document`, `name`, `view_name` are full-value fields. Dropping prior lines is blocked by the lossless write gate unless you pass `acknowledgeLoss: true` (and `lossJustification` when the loss is major). Read the current value first and edit as a minimal diff.
-3. Destructive removals (`removeElement` / `removeRelationship` / `removeView`) require `acknowledgeLoss: true`; the full removed object is snapshotted to the tombstone ledger `design/KG/SystemArchitecture.tombstones.json` for recovery.
+2. Scalar text is guarded: `description`, `statement`, `document`, `name`, `view_name` are full-value fields. A *reworded* line is not a loss; dropping prior lines, or losing structured tokens (ids, numbers, commit hashes, paths), is blocked unless you pass `acknowledgeLoss: true` (and `lossJustification` when the loss is major). Read the current value first and edit as a minimal diff.
+3. Destructive removals (`removeElement` / `removeRelationship` / `removeView`) require `acknowledgeLoss: true` — per mutation, or once for the whole set via the top-level `acknowledgeLoss` on `applySystemArchitectureMutation`; the full removed object is snapshotted to the tombstone ledger `design/KG/SystemArchitecture.tombstones.json` for recovery.
 4. Always read the `lossless` loss report in the response (preview and apply). It lists removed text lines / testcases / members / objects. If it is blocked, fix the mutation—do not retry blindly and do not disable the gate.
 </LosslessWrite>
 

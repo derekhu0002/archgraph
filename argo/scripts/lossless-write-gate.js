@@ -35,6 +35,14 @@ const LOSS_JUSTIFICATION_FIELD = 'lossJustification';
 const MAJOR_REMOVED_CHARS = 200;
 const MAJOR_REMOVED_RATIO = 0.5;
 
+// A changed segment is a "modification" (not a loss) when its token overlap with
+// some new segment is at least this high — "reworded, not dropped".
+const MODIFICATION_SIMILARITY = 0.5;
+
+// Tokens that carry structured identity (ids, numbers, hashes, paths): if one is
+// gone it is always a loss, even when the surrounding sentence was only reworded.
+const TOKEN_RE = /[A-Za-z0-9_@#./\\:-]+|[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/g;
+
 // Full-value text fields per mutation type. Editing any of these can silently
 // drop prior content, so they are loss-guarded.
 const TEXT_FIELDS_BY_MUTATION = Object.freeze({
@@ -57,22 +65,62 @@ function normalizeSegments(text) {
     .filter(segment => segment.length > 0);
 }
 
-// Deterministic removal detector: which meaningful segments of the old value are
-// absent from the new value. Pure additions/expansions (old ⊆ new) report none.
+function tokenize(segment) {
+  const matches = String(segment === undefined || segment === null ? '' : segment).match(TOKEN_RE);
+  return matches ? matches.map(token => token.toLowerCase()) : [];
+}
+
+function isStructuredToken(token) {
+  return /[0-9]/.test(token) || /[/\\]/.test(token) || /^[0-9a-f]{7,40}$/i.test(token);
+}
+
+// Sørensen–Dice coefficient over token sets (deterministic, no network).
+function diceCoefficient(aTokens, bTokens) {
+  if (aTokens.length === 0 && bTokens.length === 0) return 1;
+  if (aTokens.length === 0 || bTokens.length === 0) return 0;
+  const a = new Set(aTokens);
+  const b = new Set(bTokens);
+  let intersection = 0;
+  for (const token of a) if (b.has(token)) intersection += 1;
+  return (2 * intersection) / (a.size + b.size);
+}
+
+// Deterministic loss detector. A changed segment is classified as a MODIFICATION
+// (kept, just reworded) when it is similar enough to some new segment; otherwise
+// it is a LOSS (dropped or substantially rewritten). Structured tokens (ids,
+// numbers, hashes, paths) that disappear are always a loss. Pure additions and
+// reorderings report nothing.
 function detectTextLoss(oldText, newText) {
   const oldSegments = normalizeSegments(oldText);
   if (oldSegments.length === 0) {
-    return { removedSegments: [], removedChars: 0, oldChars: 0, ratio: 0 };
+    return { removedSegments: [], modifiedSegments: [], removedChars: 0, oldChars: 0, ratio: 0, structuredTokensRemoved: [] };
   }
+  const newSegments = normalizeSegments(newText);
   const newNormalized = normalizeForCompare(newText);
-  const removedSegments = oldSegments.filter(segment => !newNormalized.includes(segment));
+  const newTokenSet = new Set(newSegments.flatMap(tokenize));
+  const newSegmentTokens = newSegments.map(tokenize);
+  const removedSegments = [];
+  const modifiedSegments = [];
+  const structuredTokensRemoved = [];
+  for (const segment of oldSegments) {
+    const segmentTokens = tokenize(segment);
+    for (const token of segmentTokens) {
+      if (isStructuredToken(token) && !newTokenSet.has(token)) structuredTokensRemoved.push(token);
+    }
+    if (newNormalized.includes(segment)) continue; // kept verbatim
+    const best = newSegmentTokens.reduce((max, tokens) => Math.max(max, diceCoefficient(segmentTokens, tokens)), 0);
+    if (best >= MODIFICATION_SIMILARITY) modifiedSegments.push(segment);
+    else removedSegments.push(segment);
+  }
   const removedChars = removedSegments.reduce((sum, segment) => sum + segment.length, 0);
   const oldChars = oldSegments.reduce((sum, segment) => sum + segment.length, 0);
   return {
     removedSegments,
+    modifiedSegments,
     removedChars,
     oldChars,
     ratio: oldChars > 0 ? removedChars / oldChars : 0,
+    structuredTokensRemoved: [...new Set(structuredTokensRemoved)],
   };
 }
 
@@ -161,19 +209,22 @@ function findView(views, viewId) {
   return Array.isArray(views) ? views.find(view => view && view.view_id === viewId) : undefined;
 }
 
-function isAcknowledged(mutation) {
-  return Boolean(mutation) && mutation[LOSS_ACK_FIELD] === true;
+function isAcknowledged(mutation, lossAck) {
+  return (Boolean(mutation) && mutation[LOSS_ACK_FIELD] === true)
+    || (Boolean(lossAck) && lossAck[LOSS_ACK_FIELD] === true);
 }
 
-function hasJustification(mutation) {
-  return Boolean(mutation)
-    && typeof mutation[LOSS_JUSTIFICATION_FIELD] === 'string'
-    && mutation[LOSS_JUSTIFICATION_FIELD].trim() !== '';
+function hasJustification(mutation, lossAck) {
+  const text = (mutation && mutation[LOSS_JUSTIFICATION_FIELD])
+    || (lossAck && lossAck[LOSS_JUSTIFICATION_FIELD]);
+  return typeof text === 'string' && text.trim() !== '';
 }
 
 // G5+enforcement: compute every content reduction a mutation set would cause,
 // with per-item acknowledgement state, and whether the set must be blocked.
-function buildLossReport({ baseDocument, mutations, nextDocument }) {
+// `lossAck` is an optional batch-level acknowledgement (applySystemArchitectureMutation
+// top level) that counts for every mutation in the set.
+function buildLossReport({ baseDocument, mutations, nextDocument, lossAck }) {
   const base = baseDocument || {};
   const next = nextDocument || {};
   const report = {
@@ -181,6 +232,7 @@ function buildLossReport({ baseDocument, mutations, nextDocument }) {
     acknowledged: true,
     reasons: [],
     text: [],
+    modifications: [],
     membersRemoved: [],
     testcasesRemoved: [],
     attributesRemoved: [],
@@ -195,18 +247,24 @@ function buildLossReport({ baseDocument, mutations, nextDocument }) {
 
   const guardText = (mutation, kind, id, field, oldValue, newValue) => {
     const loss = detectTextLoss(oldValue, newValue);
-    if (loss.removedSegments.length === 0) return;
+    if (loss.modifiedSegments.length > 0) {
+      // Reworded, not dropped: reported for transparency, never blocked.
+      report.modifications.push({ kind, id, field, modifiedLines: loss.modifiedSegments.length, sample: loss.modifiedSegments.slice(0, 3) });
+    }
+    const hasLoss = loss.removedSegments.length > 0 || loss.structuredTokensRemoved.length > 0;
+    if (!hasLoss) return;
     // "Major" only when the removed volume is substantial; a large share of a
     // tiny value is not major (avoids forcing justification for short edits).
     const major = loss.removedChars > MAJOR_REMOVED_CHARS
       || (loss.oldChars > MAJOR_REMOVED_CHARS && loss.ratio > MAJOR_REMOVED_RATIO);
-    const acknowledged = isAcknowledged(mutation) && (!major || hasJustification(mutation));
+    const acknowledged = isAcknowledged(mutation, lossAck) && (!major || hasJustification(mutation, lossAck));
     const item = {
       kind,
       id,
       field,
       removedChars: loss.removedChars,
       removedLines: loss.removedSegments.length,
+      structuredTokensRemoved: loss.structuredTokensRemoved,
       ratio: Number(loss.ratio.toFixed(3)),
       major,
       acknowledged,
@@ -214,11 +272,14 @@ function buildLossReport({ baseDocument, mutations, nextDocument }) {
     };
     report.text.push(item);
     if (!acknowledged) {
-      const why = major && !hasJustification(mutation)
+      const why = major && !hasJustification(mutation, lossAck)
         ? ' (major loss requires a non-empty lossJustification)'
         : '';
+      const structured = loss.structuredTokensRemoved.length > 0
+        ? ` [structured tokens removed: ${loss.structuredTokensRemoved.slice(0, 5).join(', ')}]`
+        : '';
       pushReason(
-        `Unacknowledged text loss: ${kind} '${id}' field '${field}' would remove ${loss.removedChars} char(s) / ${loss.removedSegments.length} line(s)${why}. `
+        `Unacknowledged text loss: ${kind} '${id}' field '${field}' would remove ${loss.removedChars} char(s) / ${loss.removedSegments.length} line(s)${structured}${why}. `
         + 'Read the current value first, then pass acknowledgeLoss:true (and lossJustification) to confirm an intentional rewrite, or use an additive edit that keeps the prior content.',
       );
     }
@@ -262,7 +323,7 @@ function buildLossReport({ baseDocument, mutations, nextDocument }) {
         const relationshipsExplicit = removedRelationships.length === 0
           || isExplicitRemovePatch(mutation.patch, 'included_relationships');
         const explicit = elementsExplicit && relationshipsExplicit;
-        const acknowledged = explicit || isAcknowledged(mutation);
+        const acknowledged = explicit || isAcknowledged(mutation, lossAck);
         report.membersRemoved.push({
           view_id: viewId,
           elements: removedElements,
@@ -291,7 +352,7 @@ function buildLossReport({ baseDocument, mutations, nextDocument }) {
         ? Boolean(findView(next.views, id))
         : Boolean(findById(next[spec.collection], id));
       if (!baseEntry || stillPresent) continue;
-      const acknowledged = isAcknowledged(mutation);
+      const acknowledged = isAcknowledged(mutation, lossAck);
       report.objectsRemoved.push({
         kind: mutation.type.replace(/^remove/, '').toLowerCase(),
         id,
