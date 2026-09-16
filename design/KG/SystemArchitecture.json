@@ -4175,7 +4175,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-16，项目总管）：任务=修复 getArchitectureViewContext(includeEaGeometry=true) 的视图几何连线读取缺陷——元素框正常，但 geometry.relationships[].path 恒为 EA 的 Geometry 覆盖串（SX=0;SY=0;EX=0;EY=0;EDGE=n;…），无拐点、无法还原连线、字段命名与语义不符；要求用视图『多智能体行为函数』(view 293) 验证。根因：readViewDiagramGeometry 误把 t_diagramlinks.Geometry 当成走线读取；EA 真实走线（拖拽拐点 'x:y;x:y;'）在 t_diagramlinks.Path。修复：改为读 dl.Path 作为 path，新增 points(解析 {x,y})、edge(EDGE 令牌)、geometry(覆盖串单列)，并同步 MCP 工具 schema/描述。验证 view 293（=.qea diagram 15）：1233=『评审通过后并行研究』走线 464:-162→464:-659、1240=812:-364、1241=1076:-353→835:-353；其余 EDGE=1 直连 path=[]。测试：tests/ea-qea-sync.test.js 新增 AT-2791-19、tests/architecture-view-context.test.js 增不变式（path 绝不含 SX=/EDGE=）；回归 16/16 + 关联用例 11 通过/7 skip/0 失败，validateSystemArchitecture 通过。落地 commit 068649e；登记 WP2791 + T2 记忆 overseer-view-geometry-route-fix-001（overseer-product-001）。经验：EA 连接器几何两列语义不同——Path=走线、Geometry=覆盖令牌，切勿混用。待办/注意：①运行中的常驻 MCP 仍为旧内存代码，需宿主重启后 ~/.argo 部署版更新才在线生效；②archgraph.qea 工作区被外部 EA 会话改动（含 view 293 人工走线），本次未提交。",
+      "description": "会话摘要（2026-09-16，项目总管）：任务=修复 getArchitectureViewContext(includeEaGeometry=true) 视图几何连线读取缺陷——元素框正常，但 geometry.relationships[].path 恒为 EA 的 Geometry 覆盖串（SX=0;SY=0;EX=0;EY=0;EDGE=n;…），无拐点、无法还原连线、字段命名与语义不符；要求用视图『多智能体行为函数』(view 293) 验证。根因：readViewDiagramGeometry 误把 t_diagramlinks.Geometry 当走线；EA 真实走线（拖拽拐点 'x:y;x:y;'）在 t_diagramlinks.Path。修复：读 dl.Path 为 path，新增 points/edge/geometry(覆盖串单列)，同步 MCP schema/描述。验证 view 293（=.qea diagram 15）：1233=464:-162→464:-659、1240=812:-364、1241=1076:-353→835:-353；其余 EDGE=1 直连。测试：tests/ea-qea-sync.test.js 新增 AT-2791-19、tests/architecture-view-context.test.js 增不变式（path 绝不含 SX=/EDGE=）；回归全绿、validate 通过。已发布并部署：archgraph-argo@0.22.2（npm publish shasum aff80093…, 75 files；registry 第 4 次轮询可见；npm i -g；argo-deploy 22/22，~/.argo/scripts 已含 parseRoutePoints 生效）。commits 068649e(修复)/91cff9e(release)；T2 记忆 overseer-view-geometry-route-fix-001、发布里程碑 overseer-argo-0-22-2-release-001。经验：EA 连接器 Path=走线、Geometry=覆盖令牌，切勿混用；发布里程碑语义近似会被软门禁拦，需 allowDuplicate+justification 放行。待办：宿主重启以加载新常驻 MCP，重启后重跑 argo-init。注意：archgraph.qea 工作区被外部 EA 会话改动（含 view 293 人工走线），本次未提交。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4198,7 +4198,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-16",
-          "description": "视图几何连线走线读取修复（t_diagramlinks.Path）"
+          "description": "视图几何走线修复 + 发布部署 0.22.2"
         },
         {
           "name": "commit",
@@ -4423,6 +4423,11 @@
           "name": "commit",
           "value": "e5b8aa5",
           "description": "design/KG/SystemArchitecture.json（2026-09-16 T1 摘要覆盖写：视图几何走线读取修复）"
+        },
+        {
+          "name": "commit",
+          "value": "91cff9e",
+          "description": "package.json（发布 archgraph-argo@0.22.2）"
         }
       ],
       "testcases": [
@@ -7630,6 +7635,28 @@
           "description": "GIVEN getArchitectureViewContext includeEaGeometry=true 的 geometry.relationships；WHEN 读取任一视图成员连接器；THEN path 为 EA 真实走线串（绝不含 'SX='/'EDGE=' 覆盖令牌）、points 为解析出的 [{x,y}]、geometry 单列保留覆盖串、edge 为 EDGE 令牌；带拐点连接器 points 非空，自动布线连接器 path='' 且 points=[]。"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（发布 archgraph-argo@0.22.2）",
+          "name": "commit",
+          "value": "91cff9e"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        }
+      ],
+      "description": "里程碑（2026-09-16）：发布 archgraph-argo@0.22.2。内容：修复 getArchitectureViewContext(includeEaGeometry=true) 视图几何连线读取——readViewDiagramGeometry 改读 t_diagramlinks.Path（真实走线）而非 t_diagramlinks.Geometry（仅 SX/SY/EX/EY + EDGE + 标签覆盖令牌，无拐点）；relationships 暴露 path(走线串)/points([{x,y}])/edge(EDGE)/geometry(覆盖串单列)；MCP 工具 schema/描述同步；新增 AT-2791-19。发布：npm publish（shasum aff8009310cb0af4a1e9db6173ced1e91419cc3a，75 files）→ registry 传播第 4 次轮询可见 latest=0.22.2 → npm i -g archgraph-argo@0.22.2 → argo-deploy 22/22（Copilot/Cursor/OpenCode/DSH/OpenClaw；~/.argo/.env 保留既有键）。产物核验：~/.argo/scripts/ea-qea-sync-lib.js 含 parseRoutePoints + 'dl.Path AS path'（已生效）。待办：宿主重启以加载新常驻 MCP 进程，重启后重跑 argo-init。commits 068649e(修复)/91cff9e(release)。",
+      "id": "overseer-argo-0-22-2-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.22.2（视图几何连线走线读取修复）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -9596,7 +9623,8 @@
         "overseer-argo-0-20-1-release-001",
         "overseer-argo-0-21-0-release-001",
         "overseer-argo-0-22-0-release-001",
-        "overseer-argo-0-22-1-release-001"
+        "overseer-argo-0-22-1-release-001",
+        "overseer-argo-0-22-2-release-001"
       ],
       "included_relationships": []
     },
