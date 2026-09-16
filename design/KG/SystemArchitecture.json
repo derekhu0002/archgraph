@@ -7854,6 +7854,11 @@
           "name": "commit",
           "value": "24775a0",
           "description": "package.json — release(archgraph-argo): 0.23.0（npm publish shasum 77d4e0f3611e7fb39cd9ba13a0b08dd277dc61d1，75 files；npm i -g + argo-deploy -SkipEnv 22/22，~/.argo/defaults 已含 project-manager-001）"
+        },
+        {
+          "name": "commit",
+          "value": "856e7c6",
+          "description": "design/KG/SystemArchitecture.json（登记 0.23.0 发布里程碑卡；WP 登记 release commit 24775a0）; archgraph.qea"
         }
       ]
     },
