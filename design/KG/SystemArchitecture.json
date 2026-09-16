@@ -4188,7 +4188,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-16，项目总管）：两件事。①『ArchGraph 框架介绍系列』启动：重新定位/重做总纲（非再写同质总览），既有 7 篇保留、后续逐步整合；渠道分阶段=先仓库草稿后公众号/国际；角度=总览与心智模型/核心技术深潜/工程可信与治理。交付总纲草稿 docs/archgraph-framework-overview.md（status=draft，命题『用一张意图架构图统一 Agent 工程』；架构线 AML/统一模型/视图视角 + AI线 图谱即记忆·三层记忆/GraphRAG/双通道检索 + 四道工程约束 定位先行/验收先行/变更可证/写入无害 + 系列地图 0-9），tests/framework-overview.test.js（4/4），KG WP wp-framework-overview-001（view 180）。②人类伙伴裁决：全部已定义 Agent 模型统一为 deepseek/deepseek-flash（registry 名=DeepSeek V4.1 Flash，原生多模态 text/image）——.opencode/agents/insight-*（6 个，含 validator 由 alibaba-cn/qwen3.8-flash 改）+ 全局 ~/.config/opencode/agents/wechat-publisher.md（由 qwen3.7-plus 改，不在本仓库）；KG 7 个 Actor 登记 model 属性；新增 tests/agent-model-binding.test.js（2/2）。附带修复：tests/overseer-ltm-layering 精确成员断言（框架系列 T2 卡 e4c4e0b；模型决策卡本轮再同步）。commits 3de70d2/9c74065（框架系列）、81b26cc/a580a36（模型统一）、e4c4e0b（成员同步）。T2 记忆：overseer-framework-series-001、overseer-agent-model-unification-001。待办：框架系列逐篇起草；定国际平台与英文节奏。既有失败（非本次引入，environ）：EA import 系列(20)、memory-eval 多跳(2)、wechat-publisher-agent-file(1)、excalidraw skill(1)。经验/坑：opencode 精确 model id 以 ~/.cache/opencode/models.json 为准（deepseek-flash=DeepSeek V4.1 Flash；deepseek-v4-flash=DeepSeek V4 Flash）；T2 分层视图成员被测试精确断言，新增记忆须同 commit 更新该测试；graph 写入连带 archgraph.qea 同 commit。",
+      "description": "会话摘要（2026-09-16，项目总管）：三件事。①『ArchGraph 框架介绍系列』启动：重新定位/重做总纲（非再写同质总览），既有 7 篇保留、后续逐步整合；渠道分阶段=先仓库草稿后公众号/国际；角度=总览与心智模型/核心技术深潜/工程可信与治理。交付总纲草稿 docs/archgraph-framework-overview.md（status=draft，命题『用一张意图架构图统一 Agent 工程』；架构线 AML/统一模型/视图视角 + AI线 图谱即记忆·三层记忆/GraphRAG/双通道检索 + 四道工程约束 定位先行/验收先行/变更可证/写入无害 + 系列地图 0-9），tests/framework-overview.test.js（4/4），KG WP wp-framework-overview-001（view 180）。②全部已定义 Agent 模型统一为 deepseek/deepseek-flash（registry 名=DeepSeek V4.1 Flash，原生多模态 text/image）——.opencode/agents/insight-*（6 个）+ 全局 ~/.config/opencode/agents/wechat-publisher.md；KG 7 个 Actor 登记 model 属性；tests/agent-model-binding.test.js（2/2）。附带修复 tests/overseer-ltm-layering 精确成员断言。③【本次】框架默认图谱模板内置默认主 Actor『项目经理』（框架级，不针对本项目）：argo/defaults/design/KG/SystemArchitecture.json 新增 Business Actor project-manager-001『项目经理』+ T1/T2/T3 记忆子视图（wm/ltm/archive），并纳入顶层 SystemArchitecture 视图——任何新项目经 initializeWorkspace 即自带该默认主 Agent 身份；人类裁决不绑定 agent 属性、不改 bootstrap 代码。验收 tests/default-project-manager-actor.test.js（5/5：唯一 Actor/入根视图/三层记忆子视图/模板图语义校验/initializeWorkspace 端到端）。KG：WP wp-default-pm-actor-001 + 子视图 framework-defaults-view-001（parent 1249）。commits：3de70d2/9c74065（框架系列）、81b26cc/a580a36（模型统一）、ba7d095（默认项目经理 Actor）。T2 记忆：overseer-framework-series-001、overseer-agent-model-unification-001、overseer-default-pm-actor-001。待办：框架系列逐篇起草；定国际平台与英文节奏；若需让默认项目经理可直接委派，再补内置 Agent 定义与 agent 绑定。既有失败（非本次引入，environ）：EA import 系列、memory-eval 多跳、wechat-publisher-agent-file、excalidraw skill。经验/坑：opencode 精确 model id 以 ~/.cache/opencode/models.json 为准（deepseek-flash=DeepSeek V4.1 Flash；deepseek-v4-flash=DeepSeek V4 Flash）；T2 分层视图成员被测试精确断言，新增记忆须同 commit 更新该测试；graph 写入连带 archgraph.qea 同 commit；同类谱系 T2 里程碑卡会被语义门禁拦（0.85-0.87），需 allowDuplicate+justification 放行。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4211,7 +4211,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-16",
-          "description": "2026-09-16 会话摘要（框架介绍系列启动 + 总纲草稿 + 全部 Agent 模型统一 DeepSeek flash）"
+          "description": "2026-09-16 会话摘要（框架系列 + 模型统一 + 框架默认模板内置『项目经理』默认主 Actor）"
         },
         {
           "name": "commit",
@@ -7830,7 +7830,44 @@
           "Input": "tests/default-project-manager-actor.test.js",
           "acceptanceCriteria": "tests/default-project-manager-actor.test.js"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "ba7d095",
+          "description": "argo/defaults/design/KG/SystemArchitecture.json（新增 Business Actor project-manager-001『项目经理』+ wm/ltm/archive 子视图 + 纳入顶层 SystemArchitecture 视图）; tests/default-project-manager-actor.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "status",
+          "value": "delivered"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "argo/defaults/design/KG/SystemArchitecture.json; tests/default-project-manager-actor.test.js; design/KG/SystemArchitecture.json; archgraph.qea",
+          "name": "commit",
+          "value": "ba7d095"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "里程碑（2026-09-16，项目总管）：框架级新增默认主 Agent Actor。需求：任何一个新项目，其意图图中都应有一个默认的 Business Actor『项目经理』（项目默认负责人与主 Agent 身份）。落地（框架级，不针对本项目）：修改默认图谱模板 argo/defaults/design/KG/SystemArchitecture.json（initializeWorkspace 新建项目时拷贝它）——新增 Business Actor project-manager-001『项目经理』并纳入顶层 SystemArchitecture 视图；按三层记忆约定创建 T1/T2/T3 记忆子视图 project-manager-001-wm-001 / -ltm-001 / -archive-001。人类伙伴裁决：不绑定 agent 属性（委派回退通用 Agent）、不改 bootstrap 代码。验收：tests/default-project-manager-actor.test.js（5/5：模板存在唯一 项目经理 Business Actor、入根视图、挂三层记忆子视图、模板通过图语义校验、initializeWorkspace 端到端引导）。KG：新增 WP wp-default-pm-actor-001 + 子视图 framework-defaults-view-001（parent 1249）。commit ba7d095。",
+      "id": "overseer-default-pm-actor-001",
+      "name": "里程碑：框架默认图谱模板内置『项目经理』默认主 Actor（2026-09-16）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -9522,7 +9559,8 @@
         "overseer-retrieval-recall-first-001",
         "overseer-wiki-eval-001",
         "overseer-failure-exp-concept-001",
-        "overseer-vision-001"
+        "overseer-vision-001",
+        "overseer-default-pm-actor-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
