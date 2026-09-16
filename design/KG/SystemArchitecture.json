@@ -7849,6 +7849,11 @@
           "name": "commit",
           "value": "f2c8ad5",
           "description": "design/KG/SystemArchitecture.json（登记 WP+AT+framework-defaults-view-001；T2 卡 overseer-default-pm-actor-001；T1 摘要覆盖写）; tests/overseer-ltm-layering.test.js; archgraph.qea"
+        },
+        {
+          "name": "commit",
+          "value": "24775a0",
+          "description": "package.json — release(archgraph-argo): 0.23.0（npm publish shasum 77d4e0f3611e7fb39cd9ba13a0b08dd277dc61d1，75 files；npm i -g + argo-deploy -SkipEnv 22/22，~/.argo/defaults 已含 project-manager-001）"
         }
       ]
     },
@@ -7873,6 +7878,32 @@
       "name": "里程碑：框架默认图谱模板内置『项目经理』默认主 Actor（2026-09-16）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "overseer-argo-0-23-0-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.23.0（框架默认模板内置『项目经理』主 Actor）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "发布里程碑（2026-09-16）：archgraph-argo@0.23.0 发布 + 全局安装 + argo-deploy 22/22 部署。内容：框架默认图谱模板内置默认主 Business Actor『项目经理』(project-manager-001) + T1/T2/T3 记忆子视图（任何新项目经 initializeWorkspace 即自带）。发布流程实证：npm publish（dereckhu，shasum 77d4e0f3611e7fb39cd9ba13a0b08dd277dc61d1，75 files，unpacked 4.1MB）→ registry 传播延迟（npm view 轮询：前 14 次仍为 0.22.2，第 15 次约 150s 后可见 0.23.0）→ npm i -g archgraph-argo@0.23.0 → argo-deploy -SkipEnv 22/22（defaults 模板已部署到 ~/.argo/defaults/design/KG/SystemArchitecture.json，含 project-manager-001；OpenCode/VSCode/Cursor/DSH/OpenClaw 配置与规则同步）。特性 commit ba7d095/f2c8ad5，release commit 24775a0。待办：人类伙伴重启宿主以加载新常驻 MCP 进程与部署产物。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.23.0"
+        },
+        {
+          "name": "commit",
+          "value": "24775a0",
+          "description": "package.json（release 0.23.0）；部署：npm i -g + argo-deploy 22/22"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -9842,7 +9873,8 @@
         "overseer-argo-0-21-0-release-001",
         "overseer-argo-0-22-0-release-001",
         "overseer-argo-0-22-1-release-001",
-        "overseer-argo-0-22-2-release-001"
+        "overseer-argo-0-22-2-release-001",
+        "overseer-argo-0-23-0-release-001"
       ],
       "included_relationships": []
     },
