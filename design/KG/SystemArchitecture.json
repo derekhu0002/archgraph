@@ -7844,6 +7844,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "f2c8ad5",
+          "description": "design/KG/SystemArchitecture.json（登记 WP+AT+framework-defaults-view-001；T2 卡 overseer-default-pm-actor-001；T1 摘要覆盖写）; tests/overseer-ltm-layering.test.js; archgraph.qea"
         }
       ]
     },
