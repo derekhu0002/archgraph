@@ -79,6 +79,10 @@
         {
           "view_id": "ea-tooling-wps-001",
           "view_name": "EA 工具链工作包（EA Tooling WPs）"
+        },
+        {
+          "view_id": "framework-defaults-view-001",
+          "view_name": "Framework Defaults & Bootstrap（框架默认模板与引导）"
         }
       ]
     },
@@ -7811,6 +7815,22 @@
       "name": "决策：全部 Agent 模型统一为 deepseek/deepseek-flash（2026-09-16）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "wp-default-pm-actor-001",
+      "name": "框架默认图谱模板内置『项目经理』默认主 Actor",
+      "type": "Work Package",
+      "parent": "1249",
+      "description": "框架级能力：让任何一个新项目在初始化时，其意图图中都自带一个默认的主 Business Actor『项目经理』。落地方式是修改框架默认图谱模板 argo/defaults/design/KG/SystemArchitecture.json（initializeWorkspace 新建项目时拷贝它），在其中新增 Business Actor project-manager-001『项目经理』并把它挂到顶层 SystemArchitecture 视图（作为项目默认负责人与主 Agent 身份），同时按三层记忆约定为其创建 T1/T2/T3 记忆子视图（project-manager-001-wm-001 / -ltm-001 / -archive-001）。不绑定 agent 属性（委派时按规则回退通用 Agent）；不改 bootstrap 代码。配套可执行验收测试 tests/default-project-manager-actor.test.js。",
+      "testcases": [
+        {
+          "name": "AT-wp-default-pm-actor-001-01",
+          "description": "GIVEN 框架以 argo/defaults/design/KG/SystemArchitecture.json 作为新项目初始图谱模板；WHEN 读取该默认模板或执行 initializeWorkspace 初始化一个空工作区；THEN 图谱中存在唯一一个 Business Actor『项目经理』(project-manager-001)、它被包含在顶层 SystemArchitecture 视图内、并挂载 T1/T2/T3 三个记忆子视图，且模板通过图谱语义（唯一顶层视图/元素归属视图/端点矩阵）校验。",
+          "type": "Acceptance Test",
+          "Input": "tests/default-project-manager-actor.test.js",
+          "acceptanceCriteria": "tests/default-project-manager-actor.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -9822,6 +9842,17 @@
         "overseer-view-geometry-route-fix-001",
         "overseer-framework-series-001",
         "overseer-agent-model-unification-001"
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "framework-defaults-view-001",
+      "view_name": "Framework Defaults & Bootstrap（框架默认模板与引导）",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "description": "框架默认资源与工作区引导：新项目初始化时拷贝的默认图谱模板、默认 EA 模型模板，以及内置的默认角色（如『项目经理』主 Actor）。",
+      "included_elements": [
+        "wp-default-pm-actor-001"
       ],
       "included_relationships": []
     }

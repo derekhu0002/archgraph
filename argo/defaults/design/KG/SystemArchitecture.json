@@ -29,6 +29,26 @@
                     "view_name": "Implementation and Migration"
                 }
             ]
+        },
+        {
+            "id": "project-manager-001",
+            "name": "项目经理",
+            "type": "Business Actor",
+            "description": "新项目的默认主 Business Actor：任何由框架默认模板初始化的项目，其意图图中都内置本『项目经理』角色，作为该项目默认的负责人与主 Agent 身份。当人类伙伴未指定具体角色时，默认以项目经理身份进行对话、规划与决策，并按需把工作委派给项目内的其他 Business Actor。",
+            "subdiagram_views": [
+                {
+                    "view_id": "project-manager-001-wm-001",
+                    "view_name": "项目经理工作记忆"
+                },
+                {
+                    "view_id": "project-manager-001-ltm-001",
+                    "view_name": "项目经理长期记忆"
+                },
+                {
+                    "view_id": "project-manager-001-archive-001",
+                    "view_name": "项目经理档案"
+                }
+            ]
         }
     ],
     "relationships": [
@@ -69,11 +89,36 @@
             "included_relationships": []
         },
         {
+            "view_id": "project-manager-001-wm-001",
+            "view_name": "项目经理工作记忆",
+            "parent_element_id": "project-manager-001",
+            "parent_element_name": "项目经理",
+            "included_elements": [],
+            "included_relationships": []
+        },
+        {
+            "view_id": "project-manager-001-ltm-001",
+            "view_name": "项目经理长期记忆",
+            "parent_element_id": "project-manager-001",
+            "parent_element_name": "项目经理",
+            "included_elements": [],
+            "included_relationships": []
+        },
+        {
+            "view_id": "project-manager-001-archive-001",
+            "view_name": "项目经理档案",
+            "parent_element_id": "project-manager-001",
+            "parent_element_name": "项目经理",
+            "included_elements": [],
+            "included_relationships": []
+        },
+        {
             "view_id": "170",
             "view_name": "SystemArchitecture",
             "included_elements": [
                 "1249",
-                "1240"
+                "1240",
+                "project-manager-001"
             ],
             "included_relationships": [
                 "1161"
