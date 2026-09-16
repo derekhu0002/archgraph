@@ -113,6 +113,7 @@ test('architecture-view-context (optional EA geometry): opt-in includeEaGeometry
     { jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: '176', includeEaGeometry: true } } },
     { jsonrpc: '2.0', id: 4, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: '174', includeEaGeometry: true } } },
     { jsonrpc: '2.0', id: 5, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: '176' } } },
+    { jsonrpc: '2.0', id: 6, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: '293', includeEaGeometry: true } } },
   ]);
 
   const tool = (responses.find(entry => entry.id === 2).result.tools || []).find(t => t.name === 'getArchitectureViewContext');
@@ -140,7 +141,35 @@ test('architecture-view-context (optional EA geometry): opt-in includeEaGeometry
   assert.ok(view174.geometry.relationships.length >= 1, 'view 174 connector line geometry returned');
   for (const g of view174.geometry.relationships) {
     assert.ok(relIds.has(g.id), `geometry relationship ${g.id} must align to a returned member relationship`);
-    assert.equal(typeof g.path, 'string', `relationship ${g.id} path is the EA line geometry string`);
+    assert.equal(typeof g.path, 'string', `relationship ${g.id} path is the EA route string`);
+    assert.ok(!g.path.includes('SX=') && !g.path.includes('EDGE='), `relationship ${g.id} path must not be the EA Geometry override string`);
+    assert.ok(Array.isArray(g.points), `relationship ${g.id} points is a parsed coordinate array`);
+    assert.equal(typeof g.geometry, 'string', `relationship ${g.id} geometry carries the EA override string separately`);
+    assert.ok(g.edge === null || typeof g.edge === 'number', `relationship ${g.id} edge is the EDGE token or null`);
+    const expected = g.path.trim() === '' ? [] : g.path.trim().split(';').filter(Boolean).map(seg => {
+      const [x, y] = seg.split(':');
+      return { x: Number(x), y: Number(y) };
+    });
+    assert.deepEqual(g.points, expected, `relationship ${g.id} points are parsed from path`);
+  }
+
+  // View 293 (多智能体行为函数) is the reference view for human-adjusted connector bends:
+  // when the workspace .qea stores route points for it, they must surface as waypoints.
+  const view293 = callPayload(responses, 6);
+  assert.equal(view293.geometry.present, true, 'view 293 is laid out in the workspace EA model');
+  const routed293 = view293.geometry.relationships.filter(g => g.points.length > 0);
+  if (routed293.length > 0) {
+    for (const g of routed293) {
+      assert.ok(g.path.trim() !== '', `routed connector ${g.id} has a non-empty route string`);
+      for (const pt of g.points) {
+        assert.ok(Number.isFinite(pt.x) && Number.isFinite(pt.y), `route point of ${g.id} is numeric`);
+      }
+    }
+  } else {
+    assert.ok(
+      view293.geometry.relationships.every(g => g.path === '' && g.points.length === 0),
+      'when view 293 stores no route points, every connector reports an empty route',
+    );
   }
 
   const defaultCall = callPayload(responses, 5);

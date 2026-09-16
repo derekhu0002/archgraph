@@ -589,7 +589,7 @@ test('ea-qea-sync (incremental): single element change updates only that element
   }
 });
 
-test('ea-qea-sync (view geometry read): readViewDiagramGeometry returns stored EA element rects and connector line geometry aligned by schema id; null when the view has no diagram', () => {
+test('ea-qea-sync (view geometry read): readViewDiagramGeometry returns stored EA element rects and the connector ROUTE (t_diagramlinks.Path, never the Geometry override string) aligned by schema id; null when the view has no diagram', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-qea-geo-'));
   try {
     const qea = tmpQea(dir);
@@ -601,15 +601,18 @@ test('ea-qea-sync (view geometry read): readViewDiagramGeometry returns stored E
       ],
       relationships: [
         { id: 'r1', name: 'R1', type: 'Association', source_id: 'e1', target_id: 'e2', description: '' },
+        { id: 'r2', name: 'R2', type: 'Association', source_id: 'e2', target_id: 'e1', description: '' },
       ],
       views: [
-        { view_id: 'v1', view_name: 'View One', description: '', included_elements: ['e1', 'e2'], included_relationships: ['r1'] },
+        { view_id: 'v1', view_name: 'View One', description: '', included_elements: ['e1', 'e2'], included_relationships: ['r1', 'r2'] },
       ],
     };
     lib.syncGraphToQea(g, qea, { dryRun: false, allowDelete: false });
 
-    // Plant known geometry as EA would after manual layout; the sync never rewrites
-    // existing geometry, so the reader must return exactly these stored values.
+    // Plant known geometry as EA would after manual layout: element rects in
+    // t_diagramobjects, the connector route (bend points) in t_diagramlinks.Path and
+    // the non-route override tokens (SX/SY/EX/EY + EDGE) in t_diagramlinks.Geometry.
+    // The sync never rewrites existing geometry, so the reader must return exactly these.
     const db = new DatabaseSync(qea);
     const guid = lib.deterministicGuid('diag:v1');
     const diag = db.prepare('SELECT Diagram_ID FROM t_diagram WHERE ea_guid=?').get(guid);
@@ -617,17 +620,31 @@ test('ea-qea-sync (view geometry read): readViewDiagramGeometry returns stored E
     const e1 = db.prepare("SELECT Object_ID FROM t_object WHERE Alias='e1'").get();
     db.prepare('UPDATE t_diagramobjects SET RectLeft=1111, RectTop=222, RectRight=3333, RectBottom=444 WHERE Diagram_ID=? AND Object_ID=?')
       .run(Number(diag.Diagram_ID), Number(e1.Object_ID));
-    const link = db.prepare('SELECT ConnectorID FROM t_diagramlinks WHERE DiagramID=?').get(Number(diag.Diagram_ID));
-    assert.ok(link, 'v1 connector placed');
-    db.prepare("UPDATE t_diagramlinks SET Geometry='10:20;30:40;50:60' WHERE DiagramID=? AND ConnectorID=?")
-      .run(Number(diag.Diagram_ID), Number(link.ConnectorID));
+    const routed = db.prepare("SELECT dl.ConnectorID FROM t_diagramlinks dl JOIN t_connectortag t ON t.ElementID=dl.ConnectorID AND t.Property='schema_id' WHERE dl.DiagramID=? AND t.VALUE='r1'").get(Number(diag.Diagram_ID));
+    assert.ok(routed, 'r1 connector placed');
+    db.prepare("UPDATE t_diagramlinks SET Path='10:20;30:40;50:60', Geometry='SX=0;SY=0;EX=0;EY=0;EDGE=2;' WHERE DiagramID=? AND ConnectorID=?")
+      .run(Number(diag.Diagram_ID), Number(routed.ConnectorID));
     db.close();
 
     const geo = lib.readViewDiagramGeometry(qea, 'v1');
     assert.ok(geo, 'geometry returned for a synced view');
     assert.deepEqual(geo.elements.map((x) => x.id).sort(), ['e1', 'e2']);
     assert.deepEqual(geo.elements.find((x) => x.id === 'e1'), { id: 'e1', left: 1111, top: 222, right: 3333, bottom: 444 }, 'stored element rect read back exactly');
-    assert.deepEqual(geo.relationships, [{ id: 'r1', path: '10:20;30:40;50:60' }], 'stored connector line geometry read back by schema id');
+    const r1 = geo.relationships.find((r) => r.id === 'r1');
+    assert.deepEqual(r1, {
+      id: 'r1',
+      path: '10:20;30:40;50:60',
+      points: [{ x: 10, y: 20 }, { x: 30, y: 40 }, { x: 50, y: 60 }],
+      edge: 2,
+      geometry: 'SX=0;SY=0;EX=0;EY=0;EDGE=2;',
+    }, 'connector route read from t_diagramlinks.Path, override kept separately under geometry');
+    for (const r of geo.relationships) {
+      assert.equal(typeof r.path, 'string', `relationship ${r.id} path is the EA route string`);
+      assert.ok(!r.path.includes('SX=') && !r.path.includes('EDGE='), `relationship ${r.id} path must be the route, not the Geometry override string`);
+      assert.ok(Array.isArray(r.points), `relationship ${r.id} points is a parsed array`);
+    }
+    const r2 = geo.relationships.find((r) => r.id === 'r2');
+    assert.deepEqual(r2, { id: 'r2', path: '', points: [], edge: null, geometry: '' }, 'auto-routed connector has an empty route and no override by default');
 
     assert.equal(lib.readViewDiagramGeometry(qea, 'no-such-view'), null, 'view without an EA diagram → null (server maps to present:false)');
     assert.equal(lib.readViewDiagramGeometry(qea, ''), null, 'blank view id → null');

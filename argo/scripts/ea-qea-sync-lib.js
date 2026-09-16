@@ -893,11 +893,42 @@ function fullProjection(graph, qeaPath, opts) {
 // ---------------------------------------------------------------------------
 // Export
 // ---------------------------------------------------------------------------
+// EA stores connector layout in two distinct t_diagramlinks columns, and they mean
+// different things:
+//   - Path     = the connector ROUTE: user-adjusted bend points as "x:y;x:y;" in diagram
+//                coordinates (empty when EA auto-routes a straight/orthogonal line).
+//   - Geometry = the non-route OVERRIDE tokens (SX/SY/EX/EY dock offsets, EDGE route
+//                style and label positions). It never contains bend points.
+// Reading Geometry as if it were the line was the original defect: callers got the
+// override string and could not rebuild the connector. We expose the route under `path`
+// (+ parsed `points`), the route style as `edge`, and keep the override as `geometry`.
+function parseRoutePoints(raw) {
+  const s = String(raw === null || raw === undefined ? '' : raw).trim();
+  if (s === '') { return []; }
+  const points = [];
+  for (const seg of s.split(';')) {
+    const t = seg.trim();
+    if (t === '') { continue; }
+    const parts = t.split(':');
+    if (parts.length < 2) { continue; }
+    const x = Number(parts[0]);
+    const y = Number(parts[1]);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) { continue; }
+    points.push({ x, y });
+  }
+  return points;
+}
+function parseEdgeToken(geometry) {
+  const m = /(?:^|;)EDGE=(-?\d+)(?:;|$)/.exec(String(geometry === null || geometry === undefined ? '' : geometry));
+  return m ? Number(m[1]) : null;
+}
+
 // Read the EA diagram GEOMETRY for one KG view from a .qea model (read-only).
 // The view maps to the diagram anchored by the deterministic ea_guid (diag:<viewId>)
 // or the schema_view_id StyleEx token written by the sync. Returns:
 //   - element boxes  = t_diagramobjects rects joined to t_object.Alias (schema id)
-//   - connector lines = t_diagramlinks rows joined to the connector's schema_id tag
+//   - connector lines = t_diagramlinks rows joined to the connector's schema_id tag,
+//                       with the ROUTE (t_diagramlinks.Path) parsed into `points`
 // Returns null when the view has no matching EA diagram. Never writes EA geometry.
 function readViewDiagramGeometry(qeaPath, viewId) {
   const v = String(viewId === null || viewId === undefined ? '' : viewId).trim();
@@ -920,13 +951,14 @@ function readViewDiagramGeometry(qeaPath, viewId) {
       left: Number(r.left), top: Number(r.top), right: Number(r.right), bottom: Number(r.bottom),
     }));
     const relationships = db.prepare(
-      'SELECT t.VALUE AS id, dl.Geometry AS path ' +
+      'SELECT t.VALUE AS id, dl.Path AS path, dl.Geometry AS geometry ' +
       'FROM t_diagramlinks dl JOIN t_connectortag t ON t.ElementID = dl.ConnectorID AND t.Property = ? ' +
       'WHERE dl.DiagramID = ? ORDER BY dl.ConnectorID'
-    ).all('schema_id', diagramId).map((r) => ({
-      id: String(r.id),
-      path: String(r.path === null || r.path === undefined ? '' : r.path),
-    }));
+    ).all('schema_id', diagramId).map((r) => {
+      const path = String(r.path === null || r.path === undefined ? '' : r.path);
+      const geometry = String(r.geometry === null || r.geometry === undefined ? '' : r.geometry);
+      return { id: String(r.id), path, points: parseRoutePoints(path), edge: parseEdgeToken(geometry), geometry };
+    });
     return { diagramId, elements, relationships };
   } finally {
     try { db.close(); } catch { /* ignore */ }

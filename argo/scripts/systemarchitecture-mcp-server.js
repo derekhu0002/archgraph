@@ -226,7 +226,7 @@ const TOOLS = [
   },
   {
     name: 'getArchitectureViewContext',
-    description: 'read-only query that resolves one view by view_id into its complete membership: the view object, every member element (from included_elements), every member relationship (from included_relationships), the parent element, and optionally child sub-views declared by member elements. Resolves ids into full canonical objects instead of returning raw id lists. Optional includeEaGeometry (default false) additionally returns the EA diagram geometry of the resolved view.',
+    description: 'read-only query that resolves one view by view_id into its complete membership: the view object, every member element (from included_elements), every member relationship (from included_relationships), the parent element, and optionally child sub-views declared by member elements. Resolves ids into full canonical objects instead of returning raw id lists. Optional includeEaGeometry (default false) additionally returns the EA diagram geometry of the resolved view: element boxes plus each connector ROUTE (t_diagramlinks.Path as `path` + parsed `points`, with the non-route Geometry override kept separately under `geometry`).',
     inputSchema: viewContextInputSchema(),
   },
   {
@@ -475,7 +475,7 @@ function viewContextInputSchema() {
       view_id: { type: 'string', description: 'The id of the view to resolve.' },
       includeParentElement: { type: 'boolean', description: 'Default: true. Resolve the parent element referenced by the view.' },
       includeChildViews: { type: 'boolean', description: 'Default: false. Include child views declared by member elements through subdiagram_views.' },
-      includeEaGeometry: { type: 'boolean', description: 'Default: false (opt-in). When true, additionally resolve the diagram GEOMETRY (element boxes + connector line paths) for this view from the workspace EA model (.qea) and return it under a `geometry` field aligned by schema id with the resolved members. By default the EA model is never touched and no `geometry` field is returned; a missing EA model/diagram yields geometry.present=false, never an error.' },
+      includeEaGeometry: { type: 'boolean', description: 'Default: false (opt-in). When true, additionally resolve the diagram GEOMETRY (element boxes + connector line routes) for this view from the workspace EA model (.qea) and return it under a `geometry` field aligned by schema id with the resolved members. Each geometry relationship carries: `path` (the EA route from t_diagramlinks.Path, "" when EA auto-routes), `points` (the parsed [{x,y}] waypoints), `edge` (the EDGE route-style token or null) and `geometry` (the raw SX/SY/EX/EY override string, which contains NO waypoints). By default the EA model is never touched and no `geometry` field is returned; a missing EA model/diagram yields geometry.present=false, never an error.' },
     },
     additionalProperties: false,
   };
@@ -726,9 +726,11 @@ function buildIntentElementContext(context, args = {}) {
 // model unless the caller explicitly sets includeEaGeometry=true. The workspace's
 // EA model (.qea, the SQLite carrier this toolchain can read) may hold human-laid-out
 // diagram geometry for a view — element boxes (t_diagramobjects rects) and connector
-// line paths (t_diagramlinks). When present it is returned under `geometry`, aligned
+// routes (t_diagramlinks.Path). When present it is returned under `geometry`, aligned
 // by schema id with the resolved members, so an image-capable LLM can redraw the view
-// faithfully. Absent model/diagram → present:false (never an error).
+// faithfully. Each connector also carries the non-route t_diagramlinks.Geometry override
+// string under a distinct `geometry` key, so the route is never confused with the
+// SX/SY/EX/EY/EDGE tokens. Absent model/diagram → present:false (never an error).
 const EA_GEOMETRY_MODEL_EXTENSIONS = new Set(['.qea']);
 function findEaGeometryModelPath(workspaceRoot) {
   try {
