@@ -34,6 +34,7 @@ const MEMBERS_BY_VIEW = {
   'overseer-product-001': [
     'overseer-teamai-insight-001', 'overseer-homepage-v3-kglibrary-retire-001', 'overseer-community-linkage-001',
     'overseer-multiagent-delegation-plan-001', 'overseer-view-geometry-route-fix-001',
+    'overseer-framework-series-001',
   ],
 };
 
