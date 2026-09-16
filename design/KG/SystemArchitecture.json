@@ -7668,6 +7668,11 @@
         {
           "name": "deliveryStatus",
           "value": "in_progress"
+        },
+        {
+          "name": "commit",
+          "value": "3de70d2",
+          "description": "docs/archgraph-framework-overview.md（框架介绍系列总纲草稿）; tests/framework-overview.test.js（AT-wp-framework-overview-001-01）; design/KG/SystemArchitecture.json（新增 WP wp-framework-overview-001 于 view 180）"
         }
       ],
       "description": "ArchGraph 框架介绍系列的总纲。以《ArchGraph 总纲：用一张意图架构图，统一 Agent 工程》统一整个系列的叙事与术语：覆盖架构线（AML 把 ArchiMate 3.2 扩成 Agent 建模语言 / 产品与 Harness 统一模型 / 视图与视角）与 AI 线（图谱即记忆·三层记忆 / GraphRAG 检索 / 语义与结构双通道）两条主线，以及四道工程约束（定位先行 / 验收先行 / 变更可证 / 写入无害）。给出系列地图，用于逐步把既有文章（官宣、8 创新、多角色、社区、Skill 共演化、洞察报告）整合进同一体系。产出仓库草稿 docs/archgraph-framework-overview.md（status=draft），配套可执行验收测试 tests/framework-overview.test.js。",
