@@ -2247,6 +2247,11 @@
         {
           "name": "model",
           "value": "deepseek/deepseek-flash"
+        },
+        {
+          "name": "commit",
+          "value": "81b26cc",
+          "description": "~/.config/opencode/agents/wechat-publisher.md（全局 agent 定义，不在本仓库；模型统一 deepseek/deepseek-flash）; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [],
@@ -4487,6 +4492,11 @@
         {
           "name": "model",
           "value": "deepseek/deepseek-flash"
+        },
+        {
+          "name": "commit",
+          "value": "81b26cc",
+          "description": ".opencode/agents/insight-lead.md; design/KG/SystemArchitecture.json（模型统一 deepseek/deepseek-flash）"
         }
       ],
       "subdiagram_views": [
@@ -4524,6 +4534,11 @@
         {
           "name": "model",
           "value": "deepseek/deepseek-flash"
+        },
+        {
+          "name": "commit",
+          "value": "81b26cc",
+          "description": ".opencode/agents/insight-definer.md; design/KG/SystemArchitecture.json（模型统一 deepseek/deepseek-flash）"
         }
       ],
       "subdiagram_views": [
@@ -4561,6 +4576,11 @@
         {
           "name": "model",
           "value": "deepseek/deepseek-flash"
+        },
+        {
+          "name": "commit",
+          "value": "81b26cc",
+          "description": ".opencode/agents/insight-decomposer.md; design/KG/SystemArchitecture.json（模型统一 deepseek/deepseek-flash）"
         }
       ],
       "subdiagram_views": [
@@ -4598,6 +4618,11 @@
         {
           "name": "model",
           "value": "deepseek/deepseek-flash"
+        },
+        {
+          "name": "commit",
+          "value": "81b26cc",
+          "description": ".opencode/agents/insight-hypothesis.md; design/KG/SystemArchitecture.json（模型统一 deepseek/deepseek-flash）"
         }
       ],
       "subdiagram_views": [
@@ -4650,6 +4675,11 @@
         {
           "name": "model",
           "value": "deepseek/deepseek-flash"
+        },
+        {
+          "name": "commit",
+          "value": "81b26cc",
+          "description": ".opencode/agents/insight-validator.md; design/KG/SystemArchitecture.json（模型统一 deepseek/deepseek-flash）"
         }
       ],
       "subdiagram_views": [
@@ -4683,6 +4713,11 @@
         {
           "name": "model",
           "value": "deepseek/deepseek-flash"
+        },
+        {
+          "name": "commit",
+          "value": "81b26cc",
+          "description": ".opencode/agents/insight-synthesizer.md; design/KG/SystemArchitecture.json（模型统一 deepseek/deepseek-flash）"
         }
       ],
       "subdiagram_views": [
