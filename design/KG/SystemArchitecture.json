@@ -4175,7 +4175,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-16，项目总管）：目标=洞察并规划『框架级多 Agent 协作（自相似递归分身）』。完成：①委派洞察Lead（麦肯锡五步法）产出业界洞察——结论『部分有』：递归派生/委派/结果回馈重拆成熟（Claude Code 子 Agent 默认 3 层；Anthropic orchestrator-worker 同构 worker 较单 Agent +90.2%），但『单一通用角色 + 派生权限无差别继承』非主流且违 least-privilege（权限放大 / confused deputy）；BAILIAN MCP 本会话不可用，改 webfetch 抓 14 个一手来源并显式声明覆盖局限。commits c0dafe7/e07c0ac，元素 insight-lead-milestone-multiagent-delegation-001。②人类伙伴澄清目标形态=自相似递归分身（同类型分身、不可追溯、无独立身份，对外单例），去掉 Work Package/Task 图元素；确认深度 3 + 扇出、权限按 scope 单调收窄、spawn『判据 + harness 硬门禁 + fail-safe 默认不分身 + fallback』三层控制；决定暂缓实施，登记为待规划项 overseer-multiagent-delegation-plan-001（PLANNED/T2，overseer-product-001，commit df67c5f）。决策：不建跨 Actor 关联（关系进视图会级联带入端点元素、污染 T2 记忆视图），改用属性 sourceInsight 记录引用。经验：①新增项目总管 T2 记忆元素必须同步 overseer-ltm-layering 的精确成员断言（本次顺带修复 rules 视图既有漂移：overseer-milestone-lossless-write-001 未登记）；②跨 Actor 关系慎用。既有失败（与本变更无关）：ea-import-* / excalidraw / memory-eval(2) / wechat。待办：待人类伙伴决定是否推进该机制；BAILIAN MCP 需修复后可重跑验证。",
+      "description": "会话摘要（2026-09-16，项目总管）：任务=修复 getArchitectureViewContext(includeEaGeometry=true) 的视图几何连线读取缺陷——元素框正常，但 geometry.relationships[].path 恒为 EA 的 Geometry 覆盖串（SX=0;SY=0;EX=0;EY=0;EDGE=n;…），无拐点、无法还原连线、字段命名与语义不符；要求用视图『多智能体行为函数』(view 293) 验证。根因：readViewDiagramGeometry 误把 t_diagramlinks.Geometry 当成走线读取；EA 真实走线（拖拽拐点 'x:y;x:y;'）在 t_diagramlinks.Path。修复：改为读 dl.Path 作为 path，新增 points(解析 {x,y})、edge(EDGE 令牌)、geometry(覆盖串单列)，并同步 MCP 工具 schema/描述。验证 view 293（=.qea diagram 15）：1233=『评审通过后并行研究』走线 464:-162→464:-659、1240=812:-364、1241=1076:-353→835:-353；其余 EDGE=1 直连 path=[]。测试：tests/ea-qea-sync.test.js 新增 AT-2791-19、tests/architecture-view-context.test.js 增不变式（path 绝不含 SX=/EDGE=）；回归 16/16 + 关联用例 11 通过/7 skip/0 失败，validateSystemArchitecture 通过。落地 commit 068649e；登记 WP2791 + T2 记忆 overseer-view-geometry-route-fix-001（overseer-product-001）。经验：EA 连接器几何两列语义不同——Path=走线、Geometry=覆盖令牌，切勿混用。待办/注意：①运行中的常驻 MCP 仍为旧内存代码，需宿主重启后 ~/.argo 部署版更新才在线生效；②archgraph.qea 工作区被外部 EA 会话改动（含 view 293 人工走线），本次未提交。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4198,7 +4198,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-16",
-          "description": "2026-09-11 memory_search workspaceRoot 修复 + 发布 0.16.2 + 部署"
+          "description": "视图几何连线走线读取修复（t_diagramlinks.Path）"
         },
         {
           "name": "commit",
@@ -5854,6 +5854,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "068649e",
+          "description": "argo/scripts/ea-qea-sync-lib.js; argo/scripts/systemarchitecture-mcp-server.js; tests/ea-qea-sync.test.js; tests/architecture-view-context.test.js（修复视图几何连线：readViewDiagramGeometry 改读 t_diagramlinks.Path 真实走线而非 Geometry 覆盖串 SX/SY/EX/EY/EDGE；relationships 新增 points/edge/geometry 并校正 path 语义；AT-2791-19）"
         }
       ],
       "description": "ARGO 写图 → 下游直写 .qea 投影（Node + node:sqlite，标准批量 SQL）。背景与结论：Repository.Execute 仅 DBMS 库可用（.feap 内嵌 Firebird 单条可用、.qea/SQLite 完全禁用）；.qea 是标准 SQLite，外部直写最符“一把 SQL 写库”诉求，EA 开/关皆可写（实测）；仓库 EA 文件已换 archgraph.qea。本 WP：① Node 模块直接对 .qea 做图谱⇄SQLite 批量读写（t_object/t_connector/t_diagram/t_objectproperties/t_connectortag/t_diagramobjects/t_diagramlinks），对账语义沿用 2100（固定同步根包/update-in-place 不动几何/删除清单确认/幂等）；② ARGO MCP 写图下游投影：观察 design/KG/SystemArchitecture.json 落盘→投影到 archgraph.qea（不改 argo/**）；③ 并发 busy_timeout+短事务+重试，EA 开着也能写；EA 缓存需人工刷新可见；④ unchanged-skip 变更检测使稳态增量快；⑤ .feap(Firebird) 旧路径保留。在本项目验证：真实图谱投影到 archgraph.qea + 回环一致 + 幂等 + 测速。",
@@ -5958,6 +5963,13 @@
           "Input": "tests/argo-qea-projection.test.js",
           "name": "AT-2791-18",
           "type": "Acceptance Test"
+        },
+        {
+          "name": "AT-2791-19",
+          "type": "Acceptance Test",
+          "Input": "tests/ea-qea-sync.test.js",
+          "acceptanceCriteria": "tests/ea-qea-sync.test.js",
+          "description": "GIVEN 隔离 .qea 中某连接器走线拐点存于 t_diagramlinks.Path（如 '10:20;30:40;50:60'）、覆盖令牌（SX/SY/EX/EY/EDGE=2）存于 t_diagramlinks.Geometry；WHEN readViewDiagramGeometry 读取该视图（即 getArchitectureViewContext includeEaGeometry=true 暴露的 geometry.relationships）；THEN 每条关系返回 path=真实走线串、points=解析出的 [{x,y}] 拐点、edge=EDGE 号、geometry=覆盖串（绝不把覆盖串当 path）；无 Path 的自动布线连接器 path='' 且 points=[]；path 永不含 'SX='/'EDGE='。"
         }
       ],
       "type": "Work Package"
@@ -7577,6 +7589,37 @@
         }
       ],
       "type": "Business Object"
+    },
+    {
+      "id": "overseer-view-geometry-route-fix-001",
+      "name": "记忆：视图几何连线走线读取修复（t_diagramlinks.Path）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "记忆（pitfall+fix，2026-09-16，project-overseer-001）。症状：getArchitectureViewContext(includeEaGeometry=true) 元素框正常，但 geometry.relationships[].path 恒为 EA 的 Geometry 覆盖串（SX=0;SY=0;EX=0;EY=0;EDGE=n;…），不含拐点、无法还原连线。根因：readViewDiagramGeometry 把 t_diagramlinks.Geometry 当走线读取；EA 真实走线（用户拖拽拐点，格式 'x:y;x:y;'，图坐标）存于 t_diagramlinks.Path，Geometry 只存 SX/SY/EX/EY 停靠偏移 + EDGE 路由样式 + 标签位置。修复：改读 dl.Path 为 path；新增 points（解析 [{x,y}]）、edge（EDGE 令牌）、geometry（保留覆盖串，语义归位）；无拐点连接器 path=''、points=[]，靠元素 rect + edge 还原直线。用视图 293『多智能体行为函数』（=.qea diagram 15）验证：1233 走线 464:-162→464:-659；1240 单拐点 812:-364；1241 1076:-353→835:-353；其余 EDGE=1 直连。落地：argo/scripts/ea-qea-sync-lib.js、argo/scripts/systemarchitecture-mcp-server.js；tests/ea-qea-sync.test.js（AT-2791-19）、tests/architecture-view-context.test.js；commit 068649e。经验：EA 连接器几何两列语义不同——Path=走线、Geometry=覆盖令牌，切勿混用。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "068649e",
+          "description": "argo/scripts/ea-qea-sync-lib.js; argo/scripts/systemarchitecture-mcp-server.js; tests/ea-qea-sync.test.js; tests/architecture-view-context.test.js（视图几何走线读取修复）"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-overseer-view-geometry-route-fix-01",
+          "type": "Acceptance Test",
+          "Input": "tests/architecture-view-context.test.js",
+          "acceptanceCriteria": "tests/architecture-view-context.test.js",
+          "description": "GIVEN getArchitectureViewContext includeEaGeometry=true 的 geometry.relationships；WHEN 读取任一视图成员连接器；THEN path 为 EA 真实走线串（绝不含 'SX='/'EDGE=' 覆盖令牌）、points 为解析出的 [{x,y}]、geometry 单列保留覆盖串、edge 为 EDGE 令牌；带拐点连接器 points 非空，自动布线连接器 path='' 且 points=[]。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -9582,7 +9625,8 @@
         "overseer-teamai-insight-001",
         "overseer-homepage-v3-kglibrary-retire-001",
         "overseer-community-linkage-001",
-        "overseer-multiagent-delegation-plan-001"
+        "overseer-multiagent-delegation-plan-001",
+        "overseer-view-geometry-route-fix-001"
       ],
       "included_relationships": []
     }
