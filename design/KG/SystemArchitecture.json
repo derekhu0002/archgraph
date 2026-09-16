@@ -4418,6 +4418,11 @@
           "name": "commit",
           "value": "c4f0803",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-09-16 T1 会话摘要覆盖写：多 Agent 洞察 + 待规划项登记）"
+        },
+        {
+          "name": "commit",
+          "value": "e5b8aa5",
+          "description": "design/KG/SystemArchitecture.json（2026-09-16 T1 摘要覆盖写：视图几何走线读取修复）"
         }
       ],
       "testcases": [
@@ -7609,6 +7614,11 @@
           "name": "commit",
           "value": "068649e",
           "description": "argo/scripts/ea-qea-sync-lib.js; argo/scripts/systemarchitecture-mcp-server.js; tests/ea-qea-sync.test.js; tests/architecture-view-context.test.js（视图几何走线读取修复）"
+        },
+        {
+          "name": "commit",
+          "value": "e5b8aa5",
+          "description": "design/KG/SystemArchitecture.json; tests/overseer-ltm-layering.test.js（T2 记忆 + AT-2791-19 登记 + T1 摘要刷新）"
         }
       ],
       "testcases": [
