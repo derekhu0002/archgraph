@@ -4184,7 +4184,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-16，项目总管）：任务=启动『ArchGraph 框架介绍系列』，对外体系化介绍本 graph 框架（架构+AI 两条线）。决策：① 重新定位/重做总纲，非再写同质总览；② 既有 7 篇文章保留、后续逐步整合进同一体系；③ 渠道分阶段=先在仓库打草稿，后再生公众号与国际/英文；④ 覆盖角度=总览与心智模型、核心技术深潜、工程可信与治理。交付：总纲草稿 docs/archgraph-framework-overview.md（status=draft，命题『用一张意图架构图统一 Agent 工程』，架构线 AML/统一模型/视图视角 + AI线 图谱即记忆·三层记忆/GraphRAG/双通道检索 + 四道工程约束 定位先行/验收先行/变更可证/写入无害 + 系列地图 0-9），可执行验收 tests/framework-overview.test.js（AT-wp-framework-overview-001-01，4/4 通过），KG WP wp-framework-overview-001（view 180）。commits 3de70d2(草稿)/9c74065(登记)。T2 记忆 overseer-framework-series-001。待办：逐篇起草后续篇章；定国际平台与英文节奏。经验/坑：新增 WP 触发同类型语义近似门禁（0.85-0.87 谱系近似），需 allowDuplicate+justification 放行；tests/memory-eval-run 多跳 + wechat-publisher-agent-file 为既有失败（已 stash 对照验证非本次引入）；graph 写入连带 archgraph.qea 投影，按仓库惯例与 graph 同 commit。",
+      "description": "会话摘要（2026-09-16，项目总管）：两件事。①『ArchGraph 框架介绍系列』启动：重新定位/重做总纲（非再写同质总览），既有 7 篇保留、后续逐步整合；渠道分阶段=先仓库草稿后公众号/国际；角度=总览与心智模型/核心技术深潜/工程可信与治理。交付总纲草稿 docs/archgraph-framework-overview.md（status=draft，命题『用一张意图架构图统一 Agent 工程』；架构线 AML/统一模型/视图视角 + AI线 图谱即记忆·三层记忆/GraphRAG/双通道检索 + 四道工程约束 定位先行/验收先行/变更可证/写入无害 + 系列地图 0-9），tests/framework-overview.test.js（4/4），KG WP wp-framework-overview-001（view 180）。②人类伙伴裁决：全部已定义 Agent 模型统一为 deepseek/deepseek-flash（registry 名=DeepSeek V4.1 Flash，原生多模态 text/image）——.opencode/agents/insight-*（6 个，含 validator 由 alibaba-cn/qwen3.8-flash 改）+ 全局 ~/.config/opencode/agents/wechat-publisher.md（由 qwen3.7-plus 改，不在本仓库）；KG 7 个 Actor 登记 model 属性；新增 tests/agent-model-binding.test.js（2/2）。附带修复：tests/overseer-ltm-layering 精确成员断言（框架系列 T2 卡 e4c4e0b；模型决策卡本轮再同步）。commits 3de70d2/9c74065（框架系列）、81b26cc/a580a36（模型统一）、e4c4e0b（成员同步）。T2 记忆：overseer-framework-series-001、overseer-agent-model-unification-001。待办：框架系列逐篇起草；定国际平台与英文节奏。既有失败（非本次引入，environ）：EA import 系列(20)、memory-eval 多跳(2)、wechat-publisher-agent-file(1)、excalidraw skill(1)。经验/坑：opencode 精确 model id 以 ~/.cache/opencode/models.json 为准（deepseek-flash=DeepSeek V4.1 Flash；deepseek-v4-flash=DeepSeek V4 Flash）；T2 分层视图成员被测试精确断言，新增记忆须同 commit 更新该测试；graph 写入连带 archgraph.qea 同 commit。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4207,7 +4207,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-16",
-          "description": "2026-09-16 会话结束摘要（框架介绍系列启动 + 总纲草稿）"
+          "description": "2026-09-16 会话摘要（框架介绍系列启动 + 总纲草稿 + 全部 Agent 模型统一 DeepSeek flash）"
         },
         {
           "name": "commit",
@@ -7779,6 +7779,38 @@
       "name": "ArchGraph 框架介绍系列·体系与总纲（2026-09-16）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "description": ".opencode/agents/insight-*.md（6）; tests/agent-model-binding.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "81b26cc"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json + archgraph.qea（登记 81b26cc 到 7 个 Actor）",
+          "name": "commit",
+          "value": "a580a36"
+        },
+        {
+          "description": "tests/overseer-ltm-layering.test.js（同步框架介绍系列 T2 记忆卡导致的分层成员断言）",
+          "name": "commit",
+          "value": "e4c4e0b"
+        }
+      ],
+      "description": "决策（2026-09-16，人类伙伴裁决）：公众号发布员及全部已定义 Agent 的模型统一为 deepseek/deepseek-flash（registry 名 = DeepSeek V4.1 Flash，原生多模态 text/image）。范围与执行：① .opencode/agents/insight-{lead,definer,decomposer,hypothesis,synthesizer}.md 由 deepseek/deepseek-v4-flash 改；② .opencode/agents/insight-validator.md 由 alibaba-cn/qwen3.8-flash 改；③ 全局 ~/.config/opencode/agents/wechat-publisher.md 由 qwen3.7-plus 改（该文件不在本仓库；仓库 argo/agents/ 已由 c9738ae 从包中移除）。KG：6 洞察 Actor + 公众号发布员(2755) 登记 model 属性并回写 commit，验证分析师 description 同步。验收：新增 tests/agent-model-binding.test.js（断言所有仓库 Agent 统一 pin deepseek/deepseek-flash、无 Qwen 绑定）。commits 81b26cc(改动)/a580a36(登记)。附带修复：框架介绍系列 T2 记忆卡加入 overseer-product-001 后使 tests/overseer-ltm-layering 的精确成员断言失败，已同步期望成员（e4c4e0b）。经验/坑：opencode 精确 model id 以 ~/.cache/opencode/models.json 为准（deepseek-flash=DeepSeek V4.1 Flash；deepseek-v4-flash=DeepSeek V4 Flash；deepseek-v4-flash-vision-exp 又一个），勿猜以免 agent 无法启动；T2 分层视图成员被 overseer-ltm-layering 精确断言，新增记忆须同 commit 更新该测试；install-argo.ps1 顶部 qwen3.7-plus 重映射注释为残留（无对应代码）。",
+      "id": "overseer-agent-model-unification-001",
+      "name": "决策：全部 Agent 模型统一为 deepseek/deepseek-flash（2026-09-16）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -9788,7 +9820,8 @@
         "overseer-community-linkage-001",
         "overseer-multiagent-delegation-plan-001",
         "overseer-view-geometry-route-fix-001",
-        "overseer-framework-series-001"
+        "overseer-framework-series-001",
+        "overseer-agent-model-unification-001"
       ],
       "included_relationships": []
     }
