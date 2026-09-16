@@ -7662,6 +7662,28 @@
       "name": "里程碑：发布 archgraph-argo@0.22.2（视图几何连线走线读取修复）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "deliveryStatus",
+          "value": "in_progress"
+        }
+      ],
+      "description": "ArchGraph 框架介绍系列的总纲。以《ArchGraph 总纲：用一张意图架构图，统一 Agent 工程》统一整个系列的叙事与术语：覆盖架构线（AML 把 ArchiMate 3.2 扩成 Agent 建模语言 / 产品与 Harness 统一模型 / 视图与视角）与 AI 线（图谱即记忆·三层记忆 / GraphRAG 检索 / 语义与结构双通道）两条主线，以及四道工程约束（定位先行 / 验收先行 / 变更可证 / 写入无害）。给出系列地图，用于逐步把既有文章（官宣、8 创新、多角色、社区、Skill 共演化、洞察报告）整合进同一体系。产出仓库草稿 docs/archgraph-framework-overview.md（status=draft），配套可执行验收测试 tests/framework-overview.test.js。",
+      "id": "wp-framework-overview-001",
+      "name": "撰写 ArchGraph 框架介绍系列总纲（仓库草稿）",
+      "parent": "1249",
+      "type": "Work Package",
+      "testcases": [
+        {
+          "name": "AT-wp-framework-overview-001-01",
+          "type": "Acceptance Test",
+          "description": "GIVEN 框架介绍系列的总纲仓库草稿 docs/archgraph-framework-overview.md；WHEN 读取该文件；THEN frontmatter 完整（title/digest/status=draft/series），正文含核心命题（ArchiMate 3.2/意图架构图/单一事实源）、两条主线（AML/统一模型/GraphRAG/三层记忆）、四道工程约束（定位先行/验收先行/commit id/去重）与系列地图。",
+          "Input": "tests/framework-overview.test.js",
+          "acceptanceCriteria": "tests/framework-overview.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -8739,7 +8761,8 @@
         "2781",
         "2782",
         "2783",
-        "2784"
+        "2784",
+        "wp-framework-overview-001"
       ],
       "included_relationships": [
         "skill-insight-informs-2783"
