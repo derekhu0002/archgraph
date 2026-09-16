@@ -4175,7 +4175,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-16，项目总管）：任务=修复 getArchitectureViewContext(includeEaGeometry=true) 视图几何连线读取缺陷——元素框正常，但 geometry.relationships[].path 恒为 EA 的 Geometry 覆盖串（SX=0;SY=0;EX=0;EY=0;EDGE=n;…），无拐点、无法还原连线、字段命名与语义不符；要求用视图『多智能体行为函数』(view 293) 验证。根因：readViewDiagramGeometry 误把 t_diagramlinks.Geometry 当走线；EA 真实走线（拖拽拐点 'x:y;x:y;'）在 t_diagramlinks.Path。修复：读 dl.Path 为 path，新增 points/edge/geometry(覆盖串单列)，同步 MCP schema/描述。验证 view 293（=.qea diagram 15）：1233=464:-162→464:-659、1240=812:-364、1241=1076:-353→835:-353；其余 EDGE=1 直连。测试：tests/ea-qea-sync.test.js 新增 AT-2791-19、tests/architecture-view-context.test.js 增不变式（path 绝不含 SX=/EDGE=）；回归全绿、validate 通过。已发布并部署：archgraph-argo@0.22.2（npm publish shasum aff80093…, 75 files；registry 第 4 次轮询可见；npm i -g；argo-deploy 22/22，~/.argo/scripts 已含 parseRoutePoints 生效）。commits 068649e(修复)/91cff9e(release)；T2 记忆 overseer-view-geometry-route-fix-001、发布里程碑 overseer-argo-0-22-2-release-001。经验：EA 连接器 Path=走线、Geometry=覆盖令牌，切勿混用；发布里程碑语义近似会被软门禁拦，需 allowDuplicate+justification 放行。待办：宿主重启以加载新常驻 MCP，重启后重跑 argo-init。注意：archgraph.qea 工作区被外部 EA 会话改动（含 view 293 人工走线），本次未提交。",
+      "description": "会话摘要（2026-09-16，项目总管）：任务=修复 getArchitectureViewContext(includeEaGeometry=true) 视图几何连线读取缺陷（元素框正常，但 geometry.relationships[].path 恒为 EA 的 Geometry 覆盖串 SX/SY/EX/EY/EDGE、无拐点、字段语义不符），用视图『多智能体行为函数』(view 293) 验证。根因：readViewDiagramGeometry 误把 t_diagramlinks.Geometry 当走线；真实走线在 t_diagramlinks.Path。修复：读 dl.Path 为 path + points([{x,y}]) + edge(EDGE) + geometry(覆盖串单列)，同步 MCP schema/描述。验证：view 293（diagram 15）1233=464:-162→464:-659、1240=812:-364、1241=1076:-353→835:-353，其余 EDGE=1 直连。已发布部署 archgraph-argo@0.22.2（npm publish shasum aff80093…, 75 files；registry 第 4 次轮询可见；npm i -g；argo-deploy 22/22；~/.argo/scripts 已生效）；宿主重启后实时复核通过（path/points/edge/geometry 均正确）。补充发现：EA 只为人工拖拽过的连接器存 Path，自动布线连接器 Path=NULL、dock=0（视图 291『多智能体数据与流程』=diagram 13：7 条仅 2 条有 Path），故 path='' 属忠实结果而非漏读；自动连线需按『元素 rect + source/target + edge』推导（EDGE=1 直线裁到两框边界；EDGE=2/3 正交折线）。待人类裁决：是否为自动连线补『推导端点』(start/end + derived:true，拟 AT-2791-20)——本会话未实施。commits 068649e(修复)/91cff9e(release)/06ce255(图谱登记)；T2 记忆 overseer-view-geometry-route-fix-001、发布里程碑 overseer-argo-0-22-2-release-001（发布谱系语义近似需 allowDuplicate+justification 放行）。经验/坑：Path=走线、Geometry=覆盖令牌切勿混用；initializeWorkspace 的 .qea 全量投影会抹掉 EA 人工走线/坐标，勿轻跑；archgraph.qea 已由人类提交 c0cf1b7 'S'。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4198,7 +4198,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-16",
-          "description": "视图几何走线修复 + 发布部署 0.22.2"
+          "description": "2026-09-16 会话结束摘要（含发布部署 + 重启后在线复核 + 自动路由待裁决）"
         },
         {
           "name": "commit",
@@ -7605,7 +7605,7 @@
       "name": "记忆：视图几何连线走线读取修复（t_diagramlinks.Path）",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "记忆（pitfall+fix，2026-09-16，project-overseer-001）。症状：getArchitectureViewContext(includeEaGeometry=true) 元素框正常，但 geometry.relationships[].path 恒为 EA 的 Geometry 覆盖串（SX=0;SY=0;EX=0;EY=0;EDGE=n;…），不含拐点、无法还原连线。根因：readViewDiagramGeometry 把 t_diagramlinks.Geometry 当走线读取；EA 真实走线（用户拖拽拐点，格式 'x:y;x:y;'，图坐标）存于 t_diagramlinks.Path，Geometry 只存 SX/SY/EX/EY 停靠偏移 + EDGE 路由样式 + 标签位置。修复：改读 dl.Path 为 path；新增 points（解析 [{x,y}]）、edge（EDGE 令牌）、geometry（保留覆盖串，语义归位）；无拐点连接器 path=''、points=[]，靠元素 rect + edge 还原直线。用视图 293『多智能体行为函数』（=.qea diagram 15）验证：1233 走线 464:-162→464:-659；1240 单拐点 812:-364；1241 1076:-353→835:-353；其余 EDGE=1 直连。落地：argo/scripts/ea-qea-sync-lib.js、argo/scripts/systemarchitecture-mcp-server.js；tests/ea-qea-sync.test.js（AT-2791-19）、tests/architecture-view-context.test.js；commit 068649e。经验：EA 连接器几何两列语义不同——Path=走线、Geometry=覆盖令牌，切勿混用。",
+      "description": "记忆（pitfall+fix，2026-09-16，project-overseer-001）。症状：getArchitectureViewContext(includeEaGeometry=true) 元素框正常，但 geometry.relationships[].path 恒为 EA 的 Geometry 覆盖串（SX=0;SY=0;EX=0;EY=0;EDGE=n;…），不含拐点、无法还原连线。根因：readViewDiagramGeometry 把 t_diagramlinks.Geometry 当走线读取；EA 真实走线（用户拖拽拐点，格式 'x:y;x:y;'，图坐标）存于 t_diagramlinks.Path，Geometry 只存 SX/SY/EX/EY 停靠偏移 + EDGE 路由样式 + 标签位置。修复：改读 dl.Path 为 path；新增 points（解析 [{x,y}]）、edge（EDGE 令牌）、geometry（保留覆盖串，语义归位）；无拐点连接器 path=''、points=[]，靠元素 rect + edge 还原直线。用视图 293『多智能体行为函数』（=.qea diagram 15）验证：1233 走线 464:-162→464:-659；1240 单拐点 812:-364；1241 1076:-353→835:-353；其余 EDGE=1 直连。落地：argo/scripts/ea-qea-sync-lib.js、argo/scripts/systemarchitecture-mcp-server.js；tests/ea-qea-sync.test.js（AT-2791-19）、tests/architecture-view-context.test.js；commit 068649e。经验：EA 连接器几何两列语义不同——Path=走线、Geometry=覆盖令牌，切勿混用。【2026-09-16 收尾】已发布并部署 archgraph-argo@0.22.2（shasum aff80093… , 75 files；npm i -g；argo-deploy 22/22）；宿主重启后在线复核通过：实时 getArchitectureViewContext(view 293, includeEaGeometry=true) 返回 path/points/edge/geometry 均正确（1233 edge=2 拐点 464:-162→464:-659 等），证明重启后常驻 MCP 已加载新代码。【自动路由无路径发现】EA 只为人工拖拽过的连接器存 Path；自动布线连接器 Path=NULL、dock(SX/SY/EX/EY)=0（视图 291『多智能体数据与流程』=diagram 13：7 条仅 2 条有 Path，其余 5 条 EDGE=1 自动直线），故 path=''/points=[] 是忠实结果而非漏读；自动连线只能按『元素 rect + source/target + edge』推导（EDGE=1 直线=中心连线裁到两框边界；EDGE=2/3 正交折线）。待人类裁决：是否为自动连线补『推导端点』（如 start/end 并标 derived:true，与存储 points 区分；拟 AT-2791-20）——本会话未实施。提醒：initializeWorkspace 的 .qea 全量投影会抹掉 EA 人工走线/坐标，需保护。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -7613,7 +7613,7 @@
         },
         {
           "name": "status",
-          "value": "COMPLETED"
+          "value": "ACTIVE"
         },
         {
           "name": "commit",
@@ -7624,6 +7624,11 @@
           "name": "commit",
           "value": "e5b8aa5",
           "description": "design/KG/SystemArchitecture.json; tests/overseer-ltm-layering.test.js（T2 记忆 + AT-2791-19 登记 + T1 摘要刷新）"
+        },
+        {
+          "name": "commit",
+          "value": "06ce255",
+          "description": "design/KG/SystemArchitecture.json（发布里程碑 + T1 摘要）"
         }
       ],
       "testcases": [
