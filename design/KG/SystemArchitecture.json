@@ -4175,7 +4175,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-16，项目总管）：任务=修复 getArchitectureViewContext(includeEaGeometry=true) 视图几何连线读取缺陷（元素框正常，但 geometry.relationships[].path 恒为 EA 的 Geometry 覆盖串 SX/SY/EX/EY/EDGE、无拐点、字段语义不符），用视图『多智能体行为函数』(view 293) 验证。根因：readViewDiagramGeometry 误把 t_diagramlinks.Geometry 当走线；真实走线在 t_diagramlinks.Path。修复：读 dl.Path 为 path + points([{x,y}]) + edge(EDGE) + geometry(覆盖串单列)，同步 MCP schema/描述。验证：view 293（diagram 15）1233=464:-162→464:-659、1240=812:-364、1241=1076:-353→835:-353，其余 EDGE=1 直连。已发布部署 archgraph-argo@0.22.2（npm publish shasum aff80093…, 75 files；registry 第 4 次轮询可见；npm i -g；argo-deploy 22/22；~/.argo/scripts 已生效）；宿主重启后实时复核通过（path/points/edge/geometry 均正确）。补充发现：EA 只为人工拖拽过的连接器存 Path，自动布线连接器 Path=NULL、dock=0（视图 291『多智能体数据与流程』=diagram 13：7 条仅 2 条有 Path），故 path='' 属忠实结果而非漏读；自动连线需按『元素 rect + source/target + edge』推导（EDGE=1 直线裁到两框边界；EDGE=2/3 正交折线）。待人类裁决：是否为自动连线补『推导端点』(start/end + derived:true，拟 AT-2791-20)——本会话未实施。commits 068649e(修复)/91cff9e(release)/06ce255(图谱登记)；T2 记忆 overseer-view-geometry-route-fix-001、发布里程碑 overseer-argo-0-22-2-release-001（发布谱系语义近似需 allowDuplicate+justification 放行）。经验/坑：Path=走线、Geometry=覆盖令牌切勿混用；initializeWorkspace 的 .qea 全量投影会抹掉 EA 人工走线/坐标，勿轻跑；archgraph.qea 已由人类提交 c0cf1b7 'S'。",
+      "description": "会话摘要（2026-09-16，项目总管）：任务=启动『ArchGraph 框架介绍系列』，对外体系化介绍本 graph 框架（架构+AI 两条线）。决策：① 重新定位/重做总纲，非再写同质总览；② 既有 7 篇文章保留、后续逐步整合进同一体系；③ 渠道分阶段=先在仓库打草稿，后再生公众号与国际/英文；④ 覆盖角度=总览与心智模型、核心技术深潜、工程可信与治理。交付：总纲草稿 docs/archgraph-framework-overview.md（status=draft，命题『用一张意图架构图统一 Agent 工程』，架构线 AML/统一模型/视图视角 + AI线 图谱即记忆·三层记忆/GraphRAG/双通道检索 + 四道工程约束 定位先行/验收先行/变更可证/写入无害 + 系列地图 0-9），可执行验收 tests/framework-overview.test.js（AT-wp-framework-overview-001-01，4/4 通过），KG WP wp-framework-overview-001（view 180）。commits 3de70d2(草稿)/9c74065(登记)。T2 记忆 overseer-framework-series-001。待办：逐篇起草后续篇章；定国际平台与英文节奏。经验/坑：新增 WP 触发同类型语义近似门禁（0.85-0.87 谱系近似），需 allowDuplicate+justification 放行；tests/memory-eval-run 多跳 + wechat-publisher-agent-file 为既有失败（已 stash 对照验证非本次引入）；graph 写入连带 archgraph.qea 投影，按仓库惯例与 graph 同 commit。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4198,7 +4198,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-16",
-          "description": "2026-09-16 会话结束摘要（含发布部署 + 重启后在线复核 + 自动路由待裁决）"
+          "description": "2026-09-16 会话结束摘要（框架介绍系列启动 + 总纲草稿）"
         },
         {
           "name": "commit",
@@ -7689,6 +7689,33 @@
           "acceptanceCriteria": "tests/framework-overview.test.js"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "description": "docs/archgraph-framework-overview.md（框架介绍系列总纲草稿）+ tests/framework-overview.test.js + design/KG/SystemArchitecture.json（WP wp-framework-overview-001）",
+          "name": "commit",
+          "value": "3de70d2"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json + archgraph.qea（登记 3de70d2）",
+          "name": "commit",
+          "value": "9c74065"
+        }
+      ],
+      "description": "决策（2026-09-16，项目总管）：启动『ArchGraph 框架介绍系列』——对外体系化介绍本 graph 框架（架构 + AI 两条线）。① 定位＝重新定位/重做总纲，不是再写一篇同质总览；② 既有文章（官宣/8创新/设计Agent系统/多角色/开发者社区/OpenClaw/Skill共演化/洞察报告）保留，后续逐步整合进同一体系；③ 渠道分阶段：先在仓库打草稿，之后再生公众号与国际平台/英文版；④ 覆盖角度：框架总览与心智模型、核心技术深潜、工程可信与治理。里程碑：总纲草稿 docs/archgraph-framework-overview.md（status=draft），命题『用一张意图架构图统一 Agent 工程』，含两条主线（架构线 AML/统一模型/视图视角；AI线 图谱即记忆·三层记忆/GraphRAG/双通道检索）+ 四道工程约束（定位先行/验收先行/变更可证/写入无害）+ 系列地图（0 总纲/1 意图架构优先/2 AML/3 统一模型/4 三层记忆/5 检索深潜/6 双通道/7 治理/8 写入治理/9 多Harness+EA）。KG：WP wp-framework-overview-001（view 180），AT-wp-framework-overview-001-01（tests/framework-overview.test.js）。待办：逐篇起草后续篇章；定国际平台与英文节奏。经验：新增 WP 触发同类型语义近似门禁（0.85-0.87，谱系近似），需 allowDuplicate+justification 放行；tests/memory-eval-run 多跳用例与 wechat-publisher-agent-file 为既有失败（已用 stash 对照验证非本次引入）。",
+      "id": "overseer-framework-series-001",
+      "name": "ArchGraph 框架介绍系列·体系与总纲（2026-09-16）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -9697,7 +9724,8 @@
         "overseer-homepage-v3-kglibrary-retire-001",
         "overseer-community-linkage-001",
         "overseer-multiagent-delegation-plan-001",
-        "overseer-view-geometry-route-fix-001"
+        "overseer-view-geometry-route-fix-001",
+        "overseer-framework-series-001"
       ],
       "included_relationships": []
     }
