@@ -7909,6 +7909,29 @@
           "description": "package.json（release 0.23.0）；部署：npm i -g + argo-deploy 22/22"
         }
       ]
+    },
+    {
+      "description": "使用 Neo4j GDS（实例已装 2026.07.0，471 过程；此前仓库零 gds./apoc. 调用）对 graphKey 作用域内的结构投影（Element + ARCHIMATE_RELATES）做社区划分（Louvain/Leiden），为 Agent 提供全局/社区级视角，补齐当前只有种子/局部检索、缺全局查询的缺口。策略：①只落 Neo4j 投影（Element.communityId + 投影专有 ArgoCommunitySummary），随 canonicalVersion 版本化失效；②canonical JSON 字节不变，canonical 仍是唯一事实源；③多项目按 graphKey 隔离（Cypher 投影过滤）；④默认关（ARGO_COMMUNITY_INDEX=0）；⑤交付通道不改 MCP 契约，经现有只读 queryNeo4jGraph 查询。阶段：P0=只读探针 scripts/eval-communities.js（测量此规模下社区结构是否真实，零产品改动，含停止判据）；P1=graph-rag/communityIndex.js 投影索引 + 生命周期（冻结区，需 guard/授权）；P2=queryNeo4jGraph 查询模式文档。源码：scripts/eval-communities.js、argo/scripts/graph-rag/communityIndex.js。",
+      "id": "community-index-001",
+      "name": "图谱社区索引（Neo4j GDS）",
+      "parent": "1961",
+      "testcases": [
+        {
+          "acceptanceCriteria": "tests/community-probe.test.js",
+          "description": "GIVEN 只读社区探针 scripts/eval-communities.js（固定随机种子）；WHEN 对同一 canonical 图跑两次；THEN 社区划分结果一致（确定性）。",
+          "Input": "tests/community-probe.test.js",
+          "name": "AT-community-probe-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/community-probe.test.js",
+          "description": "GIVEN 探针只读；WHEN 运行结束；THEN canonical JSON 字节不变，不产生任何图谱/投影写入。",
+          "Input": "tests/community-probe.test.js",
+          "name": "AT-community-probe-02",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Application Component"
     }
   ],
   "relationships": [
@@ -9370,7 +9393,8 @@
         "graph-semantics-validation-001",
         "hybrid-semantic-retrieval-001",
         "semantic-rerank-001",
-        "lossless-write-gate"
+        "lossless-write-gate",
+        "community-index-001"
       ],
       "included_relationships": []
     },
