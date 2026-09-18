@@ -4441,6 +4441,11 @@
           "name": "commit",
           "value": "91cff9e",
           "description": "package.json（发布 archgraph-argo@0.22.2）"
+        },
+        {
+          "name": "commit",
+          "value": "435b7b4",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-09-18 T1 会话摘要覆盖写）"
         }
       ],
       "testcases": [
