@@ -4188,7 +4188,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-16，项目总管）：三件事。①『ArchGraph 框架介绍系列』启动：重新定位/重做总纲（非再写同质总览），既有 7 篇保留、后续逐步整合；渠道分阶段=先仓库草稿后公众号/国际；角度=总览与心智模型/核心技术深潜/工程可信与治理。交付总纲草稿 docs/archgraph-framework-overview.md（status=draft，命题『用一张意图架构图统一 Agent 工程』；架构线 AML/统一模型/视图视角 + AI线 图谱即记忆·三层记忆/GraphRAG/双通道检索 + 四道工程约束 定位先行/验收先行/变更可证/写入无害 + 系列地图 0-9），tests/framework-overview.test.js（4/4），KG WP wp-framework-overview-001（view 180）。②全部已定义 Agent 模型统一为 deepseek/deepseek-flash（registry 名=DeepSeek V4.1 Flash，原生多模态 text/image）——.opencode/agents/insight-*（6 个）+ 全局 ~/.config/opencode/agents/wechat-publisher.md；KG 7 个 Actor 登记 model 属性；tests/agent-model-binding.test.js（2/2）。附带修复 tests/overseer-ltm-layering 精确成员断言。③【本次】框架默认图谱模板内置默认主 Actor『项目经理』（框架级，不针对本项目）：argo/defaults/design/KG/SystemArchitecture.json 新增 Business Actor project-manager-001『项目经理』+ T1/T2/T3 记忆子视图（wm/ltm/archive），并纳入顶层 SystemArchitecture 视图——任何新项目经 initializeWorkspace 即自带该默认主 Agent 身份；人类裁决不绑定 agent 属性、不改 bootstrap 代码。验收 tests/default-project-manager-actor.test.js（5/5：唯一 Actor/入根视图/三层记忆子视图/模板图语义校验/initializeWorkspace 端到端）。KG：WP wp-default-pm-actor-001 + 子视图 framework-defaults-view-001（parent 1249）。commits：3de70d2/9c74065（框架系列）、81b26cc/a580a36（模型统一）、ba7d095（默认项目经理 Actor）。T2 记忆：overseer-framework-series-001、overseer-agent-model-unification-001、overseer-default-pm-actor-001。待办：框架系列逐篇起草；定国际平台与英文节奏；若需让默认项目经理可直接委派，再补内置 Agent 定义与 agent 绑定。既有失败（非本次引入，environ）：EA import 系列、memory-eval 多跳、wechat-publisher-agent-file、excalidraw skill。经验/坑：opencode 精确 model id 以 ~/.cache/opencode/models.json 为准（deepseek-flash=DeepSeek V4.1 Flash；deepseek-v4-flash=DeepSeek V4 Flash）；T2 分层视图成员被测试精确断言，新增记忆须同 commit 更新该测试；graph 写入连带 archgraph.qea 同 commit；同类谱系 T2 里程碑卡会被语义门禁拦（0.85-0.87），需 allowDuplicate+justification 放行。",
+      "description": "会话摘要（2026-09-18，项目总管）：本体推理 + Neo4j 能力评估，两次均以证据判定停止。\n① 本体推理引擎（讨论）：ArchiMate 3.2 附录 B 已有官方推导规则 DR1–DR8（确定）/PDR1–PDR12（潜在），无需自创；ArchiMate 非 OWL，硬矛盾仅限特化反对称/组合偏序无环。实测关系分布 Association 40/Triggering 24/Assignment 16/Realization 11/Access 8/Serving 4，Specialization/Composition/Aggregation/Flow/Influence=0（DR1 输入为零），仅 1 处双向 Triggering 环（评审草稿↔修订草稿）。读时省 token 假设弱（链已在上下文时 LLM 单跳几乎免费）。结论：不建通用推理引擎；若做只做最小写时一致性（自环/环硬拦 + 推导冲突告警，待人类裁决）。\n② Neo4j 数据科学能力：实例 Neo4j 2026.07.1 Enterprise + GDS 2026.07.0（471 过程）+ APOC 2026.07.1，此前仓库零 gds./apoc. 调用。先做社区检测 P0（scripts/eval-communities.js + tests/community-probe.test.js AT-01/02；组件 community-index-001；T2 卡 overseer-community-probe-001）：253 节点/103 边，161 社区但 141 孤立单例（55.7%），模块度 0.888 受连通分量膨胀，真实社区与既有 View 高度重合（团队/职能纯度 1.0）→ stop: singleton-dominated。再核连通性：142 个无关系元素 142/142 均有语义投影记录（可语义召回），图谱是『视图组织目录+语义记忆』而非依赖图 → 补关系无必要。战略决策：Neo4j 关系中心类算法（社区/中心性/路径/链路预测）杠杆低，停止该方向（decision 已登记）。\ncommits：ed61cb0/a0d2ebc/eec5dda/8dedec6/a981692/3582cbb。待办：是否做最小写时一致性（有 1 真实样本）；或回归框架介绍系列/内容质量。\n经验/坑：该 GDS 版无 Louvain 随机种子配置键（randomSeed/seed 均被拒），确定性用 concurrency:1（两跑逐字节一致）；GDS 内存图不支持 String 节点属性（nodeQuery 返回 e.type 报 Unsupported conversion to GDS Value ... String），只返回 id；GDS 过程参数不接受 Cypher 参数化，需内联字面量；PS 5.1 `>` 重定向产生 UTF-16 使 ConvertFrom-Json 失败，JSON 比较用 node 解析。既有失败（environ，非本次）：EA import 系列、memory-eval 多跳、wechat-publisher-agent-file、excalidraw skill。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4210,8 +4210,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-16",
-          "description": "2026-09-16 会话摘要（框架系列 + 模型统一 + 框架默认模板内置『项目经理』默认主 Actor）"
+          "value": "2026-09-18",
+          "description": "2026-09-18 会话摘要（本体推理讨论 + Neo4j GDS 社区/连通性评估，均判停止）"
         },
         {
           "name": "commit",
