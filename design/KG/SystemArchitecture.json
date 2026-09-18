@@ -7953,6 +7953,16 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "ed61cb0",
+          "description": "scripts/eval-communities.js; tests/community-probe.test.js; design/KG/SystemArchitecture.json; archgraph.qea（P0 探针 + 验收）"
+        },
+        {
+          "name": "commit",
+          "value": "eec5dda",
+          "description": "tests/overseer-ltm-layering.test.js; design/KG/SystemArchitecture.json; archgraph.qea（T2 记忆卡落地 + 分层成员测试同步）"
         }
       ],
       "description": "里程碑 P0（2026-09-18，项目总管）：评估用 Neo4j 内置 GDS 做社区检测、补齐‘全局检索’是否值得。背景：实例已装 GDS 2026.07.0（471 过程）+ APOC 2026.07.1，但仓库此前零 gds./apoc. 调用。交付：scripts/eval-communities.js（按 graphKey 用 gds.graph.project.cypher 建内存图 → gds.louvain.stream/stats → drop；纯只读、canonical 字节不变；--summary 紧凑模式）+ tests/community-probe.test.js（AT-community-probe-01/02）；KG 组件 community-index-001（Harness 视图 298）。测量结论：253 节点/103 边；161 社区但 141 为孤立单例（singletonNodeRatio 55.7%）；模块度 0.888 受连通分量膨胀；真实社区（规模 8–17）与既有 View 高度重合（DevelopmentTeam/insight-team/media+video team 纯度 1.0，多智能体职能 0.923）→ 停止判据 stop: singleton-dominated，暂缓 P1（全局社区索引对既有 View 增量价值低）。更值得做的发现：55.7% 元素无任何结构关系（图谱连通性缺口）。坑：①该 GDS 版无 Louvain 随机种子配置键（randomSeed/seed 均报 Unexpected configuration key），确定性改用 concurrency:1（两跑逐字节一致）；②GDS 内存图不支持 String 节点属性（nodeQuery 返回 e.type 会报 Unsupported conversion to GDS Value ... String），只能返回 id；③GDS 过程参数不接受 Cypher 参数化（$graphName/$nodeQuery 触发同错），需内联字面量（graphKey 为常量，内联安全）；④PS 5.1 `>` 重定向产生 UTF-16，ConvertFrom-Json 失败，JSON 比较应用 node 解析。"
