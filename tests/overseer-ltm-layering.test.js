@@ -31,6 +31,7 @@ const MEMBERS_BY_VIEW = {
   ],
   'overseer-retrieval-001': [
     'overseer-semantic-seed-prefix-fix-001', 'overseer-rerank-latency-fix-001',
+    'overseer-community-probe-001',
   ],
   'overseer-product-001': [
     'overseer-teamai-insight-001', 'overseer-homepage-v3-kglibrary-retire-001', 'overseer-community-linkage-001',
