@@ -57,12 +57,15 @@ Everything works out of the box except **semantic (Graph RAG) queries**, which n
 - **Embedding / vector engine** — powers semantic Graph RAG retrieval. Configure
   `ARGO_EMBEDDING_BASE_URL`, `ARGO_EMBEDDING_MODEL`, `ARGO_EMBEDDING_PROVIDER`,
   `ARGO_EMBEDDING_MODEL_VERSION`, `ARGO_EMBEDDING_DIMENSIONS`, plus the API key `QWEN_KEY`.
+  It points at **any OpenAI-compatible embedding endpoint** — a cloud provider, or a self-hosted
+  server for offline / intranet / private deployments via `ARGO_EMBEDDING_PROFILE=openai-compatible`
+  (see the [self-hosted embedding guide](docs/self-hosted-embedding-deployment.md)).
 
 Where do the values come from? The Neo4j credentials come from the Neo4j instance you own or
 provision (URI, username, password). The embedding configuration and `QWEN_KEY` come from your
-embedding provider's dashboard — for example Alibaba DashScope. `argo-deploy` walks you through the
-prompt (existing non-empty values in `~/.argo/.env` are kept); you can also edit the file afterwards
-and re-run.
+embedding provider's dashboard — for example Alibaba DashScope — or from a self-hosted
+OpenAI-compatible server. `argo-deploy` walks you through the prompt (existing non-empty values in
+`~/.argo/.env` are kept); you can also edit the file afterwards and re-run.
 
 ## How to use
 

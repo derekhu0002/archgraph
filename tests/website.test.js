@@ -130,6 +130,21 @@ test('capabilities: homepage summarises the framework capabilities before Instal
   assert.match(section, /GIVEN-WHEN-THEN/, 'should mention executable acceptance tests');
 });
 
+test('self-hosted-embedding: homepage presents a pluggable / self-hosted embedding option', () => {
+  // GIVEN semantic retrieval can point at any OpenAI-compatible embedding endpoint (ARGO_EMBEDDING_PROFILE)
+  // WHEN a visitor opens the homepage
+  // THEN Capabilities names a self-hosted / bring-your-own embedding option and Install documents the profile switch
+  const capabilities = HTML.slice(HTML.indexOf('id="capabilities"'), HTML.indexOf('id="install"'));
+  assert.match(capabilities, /embedding|Graph RAG/i, 'Capabilities should mention embedding / Graph RAG');
+  assert.match(
+    capabilities,
+    /self-hosted|bring your own|openai-compatible/i,
+    'Capabilities should present the self-hosted / bring-your-own embedding option'
+  );
+  const install = HTML.slice(HTML.indexOf('id="install"'), HTML.indexOf('id="howto"'));
+  assert.match(install, /ARGO_EMBEDDING_PROFILE/, 'Install should document the embedding profile switch');
+});
+
 test('reference-library-removed: homepage no longer exposes a KGlibrary reference library', () => {
   // GIVEN the reference library role moved to the community hub / graph-wiki
   // WHEN a visitor opens the homepage

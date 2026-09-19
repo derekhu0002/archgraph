@@ -55,6 +55,15 @@ test('readme: install section documents npm deployment and semantic requirements
   assert.match(section, /QWEN_KEY/, 'should mention the embedding API key');
 });
 
+test('readme: install documents pluggable / self-hosted embedding', () => {
+  // GIVEN semantic retrieval can point at any OpenAI-compatible endpoint (ARGO_EMBEDDING_PROFILE)
+  // WHEN a reader opens README.md
+  // THEN the Install section documents the profile switch and the self-hosted / OpenAI-compatible option
+  const section = sectionAfter(README, 'Install');
+  assert.match(section, /ARGO_EMBEDDING_PROFILE/, 'should document the embedding profile switch');
+  assert.match(section, /self-hosted|OpenAI-compatible/i, 'should present the self-hosted / OpenAI-compatible option');
+});
+
 test('readme: supported harnesses include OpenClaw', () => {
   // GIVEN ArchGraph has been adapted for OpenClaw (WP 2780 completed)
   // WHEN a reader opens README.md

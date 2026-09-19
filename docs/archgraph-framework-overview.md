@@ -157,6 +157,7 @@ argo-deploy
 安装后打开项目、启动编程 Agent，它会自动：**先定位**（在图里找到任务背后的架构元素）→ **再武装**（获取该元素关联的 Skill 与 Rule）→ **测试先行**（用 GIVEN-WHEN-THEN 驱动实现）→ **可追溯**（提交并回登记到图谱）。
 
 > 语义（Graph RAG）检索需额外配置 Neo4j 与向量引擎；其余能力开箱即用。
+> Embedding 可指向**任意 OpenAI 兼容端点**：沿用云端 profile，或设 `ARGO_EMBEDDING_PROFILE=openai-compatible` 接入自建模型，用于离线/内网/私有化部署（详见 `docs/self-hosted-embedding-deployment.md`）。
 
 ArchGraph 以 **Apache License 2.0** 开源：
 
