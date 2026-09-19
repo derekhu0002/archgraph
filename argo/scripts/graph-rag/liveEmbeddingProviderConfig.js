@@ -77,6 +77,27 @@ const READABLE_KEYS = Object.freeze([
   ...Object.keys(OPT_IN_KEYS),
 ]);
 const LEGACY_KEYS = Object.freeze(['ARGO_NEO4J_URI', 'ARGO_NEO4J_USERNAME', 'ARGO_NEO4J_PASSWORD']);
+// Host / process-level keys: read from the environment at launch, but NOT
+// accepted inside the .env file (see argo/.env.example Part 2). Kept explicit so
+// the coverage test (tests/env-key-coverage.test.js) can prove every env key
+// referenced by argo/scripts is classified — either a .env key, a host-only key,
+// or a legacy alias. This is what prevents "a key the code already uses is still
+// rejected as unknown".
+const HOST_ONLY_ENV_KEYS = Object.freeze([
+  'ARGO_ENV_FILE',
+  'ARGO_REPO_ROOT',
+  'ARGO_EA_QEA',
+  'ARGO_WORKSPACE_ROOTS',
+  'ARGO_SERVER_PATH',
+  'GRAPH_MCP_URL',
+  'EA_QEA_DEBUG',
+  'WORKSPACE_FOLDER',
+  'ARGO_TEST_TIMEOUT_MS',
+  'ARGO_MCP_MUTATION_RESPONSE_DEBUG',
+  'ARGO_MCP_SEMANTIC_DEDUP',
+  'ARGO_MCP_SEMANTIC_DEDUP_THRESHOLD',
+  'ARGO_SEMANTIC_DEDUP_THRESHOLD',
+]);
 const PROHIBITED_RUNTIME_FIELD_KEYS = Object.freeze(['neo4jUri', 'embeddingCredential']);
 const SECRET_KEYS = new Set(['ARGO_NEO4J_DATABASE_PASSWORD', 'QWEN_KEY', 'ARGO_RERANK_API_KEY', EMBEDDING_API_KEY_KEY]);
 const APPROVED = Object.freeze({
@@ -600,4 +621,6 @@ module.exports = {
   // preflighted as secrets.
   ENV_FILE_KEYS: READABLE_KEYS,
   ENV_FILE_SECRET_KEYS: Object.freeze(Array.from(SECRET_KEYS)),
+  HOST_ONLY_ENV_KEYS,
+  ENV_FILE_LEGACY_KEYS: LEGACY_KEYS,
 };
