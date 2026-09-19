@@ -4188,7 +4188,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-18，项目总管）：本体推理 + Neo4j 能力评估，两次均以证据判定停止。\n① 本体推理引擎（讨论）：ArchiMate 3.2 附录 B 已有官方推导规则 DR1–DR8（确定）/PDR1–PDR12（潜在），无需自创；ArchiMate 非 OWL，硬矛盾仅限特化反对称/组合偏序无环。实测关系分布 Association 40/Triggering 24/Assignment 16/Realization 11/Access 8/Serving 4，Specialization/Composition/Aggregation/Flow/Influence=0（DR1 输入为零），仅 1 处双向 Triggering 环（评审草稿↔修订草稿）。读时省 token 假设弱（链已在上下文时 LLM 单跳几乎免费）。结论：不建通用推理引擎；若做只做最小写时一致性（自环/环硬拦 + 推导冲突告警，待人类裁决）。\n② Neo4j 数据科学能力：实例 Neo4j 2026.07.1 Enterprise + GDS 2026.07.0（471 过程）+ APOC 2026.07.1，此前仓库零 gds./apoc. 调用。先做社区检测 P0（scripts/eval-communities.js + tests/community-probe.test.js AT-01/02；组件 community-index-001；T2 卡 overseer-community-probe-001）：253 节点/103 边，161 社区但 141 孤立单例（55.7%），模块度 0.888 受连通分量膨胀，真实社区与既有 View 高度重合（团队/职能纯度 1.0）→ stop: singleton-dominated。再核连通性：142 个无关系元素 142/142 均有语义投影记录（可语义召回），图谱是『视图组织目录+语义记忆』而非依赖图 → 补关系无必要。战略决策：Neo4j 关系中心类算法（社区/中心性/路径/链路预测）杠杆低，停止该方向（decision 已登记）。\ncommits：ed61cb0/a0d2ebc/eec5dda/8dedec6/a981692/3582cbb。待办：是否做最小写时一致性（有 1 真实样本）；或回归框架介绍系列/内容质量。\n经验/坑：该 GDS 版无 Louvain 随机种子配置键（randomSeed/seed 均被拒），确定性用 concurrency:1（两跑逐字节一致）；GDS 内存图不支持 String 节点属性（nodeQuery 返回 e.type 报 Unsupported conversion to GDS Value ... String），只返回 id；GDS 过程参数不接受 Cypher 参数化，需内联字面量；PS 5.1 `>` 重定向产生 UTF-16 使 ConvertFrom-Json 失败，JSON 比较用 node 解析。既有失败（environ，非本次）：EA import 系列、memory-eval 多跳、wechat-publisher-agent-file、excalidraw skill。",
+      "description": "会话摘要（2026-09-19，项目总管）：交付「可配置语义嵌入提供者」插件（面向内网/离线）。\n① 界定（证据修正前提）：内网卡点不是「向量引擎」——Neo4j 原生 vector index 已具备；真正卡点是生产检索把 embedding provider 硬编码为 approved 云 profile（defaultSemanticRetrieval.js requireApprovedProfile + liveEmbeddingProviderConfig.js APPROVED + 维度硬编码 1536），且在 .env 指向 localhost 会被拒。rerank 早已解耦（ARGO_RERANK_*），embedding 未解耦。\n② 选型（官方 config.json 实测）：「无 GPU + 必须 1536」下 gte-Qwen2-1.5B-instruct（hidden_size=1536）为唯一优雅解；Qwen3-Embedding-0.6B/bge-m3=1024 排除、4B=2560 偏重。它是 instrut 模型，查询侧需 Instruct 前缀。本机无 GPU（i9-12900H/20 线程/64GB），有 Docker，无 Ollama；Python 3.14 可能无 torch 轮子→优先 Docker 服务。\n③ 落地（Tier 3）：新增 ARGO_EMBEDDING_PROFILE=approved|openai-compatible（默认 approved 逐字节不变；openai-compatible 逐字读 env、缺项/坏维度 fail-closed）；ARGO_EMBEDDING_QUERY_INSTRUCTION（仅查询侧前缀，文档侧不加）与 ARGO_EMBEDDING_API_KEY（缺省回落 QWEN_KEY）；向量索引维度随 ARGO_EMBEDDING_DIMENSIONS 驱动；readiness/evidence/qualification 改用 resolved config。\n④ 验收：tests/embedding-provider-profile.test.js AT-embed-profile-01..06 全绿；相关 11 套件 61/61；全量 504 中 24 失败均既有 environ（EA import 系列、excalidraw、wechat agent 文件缺失、memory-eval 多跳、architecture-view-context），与本次无关。\n⑤ KG：新增组件 configurable-embedding-provider-001（view 298 Harness）；语义去重 0.8666 vs neo4j-semantic-projection-store，以 allowDuplicate+justification 放行（职责不同）。commits 44e2739（实现）+ 3c621c0（KG 登记）。\n⑥ 下一步（Phase 1）：本机起 OpenAI 兼容 /v1/embeddings 服务（Docker TEI 或 sentence-transformers+FastAPI）+ 下载 gte-Qwen2-1.5B-instruct，用 sandbox/probe-semantic-score.js 验证协议与召回；随后内网交付（离线权重/启动脚本/ACL/reindex）。\n经验/坑：ARCHITECTURE.md:140 曾漂移写 dimensions=1024（代码 1536），已修正。上次遗留待办：是否做最小写时一致性（有 1 真实样本）仍待裁决。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4210,8 +4210,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-18",
-          "description": "2026-09-18 会话摘要（本体推理讨论 + Neo4j GDS 社区/连通性评估，均判停止）"
+          "value": "2026-09-19",
+          "description": "2026-09-19 会话摘要：可配置 embedding provider 插件（approved|openai-compatible）+ 内网离线选型 gte-Qwen2-1.5B-instruct@1536"
         },
         {
           "name": "commit",
