@@ -8145,6 +8145,40 @@
       "name": "里程碑：发布 archgraph-argo@0.24.0（可配置 embedding provider profile）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "description": "环境文件键覆盖治理：保证「代码实际引用的 env 键」与「已知键集合」不漂移，同时**保持 .env 未知键严格拒绝**（像密钥者一律拒），不放开管控。分类三集合（单一事实源）：ENV_FILE_KEYS（可写入 .env 的白名单）、HOST_ONLY_ENV_KEYS（宿/进程级，不得放进 .env）、ENV_FILE_LEGACY_KEYS（历史别名，引用仅用于拒绝）。守护：新增可执行覆盖测试，扫描 argo/scripts 中引用的 env 键（process.env.X / process.env['X'] / env.X / 引号字符串 / 模板族 base），要求每个键属于上述三集合之一，否则失败；模板族（ARGO_SEMANTIC_{MEMORY,AUDIT}_THRESHOLD_}）要求在 ENV_FILE_KEYS 中有具体键覆盖；ENV_FILE_KEYS 与 HOST_ONLY 不得重叠。历史故障：脚本已使用某键却没进白名单 → 被当未知键、整份 .env 被拒 → 检索/写入失败（如昔年 ARGO_SEMANTIC_HYBRID）。源码：argo/scripts/graph-rag/liveEmbeddingProviderConfig.js（导出三集合）、tests/env-key-coverage.test.js。",
+      "id": "env-file-key-governance-001",
+      "name": "环境文件键覆盖治理（Env File Key Coverage Governance）",
+      "parent": "1961",
+      "testcases": [
+        {
+          "Input": "tests/env-key-coverage.test.js",
+          "acceptanceCriteria": "tests/env-key-coverage.test.js",
+          "description": "GIVEN argo/scripts 中实际引用的 env 键；WHEN 扫描并与 ENV_FILE_KEYS∩HOST_ONLY_ENV_KEYS∩ENV_FILE_LEGACY_KEYS 比对；THEN 无未分类键（任何新引用键未归类即失败）。",
+          "name": "AT-env-coverage-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/env-key-coverage.test.js",
+          "acceptanceCriteria": "tests/env-key-coverage.test.js",
+          "description": "GIVEN 模板族键（ARGO_SEMANTIC_{MEMORY,AUDIT}_THRESHOLD_}）与两类集合；WHEN 检查覆盖；THEN 每个模板族在白名单中有具体键覆盖，且 ENV_FILE_KEYS 与 HOST_ONLY_ENV_KEYS 不重叠。",
+          "name": "AT-env-coverage-02",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Application Component",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "44ab497",
+          "description": "argo/scripts/graph-rag/liveEmbeddingProviderConfig.js（导出 HOST_ONLY_ENV_KEYS + ENV_FILE_LEGACY_KEYS，与 ENV_FILE_KEYS 构成单一分类）；tests/env-key-coverage.test.js（AT-env-coverage-01/02 覆盖守护；已实证：注入未分类键即失败并报出键名）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -9609,7 +9643,8 @@
         "lossless-write-gate",
         "community-index-001",
         "configurable-embedding-provider-001",
-        "offline-embedding-deployment-001"
+        "offline-embedding-deployment-001",
+        "env-file-key-governance-001"
       ],
       "included_relationships": []
     },
