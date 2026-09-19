@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-15T16:17:36.385Z",
+  "generatedAt": "2026-09-19T03:17:40.698Z",
   "dataset": "ArchGraph navigation-capability eval (NV-01..20)",
   "overall": {
     "correct": 28,
     "total": 28
   },
-  "avgLatencyMs": 35,
+  "avgLatencyMs": 55,
   "byDimension": {
     "定位": {
       "correct": 5,
@@ -41,91 +41,91 @@
       "id": "NV-01",
       "dimension": "定位",
       "pass": true,
-      "latencyMs": 521,
+      "latencyMs": 813,
       "reason": "PASS"
     },
     {
       "id": "NV-02",
       "dimension": "定位",
       "pass": true,
-      "latencyMs": 16,
+      "latencyMs": 74,
       "reason": "PASS"
     },
     {
       "id": "NV-03",
       "dimension": "定位",
       "pass": true,
-      "latencyMs": 53,
+      "latencyMs": 56,
       "reason": "PASS"
     },
     {
       "id": "NV-04",
       "dimension": "定位",
       "pass": true,
-      "latencyMs": 14,
+      "latencyMs": 19,
       "reason": "PASS"
     },
     {
       "id": "NV-05",
       "dimension": "定位",
       "pass": true,
-      "latencyMs": 12,
+      "latencyMs": 32,
       "reason": "PASS"
     },
     {
       "id": "NV-06",
       "dimension": "可达",
       "pass": true,
-      "latencyMs": 29,
+      "latencyMs": 72,
       "reason": "PASS"
     },
     {
       "id": "NV-07",
       "dimension": "可达",
       "pass": true,
-      "latencyMs": 29,
+      "latencyMs": 40,
       "reason": "PASS"
     },
     {
       "id": "NV-08",
       "dimension": "可达",
       "pass": true,
-      "latencyMs": 15,
+      "latencyMs": 22,
       "reason": "PASS"
     },
     {
       "id": "NV-09",
       "dimension": "可达",
       "pass": true,
-      "latencyMs": 25,
+      "latencyMs": 38,
       "reason": "PASS"
     },
     {
       "id": "NV-10",
       "dimension": "可达",
       "pass": true,
-      "latencyMs": 24,
+      "latencyMs": 38,
       "reason": "PASS"
     },
     {
       "id": "NV-11",
       "dimension": "视角切换",
       "pass": true,
-      "latencyMs": 13,
+      "latencyMs": 22,
       "reason": "PASS"
     },
     {
       "id": "NV-12",
       "dimension": "视角切换",
       "pass": true,
-      "latencyMs": 14,
+      "latencyMs": 20,
       "reason": "PASS"
     },
     {
       "id": "NV-13",
       "dimension": "视角切换",
       "pass": true,
-      "latencyMs": 11,
+      "latencyMs": 20,
       "reason": "PASS"
     },
     {
@@ -139,98 +139,98 @@
       "id": "NV-15",
       "dimension": "视角切换",
       "pass": true,
-      "latencyMs": 13,
+      "latencyMs": 17,
       "reason": "PASS"
     },
     {
       "id": "NV-16",
       "dimension": "边界内导航",
       "pass": true,
-      "latencyMs": 11,
+      "latencyMs": 21,
       "reason": "PASS"
     },
     {
       "id": "NV-17",
       "dimension": "边界内导航",
       "pass": true,
-      "latencyMs": 15,
+      "latencyMs": 21,
       "reason": "PASS"
     },
     {
       "id": "NV-18",
       "dimension": "边界内导航",
       "pass": true,
-      "latencyMs": 13,
+      "latencyMs": 18,
       "reason": "PASS"
     },
     {
       "id": "NV-19",
       "dimension": "边界内导航",
       "pass": true,
-      "latencyMs": 16,
+      "latencyMs": 19,
       "reason": "PASS"
     },
     {
       "id": "NV-20",
       "dimension": "边界内导航",
       "pass": true,
-      "latencyMs": 16,
+      "latencyMs": 22,
       "reason": "PASS"
     },
     {
       "id": "CA-01",
       "dimension": "验收用例定位",
       "pass": true,
-      "latencyMs": 13,
+      "latencyMs": 18,
       "reason": "PASS"
     },
     {
       "id": "CA-02",
       "dimension": "验收用例定位",
       "pass": true,
-      "latencyMs": 13,
+      "latencyMs": 15,
       "reason": "PASS"
     },
     {
       "id": "CA-03",
       "dimension": "验收用例定位",
       "pass": true,
-      "latencyMs": 13,
+      "latencyMs": 18,
       "reason": "PASS"
     },
     {
       "id": "CR-01",
       "dimension": "提交登记",
       "pass": true,
-      "latencyMs": 10,
+      "latencyMs": 17,
       "reason": "PASS"
     },
     {
       "id": "CR-02",
       "dimension": "提交登记",
       "pass": true,
-      "latencyMs": 14,
+      "latencyMs": 18,
       "reason": "PASS"
     },
     {
       "id": "CI-01",
       "dimension": "变更影响",
       "pass": true,
-      "latencyMs": 10,
+      "latencyMs": 19,
       "reason": "PASS"
     },
     {
       "id": "CI-02",
       "dimension": "变更影响",
       "pass": true,
-      "latencyMs": 12,
+      "latencyMs": 25,
       "reason": "PASS"
     },
     {
       "id": "CI-03",
       "dimension": "变更影响",
       "pass": true,
-      "latencyMs": 11,
+      "latencyMs": 16,
       "reason": "PASS"
     }
   ]

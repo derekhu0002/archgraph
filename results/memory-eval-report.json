@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-15T16:17:51.294Z",
+  "generatedAt": "2026-09-19T03:17:57.401Z",
   "totalQuestions": 31,
   "passed": 29,
   "failed": 2,
@@ -54,13 +54,13 @@
     "pass": 3,
     "total": 3
   },
-  "avgLatencyMs": 161.25806451612902,
+  "avgLatencyMs": 173.25806451612902,
   "costStats": {
-    "rawCorpusTokens": 176373,
+    "rawCorpusTokens": 186933,
     "probeCount": 31,
-    "avgRetrievedTokens": 5526,
+    "avgRetrievedTokens": 5710,
     "minRetrievedTokens": 1070,
-    "maxRetrievedTokens": 11282,
+    "maxRetrievedTokens": 12262,
     "avgCompressionRatio": 0.969
   },
   "results": [
@@ -70,7 +70,7 @@
       "label": "谁是项目总管 Business Actor？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 10
+      "latencyMs": 16
     },
     {
       "id": "MQ-02",
@@ -78,7 +78,7 @@
       "label": "项目总管长期记忆子视图 id？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 8
+      "latencyMs": 10
     },
     {
       "id": "MQ-03",
@@ -86,7 +86,7 @@
       "label": "愿景三要素中「目标」是什么？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 9
     },
     {
       "id": "MQ-04",
@@ -94,7 +94,7 @@
       "label": "业界公认的三大记忆基准？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 10
     },
     {
       "id": "MQ-05",
@@ -102,7 +102,7 @@
       "label": "视频制作流程几个 Business Actor？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 9
     },
     {
       "id": "MQ-06",
@@ -110,7 +110,7 @@
       "label": "愿景固化在图内哪层记忆？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 9
     },
     {
       "id": "MQ-07",
@@ -118,7 +118,7 @@
       "label": "AgentOrganization 下有几类专项团队？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 8
+      "latencyMs": 12
     },
     {
       "id": "MQ-08",
@@ -126,7 +126,7 @@
       "label": "为什么说 ArchiMate 是手段？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 9
     },
     {
       "id": "MQ-09",
@@ -134,7 +134,7 @@
       "label": "长期记忆评测已登记元素有哪些？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 11
     },
     {
       "id": "MQ-10",
@@ -142,7 +142,7 @@
       "label": "人类角色与专项 Agent 角色各一例？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 14
+      "latencyMs": 21
     },
     {
       "id": "MQ-11",
@@ -150,7 +150,7 @@
       "label": "升格为总纲 vs 概念校正哪个先？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 14
     },
     {
       "id": "MQ-12",
@@ -158,7 +158,7 @@
       "label": "Actor 与愿景元素哪个先创建？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 12
+      "latencyMs": 25
     },
     {
       "id": "MQ-13",
@@ -166,7 +166,7 @@
       "label": "Terminal-Bench 与记忆评测哪个先完成？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 12
+      "latencyMs": 22
     },
     {
       "id": "MQ-14",
@@ -174,7 +174,7 @@
       "label": "图书馆类比在校正之前还是之后？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 9
     },
     {
       "id": "MQ-15",
@@ -182,7 +182,7 @@
       "label": "愿景描述演进 commit 顺序？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 7
     },
     {
       "id": "MQ-16",
@@ -190,15 +190,15 @@
       "label": "愿景最新表述的关键要素？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 10
     },
     {
       "id": "MQ-17",
       "dimension": "知识更新",
       "label": "view 429 当前多少子视图？",
       "pass": false,
-      "reason": "子视图数 17 != 15",
-      "latencyMs": 6
+      "reason": "子视图数 18 != 15",
+      "latencyMs": 7
     },
     {
       "id": "MQ-18",
@@ -206,7 +206,7 @@
       "label": "结构在愿景中的地位如何修正？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 7
     },
     {
       "id": "MQ-19",
@@ -214,7 +214,7 @@
       "label": "总纲是哪次 commit 加入？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 10
     },
     {
       "id": "MQ-20",
@@ -222,7 +222,7 @@
       "label": "愿景最新描述以哪个 commit 为准？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 9
     },
     {
       "id": "MQ-21",
@@ -230,7 +230,7 @@
       "label": "图谱是否记录 XYZ 长期记忆系统？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 7
     },
     {
       "id": "MQ-22",
@@ -238,7 +238,7 @@
       "label": "主管 LTM 是否有 2026-07-01 细节？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 6
+      "latencyMs": 7
     },
     {
       "id": "MQ-23",
@@ -246,7 +246,7 @@
       "label": "愿景元素是否有无关配色信息？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 7
+      "latencyMs": 9
     },
     {
       "id": "MH-01",
@@ -254,7 +254,7 @@
       "label": "愿景→LTM视图→Actor 两跳追踪？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 11
+      "latencyMs": 15
     },
     {
       "id": "MH-02",
@@ -262,7 +262,7 @@
       "label": "视图→Actor→组织 三跳，组织下还有哪些团队视图？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 19
+      "latencyMs": 23
     },
     {
       "id": "MH-03",
@@ -270,7 +270,7 @@
       "label": "评测工作包→视图→组织元素 两跳？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 13
+      "latencyMs": 15
     },
     {
       "id": "MH-04",
@@ -278,7 +278,7 @@
       "label": "公众号发布员→组织元素 两跳？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 13
+      "latencyMs": 16
     },
     {
       "id": "MH-05",
@@ -286,7 +286,7 @@
       "label": "项目总管 LTM 全部元素找全（含评测口径）？",
       "pass": false,
       "reason": "step0 缺少 overseer-mem-eval-001,overseer-query-rules-001,overseer-content-storage-001,overseer-subgraph-semantic-001",
-      "latencyMs": 7
+      "latencyMs": 10
     },
     {
       "id": "TR-01",
@@ -294,7 +294,7 @@
       "label": "两步回忆：语义定位愿景元素并取全文读目标？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 1902
+      "latencyMs": 1970
     },
     {
       "id": "TR-02",
@@ -302,7 +302,7 @@
       "label": "低分相关命中：paraphrase 查询仍召回愿景元素（宽松阈值）？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 1519
+      "latencyMs": 1585
     },
     {
       "id": "TR-03",
@@ -310,7 +310,7 @@
       "label": "无关查询拒答且不虚构（阈值分层拒答侧）？",
       "pass": true,
       "reason": "ok",
-      "latencyMs": 1343
+      "latencyMs": 1478
     }
   ]
 }
