@@ -8034,7 +8034,7 @@
         {
           "Input": "tests/embedding-provider-profile.test.js",
           "acceptanceCriteria": "tests/embedding-provider-profile.test.js",
-          "description": "GIVEN ARGO_EMBEDDING_QUERY_INSTRUCTION；WHEN 嵌入查询 vs 嵌入文档；THEN 前缀只加在查询侧，文档侧不加（不改协议、不污染文档向量）。",
+          "description": "GIVEN ARGO_EMBEDDING_QUERY_INSTRUCTION（单行 .env 可用 \\n 转义）；WHEN 嵌入查询 vs 嵌入文档；THEN 前缀只加在查询侧、文档侧不加，且 \\n/\\r/\\t 转义解码为真换行（不改协议、不污染文档向量）。",
           "name": "AT-embed-profile-05",
           "type": "Acceptance Test"
         },
@@ -8075,7 +8075,7 @@
       ]
     },
     {
-      "description": "内网自建 Embedding 部署方案（离线/私有化）：在无外网 embedding 服务的内网，用自建 OpenAI 兼容 /v1/embeddings 服务替代云端 approved profile，供 ArchGraph 语义检索使用；前置能力见组件 configurable-embedding-provider-001。\n模型/服务：Alibaba-NLP/gte-Qwen2-1.5B-instruct（原生 1536 维、32k 上下文、多语言、指令型）；sentence-transformers + FastAPI，CPU 可跑；参考实现 sandbox/local-embedding/{server.py,run_server.ps1,download_model.py,probe_http.js,verify_framework_client.js}。\n获取（联网机）：python download_model.py（HF_ENDPOINT=https://hf-mirror.com + 短读超时重试）下载权重至 sandbox/local-embedding/hf；将 hf/ + .venv/（或按 requirements.txt 重建）拷入内网。依赖：transformers==4.44.2（gte-Qwen2 远程码；4.57 报 DynamicCache.get_usable_length）、CPU flash_attn stub、sentence-transformers==3.0.1。\n运行：run_server.ps1（HF_HUB_OFFLINE=1、EMBED_MAX_SEQ=512、127.0.0.1:8080）。\n框架 .env（~/.argo/.env）：ARGO_EMBEDDING_PROFILE=openai-compatible；ARGO_EMBEDDING_BASE_URL=http://127.0.0.1:8080/v1；ARGO_EMBEDDING_MODEL=Alibaba-NLP/gte-Qwen2-1.5B-instruct；ARGO_EMBEDDING_PROVIDER=self-hosted-openai-compatible；ARGO_EMBEDDING_MODEL_VERSION=local-2026-09-19；ARGO_EMBEDDING_DIMENSIONS=1536；ARGO_EMBEDDING_QUERY_INSTRUCTION=Instruct: Given a web search query, retrieve relevant passages that answer the query\\nQuery: ；ARGO_EMBEDDING_API_KEY=<本地占位>；QWEN_KEY=<预检要求非空，本地端点可用占位值>；ARGO_NEO4J_*（既有）。\n重建索引：profile/model/provider 变化后运行 argo-init（initializeWorkspace）触发语义回填，重建 1536 向量索引与 readiness（维度不变，仅需重嵌入）。回滚：ARGO_EMBEDDING_PROFILE=approved 后重跑 argo-init。\n安全：.env 仍走既有 ACL 预检（ignored/untracked + 当前身份读、无 Everyone/BUILTIN\\Users）；密钥不入库不入日志。\n已验收据：Phase 1 协议与向量（1536、related>unrelated、框架 client 端到端）；Phase 2 召回 A/B（同 golden 705 查询、同策展文本、精确 per-channel cosine）：本地 recall@1 93.6 / r@5 99.1 / MRR 0.959 vs 云端 95.3 / 99.6 / 0.973；desc 反超 +0.7，Element −0.4、Relationship −1.0、name −3.4、View −8.4。已知缺口经人类裁决接受（2026-09-19）。",
+      "description": "内网自建 Embedding 部署方案（离线/私有化）：在无外网 embedding 服务的内网，用自建 OpenAI 兼容 /v1/embeddings 服务替代云端 approved profile，供 ArchGraph 语义检索使用；前置能力见组件 configurable-embedding-provider-001。完整交付 runbook：docs/self-hosted-embedding-deployment.md（本元素的仓库副本，KG 为权威）。\n前置：框架构建需包含 commit 44e2739（openai-compatible profile）；npm archgraph-argo@0.23.0 尚未包含。\n模型/服务：Alibaba-NLP/gte-Qwen2-1.5B-instruct（原生 1536 维、32k 上下文、多语言、指令型）；sentence-transformers + FastAPI，CPU 可跑。参考实现/脚本 sandbox/local-embedding/{server.py,setup.ps1,run_server.ps1,stop.ps1,probe.ps1,download_model.py,probe_http.js,verify_framework_client.js}：setup.ps1 一键引导（建 venv、装钉版依赖、装 flash_attn CPU stub、下载模型）；run_server.ps1 启动；stop.ps1 停止；probe.ps1 验证协议与框架 client。\n依赖：transformers==4.44.2（gte-Qwen2 远程码；4.57 报 DynamicCache.get_usable_length）、CPU flash_attn stub、sentence-transformers==3.0.1。\n运行：run_server.ps1（HF_HUB_OFFLINE=1、EMBED_MAX_SEQ=512、127.0.0.1:8080）；健康检查 GET /health 应返回 dimensions 1536。\n框架 .env（~/.argo/.env）：ARGO_EMBEDDING_PROFILE=openai-compatible；ARGO_EMBEDDING_BASE_URL=http://127.0.0.1:8080/v1；ARGO_EMBEDDING_MODEL=Alibaba-NLP/gte-Qwen2-1.5B-instruct；ARGO_EMBEDDING_PROVIDER=self-hosted-openai-compatible；ARGO_EMBEDDING_MODEL_VERSION=local-2026-09-19；ARGO_EMBEDDING_DIMENSIONS=1536；ARGO_EMBEDDING_QUERY_INSTRUCTION=Instruct: Given a web search query, retrieve relevant passages that answer the query\\nQuery: （单行 \\n 转义，框架会解码真换行；仅查询侧）；ARGO_EMBEDDING_API_KEY=<本地占位>；QWEN_KEY=<预检要求非空，本地端点可用占位值>；ARGO_NEO4J_*（既有）。改 .env 后必须重启宿主/MCP。\n重建索引：profile/model/provider 变化后运行 argo-init（initializeWorkspace）触发语义回填，重建 1536 向量索引与 readiness（维度不变，仅需重嵌入），直到 Aligned。回滚：ARGO_EMBEDDING_PROFILE=approved 后重启 MCP 再跑 argo-init。\n安全：.env 仍走既有 ACL 预检（ignored/untracked + 当前身份读、无 Everyone/BUILTIN\\Users）；密钥不入库不入日志。\n已验收据：Phase 1 协议与向量（1536、related>unrelated、框架 client 端到端）；Phase 2 召回 A/B（同 golden 705 查询、同策展文本、精确 per-channel cosine）：本地 recall@1 93.6 / r@5 99.1 / MRR 0.959 vs 云端 95.3 / 99.6 / 0.973；desc 反超 +0.7、Element −0.4、Relationship −1.0、name −3.4、View −8.4。已知缺口经人类裁决接受（2026-09-19）。",
       "id": "offline-embedding-deployment-001",
       "name": "内网自建 Embedding 部署方案（Offline Self-hosted Embedding Deployment）",
       "parent": "1961",
@@ -8089,6 +8089,21 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "75609ef",
+          "description": "argo/scripts/graph-rag/embeddingProviderProfile.js; tests/embedding-provider-profile.test.js（ARGO_EMBEDDING_QUERY_INSTRUCTION 支持单行 .env 的 \\n/\\t 转义解码；AT-embed-profile-05 扩展）"
+        },
+        {
+          "name": "commit",
+          "value": "09df401",
+          "description": "docs/self-hosted-embedding-deployment.md; sandbox/local-embedding/{setup.ps1,stop.ps1,probe.ps1,requirements.txt}（完整交付 runbook + 一键引导/停止/验证脚本；钉 transformers==4.44.2）"
+        },
+        {
+          "name": "doc",
+          "value": "docs/self-hosted-embedding-deployment.md",
+          "description": "仓库副本；KG 本元素为权威来源"
         }
       ]
     }
