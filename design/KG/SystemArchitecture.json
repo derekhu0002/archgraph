@@ -319,6 +319,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "313420b",
+          "description": "index.html; README.md; docs/archgraph-framework-overview.md（对外介绍补自建/可插拔 embedding 能力，对应 0.24.0）"
         }
       ],
       "testcases": [
@@ -466,6 +471,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "313420b",
+          "description": "README.md（Install 补可插拔/自建 embedding：任意 OpenAI 兼容端点、ARGO_EMBEDDING_PROFILE=openai-compatible、自建指南链接）；tests/readme.test.js（新增 AT）"
         }
       ],
       "testcases": [
@@ -618,6 +628,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "313420b",
+          "description": "index.html（Capabilities 新增 Bring your own embedding 卡；Install 指向任意 OpenAI 兼容端点/自建 + 指南链接）；tests/website.test.js（新增 AT）"
         }
       ],
       "testcases": []
