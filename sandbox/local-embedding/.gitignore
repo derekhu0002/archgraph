@@ -1,4 +1,6 @@
 .venv/
 hf/
+__pycache__/
+*.pyc
 *.log
 *.pid
