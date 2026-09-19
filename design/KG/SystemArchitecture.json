@@ -8061,6 +8061,16 @@
           "name": "commit",
           "value": "267754f",
           "description": "Phase 1 自建 embedding 服务验证：sandbox/local-embedding/{server.py,requirements.txt,Dockerfile,run_server.ps1,download_model.py,probe_model.py,probe_http.js,verify_framework_client.js}（commit 16a5d58 补 .gitignore）。实测 gte-Qwen2-1.5B-instruct @1536 CPU：related 0.684 vs unrelated 0.056，~0.8s/text；框架 client + openai-compatible profile → 本地 /v1/embeddings 返回 1536 维。Pitfall：gte-Qwen2 remote code 需 transformers==4.44.2 + flash_attn CPU stub（transformers 4.57 报 DynamicCache.get_usable_length）。"
+        },
+        {
+          "name": "commit",
+          "value": "6fa791e",
+          "description": "Phase 2 召回 A/B（同 golden 705 查询、同策展文本、精确 per-channel cosine）：sandbox/local-embedding/eval_local_vs_cloud.js + eval-report.json。local gte-Qwen2-1.5B(@512) vs cloud qwen3.7：ALL recall@1 93.6 vs 95.3（-1.7）、r@5 99.1 vs 99.6、MRR 0.959 vs 0.973；desc 99.6 vs 98.9（+0.7，反超）；Element 93.3 vs 93.7；Relationship 99.0 vs 100；name 89.5 vs 92.9（-3.4）；View 89.7 vs 98.1（-8.4，主要缺口）。关键证据：View 文本均短（avg 193 char，无 >2000），故缺口非 512 截断而是模型质量；仅 Element 有 20 条 >2000 char 受截断影响。结论：本地模型可用但存在真实召回退化，按召回优先不得静默接受。"
+        },
+        {
+          "name": "decision",
+          "value": "local-embedding-recall-gap-view-name",
+          "description": "决策待定（2026-09-19）：内网自建 gte-Qwen2-1.5B(@1536) 相比云端 qwen3.7 存在召回退化（ALL -1.7、View -8.4、name -3.4）。候选补救：（1）二阶段 rerank（框架已有，需本地 reranker 或池扩大）（2）提高 max_seq 去 Element 截断（3）调/去查询 Instruct 前缀（4）换/升模型。待人类裁决。"
         }
       ]
     }
