@@ -4188,7 +4188,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-19，项目总管）：交付「可配置语义嵌入提供者」插件（面向内网/离线）。\n① 界定（证据修正前提）：内网卡点不是「向量引擎」——Neo4j 原生 vector index 已具备；真正卡点是生产检索把 embedding provider 硬编码为 approved 云 profile（defaultSemanticRetrieval.js requireApprovedProfile + liveEmbeddingProviderConfig.js APPROVED + 维度硬编码 1536），且在 .env 指向 localhost 会被拒。rerank 早已解耦（ARGO_RERANK_*），embedding 未解耦。\n② 选型（官方 config.json 实测）：「无 GPU + 必须 1536」下 gte-Qwen2-1.5B-instruct（hidden_size=1536）为唯一优雅解；Qwen3-Embedding-0.6B/bge-m3=1024 排除、4B=2560 偏重。它是 instrut 模型，查询侧需 Instruct 前缀。本机无 GPU（i9-12900H/20 线程/64GB），有 Docker，无 Ollama；Python 3.14 可能无 torch 轮子→优先 Docker 服务。\n③ 落地（Tier 3）：新增 ARGO_EMBEDDING_PROFILE=approved|openai-compatible（默认 approved 逐字节不变；openai-compatible 逐字读 env、缺项/坏维度 fail-closed）；ARGO_EMBEDDING_QUERY_INSTRUCTION（仅查询侧前缀，文档侧不加）与 ARGO_EMBEDDING_API_KEY（缺省回落 QWEN_KEY）；向量索引维度随 ARGO_EMBEDDING_DIMENSIONS 驱动；readiness/evidence/qualification 改用 resolved config。\n④ 验收：tests/embedding-provider-profile.test.js AT-embed-profile-01..06 全绿；相关 11 套件 61/61；全量 504 中 24 失败均既有 environ（EA import 系列、excalidraw、wechat agent 文件缺失、memory-eval 多跳、architecture-view-context），与本次无关。\n⑤ KG：新增组件 configurable-embedding-provider-001（view 298 Harness）；语义去重 0.8666 vs neo4j-semantic-projection-store，以 allowDuplicate+justification 放行（职责不同）。commits 44e2739（实现）+ 3c621c0（KG 登记）。\n⑥ 下一步（Phase 1）：本机起 OpenAI 兼容 /v1/embeddings 服务（Docker TEI 或 sentence-transformers+FastAPI）+ 下载 gte-Qwen2-1.5B-instruct，用 sandbox/probe-semantic-score.js 验证协议与召回；随后内网交付（离线权重/启动脚本/ACL/reindex）。\n经验/坑：ARCHITECTURE.md:140 曾漂移写 dimensions=1024（代码 1536），已修正。上次遗留待办：是否做最小写时一致性（有 1 真实样本）仍待裁决。",
+      "description": "会话摘要（2026-09-19，项目总管）：交付「可配置语义嵌入提供者」+ 内网/离线自建 embedding 全链路（研究→插件→本机验证→召回对比→交付）。\n① 界定（证据修正）：内网卡点是生产路径硬编码 approved 云 embedding profile（非「向量引擎」；Neo4j 原生 vector index 已有）。rerank 早已解耦，embedding 未解耦。\n② 插件（commit 44e2739）：ARGO_EMBEDDING_PROFILE=approved|openai-compatible（默认 approved 逐字节不变；openai-compatible 逐字读 env、缺项/坏维度 fail-closed）；ARGO_EMBEDDING_QUERY_INSTRUCTION（仅查询侧）+ ARGO_EMBEDDING_API_KEY（缺省回落 QWEN_KEY）；索引维度随 ARGO_EMBEDDING_DIMENSIONS。组件 configurable-embedding-provider-001；AT-embed-profile-01..06 全绿。\n③ 选型：无GPU+必须1536 ⇒ gte-Qwen2-1.5B-instruct（官方 config hidden_size=1536）。\n④ Phase 1（commit 267754f）：Docker Hub 被墙→本机 venv(py3.12)；HF 直连超时→本机代理 127.0.0.1:7890；Xet/大文件断流→hf-mirror+短超时重试；gte-Qwen2 远程码需 transformers==4.44.2 + CPU flash_attn stub；服务 sandbox/local-embedding（/v1/embeddings、1536、CPU ~0.31s/text@512）。框架 client + openai-compatible profile 端到端通过。\n⑤ Phase 2（commit 6fa791e）：同 golden 705 查询 A/B。local r@1 93.6 / r@5 99.1 / MRR .959 vs cloud 95.3 / 99.6 / .973；desc +0.7、Element −0.4、Rel −1.0、name −3.4、View −8.4（主缺口）。证据：View 文本均短→非截断，是模型质量。人类裁决：接受缺口并交付（decision local-embedding-recall-gap-view-name）。\n⑥ Phase 4（commit daebd21）：KG 交付元素 offline-embedding-deployment-001（模型/获取/运行/.env/重建索引/回滚/安全/已验收据）。\n经验/坑：本地长任务用 Start-Process 后台+轮询（绕开 shell 超时）；本地 CPU 批量按长度分桶避免 padding；gte-Qwen2 远程码与新版 transformers 不兼容。上次遗留：是否做最小写时一致性（有 1 真实样本）仍待裁决。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4211,7 +4211,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-19",
-          "description": "2026-09-19 会话摘要：可配置 embedding provider 插件（approved|openai-compatible）+ 内网离线选型 gte-Qwen2-1.5B-instruct@1536"
+          "description": "2026-09-19 会话：可配置 embedding 插件 + 内网自建 embedding 全链路（Phase 1-4）交付"
         },
         {
           "name": "commit",
@@ -8079,7 +8079,18 @@
       "id": "offline-embedding-deployment-001",
       "name": "内网自建 Embedding 部署方案（Offline Self-hosted Embedding Deployment）",
       "parent": "1961",
-      "type": "Work Package"
+      "type": "Work Package",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "daebd21",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（Phase 4 交付：内网自建 embedding 部署方案元素落地；全链论据见 Phase 1 commit 267754f + Phase 2 commit 6fa791e）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ]
     }
   ],
   "relationships": [
