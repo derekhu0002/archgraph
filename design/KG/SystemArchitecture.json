@@ -8056,6 +8056,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "267754f",
+          "description": "Phase 1 自建 embedding 服务验证：sandbox/local-embedding/{server.py,requirements.txt,Dockerfile,run_server.ps1,download_model.py,probe_model.py,probe_http.js,verify_framework_client.js}（commit 16a5d58 补 .gitignore）。实测 gte-Qwen2-1.5B-instruct @1536 CPU：related 0.684 vs unrelated 0.056，~0.8s/text；框架 client + openai-compatible profile → 本地 /v1/embeddings 返回 1536 维。Pitfall：gte-Qwen2 remote code 需 transformers==4.44.2 + flash_attn CPU stub（transformers 4.57 报 DynamicCache.get_usable_length）。"
         }
       ]
     }
