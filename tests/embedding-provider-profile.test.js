@@ -145,6 +145,11 @@ test('AT-embed-profile-05: query instruction applies to the query side only', ()
   assert.equal(composeQueryEmbeddingInput('find the auth element', prefix), `${prefix}find the auth element`);
   assert.equal(composeQueryEmbeddingInput('find the auth element', ''), 'find the auth element');
   assert.equal(composeQueryEmbeddingInput('find the auth element', undefined), 'find the auth element');
+  assert.equal(
+    composeQueryEmbeddingInput('find the auth element', 'Instruct: retrieve architecture\\nQuery: '),
+    `${prefix}find the auth element`,
+    'single-line .env escapes must decode to real newlines',
+  );
 
   const src = fs.readFileSync(path.join(ROOT, 'argo/scripts/graph-rag/defaultSemanticRetrieval.js'), 'utf8');
   assert.match(

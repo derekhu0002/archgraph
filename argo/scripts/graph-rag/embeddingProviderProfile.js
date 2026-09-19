@@ -49,10 +49,20 @@ function requireEmbeddingDimensions(value) {
 
 // The query-side input may carry an instruction prefix (e.g. gte-Qwen2's
 // "Instruct: <task>\nQuery: <query>"); document-side input stays raw so stored
-// vectors are never polluted by a query-only prefix.
+// vectors are never polluted by a query-only prefix. The prefix commonly comes
+// from a single-line `.env` value, so `\n`/`\r`/`\t` escapes are decoded here.
+function normalizeInstruction(instruction) {
+  if (typeof instruction !== 'string') return '';
+  return instruction
+    .replace(/\\r\\n/g, '\n')
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\r')
+    .replace(/\\t/g, '\t');
+}
+
 function composeQueryEmbeddingInput(text, instruction) {
   const query = text == null ? '' : String(text);
-  const prefix = typeof instruction === 'string' ? instruction : '';
+  const prefix = normalizeInstruction(instruction);
   return prefix === '' ? query : `${prefix}${query}`;
 }
 
