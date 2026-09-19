@@ -8041,7 +8041,18 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Application Component"
+      "type": "Application Component",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "44e2739",
+          "description": "可配置 embedding provider profile（approved | openai-compatible）：argo/scripts/graph-rag/embeddingProviderProfile.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/graph-rag/semantic-persistence/productionSemanticNeo4jAdapter.js; argo/scripts/graph-rag/liveEmbeddingIndexGate.js; argo/scripts/graph-rag/liveEmbeddingProviderClient.js; argo/.env.example; argo/scripts/graph-rag/ARCHITECTURE.md; tests/embedding-provider-profile.test.js; design/KG/SystemArchitecture.json; archgraph.qea（AT-embed-profile-01..06 全绿；全量回归 24 个既有 environ 失败，均非本次）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ]
     }
   ],
   "relationships": [
