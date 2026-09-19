@@ -8071,6 +8071,11 @@
           "name": "decision",
           "value": "local-embedding-recall-gap-view-name",
           "description": "决策待定（2026-09-19）：内网自建 gte-Qwen2-1.5B(@1536) 相比云端 qwen3.7 存在召回退化（ALL -1.7、View -8.4、name -3.4）。候选补救：（1）二阶段 rerank（框架已有，需本地 reranker 或池扩大）（2）提高 max_seq 去 Element 截断（3）调/去查询 Instruct 前缀（4）换/升模型。待人类裁决。"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.24.0",
+          "description": "npm archgraph-argo@0.24.0（shasum 0972d86979ae02e1f57eeb0647511f9263be3de1）；发布里程碑 overseer-argo-0-24-0-release-001"
         }
       ]
     },
@@ -8106,6 +8111,25 @@
           "description": "仓库副本；KG 本元素为权威来源"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（发布 archgraph-argo@0.24.0）",
+          "name": "commit",
+          "value": "6a20bc9"
+        },
+        {
+          "description": "npm 发布 + 全局安装 + argo-deploy -SkipEnv（本机 .env 未改）",
+          "name": "release",
+          "value": "archgraph-argo@0.24.0"
+        }
+      ],
+      "description": "里程碑：发布 archgraph-argo@0.24.0（可配置语义嵌入提供者 profile，面向内网/离线自建 embedding）。内容：新增 ARGO_EMBEDDING_PROFILE=approved|openai-compatible（默认 approved 逐字节不变）；ARGO_EMBEDDING_QUERY_INSTRUCTION（仅查询侧，支持单行 .env 的 \\n/\\t 转义）；ARGO_EMBEDDING_API_KEY（缺省回落 QWEN_KEY）；向量索引维度随 ARGO_EMBEDDING_DIMENSIONS 驱动；新增 argo/scripts/graph-rag/embeddingProviderProfile.js。验收 AT-embed-profile-01..06。发布：npm archgraph-argo@0.24.0（shasum 0972d86979ae02e1f57eeb0647511f9263be3de1）→ npm i -g → argo-deploy -SkipEnv。本机 ~/.argo/.env 未改动（embedding 仍为原云端 qwen3.7-text-embedding，sha256 前后一致 E4422DA1…）。待办：重启宿主以加载新常驻 MCP 代码。配套文档 docs/self-hosted-embedding-deployment.md + 元素 offline-embedding-deployment-001。",
+      "id": "overseer-argo-0-24-0-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.24.0（可配置 embedding provider profile）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -10079,7 +10103,8 @@
         "overseer-argo-0-22-0-release-001",
         "overseer-argo-0-22-1-release-001",
         "overseer-argo-0-22-2-release-001",
-        "overseer-argo-0-23-0-release-001"
+        "overseer-argo-0-23-0-release-001",
+        "overseer-argo-0-24-0-release-001"
       ],
       "included_relationships": []
     },
