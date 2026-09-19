@@ -29,7 +29,7 @@ function createProductionSemanticNeo4jAdapter(dependencies = {}) {
         }));
       }
       return withSession(driver, dependencies.configuration, async session => {
-        await ensureVectorIndexes(session);
+        await ensureVectorIndexes(session, resolveEmbeddingDimensions(dependencies.configuration));
         await ensureFulltextIndexes(session);
         const results = [];
         for (const [channel, definition] of Object.entries(CHANNEL_INDEXES)) {
@@ -93,11 +93,16 @@ function createProductionSemanticNeo4jAdapter(dependencies = {}) {
 
 const EMBEDDING_DIMENSIONS = 1536;
 
-async function ensureVectorIndexes(session) {
+function resolveEmbeddingDimensions(configuration) {
+  const value = configuration && configuration.embeddingDimensions;
+  return Number.isInteger(value) && value > 0 ? value : EMBEDDING_DIMENSIONS;
+}
+
+async function ensureVectorIndexes(session, dimensions = EMBEDDING_DIMENSIONS) {
   for (const definition of Object.values(CHANNEL_INDEXES)) {
     // CREATE ... IF NOT EXISTS cannot change an existing index's dimensions, so
-    // when the approved embedding dimension changes (e.g. 1024 -> 1536) drop the
-    // stale index first and recreate it at the approved dimension.
+    // when the configured embedding dimension changes (e.g. 1024 -> 1536) drop
+    // the stale index first and recreate it at the configured dimension.
     const existing = await executeRead(
       session,
       'SHOW INDEXES YIELD name, type, options WHERE type = \'VECTOR\' AND name = $name RETURN name, options',
@@ -106,7 +111,7 @@ async function ensureVectorIndexes(session) {
     if (existing.records.length > 0) {
       const options = existing.records[0].get('options');
       const dim = options && options.indexConfig && options.indexConfig['vector.dimensions'];
-      if (dim !== EMBEDDING_DIMENSIONS) {
+      if (dim !== dimensions) {
         await executeWrite(session, `DROP INDEX ${definition.indexName} IF EXISTS`, {});
       }
     }
@@ -115,7 +120,7 @@ async function ensureVectorIndexes(session) {
       [
         `CREATE VECTOR INDEX ${definition.indexName} IF NOT EXISTS`,
         `FOR (semantic:${definition.label}) ON (semantic.vector)`,
-        `OPTIONS { indexConfig: { \`vector.dimensions\`: ${EMBEDDING_DIMENSIONS}, \`vector.similarity_function\`: "cosine" } }`,
+        `OPTIONS { indexConfig: { \`vector.dimensions\`: ${dimensions}, \`vector.similarity_function\`: "cosine" } }`,
       ].join('\n'),
       {},
     );
@@ -177,4 +182,5 @@ function cloneRecord(record) {
 
 module.exports = {
   createProductionSemanticNeo4jAdapter,
+  resolveEmbeddingDimensions,
 };

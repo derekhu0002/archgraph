@@ -6,6 +6,14 @@ const {
 const {
   getArgoEnvPath,
 } = require('../argo-paths.js');
+const {
+  PROFILE_KEY,
+  QUERY_INSTRUCTION_KEY,
+  API_KEY: EMBEDDING_API_KEY_KEY,
+  PROFILE_APPROVED,
+  requireSupportedEmbeddingProfile,
+  requireEmbeddingDimensions,
+} = require('./embeddingProviderProfile.js');
 
 const CONFIG_KEYS = Object.freeze([
   'ARGO_EMBEDDING_BASE_URL',
@@ -63,11 +71,14 @@ const READABLE_KEYS = Object.freeze([
   ...CONFIG_KEYS,
   ...OPTIONAL_CONFIG_KEYS,
   ...RETRIEVAL_TUNING_KEYS,
+  PROFILE_KEY,
+  QUERY_INSTRUCTION_KEY,
+  EMBEDDING_API_KEY_KEY,
   ...Object.keys(OPT_IN_KEYS),
 ]);
 const LEGACY_KEYS = Object.freeze(['ARGO_NEO4J_URI', 'ARGO_NEO4J_USERNAME', 'ARGO_NEO4J_PASSWORD']);
 const PROHIBITED_RUNTIME_FIELD_KEYS = Object.freeze(['neo4jUri', 'embeddingCredential']);
-const SECRET_KEYS = new Set(['ARGO_NEO4J_DATABASE_PASSWORD', 'QWEN_KEY', 'ARGO_RERANK_API_KEY']);
+const SECRET_KEYS = new Set(['ARGO_NEO4J_DATABASE_PASSWORD', 'QWEN_KEY', 'ARGO_RERANK_API_KEY', EMBEDDING_API_KEY_KEY]);
 const APPROVED = Object.freeze({
   ARGO_EMBEDDING_BASE_URL: 'https://llm-clids9mqc5o1mbvb.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
   ARGO_EMBEDDING_MODEL: 'qwen3.7-text-embedding',
@@ -194,15 +205,16 @@ async function resolveTrusted({
     }
     attribution[key] = present(processValue) ? 'process' : 'file';
   }
-  for (const [key, expected] of Object.entries(APPROVED)) {
-    if (normalized[key] !== expected) throw safeError('LIVE_PROVIDER_CONFIGURATION_REQUIRED');
-  }
+  const profile = requireSupportedEmbeddingProfile(
+    selectOptional(processValues, fileValues, PROFILE_KEY),
+  );
+  const profileConfiguration = buildProfileConfiguration(normalized, profile);
+  const embeddingQueryInstruction = selectOptional(processValues, fileValues, QUERY_INSTRUCTION_KEY);
+  const explicitEmbeddingApiKey = selectOptional(processValues, fileValues, EMBEDDING_API_KEY_KEY);
   const configuration = Object.freeze({
-    embeddingBaseUrl: normalized.ARGO_EMBEDDING_BASE_URL,
-    embeddingModel: normalized.ARGO_EMBEDDING_MODEL,
-    embeddingProvider: normalized.ARGO_EMBEDDING_PROVIDER,
-    embeddingModelVersion: normalized.ARGO_EMBEDDING_MODEL_VERSION,
-    embeddingDimensions: 1536,
+    ...profileConfiguration,
+    embeddingQueryInstruction,
+    embeddingApiKey: explicitEmbeddingApiKey || normalized.QWEN_KEY,
     neo4jDatabaseUrl: normalized.ARGO_NEO4J_DATABASE_URL,
     neo4jDatabaseUsername: normalized.ARGO_NEO4J_DATABASE_USERNAME,
     neo4jDatabasePassword: normalized.ARGO_NEO4J_DATABASE_PASSWORD,
@@ -214,6 +226,52 @@ async function resolveTrusted({
     configuration,
     attribution: Object.freeze({ ...attribution }),
   });
+}
+
+// Profile-aware embedding identity. `approved` (the default) enforces the
+// human-approved cloud values byte-for-byte; `openai-compatible` accepts the
+// configured self-hosted endpoint verbatim but still fails closed on any missing
+// key or invalid dimension (no implicit default).
+function buildProfileConfiguration(normalized, profileValue) {
+  const profile = requireSupportedEmbeddingProfile(profileValue);
+  for (const key of [
+    'ARGO_EMBEDDING_BASE_URL',
+    'ARGO_EMBEDDING_MODEL',
+    'ARGO_EMBEDDING_PROVIDER',
+    'ARGO_EMBEDDING_MODEL_VERSION',
+  ]) {
+    if (!present(normalized[key])) {
+      const error = safeError('LIVE_PROVIDER_CONFIGURATION_REQUIRED');
+      error.field = key;
+      throw error;
+    }
+  }
+  if (profile === PROFILE_APPROVED) {
+    for (const [key, expected] of Object.entries(APPROVED)) {
+      if (normalized[key] !== expected) throw safeError('LIVE_PROVIDER_CONFIGURATION_REQUIRED');
+    }
+  }
+  return Object.freeze({
+    embeddingProfile: profile,
+    embeddingBaseUrl: normalized.ARGO_EMBEDDING_BASE_URL,
+    embeddingModel: normalized.ARGO_EMBEDDING_MODEL,
+    embeddingProvider: normalized.ARGO_EMBEDDING_PROVIDER,
+    embeddingModelVersion: normalized.ARGO_EMBEDDING_MODEL_VERSION,
+    embeddingDimensions: requireEmbeddingDimensions(normalized.ARGO_EMBEDDING_DIMENSIONS),
+  });
+}
+
+function selectOptional(processValues, fileValues, key) {
+  const processValue = processValues.get(key);
+  const fileValue = fileValues.get(key);
+  if (present(processValue) && present(fileValue) && processValue !== fileValue) {
+    throw safeError(SECRET_KEYS.has(key)
+      ? 'SECRET_SOURCE_CONFLICT'
+      : 'LIVE_PROVIDER_CONFIGURATION_CONFLICT');
+  }
+  if (present(processValue)) return processValue;
+  if (present(fileValue)) return fileValue;
+  return '';
 }
 
 function optionalDatabaseName(value, repositoryRoot) {
@@ -534,6 +592,8 @@ module.exports = {
   resolveApprovedLiveConfiguration,
   withApprovedLiveConfigurationTestComposition,
   posixModeIsSecretSafe,
+  buildProfileConfiguration,
+  APPROVED_EMBEDDING_VALUES: APPROVED,
   // The authoritative set of keys an approved `.env` file may carry. The
   // committed `.env.example` must document exactly this set (see
   // tests/env-example.test.js); SECRET_KEYS marks the subset that must be

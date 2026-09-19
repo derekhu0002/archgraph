@@ -11,7 +11,7 @@ function createLiveEmbeddingProviderClient({ configuration, transport }) {
           {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${configuration.qwenKey}`,
+              Authorization: `Bearer ${configuration.embeddingApiKey || configuration.qwenKey}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({

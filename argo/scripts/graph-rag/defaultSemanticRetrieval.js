@@ -35,6 +35,9 @@ const {
 const {
   markPhase,
 } = require('./mcpCrashDiagnostics.js');
+const {
+  composeQueryEmbeddingInput,
+} = require('./embeddingProviderProfile.js');
 
 const APPROVED_SOURCE_KEYS = Object.freeze([
   'ARGO_EMBEDDING_BASE_URL',
@@ -165,6 +168,7 @@ function createDefaultSemanticRetrieval(dependencies = {}) {
           composition,
           canonicalGraph,
           activeReadinessBoundary,
+          expectedEmbeddingQualification(configurationEvidence.configuration),
         );
         if (!evidence.alignment.aligned) {
           await attemptAutomaticAlignment({
@@ -176,6 +180,7 @@ function createDefaultSemanticRetrieval(dependencies = {}) {
             composition,
             canonicalGraph,
             activeReadinessBoundary,
+            expectedEmbeddingQualification(configurationEvidence.configuration),
           );
           if (!evidence.alignment.aligned) {
             throw semanticAutomaticAlignmentFailed(evidence.alignment);
@@ -219,11 +224,12 @@ function createDefaultSemanticRetrieval(dependencies = {}) {
           && activeTestComposition.useReadinessBoundary !== true
           ? undefined
           : readinessBoundary;
-        await composition.resolveConfiguration();
+        const configurationEvidence = await composition.resolveConfiguration();
         const evidence = await readAndEvaluatePersistentReadiness(
           composition,
           canonicalGraph,
           activeReadinessBoundary,
+          expectedEmbeddingQualification(configurationEvidence.configuration),
         );
         return publicReadinessOutcome(evidence.alignment);
       } finally {
@@ -255,9 +261,12 @@ async function executeWpP2Retrieval({
     transport: composition.transport,
   });
   markPhase('retrieval:embed:start');
-  const vector = await provider.embed(request.intent);
+  const vector = await provider.embed(composeQueryEmbeddingInput(
+    request.intent,
+    configurationEvidence.configuration.embeddingQueryInstruction,
+  ));
   markPhase('retrieval:embed:done');
-  requireQualifiedVector(vector);
+  requireQualifiedVector(vector, configurationEvidence.configuration.embeddingDimensions);
   const purpose = request && typeof request.purpose === 'string' ? request.purpose : '';
   const strict = AUDIT_PURPOSES.has(purpose);
   const topK = Number.isInteger(request.topK) && request.topK > 0 ? request.topK : resolveTopK();
@@ -652,7 +661,7 @@ async function readPersistentReadiness(neo4jDriver, readinessBoundary) {
   return { readiness, requireQualification: false };
 }
 
-function evaluatePersistentReadiness(readiness, canonicalGraph, requireQualification = false) {
+function evaluatePersistentReadiness(readiness, canonicalGraph, requireQualification = false, expectedQualification = APPROVED_PROFILE) {
   const expectedCanonicalVersion = deriveCanonicalVersion(canonicalGraph);
   const records = new Map((Array.isArray(readiness.channels) ? readiness.channels : [])
     .map(record => [record.channel, record]));
@@ -669,10 +678,10 @@ function evaluatePersistentReadiness(readiness, canonicalGraph, requireQualifica
       || record.contentVersion !== readiness.contentVersion
       || record.indexVersion !== readiness.indexVersion
       || (requireQualification && (
-        record.provider !== APPROVED_PROFILE.provider
-        || record.model !== APPROVED_PROFILE.model
-        || record.modelVersion !== APPROVED_PROFILE.version
-        || record.dimensions !== APPROVED_PROFILE.dimensions
+        record.provider !== expectedQualification.provider
+        || record.model !== expectedQualification.model
+        || record.modelVersion !== expectedQualification.version
+        || record.dimensions !== expectedQualification.dimensions
         || record.queryable !== true
         || record.coherent !== true
       ))
@@ -720,15 +729,25 @@ function arrayEvidence(value, fallback = []) {
     : fallback;
 }
 
-async function readAndEvaluatePersistentReadiness(composition, canonicalGraph, readinessBoundary) {
+async function readAndEvaluatePersistentReadiness(composition, canonicalGraph, readinessBoundary, expectedQualification) {
   const persistent = await readPersistentReadiness(composition.neo4jDriver, readinessBoundary);
   const readiness = persistent.readiness;
   const alignment = evaluatePersistentReadiness(
     readiness,
     canonicalGraph,
     persistent.requireQualification,
+    expectedQualification,
   );
   return { composition, readiness, alignment };
+}
+
+function expectedEmbeddingQualification(configuration) {
+  return {
+    provider: configuration.embeddingProvider,
+    model: configuration.embeddingModel,
+    version: configuration.embeddingModelVersion,
+    dimensions: configuration.embeddingDimensions,
+  };
 }
 
 function publicFailureEvidence(readiness) {
@@ -929,10 +948,10 @@ async function completeSemanticResult({
     canonicalGraph,
     embeddingQualification: {
       approvedByHuman: true,
-      provider: APPROVED_PROFILE.provider,
-      model: APPROVED_PROFILE.model,
-      version: APPROVED_PROFILE.version,
-      dimensions: APPROVED_PROFILE.dimensions,
+      provider: configurationEvidence.configuration.embeddingProvider,
+      model: configurationEvidence.configuration.embeddingModel,
+      version: configurationEvidence.configuration.embeddingModelVersion,
+      dimensions: configurationEvidence.configuration.embeddingDimensions,
     },
     neo4jRetrievalBoundary: {
       async retrieve() {
@@ -967,10 +986,10 @@ async function completeSemanticResult({
     seedsByType: Object.freeze(seedsByType),
     configurationEvidence: Object.freeze({
       attribution: configurationEvidence.attribution,
-      provider: APPROVED_PROFILE.provider,
-      model: APPROVED_PROFILE.model,
-      modelVersion: APPROVED_PROFILE.version,
-      dimensions: APPROVED_PROFILE.dimensions,
+      provider: configurationEvidence.configuration.embeddingProvider,
+      model: configurationEvidence.configuration.embeddingModel,
+      modelVersion: configurationEvidence.configuration.embeddingModelVersion,
+      dimensions: configurationEvidence.configuration.embeddingDimensions,
     }),
     canonicalVersion: versions.canonicalVersion,
     contentVersion: versions.contentVersion,
@@ -1159,10 +1178,10 @@ function semanticAutomaticAlignmentFailed(alignment, sourceError) {
   return error;
 }
 
-function requireQualifiedVector(vector) {
+function requireQualifiedVector(vector, dimensions = APPROVED_PROFILE.dimensions) {
   if (
     !Array.isArray(vector)
-    || vector.length !== APPROVED_PROFILE.dimensions
+    || vector.length !== dimensions
     || vector.some(value => typeof value !== 'number' || !Number.isFinite(value))
   ) {
     throw safeError('LIVE_PROVIDER_RESPONSE_INVALID');

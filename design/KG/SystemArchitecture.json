@@ -7991,6 +7991,57 @@
         }
       ],
       "description": "里程碑 P0（2026-09-18，项目总管）：评估用 Neo4j 内置 GDS 做社区检测、补齐‘全局检索’是否值得。背景：实例已装 GDS 2026.07.0（471 过程）+ APOC 2026.07.1，但仓库此前零 gds./apoc. 调用。交付：scripts/eval-communities.js（按 graphKey 用 gds.graph.project.cypher 建内存图 → gds.louvain.stream/stats → drop；纯只读、canonical 字节不变；--summary 紧凑模式）+ tests/community-probe.test.js（AT-community-probe-01/02）；KG 组件 community-index-001（Harness 视图 298）。测量结论：253 节点/103 边；161 社区但 141 为孤立单例（singletonNodeRatio 55.7%）；模块度 0.888 受连通分量膨胀；真实社区（规模 8–17）与既有 View 高度重合（DevelopmentTeam/insight-team/media+video team 纯度 1.0，多智能体职能 0.923）→ 停止判据 stop: singleton-dominated，暂缓 P1（全局社区索引对既有 View 增量价值低）。更值得做的发现：55.7% 元素无任何结构关系（图谱连通性缺口）。坑：①该 GDS 版无 Louvain 随机种子配置键（randomSeed/seed 均报 Unexpected configuration key），确定性改用 concurrency:1（两跑逐字节一致）；②GDS 内存图不支持 String 节点属性（nodeQuery 返回 e.type 会报 Unsupported conversion to GDS Value ... String），只能返回 id；③GDS 过程参数不接受 Cypher 参数化（$graphName/$nodeQuery 触发同错），需内联字面量（graphKey 为常量，内联安全）；④PS 5.1 `>` 重定向产生 UTF-16，ConvertFrom-Json 失败，JSON 比较应用 node 解析。"
+    },
+    {
+      "description": "可配置语义嵌入提供者：让语义检索的 embedding 后端从「硬编码的云端 approved profile」变为可显式配置的 OpenAI 兼容端点，以支持内网/离线私有化部署（内网无外网 embedding 服务）。新增开关 ARGO_EMBEDDING_PROFILE=approved|openai-compatible，默认 approved 且行为逐字节不变；openai-compatible 时从 env 读取 base_url/model/provider/model_version/dimensions（不再做等值门禁，但缺项即拒），并可用 ARGO_EMBEDDING_API_KEY（可选密钥，缺省回落 QWEN_KEY）与 ARGO_EMBEDDING_QUERY_INSTRUCTION（仅查询侧前缀，供指令型嵌入模型如 gte-Qwen2-1.5B-instruct 使用）。向量索引维度随 ARGO_EMBEDDING_DIMENSIONS 驱动（当前锁定 1536）。源码：argo/scripts/graph-rag/embeddingProviderProfile.js、liveEmbeddingProviderConfig.js、defaultSemanticRetrieval.js、liveEmbeddingIndexGate.js、semantic-persistence/productionSemanticNeo4jAdapter.js、mutationEmbeddingVectorLifecycle.js、systemarchitecture-mcp-server.js。",
+      "id": "configurable-embedding-provider-001",
+      "name": "可配置语义嵌入提供者（Configurable Embedding Provider）",
+      "parent": "1961",
+      "testcases": [
+        {
+          "Input": "tests/embedding-provider-profile.test.js",
+          "acceptanceCriteria": "tests/embedding-provider-profile.test.js",
+          "description": "GIVEN profile 解析；WHEN ARGO_EMBEDDING_PROFILE 未设或为 approved；THEN 行为与现状一致：逐字段等于 approved 常量，任何偏离即抛 LIVE_PROVIDER_CONFIGURATION_REQUIRED。",
+          "name": "AT-embed-profile-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/embedding-provider-profile.test.js",
+          "acceptanceCriteria": "tests/embedding-provider-profile.test.js",
+          "description": "GIVEN openai-compatible profile；WHEN 五个 embedding 键齐全；THEN 解析成功并返回 env 驱动的 baseUrl/model/provider/modelVersion/dimensions，不做等值门禁。",
+          "name": "AT-embed-profile-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/embedding-provider-profile.test.js",
+          "acceptanceCriteria": "tests/embedding-provider-profile.test.js",
+          "description": "GIVEN openai-compatible profile；WHEN 任一必填键缺失；THEN 抛 LIVE_PROVIDER_CONFIGURATION_REQUIRED（无隐式默认）。",
+          "name": "AT-embed-profile-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/embedding-provider-profile.test.js",
+          "acceptanceCriteria": "tests/embedding-provider-profile.test.js",
+          "description": "GIVEN 维度配置；WHEN 解析配置与建向量索引；THEN embeddingDimensions 取自 ARGO_EMBEDDING_DIMENSIONS（1536）并驱动索引维度，查询向量长度校验与之一致。",
+          "name": "AT-embed-profile-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/embedding-provider-profile.test.js",
+          "acceptanceCriteria": "tests/embedding-provider-profile.test.js",
+          "description": "GIVEN ARGO_EMBEDDING_QUERY_INSTRUCTION；WHEN 嵌入查询 vs 嵌入文档；THEN 前缀只加在查询侧，文档侧不加（不改协议、不污染文档向量）。",
+          "name": "AT-embed-profile-05",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/embedding-provider-profile.test.js",
+          "acceptanceCriteria": "tests/embedding-provider-profile.test.js",
+          "description": "GIVEN 自建端点；WHEN ARGO_EMBEDDING_API_KEY 设/未设；THEN 优先用它作为 Bearer，缺省回落 QWEN_KEY。",
+          "name": "AT-embed-profile-06",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Application Component"
     }
   ],
   "relationships": [
@@ -9453,7 +9504,8 @@
         "hybrid-semantic-retrieval-001",
         "semantic-rerank-001",
         "lossless-write-gate",
-        "community-index-001"
+        "community-index-001",
+        "configurable-embedding-provider-001"
       ],
       "included_relationships": []
     },

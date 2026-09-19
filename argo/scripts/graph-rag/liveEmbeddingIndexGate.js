@@ -46,7 +46,7 @@ function createLiveEmbeddingIndexGate(dependencies = {}) {
       requireInput(input);
       const vector = await client.embed(input.input);
       if (
-        vector.length !== 1536
+        vector.length !== configuration.embeddingDimensions
         || vector.some(value => typeof value !== 'number' || !Number.isFinite(value))
       ) {
         throw safeError('LIVE_PROVIDER_RESPONSE_INVALID');
@@ -79,7 +79,6 @@ function requireApprovedConfiguration(configuration, qualification) {
     || qualification.model !== configuration.embeddingModel
     || qualification.version !== configuration.embeddingModelVersion
     || qualification.dimensions !== configuration.embeddingDimensions
-    || qualification.dimensions !== 1536
   ) {
     throw safeError('LIVE_PROVIDER_INDEX_WRITE_PROHIBITED');
   }
