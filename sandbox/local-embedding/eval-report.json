@@ -1,0 +1,42 @@
+{
+  "local": {
+    "label": "local gte-Qwen2-1.5B",
+    "seconds": 1733,
+    "ALL": {
+      "n": 705,
+      "recall1": 93.6,
+      "recall5": 99.1,
+      "mrr": 0.959
+    },
+    "name": {
+      "n": 420,
+      "recall1": 89.5,
+      "recall5": 98.6,
+      "mrr": 0.933
+    },
+    "desc": {
+      "n": 285,
+      "recall1": 99.6,
+      "recall5": 100,
+      "mrr": 0.998
+    },
+    "Element": {
+      "n": 495,
+      "recall1": 93.3,
+      "recall5": 99.6,
+      "mrr": 0.959
+    },
+    "ArchitectureRelationship": {
+      "n": 103,
+      "recall1": 99,
+      "recall5": 100,
+      "mrr": 0.995
+    },
+    "View": {
+      "n": 107,
+      "recall1": 89.7,
+      "recall5": 96.3,
+      "mrr": 0.926
+    }
+  }
+}
