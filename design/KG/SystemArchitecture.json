@@ -8059,6 +8059,13 @@
           "description": "GIVEN 自建端点；WHEN ARGO_EMBEDDING_API_KEY 设/未设；THEN 优先用它作为 Bearer，缺省回落 QWEN_KEY。",
           "name": "AT-embed-profile-06",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/embedding-provider-profile.test.js",
+          "acceptanceCriteria": "tests/embedding-provider-profile.test.js",
+          "description": "GIVEN openai-compatible profile（自建端点）；WHEN canonical semantic-init/backfill 解析配置；THEN embedding baseUrl/model/provider/dimensions 取自 profile（非云端硬编码），embeddingCredential=embeddingApiKey||qwenKey；且 resolveDefaultSemanticConfiguration 经 resolveApprovedLiveConfiguration、不得引用 W31_APPROVED_PROFILE。",
+          "name": "AT-embed-profile-07",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Application Component",
@@ -8091,6 +8098,11 @@
           "name": "release",
           "value": "archgraph-argo@0.24.0",
           "description": "npm archgraph-argo@0.24.0（shasum 0972d86979ae02e1f57eeb0647511f9263be3de1）；发布里程碑 overseer-argo-0-24-0-release-001"
+        },
+        {
+          "name": "commit",
+          "value": "4f744b3",
+          "description": "修复 argo init/backfill 忽略 embedding profile 的问题：argo/scripts/graph-rag/semanticInitConfiguration.js（新增 buildDefaultSemanticConfiguration）；argo/scripts/systemarchitecture-mcp-server.js（resolveDefaultSemanticConfiguration 改为委托 resolveApprovedLiveConfiguration，移除硬编码 W31_APPROVED_PROFILE / 无用辅助）；tests/embedding-provider-profile.test.js（AT-embed-profile-07 映射 + source guard）。7/7 通过，无回归。"
         }
       ]
     },
