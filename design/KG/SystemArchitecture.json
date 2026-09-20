@@ -8219,6 +8219,110 @@
       "name": "里程碑：发布 archgraph-argo@0.24.1（修复 argo init/backfill 忽略 embedding profile）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "name": "insightMethod",
+          "value": "McKinsey 5-step (define/decompose/hypothesize/validate/synthesize)"
+        },
+        {
+          "name": "retrievalChannel",
+          "value": "webfetch (BAILIAN MCP unavailable: tool not mounted, DASHSCOPE_API_KEY unset, endpoint 401); 20 primary sources"
+        },
+        {
+          "name": "topic",
+          "value": "KG write-time logical contradiction / inconsistency detection"
+        }
+      ],
+      "description": "里程碑（2026-09-20，洞察Lead insight-lead-001 编排麦肯锡新五步法）：洞察『知识图谱/本体/语义网/图数据库的写入时（write-time/事务内）逻辑矛盾检测』——检测新写入与已有图谱的逻辑不一致/矛盾（与重复本质不同：非对称蕴含/否定 vs 对称相似度）。①界定=问题陈述 Q0（目标/范围/成功标准/约束）。②拆解=MECE 六支议题树（A 形式化标准层 / B 图库引擎层 / C 工业平台实践 / D 校验时机与架构 / E ML·LLM / F 矛盾类型学）。③假设 H1–H7。④验证=BAILIAN MCP 本会话未挂载（bailian-websearch 工具未挂载 + DASHSCOPE_API_KEY 未设 + 端点 401），改用 webfetch 真实抓取 20 个一手来源（W3C OWL 2 Primer/SHACL/SWRL/OWL 2 Profiles、HermiT、Openllet、ELK、RDF4J ShaclSail、Stardog ICV + reasoning consistency、Ontotext GraphDB SHACL、Neo4j constraints、Amazon Neptune SPARQL/compliance、ROBOT reason、pySHACL、MultiNLI、SelfCheckGPT、KGE 综述、Great Expectations），未以模型记忆冒充；Wikidata 约束页 4 次抓取 transport error，已如实声明局限。⑤结论=『有，但分层』：写时阻塞在形式化约束层/三元组库事务层最成熟（RDF4J ShaclSail 在 commit() 生成校验计划并在违反时抛异常回滚事务；Stardog ICV guard mode 在数据库修改时强制约束使事务失败；GraphDB SHACL 仓库 commit() 抛校验报告；本体 CI 以 ROBOT reason 对 incoherency=inconsistency+unsatisfiable 非零退出阻塞）；关键在于区分『确定性可阻塞』（值冲突/基数/互斥/封闭/显式 not·negative assertion）与『建议型 advisory』，以及写时 vs 离线（全 DL 一致性靠 HermiT/Openllet/ELK profiles 离线或显式检查，Stardog reasoning consistency；OWL 2 EL/RL 可多项式并增量近实时）。Neo4j 原生仅有唯一/存在/类型/key、Neptune 无 ICV（H4 证伪）。LLM/NLI 仅建议型且误报（MultiNLI/SelfCheckGPT），KGE 面向 link prediction 非一致性。开放难题=跨多跳/传递/并发涌现矛盾（RDF4J 官方记录两个各自合法事务可共同违反，需 SNAPSHOT+写锁）。裁决：ArchGraph 现有 L0/L1 去重、结构校验、无损门禁正确但缺『L2 矛盾门』；建议三层落地（L2-A 确定性可阻塞不变量 / L2-B 建议型 advisory 带 severity / L2-C 全局审计角色）+ 前置条件（标注样本与 AT、recall-first、fail-open、单写者、绝不用相似度判矛盾）。交付 docs/graph-write-time-contradiction-insight.md；验收 AT-write-contradiction-insight-01..10。",
+      "id": "insight-lead-milestone-write-time-contradiction-001",
+      "name": "里程碑：知识图谱写入时逻辑矛盾检测业界洞察",
+      "testcases": [
+        {
+          "acceptanceCriteria": "tests/graph-write-time-contradiction-insight.test.js",
+          "description": "GIVEN 洞察团队以麦肯锡五步法产出『知识图谱写入时逻辑矛盾检测』方向洞察；WHEN 检查 docs/graph-write-time-contradiction-insight.md；THEN 报告包含核心结论、问题陈述、MECE 议题树、假设清单、逐条验证结论、对比表、来源清单与局限章节。",
+          "Input": "docs/graph-write-time-contradiction-insight.md",
+          "name": "AT-write-contradiction-insight-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/graph-write-time-contradiction-insight.test.js",
+          "description": "GIVEN 验证阶段无法使用强制的 BAILIAN MCP；WHEN 检查报告；THEN 报告显式声明 BAILIAN 未挂载、说明实际检索通道 webfetch 与具体卡点（工具未挂载 / DASHSCOPE_API_KEY 未设 / 401），未以模型记忆冒充验证结论。",
+          "Input": "docs/graph-write-time-contradiction-insight.md",
+          "name": "AT-write-contradiction-insight-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/graph-write-time-contradiction-insight.test.js",
+          "description": "GIVEN 核心问题强调『矛盾』与『重复』本质不同；WHEN 检查报告；THEN 报告显式区分：矛盾是非对称的蕴含/否定关系，重复是（对称）相似度问题，绝不能用相似度作为矛盾判据。",
+          "Input": "docs/graph-write-time-contradiction-insight.md",
+          "name": "AT-write-contradiction-insight-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/graph-write-time-contradiction-insight.test.js",
+          "description": "GIVEN 议题树覆盖形式化标准层、引擎层与工业实践；WHEN 检查报告；THEN 报告覆盖并对比 OWL 2、SHACL、SWRL、ELK、HermiT、Pellet/Openllet、RDF4J ShaclSail、Stardog、Ontotext GraphDB、Neo4j、Amazon Neptune、ROBOT、Great Expectations。",
+          "Input": "docs/graph-write-time-contradiction-insight.md",
+          "name": "AT-write-contradiction-insight-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/graph-write-time-contradiction-insight.test.js",
+          "description": "GIVEN 问题要求区分写时阻塞 vs 事后/离线、确定性 vs 建议/评分型；WHEN 检查报告；THEN 报告明确给出该区分并引证 commit() 内校验（RDF4J/GraphDB）与 Stardog ICV guard mode 的写时阻塞证据。",
+          "Input": "docs/graph-write-time-contradiction-insight.md",
+          "name": "AT-write-contradiction-insight-05",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/graph-write-time-contradiction-insight.test.js",
+          "description": "GIVEN 议题树包含 ML/LLM 方向；WHEN 检查报告；THEN 报告把 NLI/LLM 定为建议型（有误报），并明确 KGE 面向 link prediction/补全而非一致性检测。",
+          "Input": "docs/graph-write-time-contradiction-insight.md",
+          "name": "AT-write-contradiction-insight-06",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/graph-write-time-contradiction-insight.test.js",
+          "description": "GIVEN 综合建议须可决策；WHEN 检查报告；THEN 报告给出对比表与对 ArchGraph 的分层落地建议（L2 矛盾门、severity 分级、fail-open、recall-first、单写者、preview→apply 门禁）。",
+          "Input": "docs/graph-write-time-contradiction-insight.md",
+          "name": "AT-write-contradiction-insight-07",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/graph-write-time-contradiction-insight.test.js",
+          "description": "GIVEN 部分一手来源未能取得；WHEN 检查报告；THEN 报告如实声明 Wikidata 抓取失败与中文社区/YouTube 等未覆盖缺口，不以臆测补全。",
+          "Input": "docs/graph-write-time-contradiction-insight.md",
+          "name": "AT-write-contradiction-insight-08",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/graph-write-time-contradiction-insight.test.js",
+          "description": "GIVEN 洞察已登记进意图图谱；WHEN 查询；THEN 存在 Business Object『里程碑：知识图谱写入时逻辑矛盾检测业界洞察』（id insight-lead-milestone-write-time-contradiction-001），带非空 description 与 GIVEN-WHEN-THEN testcase。",
+          "Input": "design/KG/SystemArchitecture.json",
+          "name": "AT-write-contradiction-insight-09",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/graph-write-time-contradiction-insight.test.js",
+          "description": "GIVEN 洞察属洞察Lead 的长期记忆；WHEN 检查视图；THEN 该里程碑元素位于视图 insight-lead-ltm-001（洞察Lead T2 长期记忆，parent_element_id=insight-lead-001）成员中。",
+          "Input": "design/KG/SystemArchitecture.json",
+          "name": "AT-write-contradiction-insight-10",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -10144,7 +10248,8 @@
         "insight-lead-milestone-multiproject-ea-feasibility-001",
         "insight-lead-milestone-reverse-ea2kg-001",
         "insight-lead-milestone-tablet-app-001",
-        "insight-lead-milestone-multiagent-delegation-001"
+        "insight-lead-milestone-multiagent-delegation-001",
+        "insight-lead-milestone-write-time-contradiction-001"
       ],
       "included_relationships": []
     },
