@@ -5219,7 +5219,7 @@
       "id": "insight-lead-wm-summary-001",
       "name": "洞察Lead工作记忆摘要",
       "type": "Business Object",
-      "description": "洞察Lead T1 工作记忆摘要（2026-09-15，框架级可递归派生通用Agent机制业界洞察）：1) 本轮=人类诉求『业界有没有这种 Agent 定义和协作的做法』（主Agent拆子任务→委派；子Agent可递归派生或结果回馈重拆；单一通用角色+派生权限继承）。按麦肯锡五步法完成正式洞察→LTM milestone insight-lead-milestone-multiagent-delegation-001（commit c0dafe7，交付 docs/multi-agent-recursive-delegation-insight.md + tests/multi-agent-recursive-delegation-insight.test.js，AT-multiagent-insight-01..07 全绿，validateSystemArchitecture 通过）。核心结论=『部分是』：递归派生+委派+结果回馈已成体系（Claude Code 子Agent默认可再派生3层、可配 CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH；Anthropic orchestrator-worker 较单Agent +90.2%），但『单一通用角色+派生权限一路无差别继承』非业界主流且与 least-privilege 冲突（H5 被证伪）。裁决：人类设定②递归派生③结果回馈重拆可直接落地；①单一通用角色可落地但须任务契约补足专精；④必须改造为『继承但权限单调不放大+深度/数量上限+图谱写入 preview→apply 门禁』。建议 R1–R5 + 7 条反模式。2) 关键卡点：BAILIAN MCP 本会话不可用（bailian-websearch 工具未挂载 + DASHSCOPE_API_KEY 未设置 + 端点 401），改用 webfetch 真实抓取 14 个一手来源并如实标注——与团队既有先例一致。3) 交付：报告+KG 登记+commit c0dafe7 已登记元素；仅洞察、未实施框架改造。4) 经验：①『上下文过大→变笨』有强实证（Chroma Context Rot 18模型；Anthropic 注意力预算/n²）；②多Agent最大风险不是派生能力本身，而是『权限放大』与『并发写同一状态冲突』（Cognition 两原则）；③BAILIAN 不可用时 webfetch 是可接受的真实检索兜底，但必须显式声明覆盖局限。",
+      "description": "洞察Lead T1 工作记忆摘要（2026-09-20，知识图谱『写入时逻辑矛盾检测』业界洞察）：1) 本轮=人类诉求『写入时除查重外能否检查与已有图谱的逻辑矛盾』（矛盾≠重复：非对称蕴含/否定 vs 对称相似度）。按麦肯锡五步法完成正式洞察→LTM milestone insight-lead-milestone-write-time-contradiction-001（commit d0c1c45，交付 docs/graph-write-time-contradiction-insight.md + tests/graph-write-time-contradiction-insight.test.js，AT-write-contradiction-insight-01..10 全绿，validateSystemArchitecture 通过）。核心结论=『有，但分层』：写时阻塞在形式化约束层/三元组库事务层最成熟（RDF4J ShaclSail 于 commit() 校验违反即抛异常回滚；Stardog ICV guard mode 修改时强制约束使事务失败；GraphDB commit() 抛校验报告；本体 CI 用 ROBOT reason 对 incoherency 非零退出），但只有『确定性可阻塞』子集（值冲突/基数/互斥/封闭/显式 not·negative）能硬阻塞，其余为建议型 advisory；全 DL 一致性靠离线/显式 reasoner（HermiT/Openllet/ELK；OWL2 EL/RL 可多项式+增量）；Neo4j/Neptune 无原生矛盾检测（H4 证伪）；LLM/NLI 仅建议型有误报，KGE 面向 link prediction 非一致性；开放难题=多跳/并发涌现矛盾（RDF4J 记录并发事务可共同违反，需 SNAPSHOT+写锁）。裁决=ArchGraph 现有 L0/L1 去重、结构校验、无损门禁正确但缺 L2 矛盾门；建议三层落地（L2-A 确定性可阻塞不变量 / L2-B 建议型 advisory 带 severity / L2-C 全局审计）+ 前置条件（标注样本/AT、recall-first、fail-open、单写者、绝不用相似度判矛盾）。2) 关键卡点：BAILIAN MCP 本会话不可用（工具未挂载 + DASHSCOPE_API_KEY 未设 + 端点 401），改用 webfetch 真实抓取 20 个一手来源并如实标注；Wikidata 约束页 4 次 transport error 已声明为覆盖缺口。3) 交付：报告+KG 登记+commit d0c1c45 已登记元素；仅洞察、未实施 L2 改造。4) 经验：①矛盾是可形式化可判定（OWL disjointness/functional/NPA；OWL2 RL 以 false 表 contradiction），业界写时阻塞成熟但默认建议优先、阻塞 opt-in、按 severity 分级；②工程难点在并发/多跳涌现矛盾与隔离，须单写者；③LLM/KGE 不能当确定性矛盾判据。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -5231,7 +5231,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-15"
+          "value": "2026-09-20"
         },
         {
           "name": "commit",
@@ -5262,6 +5262,11 @@
           "name": "commit",
           "value": "3120121",
           "description": "design/KG/SystemArchitecture.json（反向 EA→图谱设计里程碑 + T1 摘要）"
+        },
+        {
+          "name": "commit",
+          "value": "d0c1c45",
+          "description": "design/KG/SystemArchitecture.json（洞察Lead T1 摘要更新：知识图谱写入时逻辑矛盾检测业界洞察）"
         }
       ]
     },
@@ -8245,6 +8250,11 @@
         {
           "name": "topic",
           "value": "KG write-time logical contradiction / inconsistency detection"
+        },
+        {
+          "name": "commit",
+          "value": "d0c1c45",
+          "description": "docs/graph-write-time-contradiction-insight.md; tests/graph-write-time-contradiction-insight.test.js; design/KG/SystemArchitecture.json; archgraph.qea（知识图谱写入时逻辑矛盾检测业界洞察 + 里程碑登记 + 验收 AT-write-contradiction-insight-01..10）"
         }
       ],
       "description": "里程碑（2026-09-20，洞察Lead insight-lead-001 编排麦肯锡新五步法）：洞察『知识图谱/本体/语义网/图数据库的写入时（write-time/事务内）逻辑矛盾检测』——检测新写入与已有图谱的逻辑不一致/矛盾（与重复本质不同：非对称蕴含/否定 vs 对称相似度）。①界定=问题陈述 Q0（目标/范围/成功标准/约束）。②拆解=MECE 六支议题树（A 形式化标准层 / B 图库引擎层 / C 工业平台实践 / D 校验时机与架构 / E ML·LLM / F 矛盾类型学）。③假设 H1–H7。④验证=BAILIAN MCP 本会话未挂载（bailian-websearch 工具未挂载 + DASHSCOPE_API_KEY 未设 + 端点 401），改用 webfetch 真实抓取 20 个一手来源（W3C OWL 2 Primer/SHACL/SWRL/OWL 2 Profiles、HermiT、Openllet、ELK、RDF4J ShaclSail、Stardog ICV + reasoning consistency、Ontotext GraphDB SHACL、Neo4j constraints、Amazon Neptune SPARQL/compliance、ROBOT reason、pySHACL、MultiNLI、SelfCheckGPT、KGE 综述、Great Expectations），未以模型记忆冒充；Wikidata 约束页 4 次抓取 transport error，已如实声明局限。⑤结论=『有，但分层』：写时阻塞在形式化约束层/三元组库事务层最成熟（RDF4J ShaclSail 在 commit() 生成校验计划并在违反时抛异常回滚事务；Stardog ICV guard mode 在数据库修改时强制约束使事务失败；GraphDB SHACL 仓库 commit() 抛校验报告；本体 CI 以 ROBOT reason 对 incoherency=inconsistency+unsatisfiable 非零退出阻塞）；关键在于区分『确定性可阻塞』（值冲突/基数/互斥/封闭/显式 not·negative assertion）与『建议型 advisory』，以及写时 vs 离线（全 DL 一致性靠 HermiT/Openllet/ELK profiles 离线或显式检查，Stardog reasoning consistency；OWL 2 EL/RL 可多项式并增量近实时）。Neo4j 原生仅有唯一/存在/类型/key、Neptune 无 ICV（H4 证伪）。LLM/NLI 仅建议型且误报（MultiNLI/SelfCheckGPT），KGE 面向 link prediction 非一致性。开放难题=跨多跳/传递/并发涌现矛盾（RDF4J 官方记录两个各自合法事务可共同违反，需 SNAPSHOT+写锁）。裁决：ArchGraph 现有 L0/L1 去重、结构校验、无损门禁正确但缺『L2 矛盾门』；建议三层落地（L2-A 确定性可阻塞不变量 / L2-B 建议型 advisory 带 severity / L2-C 全局审计角色）+ 前置条件（标注样本与 AT、recall-first、fail-open、单写者、绝不用相似度判矛盾）。交付 docs/graph-write-time-contradiction-insight.md；验收 AT-write-contradiction-insight-01..10。",
