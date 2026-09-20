@@ -4216,7 +4216,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-19，项目总管）：交付「可配置语义嵌入提供者」+ 内网/离线自建 embedding 全链路（研究→插件→本机验证→召回对比→交付）。\n① 界定（证据修正）：内网卡点是生产路径硬编码 approved 云 embedding profile（非「向量引擎」；Neo4j 原生 vector index 已有）。rerank 早已解耦，embedding 未解耦。\n② 插件（commit 44e2739）：ARGO_EMBEDDING_PROFILE=approved|openai-compatible（默认 approved 逐字节不变；openai-compatible 逐字读 env、缺项/坏维度 fail-closed）；ARGO_EMBEDDING_QUERY_INSTRUCTION（仅查询侧）+ ARGO_EMBEDDING_API_KEY（缺省回落 QWEN_KEY）；索引维度随 ARGO_EMBEDDING_DIMENSIONS。组件 configurable-embedding-provider-001；AT-embed-profile-01..06 全绿。\n③ 选型：无GPU+必须1536 ⇒ gte-Qwen2-1.5B-instruct（官方 config hidden_size=1536）。\n④ Phase 1（commit 267754f）：Docker Hub 被墙→本机 venv(py3.12)；HF 直连超时→本机代理 127.0.0.1:7890；Xet/大文件断流→hf-mirror+短超时重试；gte-Qwen2 远程码需 transformers==4.44.2 + CPU flash_attn stub；服务 sandbox/local-embedding（/v1/embeddings、1536、CPU ~0.31s/text@512）。框架 client + openai-compatible profile 端到端通过。\n⑤ Phase 2（commit 6fa791e）：同 golden 705 查询 A/B。local r@1 93.6 / r@5 99.1 / MRR .959 vs cloud 95.3 / 99.6 / .973；desc +0.7、Element −0.4、Rel −1.0、name −3.4、View −8.4（主缺口）。证据：View 文本均短→非截断，是模型质量。人类裁决：接受缺口并交付（decision local-embedding-recall-gap-view-name）。\n⑥ Phase 4（commit daebd21）：KG 交付元素 offline-embedding-deployment-001（模型/获取/运行/.env/重建索引/回滚/安全/已验收据）。\n经验/坑：本地长任务用 Start-Process 后台+轮询（绕开 shell 超时）；本地 CPU 批量按长度分桶避免 padding；gte-Qwen2 远程码与新版 transformers 不兼容。上次遗留：是否做最小写时一致性（有 1 真实样本）仍待裁决。",
+      "description": "会话摘要（2026-09-20，项目总管）：\n① 评估人类伙伴优化点「写图时除查重外，再检查与已有内容的逻辑矛盾」：结论=矛盾≠重复（非对称蕴含/否定 vs 对称相似度），不能复用相似度机制；建议分层——确定性不变量写时阻塞 + 建议型 advisory + 离线全局审计。定位到既有角色「图谱语义合理性分析师」(1963) 与历史悬置项「最小写时一致性」。\n② 委派洞察Lead（麦肯锡五步法）完成业界洞察：docs/graph-write-time-contradiction-insight.md（commits d0c1c45/2dc9d80）。结论「有但分层」：写时阻塞在形式化约束层（SHACL/SWRL）与三元组库事务层（RDF4J ShaclSail / Stardog ICV guard mode / GraphDB 在 commit() 校验）最成熟；Neo4j 仅完整性约束、Neptune 无原生矛盾检测；多跳/并发涌现矛盾与文本矛盾仍是开放难题。建议增设 L2 矛盾门（A 确定性可阻塞 / B 建议型 advisory / C 离线审计），前置：标注样本+AT、recall-first、fail-open、单写者。BAILIAN MCP 未挂载（缺 DASHSCOPE_API_KEY，端点 401），改用 webfetch 抓 20 个一手来源并如实声明缺口。\n③ 应要求交付「语义网校验/推理技术学习参考」（背景+技术地图+学习路径+参考链接）HTML+PDF 并入库入图：docs/semantic-web-validation-learning-guide.{html,pdf}；KG 新增视图 graph-consistency-tech-ref-001（parent 1249）+ Business Object semantic-web-validation-learning-guide-001（因与洞察里程碑语义相似 0.8617 被 L1 语义门禁拦截，以 allowDuplicate+justification 放行）；AT-sw-learning-guide-01（tests/semantic-web-learning-guide.test.js，7/7）；validateSystemArchitecture 通过；commit 11df50c。\n④ 未决/待办：L2 最小可阻塞不变量子集与是否立项尚待人类伙伴裁决；BAILIAN MCP 本会话未挂载。\n经验/坑：headless Edge（--headless=new --no-pdf-header-footer --print-to-pdf）可生成中文 PDF；其 QQBrowser importer 报错为无害噪声。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4238,8 +4238,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-19",
-          "description": "2026-09-19 会话：可配置 embedding 插件 + 内网自建 embedding 全链路（Phase 1-4）交付"
+          "value": "2026-09-20",
+          "description": "2026-09-20 会话：L2 矛盾检测评估 + 业界洞察委派 + 语义网学习参考（HTML+PDF）入库入图"
         },
         {
           "name": "commit",
@@ -8358,6 +8358,11 @@
           "name": "references_section",
           "value": "docs/semantic-web-validation-learning-guide.html#7",
           "description": "参考资料清单锚点（W3C 规范 / 工具与实现 / 书籍 / 工业落地与论文）"
+        },
+        {
+          "name": "commit",
+          "value": "11df50c",
+          "description": "docs/semantic-web-validation-learning-guide.html; docs/semantic-web-validation-learning-guide.pdf; tests/semantic-web-learning-guide.test.js; design/KG/SystemArchitecture.json; archgraph.qea（学习参考交付 + KG 视图 graph-consistency-tech-ref-001/元素登记 + AT-sw-learning-guide-01）"
         }
       ],
       "testcases": [
