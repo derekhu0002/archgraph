@@ -28,6 +28,10 @@ const {
   resolveEmbeddingDimensions,
 } = require('../argo/scripts/graph-rag/semantic-persistence/productionSemanticNeo4jAdapter.js');
 
+const {
+  buildDefaultSemanticConfiguration,
+} = require('../argo/scripts/graph-rag/semanticInitConfiguration.js');
+
 const ROOT = path.resolve(__dirname, '..');
 
 const OPENAI_COMPATIBLE_VALUES = Object.freeze({
@@ -182,4 +186,48 @@ test('AT-embed-profile-06: embedding API key overrides QWEN_KEY for the Bearer t
   });
   await fallback.embed('x');
   assert.equal(captured, 'Bearer QWEN_KEY');
+});
+
+// AT-embed-profile-07: the canonical semantic-init / backfill path must resolve
+// the SAME profile-aware configuration the retrieval path uses — argo init must
+// not force the hardcoded cloud profile.
+test('AT-embed-profile-07: argo init / backfill uses the configured embedding profile', () => {
+  const evidence = {
+    configuration: {
+      embeddingProfile: PROFILE_OPENAI_COMPATIBLE,
+      embeddingBaseUrl: 'http://localhost:8080/v1',
+      embeddingModel: 'Alibaba-NLP/gte-Qwen2-1.5B-instruct',
+      embeddingProvider: 'self-hosted-openai-compatible',
+      embeddingModelVersion: 'local-2026-09-19',
+      embeddingDimensions: 1536,
+      embeddingApiKey: 'LOCAL_KEY',
+      qwenKey: 'QWEN_KEY',
+      neo4jDatabaseUrl: 'neo4j://127.0.0.1:7687',
+      neo4jDatabaseUsername: 'neo4j',
+      neo4jDatabasePassword: 'p',
+    },
+  };
+  const config = buildDefaultSemanticConfiguration(evidence);
+  assert.equal(config.embeddingBaseUrl, 'http://localhost:8080/v1');
+  assert.equal(config.embeddingModel, 'Alibaba-NLP/gte-Qwen2-1.5B-instruct');
+  assert.equal(config.embeddingProvider, 'self-hosted-openai-compatible');
+  assert.equal(config.embeddingDimensions, 1536);
+  assert.equal(config.embeddingCredential, 'LOCAL_KEY', 'dedicated embedding key wins');
+  assert.equal(
+    buildDefaultSemanticConfiguration({
+      configuration: { ...evidence.configuration, embeddingApiKey: undefined },
+    }).embeddingCredential,
+    'QWEN_KEY',
+    'falls back to QWEN_KEY',
+  );
+
+  // source guard: the init resolver must delegate to the profile-aware resolver
+  // and must not source embedding fields from the hardcoded approved profile.
+  const src = fs.readFileSync(path.join(ROOT, 'argo/scripts/systemarchitecture-mcp-server.js'), 'utf8');
+  const start = src.indexOf('async function resolveDefaultSemanticConfiguration');
+  assert.ok(start > 0, 'resolveDefaultSemanticConfiguration should exist');
+  const end = src.indexOf('\n}', start);
+  const body = src.slice(start, end);
+  assert.match(body, /resolveApprovedLiveConfiguration\(/, 'init must resolve via the profile-aware resolver');
+  assert.doesNotMatch(body, /W31_APPROVED_PROFILE/, 'init must not hardcode the approved cloud profile');
 });

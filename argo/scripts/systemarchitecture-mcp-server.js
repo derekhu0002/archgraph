@@ -145,11 +145,11 @@ const {
   semanticOperatorErrorResult,
 } = require('./graph-rag/semanticOperatorError.js');
 const {
-  resolveExternalProductionConfig,
-} = require('./graph-rag/externalProductionConfig.js');
-const {
   resolveApprovedLiveConfiguration,
 } = require('./graph-rag/liveEmbeddingProviderConfig.js');
+const {
+  buildDefaultSemanticConfiguration,
+} = require('./graph-rag/semanticInitConfiguration.js');
 const {
   createLiveEmbeddingProviderClient,
 } = require('./graph-rag/liveEmbeddingProviderClient.js');
@@ -4056,59 +4056,17 @@ async function createDefaultProductionSemanticRuntime(options = {}) {
   });
 }
 
+// Resolve the canonical semantic-init/backfill configuration through the SAME
+// profile-aware resolver the retrieval path uses, so argo init embeds via the
+// configured provider (ARGO_EMBEDDING_PROFILE) instead of a hardcoded cloud
+// profile. `resolveApprovedLiveConfiguration` still fails closed when a required
+// key is missing or an unknown key is present in the .env file.
 async function resolveDefaultSemanticConfiguration(repositoryRoot) {
-  let external;
-  try {
-    external = resolveExternalProductionConfig({
-      neo4jUri: process.env.ARGO_NEO4J_DATABASE_URL,
-      neo4jUsername: process.env.ARGO_NEO4J_DATABASE_USERNAME,
-      neo4jPassword: process.env.ARGO_NEO4J_DATABASE_PASSWORD,
-      embeddingCredential: process.env.QWEN_KEY,
-      neo4jDatabase: process.env.ARGO_NEO4J_DATABASE || getDefaultSemanticNeo4jDatabaseName(repositoryRoot),
-    }, {
-      operation: 'semantic-backfill',
-      sourceKeys: new Map([
-        ['neo4jUri', 'ARGO_NEO4J_DATABASE_URL'],
-        ['neo4jUsername', 'ARGO_NEO4J_DATABASE_USERNAME'],
-        ['neo4jPassword', 'ARGO_NEO4J_DATABASE_PASSWORD'],
-        ['embeddingCredential', 'QWEN_KEY'],
-      ]),
-    });
-  } catch (error) {
-    if (error && error.category === 'EXTERNAL_CREDENTIALS_REQUIRED') {
-      const missing = new Error('EXTERNAL_CREDENTIALS_REQUIRED');
-      missing.category = 'EXTERNAL_CREDENTIALS_REQUIRED';
-      missing.field = error.field;
-      throw missing;
-    }
-    throw error;
-  }
-  return Object.freeze({
-    embeddingBaseUrl: W31_APPROVED_PROFILE.baseUrl,
-    embeddingModel: W31_APPROVED_PROFILE.model,
-    embeddingProvider: W31_APPROVED_PROFILE.provider,
-    embeddingModelVersion: W31_APPROVED_PROFILE.version,
-    embeddingDimensions: W31_APPROVED_PROFILE.dimensions,
-    neo4jDatabaseUrl: external.neo4jUri,
-    neo4jDatabaseUsername: external.neo4jUsername,
-    neo4jDatabasePassword: external.neo4jPassword,
-    qwenKey: external.embeddingCredential,
-    embeddingCredential: external.embeddingCredential,
-    ...(external.neo4jDatabase === undefined ? {} : { neo4jDatabase: external.neo4jDatabase }),
+  const evidence = await resolveApprovedLiveConfiguration({
+    repositoryRoot,
+    requiredOptIns: [LIVE_PROVIDER_OPT_IN, W31_LIVE_OPT_IN],
   });
-}
-
-function getDefaultSemanticNeo4jDatabaseName(repositoryRoot) {
-  const repoName = path.basename(repositoryRoot || resolveWorkspaceRoot());
-  const normalized = String(repoName)
-    .toLowerCase()
-    .replace(/[^a-z0-9.-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/\.{2,}/g, '.')
-    .replace(/-{2,}/g, '-');
-  const safe = normalized || 'workspace';
-  const prefixed = /^[a-z]/.test(safe) ? safe : `db-${safe}`;
-  return prefixed.slice(0, 63);
+  return buildDefaultSemanticConfiguration(evidence);
 }
 
 function deriveSemanticCanonicalVersion(document) {
