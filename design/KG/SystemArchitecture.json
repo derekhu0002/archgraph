@@ -83,6 +83,10 @@
         {
           "view_id": "framework-defaults-view-001",
           "view_name": "Framework Defaults & Bootstrap（框架默认模板与引导）"
+        },
+        {
+          "view_id": "graph-consistency-tech-ref-001",
+          "view_name": "图谱一致性校验技术参考（SHACL/OWL/SWRL/RDF）"
         }
       ]
     },
@@ -8333,6 +8337,38 @@
         }
       ],
       "type": "Business Object"
+    },
+    {
+      "id": "semantic-web-validation-learning-guide-001",
+      "name": "语义网校验/推理技术学习参考（SHACL·OWL·SWRL·RDF）",
+      "type": "Business Object",
+      "description": "语义网一致性校验/推理技术学习参考（面向 ArchGraph 写时逻辑矛盾检测 L2 矛盾门）。①技术地图：RDF/RDFS（数据模型与轻量本体）→ OWL 2/SWRL（推理，开放世界 OWA，判『不一致=矛盾』）→ SHACL/ShEx（校验，封闭世界 CWA，判『违约』）→ SPARQL（查询与自定义约束）；关键区分=OWL/SWRL 问『是否存在一个世界使所有陈述同时为真』（不存在即矛盾），SHACL 问『数据是否满足形状约束』；OWL 的 OWA 使『缺失即违规』只能用 SHACL 表达，RDFS domain/range 是推理规则而非约束。②逐技术速览：OWL 2 用 disjointWith/FunctionalProperty/NegativePropertyAssertion 表达矛盾，reasoner 判不一致/类不可满足（全 DL 重，profiles EL/QL/RL+增量才近实时）；SHACL 用 maxCount/minCount/not/and/or/xone/disjoint/closed/qualifiedValueShape + sh:severity 表达矛盾的可判定子集，RDF4J ShaclSail/Stardog ICV/GraphDB 在事务 commit() 时执行→可写时阻塞；SWRL（Horn 规则）不可判定且生产支持弱；SPARQL 作 SHACL 扩展。③学习路径：阶段0 RDF Primer+Turtle；阶段1 RDFS+SPARQL+Jena/RDF4J；阶段2 SHACL 规范+《Validating RDF Data》+pySHACL；阶段3 OWL 2 Primer+Profiles+Protégé/HermiT/Openllet/ELK；阶段4 SWRL+工业实现（RDF4J ShaclSail/Stardog ICV/GraphDB/ROBOT CI）。④与 L2 对应：单值/互斥/否定/封闭世界缺失→SHACL 确定性可阻塞；多跳传递矛盾→OWL 离线审计+单写者加锁；文本矛盾→NLI/LLM 仅建议型。结论与业界成熟形态一致：只让极小高精度确定性不变量写时硬阻塞，其余 advisory+离线审计，fail-open、recall-first、单写者。交付：docs/semantic-web-validation-learning-guide.html（源，自包含 HTML+内页 CSS）+ docs/semantic-web-validation-learning-guide.pdf（A4 约8页，含全部参考链接）。核验：BAILIAN MCP 未挂载，关键链接经 webfetch 核验（RDF 1.1 Primer/OWL 2 Primer/SHACL/Validating RDF Data）。",
+      "attributes": [
+        {
+          "name": "doc",
+          "value": "docs/semantic-web-validation-learning-guide.html",
+          "description": "学习参考源文件（自包含 HTML+内页 CSS，可经 headless 浏览器 --print-to-pdf 重建 PDF）"
+        },
+        {
+          "name": "pdf",
+          "value": "docs/semantic-web-validation-learning-guide.pdf",
+          "description": "交付 PDF（A4，约8页；含 W3C 规范/工具实现/书籍/工业落地与论文全部参考链接）"
+        },
+        {
+          "name": "references_section",
+          "value": "docs/semantic-web-validation-learning-guide.html#7",
+          "description": "参考资料清单锚点（W3C 规范 / 工具与实现 / 书籍 / 工业落地与论文）"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-sw-learning-guide-01",
+          "description": "GIVEN 语义网一致性校验/推理技术学习参考已交付（docs/semantic-web-validation-learning-guide.html 与 .pdf）并在图谱登记；WHEN 检查文档与图谱元素；THEN 文档包含术语澄清、技术栈地图、逐技术速览、学习路径、参考资料清单（含可核验链接）与 L2 对应，标记 PDF 为合法非空文档，图谱存在该 Business Object、挂载于『图谱一致性校验技术参考』视图且带本可执行验收用例。",
+          "type": "Acceptance Test",
+          "Input": "tests/semantic-web-learning-guide.test.js",
+          "acceptanceCriteria": "tests/semantic-web-learning-guide.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -10375,6 +10411,16 @@
       "parent_element_id": "project-overseer-001",
       "view_id": "overseer-release-archive-001",
       "view_name": "项目总管发布记录·归档（≤0.20.x）"
+    },
+    {
+      "view_id": "graph-consistency-tech-ref-001",
+      "view_name": "图谱一致性校验技术参考（SHACL/OWL/SWRL/RDF）",
+      "parent_element_id": "1249",
+      "description": "图谱一致性/矛盾检测相关技术参考子视图：收录面向 ArchGraph 写时逻辑矛盾检测（L2 矛盾门）的语义网校验与推理技术学习资料（SHACL/ShEx/OWL 2/SWRL/RDF/SPARQL），供后续 L2 设计与实现查阅。",
+      "included_elements": [
+        "semantic-web-validation-learning-guide-001"
+      ],
+      "included_relationships": []
     }
   ]
 }

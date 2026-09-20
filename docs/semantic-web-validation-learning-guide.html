@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>知识图谱一致性校验与推理技术学习参考</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  :root {
+    --ink: #1b2733;
+    --muted: #5b6b7b;
+    --line: #d7dee6;
+    --accent: #0b5cad;
+    --accent-soft: #eef4fb;
+    --code-bg: #f4f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    font-size: 10.5pt;
+    line-height: 1.65;
+    margin: 0;
+  }
+  h1 { font-size: 21pt; margin: 0 0 4px; letter-spacing: .2px; }
+  h2 {
+    font-size: 14pt; margin: 26px 0 10px; padding-bottom: 5px;
+    border-bottom: 2px solid var(--accent); color: var(--accent);
+  }
+  h3 { font-size: 11.5pt; margin: 18px 0 6px; color: #123; }
+  p { margin: 6px 0; }
+  .subtitle { font-size: 12pt; color: var(--muted); margin: 0 0 6px; }
+  .meta {
+    font-size: 9pt; color: var(--muted); border: 1px solid var(--line);
+    background: var(--accent-soft); border-radius: 6px; padding: 10px 12px; margin: 14px 0 4px;
+  }
+  .meta b { color: var(--ink); }
+  code, kbd { font-family: "Cascadia Mono", Consolas, "Courier New", monospace; font-size: 9.3pt; }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px 12px; overflow-x: auto; font-size: 9pt; line-height: 1.5;
+    white-space: pre; page-break-inside: avoid;
+  }
+  table {
+    width: 100%; border-collapse: collapse; margin: 10px 0;
+    font-size: 9.3pt; page-break-inside: auto;
+  }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #eef2f6; font-weight: 600; }
+  tr { page-break-inside: avoid; }
+  ul, ol { margin: 6px 0 6px 20px; padding: 0; }
+  li { margin: 3px 0; }
+  a { color: var(--accent); text-decoration: none; word-break: break-all; }
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--accent-soft);
+    padding: 8px 12px; margin: 10px 0; border-radius: 0 6px 6px 0;
+  }
+  .ref li { margin: 4px 0; }
+  .tag {
+    display: inline-block; font-size: 8pt; color: #fff; background: var(--accent);
+    border-radius: 3px; padding: 1px 6px; margin-right: 6px; vertical-align: middle;
+  }
+  .footer { margin-top: 26px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 8.5pt; color: var(--muted); }
+  .pb { page-break-before: always; }
+  .nobreak { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<h1>知识图谱一致性校验与推理技术学习参考</h1>
+<p class="subtitle">面向 ArchGraph「写时逻辑矛盾检测（L2 矛盾门）」的技术背景与学习路径</p>
+
+<div class="meta">
+  <b>整理</b>：项目总管（project-overseer-001）　|　<b>日期</b>：2026-09-20<br />
+  <b>关联洞察</b>：知识图谱「写入时逻辑矛盾检测」业界洞察（洞察Lead，docs/graph-write-time-contradiction-insight.md）<br />
+  <b>用途</b>：为 ArchGraph 写入门禁增设「矛盾门（L2）」做技术储备；本文只做背景说明与资料导读，结论以所列一手规范为准。
+</div>
+
+<h2>1. 文档目的与阅读方式</h2>
+<p>本文解释 W3C 语义网技术栈中与「逻辑矛盾检测」直接相关的几个标准（RDF、RDFS、OWL 2、SWRL、SHACL、SPARQL），说明它们各自解决什么问题、与「矛盾」是什么关系、能否在写入时阻塞，并给出一条分阶段学习路径与一份可核验的参考资料清单。</p>
+<p>阅读方式：<b>第 2–4 节建立概念地图</b>，<b>第 5 节是动手路径</b>，<b>第 7 节链接清单</b>可直接当索引；篇幅大的规范与书籍只给链接，读者按需展开。</p>
+
+<h2>2. 术语澄清</h2>
+<table class="nobreak">
+  <thead><tr><th style="width:14%">名称</th><th style="width:30%">全称</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>W3C</td><td>World Wide Web Consortium</td><td>万维网联盟，制定这些标准的组织，本身不是一项技术。</td></tr>
+    <tr><td>RDF</td><td>Resource Description Framework</td><td>资源描述框架，语义网的数据模型（主语-谓语-宾语三元组）。</td></tr>
+    <tr><td>RDFS</td><td>RDF Schema</td><td>轻量本体词汇（类/属性/subClassOf/domain/range）。</td></tr>
+    <tr><td>OWL 2</td><td>Web Ontology Language 2</td><td>基于描述逻辑的本体语言，W3C 正式推荐标准，可做一致性推理。</td></tr>
+    <tr><td>SWRL</td><td>Semantic Web Rule Language</td><td>语义网规则语言，W3C 2004 <b>Member Submission</b>（非正式推荐标准），工业工具支持有限。</td></tr>
+    <tr><td>SHACL</td><td>Shapes Constraint Language</td><td>形状约束语言，W3C 2017 正式推荐标准，对 RDF 图做约束校验。</td></tr>
+    <tr><td>ShEx</td><td>Shape Expressions</td><td>SHACL 的姊妹技术，更偏 schema/类型校验。</td></tr>
+    <tr><td>SPARQL</td><td>SPARQL Protocol and RDF Query Language</td><td>RDF 查询/更新语言，可实现自定义约束。</td></tr>
+  </tbody>
+</table>
+
+<h2>3. 一张地图：这些技术为什么出现在「矛盾检测」里</h2>
+<p>它们同属 W3C 语义网技术栈，但解决不同问题，必须分清两条线：<b>推理（entailment）</b> 与 <b>校验（validation）</b>。</p>
+<pre>数据模型:              RDF (三元组)  ──►  RDFS (类/属性/domain/range)
+推理 (开放世界 OWA):   OWL 2 ──► SWRL            ← "能不能推出矛盾"（entailment）
+校验 (封闭世界 CWA):   SHACL / ShEx              ← "是否违反约束"（validation）
+查询 / 自定义规则:      SPARQL (+ SPARQL-based constraints)
+序列化:                Turtle / JSON-LD / RDF/XML</pre>
+<div class="callout">
+  <b>最关键的一句</b>：OWL/SWRL 问的是「是否存在一个世界让所有陈述同时为真？」——不存在即<b>不一致（inconsistency = 逻辑矛盾）</b>；
+  SHACL 问的是「在封闭世界的模型里，数据是否满足形状约束？」。
+  ArchGraph 想要的「写时阻塞矛盾」，工程上主要落在 <b>SHACL 这一类</b>（确定性、可阻塞）；
+  OWL/SWRL 是一致的「逻辑判据」，但通常离线/推断式，写时全量推理代价大。
+</div>
+<h3>3.1 两个容易踩的概念坑</h3>
+<ul>
+  <li><b>开放世界假设（OWA）</b>：RDF/OWL 里「没写」≠「为假」，只是「未知」。所以「缺失即违规」必须用 SHACL（封闭世界）表达，不能用 OWL。</li>
+  <li><b>domain/range 是推理规则、不是约束</b>：声明 <code>hasAge rdfs:domain Person</code> 并不会禁止给猫写年龄，而是会<b>推出</b>「这只猫也是 Person」。要表达「约束」必须用 SHACL。</li>
+</ul>
+
+<h2>4. 逐技术速览</h2>
+<table>
+  <thead>
+    <tr><th style="width:11%">技术</th><th style="width:22%">是什么</th><th style="width:28%">能表达/检测什么</th><th style="width:20%">与「矛盾」的关系</th><th style="width:19%">写时可行性</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>RDF</b></td>
+      <td>三元组数据模型</td>
+      <td>事实陈述；literal 违反 datatype（如 <code>"forty"^^xsd:integer</code>）即算逻辑不一致</td>
+      <td>最底层载体</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><b>RDFS</b></td>
+      <td>轻量本体词汇</td>
+      <td><code>subClassOf</code> / <code>subPropertyOf</code> / <code>domain</code> / <code>range</code>；注意它们推理性，不是约束</td>
+      <td>可推出类归属，间接产生冲突</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><b>OWL 2</b></td>
+      <td>描述逻辑本体语言</td>
+      <td><code>owl:disjointWith</code>（互斥）、<code>owl:FunctionalProperty</code>（单值）、基数限制、<code>owl:NegativePropertyAssertion</code>（显式否定）、<code>owl:sameAs/differentFrom</code>；reasoner 可判「不一致/类不可满足」</td>
+      <td><b>最直接</b>：这正是「逻辑矛盾」的形式化定义</td>
+      <td>全 DL 重；<b>profiles（EL/QL/RL）+ 增量</b>才可近实时</td>
+    </tr>
+    <tr>
+      <td><b>SWRL</b></td>
+      <td>规则语言（若…则…）</td>
+      <td>Horn 规则，可推出矛盾</td>
+      <td>规则级冲突</td>
+      <td>差（推理不可判定、生产支持弱）</td>
+    </tr>
+    <tr>
+      <td><b>SHACL</b></td>
+      <td>形状约束语言</td>
+      <td><code>sh:maxCount/minCount</code>、<code>sh:not/and/or/xone</code>、<code>sh:disjoint</code>、<code>sh:closed</code>、<code>sh:qualifiedValueShape</code>、SHACL-SPARQL 自定义；<code>sh:severity</code>（Info/Warning/Violation）</td>
+      <td><b>能表达「矛盾的一个可判定子集」</b>（单值冲突、互斥、封闭世界否定）</td>
+      <td><b>好</b>：RDF4J / Stardog / GraphDB 均在事务 <code>commit()</code> 时执行</td>
+    </tr>
+    <tr>
+      <td><b>ShEx</b></td>
+      <td>Shape Expressions</td>
+      <td>形状校验，更偏 schema/类型</td>
+      <td>同类</td>
+      <td>好（生态与 SHACL 不同）</td>
+    </tr>
+    <tr>
+      <td><b>SPARQL</b></td>
+      <td>RDF 查询/更新</td>
+      <td>SPARQL-based constraints、<code>ASK</code> 做自定义校验</td>
+      <td>自定义冲突规则</td>
+      <td>好（作为 SHACL 的扩展机制）</td>
+    </tr>
+  </tbody>
+</table>
+<p><b>一句话记忆</b>：要「查矛盾」用 OWL 的 <code>disjointWith / FunctionalProperty / NegativePropertyAssertion</code>；要「写时挡矛盾」用 SHACL 的 <code>maxCount / not / disjoint / closed</code>。</p>
+
+<h2 class="pb">5. 学习路径（建议按序，带实操）</h2>
+
+<h3>阶段 0 · 地基（1–2 天）</h3>
+<ul>
+  <li>读 <b>RDF 1.1 Primer</b>，理解三元组 / IRI / literal / blank node。<span class="tag">链接</span><a href="https://www.w3.org/TR/rdf11-primer/">https://www.w3.org/TR/rdf11-primer/</a></li>
+  <li>学 <b>Turtle</b> 语法，能手写三元组。<span class="tag">链接</span><a href="https://www.w3.org/TR/turtle/">https://www.w3.org/TR/turtle/</a></li>
+</ul>
+
+<h3>阶段 1 · 建模与查询（2–3 天）</h3>
+<ul>
+  <li><b>RDFS</b>：搞清 <code>subClassOf</code>/<code>domain</code>/<code>range</code>，<b>重点体会「domain/range 是推理不是约束」</b>（OWL 2 Primer §4.6 有专门警告）。<span class="tag">链接</span><a href="https://www.w3.org/TR/rdf-schema/">https://www.w3.org/TR/rdf-schema/</a></li>
+  <li><b>SPARQL 1.1 Query</b>：SELECT / ASK / CONSTRUCT。<span class="tag">链接</span><a href="https://www.w3.org/TR/sparql11-query/">https://www.w3.org/TR/sparql11-query/</a></li>
+  <li>工具：安装 <b>Apache Jena</b> 或 <b>Eclipse RDF4J</b>，跑本地三元组库。</li>
+</ul>
+
+<h3>阶段 2 · 校验（重点，3–5 天）</h3>
+<ul>
+  <li>读 <b>SHACL 规范</b>：先 §1.4 例子、§2 shapes/targets、§4 Core constraint components、§3.6 Validation Report。<span class="tag">链接</span><a href="https://www.w3.org/TR/shacl/">https://www.w3.org/TR/shacl/</a></li>
+  <li>读免费书 <b>《Validating RDF Data》</b>（SHACL/ShEx 最佳入门）。<span class="tag">链接</span><a href="http://book.validatingrdf.com/">http://book.validatingrdf.com/</a></li>
+  <li>实操：<b>pySHACL</b> 或 <b>TopBraid SHACL</b>，写一个 <code>sh:maxCount 1</code> + <code>sh:not</code> 的 shape，观察 Validation Report。</li>
+  <li>进阶：<b>SHACL Advanced Features</b>（含 SHACL Rules）。<span class="tag">链接</span><a href="https://www.w3.org/TR/shacl-af/">https://www.w3.org/TR/shacl-af/</a></li>
+</ul>
+
+<h3>阶段 3 · 逻辑与矛盾（3–5 天）</h3>
+<ul>
+  <li>读 <b>OWL 2 Primer</b>：重点 §4.3 <code>DisjointClasses</code>、§4.7 <code>sameAs/differentFrom</code>、§5.1 复杂类（<code>not</code>/<code>and</code>）、§6.1 属性特征（functional）、§5.3 基数。<span class="tag">链接</span><a href="https://www.w3.org/TR/owl2-primer/">https://www.w3.org/TR/owl2-primer/</a></li>
+  <li>读 <b>OWL 2 Profiles</b>：理解用表达力换推理效率的 EL/QL/RL 三档。<span class="tag">链接</span><a href="https://www.w3.org/TR/owl2-profiles/">https://www.w3.org/TR/owl2-profiles/</a></li>
+  <li>实操：<b>Protégé</b> 建 Man/Woman disjoint，再断言某人 both，让内置 reasoner（HermiT）报 inconsistent。</li>
+  <li>reasoner 选型：<b>HermiT</b> / <b>Openllet</b>（全 DL 一致性）、增量 <b>ELK</b>。</li>
+</ul>
+
+<h3>阶段 4 · 规则与工程化（按需）</h3>
+<ul>
+  <li><b>SWRL</b>：理解即可，注意其不可判定 / 工具支持弱。<span class="tag">链接</span><a href="https://www.w3.org/Submission/SWRL/">https://www.w3.org/Submission/SWRL/</a></li>
+  <li>写时阻塞的工业实现：<b>RDF4J ShaclSail</b>、<b>Stardog ICV guard mode</b>、<b>GraphDB SHACL</b>。</li>
+  <li>本体 CI：<b>ROBOT <code>reason</code></b> 以非零退出当 CI 门。</li>
+</ul>
+
+<h2>6. 书籍与课程</h2>
+<ul>
+  <li><b>《Validating RDF Data》</b>（Labra Gayo, Prud'hommeaux, Boneva, Kontokostas, 2018），Morgan &amp; Claypool。免费 HTML 版：<a href="http://book.validatingrdf.com/">http://book.validatingrdf.com/</a> —— SHACL/ShEx 首选。</li>
+  <li><b>《Semantic Web for the Working Ontologist》</b>（Dean Allemang &amp; James Hendler）——最友好的建模入门，讲清 OWL/RDFS 的实际用法。</li>
+  <li><b>《Foundations of Semantic Web Technologies》</b>（Pascal Hitzler et al.）——偏形式化，讲逻辑语义。</li>
+  <li>W3C 语义网标准总入口：<a href="https://www.w3.org/standards/semanticweb/">https://www.w3.org/standards/semanticweb/</a></li>
+</ul>
+
+<h2 class="pb">7. 参考资料与链接（Reference）</h2>
+<p>以下链接为本文引用的原始出处。带 <span class="tag">✓已核验</span> 者于 2026-09-20 经联网抓取确认在线；其余为 W3C 稳定规范地址或本案洞察已验证的一手来源。篇幅大的规范/书籍只给链接，按其章节按需阅读。</p>
+
+<h3>7.1 W3C 规范（一手权威）</h3>
+<ul class="ref">
+  <li><span class="tag">✓已核验</span>RDF 1.1 Primer：<a href="https://www.w3.org/TR/rdf11-primer/">https://www.w3.org/TR/rdf11-primer/</a></li>
+  <li><span class="tag">✓已核验</span>OWL 2 Web Ontology Language Primer (2nd Ed.)：<a href="https://www.w3.org/TR/owl2-primer/">https://www.w3.org/TR/owl2-primer/</a></li>
+  <li><span class="tag">✓已核验</span>Shapes Constraint Language (SHACL)：<a href="https://www.w3.org/TR/shacl/">https://www.w3.org/TR/shacl/</a></li>
+  <li>RDF 1.1 Concepts and Abstract Syntax：<a href="https://www.w3.org/TR/rdf11-concepts/">https://www.w3.org/TR/rdf11-concepts/</a></li>
+  <li>RDF Schema 1.1：<a href="https://www.w3.org/TR/rdf-schema/">https://www.w3.org/TR/rdf-schema/</a></li>
+  <li>RDF 1.1 Turtle：<a href="https://www.w3.org/TR/turtle/">https://www.w3.org/TR/turtle/</a></li>
+  <li>SPARQL 1.1 Query Language：<a href="https://www.w3.org/TR/sparql11-query/">https://www.w3.org/TR/sparql11-query/</a></li>
+  <li>OWL 2 Document Overview：<a href="https://www.w3.org/TR/owl2-overview/">https://www.w3.org/TR/owl2-overview/</a></li>
+  <li>OWL 2 Profiles：<a href="https://www.w3.org/TR/owl2-profiles/">https://www.w3.org/TR/owl2-profiles/</a></li>
+  <li>SHACL Advanced Features：<a href="https://www.w3.org/TR/shacl-af/">https://www.w3.org/TR/shacl-af/</a></li>
+  <li>SWRL (W3C Member Submission)：<a href="https://www.w3.org/Submission/SWRL/">https://www.w3.org/Submission/SWRL/</a></li>
+  <li>Shape Expressions (ShEx) Semantics：<a href="https://www.w3.org/TR/shex-semantics/">https://www.w3.org/TR/shex-semantics/</a></li>
+  <li>W3C Semantic Web standards：<a href="https://www.w3.org/standards/semanticweb/">https://www.w3.org/standards/semanticweb/</a></li>
+  <li>SHACL Test Suite：<a href="https://w3c.github.io/data-shapes/data-shapes-test-suite/">https://w3c.github.io/data-shapes/data-shapes-test-suite/</a></li>
+</ul>
+
+<h3>7.2 工具与实现</h3>
+<ul class="ref">
+  <li>Apache Jena（RDF/OWL/SPARQL Java 框架）：<a href="https://jena.apache.org/">https://jena.apache.org/</a></li>
+  <li>Eclipse RDF4J：<a href="https://rdf4j.org/">https://rdf4j.org/</a></li>
+  <li>RDF4J ShaclSail（写时校验）：<a href="https://rdf4j.org/documentation/programming/shacl/">https://rdf4j.org/documentation/programming/shacl/</a></li>
+  <li>pySHACL（Python SHACL 校验器）：<a href="https://github.com/RDFLib/pySHACL">https://github.com/RDFLib/pySHACL</a></li>
+  <li>TopBraid SHACL（Java/JS 实现）：<a href="https://github.com/TopQuadrant/shacl">https://github.com/TopQuadrant/shacl</a></li>
+  <li>Protégé（本体编辑器 + 内置 reasoner）：<a href="https://protege.stanford.edu/">https://protege.stanford.edu/</a></li>
+  <li>HermiT Reasoner：<a href="http://www.hermit-reasoner.com/">http://www.hermit-reasoner.com/</a></li>
+  <li>Openllet（Pellet 后继 OWL reasoner）：<a href="https://github.com/Galigator/openllet">https://github.com/Galigator/openllet</a></li>
+  <li>ELK Reasoner（OWL 2 EL 增量推理）：<a href="https://github.com/liveontologies/elk-reasoner">https://github.com/liveontologies/elk-reasoner</a></li>
+  <li>ROBOT（本体工具链，含 <code>reason</code> CI 门）：<a href="http://robot.obolibrary.org/reason">http://robot.obolibrary.org/reason</a></li>
+</ul>
+
+<h3>7.3 书籍</h3>
+<ul class="ref">
+  <li><span class="tag">✓已核验</span>Validating RDF Data（免费 HTML 版）：<a href="http://book.validatingrdf.com/">http://book.validatingrdf.com/</a></li>
+  <li>Semantic Web for the Working Ontologist（Allemang &amp; Hendler）——按书名检索即可。</li>
+  <li>Foundations of Semantic Web Technologies（Hitzler et al.）——按书名检索即可。</li>
+</ul>
+
+<h3>7.4 工业落地与论文（来自本案业界洞察）</h3>
+<ul class="ref">
+  <li>Stardog Integrity Constraint Validation (ICV)：<a href="https://docs.stardog.com/data-quality-constraints">https://docs.stardog.com/data-quality-constraints</a></li>
+  <li>Stardog reasoning consistency：<a href="https://docs.stardog.com/stardog-cli-reference/reasoning/reasoning-consistency">https://docs.stardog.com/stardog-cli-reference/reasoning/reasoning-consistency</a></li>
+  <li>Ontotext GraphDB SHACL 校验：<a href="https://graphdb.ontotext.com/documentation/10.8/shacl-validation.html">https://graphdb.ontotext.com/documentation/10.8/shacl-validation.html</a></li>
+  <li>Neo4j 约束（能力边界：仅完整性，不做逻辑矛盾）：<a href="https://neo4j.com/docs/cypher-manual/current/constraints/">https://neo4j.com/docs/cypher-manual/current/constraints/</a></li>
+  <li>Amazon Neptune SPARQL 合规性：<a href="https://docs.aws.amazon.com/neptune/latest/userguide/feature-sparql-compliance.html">https://docs.aws.amazon.com/neptune/latest/userguide/feature-sparql-compliance.html</a></li>
+  <li>Great Expectations（数据质量框架）：<a href="https://docs.greatexpectations.io/docs/">https://docs.greatexpectations.io/docs/</a></li>
+  <li>MultiNLI（NLI 三分类含 contradiction）：<a href="https://arxiv.org/abs/1704.05426">https://arxiv.org/abs/1704.05426</a></li>
+  <li>SelfCheckGPT（采样分歧检测幻觉）：<a href="https://arxiv.org/abs/2303.08896">https://arxiv.org/abs/2303.08896</a></li>
+  <li>Knowledge Graph Embedding 综述：<a href="https://arxiv.org/abs/2002.00388">https://arxiv.org/abs/2002.00388</a></li>
+</ul>
+
+<h2>8. 与 ArchGraph L2「矛盾门」的对应</h2>
+<table>
+  <thead><tr><th style="width:30%">矛盾类型</th><th style="width:36%">对应技术</th><th>能否写时阻塞</th></tr></thead>
+  <tbody>
+    <tr><td>单值 / functional 槽冲突</td><td>SHACL <code>sh:maxCount 1</code>；OWL <code>owl:FunctionalProperty</code></td><td>能（确定性，建议手写 SHACL）</td></tr>
+    <tr><td>显式互斥（disjoint）</td><td>SHACL <code>sh:disjoint</code> / <code>sh:not</code>；OWL <code>owl:disjointWith</code></td><td>能（确定性）</td></tr>
+    <tr><td>显式否定（negative assertion）</td><td>OWL <code>owl:NegativePropertyAssertion</code>；SHACL <code>sh:not</code></td><td>能（确定性）</td></tr>
+    <tr><td>封闭世界「缺失即违规」</td><td>SHACL <code>sh:closed</code> / <code>sh:minCount</code></td><td>能（确定性；OWL 的 OWA 表达不了）</td></tr>
+    <tr><td>多跳 / 传递涌现矛盾</td><td>OWL reasoner（离线一致性）+ 加锁单写者</td><td>写时难，宜离线审计</td></tr>
+    <tr><td>文本级语义矛盾</td><td>NLI / LLM-as-judge（MultiNLI、SelfCheckGPT 思路）</td><td>否，仅建议型</td></tr>
+  </tbody>
+</table>
+<p>据此，业界成熟形态（RDF4J / Stardog / GraphDB / ROBOT）与本项目的建议一致：<b>只让极小的高精度确定性不变量在写入时硬阻塞，其余一律 advisory + 离线审计</b>，并保持 <b>fail-open</b>、<b>recall-first</b> 与 <b>单写者</b>。</p>
+
+<h2>9. 说明与局限</h2>
+<ul>
+  <li>本文为背景说明与资料导读，不替代一手规范；以正文所列 W3C 规范为准。</li>
+  <li>联网核验通道：本会话 BAILIAN MCP 未挂载，核验经 <code>webfetch</code> 完成；带「✓已核验」链接为 2026-09-20 实测在线，其余链接取自 W3C 稳定地址或本案洞察已抓取的一手来源，未逐一实测。</li>
+  <li>本书籍类资源（《Semantic Web for the Working Ontologist》《Foundations of Semantic Web Technologies》）按书名检索，未给出具体购买链接以避免失效。</li>
+</ul>
+
+<div class="footer">
+  知识图谱一致性校验与推理技术学习参考 · 由 ArchGraph 项目总管整理 · 生成日期 2026-09-20 ·
+  源文件 docs/semantic-web-validation-learning-guide.html · PDF docs/semantic-web-validation-learning-guide.pdf
+</div>
+
+</body>
+</html>
