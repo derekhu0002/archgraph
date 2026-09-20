@@ -2271,6 +2271,11 @@
           "name": "commit",
           "value": "81b26cc",
           "description": "~/.config/opencode/agents/wechat-publisher.md（全局 agent 定义，不在本仓库；模型统一 deepseek/deepseek-flash）; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "3c64e3d",
+          "description": "tests/wechat-publisher-actor.test.js — 清理 wechat-publisher 从主框架移除后的残留：删除对已移除包内 agent 文件 argo/agents/wechat-publisher.agent.md 的陈旧断言（0.13.6 c9738ae 只删了 agent 文件、漏改该测试，导致 ENOENT）；保留 3 条图谱断言（公众号发布员 Actor/Role/Assignment/View 仍存在）。3/3 通过。"
         }
       ],
       "testcases": [],
