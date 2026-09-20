@@ -3366,6 +3366,10 @@
         {
           "view_id": "overseer-product-001",
           "view_name": "项目总管记忆·产品与团队"
+        },
+        {
+          "view_id": "overseer-release-archive-001",
+          "view_name": "项目总管发布记录·归档（≤0.20.x）"
         }
       ],
       "attributes": [
@@ -8191,6 +8195,25 @@
           "value": "delivered"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（发布 archgraph-argo@0.24.1）",
+          "name": "commit",
+          "value": "e0976b3"
+        },
+        {
+          "description": "npm 发布 + 全局安装 + argo-deploy -SkipEnv（本机 .env 未改）",
+          "name": "release",
+          "value": "archgraph-argo@0.24.1"
+        }
+      ],
+      "description": "里程碑：发布 archgraph-argo@0.24.1（修复 argo init/backfill 忽略 embedding profile）。问题：argo init 建语义索引经 resolveDefaultSemanticConfiguration 硬编码 W31_APPROVED_PROFILE（云端），忽略 ARGO_EMBEDDING_PROFILE/BASE_URL/MODEL/DIMENSIONS → 自建 profile 被强制回云端（检索/增量写入已 profile-aware，唯 init 未接上）。修复（commit 4f744b3）：新增 argo/scripts/graph-rag/semanticInitConfiguration.js（buildDefaultSemanticConfiguration）；resolveDefaultSemanticConfiguration 改为委托 resolveApprovedLiveConfiguration（与检索同源）并映射 embeddingCredential；移除硬编码与死代码。验收 AT-embed-profile-07；相关 7/7；全量 509/473/25（25 中 24 既有 + 1 flaky ea-web-service-impl，单跑 22/22）。发布：npm archgraph-argo@0.24.1（shasum e50c1bb5ae19f4e4d0c907e1d7b1e33529b3989b）→ npm i -g → argo-deploy -SkipEnv（本机 .env 未改，sha256 一致 E4422DA1…）。待办：重启宿主加载新 MCP 代码；重启后跑 argo-init 验证（本机为 approved，行为不变）。",
+      "id": "overseer-argo-0-24-1-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.24.1（修复 argo init/backfill 忽略 embedding profile）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -10152,21 +10175,13 @@
       "view_id": "overseer-release-001",
       "view_name": "项目总管发布记录",
       "included_elements": [
-        "overseer-argo-0-15-3-release-001",
-        "overseer-argo-0-16-2-release-001",
-        "overseer-argo-0-17-1-release-001",
-        "overseer-argo-0-18-0-release-001",
-        "overseer-argo-0-18-1-release-001",
-        "overseer-argo-0-19-0-release-001",
-        "overseer-argo-0-19-1-release-001",
-        "overseer-argo-0-20-0-release-001",
-        "overseer-argo-0-20-1-release-001",
         "overseer-argo-0-21-0-release-001",
         "overseer-argo-0-22-0-release-001",
         "overseer-argo-0-22-1-release-001",
         "overseer-argo-0-22-2-release-001",
         "overseer-argo-0-23-0-release-001",
-        "overseer-argo-0-24-0-release-001"
+        "overseer-argo-0-24-0-release-001",
+        "overseer-argo-0-24-1-release-001"
       ],
       "included_relationships": []
     },
@@ -10223,6 +10238,23 @@
         "wp-default-pm-actor-001"
       ],
       "included_relationships": []
+    },
+    {
+      "description": "项目总管发布记录的归档层：收录较早的发布里程碑（≤0.20.x），避免 overseer-release-001 达 15 元素上限（分层子视图）。",
+      "included_elements": [
+        "overseer-argo-0-15-3-release-001",
+        "overseer-argo-0-16-2-release-001",
+        "overseer-argo-0-17-1-release-001",
+        "overseer-argo-0-18-0-release-001",
+        "overseer-argo-0-18-1-release-001",
+        "overseer-argo-0-19-0-release-001",
+        "overseer-argo-0-19-1-release-001",
+        "overseer-argo-0-20-0-release-001",
+        "overseer-argo-0-20-1-release-001"
+      ],
+      "parent_element_id": "project-overseer-001",
+      "view_id": "overseer-release-archive-001",
+      "view_name": "项目总管发布记录·归档（≤0.20.x）"
     }
   ]
 }
