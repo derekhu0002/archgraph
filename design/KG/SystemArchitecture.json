@@ -4238,8 +4238,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-20",
-          "description": "2026-09-20 会话：L2 矛盾检测评估 + 业界洞察委派 + 语义网学习参考（HTML+PDF）入库入图"
+          "value": "2026-09-21",
+          "description": "2026-09-21 会话：图谱 + 语义检索健康核验（validateSystemArchitecture 通过；投影 261/103/64 一致；11 索引 ONLINE；readiness Aligned/verified；428 语义记录 1536 维）；发现 tests/architecture-view-context.test.js:85 硬编码子视图清单陈旧（25/26）"
         },
         {
           "name": "commit",
@@ -4479,6 +4479,11 @@
           "name": "commit",
           "value": "78d26e2",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-09-19 T1 会话摘要覆盖写：可配置 embedding provider 插件 + 内网离线选型 + Phase 1 待办）"
+        },
+        {
+          "name": "commit",
+          "value": "cf959ba",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-09-21 T1 会话摘要覆盖写：图谱与语义检索健康核验 + 陈旧验收用例发现）"
         }
       ],
       "testcases": [
