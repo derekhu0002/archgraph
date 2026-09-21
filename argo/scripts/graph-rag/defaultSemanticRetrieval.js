@@ -149,6 +149,12 @@ function resolveTopK() {
   const k = envNumber('ARGO_SEMANTIC_TOP_K', DEFAULT_TOP_K);
   return Number.isInteger(k) && k > 0 ? k : DEFAULT_TOP_K;
 }
+// The single production seed gate: a retrieved record becomes a seed only when
+// its TRUE vector similarity reaches the purpose-aware threshold. Exposed so
+// acceptance tests exercise the exact predicate the retrieval runtime uses.
+function isSeedAboveThreshold(score, threshold) {
+  return Number.isFinite(score) && Number.isFinite(threshold) && score >= threshold;
+}
 const testCompositionStorage = new AsyncLocalStorage();
 
 function createDefaultSemanticRetrieval(dependencies = {}) {
@@ -828,7 +834,7 @@ async function exhaustChannel({
     for (const raw of newlyVisible) {
       if (accepted.length >= effectiveMax) break;
       const record = normalizeVectorRecord(raw, channel);
-      if (record && record.score >= effectiveThreshold && !seen.has(record.id)) {
+      if (record && isSeedAboveThreshold(record.score, effectiveThreshold) && !seen.has(record.id)) {
         seen.add(record.id);
         accepted.push(Object.freeze(record));
       }
@@ -1238,6 +1244,7 @@ module.exports = {
   memoryThresholdFor,
   auditThresholdFor,
   resolveTopK,
+  isSeedAboveThreshold,
   scopeCanonicalIdentitiesForChannel,
   bareCanonicalId,
   normalizeVectorRecord,
