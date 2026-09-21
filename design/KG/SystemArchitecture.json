@@ -8394,7 +8394,36 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Application Component"
+      "type": "Application Component",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "4ed436f",
+          "description": "argo/scripts/graph-rag/defaultSemanticRetrieval.js; tests/semantic-threshold-tuning.test.js; design/KG/SystemArchitecture.json; archgraph.qea（新增本元素 + AT-default-semantic-retrieval-01；标定 memory 种子阈值 0.70）"
+        }
+      ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "description": "defaultSemanticRetrieval.js; tests/semantic-threshold-tuning.test.js; design/KG/SystemArchitecture.json; 运行态 ~/.argo/.env（ARGO_SEMANTIC_MEMORY_THRESHOLD=0.70）",
+          "name": "commit",
+          "value": "4ed436f"
+        }
+      ],
+      "description": "教训/结论（2026-09-21，项目总管，aBot 反馈核实）：① memory_search / getSystemArchitecture 返回的 score 是**闭包排名派生**（productionGraphRagRuntime.js:1272 Math.max(0.99 - index*0.01, 0.8)）——恒为 0.99/0.98/…/0.92 名次阶梯，与相关性无关，**绝不可用作相关性阈值**；真实向量相似度仅在写路径去重门 scoreMode:'similarity' 时保留。相关性必须由 Agent 自判（仅零相关才拒答，MemoryRecallGuideline）。② 读路径种子门按 purpose 对**真实 cosine** 过滤：memory/general = ARGO_SEMANTIC_MEMORY_THRESHOLD（代码默认 0.55）、audit = 0.8（defaultSemanticRetrieval.js exhaustChannel/isSeedAboveThreshold）。③ 根因：0.55 低于无关内容余弦地板（实测无关探针 top1 0.628–0.685），**不过滤任何内容**，无关查询恒返回满 topK=8。④ 标定（真实 qwen3.7-text-embedding，24 无关探针 / 8 相关目标）：有效分离窗口约 (0.686, 0.833)；运行态置 ARGO_SEMANTIC_MEMORY_THRESHOLD=0.70 → 无关命中 0、相关召回不降 8/8。⑤ 边界：阈值仅作用于向量通道，hybrid=1 时词法通道无门；换 embedding 模型（如内网 gte-Qwen2）须重新标定；CHANNELS 的 per-channel 0.8/0.78/0.76 在生产路径被 0.55 覆盖（死代码，待裁决）。交付：组件元素 default-semantic-retrieval-001 + AT-default-semantic-retrieval-01；运行态改 .env 需重启宿主生效。",
+      "id": "overseer-mem-semantic-threshold-calibration-001",
+      "name": "教训：语义 score 排名派生不可作阈值 + memory 种子阈值标定 0.70",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -10391,7 +10420,8 @@
       "included_elements": [
         "overseer-semantic-seed-prefix-fix-001",
         "overseer-rerank-latency-fix-001",
-        "overseer-community-probe-001"
+        "overseer-community-probe-001",
+        "overseer-mem-semantic-threshold-calibration-001"
       ],
       "included_relationships": []
     },
