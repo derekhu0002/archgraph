@@ -4216,7 +4216,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-22 会话二）：登记「联邦式组织级图谱」愿景方向。\n需求（人类伙伴口述）：把 ArchGraph 做成通用框架——①同一 Graph 框架可被多个项目各自实例化（embedding/MCP 是框架组成部分，不破坏通用性）；②项目即国家、组织即联邦，项目图谱作为知识库基本单元可相互关联，拼成组织级知识图谱。\n决策：采用联邦/引用式（各国地图不合并、交流走引用），避免拷贝式内容漂移；最小门槛＝联邦法则（跨国引用绝对坐标 (graphKey, elementId)＋版本指纹；同构类型共同语言 ArchiMate3.2＋AML；默认拒绝的海关基线）；信任极性对内『先给再收窄』、对外『先拒绝再授予』。类比三要素：地形=项目属性、海关=访问权限、联邦-国家=组织-项目（含分工）。定位：与旧愿景『为 AGENT 提供长期记忆系统』并存不冲突，是其向图间/组织级的延伸；本质是在『图』之上再加一层『图间组织』模型（现 AgentOrganization 仅为图内组织）。\n交付一：新增 Goal overseer-federation-vision-001（T2，status=PLANNED）挂 project-overseer-001、入核心 T2 视图 overseer-ltm-001，与 overseer-vision-001 关联；tests/overseer-federation-vision.test.js（7/7）+ 同步 tests/overseer-ltm-layering.test.js 成员。commit 9ba8379。\n交付二（人类伙伴补充两点后）：新增 Business Object overseer-federation-center-design-001『设计稿：联邦中心机构 + 规则内化（插拔式联邦 v0）』——点1 中心机构（管理新增/注册/销毁退出，让成员相互感知；红线：中心只持有联邦元数据、不持有成员国内容，单点可降级）；点2 规则内化到 Graph 框架（插拔：注册/发现授权/请求交付三能力；交互两级 L-Read 引用 vs L-Provide 契约交付；生命周期 genesis→register→operate→exit）；关键修正=Graph Store 现状为 copy 式分发，须升级为 reference-registry；分期 P0–P4。关联 Goal overseer-federation-vision-001；tests/overseer-federation-center-design.test.js（8/8）。commit 14c8d5c。validateSystemArchitecture 两次均通过。\n遗留钩子：①联邦法则三要素与中心机构尚未立项实施（仅愿景方向+设计稿）；②跨图访问权限（海关）尚无技术层，现为 graphKey 硬隔离（全有或全无）；③同日的上一场 OOM 修复内容已在 T2 卡 overseer-semantic-projection-oom-001 与发布里程碑，故本次 T1 覆盖写不构成净损失；④待人类裁决：D1b Graph Store 升级 vs 旁挂 registry、D2 注册/退出是否需人类批准、D3 首期是否只做 L-Read、D4 信任圈层、D5 中心单点 vs 可复制。",
+      "description": "项目总管工作记忆摘要（2026-09-22 会话二）：登记「联邦式组织级图谱」愿景方向。\n需求（人类伙伴口述）：把 ArchGraph 做成通用框架——①同一 Graph 框架可被多个项目各自实例化（embedding/MCP 是框架组成部分，不破坏通用性）；②项目即国家、组织即联邦，项目图谱作为知识库基本单元可相互关联，拼成组织级知识图谱。\n决策：采用联邦/引用式（各国地图不合并、交流走引用），避免拷贝式内容漂移；最小门槛＝联邦法则（跨国引用绝对坐标 (graphKey, elementId)＋版本指纹；同构类型共同语言 ArchiMate3.2＋AML；默认拒绝的海关基线）；信任极性对内『先给再收窄』、对外『先拒绝再授予』。类比三要素：地形=项目属性、海关=访问权限、联邦-国家=组织-项目（含分工）。定位：与旧愿景『为 AGENT 提供长期记忆系统』并存不冲突，是其向图间/组织级的延伸；本质是在『图』之上再加一层『图间组织』模型（现 AgentOrganization 仅为图内组织）。\n交付一：新增 Goal overseer-federation-vision-001（T2，status=PLANNED）挂 project-overseer-001、入核心 T2 视图 overseer-ltm-001，与 overseer-vision-001 关联；tests/overseer-federation-vision.test.js（7/7）+ 同步 tests/overseer-ltm-layering.test.js 成员。commit 9ba8379。\n交付二：新增 Business Object overseer-federation-center-design-001『设计稿：联邦中心机构 + 规则内化（插拔式联邦 v0）』——中心机构（红线：只持有联邦元数据、不持有成员国内容）+ 规则内化（注册/发现授权/请求交付三能力；L-Read vs L-Provide；生命周期）；关键修正=Graph Store 须升级为 reference-registry；分期 P0–P4。tests/overseer-federation-center-design.test.js（8/8）。commit 14c8d5c。\n交付三（裁决 D1b/D3 + 跨项目投递 + 框架侧立项）：D1b=框架落规则+MCP 接口、中心落 graph-wiki 云端服务（经 Graph MCP 注册/注销）；D3=首期只读（内容维度只读），注册/注销/发现/授权/读取作为最小元数据写必需。经 OpenCode 桌面版内置 HTTP server（本机未装 CLI）向 graph-wiki 投递「联邦中心 P0」需求——graph-wiki 已交付并部署公网（9 工具、7 步远端验证全绿；commits dcb85bb/11220fc/c19f297/bc52bdf/360eec4）。我方新增 WP wp-federation-framework-side-001（框架侧规则+工具契约）+ T2 经验卡 overseer-cross-project-dispatch-001（投递机制/编码规范/项目隔离），设计稿补 D1b/D3 与进展。tests/overseer-federation-framework-wp.test.js（5/5，含 LTM 共 23/23）。commit 00771d6；validateSystemArchitecture 均通过。\n遗留钩子：①框架侧规则与工具契约待实施（WP 已立）；②D2 注册/退出是否需人类批准、D4 信任圈层、D5 中心单点 vs 可复制待裁决；③同日的上一场 OOM 修复内容已在 T2 卡 overseer-semantic-projection-oom-001 与发布里程碑，故 T1 覆盖写不构成净损失；④D1b/D3 已裁决。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4239,7 +4239,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-22",
-          "description": "本次会话：登记联邦愿景 Goal + 中心机构/规则内化设计稿（含验收测试）"
+          "description": "本次会话：登记联邦愿景 Goal + 中心机构/规则内化设计稿 + 框架侧 WP + 跨项目投递经验（含验收测试）"
         },
         {
           "name": "commit",
@@ -8708,6 +8708,11 @@
         {
           "name": "status",
           "value": "PLANNED"
+        },
+        {
+          "name": "commit",
+          "value": "00771d6",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-federation-framework-wp.test.js（立项框架侧：联邦规则 + Graph MCP 工具契约）"
         }
       ],
       "description": "框架侧工作包（2026-09-22 立项）：在 archgraph 框架侧落地联邦能力——① 规则：把联邦行为契约写进工作流规则（Agent 如何注册/注销/发现/授权/读取、默认拒绝、内容不复制、身份稳定），沿用既有 CoreRules 风格、Agent 视角；② MCP 工具契约：在框架 MCP 工具面新增/对接联邦工具（registry_register/deregister/discover/authorize/read），与 graph-wiki 中心（公网 https://argo.derekworkspacev5.com/mcp，9 工具）对齐输入/输出 schema。对接基线可由 graph-wiki 提供其 registry 工具输入 schema 清单。关联设计稿 overseer-federation-center-design-001；D1b 已定（框架落规则+工具、中心落 graph-wiki）。验收：GIVEN 框架侧规则与工具契约；WHEN 项目初始化后尝试注册/发现/授权读取；THEN 规则可被 Agent 读取执行、工具与中心契约一致、默认拒绝生效。",
@@ -8734,6 +8739,11 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "00771d6",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-federation-framework-wp.test.js; tests/overseer-ltm-layering.test.js（登记跨项目投递机制与编码规范 T2 经验卡）"
         }
       ],
       "description": "可复用经验（2026-09-22，项目总管）：跨项目给另一个项目的 Agent 投递需求/消息的机制与编码规范。\n机制：OpenCode 桌面版内置 HTTP server（127.0.0.1:<port>，端口每次运行不同）＋ Basic 认证（取 env OPENCODE_SERVER_USERNAME/PASSWORD，勿打印值）；POST /session?directory=<项目目录> 建绑定该目录的会话 → POST /session/{id}/message（body {parts:[{type:'text',text:'...'}]}）发送并等待回复。CLI 等价物 opencode run --dir <项目> 'msg'，但本机仅桌面 Electron 版、未装 CLI（PATH 无 opencode；全局 npm 仅 archgraph-argo/openclaw）。\n编码规范（坑）：PowerShell 5.1 对无 charset 的 JSON 默认按 Latin-1 解码 → 发出的中文变 '?'、响应双重编码；修复：以 UTF-8 字节发送并显式 Content-Type: application/json; charset=utf-8，响应按 UTF-8 解码。\n隔离发现：各项目 ARGO 图相互隔离（身份/记忆不共享），跨项目消息可达但缺共享身份——正是联邦中心要解决的。\n实证：以该机制向 graph-wiki 投递「联邦中心 P0」需求并收到完成回报（会话 ses_f36641094ffeODqwWHyVeWyuT6）；graph-wiki 侧亦登记同类经验元素（xproj-msg-mechanism / xproj-encoding-norm / xproj-isolation-finding，commits bc52bdf/360eec4）。",
