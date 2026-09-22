@@ -8386,7 +8386,7 @@
       ]
     },
     {
-      "description": "默认语义检索（Default Semantic Retrieval）：ARGO MCP 读路径的基座语义检索——按 purpose 选择阈值（memory/general = 宽松阈值 ARGO_SEMANTIC_MEMORY_THRESHOLD，代码默认 0.55；audit = 严格 0.8），逐通道（Element/ArchitectureRelationship/View）对**真实向量相似度**做 `score >= threshold` 的种子门过滤，窗口自扩张后以 topK（ARGO_SEMANTIC_TOP_K，默认 8）截断，再交给 purpose 闭包/端点/视图补全。源码：argo/scripts/graph-rag/defaultSemanticRetrieval.js（memoryThresholdFor/auditThresholdFor/resolveTopK/isSeedAboveThreshold/exhaustChannel）。标定（2026-09-21，真实 qwen3.7-text-embedding，24 条无关探针 top1 上限 0.6852；8 个相关目标下限 0.8325）：代码默认 0.55 **低于无关余弦地板（约 0.63–0.69）因而不过滤任何内容**；运行态以 ARGO_SEMANTIC_MEMORY_THRESHOLD=0.70 标定（有效分离窗口约 (0.686, 0.833)），无关命中降为 0 且相关召回不降。注意：该阈值仅作用于向量通道；hybrid=1 时词法通道（exhaustLexicalChannel）不加此门。另：读路径返回的 semanticScore 为闭包排名派生（0.99..0.8），并非本门所用的真实相似度。",
+      "description": "默认语义检索（Default Semantic Retrieval）：ARGO MCP 读路径的基座语义检索——按 purpose 选择阈值（memory/general = 宽松阈值 ARGO_SEMANTIC_MEMORY_THRESHOLD，代码默认 0.55；audit = 严格 0.8），逐通道（Element/ArchitectureRelationship/View）对**真实向量相似度**做 `score >= threshold` 的种子门过滤，窗口自扩张后以 topK（ARGO_SEMANTIC_TOP_K，默认 8）截断，再交给 purpose 闭包/端点/视图补全。源码：argo/scripts/graph-rag/defaultSemanticRetrieval.js（memoryThresholdFor/auditThresholdFor/resolveTopK/isSeedAboveThreshold/exhaustChannel）。标定（2026-09-21，真实 qwen3.7-text-embedding，24 条无关探针 top1 上限 0.6852；8 个相关目标下限 0.8325）：代码默认 0.55 **低于无关余弦地板（约 0.63–0.69）因而不过滤任何内容**；运行态以 ARGO_SEMANTIC_MEMORY_THRESHOLD=0.70 标定（有效分离窗口约 (0.686, 0.833)），无关命中降为 0 且相关召回不降。注意：该阈值仅作用于向量通道；hybrid=1 时词法通道（exhaustLexicalChannel）不加此门。另：读路径返回的 semanticScore 为闭包排名派生（0.99..0.8），并非本门所用的真实相似度。自 0.24.x 起：向量/词法通道查询在 Cypher 投影层显式改为元数据 allowlist（剔除 1536 维 vector 与重复大文本 content）——因读链路从不消费 vector/content，候选集/排序/分数/阈值/融合/rerank 输出逐字节不变，但消除了大图谱下 O(N²) 窗口扫描把向量整体物化进 JS 堆导致的常驻 MCP OOM（根因：`RETURN properties(node)`）。注意 Neo4j 映射投影 `.*` 不会让显式条目覆盖既有属性，故不能用 `node{.*, vector:null}` 去向量，只能用显式 map literal。",
       "id": "default-semantic-retrieval-001",
       "name": "默认语义检索（Default Semantic Retrieval：purpose-aware 阈值 + topK）",
       "parent": "1961",
@@ -8397,6 +8397,13 @@
           "description": "GIVEN 已标定的 memory 种子阈值 0.70（ARGO_SEMANTIC_MEMORY_THRESHOLD）与真实 cosine 标定数据（无关探针 top1 ≤ 0.6852、相关目标 ≥ 0.8325）；WHEN 生产种子门 isSeedAboveThreshold 对无关探针与相关目标求值；THEN 无关探针 0 命中、相关目标全部保留（召回不降），且 0.55 旧默认被证明低于噪声地板（不过滤）。",
           "name": "AT-default-semantic-retrieval-01",
           "type": "Acceptance Test"
+        },
+        {
+          "name": "AT-default-semantic-retrieval-02",
+          "type": "Acceptance Test",
+          "description": "GIVEN 语义检索的 4 条通道查询（向量/词法 × 普通/scoped）已改为在 Cypher 投影层显式只取元数据 allowlist（canonicalIdentity/channel/searchText/dimensions/provider/model/modelVersion/canonicalVersion/contentVersion/indexVersion），剔除 1536 维 vector 与重复大文本 content；WHEN 用假 Neo4j driver 捕获实际下发 cypher 并驱动 exhaustChannel/exhaustLexicalChannel；THEN 投影不含 vector/content（无 properties(node)、无 node.vector）、accepted (id,score) 序列在「带/不带 vector+content」两态下逐条一致、且 20000 条 ×1536 维下单窗 JSON 载荷 < N×1KB（无向量物化）。",
+          "Input": "tests/semantic-retrieval-vector-project.test.js",
+          "acceptanceCriteria": "tests/semantic-retrieval-vector-project.test.js"
         }
       ],
       "type": "Application Component",

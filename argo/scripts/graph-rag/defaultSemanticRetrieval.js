@@ -85,32 +85,35 @@ const CHANNELS = Object.freeze([
     indexName: 'argo_production_semantic_view_vector',
   }),
 ]);
+// Project an explicit metadata allowlist instead of properties(node): Neo4j map
+// projection `.*` lets an existing property win, so properties(node) / node{.*, vector:null}
+// would still ship the 1536-dim vector; the read path only consumes canonicalIdentity, channel, searchText and score.
 const VECTOR_QUERY_CYPHER = [
   'CALL db.index.vector.queryNodes($indexName, $topK, $vector)',
   'YIELD node, score',
   'WHERE node.channel = $channel',
-  'RETURN properties(node) AS record, score',
+  'RETURN {canonicalIdentity: node.canonicalIdentity, channel: node.channel, searchText: node.searchText, dimensions: node.dimensions, provider: node.provider, model: node.model, modelVersion: node.modelVersion, canonicalVersion: node.canonicalVersion, contentVersion: node.contentVersion, indexVersion: node.indexVersion} AS record, score',
   'ORDER BY score DESC',
 ].join('\n');
 const VECTOR_QUERY_CYPHER_SCOPED = [
   'CALL db.index.vector.queryNodes($indexName, $topK, $vector)',
   'YIELD node, score',
   'WHERE node.channel = $channel AND node.canonicalIdentity IN $canonicalIdentities',
-  'RETURN properties(node) AS record, score',
+  'RETURN {canonicalIdentity: node.canonicalIdentity, channel: node.channel, searchText: node.searchText, dimensions: node.dimensions, provider: node.provider, model: node.model, modelVersion: node.modelVersion, canonicalVersion: node.canonicalVersion, contentVersion: node.contentVersion, indexVersion: node.indexVersion} AS record, score',
   'ORDER BY score DESC',
 ].join('\n');
 const LEXICAL_QUERY_CYPHER = [
   'CALL db.index.fulltext.queryNodes($indexName, $queryText, { limit: $topK })',
   'YIELD node, score',
   'WHERE node.channel = $channel',
-  'RETURN properties(node) AS record, score',
+  'RETURN {canonicalIdentity: node.canonicalIdentity, channel: node.channel, searchText: node.searchText, dimensions: node.dimensions, provider: node.provider, model: node.model, modelVersion: node.modelVersion, canonicalVersion: node.canonicalVersion, contentVersion: node.contentVersion, indexVersion: node.indexVersion} AS record, score',
   'ORDER BY score DESC',
 ].join('\n');
 const LEXICAL_QUERY_CYPHER_SCOPED = [
   'CALL db.index.fulltext.queryNodes($indexName, $queryText, { limit: $topK })',
   'YIELD node, score',
   'WHERE node.channel = $channel AND node.canonicalIdentity IN $canonicalIdentities',
-  'RETURN properties(node) AS record, score',
+  'RETURN {canonicalIdentity: node.canonicalIdentity, channel: node.channel, searchText: node.searchText, dimensions: node.dimensions, provider: node.provider, model: node.model, modelVersion: node.modelVersion, canonicalVersion: node.canonicalVersion, contentVersion: node.contentVersion, indexVersion: node.indexVersion} AS record, score',
   'ORDER BY score DESC',
 ].join('\n');
 const READINESS_QUERY_CYPHER = [
@@ -1248,5 +1251,7 @@ module.exports = {
   scopeCanonicalIdentitiesForChannel,
   bareCanonicalId,
   normalizeVectorRecord,
+  exhaustChannel,
+  exhaustLexicalChannel,
   AUDIT_PURPOSES,
 };
