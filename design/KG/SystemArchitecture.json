@@ -8758,8 +8758,8 @@
         },
         {
           "name": "evidence",
-          "value": "federation-live-2026-09-22",
-          "description": "联邦中心实况（2026-09-22）：成员=archgraph + soc-demo（soc-demo 自注册 → 远端 6292ca4b；双向授权 archgraph→soc-demo 13e931da / soc-demo→archgraph 12764faa）；archgraph openContent 2 项（远端 582cba8a），soc-demo read archgraph=2 引用 ok、未授权 denied。人类可见成员页已上线：https://argo.derekworkspacev5.com/archgraph/federation/（graph-wiki commits d18252d/0658760/6766b4a），实时拉取 registry_discover，openContent 以 ref 外链呈现。"
+          "value": "graph-wiki-sync-2026-09-23",
+          "description": "graph-wiki 回补/同步（2026-09-23）：主仓 github.com/derekhu0002/graph-wiki main 现为 fe1c3c5（本机与远端一致无分叉）；回补服务器 live registry（archgraph+soc-demo）按文件状态补入；新增同步机制 mcp/registry-sync.sh（push/pull 幂等）+ .gitattributes(LF) + README 多设备说明。缺口：服务器 /opt/graph-wiki 为独立仓（无 remote）且无 GitHub 凭证，真触发式 push 需先配只写 deploy key；另 graph_submit/graph_update 产生的 assets/graphs/*+catalog.json（~10 图）未回主仓（主仓仅 2 图），待单独处理。"
         }
       ],
       "description": "框架侧工作包（2026-09-22 立项；同日首刀落地规则）：在 archgraph 框架侧落地联邦能力——① 规则：把联邦行为契约写进工作流规则（Agent 如何注册/注销/发现/授权/读取、默认拒绝、内容不复制、身份稳定），Agent 视角、命令式行为契约（已完成：<FederationGuideline> + CoreRule 12，AT-rules-06；初始 commit 343a98f，Agent 视角修订 commit 92ec334）；② MCP 工具契约：中心（graph-wiki，公网 https://argo.derekworkspacev5.com/mcp，9 工具）在 OpenCode 以 remote MCP 直连，registry_* 工具自动可用，框架侧无需新增工具或桥——工具契约以『规则声明工具面 + 远端注册』兑现，schema 对齐仅为文档层面确认（graph-wiki 可提供输入 schema 清单）。关联设计稿 overseer-federation-center-design-001；D1b 已定（框架落规则+工具、中心落 graph-wiki）。验收：GIVEN 框架侧规则与工具契约；WHEN 项目初始化后尝试注册/发现/授权读取；THEN 规则可被 Agent 读取执行、远端工具面一致、默认拒绝生效。",
