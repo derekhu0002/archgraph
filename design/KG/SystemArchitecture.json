@@ -4484,6 +4484,11 @@
           "name": "commit",
           "value": "cf959ba",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-09-21 T1 会话摘要覆盖写：图谱与语义检索健康核验 + 陈旧验收用例发现）"
+        },
+        {
+          "name": "commit",
+          "value": "874a3fa",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-09-21 T1 会话摘要覆盖写：阈值 0.70 标定 + 关 hybrid + Step 0 量化）"
         }
       ],
       "testcases": [
