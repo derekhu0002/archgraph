@@ -8624,6 +8624,40 @@
           "description": "package.json（发布 0.24.2）；docs/self-hosted-embedding-deployment.md（前置条件 >=0.24.2）；部署 npm i -g + argo-deploy -SkipEnv 22/22"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "PLANNED"
+        },
+        {
+          "name": "planningState",
+          "value": "构想"
+        },
+        {
+          "name": "decidedBy",
+          "value": "人类伙伴"
+        }
+      ],
+      "description": "愿景延伸（2026-09-22 人类伙伴口述，项目总管登记）：联邦式组织级图谱——以「国家/联邦」类比「项目/组织」。① 国家与地形（项目属性）：每个国家有自己的地形（建筑、人才等），对应该项目自身意图图的内容与属性。② 国家间的管控（访问权限/海关）：国家与国家之间有进入的限制和管控（如海关），对应图谱/项目之间的访问权限设定。③ 联邦与国家（组织与项目）：联邦有总的法则规范，成员国保持独立与自治；各国在联邦中各有分工与优劣（如有的项目专责知识库构建、有的专责项目开发）。定位：与既有愿景『为 AGENT 提供长期记忆系统』并存、不冲突，是其向『图间/组织级』的延伸；本质是在『图』之上再加一层『图间组织（联邦）』模型（现有 AgentOrganization 仅为图内组织）。方法：采用联邦/引用式（各国地图不合并、交流走引用），避免拷贝式内容漂移；引用需引用契约兜底（悬空检测依托墓碑账本/canonicalDigest）。最小门槛＝联邦法则：① 跨国引用绝对坐标 (graphKey, elementId)＋可选版本指纹；② 同构类型共同语言 ArchiMate 3.2＋AML；③ 默认拒绝的海关基线（先拒绝、再显式邦交授予）。信任极性：对内『先给再收窄』、对外『先拒绝再授予』。地形与分工属成员国内政，非联邦成立门槛。关联既有评测缺口：多跳 Recall 深度。",
+      "id": "overseer-federation-vision-001",
+      "name": "愿景延伸：联邦式组织级图谱（项目即国家，组织即联邦）",
+      "parent": "project-overseer-001",
+      "testcases": [
+        {
+          "Input": "tests/overseer-federation-vision.test.js",
+          "acceptanceCriteria": "tests/overseer-federation-vision.test.js",
+          "description": "GIVEN 人类伙伴口述的『联邦式组织级图谱（项目即国家，组织即联邦）』愿景方向；WHEN 检查意图图谱；THEN 存在 Goal『愿景延伸：联邦式组织级图谱（项目即国家，组织即联邦）』（id overseer-federation-vision-001），type=Goal、status=PLANNED、memoryTier=T2，位于项目总管核心 T2 视图 overseer-ltm-001 成员中，描述含国家/联邦类比三要素（地形/海关/分工）与引用式方法与最小联邦法则，与 overseer-vision-001 存在 Association。",
+          "name": "AT-overseer-federation-vision-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Goal"
     }
   ],
   "relationships": [
@@ -9656,6 +9690,16 @@
       "target_id": "2791",
       "target_name": "ARGO写图下游直写.qea投影（Node:sqlite）",
       "statement": "人类EA草稿→语义diff→agent写回canonical（draft-proposal收敛） --(Association)--> ARGO写图下游直写.qea投影（Node:sqlite）"
+    },
+    {
+      "id": "overseer-federation-vision-rel-001",
+      "name": "愿景延伸",
+      "source_id": "overseer-federation-vision-001",
+      "source_name": "愿景延伸：联邦式组织级图谱（项目即国家，组织即联邦）",
+      "statement": "愿景延伸：联邦式组织级图谱（项目即国家，组织即联邦） --(Association)--> 项目愿景：为 AGENT 提供长期记忆系统",
+      "target_id": "overseer-vision-001",
+      "target_name": "项目愿景：为 AGENT 提供长期记忆系统",
+      "type": "Association"
     }
   ],
   "views": [
@@ -10322,11 +10366,13 @@
         "overseer-wiki-eval-001",
         "overseer-failure-exp-concept-001",
         "overseer-vision-001",
-        "overseer-default-pm-actor-001"
+        "overseer-default-pm-actor-001",
+        "overseer-federation-vision-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
-        "overseer-failure-exp-concept-rel-001"
+        "overseer-failure-exp-concept-rel-001",
+        "overseer-federation-vision-rel-001"
       ]
     },
     {
