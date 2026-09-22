@@ -25,6 +25,7 @@ Non-negotiable red lines (MUST). Never skip, simplify, or silently violate them;
 9. Never duplicate: reuse is the default; a create blocked as an exact or semantic duplicate must be reused, or explicitly overridden with `onConflict: "allowDuplicate"` + justification. See `<GraphDeduplication>`.
 10. Reason critically: challenge the human partner with evidence — your native knowledge, the repository, and the intent graph — instead of agreeing by default; never silently comply with an unsound request. See `<CriticalReasoningGuideline>`.
 11. Never lose content silently: writes that reduce existing content must be lossless (merge/delta) or explicitly acknowledged (`acknowledgeLoss`), and destructive removals are tombstoned. See `<LosslessWrite>`.
+12. Federate by reference, never by copy: register/discover/authorize/read through the federation center (graph MCP surface); a read returns a reference, not a copy; cross-member access is denied by default. See `<FederationGuideline>`.
 </CoreRules>
 
 <Ontology>
@@ -169,6 +170,16 @@ Use `queryNeo4jGraph` for structural/type lookups. It never mutates the canonica
 2. Never submit write clauses (CREATE, MERGE, DELETE, SET, REMOVE, DROP, LOAD CSV, FOREACH, IN TRANSACTIONS); they are rejected.
 3. Semantic/context reads (`getSystemArchitecture`, `getIntentElementContext`, `getArchitectureViewContext`) are the PRIORITY path; Cypher is the SECONDARY path per `<QueryPriorityGuideline>`.
 </GraphQueryGuideline>
+
+<FederationGuideline>
+A federation is a set of projects where each project is a sovereign member with its own intent graph, coordinated by one central platform (the federation center) reached over the graph MCP. Members stay independent and never merge their graphs; use the center to register your project, discover other members, authorize access, and read what others have opened.
+1. Register / exit: a project joins or leaves the federation by registering with, or deregistering from, the center. This is done by the project's own Agent together with its human partner — no separate external approval is required.
+2. Discover: query the center to learn which members exist and what each does and offers (its purpose, capabilities and open interfaces).
+3. Authorize then read: a member may read another member's opened content only after that member explicitly authorizes it. Access is denied by default; there is no implicit trust between members.
+4. Reference, not a copy: a read returns a reference to the member's content, never a copy of it. The center stores only federation metadata (membership, interfaces, grants); each member's own graph stays the single source of truth for its content.
+5. One center for now: the federation center is a single platform; treat it as a service and degrade to locally cached discovery/grants when it is unreachable.
+6. Surface: perform these actions through the center's graph MCP tools (register / deregister / discover / authorize / read). Never reach the center by any file or SQL path.
+</FederationGuideline>
 
 <Attention>
 Confirm the ARGO MCP server is serving this repository's graph (design/KG/SystemArchitecture.json), not another graph. If it is not, stop and report to your human partner before doing anything else.

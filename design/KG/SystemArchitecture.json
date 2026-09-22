@@ -2709,7 +2709,7 @@
       "name": "ArchGraph ARGO Workflow Rules",
       "parent": "1249",
       "type": "Rule",
-      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）。2026-09-11 全量改写为 Agent 视角：规则文件是给 Agent 的提示，只写「Agent 该做什么/怎么判定」的行为契约，不写工具内部实现（算法/阈值/环境变量/字段名）与解释性论证；每个会话随上下文加载，越短越准越好。运行规则：起步闸门（WakeupGuideline STEP 0）仅载 T1 工作记忆摘要；改动前先定位元素、只经 ARGO MCP 读写图谱、验收测试先行（可执行 GIVEN-WHEN-THEN）、提交后登记 commit id+文件路径；KG-first 且语义优先检索；KG-first 内容存储；写入去重（GraphDeduplication）；三层记忆；分级改动（Tier 1/2/3）。2026-09-15 新增 <CriticalReasoningGuideline> + CoreRule 10（证据驱动的批判性思维，AT-rules-04）。2026-09-15 新增 <LosslessWrite> + CoreRule 11：写图不静默丢内容——结构化字段 merge（省略≠删除）、标量文本 acknowledgeLoss（重大加 lossJustification）、破坏性删除 tombstone 快照、每次响应含 lossless 报告（AT-rules-05；能力组件 lossless-write-gate）。安装器 install-argo.ps1 从 <WakeupGuideline> 块生成各宿主唤醒插件，部署测试断言该锚点与 UNCONDITIONAL STARTUP GATE 文本。",
+      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）。2026-09-11 全量改写为 Agent 视角：规则文件是给 Agent 的提示，只写「Agent 该做什么/怎么判定」的行为契约，不写工具内部实现（算法/阈值/环境变量/字段名）与解释性论证；每个会话随上下文加载，越短越准越好。运行规则：起步闸门（WakeupGuideline STEP 0）仅载 T1 工作记忆摘要；改动前先定位元素、只经 ARGO MCP 读写图谱、验收测试先行（可执行 GIVEN-WHEN-THEN）、提交后登记 commit id+文件路径；KG-first 且语义优先检索；KG-first 内容存储；写入去重（GraphDeduplication）；三层记忆；分级改动（Tier 1/2/3）。2026-09-15 新增 <CriticalReasoningGuideline> + CoreRule 10（证据驱动的批判性思维，AT-rules-04）。2026-09-15 新增 <LosslessWrite> + CoreRule 11：写图不静默丢内容——结构化字段 merge（省略≠删除）、标量文本 acknowledgeLoss（重大加 lossJustification）、破坏性删除 tombstone 快照、每次响应含 lossless 报告（AT-rules-05；能力组件 lossless-write-gate）。安装器 install-argo.ps1 从 <WakeupGuideline> 块生成各宿主唤醒插件，部署测试断言该锚点与 UNCONDITIONAL STARTUP GATE 文本。 2026-09-22 新增 <FederationGuideline> + CoreRule 12：联邦行为契约——注册/注销无需外部审批、发现成员、先授权后读取、默认拒绝、读返回引用而非副本、单一中心经 graph MCP；中心落在 graph-wiki（云端），各项目自注册/自注销（AT-rules-06；WP wp-federation-framework-side-001）。",
       "testcases": [
         {
           "Input": "tests/argo-rules-query.test.js",
@@ -2744,6 +2744,13 @@
           "acceptanceCriteria": "tests/argo-rules-lossless.test.js",
           "description": "GIVEN ARGO 工作流规则已维护；WHEN Agent 写图减少既有内容；THEN 规则声明无损写入契约：结构化字段 merge（省略≠删除）、标量文本 acknowledgeLoss（重大加 lossJustification）、破坏性删除 tombstone、检查每次响应的 lossless 报告；CoreRules 引用该准则。",
           "name": "AT-rules-05",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/argo-rules-federation.test.js",
+          "acceptanceCriteria": "tests/argo-rules-federation.test.js",
+          "description": "GIVEN ARGO 工作流规则已维护；WHEN Agent 参与联邦（注册/发现/授权/读取）；THEN 规则声明 <FederationGuideline>：注册/注销无需外部审批、发现成员、先授权后读取、默认拒绝、读返回引用而非副本、单一中心经 graph MCP；CoreRules 引用该准则。",
+          "name": "AT-rules-06",
           "type": "Acceptance Test"
         }
       ],
@@ -8707,7 +8714,7 @@
       "attributes": [
         {
           "name": "status",
-          "value": "PLANNED"
+          "value": "IN_PROGRESS"
         },
         {
           "name": "commit",
