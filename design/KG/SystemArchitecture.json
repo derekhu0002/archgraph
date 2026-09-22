@@ -8509,6 +8509,11 @@
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记 1f02e74）",
           "name": "commit",
           "value": "ef24585"
+        },
+        {
+          "name": "commit",
+          "value": "cc92ac0",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-ltm-layering.test.js（T2 里程碑卡 + T1 摘要覆盖写 + 同步 ltm-layering 成员）"
         }
       ],
       "description": "里程碑（2026-09-22，项目总管）：编制 ArchGraph 图文介绍 PDF（四大主题版）。需求：对 ARCHGRAPH 整理一份介绍 PDF，四个主题——① 项目大脑（架构知识图谱 / GraphRAG / 图写入门禁（去重·无损·墓碑）/ 图检索关键技术（图查询 queryNeo4jGraph、上下文获取 getIntentElementContext/getArchitectureViewContext、混合检索、RERANK））；② 人+Agent 协作（共同心智 ArchiMate + 会话开始/工作中/会话结束的记忆节拍与 T1/T2/T3）；③ 项目互助（Graph Store 子图工作包导出/治理/发布/复用闭环）；④ 项目集群（L1→L4 成熟度路径 + 方法/纪律）。要求多用图文配合。落地：docs/archgraph-introduction.html（自包含 HTML + 4 张内联 SVG 图）→ Playwright 渲染 docs/archgraph-introduction.pdf（A4，11 页，661KB）；配套可执行验收 tests/archgraph-introduction.test.js（8/8）。KG：新增 WP wp-archgraph-introduction-pdf-001（view 180），doc/pdf 属性 + AT。commits 1f02e74/ef24585。决策：新增 WP 触发同型语义软门禁（与框架介绍系列总纲 WP 0.9068、rename 0.8767），以 allowDuplicate+justification 放行（属并列不同交付物）。经验/坑：本机 Playwright 预期 chromium-1228 但只装了 1243，需显式 executablePath；T2 分层视图成员被 tests/overseer-ltm-layering 精确断言，新增记忆卡须同 commit 同步该测试（并把既有的 calibration 成员漂移一并补齐）。",
