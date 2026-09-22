@@ -28,7 +28,7 @@ const MEMBERS_BY_VIEW = {
   'overseer-rules-001': [
     'overseer-graph-dedup-gate-001', 'overseer-harness-workspaceroot-fix-001', 'overseer-graph-mcp-deploy-001',
     'overseer-mcp-tool-surface-001', 'overseer-milestone-critical-reasoning-001',
-    'overseer-milestone-lossless-write-001',
+    'overseer-milestone-lossless-write-001', 'overseer-cross-project-dispatch-001',
   ],
   'overseer-retrieval-001': [
     'overseer-semantic-seed-prefix-fix-001', 'overseer-rerank-latency-fix-001',

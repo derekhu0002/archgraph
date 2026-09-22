@@ -8688,7 +8688,7 @@
           "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-federation-center-design.test.js; tests/overseer-ltm-layering.test.js（登记联邦中心机构+规则内化设计稿 + 可执行验收 + LTM 核心视图成员同步）"
         }
       ],
-      "description": "设计方案（2026-09-22 人类伙伴口述要点 + 项目总管成稿，v0 设计稿；承接 Goal overseer-federation-vision-001，纸面推演，未实施）：\n【点1 中心机构】设一个联邦中心，管理成员国的新增/注册/销毁退出，并让成员相互知道对方存在。红线：中心只持有『联邦元数据』（成员身份/作用/能力、接口清单、授权、请求队列），不持有成员国内容——内容仍留各国 canonical 图，跨国走引用；以此保住各国自治与唯一事实源，避免中心成为拷贝式超级图。单点风险：中心不可用时允许成员以本地缓存目录+已授信降级可读。承载：拿 Graph Store 当中心的方向可行，但 Graph Store 现状是『子图工作包导出/发布/复用』（copy 式，见 2748 社区 + export-to-kg.js），必须升级为 reference-registry（同时托管已发布工件+接口描述+成员/授权元数据），否则与『引用不漂移』矛盾。\n【点2 规则内化到 Graph 框架（插拔）】联邦能力随框架分发（argo/defaults 模板 + initializeWorkspace 把『注册联邦』作为建国出生步骤）。三能力：(a) 项目注册与管理 register；(b) 相互授权与感知 discover/grant/revoke/checkAccess（默认拒绝）；(c) 需求申请与接口交互 request→accept/reject→expose(interface)。交互分两级：L-Read 引用（只读、无漂移）与 L-Provide 契约式交付（请求-接纳-接口暴露，可能含写/交付语义，须契约+审计+可能人类审批）。组件提供方/消费方天然构成依赖图（安卓子仓/组件消费类比），可放进自相似联邦图。\n【生命周期】genesis→register→operate→exit/destroy；退出协议=注销→墓碑→通知下游（悬空引用/依赖断裂）→降级；接口带版本语义、引用可 pin。\n【分期】P0 契约与寻址（联邦法则 v0+稳定 fedId+ForeignReference 代理+中心元数据模型）；P1 中心=Registry（注册/发现/授权，默认拒绝，只读）；P2 跨图只读检索（grant 范围 fan-out+provenance）；P3 契约式交付+组织层/分工（自相似联邦图）；P4 生命周期/退出对账、drift/墓碑/审计。\n【待裁决】D1b Graph Store 升级为 registry vs 旁挂 registry（倾向前者，须保留 reference 语义）；D2 注册/退出是否需人类批准；D3 首期只做 L-Read；D4 是否引入信任圈层；D5 中心单点 vs 可复制。",
+      "description": "设计方案（2026-09-22 人类伙伴口述要点 + 项目总管成稿，v0 设计稿；承接 Goal overseer-federation-vision-001）：\n【点1 中心机构】设一个联邦中心，管理成员国的新增/注册/销毁退出，并让成员相互知道对方存在。红线：中心只持有『联邦元数据』（成员身份/作用/能力、接口清单、授权、请求队列），不持有成员国内容——内容仍留各国 canonical 图，跨国走引用；以此保住各国自治与唯一事实源，避免中心成为拷贝式超级图。单点风险：中心不可用时允许成员以本地缓存目录+已授信降级可读。承载：拿 Graph Store 当中心的方向可行，但 Graph Store 现状是『子图工作包导出/发布/复用』（copy 式，见 2748 社区 + export-to-kg.js），必须升级为 reference-registry（同时托管已发布工件+接口描述+成员/授权元数据），否则与『引用不漂移』矛盾。\n【点2 规则内化到 Graph 框架（插拔）】联邦能力随框架分发（argo/defaults 模板 + initializeWorkspace 把『注册联邦』作为建国出生步骤）。三能力：(a) 项目注册与管理 register；(b) 相互授权与感知 discover/grant/revoke/checkAccess（默认拒绝）；(c) 需求申请与接口交互 request→accept/reject→expose(interface)。交互分两级：L-Read 引用（只读、无漂移）与 L-Provide 契约式交付（请求-接纳-接口暴露，可能含写/交付语义，须契约+审计+可能人类审批）。组件提供方/消费方天然构成依赖图（安卓子仓/组件消费类比），可放进自相似联邦图。\n【生命周期】genesis→register→operate→exit/destroy；退出协议=注销→墓碑→通知下游（悬空引用/依赖断裂）→降级；接口带版本语义、引用可 pin。\n【分期】P0 契约与寻址（联邦法则 v0+稳定 fedId+ForeignReference 代理+中心元数据模型）；P1 中心=Registry（注册/发现/授权，默认拒绝，只读）；P2 跨图只读检索（grant 范围 fan-out+provenance）；P3 契约式交付+组织层/分工（自相似联邦图）；P4 生命周期/退出对账、drift/墓碑/审计。\n【裁决与进展（2026-09-22 人类伙伴裁决）】D1b 已定：框架（archgraph）负责落规则 + 提供 Graph MCP 接口；中心（Registry）落在 graph-wiki——它是云端托管服务，各项目经 Graph MCP 注册/注销自己。D3 已定：首期只做 Read，且『只读』限定在内容维度（中心对内容 read-through、不复制副本）；注册/注销/发现/授权/授权后读取作为最小元数据写原语必须实现。进展：graph-wiki 已交付联邦中心 P0（新视图 federation-registry-view + 11 元素 + 10 关系；mcp/registry.js + 5 个 registry_* 工具），并已部署到公网 120.24.114.13 的 graph-mcp（9 工具，7 步远端验证全绿）。框架侧规则与工具契约待我方落地（WP wp-federation-framework-side-001）。graph-wiki commits dcb85bb/11220fc/c19f297/bc52bdf/360eec4。\n【遗留待裁决】D2 注册/退出是否需人类批准；D4 是否引入信任圈层；D5 中心单点 vs 可复制。",
       "id": "overseer-federation-center-design-001",
       "name": "设计稿：联邦中心机构 + 规则内化（插拔式联邦 v0）",
       "parent": "project-overseer-001",
@@ -8698,6 +8698,54 @@
           "acceptanceCriteria": "tests/overseer-federation-center-design.test.js",
           "description": "GIVEN 人类伙伴批准把『联邦中心机构 + 规则内化』设计增量登记入图；WHEN 检查意图图谱；THEN 存在 Business Object『设计稿：联邦中心机构 + 规则内化（插拔式联邦 v0）』（id overseer-federation-center-design-001），status=PLANNED、memoryTier=T2，位于项目总管核心 T2 视图 overseer-ltm-001 成员中，描述含中心=元数据非内容的红线、Graph Store 升级为 reference-registry、三能力（register/授权/请求）、交互两级（L-Read/L-Provide）与生命周期/退出协议，且与 overseer-federation-vision-001 存在 Association。",
           "name": "AT-overseer-federation-center-design-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "status",
+          "value": "PLANNED"
+        }
+      ],
+      "description": "框架侧工作包（2026-09-22 立项）：在 archgraph 框架侧落地联邦能力——① 规则：把联邦行为契约写进工作流规则（Agent 如何注册/注销/发现/授权/读取、默认拒绝、内容不复制、身份稳定），沿用既有 CoreRules 风格、Agent 视角；② MCP 工具契约：在框架 MCP 工具面新增/对接联邦工具（registry_register/deregister/discover/authorize/read），与 graph-wiki 中心（公网 https://argo.derekworkspacev5.com/mcp，9 工具）对齐输入/输出 schema。对接基线可由 graph-wiki 提供其 registry 工具输入 schema 清单。关联设计稿 overseer-federation-center-design-001；D1b 已定（框架落规则+工具、中心落 graph-wiki）。验收：GIVEN 框架侧规则与工具契约；WHEN 项目初始化后尝试注册/发现/授权读取；THEN 规则可被 Agent 读取执行、工具与中心契约一致、默认拒绝生效。",
+      "id": "wp-federation-framework-side-001",
+      "name": "框架侧：联邦规则 + Graph MCP 工具契约（注册/注销/发现/授权/读取）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/overseer-federation-framework-wp.test.js",
+          "acceptanceCriteria": "tests/overseer-federation-framework-wp.test.js",
+          "description": "GIVEN 框架侧需落地联邦规则与 Graph MCP 工具契约；WHEN 检查意图图谱；THEN 存在 Work Package『框架侧：联邦规则 + Graph MCP 工具契约（注册/注销/发现/授权/读取）』（id wp-federation-framework-side-001），为 Implementation and Migration 视图（180）成员，含 GIVEN-WHEN-THEN 用例，描述涵盖规则、MCP 工具契约、默认拒绝与 schema 对齐。",
+          "name": "AT-wp-federation-framework-side-001-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "可复用经验（2026-09-22，项目总管）：跨项目给另一个项目的 Agent 投递需求/消息的机制与编码规范。\n机制：OpenCode 桌面版内置 HTTP server（127.0.0.1:<port>，端口每次运行不同）＋ Basic 认证（取 env OPENCODE_SERVER_USERNAME/PASSWORD，勿打印值）；POST /session?directory=<项目目录> 建绑定该目录的会话 → POST /session/{id}/message（body {parts:[{type:'text',text:'...'}]}）发送并等待回复。CLI 等价物 opencode run --dir <项目> 'msg'，但本机仅桌面 Electron 版、未装 CLI（PATH 无 opencode；全局 npm 仅 archgraph-argo/openclaw）。\n编码规范（坑）：PowerShell 5.1 对无 charset 的 JSON 默认按 Latin-1 解码 → 发出的中文变 '?'、响应双重编码；修复：以 UTF-8 字节发送并显式 Content-Type: application/json; charset=utf-8，响应按 UTF-8 解码。\n隔离发现：各项目 ARGO 图相互隔离（身份/记忆不共享），跨项目消息可达但缺共享身份——正是联邦中心要解决的。\n实证：以该机制向 graph-wiki 投递「联邦中心 P0」需求并收到完成回报（会话 ses_f36641094ffeODqwWHyVeWyuT6）；graph-wiki 侧亦登记同类经验元素（xproj-msg-mechanism / xproj-encoding-norm / xproj-isolation-finding，commits bc52bdf/360eec4）。",
+      "id": "overseer-cross-project-dispatch-001",
+      "name": "可复用经验：跨项目 Agent 投递机制与编码规范（OpenCode 桌面版 HTTP server）",
+      "parent": "project-overseer-001",
+      "testcases": [
+        {
+          "Input": "tests/overseer-federation-framework-wp.test.js",
+          "acceptanceCriteria": "tests/overseer-federation-framework-wp.test.js",
+          "description": "GIVEN 本会话通过 OpenCode 桌面版 HTTP server 向 graph-wiki 投递了需求；WHEN 检查项目总管 T2 记忆；THEN 存在 Business Object『可复用经验：跨项目 Agent 投递机制与编码规范（OpenCode 桌面版 HTTP server）』（id overseer-cross-project-dispatch-001），memoryTier=T2，位于 overseer-rules-001 成员中，描述含机制（/session/message、Basic 认证）、编码规范（UTF-8 字节 vs Latin-1 坑）与项目隔离发现，且带 GIVEN-WHEN-THEN 用例。",
+          "name": "AT-overseer-cross-project-dispatch-01",
           "type": "Acceptance Test"
         }
       ],
@@ -9801,7 +9849,8 @@
         "2783",
         "2784",
         "wp-framework-overview-001",
-        "wp-archgraph-introduction-pdf-001"
+        "wp-archgraph-introduction-pdf-001",
+        "wp-federation-framework-side-001"
       ],
       "included_relationships": [
         "skill-insight-informs-2783"
@@ -10712,7 +10761,8 @@
         "overseer-graph-mcp-deploy-001",
         "overseer-mcp-tool-surface-001",
         "overseer-milestone-critical-reasoning-001",
-        "overseer-milestone-lossless-write-001"
+        "overseer-milestone-lossless-write-001",
+        "overseer-cross-project-dispatch-001"
       ],
       "included_relationships": []
     },
