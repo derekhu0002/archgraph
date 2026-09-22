@@ -8569,6 +8569,32 @@
       "name": "里程碑：语义检索向量投影剔除（修常驻 MCP 大图谱 OOM）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "overseer-argo-0-24-2-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.24.2（语义检索向量投影修复，修内网大图谱 MCP OOM）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "发布里程碑（2026-09-22）：archgraph-argo@0.24.2 发布 + 全局安装 + argo-deploy 22/22。内容：语义检索向量投影修复——4 条通道查询（向量/词法 × 普通/scoped）由 `RETURN properties(node)`（物化 1536 维 vector + 重复 content）改为 Cypher 元数据 allowlist 投影（canonicalIdentity/channel/searchText/dimensions/provider/model/modelVersion/canonicalVersion/contentVersion/indexVersion），消除大图谱下 O(N^2) 窗口扫描把向量整体物化进 JS 堆导致的常驻 MCP OOM；候选集/排序/分数/阈值/融合/rerank 输出不变，索引维度与写入侧不动（无需重灌向量）。关键坑：Neo4j 映射投影 `.*` 不会让显式条目覆盖既有属性，故不能用 node{.*, vector:null}，必须显式 map literal。发布实证：npm publish（dereckhu，shasum 5400a756eff1c85b350f4d03ffd76f91205787c8，77 files，unpacked 4.1MB）→ registry 传播第 7 次轮询（约 60-70s）可见 0.24.2 → npm i -g archgraph-argo@0.24.2 → argo-deploy -SkipEnv 22/22。产物核验：~/.argo/scripts/graph-rag/defaultSemanticRetrieval.js 含 4 处 allowlist 投影、0 处 properties(node) AS record、导出 exhaustChannel。内网部署文档 docs/self-hosted-embedding-deployment.md 前置条件改为 >=0.24.2。待办：宿主重启以加载新常驻 MCP（当前进程仍为旧代码）；重启后跑 argo-init 校验；内网按 AC-6 观测堆曲线确认。代码/测试 commit fb60cae；release commit 934444c。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.24.2"
+        },
+        {
+          "name": "commit",
+          "value": "934444c",
+          "description": "package.json（发布 0.24.2）；docs/self-hosted-embedding-deployment.md（前置条件 >=0.24.2）；部署 npm i -g + argo-deploy -SkipEnv 22/22"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -10539,7 +10565,8 @@
         "overseer-argo-0-22-2-release-001",
         "overseer-argo-0-23-0-release-001",
         "overseer-argo-0-24-0-release-001",
-        "overseer-argo-0-24-1-release-001"
+        "overseer-argo-0-24-1-release-001",
+        "overseer-argo-0-24-2-release-001"
       ],
       "included_relationships": []
     },
