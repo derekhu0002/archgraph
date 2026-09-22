@@ -4238,7 +4238,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-22 会话二，联邦式组织级图谱）：\n目标（人类伙伴）：把 ArchGraph 做成通用框架——①同一 Graph 框架可被多项目各自实例化；②项目即国家、组织即联邦，各项目意图图作为知识库基本单元可相互关联成组织级图谱。\n核心裁决：联邦/引用式（不合并、交流走引用、不漂移）；联邦法则 v0（跨国引用坐标 (graphKey,elementId)+版本指纹；同构类型 ArchiMate3.2+AML；默认拒绝）；信任极性内『先给再收窄』、外『先拒绝再授予』。D1b：框架（archgraph）落规则+MCP 接口，中心（Registry）落 graph-wiki 云端服务（经 Graph MCP 注册/注销）。D3：首期只读，且只读=内容维度（中心 read-through 不存副本），注册/注销/发现/授权作为最小元数据写必需。D2：注册/退出无需人类单独审批。D5：先单点中心。D4（信任圈层）搁置。中心定位=提供平台。\n交付：①Goal overseer-federation-vision-001（9ba8379）；②设计稿 overseer-federation-center-design-001（14c8d5c）；③T2 经验卡 overseer-cross-project-dispatch-001（跨项目投递机制/UTF-8 编码规范/项目隔离）与 WP wp-federation-framework-side-001（00771d6）；④框架侧规则 <FederationGuideline>+CoreRule 12 + AT-rules-06（343a98f；规则回归 22/22、argo-deploy 8/8）。\n跨项目投递：经 OpenCode 桌面版内置 HTTP server（非 CLI，本机未装）向 graph-wiki 投递「联邦中心 P0」；graph-wiki 已交付并部署公网（9 工具、7 步远端验证全绿；commits dcb85bb/11220fc/c19f297/bc52bdf/360eec4）。\n遗留钩子：①框架侧 MCP 工具契约 schema 对齐待续（桥为通用透传，规则已声明工具面）；②D4 信任圈层与中心可复制后置；③上一场 OOM 修复内容已在 T2 卡 overseer-semantic-projection-oom-001 与发布里程碑，T1 覆盖写不构成净损失；④规则改动需 argo-deploy 才传播到各宿主。",
+      "description": "项目总管工作记忆摘要（2026-09-22/23 会话，联邦式组织级图谱）：\n目标（人类伙伴）：把 ArchGraph 做成通用框架——①同一 Graph 框架可被多项目各自实例化；②项目即国家、组织即联邦，各项目意图图作为知识库基本单元可相互关联成组织级图谱。\n核心裁决：联邦/引用式（不合并、交流走引用、不漂移）；联邦法则 v0（跨国引用坐标+版本指纹；同构类型 ArchiMate3.2+AML；默认拒绝）；信任极性内『先给再收窄』、外『先拒绝再授予』。D1b：框架（archgraph）落规则+MCP 接口，中心（Registry）落 graph-wiki 云端服务（Graph MCP：register/deregister/discover/authorize/read）。D3：首期只读＝内容维度只读（中心 read-through 不存副本），元数据写必需。D2：注册/退出无需人类审批（但注册由人类发起、AI 执行，**不加入 initializeWorkspace**）。D5：先单点中心。D4 信任圈层搁置。中心定位=提供平台。\n交付与实况：①Goal overseer-federation-vision-001（9ba8379）+ 设计稿 overseer-federation-center-design-001（14c8d5c）；②框架侧规则 <FederationGuideline>（Agent 视角）+ CoreRule 12 + AT-rules-06（343a98f/92ec334），发布 archgraph-argo@0.24.3 并部署到 OpenCode/Copilot/Cursor/DSH/OpenClaw（90e9bc6）；③T2 经验卡 overseer-cross-project-dispatch-001（跨项目投递机制/UTF-8 编码规范/项目隔离）；④联邦中心实测：archgraph 注册+openContent 2 项（582cba8a）、授权 soc-demo（13e931da）；SOC-DEMO 自注册 6292ca4b 并双向授权（12764faa）；人类可见成员页 https://argo.derekworkspacev5.com/archgraph/federation/（graph-wiki d18252d/0658760/6766b4a）；graph-wiki 主仓回补/同步 fe1c3c5（mcp/registry-sync.sh）。\n关键坑/教训：①graph-mcp 在 OpenCode 是 remote 直连、**无需桥**（stdio 桥只给 Cursor 等 SSE 宿主兜底）——勿因仓库存在某模块就假定它是必经路径；②PowerShell 5.1 发 JSON 默认 Latin-1（中文变?）→ UTF-8 字节 + charset=utf-8；桌面版内置 HTTP server 端口每次不同；HttpClient 改 Timeout 须在发首个请求前。\n遗留钩子：①框架侧 MCP 工具契约 schema 对齐＝文档层面确认；②服务器无 GitHub 凭证，触发式 push 需配只写 deploy key；③服务器 graph_submit/graph_update 的 graphs/catalog（~10 图）未回主仓；④D4 信任圈层、中心可复制后置；⑤规则改动需 argo-deploy 才传播。\ncommits：9ba8379/14c8d5c/00771d6/343a98f/32b8ea3/90e9bc6/92ec334/b872583/cbf7b3e/ec5eb49/25a6fea/612c423/12be06c。\n记忆层级：本摘要在 T1（overseer-wm-001）；相关长期记忆在 T2 overseer-ltm-001/overseer-rules-001/overseer-product-001；联邦专项元素：overseer-federation-vision-001、overseer-federation-center-design-001、wp-federation-framework-side-001、overseer-cross-project-dispatch-001。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4260,8 +4260,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-22",
-          "description": "本次会话：登记联邦愿景 Goal + 中心机构/规则内化设计稿 + 框架侧 WP + 跨项目投递经验（含验收测试）"
+          "value": "2026-09-23",
+          "description": "会话收尾：联邦式组织级图谱（愿景→设计→框架规则发布部署→中心实测→成员页→回补同步）"
         },
         {
           "name": "commit",
