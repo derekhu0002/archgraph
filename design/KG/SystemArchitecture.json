@@ -2903,6 +2903,11 @@
           "name": "commit",
           "value": "343a98f",
           "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-federation.test.js; design/KG/SystemArchitecture.json（新增 <FederationGuideline> + CoreRule 12 + AT-rules-06）"
+        },
+        {
+          "name": "commit",
+          "value": "92ec334",
+          "description": "argo/rules/archgraph.instructions.md（<FederationGuideline> Agent 视角修订）"
         }
       ]
     },
@@ -8730,9 +8735,14 @@
           "name": "commit",
           "value": "343a98f",
           "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-federation.test.js（框架侧规则落地：<FederationGuideline> + CoreRule 12；AT-rules-06）"
+        },
+        {
+          "name": "commit",
+          "value": "92ec334",
+          "description": "argo/rules/archgraph.instructions.md（<FederationGuideline> 改为 Agent 视角命令式行为契约；tests/argo-rules-federation.test.js 15/15）"
         }
       ],
-      "description": "框架侧工作包（2026-09-22 立项）：在 archgraph 框架侧落地联邦能力——① 规则：把联邦行为契约写进工作流规则（Agent 如何注册/注销/发现/授权/读取、默认拒绝、内容不复制、身份稳定），沿用既有 CoreRules 风格、Agent 视角；② MCP 工具契约：在框架 MCP 工具面新增/对接联邦工具（registry_register/deregister/discover/authorize/read），与 graph-wiki 中心（公网 https://argo.derekworkspacev5.com/mcp，9 工具）对齐输入/输出 schema。对接基线可由 graph-wiki 提供其 registry 工具输入 schema 清单。关联设计稿 overseer-federation-center-design-001；D1b 已定（框架落规则+工具、中心落 graph-wiki）。验收：GIVEN 框架侧规则与工具契约；WHEN 项目初始化后尝试注册/发现/授权读取；THEN 规则可被 Agent 读取执行、工具与中心契约一致、默认拒绝生效。",
+      "description": "框架侧工作包（2026-09-22 立项；同日首刀落地规则）：在 archgraph 框架侧落地联邦能力——① 规则：把联邦行为契约写进工作流规则（Agent 如何注册/注销/发现/授权/读取、默认拒绝、内容不复制、身份稳定），Agent 视角、命令式行为契约（已完成：<FederationGuideline> + CoreRule 12，AT-rules-06；初始 commit 343a98f，Agent 视角修订 commit 92ec334）；② MCP 工具契约：中心（graph-wiki，公网 https://argo.derekworkspacev5.com/mcp，9 工具）在 OpenCode 以 remote MCP 直连，registry_* 工具自动可用，框架侧无需新增工具或桥——工具契约以『规则声明工具面 + 远端注册』兑现，schema 对齐仅为文档层面确认（graph-wiki 可提供输入 schema 清单）。关联设计稿 overseer-federation-center-design-001；D1b 已定（框架落规则+工具、中心落 graph-wiki）。验收：GIVEN 框架侧规则与工具契约；WHEN 项目初始化后尝试注册/发现/授权读取；THEN 规则可被 Agent 读取执行、远端工具面一致、默认拒绝生效。",
       "id": "wp-federation-framework-side-001",
       "name": "框架侧：联邦规则 + Graph MCP 工具契约（注册/注销/发现/授权/读取）",
       "parent": "1249",
@@ -8763,7 +8773,7 @@
           "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-federation-framework-wp.test.js; tests/overseer-ltm-layering.test.js（登记跨项目投递机制与编码规范 T2 经验卡）"
         }
       ],
-      "description": "可复用经验（2026-09-22，项目总管）：跨项目给另一个项目的 Agent 投递需求/消息的机制与编码规范。\n机制：OpenCode 桌面版内置 HTTP server（127.0.0.1:<port>，端口每次运行不同）＋ Basic 认证（取 env OPENCODE_SERVER_USERNAME/PASSWORD，勿打印值）；POST /session?directory=<项目目录> 建绑定该目录的会话 → POST /session/{id}/message（body {parts:[{type:'text',text:'...'}]}）发送并等待回复。CLI 等价物 opencode run --dir <项目> 'msg'，但本机仅桌面 Electron 版、未装 CLI（PATH 无 opencode；全局 npm 仅 archgraph-argo/openclaw）。\n编码规范（坑）：PowerShell 5.1 对无 charset 的 JSON 默认按 Latin-1 解码 → 发出的中文变 '?'、响应双重编码；修复：以 UTF-8 字节发送并显式 Content-Type: application/json; charset=utf-8，响应按 UTF-8 解码。\n隔离发现：各项目 ARGO 图相互隔离（身份/记忆不共享），跨项目消息可达但缺共享身份——正是联邦中心要解决的。\n实证：以该机制向 graph-wiki 投递「联邦中心 P0」需求并收到完成回报（会话 ses_f36641094ffeODqwWHyVeWyuT6）；graph-wiki 侧亦登记同类经验元素（xproj-msg-mechanism / xproj-encoding-norm / xproj-isolation-finding，commits bc52bdf/360eec4）。",
+      "description": "可复用经验（2026-09-22，项目总管）：跨项目给另一个项目的 Agent 投递需求/消息的机制与编码规范。\n机制：OpenCode 桌面版内置 HTTP server（127.0.0.1:<port>，端口每次运行不同）＋ Basic 认证（取 env OPENCODE_SERVER_USERNAME/PASSWORD，勿打印值）；POST /session?directory=<项目目录> 建绑定该目录的会话 → POST /session/{id}/message（body {parts:[{type:'text',text:'...'}]}）发送并等待回复。CLI 等价物 opencode run --dir <项目> 'msg'，但本机仅桌面 Electron 版、未装 CLI（PATH 无 opencode；全局 npm 仅 archgraph-argo/openclaw）。\n编码规范（坑）：PowerShell 5.1 对无 charset 的 JSON 默认按 Latin-1 解码 → 发出的中文变 '?'、响应双重编码；修复：以 UTF-8 字节发送并显式 Content-Type: application/json; charset=utf-8，响应按 UTF-8 解码。\n隔离发现：各项目 ARGO 图相互隔离（身份/记忆不共享），跨项目消息可达但缺共享身份——正是联邦中心要解决的。\n实证：以该机制向 graph-wiki 投递「联邦中心 P0」需求并收到完成回报（会话 ses_f36641094ffeODqwWHyVeWyuT6）；graph-wiki 侧亦登记同类经验元素（xproj-msg-mechanism / xproj-encoding-norm / xproj-isolation-finding，commits bc52bdf/360eec4）。\n【更正/补充（2026-09-22）graph-mcp 接入方式】graph-mcp 在 OpenCode 里以 type: remote + url 直连（OpenCode 原生支持 Streamable HTTP），无需任何桥；远端工具面（含 registry_*）重连后自动出现。argo/mcp-bridges/graph-mcp-stdio.js 不是给 OpenCode 用的——它是给只按 SSE GET /mcp 拉远端、遇 Streamable-HTTP-only 端点 404 的宿主（典型 Cursor）准备的 stdio 兜底桥（见其文件头注释）。教训：不要因仓库里存在某模块就假定它是当前链路的必经路径，先读它的自述/引用再下结论（本次因此把一句误导性的『桥为通用透传』写入过 WP）。框架侧 MCP 接口因此无需新增工具或桥，只需 remote 注册（已注册）。",
       "id": "overseer-cross-project-dispatch-001",
       "name": "可复用经验：跨项目 Agent 投递机制与编码规范（OpenCode 桌面版 HTTP server）",
       "parent": "project-overseer-001",
