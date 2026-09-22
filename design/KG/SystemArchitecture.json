@@ -8454,6 +8454,36 @@
       "name": "教训：语义 score 排名派生不可作阈值 + memory 种子阈值标定 0.70",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "doc",
+          "value": "docs/archgraph-introduction.html"
+        },
+        {
+          "name": "pdf",
+          "value": "docs/archgraph-introduction.pdf"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "in_progress"
+        }
+      ],
+      "description": "面向开发者/架构师/AI 工程实践者的 ArchGraph 图文介绍：以四个主题系统化讲解——① 项目大脑（架构知识图谱、GraphRAG、图写入门禁（去重/无损/墓碑）、图检索关键技术（图查询 queryNeo4jGraph、上下文获取 getIntentElementContext/getArchitectureViewContext、混合检索、RERANK））；② 人+Agent 协作（共同心智 ArchiMate、会话开始/工作中/会话结束的记忆节拍与三层记忆 T1/T2/T3）；③ 项目互助（Graph Store 子图工作包导出/治理/发布/复用闭环）；④ 项目集群（从个人单项目到组织项目群的 L1→L4 成熟度路径、方法与四道工程纪律）。每个主题配一张内联 SVG 结构图，图文配合。产出 docs/archgraph-introduction.html（自包含 HTML+SVG）与 docs/archgraph-introduction.pdf（A4 渲染）。配套可执行验收测试 tests/archgraph-introduction.test.js。",
+      "id": "wp-archgraph-introduction-pdf-001",
+      "name": "编制 ArchGraph 介绍 PDF（四大主题图文版）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/archgraph-introduction.test.js",
+          "acceptanceCriteria": "tests/archgraph-introduction.test.js",
+          "description": "GIVEN ArchGraph 介绍图文 PDF 的仓库交付物（docs/archgraph-introduction.html + .pdf）；WHEN 读取 HTML 与 PDF 并检查意图图谱元素；THEN HTML 覆盖四个主题（项目大脑/人+Agent 协作/项目互助/项目集群）各自关键内容（GraphRAG、去重/无损/墓碑、queryNeo4jGraph/getIntentElementContext、混合检索/RERANK、WakeupGuideline/MemoryTriggerTiming/SessionMemorySummarization/T1-T2-T3、Graph Store 子图工作包、L1-L4 与四道纪律），内嵌至少 4 张 SVG 图；PDF 存在、非平凡大小且以 %PDF- 开头；图谱中元素为 Work Package、含 doc/pdf 属性与 GIVEN-WHEN-THEN 用例，且是视图 180 的成员。",
+          "name": "AT-wp-archgraph-introduction-pdf-001-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -9532,7 +9562,8 @@
         "2782",
         "2783",
         "2784",
-        "wp-framework-overview-001"
+        "wp-framework-overview-001",
+        "wp-archgraph-introduction-pdf-001"
       ],
       "included_relationships": [
         "skill-insight-informs-2783"

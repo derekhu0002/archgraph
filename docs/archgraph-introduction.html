@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>ArchGraph 介绍：四大主题图文版</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm; }
+  :root {
+    --ink: #1b2733;
+    --muted: #5b6b7b;
+    --line: #d7dee6;
+    --accent: #0b5cad;
+    --accent-soft: #eef4fb;
+    --code-bg: #f4f7fa;
+    --green: #059669;
+    --violet: #7c3aed;
+    --oranges: #ea580c;
+    --slate: #475569;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    font-size: 10.2pt;
+    line-height: 1.62;
+    margin: 0;
+  }
+  h1 { font-size: 23pt; margin: 0 0 4px; letter-spacing: .2px; line-height: 1.25; }
+  h2 {
+    font-size: 14.5pt; margin: 26px 0 10px; padding-bottom: 5px;
+    border-bottom: 2px solid var(--accent); color: var(--accent);
+  }
+  h3 { font-size: 11.5pt; margin: 16px 0 6px; color: #14324f; }
+  h4 { font-size: 10.4pt; margin: 12px 0 4px; color: #1b2733; }
+  p { margin: 6px 0; }
+  .subtitle { font-size: 12.5pt; color: var(--muted); margin: 0 0 8px; }
+  .meta {
+    font-size: 9pt; color: var(--muted); border: 1px solid var(--line);
+    background: var(--accent-soft); border-radius: 6px; padding: 10px 12px; margin: 14px 0 6px;
+  }
+  .meta b { color: var(--ink); }
+  code, kbd { font-family: "Cascadia Mono", Consolas, "Courier New", monospace; font-size: 9pt; }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px 12px; overflow-x: auto; font-size: 8.8pt; line-height: 1.5;
+    white-space: pre; page-break-inside: avoid;
+  }
+  table {
+    width: 100%; border-collapse: collapse; margin: 10px 0;
+    font-size: 9pt; page-break-inside: auto;
+  }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #eef2f6; font-weight: 600; }
+  tr { page-break-inside: avoid; }
+  ul, ol { margin: 6px 0 6px 20px; padding: 0; }
+  li { margin: 3px 0; }
+  a { color: var(--accent); text-decoration: none; word-break: break-all; }
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--accent-soft);
+    padding: 8px 12px; margin: 10px 0; border-radius: 0 6px 6px 0;
+  }
+  .callout.warn { border-left-color: var(--oranges); background: #fff7ed; }
+  .callout.good { border-left-color: var(--green); background: #ecfdf5; }
+  .tag {
+    display: inline-block; font-size: 8pt; color: #fff; background: var(--accent);
+    border-radius: 3px; padding: 1px 6px; margin-right: 6px; vertical-align: middle;
+  }
+  .tag.g { background: var(--green); }
+  .tag.v { background: var(--violet); }
+  .tag.o { background: var(--oranges); }
+  .footer { margin-top: 26px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 8.5pt; color: var(--muted); }
+  .pb { page-break-before: always; }
+  .nobreak { page-break-inside: avoid; }
+  .lead { font-size: 11pt; color: #24435f; }
+
+  /* cover */
+  .cover { text-align: left; padding: 8px 0 0; }
+  .cover .kicker { font-size: 9.5pt; color: var(--accent); letter-spacing: 2px; font-weight: 700; }
+  .cover-rule { height: 4px; width: 86px; background: var(--accent); border-radius: 2px; margin: 10px 0 16px; }
+  .pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 4px; }
+  .pillar {
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+    background: #fbfdff; page-break-inside: avoid;
+  }
+  .pillar h4 { margin: 0 0 4px; color: var(--accent); font-size: 10.6pt; }
+  .pillar p { margin: 0; font-size: 9pt; color: var(--muted); }
+  .pillar .no { font-weight: 700; color: var(--accent); margin-right: 6px; }
+
+  figure { margin: 12px 0; page-break-inside: avoid; }
+  figure svg { width: 100%; height: auto; display: block; }
+  .figure-card {
+    border: 1px solid var(--line); border-radius: 10px; background: #fcfdff;
+    padding: 10px 12px 4px;
+  }
+  figcaption { font-size: 8.6pt; color: var(--muted); margin: 6px 2px 2px; }
+  .diagram-title { font-size: 9.6pt; font-weight: 700; color: var(--accent); margin: 0 0 6px; }
+  svg text { font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif; }
+  .gv-box { fill: #f3f0ff; stroke: #7c3aed; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .kv { font-size: 9pt; }
+  .keys { font-size: 9.2pt; }
+  .keys b { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <div class="kicker">ARCHGRAPH · 框架介绍</div>
+  <h1>让 Agent 工程有图可依</h1>
+  <p class="subtitle">用四个主题读懂「架构图驱动的 Agentic Engineering」</p>
+  <div class="cover-rule"></div>
+
+  <div class="meta">
+    <b>整理</b>：项目总管（project-overseer-001）　|　<b>日期</b>：2026-09-22　|　<b>版本</b>：v1.0<br />
+    <b>一句话</b>：ArchGraph 以一张 ArchiMate 3.2 建模的<b>意图架构图</b>为单一事实源，让 Agent 的设计、执行、记忆与治理都围绕同一份可执行、可追溯的图展开。<br />
+    <b>来源</b>：<a href="https://archgraph.org">archgraph.org</a>　|　<a href="https://github.com/derekhu0002/archgraph">github.com/derekhu0002/archgraph</a>　（Apache License 2.0）
+  </div>
+
+  <p class="lead">Agent 已经能写代码、能调研、能发布内容。但真正把它当作<b>工程</b>来交付时，缺口不在「模型够不够强」，而在四个结构性问题：<b>意图漂移、黑盒执行、验收靠感觉、经验无法沉淀</b>。它们的共同点是——缺少一份人和 Agent 都能读懂、且能被机器执行的「施工图」。ArchGraph 的出发点因此很朴素：<b>Agent 缺的不是更聪明的脑子，而是一张施工图。</b></p>
+
+  <div class="pillars">
+    <div class="pillar">
+      <h4><span class="no">01</span>项目大脑</h4>
+      <p>架构知识图谱 + GraphRAG + 写入门禁 + 检索关键技术：让项目拥有一颗可读写、可治理、可回忆的「大脑」。</p>
+    </div>
+    <div class="pillar">
+      <h4><span class="no">02</span>人 + Agent 协作</h4>
+      <p>以 ArchiMate 为共同心智，在会话开始、工作中、会话结束等关键时刻提醒 Agent「记住」，实现可控协作。</p>
+    </div>
+    <div class="pillar">
+      <h4><span class="no">03</span>项目互助</h4>
+      <p>Graph Store：把「角色 / 流程 / 目标 / 约束 / 测试」的完整语义网络导出、共享、复用，让经验跨项目流动。</p>
+    </div>
+    <div class="pillar">
+      <h4><span class="no">04</span>项目集群</h4>
+      <p>从个人到组织：一套源多端运行、子图复用、组织级能力资产，给出可落地的方法、纪律与路径。</p>
+    </div>
+  </div>
+
+  <div class="callout nobreak">
+    <b>怎么读这份文档</b>：四个主题各自独立成章，每章遵循「<b>为什么 → 是什么 → 怎么做</b>」，并配一张结构图。想快速建立整体印象，先看每章的「一句话」与图示；想深入，看表格与要点。
+  </div>
+</section>
+
+<!-- ===================== TOPIC 1 ===================== -->
+<section class="pb">
+  <h2>主题一 · 项目大脑</h2>
+  <p class="lead">ArchGraph 的中心是一份<b>意图架构图谱（Intent Architecture Graph）</b>，文件形态是 <code>design/KG/SystemArchitecture.json</code>，用企业架构标准 <b>ArchiMate 3.2</b> 建模。它既是项目记忆的载体，也是检索与治理的中枢——统称「项目大脑」。</p>
+  <div class="callout">
+    <b>一句话</b>：大脑由四部分构成——<b>架构知识图谱</b>（事实源）、<b>GraphRAG</b>（读写管线）、<b>写入门禁</b>（治理）、<b>检索关键技术</b>（取用）。读走「语义优先」，写走「受治理的唯一通道」。
+  </div>
+
+  <h3>1.1 架构知识图谱：为什么能当单一事实源</h3>
+  <p>图中的每个元素都有类型（Business Actor、Business Role、Work Package、Skill、Application Component……），元素之间是<b>带类型、可校验</b>的关系（Assignment、Triggering、Association……），而不是自由文本。三个关键性质决定了它的地位：</p>
+  <table class="nobreak">
+    <thead><tr><th style="width:16%">性质</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td><b>结构化</b></td><td>元素与关系有类型、受关系推导矩阵约束，非法连接在<b>建模阶段</b>就被拦下，而非等到运行时。</td></tr>
+      <tr><td><b>可视化</b></td><td>同一张图按不同 <b>Viewpoint（视角）</b>切成不同 <b>View（视图）</b>；产品经理看 Application Cooperation，工程师看 Implementation and Migration，看到的是同一份数据的不同切面。</td></tr>
+      <tr><td><b>可执行</b></td><td>元素上挂载<b>可执行的验收用例</b>与 <b>Skill / Rule</b>，提交记录回写到元素。图不只是「画出来」的，它能驱动真实工作。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.2 GraphRAG：JSON 权威、Neo4j 从属</h3>
+  <p>检索不是单纯的向量相似度，而是「<b>语义种子 + 语义闭包 + 结构化补全</b>」的组合。权威源始终是 JSON：<b>JSON 改了，Neo4j 跟着同步，不是反过来</b>。管线分五阶段：</p>
+  <ol>
+    <li><b>嵌入向量生成</b>——对元素 / 关系 / 视图生成语义向量；</li>
+    <li><b>变更驱动增量索引</b>——不是每次全量重建；</li>
+    <li><b>种子检索</b>——按相似度选出语义种子；</li>
+    <li><b>目的策略闭包</b>——基于 ArchiMate 语义做依赖遍历，把相关子图一并拉出；</li>
+    <li><b>结构化补全</b>——补齐元素、关系、视图，组装成可用的上下文。</li>
+  </ol>
+
+  <h3>1.3 图写入门禁：治理的三道闸门</h3>
+  <p>图不会腐化，靠的是「写入无害」这条纪律。所有写入都必须经过唯一通道，并依次通过三道闸门：</p>
+  <table class="nobreak">
+    <thead><tr><th style="width:20%">闸门</th><th>规则</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="tag">去重</span>默认复用</td>
+        <td>写元素 / 关系 / 视图默认 <code>reuse</code>：<b>精确重复</b>（同类型 + 同名称）直接复用，只把既有对象挂到目标视图；<b>同类型语义近似</b>的新对象会被拦下并给出候选，必须显式放行（<code>allowDuplicate</code> + 理由）才能创建。复用是默认，重复要解释。</td>
+      </tr>
+      <tr>
+        <td><span class="tag o">无损</span>写入</td>
+        <td>结构化字段按名称<b>合并</b>（testcases、视图成员、关系属性）；<code>description</code> 等标量文本受保护，<b>省略不等于删除</b>；文本大幅收敛或破坏性删除必须显式确认（<code>acknowledgeLoss</code>）。删减内容要么无损合并，要么被明确承认。</td>
+      </tr>
+      <tr>
+        <td><span class="tag o">墓碑</span>可恢复</td>
+        <td>破坏性移除（元素 / 关系 / 视图）被记入 NDJSON <b>墓碑账本</b>（<code>SystemArchitecture.tombstones.ndjson</code>），完整对象可恢复。任何写入都不静默丢内容。</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout good nobreak">
+    <b>贯穿性纪律——召回优先</b>：一切调优不得牺牲最终检索的<b>检出率 / 召回率</b>，只能提升；宁可消耗性能，也不缩小候选池、不跳过重排。这条原则同时约束读检索与写去重检索。
+  </div>
+
+  <h3>1.4 图检索关键技术：四件套</h3>
+  <p>「项目大脑」要被高效取用，靠四种互补的检索技术；语义优先，结构化查询作补充，混合检索与重排负责精度。</p>
+  <table class="nobreak">
+    <thead><tr><th style="width:22%">关键技术</th><th style="width:30%">作用</th><th>何时用</th></tr></thead>
+    <tbody>
+      <tr><td><b>图查询</b><br /><code>queryNeo4jGraph</code></td><td>只读 Cypher，按<b>结构 / 类型</b>做枚举、遍历、计数、聚合（如「列出所有 Business Actor」）。只读、不写、绝不改权威图。</td><td>语义检索覆盖不到的结构化问题：清单、关系邻接、跨类型聚合。</td></tr>
+      <tr><td><b>上下文获取</b><br /><code>getIntentElementContext</code><br /><code>getArchitectureViewContext</code></td><td>以一个元素为中心展开 ArchiMate <b>依赖子图</b>（dependencyDepth / dependentDepth），或按视图解析<b>完整成员</b>（元素 / 关系 / 父元素 / 子视图）。</td><td>已知锚点，需要「围绕它的局部上下文」时；两步回忆法的第二步。</td></tr>
+      <tr><td><b>混合检索</b><br />向量 + BM25 + RRF</td><td>语义向量通道「按意思找」与全文词法通道「按 token 精确找」并行，用 <b>RRF</b> 融合；对缩写、代码指针、专有名词更鲁棒。</td><td>语义命中不稳、或需要精确 token 命中时（可开关）。</td></tr>
+      <tr><td><b>RERANK</b><br />LLM listwise 重排</td><td>对候选集做一次<b>二阶段重排</b>，把最相关的排到最前；失败自动 <code>fail-open</code> 回退，不阻塞检索。</td><td>候选集较大、需要把 top1 命中率拉满时（默认开）。</td></tr>
+    </tbody>
+  </table>
+  <div class="callout nobreak">
+    <b>实测口径（仓库内评测，非理论值）</b>：检索基线 725 题——向量召回 <b>~95.3%</b>、混合检索 <b>~96.3%</b>；LLM 重排后 top1 命中可达 <b>100%</b>。语义种子阈值经标定为 <b>0.70</b>（无关探针 ≤0.69、相关目标 ≥0.83 之间取最大召回）；相关性最终由 Agent 自判——只有「零相关」才拒答，低分命中不轻易丢弃。
+  </div>
+
+  <figure class="nobreak">
+    <div class="figure-card">
+      <div class="diagram-title">图 1 · 项目大脑总览：读写唯一通道 + 读检索四技 + 写三道门禁</div>
+      <svg viewBox="0 0 960 740" role="img" aria-label="项目大脑架构图">
+        <defs>
+          <marker id="a1" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+            <path d="M0 0 L9 4 L0 8 z" fill="#64748b" />
+          </marker>
+          <marker id="a1s" markerWidth="10" markerHeight="8" refX="1" refY="4" orient="auto">
+            <path d="M9 0 L0 4 L9 8 z" fill="#64748b" />
+          </marker>
+          <marker id="a1o" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto">
+            <path d="M0 0 L9 4 L0 8 z" fill="#ea580c" />
+          </marker>
+        </defs>
+
+        <rect x="0" y="0" width="960" height="740" fill="#ffffff" />
+
+        <!-- consumers -->
+        <rect x="80" y="24" width="260" height="60" rx="8" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+        <text x="210" y="50" font-size="12.5" font-weight="700" fill="#1b2733" text-anchor="middle">人类伙伴</text>
+        <text x="210" y="68" font-size="9.5" fill="#5b6b7b" text-anchor="middle">定方向 · 裁决 · 观察与纠偏</text>
+
+        <rect x="620" y="24" width="260" height="60" rx="8" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+        <text x="750" y="50" font-size="12.5" font-weight="700" fill="#1b2733" text-anchor="middle">编程 Agent</text>
+        <text x="750" y="68" font-size="9.5" fill="#5b6b7b" text-anchor="middle">定位 · 武装 · 交付</text>
+
+        <text x="480" y="52" font-size="10" fill="#0b5cad" text-anchor="middle">同一份可执行图</text>
+        <text x="480" y="68" font-size="9" fill="#5b6b7b" text-anchor="middle">共同心智</text>
+
+        <path d="M240 84 L 372 116" fill="none" stroke="#64748b" stroke-width="1.4" marker-end="url(#a1)" />
+        <path d="M720 84 L 588 116" fill="none" stroke="#64748b" stroke-width="1.4" marker-end="url(#a1)" />
+
+        <!-- MCP -->
+        <rect x="80" y="118" width="800" height="56" rx="8" fill="#e8f1ff" stroke="#2563eb" stroke-width="2" />
+        <text x="480" y="143" font-size="13" font-weight="700" fill="#1e40af" text-anchor="middle">ARGO MCP —— 读写意图图的唯一通道</text>
+        <text x="480" y="162" font-size="9.5" fill="#3b5680" text-anchor="middle">语义查询 · 结构化查询 · 受治理写入</text>
+
+        <path d="M480 174 L 480 204" fill="none" stroke="#64748b" stroke-width="1.4" marker-end="url(#a1)" />
+
+        <!-- fact source -->
+        <rect x="80" y="206" width="800" height="68" rx="8" fill="#eef4fb" stroke="#0b5cad" stroke-width="2.4" />
+        <text x="480" y="234" font-size="13" font-weight="700" fill="#0b5cad" text-anchor="middle">意图架构图 SystemArchitecture.json —— 单一事实源</text>
+        <text x="480" y="256" font-size="9.5" fill="#40586f" text-anchor="middle">ArchiMate 3.2 + AML（Skill / Rule）· 元素 / 关系 / 视图 结构化、可校验、可执行</text>
+
+        <path d="M260 274 L 205 308" fill="none" stroke="#64748b" stroke-width="1.4" marker-end="url(#a1)" />
+        <path d="M480 274 L 480 308" fill="none" stroke="#64748b" stroke-width="1.4" marker-end="url(#a1)" />
+        <path d="M700 274 L 755 308" fill="none" stroke="#64748b" stroke-width="1.4" marker-end="url(#a1)" />
+
+        <!-- indexes -->
+        <rect x="80" y="310" width="250" height="58" rx="8" fill="#f3f0ff" stroke="#7c3aed" stroke-width="1.5" />
+        <text x="205" y="336" font-size="12" font-weight="700" fill="#5b21b6" text-anchor="middle">Neo4j 结构投影</text>
+        <text x="205" y="354" font-size="9" fill="#6d5aa8" text-anchor="middle">从属索引 · JSON 改则同步</text>
+
+        <rect x="355" y="310" width="250" height="58" rx="8" fill="#f3f0ff" stroke="#7c3aed" stroke-width="1.5" />
+        <text x="480" y="336" font-size="12" font-weight="700" fill="#5b21b6" text-anchor="middle">语义向量索引</text>
+        <text x="480" y="354" font-size="9" fill="#6d5aa8" text-anchor="middle">embedding · 按意思找</text>
+
+        <rect x="630" y="310" width="250" height="58" rx="8" fill="#f3f0ff" stroke="#7c3aed" stroke-width="1.5" />
+        <text x="755" y="336" font-size="12" font-weight="700" fill="#5b21b6" text-anchor="middle">全文索引（词法）</text>
+        <text x="755" y="354" font-size="9" fill="#6d5aa8" text-anchor="middle">BM25 · 精确 token 命中</text>
+
+        <path d="M205 368 L 300 428" fill="none" stroke="#64748b" stroke-width="1.4" marker-end="url(#a1)" />
+        <path d="M480 368 L 480 428" fill="none" stroke="#64748b" stroke-width="1.4" marker-end="url(#a1)" />
+        <path d="M755 368 L 660 428" fill="none" stroke="#64748b" stroke-width="1.4" marker-end="url(#a1)" />
+
+        <!-- retrieval -->
+        <rect x="40" y="430" width="880" height="170" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.8" />
+        <text x="60" y="456" font-size="12" font-weight="700" fill="#065f46">读：图检索关键技术（语义优先 · KG-first）</text>
+
+        <rect x="60" y="470" width="200" height="112" rx="7" fill="#ffffff" stroke="#34d399" stroke-width="1.2" />
+        <text x="160" y="494" font-size="10.5" font-weight="700" fill="#065f46" text-anchor="middle">① 图查询</text>
+        <text x="160" y="514" font-size="9" fill="#3f6257" text-anchor="middle">queryNeo4jGraph</text>
+        <text x="160" y="532" font-size="8.6" fill="#5b6b7b" text-anchor="middle">只读 Cypher</text>
+        <text x="160" y="548" font-size="8.6" fill="#5b6b7b" text-anchor="middle">结构 / 类型 / 聚合</text>
+        <text x="160" y="568" font-size="8.4" fill="#94a3b8" text-anchor="middle">清单 · 邻接 · 计数</text>
+
+        <rect x="275" y="470" width="200" height="112" rx="7" fill="#ffffff" stroke="#34d399" stroke-width="1.2" />
+        <text x="375" y="494" font-size="10.5" font-weight="700" fill="#065f46" text-anchor="middle">② 上下文获取</text>
+        <text x="375" y="514" font-size="8.6" fill="#3f6257" text-anchor="middle">getIntentElementContext</text>
+        <text x="375" y="530" font-size="8.6" fill="#3f6257" text-anchor="middle">getArchitectureViewContext</text>
+        <text x="375" y="550" font-size="8.6" fill="#5b6b7b" text-anchor="middle">依赖子图 / 视图成员</text>
+        <text x="375" y="568" font-size="8.4" fill="#94a3b8" text-anchor="middle">聚焦局部上下文</text>
+
+        <rect x="490" y="470" width="200" height="112" rx="7" fill="#ffffff" stroke="#34d399" stroke-width="1.2" />
+        <text x="590" y="494" font-size="10.5" font-weight="700" fill="#065f46" text-anchor="middle">③ 混合检索</text>
+        <text x="590" y="514" font-size="9" fill="#3f6257" text-anchor="middle">向量 + BM25 + RRF</text>
+        <text x="590" y="534" font-size="8.6" fill="#5b6b7b" text-anchor="middle">语义「按意思找」</text>
+        <text x="590" y="550" font-size="8.6" fill="#5b6b7b" text-anchor="middle">词法「按 token 找」</text>
+        <text x="590" y="568" font-size="8.4" fill="#94a3b8" text-anchor="middle">抗缩写 / 代码指针</text>
+
+        <rect x="705" y="470" width="190" height="112" rx="7" fill="#ffffff" stroke="#34d399" stroke-width="1.2" />
+        <text x="800" y="494" font-size="10.5" font-weight="700" fill="#065f46" text-anchor="middle">④ RERANK</text>
+        <text x="800" y="514" font-size="9" fill="#3f6257" text-anchor="middle">LLM listwise 重排</text>
+        <text x="800" y="534" font-size="8.6" fill="#5b6b7b" text-anchor="middle">二阶段精排</text>
+        <text x="800" y="550" font-size="8.6" fill="#5b6b7b" text-anchor="middle">fail-open 回退</text>
+        <text x="800" y="568" font-size="8.4" fill="#94a3b8" text-anchor="middle">拉满 top1 命中</text>
+
+        <!-- governance -->
+        <rect x="40" y="620" width="880" height="100" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="1.8" />
+        <text x="60" y="646" font-size="12" font-weight="700" fill="#9a3412">写：图写入门禁（治理 · 写入无害）</text>
+
+        <rect x="60" y="658" width="280" height="48" rx="7" fill="#ffffff" stroke="#fdba74" stroke-width="1.2" />
+        <text x="200" y="678" font-size="10" font-weight="700" fill="#9a3412" text-anchor="middle">去重门禁</text>
+        <text x="200" y="695" font-size="8.6" fill="#5b6b7b" text-anchor="middle">L0 精确复用 · L1 语义近似软门禁</text>
+
+        <rect x="360" y="658" width="280" height="48" rx="7" fill="#ffffff" stroke="#fdba74" stroke-width="1.2" />
+        <text x="500" y="678" font-size="10" font-weight="700" fill="#9a3412" text-anchor="middle">无损写入</text>
+        <text x="500" y="695" font-size="8.6" fill="#5b6b7b" text-anchor="middle">合并 / 增量 / 省略≠删除 / 显式确认</text>
+
+        <rect x="660" y="658" width="240" height="48" rx="7" fill="#ffffff" stroke="#fdba74" stroke-width="1.2" />
+        <text x="780" y="678" font-size="10" font-weight="700" fill="#9a3412" text-anchor="middle">墓碑账本</text>
+        <text x="780" y="695" font-size="8.6" fill="#5b6b7b" text-anchor="middle">破坏性删除可恢复</text>
+
+        <!-- write path arrow -->
+        <path d="M40 670 L 16 670 L 16 240 L 76 240" fill="none" stroke="#ea580c" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#a1o)" />
+        <text x="26" y="470" font-size="9" fill="#ea580c" text-anchor="middle" transform="rotate(-90 26 470)">写入路径</text>
+      </svg>
+    </div>
+    <figcaption>读路径（自下而上取用）与写路径（受治理的唯一通道）共同构成项目大脑；去重、无损、墓碑三道闸门保证图不腐化。</figcaption>
+  </figure>
+</section>
+
+<!-- ===================== TOPIC 2 ===================== -->
+<section class="pb">
+  <h2>主题二 · 人 + Agent 协作</h2>
+  <p class="lead">协作的难点不是「Agent 能不能干」，而是「人和 Agent 是否在同一页上」。ArchGraph 用两件事解决：一套<b>共同心智</b>（同一张 ArchiMate 图），以及一套<b>记忆节拍</b>（在关键时刻提醒 Agent 记住）。</p>
+  <div class="callout">
+    <b>一句话</b>：人看全局、Agent 看局部，但看的是<b>同一份数据</b>；目标对齐不靠开会，而是<b>结构性</b>的。会话开始恢复记忆、工作中即时记账、会话结束幂等收口——让 Agent 永远不会「忘记上次做到哪儿」。
+  </div>
+
+  <h3>2.1 共同心智：ArchiMate 作为人与 Agent 的公共语言</h3>
+  <p>ArchGraph 没有另造 DSL，而是把 ArchiMate 3.2 扩展为 Agent 建模语言（AML），只新增 <code>Skill</code> 与 <code>Rule</code> 两个标准里确实没有的元素。这带来三重「共同心智」：</p>
+  <table class="nobreak">
+    <thead><tr><th style="width:22%">维度</th><th>人</th><th>Agent</th></tr></thead>
+    <tbody>
+      <tr><td><b>看什么</b></td><td>Viewpoint 分层的全局视图，俯瞰职责与协作</td><td>任务相关的局部子图（视图成员 / 依赖闭包）</td></tr>
+      <tr><td><b>怎么用</b></td><td>观察 · 约束 · 纠偏（改 description / testcases / Assignment）</td><td>定位元素 → 自武装 Skill/Rule → 测试先行 → 提交回登记</td></tr>
+      <tr><td><b>共同点</b></td><td colspan="2">面对同一张图、同一套元素与关系；产品侧（Application Component）与 Agent 侧（Business Actor / Role / Skill / Rule）通过 <b>Work Package</b> 相连，成为「目标 ↔ 执行者」的枢纽。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 记忆节拍：在关键时刻提醒 Agent 记住</h3>
+  <p>人的记忆分「意识区 / 需回忆 / 笔记档案」，Agent 亦然。ArchGraph 用<b>三层记忆</b>承载，并在三个关键时刻触发写入或加载：</p>
+  <table class="nobreak">
+    <thead><tr><th style="width:18%">时刻</th><th style="width:26%">机制</th><th>做什么</th></tr></thead>
+    <tbody>
+      <tr><td><b>会话开始</b></td><td>WakeupGuideline · STEP 0</td><td>先确认「我是哪个 Business Actor」，再<b>只加载 T1 工作记忆摘要 + 会话钩子</b>（上次未完成项 / 关键决策指针）；不 bulk-load T2/T3，避免撑爆上下文。</td></tr>
+      <tr><td><b>工作中</b></td><td>MemoryTriggerTiming</td><td>踩坑 / 修复后、「关键决策」形成时、任务 / 切片 / 里程碑完成时——<b>当场立即写入</b>长期记忆。这是最可靠的骨干：即使会话摘要漏写，关键内容早已入账。</td></tr>
+      <tr><td><b>会话结束</b></td><td>SessionMemorySummarization</td><td>人类显式要求收尾，或回合自然结束时，<b>幂等覆盖</b>同一个 T1 摘要元素（覆盖而非追加，写放大可控）。不苛求精确检测「会话结束」——关键内容已由上一行兜底。</td></tr>
+      <tr><td><b>下次会话</b></td><td>STEP 0 自检（兜底）</td><td>检查 T1 摘要时间戳是否陈旧 / 缺失，标记「上次未正常收尾」并提示人类；上下文已丢也不虚构恢复。</td></tr>
+    </tbody>
+  </table>
+  <table class="nobreak">
+    <thead><tr><th style="width:18%">层级</th><th style="width:30%">视图约定</th><th>内容与访问方式</th></tr></thead>
+    <tbody>
+      <tr><td><b>T1 工作记忆</b><br />意识区</td><td><code>&lt;actor&gt;-wm-001</code></td><td>身份 + 职责、当前任务、最近记忆摘要、会话钩子；≤2~4K token，<b>会话开始必进上下文</b>。</td></tr>
+      <tr><td><b>T2 长期记忆</b><br />可回忆</td><td><code>&lt;actor&gt;-ltm-001</code>（及主题分层子视图）</td><td>全部里程碑 / 决策 / 教训 / commit 台账；命中才加载。<b>回忆两步法</b>：<code>memory_search</code> 语义定位 → <code>getIntentElementContext</code> 取全文。</td></tr>
+      <tr><td><b>T3 档案</b><br />更长期</td><td><code>&lt;actor&gt;-archive-001</code></td><td>已完结 / 封存的旧记忆；<code>delivered</code> 且过期自动归档。<b>只移不删</b>，显式检索才读。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.3 掌控力：可观察、可约束、可纠偏</h3>
+  <ul>
+    <li><b>CoreRules 闭环</b>：找元素 → 走 MCP → 测试先行 → 提交登记 → 记忆回写 → 持续合规。每一步都有约束。</li>
+    <li><b>委派隔离（CoperationGuideline）</b>：Agent 不能越权，必须通过正式委派协作；Developer 不能干 Reviewer 的活，除非有明确的委派关系。每个 Actor 有独立的会话与记忆，互不干扰。</li>
+    <li><b>人的介入点</b>：<b>观察</b>（Viewpoint 俯瞰全局）、<b>约束</b>（改 Role description / testcases / Skill）、<b>纠偏</b>（改 Assignment 重新分配任务）。</li>
+  </ul>
+
+  <figure class="nobreak">
+    <div class="figure-card">
+      <div class="diagram-title">图 2 · 共同心智与记忆节拍：人与 Agent 围绕同一张图协作</div>
+      <svg viewBox="0 0 960 580" role="img" aria-label="人机协作与记忆节拍图">
+        <defs>
+          <marker id="a2" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0 0 L9 4 L0 8 z" fill="#0b5cad" /></marker>
+          <marker id="a2s" markerWidth="10" markerHeight="8" refX="1" refY="4" orient="auto"><path d="M9 0 L0 4 L9 8 z" fill="#0b5cad" /></marker>
+          <marker id="a2g" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L8 3.5 L0 7 z" fill="#94a3b8" /></marker>
+        </defs>
+        <rect x="0" y="0" width="960" height="580" fill="#ffffff" />
+
+        <!-- shared mental model row -->
+        <rect x="40" y="30" width="250" height="72" rx="8" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+        <text x="165" y="58" font-size="12.5" font-weight="700" fill="#1b2733" text-anchor="middle">人类伙伴</text>
+        <text x="165" y="78" font-size="9" fill="#5b6b7b" text-anchor="middle">定方向 · 裁决</text>
+        <text x="165" y="93" font-size="9" fill="#5b6b7b" text-anchor="middle">观察 · 约束 · 纠偏</text>
+
+        <rect x="345" y="30" width="270" height="72" rx="8" fill="#eef4fb" stroke="#0b5cad" stroke-width="2.2" />
+        <text x="480" y="58" font-size="12.5" font-weight="700" fill="#0b5cad" text-anchor="middle">同一张 ArchiMate 意图架构图</text>
+        <text x="480" y="78" font-size="9" fill="#40586f" text-anchor="middle">共同心智 · 单一事实源</text>
+        <text x="480" y="93" font-size="9" fill="#40586f" text-anchor="middle">人看全局 · Agent 看局部</text>
+
+        <rect x="670" y="30" width="250" height="72" rx="8" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+        <text x="795" y="58" font-size="12.5" font-weight="700" fill="#1b2733" text-anchor="middle">编程 Agent</text>
+        <text x="795" y="78" font-size="9" fill="#5b6b7b" text-anchor="middle">定位 · 自武装</text>
+        <text x="795" y="93" font-size="9" fill="#5b6b7b" text-anchor="middle">测试先行 · 提交回登记</text>
+
+        <path d="M290 66 L 340 66" fill="none" stroke="#0b5cad" stroke-width="1.4" marker-end="url(#a2)" marker-start="url(#a2s)" />
+        <path d="M620 66 L 670 66" fill="none" stroke="#0b5cad" stroke-width="1.4" marker-end="url(#a2)" marker-start="url(#a2s)" />
+
+        <!-- rhythm title -->
+        <text x="40" y="136" font-size="11.5" font-weight="700" fill="#14324f">记忆节拍：关键时刻提醒 Agent 记住</text>
+
+        <!-- 4 milestones -->
+        <rect x="40" y="150" width="205" height="104" rx="8" fill="#e8f1ff" stroke="#2563eb" stroke-width="1.4" />
+        <text x="142" y="174" font-size="10.6" font-weight="700" fill="#1e40af" text-anchor="middle">会话开始</text>
+        <text x="142" y="193" font-size="8.8" fill="#3b5680" text-anchor="middle">WakeupGuideline STEP 0</text>
+        <text x="142" y="212" font-size="8.6" fill="#5b6b7b" text-anchor="middle">确认身份 → 恢复 T1 摘要</text>
+        <text x="142" y="228" font-size="8.6" fill="#5b6b7b" text-anchor="middle">+ 会话钩子（未完项）</text>
+        <text x="142" y="245" font-size="8.4" fill="#94a3b8" text-anchor="middle">不 bulk-load T2/T3</text>
+
+        <path d="M245 202 L 265 202" fill="none" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#a2g)" />
+
+        <rect x="265" y="150" width="205" height="104" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="1.4" />
+        <text x="367" y="174" font-size="10.6" font-weight="700" fill="#9a3412" text-anchor="middle">工作中（骨干）</text>
+        <text x="367" y="193" font-size="8.8" fill="#9a3412" text-anchor="middle">MemoryTriggerTiming</text>
+        <text x="367" y="212" font-size="8.6" fill="#5b6b7b" text-anchor="middle">踩坑 / 修复后 · 决策形成</text>
+        <text x="367" y="228" font-size="8.6" fill="#5b6b7b" text-anchor="middle">任务 / 切片 / 里程碑完成</text>
+        <text x="367" y="245" font-size="8.4" fill="#94a3b8" text-anchor="middle">当场即时写入长期记忆</text>
+
+        <path d="M470 202 L 490 202" fill="none" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#a2g)" />
+
+        <rect x="490" y="150" width="205" height="104" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.4" />
+        <text x="592" y="174" font-size="10.6" font-weight="700" fill="#065f46" text-anchor="middle">会话结束</text>
+        <text x="592" y="193" font-size="8.8" fill="#065f46" text-anchor="middle">SessionMemorySummarization</text>
+        <text x="592" y="212" font-size="8.6" fill="#5b6b7b" text-anchor="middle">显式要求 / 回合自然结束</text>
+        <text x="592" y="228" font-size="8.6" fill="#5b6b7b" text-anchor="middle">幂等覆盖 T1 摘要</text>
+        <text x="592" y="245" font-size="8.4" fill="#94a3b8" text-anchor="middle">覆盖不追加 · 写放大可控</text>
+
+        <path d="M695 202 L 715 202" fill="none" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#a2g)" />
+
+        <rect x="715" y="150" width="205" height="104" rx="8" fill="#f3f0ff" stroke="#7c3aed" stroke-width="1.4" />
+        <text x="817" y="174" font-size="10.6" font-weight="700" fill="#5b21b6" text-anchor="middle">下次会话（兜底）</text>
+        <text x="817" y="193" font-size="8.8" fill="#5b21b6" text-anchor="middle">STEP 0 自检</text>
+        <text x="817" y="212" font-size="8.6" fill="#5b6b7b" text-anchor="middle">检查 T1 时间戳陈旧 / 缺失</text>
+        <text x="817" y="228" font-size="8.6" fill="#5b6b7b" text-anchor="middle">标记「上次未正常收尾」</text>
+        <text x="817" y="245" font-size="8.4" fill="#94a3b8" text-anchor="middle">不虚构恢复内容</text>
+
+        <!-- tiers -->
+        <rect x="40" y="284" width="880" height="74" rx="8" fill="#e8f1ff" stroke="#2563eb" stroke-width="1.4" />
+        <text x="60" y="310" font-size="11" font-weight="700" fill="#1e40af">T1 工作记忆（意识区）</text>
+        <text x="60" y="330" font-size="9" fill="#3b5680">&lt;actor&gt;-wm-001 · ≤2~4K token · 会话开始必进上下文：身份 + 任务 + 摘要 + 会话钩子</text>
+        <text x="60" y="348" font-size="8.6" fill="#94a3b8">幂等覆盖：写同一个摘要元素，不追加 → 多次触发只覆盖，不膨胀</text>
+
+        <rect x="40" y="370" width="880" height="74" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="1.4" />
+        <text x="60" y="396" font-size="11" font-weight="700" fill="#9a3412">T2 长期记忆（可回忆）</text>
+        <text x="60" y="416" font-size="9" fill="#7c4a21">&lt;actor&gt;-ltm-001 及主题分层子视图 · 里程碑 / 决策 / 教训 / commit 台账</text>
+        <text x="60" y="434" font-size="8.6" fill="#94a3b8">回忆两步法：memory_search 语义定位 → getIntentElementContext 取全文（按需，不全量加载）</text>
+
+        <rect x="40" y="456" width="880" height="74" rx="8" fill="#f3f0ff" stroke="#7c3aed" stroke-width="1.4" />
+        <text x="60" y="482" font-size="11" font-weight="700" fill="#5b21b6">T3 档案（更长期）</text>
+        <text x="60" y="502" font-size="9" fill="#5b3f8f">&lt;actor&gt;-archive-001 · 已完结 / 封存记忆 · delivered 且过期自动归档</text>
+        <text x="60" y="520" font-size="8.6" fill="#94a3b8">只移不删：归档后仍可结构化枚举 / 语义检索，永不删除</text>
+      </svg>
+    </div>
+    <figcaption>共同心智让目标对齐结构化；记忆节拍（开始 / 工作中 / 结束 / 自检）保证 Agent 不丢上下文、不失忆。</figcaption>
+  </figure>
+</section>
+
+<!-- ===================== TOPIC 3 ===================== -->
+<section class="pb">
+  <h2>主题三 · 项目互助</h2>
+  <p class="lead">每个项目都在重复发明 Agent 的工作方法：规则、流程、技能，散落各处、缺乏共享。ArchGraph 用 <b>Graph Store（图资产仓库 / 子图库）</b>让<a>架构决策的结构化表达</a>跨项目流动——这就是「项目互助」。</p>
+  <div class="callout">
+    <b>一句话</b>：共享的最小单位不是一段 prompt，而是一个<b>子图工作包</b>——含角色、流程、目标、约束、测试的完整语义网络。它可导出、可复用、可组合，让一个项目的经验成为另一个项目的起点。
+  </div>
+
+  <h3>3.1 可分享的子图工作包是什么</h3>
+  <p>通过仓库内的导出能力，从 <code>design/KG/SystemArchitecture.json</code> 中递归抽取一个自洽的子图，包含该工作所需的全部语义要素：</p>
+  <ul>
+    <li><b>角色</b>：Business Actor / Role 及其 Assignment；</li>
+    <li><b>流程</b>：Process / Function 与 Triggering / Flow 关系；</li>
+    <li><b>目标与约束</b>：Goal / Requirement / Constraint / Rule；</li>
+    <li><b>能力与验证</b>：Skill 与 GIVEN-WHEN-THEN 验收用例。</li>
+  </ul>
+  <p>导出时保留 <code>schema_id</code>、<code>parent</code> 层级与 <code>subdiagram_views</code>，因此导入到另一个项目后仍是<b>结构化、可导航、可执行</b>的，而不是一堆需要人肉重新理解的文字。</p>
+
+  <h3>3.2 共享闭环：导出 → 治理 → 发布 → 复用</h3>
+  <table class="nobreak">
+    <thead><tr><th style="width:20%">环节</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>导出</b></td><td>从本项目图中选出一个认为可分享的子图工作包（角色 / 流程 / 目标 / 约束 / 测试）。</td></tr>
+      <tr><td><b>治理（脱敏）</b></td><td>发布前扫描 <b>6 类敏感信息</b>（凭据、绝对路径、commit 详情、个人信息等），确保只共享<b>结构与方法</b>，不泄露秘密。</td></tr>
+      <tr><td><b>发布（三级承载）</b></td><td>① <b>GitHub Discussions</b> 索引与讨论；② <b>公开 Gist</b> 承载 ≤10MB 子图；③ <b>KGlibrary / 仓库文件</b>承载更大的子图。</td></tr>
+      <tr><td><b>复用与内化</b></td><td>另一个项目导入子图，直接获得角色、流程与验收用例的起点；并结合自身环境<b>内化、个性化优化</b>，而非照搬。</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn nobreak">
+    <b>边界与取舍</b>：社区以 GitHub Discussions 为载体（零成本、零运维、生态内），代价是对单一平台存在依赖；子图默认以公开 Gist 承载，超过其约 10MB 单文件上限则改用仓库文件。这些取舍是<b>明示</b>的，而非隐藏风险。
+  </div>
+
+  <h3>3.3 与业界共享机制对比</h3>
+  <table class="nobreak">
+    <thead><tr><th style="width:22%">方案</th><th style="width:30%">共享的是什么</th><th>局限</th></tr></thead>
+    <tbody>
+      <tr><td>Hugging Face</td><td>模型参数</td><td>黑盒：知道「能做什么」，不知道「怎么做、为什么这么做」。</td></tr>
+      <tr><td>LangChain / AutoGen</td><td>编排逻辑（调用链）</td><td>白盒但仅限调用链，不含角色职责、目标、约束与测试的完整语义。</td></tr>
+      <tr><td><b>ArchGraph</b></td><td><b>架构决策的结构化表达</b>：角色 / 流程 / 目标 / 约束 / 测试的完整语义网络</td><td>需要 ArchiMate 心智门槛；以平台（GitHub）为社区载体。</td></tr>
+    </tbody>
+  </table>
+
+  <figure class="nobreak">
+    <div class="figure-card">
+      <div class="diagram-title">图 3 · Graph Store 共享闭环：子图跨项目流动</div>
+      <svg viewBox="0 0 960 560" role="img" aria-label="Graph Store 共享闭环图">
+        <defs>
+          <marker id="a3" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0 0 L9 4 L0 8 z" fill="#0b5cad" /></marker>
+        </defs>
+        <rect x="0" y="0" width="960" height="560" fill="#ffffff" />
+
+        <!-- center -->
+        <rect x="345" y="205" width="270" height="130" rx="12" fill="#eef4fb" stroke="#0b5cad" stroke-width="2.4" />
+        <text x="480" y="236" font-size="13" font-weight="700" fill="#0b5cad" text-anchor="middle">Graph Store</text>
+        <text x="480" y="258" font-size="9.5" fill="#40586f" text-anchor="middle">图资产仓库 · graph-wiki + 社区站</text>
+        <text x="480" y="280" font-size="9" fill="#40586f" text-anchor="middle">以子图工作包为共享单位</text>
+        <text x="480" y="300" font-size="9" fill="#5b6b7b" text-anchor="middle">角色 / 流程 / 目标 / 约束 / 测试</text>
+        <text x="480" y="320" font-size="8.6" fill="#94a3b8" text-anchor="middle">完整语义网络，而非片段 prompt</text>
+
+        <!-- TL -->
+        <rect x="60" y="60" width="290" height="96" rx="9" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+        <text x="205" y="88" font-size="11.5" font-weight="700" fill="#1b2733" text-anchor="middle">① 项目 A · 导出</text>
+        <text x="205" y="110" font-size="9" fill="#5b6b7b" text-anchor="middle">从本项目图中抽取自洽子图工作包</text>
+        <text x="205" y="130" font-size="8.6" fill="#94a3b8" text-anchor="middle">保留 schema_id / parent / subdiagram_views</text>
+        <text x="205" y="147" font-size="8.6" fill="#94a3b8" text-anchor="middle">导出 → 结构化、可导航、可执行</text>
+
+        <!-- TR -->
+        <rect x="610" y="60" width="290" height="96" rx="9" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5" />
+        <text x="755" y="88" font-size="11.5" font-weight="700" fill="#9a3412" text-anchor="middle">② 治理 · 脱敏扫描</text>
+        <text x="755" y="110" font-size="9" fill="#7c4a21" text-anchor="middle">扫描 6 类敏感信息</text>
+        <text x="755" y="130" font-size="8.6" fill="#94a3b8" text-anchor="middle">凭据 / 绝对路径 / commit 详情 / 个人信息…</text>
+        <text x="755" y="147" font-size="8.6" fill="#94a3b8" text-anchor="middle">只共享结构与方法，不泄露秘密</text>
+
+        <!-- BR -->
+        <rect x="610" y="405" width="290" height="96" rx="9" fill="#f3f0ff" stroke="#7c3aed" stroke-width="1.5" />
+        <text x="755" y="433" font-size="11.5" font-weight="700" fill="#5b21b6" text-anchor="middle">③ 发布 · 三级承载</text>
+        <text x="755" y="455" font-size="9" fill="#5b3f8f" text-anchor="middle">GitHub Discussions 索引与讨论</text>
+        <text x="755" y="475" font-size="8.6" fill="#94a3b8" text-anchor="middle">公开 Gist 承载 ≤10MB 子图</text>
+        <text x="755" y="492" font-size="8.6" fill="#94a3b8" text-anchor="middle">KGlibrary 仓库文件承载更大子图</text>
+
+        <!-- BL -->
+        <rect x="60" y="405" width="290" height="96" rx="9" fill="#ecfdf5" stroke="#059669" stroke-width="1.5" />
+        <text x="205" y="433" font-size="11.5" font-weight="700" fill="#065f46" text-anchor="middle">④ 项目 B · 导入复用</text>
+        <text x="205" y="455" font-size="9" fill="#3f6257" text-anchor="middle">直接获得角色 / 流程 / 验收用例起点</text>
+        <text x="205" y="475" font-size="8.6" fill="#94a3b8" text-anchor="middle">结合自身环境内化、个性化优化</text>
+        <text x="205" y="492" font-size="8.6" fill="#94a3b8" text-anchor="middle">不照搬，形成自己的版本</text>
+
+        <!-- cycle arrows -->
+        <path d="M350 84 L 605 84" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#a3)" />
+        <path d="M755 156 L 755 400" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#a3)" />
+        <path d="M605 453 L 355 453" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#a3)" />
+        <path d="M205 400 L 205 156" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#a3)" />
+
+        <!-- connectors to center -->
+        <path d="M300 156 L 400 205" fill="none" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" />
+        <path d="M660 156 L 560 205" fill="none" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" />
+        <path d="M660 390 L 560 335" fill="none" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" />
+        <path d="M300 390 L 400 335" fill="none" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4,3" />
+      </svg>
+    </div>
+    <figcaption>共享闭环：项目 A 导出 → 治理脱敏 → 三级发布 → 项目 B 导入内化。中心始终是「子图工作包」这一结构化语义网络。</figcaption>
+  </figure>
+</section>
+
+<!-- ===================== TOPIC 4 ===================== -->
+<section class="pb">
+  <h2>主题四 · 项目集群</h2>
+  <p class="lead">一个人用 ArchGraph 是一个项目；一个组织用 ArchGraph，是一群项目共享同一套语言、纪律与能力资产。本章给出从<b>个人提效</b>到<b>组织提效</b>的方法、纪律与路径。</p>
+  <div class="callout">
+    <b>一句话</b>：ArchGraph 的杠杆在于<b>可复用</b>——一套源多端运行、子图跨项目复用、能力资产沉淀到组织。个人提效靠「一张图 + 一个 Agent」，组织提效靠「一族已治理的可复用资产」。
+  </div>
+
+  <h3>4.1 路径：四个成熟度阶段</h3>
+  <table class="nobreak">
+    <thead><tr><th style="width:14%">阶段</th><th style="width:20%">谁在用</th><th style="width:36%">关键动作</th><th>收益</th></tr></thead>
+    <tbody>
+      <tr><td><b>L1 起步器</b></td><td>个人 · 单项目</td><td>安装 ARGO 工具链；<code>argo init</code> 建立意图图；1 人 + 1 Agent 围绕一张图工作。</td><td>Agent 有据可依、可追溯；单项目不再「跑偏无感、验收靠感觉」。</td></tr>
+      <tr><td><b>L2 多角色</b></td><td>个人 · 单项目多 Agent</td><td>用 Business Actor / Role 建模多个角色，通过正式委派协作；每个 Actor 独立记忆。</td><td>复杂任务可拆分、可隔离；角色能力（Skill）可组合。</td></tr>
+      <tr><td><b>L3 项目互助</b></td><td>团队 · 多项目</td><td>把子图工作包导出到 Graph Store，跨项目复用；对照自身环境内化。</td><td>不再重复发明工作方法；一个项目的经验成为另一个项目的起点。</td></tr>
+      <tr><td><b>L4 组织集群</b></td><td>组织 · 项目群</td><td>统一语言与纪律；组织级 Skill / Rule / 验收用例资产库 + 治理规范；一份源多 Harness 运行。</td><td>组织级能力资产沉淀；规模化交付质量可回归、可审计、可沉淀。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 方法：三根杠杆</h3>
+  <div class="two-col">
+    <div class="callout" style="margin-top:6px;">
+      <b>杠杆一 · 一套源多端运行</b><br />
+      一条 <code>argo-deploy</code> 把 ARGO MCP、Skills、Rules、Agents 部署到 GitHub Copilot、Cursor、OpenCode、DeepSeek Harness、OpenClaw。一份源文件，多端运行——团队不再为「每个 Harness 各维护一套」付出重复成本。
+    </div>
+    <div class="callout" style="margin-top:6px;">
+      <b>杠杆二 · 子图复用</b><br />
+      以角色 / 流程 / 目标 / 约束 / 测试为单位的<b>子图工作包</b>，可导出、可组合、可再导出。组织把「最佳实践」沉淀为可挂载的资产，新项目直接站在它之上。
+    </div>
+  </div>
+  <div class="callout" style="margin-top:0;">
+    <b>杠杆三 · 统一语言与枢纽元素</b><br />
+    ArchiMate 3.2 + AML 让产品侧与 Agent 侧同图；<b>Work Package</b> 作为枢纽，同时指向产品组件与 Agent 技能，形成 <b>Task → Skill → Capability</b> 的语义链。技能不再是散落的 prompt 片段，而是可追溯、可复用的组织能力。
+  </div>
+
+  <h3>4.3 纪律：规模化不腐化的四道约束</h3>
+  <table class="nobreak">
+    <thead><tr><th style="width:24%">纪律</th><th>规模化时的作用</th></tr></thead>
+    <tbody>
+      <tr><td><b>定位先行</b></td><td>动手前先在图里找到（或创建）对应元素与视图；元素必须属于至少一个视图，不存在「图之外的孤儿元素」——多项目下依然边界清晰。</td></tr>
+      <tr><td><b>验收先行</b></td><td>每个元素挂载 GIVEN-WHEN-THEN、<b>可执行</b>的验收用例；改动前识别受影响用例、改动后跑回归。多个项目共享用例时，质量可横向对齐。</td></tr>
+      <tr><td><b>变更可证</b></td><td>每次提交把 <b>commit id + 文件路径</b>回登记到对应元素，元素拥有自己的变更时间线——谁、何时、改了什么，一目了然。</td></tr>
+      <tr><td><b>写入无害</b></td><td>去重（复用优先）+ 无损（省略≠删除）+ 墓碑（破坏性删除可恢复）。多人 / 多 Agent 并发写图时，图不会因重复或误删而腐化。</td></tr>
+    </tbody>
+  </table>
+  <p class="keys">叠加两条协作纪律：<b>记忆分层</b>（T1/T2/T3，避免上下文膨胀与知识丢失）与<b>委派隔离</b>（各 Actor 独立会话与记忆，不越权、不互相干扰）。</p>
+
+  <figure class="nobreak">
+    <div class="figure-card">
+      <div class="diagram-title">图 4 · 项目集群成熟度阶梯：从个人提效到组织提效</div>
+      <svg viewBox="0 0 960 600" role="img" aria-label="项目集群成熟度阶梯图">
+        <defs>
+          <marker id="a4" markerWidth="11" markerHeight="9" refX="9" refY="4.5" orient="auto"><path d="M0 0 L10 4.5 L0 9 z" fill="#0b5cad" /></marker>
+        </defs>
+        <rect x="0" y="0" width="960" height="600" fill="#ffffff" />
+
+        <text x="40" y="34" font-size="11.5" font-weight="700" fill="#14324f">成熟度阶梯（左下 → 右上）</text>
+
+        <!-- steps -->
+        <rect x="40" y="360" width="200" height="96" rx="9" fill="#f1f5f9" stroke="#475569" stroke-width="1.6" />
+        <text x="140" y="388" font-size="11" font-weight="700" fill="#1b2733" text-anchor="middle">L1 起步器</text>
+        <text x="140" y="408" font-size="8.8" fill="#5b6b7b" text-anchor="middle">个人 · 单项目</text>
+        <text x="140" y="426" font-size="8.4" fill="#94a3b8" text-anchor="middle">1 人 + 1 Agent</text>
+        <text x="140" y="443" font-size="8.4" fill="#94a3b8" text-anchor="middle">一张图，有据可依</text>
+
+        <rect x="275" y="270" width="200" height="96" rx="9" fill="#e8f1ff" stroke="#2563eb" stroke-width="1.6" />
+        <text x="375" y="298" font-size="11" font-weight="700" fill="#1e40af" text-anchor="middle">L2 多角色</text>
+        <text x="375" y="318" font-size="8.8" fill="#3b5680" text-anchor="middle">个人 · 单项目多 Agent</text>
+        <text x="375" y="336" font-size="8.4" fill="#94a3b8" text-anchor="middle">Actor / Role + 正式委派</text>
+        <text x="375" y="353" font-size="8.4" fill="#94a3b8" text-anchor="middle">独立记忆 · 能力可组合</text>
+
+        <rect x="510" y="180" width="200" height="96" rx="9" fill="#fff7ed" stroke="#ea580c" stroke-width="1.6" />
+        <text x="610" y="208" font-size="11" font-weight="700" fill="#9a3412" text-anchor="middle">L3 项目互助</text>
+        <text x="610" y="228" font-size="8.8" fill="#7c4a21" text-anchor="middle">团队 · 多项目</text>
+        <text x="610" y="246" font-size="8.4" fill="#94a3b8" text-anchor="middle">Graph Store 子图复用</text>
+        <text x="610" y="263" font-size="8.4" fill="#94a3b8" text-anchor="middle">跨项目内化最佳实践</text>
+
+        <rect x="745" y="90" width="175" height="96" rx="9" fill="#ecfdf5" stroke="#059669" stroke-width="1.6" />
+        <text x="832" y="118" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">L4 组织集群</text>
+        <text x="832" y="138" font-size="8.8" fill="#3f6257" text-anchor="middle">组织 · 项目群</text>
+        <text x="832" y="156" font-size="8.4" fill="#94a3b8" text-anchor="middle">组织级能力资产库</text>
+        <text x="832" y="173" font-size="8.4" fill="#94a3b8" text-anchor="middle">一份源多 Harness · 治理</text>
+
+        <!-- ascending arrows -->
+        <path d="M240 372 L 271 352" fill="none" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#a4)" />
+        <path d="M475 282 L 506 262" fill="none" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#a4)" />
+        <path d="M710 192 L 741 172" fill="none" stroke="#0b5cad" stroke-width="1.8" marker-end="url(#a4)" />
+
+        <!-- discipline rail -->
+        <rect x="40" y="476" width="880" height="104" rx="10" fill="#f8fafc" stroke="#0b5cad" stroke-width="1.6" />
+        <text x="60" y="502" font-size="11.5" font-weight="700" fill="#0b5cad">贯穿四阶段的纪律（规模化不腐化）</text>
+        <rect x="60" y="514" width="200" height="50" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.1" />
+        <text x="160" y="536" font-size="10" font-weight="700" fill="#1b2733" text-anchor="middle">定位先行</text>
+        <text x="160" y="553" font-size="8.4" fill="#5b6b7b" text-anchor="middle">先建图，再动手</text>
+
+        <rect x="272" y="514" width="200" height="50" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.1" />
+        <text x="372" y="536" font-size="10" font-weight="700" fill="#1b2733" text-anchor="middle">验收先行</text>
+        <text x="372" y="553" font-size="8.4" fill="#5b6b7b" text-anchor="middle">可执行 GIVEN-WHEN-THEN</text>
+
+        <rect x="484" y="514" width="200" height="50" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.1" />
+        <text x="584" y="536" font-size="10" font-weight="700" fill="#1b2733" text-anchor="middle">变更可证</text>
+        <text x="584" y="553" font-size="8.4" fill="#5b6b7b" text-anchor="middle">commit id + 文件路径</text>
+
+        <rect x="696" y="514" width="200" height="50" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.1" />
+        <text x="796" y="536" font-size="10" font-weight="700" fill="#1b2733" text-anchor="middle">写入无害</text>
+        <text x="796" y="553" font-size="8.4" fill="#5b6b7b" text-anchor="middle">去重 · 无损 · 墓碑</text>
+      </svg>
+    </div>
+    <figcaption>四阶段递进：个人单项目 → 单项目多角色 → 团队多项目（项目互助）→ 组织项目群；四道工程约束贯穿始终。</figcaption>
+  </figure>
+
+  <h3>4.4 组织提效的落点：能力资产化</h3>
+  <ul>
+    <li><b>Skill / Rule 是一等公民</b>：它们物化为文件系统上的具体文件（如 <code>SKILL.md</code>、<code>*.instructions.md</code>），并可被元素沿 Association 关联挂载。Agent 领取 Work Package 后<b>自武装</b>，主动获取所需能力。</li>
+    <li><b>验收用例是资产</b>：每个元素的验收用例是<b>代码</b>而非文档，可跨项目复用与回归，是组织质量的一致性来源。</li>
+    <li><b>记忆是资产</b>：踩坑经验、关键决策写入长期记忆，随项目沉淀并可跨会话召回；子图导出时可携带经验，形成「带坑的技能」。</li>
+    <li><b>可审计</b>：变更可证 + 写入无害，使组织级并发协作仍然可追溯、可恢复、可审计。</li>
+  </ul>
+</section>
+
+<!-- ===================== CLOSING ===================== -->
+<section class="pb">
+  <h2>结语 · 快速开始</h2>
+  <p class="lead">ArchGraph 用企业架构的严谨方法论（ArchiMate + TOGAF）来工程化 Agent 开发，而不是把 Agent 当作「Prompt 工程」的玩具。它直指当前 Agent 生态的三大痛点：<b>不可见</b>（行为黑盒）→ 架构图让其可见；<b>不可控</b>（自由发挥难纠偏）→ 验收 + 追溯让人类保持掌控；<b>不可复用</b>（Skills 散落）→ 图谱化让知识资产可组合、可共享。</p>
+
+  <pre>npm install -g archgraph-argo
+argo-deploy</pre>
+  <p>安装后打开项目、启动编程 Agent，它会自动：<b>先定位</b>（在图里找到任务背后的架构元素）→ <b>再武装</b>（获取该元素关联的 Skill 与 Rule）→ <b>测试先行</b>（用 GIVEN-WHEN-THEN 驱动实现）→ <b>可追溯</b>（提交并回登记到图谱）。</p>
+  <div class="callout nobreak">
+    语义（Graph RAG）检索需额外配置 Neo4j 与向量引擎；Embedding 可指向<b>任意 OpenAI 兼容端点</b>，便于离线 / 内网 / 私有化部署。其余能力开箱即用。
+  </div>
+
+  <table class="nobreak">
+    <thead><tr><th style="width:22%">资源</th><th>地址</th></tr></thead>
+    <tbody>
+      <tr><td>官网</td><td><a href="https://archgraph.org">https://archgraph.org</a></td></tr>
+      <tr><td>代码仓库</td><td><a href="https://github.com/derekhu0002/archgraph">https://github.com/derekhu0002/archgraph</a></td></tr>
+      <tr><td>社区站</td><td><a href="https://argo.derekworkspacev5.com/archgraph/">https://argo.derekworkspacev5.com/archgraph/</a>（文档 / 社区 / 子图库 / 博客）</td></tr>
+      <tr><td>图资产仓库</td><td><a href="https://github.com/derekhu0002/graph-wiki">https://github.com/derekhu0002/graph-wiki</a></td></tr>
+    </tbody>
+  </table>
+  <p>ArchGraph 以 <b>Apache License 2.0</b> 开源。欢迎试用、提 Issue——一起把 Agent 工程，从「玄学」变成「工程」。</p>
+
+  <div class="footer">
+    ArchGraph 介绍（四大主题图文版）· v1.0 · 整理：项目总管（project-overseer-001）· 2026-09-22<br />
+    事实源：<code>design/KG/SystemArchitecture.json</code>（ArchiMate 3.2 + AML）· 本 PDF 由 <code>docs/archgraph-introduction.html</code> 渲染生成。
+  </div>
+</section>
+
+</body>
+</html>
