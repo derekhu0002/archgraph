@@ -11,6 +11,25 @@ const {
   AUDIT_PURPOSES,
 } = require('../argo/scripts/graph-rag/defaultSemanticRetrieval.js');
 
+// The production MCP loads ~/.argo/.env into its process environment (e.g.
+// ARGO_SEMANTIC_MEMORY_THRESHOLD=0.70), and runArchitectureTests spawns this file
+// with that environment inherited. Ambient runtime tuning must not change what
+// "the code default" means, so the default-assertion tests below run against a
+// clean env; the override tests set their own values explicitly.
+for (const key of [
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD',
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD_ELEMENT',
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD_RELATIONSHIP',
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD_VIEW',
+  'ARGO_SEMANTIC_AUDIT_THRESHOLD',
+  'ARGO_SEMANTIC_AUDIT_THRESHOLD_ELEMENT',
+  'ARGO_SEMANTIC_AUDIT_THRESHOLD_RELATIONSHIP',
+  'ARGO_SEMANTIC_AUDIT_THRESHOLD_VIEW',
+  'ARGO_SEMANTIC_TOP_K',
+]) {
+  delete process.env[key];
+}
+
 const ELEMENT = { channel: 'Element' };
 const RELATIONSHIP = { channel: 'ArchitectureRelationship' };
 

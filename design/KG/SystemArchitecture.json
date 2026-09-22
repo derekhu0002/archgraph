@@ -321,13 +321,13 @@
           "description": "index.html（主页按 DeepSeek Harness 风格全面重写：暗色 + hero 终端 + 徽章 + 卡片 + 交替特性块 + 复制/滚动交互）; tests/website.test.js（主题断言 light→dark）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "313420b",
           "description": "index.html; README.md; docs/archgraph-framework-overview.md（对外介绍补自建/可插拔 embedding 能力，对应 0.24.0）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -473,13 +473,13 @@
           "description": "README.md（What is this? 补收益：long-term memory + deduplicated writes → precise recall；移除详细 Graph integrity 小节，细节归主页，保持简洁）; tests/readme.test.js"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "313420b",
           "description": "README.md（Install 补可插拔/自建 embedding：任意 OpenAI 兼容端点、ARGO_EMBEDDING_PROFILE=openai-compatible、自建指南链接）；tests/readme.test.js（新增 AT）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -2869,10 +2869,6 @@
           "description": "CriticalReasoningGuideline + CoreRule 10 + AT-rules-04；argo/rules/archgraph.instructions.md; tests/argo-rules-critical-reasoning.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "07f85ee",
           "description": "<LosslessWrite> + CoreRule 11；argo/rules/archgraph.instructions.md; tests/argo-rules-lossless.test.js; design/KG/SystemArchitecture.json"
@@ -2891,6 +2887,10 @@
           "name": "commit",
           "value": "f1a7814",
           "description": "<LosslessWrite> 口径修正：结构化 token 丢失用分隔符/空白不敏感判定，排除裸 / 与短数字；argo/rules/archgraph.instructions.md"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -4452,10 +4452,6 @@
           "description": "T1 摘要更新：CriticalReasoningGuideline 会话 + LTM 分层（详见 T2 里程碑 overseer-milestone-critical-reasoning-001）；design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "c4f0803",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-09-16 T1 会话摘要覆盖写：多 Agent 洞察 + 待规划项登记）"
@@ -4494,6 +4490,10 @@
           "name": "commit",
           "value": "c4376da",
           "description": "design/KG/SystemArchitecture.json（T1 摘要覆盖写：语义检索向量投影 OOM 修复 + 发布 0.24.2）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -5987,13 +5987,13 @@
           "description": "package.json（发布 archgraph-argo@0.16.1：修复图谱删除关系/视图后未从 .qea 投影删除——关系删除按 t_connectortag.schema_id 判定、视图按 schema_view_id token/确定性 ea_guid 判定，级联清孤儿行；ARGO 自动投影传 -y 默认删投影自有对象；AT-2791-16/17/18）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "068649e",
           "description": "argo/scripts/ea-qea-sync-lib.js; argo/scripts/systemarchitecture-mcp-server.js; tests/ea-qea-sync.test.js; tests/architecture-view-context.test.js（修复视图几何连线：readViewDiagramGeometry 改读 t_diagramlinks.Path 真实走线而非 Geometry 覆盖串 SX/SY/EX/EY/EDGE；relationships 新增 points/edge/geometry 并校正 path 语义；AT-2791-19）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "ARGO 写图 → 下游直写 .qea 投影（Node + node:sqlite，标准批量 SQL）。背景与结论：Repository.Execute 仅 DBMS 库可用（.feap 内嵌 Firebird 单条可用、.qea/SQLite 完全禁用）；.qea 是标准 SQLite，外部直写最符“一把 SQL 写库”诉求，EA 开/关皆可写（实测）；仓库 EA 文件已换 archgraph.qea。本 WP：① Node 模块直接对 .qea 做图谱⇄SQLite 批量读写（t_object/t_connector/t_diagram/t_objectproperties/t_connectortag/t_diagramobjects/t_diagramlinks），对账语义沿用 2100（固定同步根包/update-in-place 不动几何/删除清单确认/幂等）；② ARGO MCP 写图下游投影：观察 design/KG/SystemArchitecture.json 落盘→投影到 archgraph.qea（不改 argo/**）；③ 并发 busy_timeout+短事务+重试，EA 开着也能写；EA 缓存需人工刷新可见；④ unchanged-skip 变更检测使稳态增量快；⑤ .feap(Firebird) 旧路径保留。在本项目验证：真实图谱投影到 archgraph.qea + 回环一致 + 幂等 + 测速。",
@@ -7512,10 +7512,6 @@
       "type": "Application Component",
       "attributes": [
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "07f85ee",
           "description": "argo/scripts/lossless-write-gate.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; scripts/actor-working-memory.js; scripts/memory-archive.js; tests/lossless-write-gate.test.js; tests/argo-rules-lossless.test.js; design/KG/SystemArchitecture.json"
@@ -7534,6 +7530,10 @@
           "name": "commit",
           "value": "f1a7814",
           "description": "结构化 token 丢失判定改『规范化子串+分隔符/空白不敏感』+ 收紧 isStructuredToken（排除裸 / 与短数字）；argo/scripts/lossless-write-gate.js; argo/rules/archgraph.instructions.md; tests/lossless-write-gate.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -7614,10 +7614,6 @@
           "value": "COMPLETED"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "insightMethod",
           "value": "McKinsey 5-step (define/decompose/hypothesize/validate/synthesize)"
         },
@@ -7629,6 +7625,10 @@
           "name": "commit",
           "value": "c0dafe7",
           "description": "docs/multi-agent-recursive-delegation-insight.md; tests/multi-agent-recursive-delegation-insight.test.js; design/KG/SystemArchitecture.json; archgraph.qea（框架级可递归派生通用Agent机制业界洞察报告 + 里程碑登记 + 验收 AT-multiagent-insight-01..07）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "里程碑（2026-09-15，洞察Lead insight-lead-001 编排麦肯锡新五步法）：洞察『业界是否已存在框架级、可递归派生/委派的通用 Agent 定义与协作机制』。①界定=问题陈述 Q0（目标/范围/成功标准/约束）。②拆解=MECE 七支议题树（递归派生 / 委派交接 handoff / 互操作与定义注册 / 通用角色vs角色专精 / 权限与继承 / 上下文工程依据 / 图·共享状态底座）。③假设 H1–H7。④验证=BAILIAN MCP 本会话不可用（bailian-websearch 工具未挂载 + DASHSCOPE_API_KEY 未设置 + 端点 401 Unauthorized），改用 webfetch 真实抓取 14 个一手来源（Anthropic《multi-agent research system》/《Effective context engineering》/《Building effective agents》、Claude Code subagents 官方文档、OpenAI Agents SDK Handoffs、OpenAI Swarm GitHub、AutoGen Teams、CrewAI、Google ADK Workflows、LangGraph GitHub、Google A2A v1.0.0 规范、MCP Security Best Practices、Chroma Context Rot 报告、Cognition Don't Build Multi-Agents），未以模型记忆冒充。⑤结论=『部分是』：递归派生+委派+结果回馈已成体系（Claude Code 子 Agent 默认可再派生至 3 层、可用 CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH 配置；Anthropic orchestrator-worker 多 Agent 较单 Agent 提升 90.2%），但『单一通用角色 + 派生权限一路无差别继承』非业界主流，且与 least-privilege 实践冲突（H5 被证伪）。关键证据：Claude Code 子 Agent 继承父权限但一律以 tools/disallowedTools 收窄、插件子 Agent 禁设 hooks/mcpServers/permissionMode；MCP 安全规范强制最小权限渐进 scope、把 token passthrough 列为反模式并点名 privilege chaining/confused deputy/expanded blast radius；Chroma 18 模型实证 context rot；Cognition 反证并行子 Agent 的冲突决策与 game of telephone。裁决：人类设定②递归派生、③结果回馈重拆可直接落地；①单一通用角色可落地但须以任务契约（objective/output format/tool guidance/boundaries）补足专精缺失；④派生权限继承必须改造为『继承但权限单调不放大 + 深度/数量上限 + 图谱写入 preview→apply 门禁』。建议 R1–R5（有界递归/orchestrator-worker、通用定义+任务契约、压缩交接+图谱作共享黑板、权限继承但收窄、单写者并发护栏）+ 7 条反模式。交付 docs/multi-agent-recursive-delegation-insight.md；验收 AT-multiagent-insight-01..07。",
@@ -7709,6 +7709,10 @@
           "name": "commit",
           "value": "df67c5f",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-multiagent-delegation-plan.test.js; tests/overseer-ltm-layering.test.js（待规划项登记 + 验收测试 + LTM 分层成员同步）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "待规划事项（2026-09-15，项目总管）：把人类伙伴设想的『框架级自相似递归分身机制』纳入规划、暂缓实施（其自评『还有很多没考虑清楚的地方』，故本项为 PLANNED 而非交付）。①洞察结论（依据洞察Lead里程碑 insight-lead-milestone-multiagent-delegation-001 与 docs/multi-agent-recursive-delegation-insight.md）：业界『部分有』——递归派生、委派、结果回馈重拆已成体系（Claude Code 子 Agent 默认可再派生至 3 层、CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH 可配；Anthropic orchestrator-worker 同构 worker 较单 Agent +90.2%），但『单一通用角色 + 派生权限无差别继承』非业界主流且与 least-privilege 实践冲突（权限放大 / confused deputy / privilege chaining）。②人类伙伴澄清后的目标形态：自相似（self-similar）递归 Agent，等价于分治 / fork-join / MapReduce——每个 Agent 可并行 spawn 多个『同类型的自己』（分身）去完成本属自己的工作；对外看就是一个 Agent（单例封装），对内是递归分身树。分身不可追溯、无独立身份与记忆（『它其实就是主神的一部分』）。③已达成共识的机制要点：深度上限 3 + 扇出上限（由 harness 硬计数，非提示词，防注入绕过）；分身与父同一 agent 定义（同 prompt/工具/模型）；上下文隔离（分身只拿子任务说明 + 自己 scope 的图切片，不继承父对话历史）；只回压缩摘要，父决定合并或再拆；工具集相同但权限按 scope 单调收窄 + 写图单写者锁；不引入 Work Package / Task 图元素（委派契约退化为 spawn 提示规范）。④spawn 决策三层控制：模型侧可判定判据（≥2 条命中才分——可独立切分 / 子任务仍多步多工具 / 可并行无强序 / 预计压穿单窗预算；反之命中任一则不分）+ harness 硬门禁（深度 / 扇出 / token 配额）+ fail-safe 默认不分身；每次 spawn 记录理由可审计；必须有 fallback（分身无用则父回收、退回单 Agent 执行）。⑤未决 / 待想清楚：是否要做（未决）；通用单一角色的成立范围；判据阈值如何标定；分身与既有 Actor / 记忆模型的关系（分身在图中是否占用身份）；成本-收益的适用边界。",
@@ -7754,6 +7758,10 @@
           "name": "commit",
           "value": "06ce255",
           "description": "design/KG/SystemArchitecture.json（发布里程碑 + T1 摘要）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "testcases": [
@@ -7791,13 +7799,13 @@
     {
       "attributes": [
         {
-          "name": "deliveryStatus",
-          "value": "in_progress"
-        },
-        {
           "name": "commit",
           "value": "3de70d2",
           "description": "docs/archgraph-framework-overview.md（框架介绍系列总纲草稿）; tests/framework-overview.test.js（AT-wp-framework-overview-001-01）; design/KG/SystemArchitecture.json（新增 WP wp-framework-overview-001 于 view 180）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "ArchGraph 框架介绍系列的总纲。以《ArchGraph 总纲：用一张意图架构图，统一 Agent 工程》统一整个系列的叙事与术语：覆盖架构线（AML 把 ArchiMate 3.2 扩成 Agent 建模语言 / 产品与 Harness 统一模型 / 视图与视角）与 AI 线（图谱即记忆·三层记忆 / GraphRAG 检索 / 语义与结构双通道）两条主线，以及四道工程约束（定位先行 / 验收先行 / 变更可证 / 写入无害）。给出系列地图，用于逐步把既有文章（官宣、8 创新、多角色、社区、Skill 共演化、洞察报告）整合进同一体系。产出仓库草稿 docs/archgraph-framework-overview.md（status=draft），配套可执行验收测试 tests/framework-overview.test.js。",
@@ -7900,10 +7908,6 @@
           "value": "delivered"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "f2c8ad5",
           "description": "design/KG/SystemArchitecture.json（登记 WP+AT+framework-defaults-view-001；T2 卡 overseer-default-pm-actor-001；T1 摘要覆盖写）; tests/overseer-ltm-layering.test.js; archgraph.qea"
@@ -7917,6 +7921,10 @@
           "name": "commit",
           "value": "856e7c6",
           "description": "design/KG/SystemArchitecture.json（登记 0.23.0 发布里程碑卡；WP 登记 release commit 24775a0）; archgraph.qea"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -8005,6 +8013,10 @@
           "name": "commit",
           "value": "a981692",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（decision: stopped-low-value）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -8109,10 +8121,6 @@
           "description": "可配置 embedding provider profile（approved | openai-compatible）：argo/scripts/graph-rag/embeddingProviderProfile.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; argo/scripts/graph-rag/defaultSemanticRetrieval.js; argo/scripts/graph-rag/semantic-persistence/productionSemanticNeo4jAdapter.js; argo/scripts/graph-rag/liveEmbeddingIndexGate.js; argo/scripts/graph-rag/liveEmbeddingProviderClient.js; argo/.env.example; argo/scripts/graph-rag/ARCHITECTURE.md; tests/embedding-provider-profile.test.js; design/KG/SystemArchitecture.json; archgraph.qea（AT-embed-profile-01..06 全绿；全量回归 24 个既有 environ 失败，均非本次）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "267754f",
           "description": "Phase 1 自建 embedding 服务验证：sandbox/local-embedding/{server.py,requirements.txt,Dockerfile,run_server.ps1,download_model.py,probe_model.py,probe_http.js,verify_framework_client.js}（commit 16a5d58 补 .gitignore）。实测 gte-Qwen2-1.5B-instruct @1536 CPU：related 0.684 vs unrelated 0.056，~0.8s/text；框架 client + openai-compatible profile → 本地 /v1/embeddings 返回 1536 维。Pitfall：gte-Qwen2 remote code 需 transformers==4.44.2 + flash_attn CPU stub（transformers 4.57 报 DynamicCache.get_usable_length）。"
@@ -8136,6 +8144,10 @@
           "name": "commit",
           "value": "4f744b3",
           "description": "修复 argo init/backfill 忽略 embedding profile 的问题：argo/scripts/graph-rag/semanticInitConfiguration.js（新增 buildDefaultSemanticConfiguration）；argo/scripts/systemarchitecture-mcp-server.js（resolveDefaultSemanticConfiguration 改为委托 resolveApprovedLiveConfiguration，移除硬编码 W31_APPROVED_PROFILE / 无用辅助）；tests/embedding-provider-profile.test.js（AT-embed-profile-07 映射 + source guard）。7/7 通过，无回归。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -8255,10 +8267,6 @@
           "value": "COMPLETED"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "insightMethod",
           "value": "McKinsey 5-step (define/decompose/hypothesize/validate/synthesize)"
         },
@@ -8274,6 +8282,10 @@
           "name": "commit",
           "value": "d0c1c45",
           "description": "docs/graph-write-time-contradiction-insight.md; tests/graph-write-time-contradiction-insight.test.js; design/KG/SystemArchitecture.json; archgraph.qea（知识图谱写入时逻辑矛盾检测业界洞察 + 里程碑登记 + 验收 AT-write-contradiction-insight-01..10）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "里程碑（2026-09-20，洞察Lead insight-lead-001 编排麦肯锡新五步法）：洞察『知识图谱/本体/语义网/图数据库的写入时（write-time/事务内）逻辑矛盾检测』——检测新写入与已有图谱的逻辑不一致/矛盾（与重复本质不同：非对称蕴含/否定 vs 对称相似度）。①界定=问题陈述 Q0（目标/范围/成功标准/约束）。②拆解=MECE 六支议题树（A 形式化标准层 / B 图库引擎层 / C 工业平台实践 / D 校验时机与架构 / E ML·LLM / F 矛盾类型学）。③假设 H1–H7。④验证=BAILIAN MCP 本会话未挂载（bailian-websearch 工具未挂载 + DASHSCOPE_API_KEY 未设 + 端点 401），改用 webfetch 真实抓取 20 个一手来源（W3C OWL 2 Primer/SHACL/SWRL/OWL 2 Profiles、HermiT、Openllet、ELK、RDF4J ShaclSail、Stardog ICV + reasoning consistency、Ontotext GraphDB SHACL、Neo4j constraints、Amazon Neptune SPARQL/compliance、ROBOT reason、pySHACL、MultiNLI、SelfCheckGPT、KGE 综述、Great Expectations），未以模型记忆冒充；Wikidata 约束页 4 次抓取 transport error，已如实声明局限。⑤结论=『有，但分层』：写时阻塞在形式化约束层/三元组库事务层最成熟（RDF4J ShaclSail 在 commit() 生成校验计划并在违反时抛异常回滚事务；Stardog ICV guard mode 在数据库修改时强制约束使事务失败；GraphDB SHACL 仓库 commit() 抛校验报告；本体 CI 以 ROBOT reason 对 incoherency=inconsistency+unsatisfiable 非零退出阻塞）；关键在于区分『确定性可阻塞』（值冲突/基数/互斥/封闭/显式 not·negative assertion）与『建议型 advisory』，以及写时 vs 离线（全 DL 一致性靠 HermiT/Openllet/ELK profiles 离线或显式检查，Stardog reasoning consistency；OWL 2 EL/RL 可多项式并增量近实时）。Neo4j 原生仅有唯一/存在/类型/key、Neptune 无 ICV（H4 证伪）。LLM/NLI 仅建议型且误报（MultiNLI/SelfCheckGPT），KGE 面向 link prediction 非一致性。开放难题=跨多跳/传递/并发涌现矛盾（RDF4J 官方记录两个各自合法事务可共同违反，需 SNAPSHOT+写锁）。裁决：ArchGraph 现有 L0/L1 去重、结构校验、无损门禁正确但缺『L2 矛盾门』；建议三层落地（L2-A 确定性可阻塞不变量 / L2-B 建议型 advisory 带 severity / L2-C 全局审计角色）+ 前置条件（标注样本与 AT、recall-first、fail-open、单写者、绝不用相似度判矛盾）。交付 docs/graph-write-time-contradiction-insight.md；验收 AT-write-contradiction-insight-01..10。",
@@ -8378,6 +8390,10 @@
           "name": "commit",
           "value": "11df50c",
           "description": "docs/semantic-web-validation-learning-guide.html; docs/semantic-web-validation-learning-guide.pdf; tests/semantic-web-learning-guide.test.js; design/KG/SystemArchitecture.json; archgraph.qea（学习参考交付 + KG 视图 graph-consistency-tech-ref-001/元素登记 + AT-sw-learning-guide-01）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -8427,6 +8443,10 @@
           "name": "commit",
           "value": "fb60cae",
           "description": "argo/scripts/graph-rag/defaultSemanticRetrieval.js; tests/semantic-retrieval-vector-project.test.js; design/KG/SystemArchitecture.json; archgraph.qea — 读路径 4 条通道查询改为 Cypher 元数据 allowlist 投影（剔除 1536 维 vector + 重复 content），修常驻 ARGO MCP 大图谱 OOM；行为逐字节不变，AT-default-semantic-retrieval-02 / AC-1..AC-4。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -8483,13 +8503,13 @@
           "value": "docs/archgraph-introduction.pdf"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "1f02e74",
           "description": "docs/archgraph-introduction.html; docs/archgraph-introduction.pdf; tests/archgraph-introduction.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "面向开发者/架构师/AI 工程实践者的 ArchGraph 图文介绍：以四个主题系统化讲解——① 项目大脑（架构知识图谱、GraphRAG、图写入门禁（去重/无损/墓碑）、图检索关键技术（图查询 queryNeo4jGraph、上下文获取 getIntentElementContext/getArchitectureViewContext、混合检索、RERANK））；② 人+Agent 协作（共同心智 ArchiMate、会话开始/工作中/会话结束的记忆节拍与三层记忆 T1/T2/T3）；③ 项目互助（Graph Store 子图工作包导出/治理/发布/复用闭环）；④ 项目集群（从个人单项目到组织项目群的 L1→L4 成熟度路径、方法与四道工程纪律）。每个主题配一张内联 SVG 结构图，图文配合。产出 docs/archgraph-introduction.html（自包含 HTML+SVG）与 docs/archgraph-introduction.pdf（A4 渲染）。配套可执行验收测试 tests/archgraph-introduction.test.js。",
@@ -8531,6 +8551,10 @@
           "name": "commit",
           "value": "cc92ac0",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-ltm-layering.test.js（T2 里程碑卡 + T1 摘要覆盖写 + 同步 ltm-layering 成员）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "里程碑（2026-09-22，项目总管）：编制 ArchGraph 图文介绍 PDF（四大主题版）。需求：对 ARCHGRAPH 整理一份介绍 PDF，四个主题——① 项目大脑（架构知识图谱 / GraphRAG / 图写入门禁（去重·无损·墓碑）/ 图检索关键技术（图查询 queryNeo4jGraph、上下文获取 getIntentElementContext/getArchitectureViewContext、混合检索、RERANK））；② 人+Agent 协作（共同心智 ArchiMate + 会话开始/工作中/会话结束的记忆节拍与 T1/T2/T3）；③ 项目互助（Graph Store 子图工作包导出/治理/发布/复用闭环）；④ 项目集群（L1→L4 成熟度路径 + 方法/纪律）。要求多用图文配合。落地：docs/archgraph-introduction.html（自包含 HTML + 4 张内联 SVG 图）→ Playwright 渲染 docs/archgraph-introduction.pdf（A4，11 页，661KB）；配套可执行验收 tests/archgraph-introduction.test.js（8/8）。KG：新增 WP wp-archgraph-introduction-pdf-001（view 180），doc/pdf 属性 + AT。commits 1f02e74/ef24585。决策：新增 WP 触发同型语义软门禁（与框架介绍系列总纲 WP 0.9068、rename 0.8767），以 allowDuplicate+justification 放行（属并列不同交付物）。经验/坑：本机 Playwright 预期 chromium-1228 但只装了 1243，需显式 executablePath；T2 分层视图成员被 tests/overseer-ltm-layering 精确断言，新增记忆卡须同 commit 同步该测试（并把既有的 calibration 成员漂移一并补齐）。",
