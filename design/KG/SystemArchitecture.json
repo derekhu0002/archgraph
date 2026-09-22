@@ -2898,6 +2898,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "343a98f",
+          "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-federation.test.js; design/KG/SystemArchitecture.json（新增 <FederationGuideline> + CoreRule 12 + AT-rules-06）"
         }
       ]
     },
@@ -8720,6 +8725,11 @@
           "name": "commit",
           "value": "00771d6",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-federation-framework-wp.test.js（立项框架侧：联邦规则 + Graph MCP 工具契约）"
+        },
+        {
+          "name": "commit",
+          "value": "343a98f",
+          "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-federation.test.js（框架侧规则落地：<FederationGuideline> + CoreRule 12；AT-rules-06）"
         }
       ],
       "description": "框架侧工作包（2026-09-22 立项）：在 archgraph 框架侧落地联邦能力——① 规则：把联邦行为契约写进工作流规则（Agent 如何注册/注销/发现/授权/读取、默认拒绝、内容不复制、身份稳定），沿用既有 CoreRules 风格、Agent 视角；② MCP 工具契约：在框架 MCP 工具面新增/对接联邦工具（registry_register/deregister/discover/authorize/read），与 graph-wiki 中心（公网 https://argo.derekworkspacev5.com/mcp，9 工具）对齐输入/输出 schema。对接基线可由 graph-wiki 提供其 registry 工具输入 schema 清单。关联设计稿 overseer-federation-center-design-001；D1b 已定（框架落规则+工具、中心落 graph-wiki）。验收：GIVEN 框架侧规则与工具契约；WHEN 项目初始化后尝试注册/发现/授权读取；THEN 规则可被 Agent 读取执行、工具与中心契约一致、默认拒绝生效。",
