@@ -172,13 +172,14 @@ Use `queryNeo4jGraph` for structural/type lookups. It never mutates the canonica
 </GraphQueryGuideline>
 
 <FederationGuideline>
-A federation is a set of projects where each project is a sovereign member with its own intent graph, coordinated by one central platform (the federation center) reached over the graph MCP. Members stay independent and never merge their graphs; use the center to register your project, discover other members, authorize access, and read what others have opened.
-1. Register / exit: a project joins or leaves the federation by registering with, or deregistering from, the center. This is done by the project's own Agent together with its human partner — no separate external approval is required.
-2. Discover: query the center to learn which members exist and what each does and offers (its purpose, capabilities and open interfaces).
-3. Authorize then read: a member may read another member's opened content only after that member explicitly authorizes it. Access is denied by default; there is no implicit trust between members.
-4. Reference, not a copy: a read returns a reference to the member's content, never a copy of it. The center stores only federation metadata (membership, interfaces, grants); each member's own graph stays the single source of truth for its content.
-5. One center for now: the federation center is a single platform; treat it as a service and degrade to locally cached discovery/grants when it is unreachable.
-6. Surface: perform these actions through the center's graph MCP tools (register / deregister / discover / authorize / read). Never reach the center by any file or SQL path.
+When your project participates in a federation, act through the federation center (one central platform reached over the graph MCP):
+1. Register or exit: register your project with the center to join; deregister it to leave. Do this as the project's own Agent together with your human partner — no separate external approval is required.
+2. Discover before relying: query the center for the members that exist and what each offers (purpose, capabilities, open interfaces).
+3. Authorize before you read: read another member's opened content only after that member explicitly authorizes you; access is denied by default, assume no trust between members.
+4. Reference, not a copy: a read returns a reference, not a copy of another member's content; never persist a copy. The center holds only federation metadata (membership, interfaces, grants); each member's own graph stays the single source of truth.
+5. Never merge graphs: members stay independent; keep your own graph sovereign.
+6. One center: use the single federation center; if it is unreachable, fall back to locally cached discovery/grants and say so.
+7. Surface: do register / deregister / discover / authorize / read through the center's graph MCP tools; never reach the center by a file or SQL path.
 </FederationGuideline>
 
 <Attention>
