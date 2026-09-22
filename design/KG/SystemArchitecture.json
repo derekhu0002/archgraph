@@ -4216,7 +4216,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-21 第2段，项目总管）：核实 aBot 反馈的 ARCHGRAPH 检索问题并落实运行态修复。\n① score 语义：memory_search / getSystemArchitecture 返回的 score 是闭包排名派生阶梯（productionGraphRagRuntime.js:1272 Math.max(0.99 - index*0.01, 0.8)），与相关性无关，禁止作阈值；真实相似度仅写路径 scoreMode:'similarity' 保留。相关性由 Agent 自判（仅零相关才拒答）。\n② 根因：memory 种子阈值代码默认 0.55 低于无关余弦地板（实测无关 top1 0.628–0.685）→ 不过滤任何内容。\n③ 标定（真实 qwen3.7-text-embedding）：无关探针 ≤0.6852、相关目标 ≥0.8325，有效窗口约 (0.686, 0.833)；运行态置 ARGO_SEMANTIC_MEMORY_THRESHOLD=0.70。\n④ 交付：defaultSemanticRetrieval.js 抽出并导出生产种子门 isSeedAboveThreshold（行为不变）；AT-default-semantic-retrieval-01（tests/semantic-threshold-tuning.test.js）；组件元素 default-semantic-retrieval-001（view 298）。\n⑤ 复验发现 hybrid 词法通道泄漏（fulltext 分析器 standard-no-stop-words 中文单字切词 + exhaustLexicalChannel 无阈值；BM25 实测不可分离）；裁决运行态关 hybrid（ARGO_SEMANTIC_HYBRID=0）；重启后中/英文无关→0、相关（名称/描述/原则）不降。\n⑥ Step 0 量化：eval-retrieval 725 题 vector 95.3 / hybrid 96.3；eval-rerank 80 题 DeepSeek rerank(vector)=rerank(hybrid)=100（Δ=0）→ RERANK=1 下关 hybrid 召回退化实测为 0。\n关键决策：阈值取 0.70（噪声地板之上、相关地板之下，最大召回）；关 hybrid（rerank 已覆盖其增量、其词法噪声大）；per-channel CHANNELS 0.8/0.78/0.76 为死值（被 0.55 覆盖=放宽），待裁决清理。\n交付状态：运行态 MEMORY_THRESHOLD=0.70 + HYBRID=0 + RERANK=1；T2 卡片 overseer-mem-semantic-threshold-calibration-001（①–⑧）。commits 4ed436f / 1c3e373 / bd65f70 / 8ca5630 / 20ef5f3 / bfbd429 / a3448b0 / 3cc3ffc / 35dcecb。\n遗留钩子：① per-channel 死值是否清理待裁决；② 换 embedding 模型（内网 gte-Qwen2）须重新标定 0.70；③ 若出现确切 token（缩写/hash/code 指针）召回缺口，评估 C（拉丁 token 词法，轻）/ B（CJK 分析器+词法门，重）；④ 沿用：L2 矛盾门最小组件+是否立项待裁决；BAILIAN MCP 未挂载；tests/architecture-view-context.test.js 硬编码 view 429 子视图清单陈旧待更新。\n经验：读返回 semanticScore 是排名派生非相似度；排查语义噪声先分通道（向量带门 vs 词法无门），用英文无关探针隔离词法（中文单字切词会污染）；运行态改 .env 需重启宿主。",
+      "description": "会话摘要（2026-09-22，项目总管）：编制 ArchGraph 介绍 PDF（四大主题图文版）。\n需求：整理 ARCHGRAPH 介绍 PDF，四主题——① 项目大脑（架构知识图谱 / GraphRAG / 图写入门禁（去重·无损·墓碑）/ 图检索关键技术（图查询、上下文获取、混合检索、RERANK））；② 人+Agent 协作（共同心智 ArchiMate + 会话开始/工作中/会话结束的记忆节拍 + T1/T2/T3）；③ 项目互助（Graph Store 子图工作包闭环）；④ 项目集群（L1→L4 路径 + 方法/纪律）；要求图文配合。\n交付：docs/archgraph-introduction.html（自包含 HTML + 4 张内联 SVG 图，每主题一张）→ Playwright 渲染 docs/archgraph-introduction.pdf（A4 · 11 页 · 661KB）；tests/archgraph-introduction.test.js 8/8。\nKG：WP wp-archgraph-introduction-pdf-001（view 180，doc/pdf 属性 + AT）；T2 里程碑卡 overseer-archgraph-intro-pdf-001（overseer-product-001）。commits 1f02e74（交付）/ef24585（登记）。\n关键决策：新增 WP 触发同型语义软门禁（与框架介绍系列总纲 WP 0.9068、rename 0.8767），以 allowDuplicate+justification 放行（并列不同交付物——图文 PDF vs Markdown 总纲）；同步 tests/overseer-ltm-layering 精确成员断言（新增 T2 卡 + 补齐既有 calibration 成员漂移）。\n经验/坑：本机 Playwright 包期望 chromium-1228，实际只装了 chromium-1243，launch 须显式 executablePath；T2 分层视图成员被精确断言，新增记忆卡必须同 commit 同步该测试；PDF 渲染用 page.pdf(A4, printBackground, preferCSSPageSize)。\n遗留钩子：① 全量回归 534 用例 23 既有失败（EA import 脚本缺失 19 / architecture-view-context 陈旧子视图清单 1 / excalidraw 用户级未部署 1 / memory-eval-run 已知 2），均非本次引入；② architecture-view-context 硬编码 parent 1249 子视图清单待更新；③ 如需对外发布该 PDF 到公众号/国际平台，走 wechat-publisher/媒体艺术家流程。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4238,7 +4238,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-21",
+          "value": "2026-09-22",
           "description": "2026-09-21 会话：图谱 + 语义检索健康核验（validateSystemArchitecture 通过；投影 261/103/64 一致；11 索引 ONLINE；readiness Aligned/verified；428 语义记录 1536 维）；发现 tests/architecture-view-context.test.js:85 硬编码子视图清单陈旧（25/26）"
         },
         {
@@ -8489,6 +8489,42 @@
         }
       ],
       "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "description": "docs/archgraph-introduction.html; docs/archgraph-introduction.pdf; tests/archgraph-introduction.test.js; design/KG/SystemArchitecture.json; archgraph.qea",
+          "name": "commit",
+          "value": "1f02e74"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记 1f02e74）",
+          "name": "commit",
+          "value": "ef24585"
+        }
+      ],
+      "description": "里程碑（2026-09-22，项目总管）：编制 ArchGraph 图文介绍 PDF（四大主题版）。需求：对 ARCHGRAPH 整理一份介绍 PDF，四个主题——① 项目大脑（架构知识图谱 / GraphRAG / 图写入门禁（去重·无损·墓碑）/ 图检索关键技术（图查询 queryNeo4jGraph、上下文获取 getIntentElementContext/getArchitectureViewContext、混合检索、RERANK））；② 人+Agent 协作（共同心智 ArchiMate + 会话开始/工作中/会话结束的记忆节拍与 T1/T2/T3）；③ 项目互助（Graph Store 子图工作包导出/治理/发布/复用闭环）；④ 项目集群（L1→L4 成熟度路径 + 方法/纪律）。要求多用图文配合。落地：docs/archgraph-introduction.html（自包含 HTML + 4 张内联 SVG 图）→ Playwright 渲染 docs/archgraph-introduction.pdf（A4，11 页，661KB）；配套可执行验收 tests/archgraph-introduction.test.js（8/8）。KG：新增 WP wp-archgraph-introduction-pdf-001（view 180），doc/pdf 属性 + AT。commits 1f02e74/ef24585。决策：新增 WP 触发同型语义软门禁（与框架介绍系列总纲 WP 0.9068、rename 0.8767），以 allowDuplicate+justification 放行（属并列不同交付物）。经验/坑：本机 Playwright 预期 chromium-1228 但只装了 1243，需显式 executablePath；T2 分层视图成员被 tests/overseer-ltm-layering 精确断言，新增记忆卡须同 commit 同步该测试（并把既有的 calibration 成员漂移一并补齐）。",
+      "id": "overseer-archgraph-intro-pdf-001",
+      "name": "里程碑：ArchGraph 介绍 PDF（四大主题图文版）",
+      "parent": "project-overseer-001",
+      "testcases": [
+        {
+          "Input": "tests/archgraph-introduction.test.js",
+          "acceptanceCriteria": "tests/archgraph-introduction.test.js",
+          "description": "GIVEN 项目总管 T2 记忆的 ArchGraph 介绍 PDF 里程碑卡；WHEN 核对交付物与图谱；THEN docs/archgraph-introduction.html 覆盖四主题并内嵌 ≥4 张 SVG、docs/archgraph-introduction.pdf 以 %PDF- 开头且非平凡大小、wp-archgraph-introduction-pdf-001 为视图 180 成员并带 doc/pdf 属性与 GIVEN-WHEN-THEN 用例。",
+          "name": "AT-overseer-archgraph-intro-pdf-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -10503,7 +10539,8 @@
         "overseer-multiagent-delegation-plan-001",
         "overseer-view-geometry-route-fix-001",
         "overseer-framework-series-001",
-        "overseer-agent-model-unification-001"
+        "overseer-agent-model-unification-001",
+        "overseer-archgraph-intro-pdf-001"
       ],
       "included_relationships": []
     },
