@@ -8542,6 +8542,33 @@
         }
       ],
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "argo/scripts/graph-rag/defaultSemanticRetrieval.js; tests/semantic-retrieval-vector-project.test.js; design/KG/SystemArchitecture.json; archgraph.qea",
+          "name": "commit",
+          "value": "fb60cae"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记 fb60cae 到 default-semantic-retrieval-001）",
+          "name": "commit",
+          "value": "1bbf369"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "里程碑（2026-09-22，项目总管）：修复 ARGO MCP 常驻进程在大图谱下 V8 堆 OOM（~4GB，崩溃相位 retrieval:vector-window:*，WER RADAR_PRE_LEAK_64）。根因（已核证）：语义检索 4 条通道查询 `RETURN properties(node) AS record`（defaultSemanticRetrieval.js:92/99/106/113）把整条节点属性（含 1536 维 vector，及与 searchText 重复的大文本 content）物化进 JS；exhaustChannel 以 topK=offset+2 自扩张窗口，分配量 O(N^2)，最后一窗可达 ~N×1536 浮点，撑爆默认堆。修复：在 Cypher 投影层显式改为元数据 allowlist（canonicalIdentity/channel/searchText/dimensions/provider/model/modelVersion/canonicalVersion/contentVersion/indexVersion），剔除 vector+content；读链路从不消费二者（闭包仅用 seed.id，rerank 仅用 searchText），候选集/排序/分数/阈值/融合/rerank 逐字节不变；写入侧不动、不触发向量重灌。关键坑/决策：用户原选 denylist `node{.*, vector:null}`，但实测 Neo4j 映射投影 `.*` 不会让显式条目覆盖既有属性（vector 仍非空）→ 必须显式 map literal allowlist；已用实库验证（projectedKeys 无 vector、vector IS NULL=true）。范围：仅 4 条通道查询最小热修。明确 defer：① mutationEmbeddingVectorLifecycle.js:276 queryability 同根因投影；② productionSemanticNeo4jAdapter.js:79 readRecords 全量带 vector（单次分配最大，但 backfill 消费 vector，需拆接口）；③ 分窗早停（依赖 ANN 前缀单调性，须先证等价）；④ --max-old-space-size（内网 embedding 服务占内存，大概率不可用，仅兜底）。验收：新增 tests/semantic-retrieval-vector-project.test.js（AC-1..AC-4，含 20000×1536 单窗载荷 ~1MB，远 < N×1KB；投影未改则 driver 不剥离 vector 使测试转红）；45/45 目标回归通过、validateSystemArchitecture 通过。登记 AT-default-semantic-retrieval-02。commits fb60cae（工作）/1bbf369（登记）。",
+      "id": "overseer-semantic-projection-oom-001",
+      "name": "里程碑：语义检索向量投影剔除（修常驻 MCP 大图谱 OOM）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -10540,7 +10567,8 @@
         "overseer-semantic-seed-prefix-fix-001",
         "overseer-rerank-latency-fix-001",
         "overseer-community-probe-001",
-        "overseer-mem-semantic-threshold-calibration-001"
+        "overseer-mem-semantic-threshold-calibration-001",
+        "overseer-semantic-projection-oom-001"
       ],
       "included_relationships": []
     },
