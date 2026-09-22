@@ -23,6 +23,7 @@ const MEMBERS_BY_VIEW = {
     'overseer-memory-tiers-001', 'overseer-archimate-role-001', 'overseer-retrieval-recall-first-001',
     'overseer-wiki-eval-001', 'overseer-failure-exp-concept-001', 'overseer-vision-001',
     'overseer-default-pm-actor-001', 'overseer-federation-vision-001',
+    'overseer-federation-center-design-001',
   ],
   'overseer-rules-001': [
     'overseer-graph-dedup-gate-001', 'overseer-harness-workspaceroot-fix-001', 'overseer-graph-mcp-deploy-001',

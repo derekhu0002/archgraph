@@ -8663,6 +8663,40 @@
         }
       ],
       "type": "Goal"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "PLANNED"
+        },
+        {
+          "name": "planningState",
+          "value": "设计稿"
+        },
+        {
+          "name": "decidedBy",
+          "value": "人类伙伴"
+        }
+      ],
+      "description": "设计方案（2026-09-22 人类伙伴口述要点 + 项目总管成稿，v0 设计稿；承接 Goal overseer-federation-vision-001，纸面推演，未实施）：\n【点1 中心机构】设一个联邦中心，管理成员国的新增/注册/销毁退出，并让成员相互知道对方存在。红线：中心只持有『联邦元数据』（成员身份/作用/能力、接口清单、授权、请求队列），不持有成员国内容——内容仍留各国 canonical 图，跨国走引用；以此保住各国自治与唯一事实源，避免中心成为拷贝式超级图。单点风险：中心不可用时允许成员以本地缓存目录+已授信降级可读。承载：拿 Graph Store 当中心的方向可行，但 Graph Store 现状是『子图工作包导出/发布/复用』（copy 式，见 2748 社区 + export-to-kg.js），必须升级为 reference-registry（同时托管已发布工件+接口描述+成员/授权元数据），否则与『引用不漂移』矛盾。\n【点2 规则内化到 Graph 框架（插拔）】联邦能力随框架分发（argo/defaults 模板 + initializeWorkspace 把『注册联邦』作为建国出生步骤）。三能力：(a) 项目注册与管理 register；(b) 相互授权与感知 discover/grant/revoke/checkAccess（默认拒绝）；(c) 需求申请与接口交互 request→accept/reject→expose(interface)。交互分两级：L-Read 引用（只读、无漂移）与 L-Provide 契约式交付（请求-接纳-接口暴露，可能含写/交付语义，须契约+审计+可能人类审批）。组件提供方/消费方天然构成依赖图（安卓子仓/组件消费类比），可放进自相似联邦图。\n【生命周期】genesis→register→operate→exit/destroy；退出协议=注销→墓碑→通知下游（悬空引用/依赖断裂）→降级；接口带版本语义、引用可 pin。\n【分期】P0 契约与寻址（联邦法则 v0+稳定 fedId+ForeignReference 代理+中心元数据模型）；P1 中心=Registry（注册/发现/授权，默认拒绝，只读）；P2 跨图只读检索（grant 范围 fan-out+provenance）；P3 契约式交付+组织层/分工（自相似联邦图）；P4 生命周期/退出对账、drift/墓碑/审计。\n【待裁决】D1b Graph Store 升级为 registry vs 旁挂 registry（倾向前者，须保留 reference 语义）；D2 注册/退出是否需人类批准；D3 首期只做 L-Read；D4 是否引入信任圈层；D5 中心单点 vs 可复制。",
+      "id": "overseer-federation-center-design-001",
+      "name": "设计稿：联邦中心机构 + 规则内化（插拔式联邦 v0）",
+      "parent": "project-overseer-001",
+      "testcases": [
+        {
+          "Input": "tests/overseer-federation-center-design.test.js",
+          "acceptanceCriteria": "tests/overseer-federation-center-design.test.js",
+          "description": "GIVEN 人类伙伴批准把『联邦中心机构 + 规则内化』设计增量登记入图；WHEN 检查意图图谱；THEN 存在 Business Object『设计稿：联邦中心机构 + 规则内化（插拔式联邦 v0）』（id overseer-federation-center-design-001），status=PLANNED、memoryTier=T2，位于项目总管核心 T2 视图 overseer-ltm-001 成员中，描述含中心=元数据非内容的红线、Graph Store 升级为 reference-registry、三能力（register/授权/请求）、交互两级（L-Read/L-Provide）与生命周期/退出协议，且与 overseer-federation-vision-001 存在 Association。",
+          "name": "AT-overseer-federation-center-design-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -9705,6 +9739,16 @@
       "target_id": "overseer-vision-001",
       "target_name": "项目愿景：为 AGENT 提供长期记忆系统",
       "type": "Association"
+    },
+    {
+      "id": "overseer-federation-center-design-rel-001",
+      "name": "设计方案",
+      "source_id": "overseer-federation-center-design-001",
+      "source_name": "设计稿：联邦中心机构 + 规则内化（插拔式联邦 v0）",
+      "statement": "设计稿：联邦中心机构 + 规则内化（插拔式联邦 v0） --(Association)--> 愿景延伸：联邦式组织级图谱（项目即国家，组织即联邦）",
+      "target_id": "overseer-federation-vision-001",
+      "target_name": "愿景延伸：联邦式组织级图谱（项目即国家，组织即联邦）",
+      "type": "Association"
     }
   ],
   "views": [
@@ -10372,12 +10416,14 @@
         "overseer-failure-exp-concept-001",
         "overseer-vision-001",
         "overseer-default-pm-actor-001",
-        "overseer-federation-vision-001"
+        "overseer-federation-vision-001",
+        "overseer-federation-center-design-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
         "overseer-failure-exp-concept-rel-001",
-        "overseer-federation-vision-rel-001"
+        "overseer-federation-vision-rel-001",
+        "overseer-federation-center-design-rel-001"
       ]
     },
     {
