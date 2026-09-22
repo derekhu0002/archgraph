@@ -8467,7 +8467,12 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "in_progress"
+          "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "1f02e74",
+          "description": "docs/archgraph-introduction.html; docs/archgraph-introduction.pdf; tests/archgraph-introduction.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
         }
       ],
       "description": "面向开发者/架构师/AI 工程实践者的 ArchGraph 图文介绍：以四个主题系统化讲解——① 项目大脑（架构知识图谱、GraphRAG、图写入门禁（去重/无损/墓碑）、图检索关键技术（图查询 queryNeo4jGraph、上下文获取 getIntentElementContext/getArchitectureViewContext、混合检索、RERANK））；② 人+Agent 协作（共同心智 ArchiMate、会话开始/工作中/会话结束的记忆节拍与三层记忆 T1/T2/T3）；③ 项目互助（Graph Store 子图工作包导出/治理/发布/复用闭环）；④ 项目集群（从个人单项目到组织项目群的 L1→L4 成熟度路径、方法与四道工程纪律）。每个主题配一张内联 SVG 结构图，图文配合。产出 docs/archgraph-introduction.html（自包含 HTML+SVG）与 docs/archgraph-introduction.pdf（A4 渲染）。配套可执行验收测试 tests/archgraph-introduction.test.js。",
