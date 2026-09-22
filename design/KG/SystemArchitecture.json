@@ -4216,7 +4216,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-22，项目总管）：编制 ArchGraph 介绍 PDF（四大主题图文版）。\n需求：整理 ARCHGRAPH 介绍 PDF，四主题——① 项目大脑（架构知识图谱 / GraphRAG / 图写入门禁（去重·无损·墓碑）/ 图检索关键技术（图查询、上下文获取、混合检索、RERANK））；② 人+Agent 协作（共同心智 ArchiMate + 会话开始/工作中/会话结束的记忆节拍 + T1/T2/T3）；③ 项目互助（Graph Store 子图工作包闭环）；④ 项目集群（L1→L4 路径 + 方法/纪律）；要求图文配合。\n交付：docs/archgraph-introduction.html（自包含 HTML + 4 张内联 SVG 图，每主题一张）→ Playwright 渲染 docs/archgraph-introduction.pdf（A4 · 11 页 · 661KB）；tests/archgraph-introduction.test.js 8/8。\nKG：WP wp-archgraph-introduction-pdf-001（view 180，doc/pdf 属性 + AT）；T2 里程碑卡 overseer-archgraph-intro-pdf-001（overseer-product-001）。commits 1f02e74（交付）/ef24585（登记）。\n关键决策：新增 WP 触发同型语义软门禁（与框架介绍系列总纲 WP 0.9068、rename 0.8767），以 allowDuplicate+justification 放行（并列不同交付物——图文 PDF vs Markdown 总纲）；同步 tests/overseer-ltm-layering 精确成员断言（新增 T2 卡 + 补齐既有 calibration 成员漂移）。\n经验/坑：本机 Playwright 包期望 chromium-1228，实际只装了 chromium-1243，launch 须显式 executablePath；T2 分层视图成员被精确断言，新增记忆卡必须同 commit 同步该测试；PDF 渲染用 page.pdf(A4, printBackground, preferCSSPageSize)。\n遗留钩子：① 全量回归 534 用例 23 既有失败（EA import 脚本缺失 19 / architecture-view-context 陈旧子视图清单 1 / excalidraw 用户级未部署 1 / memory-eval-run 已知 2），均非本次引入；② architecture-view-context 硬编码 parent 1249 子视图清单待更新；③ 如需对外发布该 PDF 到公众号/国际平台，走 wechat-publisher/媒体艺术家流程。",
+      "description": "会话摘要（2026-09-22，项目总管）：分析并修复 ARGO MCP 大图谱语义检索 OOM（方案 2：读取路径投影剔除 1536 维 vector），并发布 archgraph-argo@0.24.2 + 部署。\n需求：内网自部署 embedding（1536 维）+ 超大图谱下常驻 MCP V8 堆 OOM（崩溃相位 retrieval:vector-window:*）。\n根因核证：4 条通道查询 `RETURN properties(node)` 将整条属性（含 1536 维 vector + 与 searchText 重复的大文本 content）物化进 JS；exhaustChannel 以 topK=offset+2 自扩张，分配量 O(N^2)，撑爆 4GB 默认堆。读链路从不消费 vector/content（闭包仅 seed.id，rerank 仅 searchText）→ 投影剔除后候选集/排序/分数/阈值/融合/rerank 不变。\n关键修正（相对需求文档）：①去重是 unscoped + 严格阈值 0.85（systemarchitecture-mcp-server.js:2904 未传 canonicalIdentities），不是 scoped；②另有两处同根因读点未修（mutationEmbeddingVectorLifecycle.js:276 queryability 投影；productionSemanticNeo4jAdapter.js:79 readRecords 全量带 vector，backfill 消费其 vector 需拆接口）；③content 与 searchText 重复存储，读路径不用 content。\n关键坑（重要）：Neo4j 映射投影 `.*` 不会让显式条目覆盖既有属性 → `node{.*, vector:null}` 无效（vector 仍非空），必须显式 map literal allowlist；已实库验证（4 处 allowlist、0 处 properties(node)、vector IS NULL=true）。\n交付：defaultSemanticRetrieval.js 4 条通道查询改 allowlist + 导出 exhaustChannel/exhaustLexicalChannel；tests/semantic-retrieval-vector-project.test.js（AC-1..4；20000×1536 单窗载荷 ~1.0MB）45/45 通过；validateSystemArchitecture 通过。\n发布：0.24.2（shasum 5400a756…，77 files）→ registry 第 7 次轮询可见 → npm i -g → argo-deploy -SkipEnv 22/22；产物核验 ~/.argo/scripts/graph-rag/defaultSemanticRetrieval.js 含 4 处 allowlist；docs/self-hosted-embedding-deployment.md 前置条件改为 >=0.24.2。宿主已重启，argo-init status=ok（Aligned/verified；neo4j db=archgraph=本仓库；qea=本仓库 archgraph.qea）。\nKG：AT-default-semantic-retrieval-02；元素 default-semantic-retrieval-001 登记 commit fb60cae；T2 卡 overseer-semantic-projection-oom-001；发布里程碑 overseer-argo-0-24-2-release-001。commits fb60cae（工作）/1bbf369（登记）/1316287（T2卡）/934444c（release）/c4376da（发布里程碑）。\n遗留钩子：①同根因读点（queryability / readRecords）未修；②分窗 O(N^2) 时延未修（依赖 ANN 前缀单调性需先证等价）；③--max-old-space-size 仅运维兜底（内网内存紧）。内网需 >=0.24.2 + 重启 + 按 AC-6 观测真机堆曲线坐实。待人类裁决是否将残留项立为 Requirement。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4489,6 +4489,11 @@
           "name": "commit",
           "value": "874a3fa",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-09-21 T1 会话摘要覆盖写：阈值 0.70 标定 + 关 hybrid + Step 0 量化）"
+        },
+        {
+          "name": "commit",
+          "value": "c4376da",
+          "description": "design/KG/SystemArchitecture.json（T1 摘要覆盖写：语义检索向量投影 OOM 修复 + 发布 0.24.2）"
         }
       ],
       "testcases": [
