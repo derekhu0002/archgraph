@@ -4216,7 +4216,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "会话摘要（2026-09-22，项目总管）：分析并修复 ARGO MCP 大图谱语义检索 OOM（方案 2：读取路径投影剔除 1536 维 vector），并发布 archgraph-argo@0.24.2 + 部署。\n需求：内网自部署 embedding（1536 维）+ 超大图谱下常驻 MCP V8 堆 OOM（崩溃相位 retrieval:vector-window:*）。\n根因核证：4 条通道查询 `RETURN properties(node)` 将整条属性（含 1536 维 vector + 与 searchText 重复的大文本 content）物化进 JS；exhaustChannel 以 topK=offset+2 自扩张，分配量 O(N^2)，撑爆 4GB 默认堆。读链路从不消费 vector/content（闭包仅 seed.id，rerank 仅 searchText）→ 投影剔除后候选集/排序/分数/阈值/融合/rerank 不变。\n关键修正（相对需求文档）：①去重是 unscoped + 严格阈值 0.85（systemarchitecture-mcp-server.js:2904 未传 canonicalIdentities），不是 scoped；②另有两处同根因读点未修（mutationEmbeddingVectorLifecycle.js:276 queryability 投影；productionSemanticNeo4jAdapter.js:79 readRecords 全量带 vector，backfill 消费其 vector 需拆接口）；③content 与 searchText 重复存储，读路径不用 content。\n关键坑（重要）：Neo4j 映射投影 `.*` 不会让显式条目覆盖既有属性 → `node{.*, vector:null}` 无效（vector 仍非空），必须显式 map literal allowlist；已实库验证（4 处 allowlist、0 处 properties(node)、vector IS NULL=true）。\n交付：defaultSemanticRetrieval.js 4 条通道查询改 allowlist + 导出 exhaustChannel/exhaustLexicalChannel；tests/semantic-retrieval-vector-project.test.js（AC-1..4；20000×1536 单窗载荷 ~1.0MB）45/45 通过；validateSystemArchitecture 通过。\n发布：0.24.2（shasum 5400a756…，77 files）→ registry 第 7 次轮询可见 → npm i -g → argo-deploy -SkipEnv 22/22；产物核验 ~/.argo/scripts/graph-rag/defaultSemanticRetrieval.js 含 4 处 allowlist；docs/self-hosted-embedding-deployment.md 前置条件改为 >=0.24.2。宿主已重启，argo-init status=ok（Aligned/verified；neo4j db=archgraph=本仓库；qea=本仓库 archgraph.qea）。\nKG：AT-default-semantic-retrieval-02；元素 default-semantic-retrieval-001 登记 commit fb60cae；T2 卡 overseer-semantic-projection-oom-001；发布里程碑 overseer-argo-0-24-2-release-001。commits fb60cae（工作）/1bbf369（登记）/1316287（T2卡）/934444c（release）/c4376da（发布里程碑）。\n遗留钩子：①同根因读点（queryability / readRecords）未修；②分窗 O(N^2) 时延未修（依赖 ANN 前缀单调性需先证等价）；③--max-old-space-size 仅运维兜底（内网内存紧）。内网需 >=0.24.2 + 重启 + 按 AC-6 观测真机堆曲线坐实。待人类裁决是否将残留项立为 Requirement。",
+      "description": "项目总管工作记忆摘要（2026-09-22 会话二）：登记「联邦式组织级图谱」愿景方向。\n需求（人类伙伴口述）：把 ArchGraph 做成通用框架——①同一 Graph 框架可被多个项目各自实例化（embedding/MCP 是框架组成部分，不破坏通用性）；②项目即国家、组织即联邦，项目图谱作为知识库基本单元可相互关联，拼成组织级知识图谱。\n决策：采用联邦/引用式（各国地图不合并、交流走引用），避免拷贝式内容漂移；最小门槛＝联邦法则（跨国引用绝对坐标 (graphKey, elementId)＋版本指纹；同构类型共同语言 ArchiMate3.2＋AML；默认拒绝的海关基线）；信任极性对内『先给再收窄』、对外『先拒绝再授予』。类比三要素：地形=项目属性、海关=访问权限、联邦-国家=组织-项目（含分工）。定位：与旧愿景『为 AGENT 提供长期记忆系统』并存不冲突，是其向图间/组织级的延伸；本质是在『图』之上再加一层『图间组织』模型（现 AgentOrganization 仅为图内组织）。\n交付：新增 Goal overseer-federation-vision-001（T2，status=PLANNED）挂 project-overseer-001、入核心 T2 视图 overseer-ltm-001，与 overseer-vision-001 关联；tests/overseer-federation-vision.test.js（7/7）+ 同步 tests/overseer-ltm-layering.test.js 成员。commit 9ba8379；validateSystemArchitecture 通过。\n遗留钩子：①联邦法则三要素尚未立项（仅愿景方向）；②跨图访问权限（海关）尚无技术层，现为 graphKey 硬隔离（全有或全无）；③小会话日同日的上一场 OOM 修复内容已在 T2 卡 overseer-semantic-projection-oom-001 与发布里程碑，故本次 T1 覆盖写不构成净损失；④是否/如何立项待人类伙伴裁决。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4239,7 +4239,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-22",
-          "description": "2026-09-21 会话：图谱 + 语义检索健康核验（validateSystemArchitecture 通过；投影 261/103/64 一致；11 索引 ONLINE；readiness Aligned/verified；428 语义记录 1536 维）；发现 tests/architecture-view-context.test.js:85 硬编码子视图清单陈旧（25/26）"
+          "description": "本次会话：登记联邦式组织级图谱愿景方向（Goal overseer-federation-vision-001）+ 验收测试"
         },
         {
           "name": "commit",
@@ -8642,6 +8642,11 @@
         {
           "name": "decidedBy",
           "value": "人类伙伴"
+        },
+        {
+          "name": "commit",
+          "value": "9ba8379",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-federation-vision.test.js; tests/overseer-ltm-layering.test.js（登记联邦愿景 Goal + 可执行验收 + LTM 核心视图成员同步）"
         }
       ],
       "description": "愿景延伸（2026-09-22 人类伙伴口述，项目总管登记）：联邦式组织级图谱——以「国家/联邦」类比「项目/组织」。① 国家与地形（项目属性）：每个国家有自己的地形（建筑、人才等），对应该项目自身意图图的内容与属性。② 国家间的管控（访问权限/海关）：国家与国家之间有进入的限制和管控（如海关），对应图谱/项目之间的访问权限设定。③ 联邦与国家（组织与项目）：联邦有总的法则规范，成员国保持独立与自治；各国在联邦中各有分工与优劣（如有的项目专责知识库构建、有的专责项目开发）。定位：与既有愿景『为 AGENT 提供长期记忆系统』并存、不冲突，是其向『图间/组织级』的延伸；本质是在『图』之上再加一层『图间组织（联邦）』模型（现有 AgentOrganization 仅为图内组织）。方法：采用联邦/引用式（各国地图不合并、交流走引用），避免拷贝式内容漂移；引用需引用契约兜底（悬空检测依托墓碑账本/canonicalDigest）。最小门槛＝联邦法则：① 跨国引用绝对坐标 (graphKey, elementId)＋可选版本指纹；② 同构类型共同语言 ArchiMate 3.2＋AML；③ 默认拒绝的海关基线（先拒绝、再显式邦交授予）。信任极性：对内『先给再收窄』、对外『先拒绝再授予』。地形与分工属成员国内政，非联邦成立门槛。关联既有评测缺口：多跳 Recall 深度。",
