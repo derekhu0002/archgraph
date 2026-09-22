@@ -47,7 +47,7 @@ Neo4j vector index (cosine, 1536)
 | 操作系统 | Windows（脚本为 PowerShell 5.1+）。Linux/macOS 参照「附录 A 手动步骤」 |
 | Python | **3.10 – 3.12**（3.12 已验证；**3.14 无 PyTorch 轮子**，不可用） |
 | Node.js | ≥ 18（仅用于 `probe`/`verify` 脚本；框架本身也需要） |
-| ArchGraph 框架 | **需包含提交 `44e2739`（openai-compatible profile）的构建**；npm `archgraph-argo@0.23.0` 尚未包含该特性，请使用本仓库或后续发布版 |
+| ArchGraph 框架 | **需 `archgraph-argo` ≥ `0.24.2`**：`0.24.0` 起含 `openai-compatible` profile（提交 `44e2739`），`0.24.2` 起含语义检索向量投影修复（大图谱 OOM）；更早版本请改用本仓库或后续发布版 |
 | Neo4j | 框架既有实例（支持向量索引，Neo4j ≥ 5.11） |
 | 网络 | 可联网，必要时经代理；HF 直连慢/被墙时用镜像 `https://hf-mirror.com` |
 | 硬件 | CPU 可跑（1.5B 模型约需 6 GB 内存）；显存非必需 |
