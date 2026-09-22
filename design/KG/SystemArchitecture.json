@@ -4216,7 +4216,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-22 会话二）：登记「联邦式组织级图谱」愿景方向。\n需求（人类伙伴口述）：把 ArchGraph 做成通用框架——①同一 Graph 框架可被多个项目各自实例化（embedding/MCP 是框架组成部分，不破坏通用性）；②项目即国家、组织即联邦，项目图谱作为知识库基本单元可相互关联，拼成组织级知识图谱。\n决策：采用联邦/引用式（各国地图不合并、交流走引用），避免拷贝式内容漂移；最小门槛＝联邦法则（跨国引用绝对坐标 (graphKey, elementId)＋版本指纹；同构类型共同语言 ArchiMate3.2＋AML；默认拒绝的海关基线）；信任极性对内『先给再收窄』、对外『先拒绝再授予』。类比三要素：地形=项目属性、海关=访问权限、联邦-国家=组织-项目（含分工）。定位：与旧愿景『为 AGENT 提供长期记忆系统』并存不冲突，是其向图间/组织级的延伸；本质是在『图』之上再加一层『图间组织』模型（现 AgentOrganization 仅为图内组织）。\n交付：新增 Goal overseer-federation-vision-001（T2，status=PLANNED）挂 project-overseer-001、入核心 T2 视图 overseer-ltm-001，与 overseer-vision-001 关联；tests/overseer-federation-vision.test.js（7/7）+ 同步 tests/overseer-ltm-layering.test.js 成员。commit 9ba8379；validateSystemArchitecture 通过。\n遗留钩子：①联邦法则三要素尚未立项（仅愿景方向）；②跨图访问权限（海关）尚无技术层，现为 graphKey 硬隔离（全有或全无）；③小会话日同日的上一场 OOM 修复内容已在 T2 卡 overseer-semantic-projection-oom-001 与发布里程碑，故本次 T1 覆盖写不构成净损失；④是否/如何立项待人类伙伴裁决。",
+      "description": "项目总管工作记忆摘要（2026-09-22 会话二）：登记「联邦式组织级图谱」愿景方向。\n需求（人类伙伴口述）：把 ArchGraph 做成通用框架——①同一 Graph 框架可被多个项目各自实例化（embedding/MCP 是框架组成部分，不破坏通用性）；②项目即国家、组织即联邦，项目图谱作为知识库基本单元可相互关联，拼成组织级知识图谱。\n决策：采用联邦/引用式（各国地图不合并、交流走引用），避免拷贝式内容漂移；最小门槛＝联邦法则（跨国引用绝对坐标 (graphKey, elementId)＋版本指纹；同构类型共同语言 ArchiMate3.2＋AML；默认拒绝的海关基线）；信任极性对内『先给再收窄』、对外『先拒绝再授予』。类比三要素：地形=项目属性、海关=访问权限、联邦-国家=组织-项目（含分工）。定位：与旧愿景『为 AGENT 提供长期记忆系统』并存不冲突，是其向图间/组织级的延伸；本质是在『图』之上再加一层『图间组织』模型（现 AgentOrganization 仅为图内组织）。\n交付一：新增 Goal overseer-federation-vision-001（T2，status=PLANNED）挂 project-overseer-001、入核心 T2 视图 overseer-ltm-001，与 overseer-vision-001 关联；tests/overseer-federation-vision.test.js（7/7）+ 同步 tests/overseer-ltm-layering.test.js 成员。commit 9ba8379。\n交付二（人类伙伴补充两点后）：新增 Business Object overseer-federation-center-design-001『设计稿：联邦中心机构 + 规则内化（插拔式联邦 v0）』——点1 中心机构（管理新增/注册/销毁退出，让成员相互感知；红线：中心只持有联邦元数据、不持有成员国内容，单点可降级）；点2 规则内化到 Graph 框架（插拔：注册/发现授权/请求交付三能力；交互两级 L-Read 引用 vs L-Provide 契约交付；生命周期 genesis→register→operate→exit）；关键修正=Graph Store 现状为 copy 式分发，须升级为 reference-registry；分期 P0–P4。关联 Goal overseer-federation-vision-001；tests/overseer-federation-center-design.test.js（8/8）。commit 14c8d5c。validateSystemArchitecture 两次均通过。\n遗留钩子：①联邦法则三要素与中心机构尚未立项实施（仅愿景方向+设计稿）；②跨图访问权限（海关）尚无技术层，现为 graphKey 硬隔离（全有或全无）；③同日的上一场 OOM 修复内容已在 T2 卡 overseer-semantic-projection-oom-001 与发布里程碑，故本次 T1 覆盖写不构成净损失；④待人类裁决：D1b Graph Store 升级 vs 旁挂 registry、D2 注册/退出是否需人类批准、D3 首期是否只做 L-Read、D4 信任圈层、D5 中心单点 vs 可复制。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4239,7 +4239,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-22",
-          "description": "本次会话：登记联邦式组织级图谱愿景方向（Goal overseer-federation-vision-001）+ 验收测试"
+          "description": "本次会话：登记联邦愿景 Goal + 中心机构/规则内化设计稿（含验收测试）"
         },
         {
           "name": "commit",
@@ -8681,6 +8681,11 @@
         {
           "name": "decidedBy",
           "value": "人类伙伴"
+        },
+        {
+          "name": "commit",
+          "value": "14c8d5c",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-federation-center-design.test.js; tests/overseer-ltm-layering.test.js（登记联邦中心机构+规则内化设计稿 + 可执行验收 + LTM 核心视图成员同步）"
         }
       ],
       "description": "设计方案（2026-09-22 人类伙伴口述要点 + 项目总管成稿，v0 设计稿；承接 Goal overseer-federation-vision-001，纸面推演，未实施）：\n【点1 中心机构】设一个联邦中心，管理成员国的新增/注册/销毁退出，并让成员相互知道对方存在。红线：中心只持有『联邦元数据』（成员身份/作用/能力、接口清单、授权、请求队列），不持有成员国内容——内容仍留各国 canonical 图，跨国走引用；以此保住各国自治与唯一事实源，避免中心成为拷贝式超级图。单点风险：中心不可用时允许成员以本地缓存目录+已授信降级可读。承载：拿 Graph Store 当中心的方向可行，但 Graph Store 现状是『子图工作包导出/发布/复用』（copy 式，见 2748 社区 + export-to-kg.js），必须升级为 reference-registry（同时托管已发布工件+接口描述+成员/授权元数据），否则与『引用不漂移』矛盾。\n【点2 规则内化到 Graph 框架（插拔）】联邦能力随框架分发（argo/defaults 模板 + initializeWorkspace 把『注册联邦』作为建国出生步骤）。三能力：(a) 项目注册与管理 register；(b) 相互授权与感知 discover/grant/revoke/checkAccess（默认拒绝）；(c) 需求申请与接口交互 request→accept/reject→expose(interface)。交互分两级：L-Read 引用（只读、无漂移）与 L-Provide 契约式交付（请求-接纳-接口暴露，可能含写/交付语义，须契约+审计+可能人类审批）。组件提供方/消费方天然构成依赖图（安卓子仓/组件消费类比），可放进自相似联邦图。\n【生命周期】genesis→register→operate→exit/destroy；退出协议=注销→墓碑→通知下游（悬空引用/依赖断裂）→降级；接口带版本语义、引用可 pin。\n【分期】P0 契约与寻址（联邦法则 v0+稳定 fedId+ForeignReference 代理+中心元数据模型）；P1 中心=Registry（注册/发现/授权，默认拒绝，只读）；P2 跨图只读检索（grant 范围 fan-out+provenance）；P3 契约式交付+组织层/分工（自相似联邦图）；P4 生命周期/退出对账、drift/墓碑/审计。\n【待裁决】D1b Graph Store 升级为 registry vs 旁挂 registry（倾向前者，须保留 reference 语义）；D2 注册/退出是否需人类批准；D3 首期只做 L-Read；D4 是否引入信任圈层；D5 中心单点 vs 可复制。",
