@@ -8417,6 +8417,11 @@
           "name": "commit",
           "value": "1c3e373",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（图谱登记本元素 + T2 教训卡）"
+        },
+        {
+          "name": "commit",
+          "value": "fb60cae",
+          "description": "argo/scripts/graph-rag/defaultSemanticRetrieval.js; tests/semantic-retrieval-vector-project.test.js; design/KG/SystemArchitecture.json; archgraph.qea — 读路径 4 条通道查询改为 Cypher 元数据 allowlist 投影（剔除 1536 维 vector + 重复 content），修常驻 ARGO MCP 大图谱 OOM；行为逐字节不变，AT-default-semantic-retrieval-02 / AC-1..AC-4。"
         }
       ]
     },
