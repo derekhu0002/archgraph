@@ -46,15 +46,26 @@ function backendOf(tool) {
 
 function classifyQuery(tool, input) {
   const n = String(tool || '');
+  if (n.includes('question')) return 'human-wait';
+  if (n.includes('task')) return 'subagent';
+  if (n.includes('bash')) return 'bash';
   if (n.includes('getSystemArchitecture') || n.includes('memory_search')) return 'semantic';
   if (n.includes('queryNeo4jGraph')) return 'structured-cypher';
   if (n.includes('getIntentElementContext') || n.includes('getArchitectureViewContext')) return 'structured-context';
+  if (n.includes('validateSystemArchitecture') || n.includes('runArchitectureTests')) return 'validate';
+  if (n.includes('initializeWorkspace')) return 'init';
+  if (n.includes('previewSystemArchitectureMutation') || GRAPH_WRITE_TOOLS.some(t => n.includes(t))) return 'mutation';
   if (n.includes('read')) return 'file-read';
   if (n.includes('grep')) return 'grep';
   if (n.includes('glob') || n.includes('list')) return 'list';
-  if (GRAPH_WRITE_TOOLS.some(t => n.includes(t))) return 'write';
+  if (n.includes('edit') || n.includes('write')) return 'edit';
+  if (n.includes('todowrite')) return 'todo';
   return 'other';
 }
+
+// Tools that block on a HUMAN (time spent waiting for the person, not the agent).
+const HUMAN_WAIT_TOOLS = ['question'];
+const CONTEXT_BLOWUP_TOKENS = 100000;
 
 function estimateTokens(text) {
   if (!text) return 0;
@@ -175,13 +186,18 @@ function diagnose(session, opts = {}) {
   const byQueryClass = {};
   const sigCount = {};
   const pathReads = {};
-  let toolMs = 0; let errors = 0; let empty = 0;
+  let toolMs = 0; let humanWaitMs = 0; let errors = 0; let empty = 0;
   for (const c of tc) {
-    const b = byBackend[c.backend] || (byBackend[c.backend] = { calls: 0, ms: 0 });
-    b.calls += 1; b.ms += c.durationMs || 0;
-    toolMs += c.durationMs || 0;
+    const isHuman = c.queryClass === 'human-wait' || HUMAN_WAIT_TOOLS.some(t => String(c.tool).includes(t));
     const bt = byTool[c.tool] || (byTool[c.tool] = { calls: 0, ms: 0, tokens: 0, errors: 0 });
     bt.calls += 1; bt.ms += c.durationMs || 0; bt.tokens += c.outputTokens || 0;
+    if (isHuman) {
+      humanWaitMs += c.durationMs || 0; // human time is NOT agent/tool work
+    } else {
+      const b = byBackend[c.backend] || (byBackend[c.backend] = { calls: 0, ms: 0 });
+      b.calls += 1; b.ms += c.durationMs || 0;
+      toolMs += c.durationMs || 0;
+    }
     if (c.ok === false) { bt.errors += 1; errors += 1; }
     if ((c.outputBytes || 0) < 2) empty += 1;
     byQueryClass[c.queryClass] = (byQueryClass[c.queryClass] || 0) + 1;
@@ -210,17 +226,19 @@ function diagnose(session, opts = {}) {
   const topByTokens = [...tc].sort((a, b) => (b.outputTokens || 0) - (a.outputTokens || 0)).slice(0, 5).map(c => ({ tool: c.tool, tokens: c.outputTokens, preview: c.inputPreview }));
 
   const wallMs = opts.wallMs != null ? opts.wallMs : session.wallMs;
-  const modelMs = wallMs != null ? Math.max(0, wallMs - toolMs) : null;
+  const modelMs = wallMs != null ? Math.max(0, wallMs - toolMs - humanWaitMs) : null;
+  const blowups = cumulativeInput.map((v, i) => ({ step: i, input: v })).filter(x => x.input >= CONTEXT_BLOWUP_TOKENS).sort((a, b) => b.input - a.input);
 
   return {
     schemaVersion: SCHEMA_VERSION, bundleVersion: BUNDLE_VERSION, generatedAt: new Date().toISOString(),
     workspace: opts.workspace || null, sessionId: opts.sessionId || null,
     overview: {
       steps: session.steps, toolCalls: tc.length, roundTrips: countRoundTrips(tc),
-      wallMs, modelMs, mcpMs: byBackend.graph.ms, repoToolMs: byBackend.repo.ms, toolMs,
+      wallMs, modelMs, mcpMs: byBackend.graph.ms, repoToolMs: byBackend.repo.ms, toolMs, humanWaitMs,
       tokensIn: session.tokensIn, tokensOut: session.tokensOut, tokensReasoning: session.tokensReasoning, tokens: session.tokens,
       cost: session.cost, toolErrors: errors, emptyResults: empty,
       distinctSignatures: new Set(tc.map(c => c.signature)).size,
+      contextBlowup: { thresholdTokens: CONTEXT_BLOWUP_TOKENS, count: blowups.length, max: blowups.length ? blowups[0].input : 0, top: blowups.slice(0, 5) },
     },
     byTool, byBackend, byQueryClass,
     tokenGrowth: { perStepInput: cumulativeInput, steps: cumulativeInput.length },
@@ -232,12 +250,13 @@ function diagnose(session, opts = {}) {
     },
     topOffendersByTime: topByMs,
     topOffendersByTokens: topByTokens,
-    hints: buildHints({ toolCalls: tc.length, duplicates: duplicates.length, emptyOrError: errors + empty, repeatedReads: repeatedReads.length, noProgressStreak: best, modelMs, mcpMs: byBackend.graph.ms, repoToolMs: byBackend.repo.ms, roundTrips: countRoundTrips(tc) }),
+    hints: buildHints({ toolCalls: tc.length, duplicates: duplicates.length, emptyOrError: errors + empty, repeatedReads: repeatedReads.length, noProgressStreak: best, modelMs, mcpMs: byBackend.graph.ms, repoToolMs: byBackend.repo.ms, roundTrips: countRoundTrips(tc), blowups: blowups.length, blowupMax: blowups.length ? blowups[0].input : 0 }),
   };
 }
 
 function buildHints(m) {
   const hints = [];
+  if (m.blowups > 0) hints.push(`上下文尖峰 ${m.blowups} 个 step（最大 ${m.blowupMax} tokens）→ 多由大工具输出造成；优先考虑截断/分页/摘要工具输出（observation masking）、先摘要后精读（对所有场景统一生效，勿只针对单会话）。`);
   if (m.duplicates > 0) hints.push(`重复/近似重复调用 ${m.duplicates} 组 → 考虑结果缓存或查询归一（同参不重搜）。`);
   if (m.emptyOrError > 0) hints.push(`空结果/失败 ${m.emptyOrError} 次 → 考虑改进查询构造/回退策略，避免"空手→换词→再搜"的循环。`);
   if (m.repeatedReads > 0) hints.push(`同一文件被重复读 ${m.repeatedReads} 处 → 考虑读取缓存或先摘要后精读。`);
@@ -263,7 +282,7 @@ function renderDiagnosis(m, meta) {
   L.push(`| 轮次 steps | ${m.overview.steps} |`);
   L.push(`| 工具调用 | ${m.overview.toolCalls}（去重签名 ${m.overview.distinctSignatures}） |`);
   L.push(`| 图↔仓往返 | ${m.overview.roundTrips} |`);
-  L.push(`| 墙钟 | ${fmtMs(m.overview.wallMs)} = 模型 ${fmtMs(m.overview.modelMs)} + MCP ${fmtMs(m.overview.mcpMs)} + 仓 ${fmtMs(m.overview.repoToolMs)} |`);
+  L.push(`| 墙钟 | ${fmtMs(m.overview.wallMs)} = 模型 ${fmtMs(m.overview.modelMs)} + MCP ${fmtMs(m.overview.mcpMs)} + 仓 ${fmtMs(m.overview.repoToolMs)} + 人类等待 ${fmtMs(m.overview.humanWaitMs)} |`);
   L.push(`| tokens | 总 ${m.overview.tokens}（in ${m.overview.tokensIn} / out ${m.overview.tokensOut} / reason ${m.overview.tokensReasoning}） |`);
   L.push(`| 工具失败 / 空结果 | ${m.overview.toolErrors} / ${m.overview.emptyResults} |`);
   L.push('');
@@ -288,6 +307,12 @@ function renderDiagnosis(m, meta) {
   L.push(`## token 随轮次`);
   L.push('');
   L.push(`每步 input tokens（累计上下文规模）：${m.tokenGrowth.perStepInput.join(', ') || '(无)'}`);
+  L.push('');
+  const cb = m.overview.contextBlowup || { count: 0, max: 0, top: [] };
+  L.push(`## 上下文尖峰（≥ ${cb.thresholdTokens} tokens 的 step）`);
+  L.push('');
+  L.push(`- 尖峰数：${cb.count}　最大：${cb.max} tokens`);
+  for (const b of cb.top) L.push(`  - step ${b.step}: ${b.input} input tokens`);
   L.push('');
   L.push(`## 诊断建议（启发式，供 Agent 复核）`);
   L.push('');

@@ -84,6 +84,25 @@ test('AT-agent-search-diagnosis-05: accepts the opencode export JSON form ({info
   assert.equal(s.tokensIn, 100);
 });
 
+test('AT-agent-search-diagnosis-06: human wait is separated from agent/tool time; context blowups are flagged', () => {
+  const s = ndjson([
+    { type: 'step_start', timestamp: 1000 },
+    { type: 'message.part', timestamp: 1100, part: { type: 'tool', tool: 'question', state: { status: 'completed', time: { start: 1100, end: 5000 }, input: { questions: [] }, output: 'answered' } } },
+    { type: 'message.part', timestamp: 5100, part: { type: 'tool', tool: 'grep', state: { status: 'completed', time: { start: 5100, end: 5200 }, input: { pattern: 'x' }, output: 'y' } } },
+    { type: 'step_finish', timestamp: 6000, part: { finish: { tokens: { input: 50, output: 5 }, cost: 0 } } },
+  ]);
+  const m = diag.diagnose(diag.parseSession(s), { wallMs: 6000 });
+  assert.equal(m.overview.humanWaitMs, 3900, 'question time is human wait, not tool work');
+  assert.equal(m.overview.toolMs, 100, 'agent tool time excludes human wait');
+  assert.equal(m.overview.modelMs, 6000 - 100 - 3900, 'model time excludes both human wait and tool time');
+  // the question tool must not be counted into the repo/graph backends
+  assert.equal(m.byBackend.other.calls, 0, 'human-wait tool must not inflate a backend');
+
+  const big = diag.diagnose({ toolCalls: [], usages: [{ input: 150000, output: 1, reasoning: 0, cacheRead: 0, cacheWrite: 0 }], steps: 1, cost: 0, wallMs: 1000, tokensIn: 150000, tokensOut: 1, tokensReasoning: 0, tokens: 150001 }, { wallMs: 1000 });
+  assert.equal(big.overview.contextBlowup.count, 1);
+  assert.equal(big.overview.contextBlowup.max, 150000);
+});
+
 test('AT-agent-search-diagnosis-04: the skill + script ship with the framework', () => {
   assert.ok(fs.existsSync(path.join(ROOT, 'argo', 'skills', 'agent-search-diagnosis', 'SKILL.md')), 'skill must exist');
   assert.ok(fs.existsSync(path.join(ROOT, 'argo', 'scripts', 'agentSearchDiagnose.js')), 'script must exist');
