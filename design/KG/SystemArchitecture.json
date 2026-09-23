@@ -4238,7 +4238,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-23 会话二：ArchGraph 框架使用介绍邮件）：\n目标（人类伙伴）：为利益相关者（华为侧非技术干系人，对 AI/Agent 有基本认知）编制一封 HTML 电子邮件介绍框架使用方法，并发送至 胡东华@华为.com。\n进展/交付：① docs/archgraph-intro-email.html（自包含 HTML + 4 张内联 SVG：项目容器/四步安装部署/资产数据流/人机交互 Sequence），覆盖 基础操作（npm install -g archgraph-argo → argo-deploy → 前置准备 Neo4j+向量服务 ~/.argo/.env → argo init）、核心理念（项目为单元/容器、OpenCode/Cursor 打开项目、同一张地图）、知识图谱与资产（记忆/设计写入图谱，资产=仓库+图谱）、业务理解与进化（交流消歧、反馈入记忆不再重犯）、交互纪律（会话结束须明确告知 Agent）；突出目标与价值、弱化技术细节。② 通用发送脚本 scripts/send-html-email.js（env 驱动、implicit-TLS 465、密钥不落盘）。③ 可执行验收 tests/archgraph-intro-email.test.js（9/9）。④ KG：新增 WP wp-archgraph-intro-email-001（view 180，doc/recipient 属性 + AT-wp-archgraph-intro-email-001-01）。⑤ 邮件已经 smtp.126.com:465（hdhscu@126.com → 胡东华@华为.com）发送成功。\n关键决策：新增 WP 触发同型语义软门禁（与介绍 PDF 0.90、总纲 0.88 等近似），以 allowDuplicate+justification 放行（渠道=email、受众、形式、内容均不同，属并列交付物）。\n坑/教训：收件地址 胡东华@华为.com 含中文（非 ASCII RFC5321 地址），SMTP RCPT 被 126 接受但极可能退信——真实地址应为 ASCII/拼音（如 xxx@huawei.com），待人类伙伴确认后必要时重发；凭据仅经 env 传入、未落盘。\n遗留钩子（承接上一会话）：① 框架侧 MCP 工具契约 schema 对齐＝文档层确认；② 服务器无 GitHub 凭证，触发式 push 需配只写 deploy key；③ 服务器 graph_submit/graph_update 的 graphs/catalog（~10 图）未回主仓；④ D4 信任圈层、中心可复制后置；⑤ 规则改动需 argo-deploy 才传播；⑥ 待确认胡东华正确邮箱并视情况重发本邮件。\n记忆层级：本摘要在 T1（overseer-wm-001）；相关长期记忆在 T2 overseer-ltm-001/overseer-rules-001/overseer-product-001。commits：6a6c02a（邮件+发送脚本+AT）。",
+      "description": "项目总管工作记忆摘要（2026-09-23 会话二：ArchGraph 框架使用介绍邮件）：\n目标（人类伙伴）：为多位同事（华为侧非技术干系人）编制一封 HTML 邮件介绍框架使用方法并发送。\n进展/交付：docs/archgraph-intro-email.html（自包含 HTML + 4 张邮件安全表格示意图：项目容器/四步上手/资产数据流/人机交互时序）；内容先痛点后方案、语言浅显、去产品术语（不出现 ARGO/架构术语）、称呼「大家好」；覆盖 基础操作（npm install -g archgraph-argo → argo-deploy → 前置准备 图数据库+语义检索服务 ~/.argo/.env → argo init）、以项目为中心/项目当容器、资产=仓库+图谱、越用越懂+交互纪律（会话结束须明确告知）、价值与下一步。通用发送脚本 scripts/send-html-email.js（env 驱动、implicit-TLS 465、密钥不落盘）。可执行验收 tests/archgraph-intro-email.test.js（9/9）。KG：WP wp-archgraph-intro-email-001（view 180，doc/recipient 属性 + AT-wp-archgraph-intro-email-001-01）。已发送至 hudonghua@huawei.com（smtp.126.com:465，hdhscu@126.com）。\n关键决策/教训：① 初版用内联 SVG + 网页式排版，被人类伙伴指出『格式混乱』；自查确认多数邮件客户端会丢弃内联 SVG → 改写为表格示意图（邮件安全、无外链图片）；② 语言按反馈改为先痛点后方案、浅显、去术语，开场即讲好处，删「不要求/已经很能干」；③ 初版收件地址 胡东华@华为.com 含中文（非 ASCII）有退信风险 → 改为拼音地址 hudonghua@huawei.com；④ 新增 WP 触发同型语义软门禁（与介绍 PDF 0.90/总纲 0.88 等近似），以 allowDuplicate+justification 放行。\n遗留钩子（承接上会话）：① 框架侧 MCP 工具契约 schema 对齐（文档层）；② 服务器无 GitHub 凭证，触发式 push 需配只写 deploy key；③ 服务器 graph_submit/graph_update 的 graphs/catalog 未回主仓；④ D4 信任圈层、中心可复制后置；⑤ 规则改动需 argo-deploy 才传播。\n记忆层级：本摘要在 T1（overseer-wm-001）；相关长期记忆在 T2 overseer-ltm-001/overseer-rules-001/overseer-product-001。commits：6a6c02a/4da3e11/e8639ef/e21ab27/5f052c0/2d6c5c7。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4261,7 +4261,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-23",
-          "description": "会话收尾：ArchGraph 框架使用介绍邮件（HTML+SVG）+ SMTP 发送 + WP/AT 登记"
+          "description": "会话收尾：ArchGraph 框架使用介绍邮件（邮件安全表格图 + 先痛点后方案 + SMTP 发送）"
         },
         {
           "name": "commit",
@@ -8825,11 +8825,12 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "email-sent"
+          "value": "email-sent",
+          "description": "重写后的群发版已发送（主题：以项目为中心，让 AI 越用越懂你）"
         },
         {
           "name": "deliveryChannel",
-          "value": "smtp.126.com:465（hdhscu@126.com 发送至 hudonghua@huawei.com，HTML 内联渲染 4 张 SVG）"
+          "value": "smtp.126.com:465（hdhscu@126.com 发送至 hudonghua@huawei.com，邮件安全表格排版，4 张示意图）"
         },
         {
           "name": "commit",
