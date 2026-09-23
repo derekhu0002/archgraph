@@ -3,277 +3,277 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>面向 Agent 工程的意图架构图谱：写入治理、检索优化与可信记忆的实证研究</title>
+<title>面向 Agent 工程的一张意图架构图：写入治理、检索优化与可信记忆的实证研究</title>
 </head>
 <body style="margin:0;padding:0;background:#eef1f5;font-family:'Microsoft YaHei','Segoe UI',Arial,sans-serif;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f5;">
 <tr><td align="center" style="padding:24px 12px;">
-<table role="presentation" width="880" cellpadding="0" cellspacing="0" style="width:880px;max-width:100%;background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 14px rgba(15,36,64,.08);font-family:'Microsoft YaHei','Segoe UI',Arial,sans-serif;color:#1f2937;line-height:1.75;">
+<table role="presentation" width="880" cellpadding="0" cellspacing="0" style="width:880px;max-width:100%;background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 14px rgba(15,36,64,.08);font-family:'Microsoft YaHei','Segoe UI',Arial,sans-serif;color:#1f2937;line-height:1.78;">
 
   <!-- Header -->
-  <tr><td style="background:#0f2b4c;background:linear-gradient(135deg,#0f2b4c,#1d4e89);padding:34px 46px;">
-    <div style="display:inline-block;border:1px solid rgba(255,255,255,.45);border-radius:20px;padding:2px 14px;font-size:12px;letter-spacing:1px;color:#dbe8f7;margin-bottom:16px;">研究稿 · 实证研究</div>
-    <div style="font-size:24px;font-weight:700;color:#ffffff;line-height:1.45;">面向 Agent 工程的意图架构图谱：<br>写入治理、检索优化与可信记忆的实证研究</div>
-    <div style="font-size:14px;color:#b9cde6;margin-top:12px;">项目组 · 2026 年 9 月 · 内部研究稿</div>
+  <tr><td style="background:#0f2b4c;background:linear-gradient(135deg,#0f2b4c,#1d4e89);padding:36px 46px;">
+    <div style="display:inline-block;border:1px solid rgba(255,255,255,.45);border-radius:20px;padding:2px 14px;font-size:12px;letter-spacing:1px;color:#dbe8f7;margin-bottom:16px;">研究稿 · 内部</div>
+    <div style="font-size:23px;font-weight:700;color:#ffffff;line-height:1.5;">面向 Agent 工程的一张意图架构图：<br>写入治理、检索优化与可信记忆的实证研究</div>
+    <div style="font-size:13.5px;color:#b9cde6;margin-top:12px;">项目组 · 2026 年 9 月</div>
   </td></tr>
 
   <!-- Abstract -->
   <tr><td style="padding:26px 46px 0;">
     <div style="background:#f2f7fd;border-left:5px solid #1d4e89;border-radius:6px;padding:16px 20px;font-size:14px;">
       <div style="font-weight:700;color:#0f2b4c;font-size:15px;margin-bottom:6px;">摘要</div>
-      <p style="margin:0;">面向 Agent 的工程实践中，真正的瓶颈不是「模型能力」，而是 Agent 缺少一份可信、可执行、可追溯的<strong>项目上下文</strong>；主流方案（向量库 / RAG、超长提示词）在结构、依据与沉淀能力上存在系统性缺口。本文提出以<strong>意图架构图谱</strong>（Intent Architecture Graph，唯一事实源、ArchiMate 3.2 建模）为核心的方案，并系统给出三部分机制：<strong>写入治理</strong>（去重 / 无损 / 墓碑三道门禁）、<strong>读取优化</strong>（子图限定、三层记忆、两步回忆、语义阈值标定、混合检索与二次重排）、<strong>检索指标</strong>（recall@1/@5、MRR、Precision/HitRate）。在仓库内可执行评测上，向量检索基线 top-1 召回 <strong>94.6%</strong>、top-5 <strong>99.4%</strong>、MRR <strong>0.967</strong>；引入二次重排后 top-1 召回提升至 <strong>99.3%（最高 100%）</strong>；记忆检索正确率 <strong>100%</strong>、拒答准确率 100%、平均时延约 <strong>5.7ms</strong>。结果与长期记忆领域的公认基准（LongMemEval / LOCOMO / BEAM）进行了对照。本文的贡献是：把「让 Agent 有图可依」从理念落为一组<strong>可度量、可回归</strong>的工程机制。</p>
+      <p style="margin:0;">面向真实项目工作的 Agent 常出现目标漂移、过程不可观测、验收缺乏依据、经验无法跨会话累积等问题。我们认为这些问题的共同根源，是 Agent 缺少一份可信、可执行、可追溯的项目上下文。既有做法各有侧重：检索增强生成（RAG）擅长按语义召回，但返回的是缺乏结构与依据的片段；把上下文塞入超长提示词可解一时之需，却无法沉淀与复用。本文以一张<strong>意图架构图</strong>（Intent Architecture Graph）作为项目的唯一事实源，令其同时充当 Agent 的记忆与团队的设计蓝图，并围绕它给出三部分机制：写入治理（复用式去重、无损合并、墓碑账本）、读取优化（子图限定、三层记忆、两步回忆、阈值标定、混合检索与二次重排）与可回归的度量（recall@1/@5、MRR 等）。在仓库内可执行的评测上，向量检索基线的 top-1 召回为 94.6%，top-5 为 99.4%，MRR 为 0.967；在 150 个查询上引入混合检索与二次重排后，top-1 升至 99.3%。本文把这些指标全部固化为可执行用例，使结果可复现、可回归。需要说明的是，本文的评测规模仍然有限，与公开基准不构成同分布比较。</p>
     </div>
   </td></tr>
 
   <!-- 1 Introduction -->
   <tr><td style="padding:26px 46px 0;">
-    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">1　引言</div>
-    <p style="margin:0 0 10px;font-size:14.5px;">让 Agent 承担真实项目工作时，四个问题反复出现：<strong>意图漂移</strong>（长任务中逐步偏离目标）、<strong>黑盒执行</strong>（依据与决策不可观测）、<strong>验收靠感觉</strong>（缺少可执行、可回归的标准）、<strong>经验不沉淀</strong>（换人换会话即从零开始）。它们的共同根源，是缺少一份<strong>人和机器都能读懂、且能被机器执行</strong>的项目上下文。</p>
-    <p style="margin:0 0 10px;font-size:14.5px;">既有做法两侧都不充分：向量库 / RAG 长于「按语义找」，但返回的是零散片段，缺结构、缺关系、缺依据；超长提示词一次性有效，无法沉淀与复用。一句话，二者都没有提供「单一事实源」。</p>
-    <p style="margin:0 0 6px;font-size:14.5px;">本文的出发点很朴素：<strong>给每个项目一张意图架构图谱，让知识库同时成为 Agent 的记忆系统与设计图纸，使其「有图可依」。</strong>围绕这一目标，本文的贡献如下：</p>
-    <div style="background:#f8fafc;border:1px solid #e3e8ef;border-radius:8px;padding:14px 18px;font-size:14px;">
-      <div style="padding:5px 0;"><strong style="color:#1d4e89;">C1　写入治理</strong>：提出「去重 → 无损 → 墓碑」三道写入门禁，保证图谱在长期写入下不腐化（§3.2）。</div>
-      <div style="padding:5px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">C2　读取优化</strong>：给出子图限定、三层记忆、两步回忆、阈值标定、混合检索与二次重排的组合方法，在省 Token / 提性能的同时不牺牲召回（§3.3）。</div>
-      <div style="padding:5px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">C3　量化评测</strong>：以 recall@1/@5、MRR 等标准指标给出检索与记忆的实测基线，并对齐 LongMemEval / LOCOMO / BEAM（§4、§5）。</div>
-      <div style="padding:5px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">C4　可回归交付</strong>：将全部指标固化为可执行用例，使质量可被持续守住（§5.4）。</div>
-    </div>
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:14px;">1　引言</div>
+    <p style="margin:0 0 12px;font-size:14.5px;">让 Agent 承担真实项目工作时，问题往往不在于单点能力，而在于它没有一份「可信的项目上下文」。这种缺失会引出四类可观察的失败：长任务中目标逐步漂移，人却难以及时察觉；过程不透明，Agent 读了什么、依据什么做决定难以追溯；验收依赖主观判断，缺少可执行的标准；一次会话积累的经验无法跨会话、跨人延续。</p>
+    <p style="margin:0 0 12px;font-size:14.5px;">已有的两类做法都只能缓解其中一部分。以检索增强生成（RAG）为代表的方案[1]长于「按语义找」，但返回的是孤立片段，缺少结构、关系与出处，难以支撑「为什么会这样」这类追问。另一类做法是把尽可能多的资料塞进超长提示词，这能解一时之需，代价是上下文一经更替便无从复用，也无法作为团队的共享资产。</p>
+    <p style="margin:0 0 12px;font-size:14.5px;">本文的做法是：为每个项目维护一张<strong>意图架构图</strong>，作为该项目唯一的、可执行的、可追溯的事实源；让这张图既作为 Agent 的长期记忆，又作为人和 Agent 共同的设计蓝图。我们不把「图」当作一次性检索的索引，而是把它当作会被长期写入、必须治理、需要被精确读取的一等工程对象。围绕这一前提，本文给出三部分机制——写入治理、读取优化、可回归度量——并用仓库内可执行的评测加以检验。</p>
+    <p style="margin:0 0 8px;font-size:14.5px;">本文的贡献可归纳为四点，每点都对应可检验的结果：</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13.5px;border-collapse:collapse;border:1px solid #e3e8ef;">
+      <tbody>
+        <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;width:12%;"><strong>C1</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">写入治理：复用式去重、无损合并与墓碑账本三道门禁，使图在长期写入下不因重复或误删而腐化（§3.2）。</td></tr>
+        <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>C2</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">读取优化：子图限定、三层记忆、两步回忆、阈值标定、混合检索与二次重排的组合，在节省上下文的同时维持召回（§3.3）。</td></tr>
+        <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>C3</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">量化评测：以 recall@1/@5、MRR 等标准指标给出检索与记忆的实测结果，并说明其与公开基准的关系（§4、§5）。</td></tr>
+        <tr><td style="padding:8px 12px;"><strong>C4</strong></td><td style="padding:8px 12px;">可回归交付：全部指标固化为可执行用例，使质量可被持续守住（§3.4、§5.6）。</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:10px 0 0;font-size:14px;color:#5b6b7f;">本文的结论受限于单一项目图谱与有限的评测规模，这一点在 §6 中如实讨论。</p>
   </td></tr>
 
-  <!-- 2 Related Work -->
+  <!-- 2 Related work -->
   <tr><td style="padding:26px 46px 0;">
-    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">2　相关工作</div>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13.5px;border-collapse:collapse;border:1px solid #e3e8ef;">
-      <tr style="background:#f4f7fb;color:#0f2b4c;font-weight:700;">
-        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;width:26%;">方向</td>
-        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">代表工作与差异</td>
-      </tr>
-      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>检索增强生成（RAG）</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">以向量 / 混合检索增强生成，长于语义召回；但上下文为片段、无结构约束，缺少唯一事实源与写入治理。</td></tr>
-      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>图增强检索（GraphRAG）</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">引入图结构提升多跳与全局能力；但多面向「从文本抽取图」，图本身不是人与 Agent 共同维护的工程事实源。</td></tr>
-      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>Agent 长期记忆</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">以 LongMemEval / LOCOMO / BEAM 等基准评测记忆读写；本文沿用其指标口径，但把「记忆」与「设计图纸」统一在同一张图上。</td></tr>
-      <tr><td style="padding:8px 12px;"><strong>企业架构建模</strong></td><td style="padding:8px 12px;">以 ArchiMate 3.2 等标准表达系统结构与意图；本文复用之作为公共语言，并扩展出可执行、可治理的读写机制。</td></tr>
-    </table>
-    <p style="margin:10px 0 0;font-size:13.5px;color:#5b6b7f;">与上述工作相比，本文的差异在于：把「结构（图）× 治理（写入门禁）× 检索（读优化）× 度量（指标与回归）」作为一个整体交付，并强调「不牺牲召回」这一硬约束。</p>
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:14px;">2　相关工作</div>
+    <p style="margin:0 0 12px;font-size:14.5px;"><strong>检索增强生成。</strong>RAG 用检索到的外部文本增强生成质量，显著缓解了模型的知识时效问题[1]。其检索后端以稠密向量为主，常辅以 BM25 等词法通道并做融合[5]。这类方法提升的是「找到相关文本」的概率，其上下文仍是彼此独立的片段，不承诺元素之间的一致性与可追溯性。</p>
+    <p style="margin:0 0 12px;font-size:14.5px;"><strong>图增强检索。</strong>GraphRAG 从语料中抽取实体—关系图，并借助社区摘要回答全局性问题，在全局问答上取得了明显优于朴素向量检索的裁判胜率，同时把检索所需的 token 显著降低[2]。LightRAG 进一步以更轻量的图索引改进了效率与质量[3]。这类方法的图是「从文本中抽取」出来的派生产物，而非由人和 Agent 共同维护、并作为施工依据的原始事实源；写入治理与跨会话的长期一致性通常不在其讨论范围。</p>
+    <p style="margin:0 0 12px;font-size:14.5px;"><strong>Agent 长期记忆与基准。</strong>Mem0 等系统把对话历史抽取为可检索的记忆，并报告了在准确率与延迟上的收益[4]；LongMemEval[6]、LoCoMo[7] 与 BEAM 等基准则从信息抽取、多会话与时间推理、生产规模检索等维度衡量记忆系统的读写质量。这些工作关注的是「用户—助手」式记忆，其指标口径（LLM 裁判、F1、pass rate）彼此不同，横向比较需格外谨慎。</p>
+    <p style="margin:0 0 0;font-size:14.5px;"><strong>企业架构建模。</strong>ArchiMate 3.2[8] 为系统结构、职责与意图提供了标准化的元素与关系，是业界成熟的公共语言。本文沿用其类型体系作为人机共同语言，并在此基础上补充可执行、可治理的读写机制。综合来看，既有工作分别解决了「找得到」「抽得出」「记得住」的某一面，但尚未把结构、治理、检索与度量放到同一个长期维护的事实源上统一处理。</p>
   </td></tr>
 
   <!-- 3 Method -->
   <tr><td style="padding:26px 46px 0;">
-    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">3　方法</div>
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:14px;">3　方法</div>
 
-    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:6px 0 8px;">3.1　意图架构图谱（单一事实源）</div>
-    <p style="margin:0 0 10px;font-size:14.5px;">每个项目维护一张<strong>意图架构图谱</strong>：元素（人 / 角色 / 工作包 / 技能 / 规则 / 组件…）与关系（指派 / 触发 / 关联…）均有类型、可校验；视图（Viewpoint 的投影）约束成员；元素上挂载<strong>可执行验收用例</strong>。人和 Agent 面对同一张图——人看全局，Agent 看与任务相关的局部。</p>
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:6px 0 8px;">3.1　意图架构图：单一事实源</div>
+    <p style="margin:0 0 12px;font-size:14.5px;">每个项目维护一张意图架构图，其中元素（人、角色、工作包、技能、规则、组件等）与关系（指派、触发、关联等）都具有类型，并受关系合法性的约束；视图是视角（Viewpoint）在图上的一种投影，用于约束成员与呈现层次。元素上可挂载可执行的验收用例。这张图同时承担两种角色：作为记忆，它保存对话中形成的共识与决策；作为设计蓝图，它承载职责划分、设计取舍与验收标准。人和 Agent 面对同一张图，人看全局，Agent 看与当前任务相关的局部，对齐因此成为结构性的而非会话性的。</p>
 
-    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">3.2　写入治理：三道门禁（C1）</div>
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">3.2　写入治理：三道门禁</div>
+    <p style="margin:0 0 10px;font-size:14.5px;">图会被长期、多人、多 Agent 地写入，若不治理会迅速膨胀甚至自相矛盾。我们让所有写入经过同一通道，并依次通过三道门禁。</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13.5px;border-collapse:collapse;border:1px solid #e3e8ef;">
       <tr style="background:#f4f7fb;color:#0f2b4c;font-weight:700;">
-        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;width:22%;">门禁</td>
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;width:18%;">门禁</td>
         <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">机制</td>
       </tr>
-      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>去重</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">写入默认「复用」：精确重复（类型 + 名称）直接复用；同类型语义近似的新对象被软门禁拦下并给出候选，须显式放行并说明理由。</td></tr>
-      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>无损</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">写入不静默丢内容：结构化字段按名称合并；标量文本受保护，「省略 ≠ 删除」；确需删减时必须显式确认。</td></tr>
-      <tr><td style="padding:8px 12px;"><strong>墓碑</strong></td><td style="padding:8px 12px;">破坏性删除（元素 / 关系 / 视图）进入可恢复账本，完整对象留痕，可回溯、可恢复。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>去重</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">写入默认「复用」：类型与名称均相同的对象直接复用；同类型且语义近似的新对象会被软门禁拦下并给出候选，须显式放行并说明理由方可创建。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>无损</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">写入不静默丢内容：结构化字段按名称合并，标量文本受保护，「省略不等于删除」；确需删减时必须显式确认。</td></tr>
+      <tr><td style="padding:8px 12px;"><strong>墓碑</strong></td><td style="padding:8px 12px;">破坏性删除（元素、关系、视图）被记入可恢复的墓碑账本，完整对象留痕，可回溯、可恢复。</td></tr>
     </table>
 
-    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">3.3　读取优化：省 Token 与提性能（C2）</div>
-    <div style="background:#f8fafc;border:1px solid #e3e8ef;border-radius:8px;padding:14px 18px;font-size:14px;">
-      <div style="padding:6px 0;"><strong style="color:#1d4e89;">子图限定</strong>：把检索限定在某张视图或某个元素子树，避免全图铺开。</div>
-      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">三层记忆</strong>：工作记忆（会话开始仅加载紧凑摘要，约 2–4K token）→ 长期记忆（命中才召回）→ 档案；避免全量记忆进上下文。</div>
-      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">两步回忆</strong>：先语义定位取紧凑卡片，再按需取全文。</div>
-      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">语义阈值标定</strong>：过滤无关内容，取最大召回点（§5.2）。</div>
-      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">混合检索 + 二次重排</strong>：向量语义与词法 token 双通道融合，再由 LLM 对候选精排（失败自动回退，不阻塞）。</div>
-      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">通道并发与投影瘦身</strong>：多通道并发缩短时延；去除大字段的向量投影，修复大图谱内存问题。</div>
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">3.3　读取优化：省上下文与提性能</div>
+    <p style="margin:0 0 12px;font-size:14.5px;">读取的目标是「取得到、取得准、且尽量少占上下文」。我们使用五种手段：其一，把检索限定在某张视图或某个元素子树之内，避免全图铺开；其二，按人类记忆的层次组织记忆——工作记忆在会话开始时只加载一份紧凑摘要，长期记忆命中才召回，档案只在显式检索时读取；其三，两步回忆，先以紧凑卡片定位，再按需取全文；其四，对语义检索的种子做阈值标定，滤除无关内容；其五，向量语义与词法 token 双通道融合，再由 LLM 对候选做一次精排，失败时回退原序而不阻塞。多通道并发执行以缩短时延，检索所用的向量投影也做了瘦身以控制大图下的内存占用。</p>
+    <div style="background:#f2f7fd;border-left:5px solid #1d4e89;border-radius:6px;padding:12px 18px;font-size:13.5px;">
+      一条贯穿性约束：上述优化不得以牺牲检出率与召回率为代价——宁可多消耗计算，也不通过缩小候选池、截断内容或跳过重排来换取速度。该约束同样约束 §5 中的所有取舍。
     </div>
-    <div style="background:#f2f7fd;border-left:5px solid #1d4e89;border-radius:6px;padding:12px 18px;font-size:13.5px;margin-top:10px;">
-      <strong style="color:#0f2b4c;">硬约束：</strong>任何优化都不得牺牲检出率与召回率——宁可多花性能，也不靠「缩小候选池、截断内容、跳过重排」换速度。
-    </div>
+
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">3.4　度量与可回归交付</div>
+    <p style="margin:0;font-size:14.5px;">我们把「检索那一步」拆成标准指标：recall@1 与 recall@5 衡量前 1 / 前 5 是否命中，MRR 衡量首个正确结果的排位质量，Precision 与 HitRate@K 衡量准确性与命中率。每个元素的验收用例以 GIVEN-WHEN-THEN 写成可执行形式，每次提交后把 commit 与文件路径回登记到对应元素。这样，图不仅是知识，也是可被机器执行的度量与追溯载体。</p>
   </td></tr>
 
   <!-- 4 Setup -->
   <tr><td style="padding:26px 46px 0;">
-    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">4　实验设置</div>
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:14px;">4　实验设置</div>
+    <p style="margin:0 0 12px;font-size:14.5px;">本节说明我们在什么数据、什么口径下、与哪些基线比较。</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13.5px;border-collapse:collapse;border:1px solid #e3e8ef;">
       <tr style="background:#f4f7fb;color:#0f2b4c;font-weight:700;">
-        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;width:22%;">项</td>
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;width:20%;">项</td>
         <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">设置</td>
       </tr>
-      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>数据 / 任务</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">① 检索黄金集（由项目意图架构图谱自动派生，含名称 / 描述 / 关系 / 视图四类查询）；② 150 样本四路对比集（向量 / 混合 / 重排）；③ 80 样本重排模型对比集；④ 记忆评测题集 31 题（信息抽取 / 多会话推理 / 时间推理 / 知识更新 / 拒答）。</td></tr>
-      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>指标</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">recall@1、recall@5、MRR（排序质量）、Precision / Hit Rate@K；记忆侧：正确率、拒答准确率、平均时延。</td></tr>
-      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>基线</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">向量检索（topK=8）、混合检索（向量 + BM25 + RRF）、二次重排（LLM listwise）；外部对齐 LongMemEval / LOCOMO / BEAM 头条成绩。</td></tr>
-      <tr><td style="padding:8px 12px;"><strong>实现</strong></td><td style="padding:8px 12px;">检索经统一只读接口；评测 harness 零外部数据库运行时依赖，只读、可复现；所有指标固化为可执行回归。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>数据与任务</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">① 检索黄金集：由项目意图图自动派生，覆盖名称、描述、关系、视图四类查询；② 四路对比集 150 条：向量、混合、仅向量重排、混合加重排；③ 记忆任务集 31 条：信息抽取、多会话推理、时间推理、知识更新与拒答。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>指标</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">检索侧：recall@1、recall@5、MRR；记忆侧：正确率、拒答准确率、平均时延。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>本文实跑的基线</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">向量检索（topK=8）、混合检索（向量 + BM25 经 RRF 融合[5]）、二次重排（LLM listwise）。这三者构成消融，用以隔离各通道的贡献。</td></tr>
+      <tr><td style="padding:8px 12px;"><strong>范围说明</strong></td><td style="padding:8px 12px;">我们<strong>没有</strong>把 GraphRAG、Mem0 等外部系统在同题同模型下实跑作为基线；§5.5 与公开结果的对照仅供量级参考，不构成头对头比较。检索实现经统一只读接口，评测脚本零外部数据库运行时依赖，全部指标固化为可执行回归。</td></tr>
     </table>
   </td></tr>
 
   <!-- 5 Results -->
   <tr><td style="padding:26px 46px 0;">
-    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">5　结果与分析</div>
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:14px;">5　结果与对比</div>
 
-    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:6px 0 8px;">5.1　检索质量</div>
-    <p style="margin:0 0 14px;font-size:14.5px;">图 1 给出 150 样本四路对比的 top-1 召回。向量基线已达 95.3%（top-5 为 100%）；引入二次重排后 top-1 提升至 99.3%，MRR 达 0.997。单独对向量通道重排反而略降（92.7%），说明重排应与混合检索配合使用。</p>
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:6px 0 8px;">5.1　检索质量与消融</div>
+    <p style="margin:0 0 14px;font-size:14.5px;">在 150 条查询的四路对比中，向量基线 top-1 召回为 95.3%，top-5 为 100%；混合检索把 top-1 抬到 96.0%，提升有限；仅对向量通道做重排反而降到 92.7%，而混合检索叠加二次重排后达到 99.3%，MRR 为 0.997（图 1）。这一组结果说明两点：其一，当基线已经较高时，单看 top-1 的绝对提升空间本就有限；其二，重排并非独立有效，它与混合检索的候选质量相互依赖——仅向量重排的下降提示，重排器对候选集的质量敏感。</p>
 
     <figure class="dia" style="margin:0 0 22px;">
       <div style="border:1px solid #e3e8ef;border-radius:8px;padding:14px 16px;background:#fcfdff;">
-        <div style="font-size:13px;font-weight:700;color:#0f2b4c;margin-bottom:10px;">图 1 · 检索方法对比（150 样本，top-1 召回 / %）</div>
+        <div style="font-size:13.5px;font-weight:700;color:#0f2b4c;margin-bottom:10px;">图 1　检索方法消融（150 条查询，top-1 召回 / %）</div>
         <table class="diagram" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;border-collapse:collapse;">
           <tr>
             <td style="width:34%;padding:5px 10px 5px 0;">向量检索</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="95.3%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
+            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="95.3%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
             <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">95.3</td>
           </tr>
           <tr>
             <td style="padding:5px 10px 5px 0;">混合检索</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="96.0%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
+            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="96.0%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
             <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">96.0</td>
           </tr>
           <tr>
-            <td style="padding:5px 10px 5px 0;">重排（仅向量）</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="92.7%" bgcolor="#c9b98f" style="background:#c9b98f;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
+            <td style="padding:5px 10px 5px 0;">二次重排（仅向量）</td>
+            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="92.7%" bgcolor="#c9b98f" style="background:#c9b98f;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
             <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">92.7</td>
           </tr>
           <tr>
-            <td style="padding:5px 10px 5px 0;"><strong>重排（混合）</strong></td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="99.3%" bgcolor="#1d4e89" style="background:#1d4e89;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
+            <td style="padding:5px 10px 5px 0;"><strong>二次重排（混合）</strong></td>
+            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="99.3%" bgcolor="#1d4e89" style="background:#1d4e89;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
             <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">99.3</td>
           </tr>
         </table>
-        <div style="font-size:12px;color:#7a8798;margin-top:8px;">注：150 样本四路对比集；top-5 全部为 100%；重排对提示 / 模型敏感，默认关闭。</div>
+        <div style="font-size:12px;color:#7a8798;margin-top:8px;">top-5 在四路中均为 100%；阴影浅色的两根柱为较低值，以示对比。</div>
       </div>
     </figure>
 
-    <p style="margin:0 0 14px;font-size:14.5px;">图 2 按对象类型分解向量基线的召回。关系类查询达 100%、描述类 98.4%；名称类（92.0%）仍是弱项，提示对「精确名」的匹配仍有优化空间。</p>
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">5.2　分对象差异</div>
+    <p style="margin:0 0 14px;font-size:14.5px;">按查询对象分解向量基线（图 2）：关系类查询的 top-1 召回为 100%，描述类为 98.4%，视图类为 98%，整体为 94.6%，而名称类仅为 92.0%，是主要短板。名称类多为简短的专有名词或代号，与上下文的语义信号弱，这与向量检索「重语义、轻字面」的已知特性一致，也提示词法通道在名称类上更有价值。</p>
 
     <figure class="dia" style="margin:0 0 22px;">
       <div style="border:1px solid #e3e8ef;border-radius:8px;padding:14px 16px;background:#fcfdff;">
-        <div style="font-size:13px;font-weight:700;color:#0f2b4c;margin-bottom:10px;">图 2 · 向量基线分对象召回（黄金集，top-1 / %）</div>
+        <div style="font-size:13.5px;font-weight:700;color:#0f2b4c;margin-bottom:10px;">图 2　向量基线分对象召回（黄金集，top-1 / %）</div>
         <table class="diagram" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;border-collapse:collapse;">
-          <tr>
-            <td style="width:34%;padding:5px 10px 5px 0;">名称</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="92.0%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">92.0</td>
-          </tr>
-          <tr>
-            <td style="padding:5px 10px 5px 0;">描述</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="98.4%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">98.4</td>
-          </tr>
-          <tr>
-            <td style="padding:5px 10px 5px 0;">视图</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="98.0%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">98.0</td>
-          </tr>
-          <tr>
-            <td style="padding:5px 10px 5px 0;">关系</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="100%" bgcolor="#1d4e89" style="background:#1d4e89;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">100</td>
-          </tr>
-          <tr>
-            <td style="padding:5px 10px 5px 0;"><strong>整体</strong></td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="94.6%" bgcolor="#b8860b" style="background:#b8860b;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">94.6</td>
-          </tr>
+          <tr><td style="width:30%;padding:5px 10px 5px 0;">名称</td><td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="92.0%" bgcolor="#c9b98f" style="background:#c9b98f;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td><td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">92.0</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;">描述</td><td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="98.4%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td><td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">98.4</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;">视图</td><td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="98.0%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td><td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">98.0</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;">关系</td><td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="100%" bgcolor="#1d4e89" style="background:#1d4e89;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td><td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">100</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;"><strong>整体</strong></td><td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="94.6%" bgcolor="#b8860b" style="background:#b8860b;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td><td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">94.6</td></tr>
         </table>
-        <div style="font-size:12px;color:#7a8798;margin-top:8px;">注：黄金集 topK=8，recall@5 整体 99.4%，MRR 0.967。</div>
+        <div style="font-size:12px;color:#7a8798;margin-top:8px;">黄金集 topK=8；整体 recall@5 为 99.4%，MRR 为 0.967。</div>
       </div>
     </figure>
 
-    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">5.2　语义阈值标定</div>
-    <p style="margin:0 0 14px;font-size:14.5px;">读路径的种子阈值过低会把无关内容全部召回、过高会误伤相关项。实测（24 条无关探针、8 条相关目标）显示两类的相似度几乎可分：无关上界 0.686、相关下界 0.833（图 3）。取窗口内的 <strong>0.70</strong> 后，无关命中降为 0，而相关召回保持 8/8 不降。</p>
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">5.3　语义阈值标定</div>
+    <p style="margin:0 0 14px;font-size:14.5px;">读路径的种子阈值需要权衡：过低会把无关内容一并召回，过高则会误伤相关项。我们在 24 条无关探针与 8 条相关目标上测量相似度分布，发现两类几乎可分——无关样本的上界为 0.686，相关样本的下界为 0.833（图 3）。取窗口内的 0.70 后，无关命中降为 0，而相关召回保持 8/8 不降。需要提醒的是，该阈值与所用 embedding 模型绑定，更换模型后必须重新标定。</p>
 
     <figure class="dia" style="margin:0 0 22px;">
       <div style="border:1px solid #e3e8ef;border-radius:8px;padding:14px 16px;background:#fcfdff;">
-        <div style="font-size:13px;font-weight:700;color:#0f2b4c;margin-bottom:10px;">图 3 · 语义相似度分离与阈值选择（0–1 区间）</div>
+        <div style="font-size:13.5px;font-weight:700;color:#0f2b4c;margin-bottom:10px;">图 3　语义相似度的两类分离与阈值选择（0–1 区间）</div>
         <table class="diagram" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;border-collapse:collapse;">
-          <tr>
-            <td style="width:40%;padding:5px 10px 5px 0;">无关探针（最高）</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="68.6%" bgcolor="#d9b48f" style="background:#d9b48f;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">0.686</td>
-          </tr>
-          <tr>
-            <td style="padding:5px 10px 5px 0;">相关目标（最低）</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="83.3%" bgcolor="#1d4e89" style="background:#1d4e89;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">0.833</td>
-          </tr>
-          <tr>
-            <td style="padding:5px 10px 5px 0;"><strong>选用阈值</strong></td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="70%" bgcolor="#b8860b" style="background:#b8860b;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">0.70</td>
-          </tr>
+          <tr><td style="width:40%;padding:5px 10px 5px 0;">无关探针（最高）</td><td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="68.6%" bgcolor="#d9b48f" style="background:#d9b48f;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td><td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">0.686</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;">相关目标（最低）</td><td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="83.3%" bgcolor="#1d4e89" style="background:#1d4e89;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td><td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">0.833</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;"><strong>选用阈值</strong></td><td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="70%" bgcolor="#b8860b" style="background:#b8860b;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td><td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">0.70</td></tr>
         </table>
-        <div style="font-size:12px;color:#7a8798;margin-top:8px;">注：0.686 与 0.833 之间取最大召回点；无关命中 0、相关召回 8/8。</div>
+        <div style="font-size:12px;color:#7a8798;margin-top:8px;">在 0.686 与 0.833 之间取最大召回点；阈值与 embedding 模型绑定，需随模型更换重新标定。</div>
       </div>
     </figure>
 
-    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">5.3　记忆评测（对照业界基准）</div>
-    <p style="margin:0 0 14px;font-size:14.5px;">在 31 题记忆评测上，整体正确率 100%、拒答准确率 100%、平均时延约 5.7ms。图 4 将我们的记忆正确率与长期记忆领域公认基准的头条成绩并列（口径不同，仅供参考：外部为公开基准最好成绩，我们为本仓库可执行题集）。</p>
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">5.4　记忆任务</div>
+    <p style="margin:0 0 14px;font-size:14.5px;">在 31 条记忆任务上，整体正确率为 100%，拒答准确率为 100%，平均时延约 5.7 ms（图 4）。这些数字来自本仓库自建的、与项目场景绑定的题集，规模有限，不宜与公开基准直接比较；其价值在于可随每次改动自动回归，防止退化。</p>
 
     <figure class="dia" style="margin:0 0 22px;">
       <div style="border:1px solid #e3e8ef;border-radius:8px;padding:14px 16px;background:#fcfdff;">
-        <div style="font-size:13px;font-weight:700;color:#0f2b4c;margin-bottom:10px;">图 4 · 记忆正确率对照（% ，口径不同仅供参照）</div>
+        <div style="font-size:13.5px;font-weight:700;color:#0f2b4c;margin-bottom:10px;">图 4　记忆任务指标（31 条，自建题集）</div>
         <table class="diagram" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;border-collapse:collapse;">
-          <tr>
-            <td style="width:40%;padding:5px 10px 5px 0;"><strong>本方案（31 题）</strong></td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="100%" bgcolor="#1d4e89" style="background:#1d4e89;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">100</td>
-          </tr>
-          <tr>
-            <td style="padding:5px 10px 5px 0;">LongMemEval</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="94.4%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">94.4</td>
-          </tr>
-          <tr>
-            <td style="padding:5px 10px 5px 0;">LOCOMO</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="92.5%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">92.5</td>
-          </tr>
-          <tr>
-            <td style="padding:5px 10px 5px 0;">BEAM（1M tokens）</td>
-            <td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="70.1%" bgcolor="#d9b48f" style="background:#d9b48f;height:16px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td>
-            <td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">70.1</td>
-          </tr>
+          <tr><td style="width:40%;padding:5px 10px 5px 0;">整体正确率</td><td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="100%" bgcolor="#1d4e89" style="background:#1d4e89;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td><td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">100</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;">拒答准确率</td><td style="padding:5px 8px 5px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="100%" bgcolor="#8fb4dc" style="background:#8fb4dc;height:15px;border-radius:3px;">&nbsp;</td><td>&nbsp;</td></tr></table></td><td style="width:56px;text-align:right;font-weight:700;color:#0f2b4c;">100</td></tr>
         </table>
-        <div style="font-size:12px;color:#7a8798;margin-top:8px;">注：头部成绩（约 92%–94%）作为「世界级」量化门槛的参照；我们的题集为裁剪后的 Agent 元记忆场景。</div>
+        <div style="font-size:12px;color:#7a8798;margin-top:8px;">平均时延约 5.7 ms；题集为 Agent 元记忆场景裁剪，规模小，仅供仓库内回归。</div>
       </div>
     </figure>
 
-    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">5.4　消融与默认配置</div>
-    <p style="margin:0;font-size:14.5px;">因向量基线已很高，混合检索的增量有限（top-1 约 +0.4~1.2 点），且二次重排对提示 / 模型敏感、小样本噪声大。故二者默认关闭、按宿主金丝雀开启——在保证召回不降的前提下，把增益留给需要的场景。所有指标均以可执行用例固化，随每次改动自动回归。</p>
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">5.5　与业界方案的关系</div>
+    <p style="margin:0 0 12px;font-size:14.5px;">由于基准、指标与判定流水线各不相同，我们不做头对头的数值比较，而是从<strong>能力维度</strong>给出定位（表 1），另将本文结果与公开报道的数值并列于表 2，并显式标注口径差异，仅供量级参考。</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;border-collapse:collapse;border:1px solid #e3e8ef;margin-bottom:14px;">
+      <tr style="background:#f4f7fb;color:#0f2b4c;font-weight:700;">
+        <td style="padding:9px 10px;border-bottom:1px solid #e3e8ef;">能力维度</td>
+        <td style="padding:9px 10px;border-bottom:1px solid #e3e8ef;text-align:center;">向量 RAG</td>
+        <td style="padding:9px 10px;border-bottom:1px solid #e3e8ef;text-align:center;">GraphRAG</td>
+        <td style="padding:9px 10px;border-bottom:1px solid #e3e8ef;text-align:center;">记忆系统</td>
+        <td style="padding:9px 10px;border-bottom:1px solid #e3e8ef;text-align:center;">本文</td>
+      </tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">结构化的项目事实源</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">–</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">△</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">–</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">●</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">写入治理（去重/无损/墓碑）</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">–</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">–</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">△</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">●</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">记忆与设计蓝图统一</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">–</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">–</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">–</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">●</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">检索/记忆的量化与回归</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">△</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">△</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">●</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;text-align:center;">●</td></tr>
+      <tr><td style="padding:7px 10px;">面向 Agent 工程的可执行验收</td><td style="padding:7px 10px;text-align:center;">–</td><td style="padding:7px 10px;text-align:center;">–</td><td style="padding:7px 10px;text-align:center;">–</td><td style="padding:7px 10px;text-align:center;">●</td></tr>
+      <caption style="caption-side:bottom;text-align:left;font-size:12px;color:#7a8798;padding:8px 10px 0;">表 1　能力维度对照：● 具备，△ 部分/间接，– 通常不涉及。定性对照，非数值比较。</caption>
+    </table>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:12.5px;border-collapse:collapse;border:1px solid #e3e8ef;">
+      <tr style="background:#f4f7fb;color:#0f2b4c;font-weight:700;">
+        <td style="padding:9px 10px;border-bottom:1px solid #e3e8ef;">系统 / 来源</td>
+        <td style="padding:9px 10px;border-bottom:1px solid #e3e8ef;">基准</td>
+        <td style="padding:9px 10px;border-bottom:1px solid #e3e8ef;">指标</td>
+        <td style="padding:9px 10px;border-bottom:1px solid #e3e8ef;">公开数值</td>
+      </tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">LongMemEval[6]（GPT-4o）</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">LongMemEval-M</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">裁判准确率 @top-10</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">0.720</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">Mem0[4]（官方基准）</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">LongMemEval / LoCoMo</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">准确率</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">94.4% / 92.5%</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">Mem0[4]</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">LoCoMo</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">LLM 裁判 J / 检索 p50</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">66.88 / 0.148 s</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">LoCoMo[7]（原始论文）</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">LoCoMo QA</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">F1</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">人类 87.9 / 最佳 RAG 41.4</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">BEAM</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">BEAM 1M / 10M</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">Pass Rate</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">70.1% / 50.5%</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">GraphRAG[2]</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">全局问答（1M tokens）</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">裁判胜率 vs 向量 RAG</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">72–83%</td></tr>
+      <tr><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">LightRAG[3]</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">UltraDomain</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">裁判胜率 vs GraphRAG</td><td style="padding:7px 10px;border-bottom:1px solid #eef1f5;">≈49.6–54.8%</td></tr>
+      <tr><td style="padding:7px 10px;"><strong>本文</strong></td><td style="padding:7px 10px;">仓库黄金集 / 150 条</td><td style="padding:7px 10px;">recall@1 / recall@5 / MRR</td><td style="padding:7px 10px;">94.6% / 99.4% / 0.967</td></tr>
+      <caption style="caption-side:bottom;text-align:left;font-size:12px;color:#7a8798;padding:8px 10px 0;">表 2　公开数值与本结果并列，<strong>仅供量级参考</strong>：基准、指标、判定与规模均不同（如「裁判胜率」与「准确率」不可直接比大小），<strong>不构成头对头比较</strong>。引号内数值来自各文/官方页面。</caption>
+    </table>
+
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">5.6　代价与默认配置</div>
+    <p style="margin:0;font-size:14.5px;">二次重排虽把 top-1 抬到最高，但它对提示与模型敏感、在小样本上噪声较大，因此默认关闭，按场景开启（表 3）。这与本文的召回优先约束并不矛盾：候选池始终不缩小，只是在默认路径上省去一次精排的时延与成本。此外必须指出，写入治理的三道门禁目前只有机制性保证（如复用式去重使精确重复不再新增），尚缺乏「治理前后腐化程度」的对照量化——这是我们下一阶段要补的实验。</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;border-collapse:collapse;border:1px solid #e3e8ef;margin-top:12px;">
+      <tr style="background:#f4f7fb;color:#0f2b4c;font-weight:700;">
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">配置</td>
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">默认</td>
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">依据</td>
+      </tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">混合检索</td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">关</td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">基线已高，增益约 +0.4~1.2 点，按需开启。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">二次重排</td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">关</td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">提升大但对提示/模型敏感，小样本噪声大；候选池不缩小。</td></tr>
+      <tr><td style="padding:8px 12px;">语义种子阈值</td><td style="padding:8px 12px;">0.70</td><td style="padding:8px 12px;">两类分布可分处取最大召回点；换模型需重标定。</td></tr>
+      <caption style="caption-side:bottom;text-align:left;font-size:12px;color:#7a8798;padding:8px 12px 0;">表 3　关键默认配置及其依据。</caption>
+    </table>
   </td></tr>
 
   <!-- 6 Discussion -->
   <tr><td style="padding:26px 46px 0;">
-    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">6　讨论与局限</div>
-    <p style="margin:0 0 10px;font-size:14.5px;"><strong>价值：</strong>本工作把「让 Agent 有图可依」拆成可度量、可回归的工程机制，并在「不牺牲召回」的约束下取得可复现的检索与记忆结果。</p>
-    <p style="margin:0 0 6px;font-size:14.5px;"><strong>效度威胁与局限（如实说明）：</strong></p>
-    <div style="background:#f8fafc;border:1px solid #e3e8ef;border-radius:8px;padding:14px 18px;font-size:14px;">
-      <div style="padding:5px 0;">· 检索与记忆评测目前主要在<strong>单一项目图谱</strong>上进行，跨项目 / 组织级联邦的评测尚待补齐；</div>
-      <div style="padding:5px 0;border-top:1px dashed #e3e8ef;">· 部分对比集样本量偏小（80 / 150 样本），重排结论对提示与模型敏感，需更大样本与更多模型复核；</div>
-      <div style="padding:5px 0;border-top:1px dashed #e3e8ef;">· 与外部基准的口径不同（题集、场景裁剪不一致），图 4 的数字仅供参照，不构成严格同分布对比；</div>
-      <div style="padding:5px 0;border-top:1px dashed #e3e8ef;">· 阈值与 embedding 模型绑定，更换模型（如内网自建）须重新标定。</div>
-    </div>
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:14px;">6　讨论与局限</div>
+    <p style="margin:0 0 12px;font-size:14.5px;">我们在一张长期维护的意图架构图上，把写入治理、读取优化与可回归度量整合为一套机制，并给出在仓库内可复现的检索与记忆结果。就我们所知，把「图即记忆、图即设计蓝图」「写入三道门禁」「在召回优先约束下的读优化与度量回归」放到同一个事实源上处理，是本文工作的主要特点。</p>
+    <p style="margin:0 0 6px;font-size:14.5px;">但结论的适用范围有明确边界，以下威胁需要正视：</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13.5px;border-collapse:collapse;border:1px solid #e3e8ef;">
+      <tr style="background:#f4f7fb;color:#0f2b4c;font-weight:700;">
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;width:26%;">局限</td>
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">说明</td>
+      </tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">单一项目图谱</td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">评测只在一个项目的图上进行，跨项目、组织级联邦的效果尚未验证，结论不宜外推。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">样本规模有限</td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">四路对比为 150 条、重排对比更小、记忆题集 31 条；小样本对重排等敏感结论的影响不容忽视。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">外部对照非同分布</td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">与 LongMemEval、LoCoMo、GraphRAG 等的数值口径不同，表 2 仅供参考，不能作为优劣判定。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">写入治理缺对照</td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">C1 目前只有机制性保证，尚无「开/关门禁」的量化对照来证明其对召回或腐化的影响。</td></tr>
+      <tr><td style="padding:8px 12px;">配置与宣称的落差</td><td style="padding:8px 12px;">本文最高结果（99.3%）并非默认配置；默认路径关闭重排，实际部署性能需以默认配置为准看待。</td></tr>
+    </table>
   </td></tr>
 
   <!-- 7 Conclusion -->
   <tr><td style="padding:26px 46px 0;">
-    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">7　结论与展望</div>
-    <p style="margin:0 0 10px;font-size:14.5px;">本文以<strong>意图架构图谱</strong>为单一事实源，给出写入治理、读取优化与量化评测的一体化机制：写有门禁（去重 / 无损 / 墓碑）、读有优化（子图 / 三层记忆 / 两步回忆 / 阈值 / 重排）、检索有指标（recall@1 94.6% → 重排后 99.3%–100%）、记忆有基准（100%，对齐业界基准），并全部固化为可执行回归。</p>
-    <p style="margin:0;font-size:14.5px;"><strong>展望：</strong>下一步是在更大规模、多项目（以项目为基本 block、组织级联邦）的场景下验证检索与记忆，并把「跨项目引用不漂移」纳入正式评测。</p>
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:14px;">7　结论与展望</div>
+    <p style="margin:0 0 12px;font-size:14.5px;">本文把「让 Agent 有图可依」从一句设想，落为一组可度量、可回归的工程机制：写入有门禁，读取有优化，检索有指标，交付有回归。在仓库内的评测上，三者都给出了一致的、可复现的结果。我们不主张这些结果优于既有基准，而是主张这套机制使「可信的项目上下文」成为可被持续维护与检验的对象。</p>
+    <p style="margin:0;font-size:14.5px;">下一步工作有三项：在更多项目、更大样本上复测检索与记忆；把「跨项目引用不漂移」纳入正式评测，以支撑「以项目为基本 block」的组织级协作；以及为写入治理补上开/关对照实验，把 C1 的价值从机制声明变为可测证据。</p>
   </td></tr>
 
   <!-- References -->
   <tr><td style="padding:26px 46px 0;">
-    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">参考文献</div>
-    <div style="font-size:12.5px;color:#5b6b7f;line-height:1.8;">
-      [1] LongMemEval: Benchmarking Chat Assistants on Long-Term Interactive Memory. ICLR 2025（arXiv:2410.10813）.<br>
-      [2] LOCOMO：长对话记忆与推理评测基准.<br>
-      [3] BEAM：生产规模（100K–10M tokens）记忆检索基准.<br>
-      [4] Vaswani et al. Attention Is All You Need. NeurIPS 2017（arXiv:1706.03762）.<br>
-      [5] Cormack et al. Reciprocal Rank Fusion（RRF）.<br>
-      [6] The Open Group. ArchiMate 3.2 Specification.
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:14px;">参考文献</div>
+    <div style="font-size:12.5px;color:#5b6b7f;line-height:1.85;">
+      [1] Lewis et al. Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. NeurIPS 2020. arXiv:2005.11401.<br>
+      [2] Edge et al. From Local to Global: A Graph RAG Approach to Query-Focused Summarization. 2024. arXiv:2404.16130.<br>
+      [3] Guo et al. LightRAG: Simple and Fast Retrieval-Augmented Generation. 2024. arXiv:2410.05779.<br>
+      [4] Chhikara et al. Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory. 2025. arXiv:2504.19413；官方基准 https://github.com/mem0ai/memory-benchmarks.<br>
+      [5] Cormack, Clarke, Buettcher. Reciprocal Rank Fusion Outperforms Condorcet and Individual Rank Learning Methods. SIGIR 2009.<br>
+      [6] Wu et al. LongMemEval: Benchmarking Chat Assistants on Long-Term Interactive Memory. ICLR 2025. arXiv:2410.10813.<br>
+      [7] Maharana et al. Evaluating Very Long-Term Conversational Memory of LLM Agents (LoCoMo). 2024. arXiv:2402.17753.<br>
+      [8] The Open Group. ArchiMate 3.2 Specification. 2022.
     </div>
   </td></tr>
 
   <!-- Footer -->
   <tr><td style="padding:24px 46px 30px;">
     <div style="border-top:1px solid #eef1f5;padding-top:14px;font-size:12.5px;color:#7a8798;">
-      本文为内部研究稿，指标均来自仓库内可执行评测，题干与 31 题记忆题集、检索黄金集均可复现；欢迎指正与补充。
+      本文为内部研究稿。正文指标均来自仓库内可执行评测，题集与脚本随代码可复现；表 2 的公开数值来自各文与官方页面，口径不同，仅供参考。欢迎指正。
     </div>
   </td></tr>
 

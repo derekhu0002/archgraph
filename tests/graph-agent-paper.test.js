@@ -46,7 +46,7 @@ test('paper: follows the standard scientific structure', () => {
   assert.match(html, /相关工作/, 'should have related work');
   assert.match(html, /方法/, 'should have a method section');
   assert.match(html, /实验设置/, 'should have an experimental setup');
-  assert.match(html, /结果与分析/, 'should have results and analysis');
+  assert.match(html, /结果与对比|结果与分析/, 'should have results and comparison');
   assert.match(html, /讨论|局限/, 'should have a discussion / limitations section');
   assert.match(html, /结论与展望/, 'should have a conclusion');
   assert.match(html, /参考文献/, 'should have references');
@@ -64,6 +64,19 @@ test('paper: presents the evaluation with data figures (bar charts)', () => {
   assert.match(html, /width="9[0-9]/ , 'charts should encode values as bar widths');
 });
 
+test('paper: makes an explicit comparison against prior art', () => {
+  // GIVEN the paper must include comparison, not just results
+  // WHEN the HTML is inspected
+  // THEN a capability comparison and a caveated industry reference table are present
+  const html = readHtml();
+  assert.match(html, /对比|对照/, 'should make an explicit comparison');
+  assert.match(html, /GraphRAG/, 'should compare against GraphRAG');
+  assert.match(html, /Mem0/, 'should compare against Mem0');
+  assert.match(html, /不构成头对头|口径不同|仅供参考/, 'should caveat the non-comparability');
+  assert.match(html, /表 1/, 'should have a capability comparison table');
+  assert.match(html, /表 2/, 'should have an industry reference table');
+});
+
 test('paper: cites the concrete evaluation numbers', () => {
   const html = readHtml();
   assert.match(html, /94\.6/, 'should cite recall@1 baseline 94.6%');
@@ -77,14 +90,14 @@ test('paper: cites the concrete evaluation numbers', () => {
 test('paper: aligns with industry memory benchmarks', () => {
   const html = readHtml();
   assert.match(html, /LongMemEval/, 'should align with LongMemEval');
-  assert.match(html, /LOCOMO/, 'should align with LOCOMO');
+  assert.match(html, /LoCoMo|LOCOMO/, 'should align with LoCoMo');
   assert.match(html, /BEAM/, 'should align with BEAM');
   assert.match(html, /拒答/, 'should cover abstention');
 });
 
 test('paper: method covers the authentic graph, write gates and read optimization', () => {
   const html = readHtml();
-  assert.match(html, /意图架构图谱/, 'should name the authentic graph');
+  assert.match(html, /意图架构图/, 'should name the authentic graph');
   assert.match(html, /去重/, 'should cover dedup');
   assert.match(html, /无损/, 'should cover lossless');
   assert.match(html, /墓碑/, 'should cover tombstone');
@@ -107,7 +120,7 @@ test('paper: the full text is stored in the graph', () => {
   const text = (bo.attributes || []).find((a) => a.name === 'paper');
   assert.ok(text, 'paper element should carry the full text');
   assert.ok(text.value.length > 1200, 'stored paper text should be substantial');
-  assert.match(text.value, /意图架构图谱/, 'stored text should contain the core term');
+  assert.match(text.value, /意图架构图/, 'stored text should contain the core term');
   assert.match(text.value, /recall@1|召回/, 'stored text should contain the metrics');
 });
 
