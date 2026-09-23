@@ -8996,6 +8996,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered-in-session (repo doc + executable AT + git commit pending human go-ahead)"
+        },
+        {
+          "name": "commit",
+          "value": "29e5615",
+          "description": "design/KG/SystemArchitecture.json（落图本次业界洞察里程碑 + 洞察Lead T2/T1 记忆；洞察全文见本元素描述）"
         }
       ],
       "description": "里程碑（2026-09-23，洞察Lead insight-lead-001 编排麦肯锡新五步法）：洞察『大仓（内容持续增长、大部分由 Agent 注入）+ 策展 KG（仅作语义目录/路由层、不覆盖全仓）场景下，业界有哪些技术/方案能在不牺牲召回/精度的前提下，降低 Agent 在 KG 语义检索↔仓 grep/glob/read 两后端之间的往返轮次，从而降低 token 与端到端时延』。①界定=问题陈述 Q0（目标/范围/成功标准/红线：禁止以缩小候选池/截断/跳重排/降覆盖换速度）。②拆解=MECE 五支议题树（A 检索与上下文策略 / B 代码·文档仓专用检索 / C Agent 编排与记忆 / D 写入时索引 KG-over-Repo / E 评测与可观测），覆盖检索/记忆/编排/评测四类。③假设 H1–H12。④验证=BAILIAN WebSearch MCP 本会话不可用（bailian-websearch 工具未挂载 + DASHSCOPE_API_KEY 未设 + 端点需 Bearer；opencode.json 已配置但无 credential），改用 webfetch 真实抓取 23 个一手来源（Anthropic 工程博客×5：Contextual Retrieval / Effective context engineering / Multi-agent research system / Building effective agents / Writing tools for agents + Claude 平台 context-management 公告；Cursor 官方文档 Search/Instant Grep/Explore subagent；Aider repo map 官方文档；Sourcegraph 官方 Code Search Capabilities；Microsoft GraphRAG 仓库；LightRAG 论文+仓库；RAPTOR / HippoRAG / Late Chunking / MemGPT / Zep-Graphiti / Mem0 / LongMemEval / Observation Masking 论文；Chroma Context Rot 报告；GPTCache 仓库；SWE-bench 官方站；tau-bench 论文；Langfuse 文档；OpenTelemetry GenAI semconv 仓库；Cognition《Don't Build Multi-Agents》），未以模型记忆冒充；缺口=无检索 API 排序聚合，中文社区/YouTube 未覆盖，且未找到在『仓+策展KG』精确设定下直接测量跨后端往返的单一方案（未取证）。⑤结论=『有，但无单一产品；须按三杠杆组合』：(I) 命中率↑（减少无效往返）：hybrid BM25+vector+rerank（Anthropic 官方：top-20 检索失败率 5.7%→2.9% 加 contextual BM25、→1.9% 加重排，是提高召回不是降召回）、contextual retrieval、late chunking、图结构检索（HippoRAG 单步检索≈/优于 IRCoT 而便宜 10–30×、快 6–13×；LightRAG 增量更新；RAPTOR QuALITY +20%）。(II) 累积上下文↓：observation masking 在 SWE-bench Verified 把成本减半且解出率≈/略优于 LLM 摘要（arXiv:2508.21433）；Anthropic context editing 内部 agentic search +29%、叠加 memory +39%、100 轮 web search token −84%；Chroma 18 模型实证 context rot（聚焦 ~300 token 输入显著优于 ~113k 全量）。(III) 单位成本↓：prompt caching（延迟 >2×、成本至多 −90%）、语义缓存（GPTCache 厂方称 10×/100×，须校准假命中）。代码仓共识=精确/符号优先（Cursor Instant Grep 称优于 ripgrep；Sourcegraph 全文+RE2+symbol/Zoekt；Anthropic just-in-time glob/grep 绕过 stale index）+ repo map 做全局路由（Aider 以文件依赖图 PageRank 选重要符号、默认 1k token 预算）。KG-over-Repo 写入时语义 stub 在业界强同构：Zep/Graphiti 时序 KG（LongMemEval +18.5%、延迟 −90%）、Mem0（p95 延迟 −91%、token −90%+）、LightRAG 增量、GraphRAG 社区摘要。最重要张力=Anthropic 多 Agent 研究任务 +90.2% vs Cognition『不要构建多 Agent』；裁决=检索隔离型子 Agent（Cursor Explore、Claude Code 子 Agent）安全，并行写入/决策型多 Agent 危险。裁决：ArchGraph 现有合并/无损/去重门禁正确；建议 R1–R10（两后端一次往返契约+停止判据、图检索加 hybrid+rerank、写入语义 stub 规范与增量、observation masking 优先于摘要、子 Agent 隔离+文件系统产物交接、精确/符号通道、cost-aware eval 以 oracle 全量搜索为上界、缓存分级、轮次预算、反模式清单）；三大易掉召回点=截断、观察掩码误删、语义缓存假命中，均须 recall-first 校准。未决=轮次减少的直接端到端 A/B 一手度量缺失。",
@@ -9051,6 +9056,13 @@
           "type": "Acceptance Test",
           "Input": "tests/agent-cost-eval.test.js",
           "acceptanceCriteria": "tests/agent-cost-eval.test.js"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "29e5615",
+          "description": "scripts/agent-cost-eval.js; data/eval-seeds/agent-cost-seed.json; tests/agent-cost-eval.test.js; design/KG/SystemArchitecture.json; archgraph.qea（R7 度量 harness 首刀：跨图仓成本—召回 + oracle 上界 + 可执行 AT-agent-cost-eval-01..06；实测基线复用 28 条真实导航会话）"
         }
       ]
     }
