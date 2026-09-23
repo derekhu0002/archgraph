@@ -4242,7 +4242,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-23 会话三，幂等覆盖）：两个交付。（A）业界技术洞察（派单 insight-lead-001，五步法；本会话无子 Agent 派发→Lead 亲自执行五步）：场景=大仓（无界内容源、多为 Agent 注入）+ 策展 KG（仅语义目录/路由层、不覆盖全仓），Agent 在 KG 语义检索↔仓 grep/glob/read 两后端往返，成本在往返轮次。核心结论：①业界无即插即用单一方案，是一批可组合技术；②业界降本几乎全是『提高单轮命中』或『压缩无效上下文』，天然与 retrieval-recall-first 红线兼容；凡缩池/截断/跳重排换速→掉召回。三杠杆框架：命中率↑/累积上下文↓/单位成本↓。最硬证据：混合+rerank 检索失败率 5.7%→1.9%；observation masking 在 SWE-bench Verified 上成本减半且解出率持平/略优；Zep/Mem0 写入时记忆 token −90%/延迟 −90%；Aider repo map 默认 1k token 路由全仓；MS GraphRAG 进维护模式。最大证据缺口：无一手来源直接测量『仓+KG 两后端往返轮次』端到端 A/B（故先做 R7）。洞察里程碑 insight-lead-milestone-two-backend-roundtrip-001。（B）R7 度量 harness 首刀（仓内）：scripts/agent-cost-eval.js + data/eval-seeds/agent-cost-seed.json（10 题：4 图内/4 仓内/2 图仓联合，每题 oracle 证据集）+ tests/agent-cost-eval.test.js（AT-agent-cost-eval-01..06）；图落视图 agent-cost-eval-view-001 + WP agent-cost-eval-wp-001。实测基线（复用 28 条真实导航会话）：28/28 召回、精度 6.6%、token 4689、时延 6997ms、轮次 3.2、工具调用 2.6、后端往返 0——导航会话仅挂图 MCP、未触发仓检索，正暴露现有评测未覆盖两后端往返的缺口。（C）框架化（本会话末，人类伙伴两轮校正）：度量做成框架能力，随 argo-deploy 下发、任意项目零配置后台采集，且**汇成一份、一次取全**（**无取数接口**：无 MCP 工具、无 CLI）。单一日志：<workspace>/.argo/temp/agent-cost-log.ndjson（追加式、5MB 轮转、ARGO_COST_PROFILER=0 关）。两来源写同一文件：①host——OpenCode 插件 argo/plugins/argo-cost-collector.js 经 tool.execute.before/after 采集**全部工具调用（图侧+仓侧）**+ event 的 assistant tokens/cost（OpenCode 下完整采集器）；②mcp——agentCostProfiler.js 兜底，仅当宿主采集器未激活时写（宿主写 marker .agent-cost-host-collector，过期 12h 失效）防重复计数。记录 schema：type=tool{tool,backend(graph|repo|framework|other),kind,durationMs,ok,args{keys,bytes,intentPreview?},resultBytes,resultTokens,sessionID?,callID?} / type=usage{tokens,cost}；args 绝不记原始取值。交付：argo/scripts/graph-rag/agentCostLog.js（单一日志+宿主钩子 createHostCollectorHooks）+ agentCostProfiler.js（MCP 兜底）+ argo/plugins/argo-cost-collector.js + install-argo.ps1 注册插件 + docs/agent-cost-profiler.md + tests/agent-cost-log.test.js（AT-agent-cost-log-01..05，5/5）+ tests/argo-deploy.test.js（断言部署与注册）；图谱组件 agent-cost-profiler-001（parent 1961，落视图 agent-cost-eval-view-001）。人类伙伴使用：后台自采→直接去该固定路径取一份日志发回分析。关键决策：先度量(R7 前置)再优化；优化序 R4 观察掩码→R1 一次往返编排契约→R2 检索增强（先 rerank 现状；hybrid 已裁决 HYBRID=0，中文单字词法泄漏，须带校准再议）→R3 stub 增量+时间+回跳→R5 检索隔离子 Agent→R6 仓侧精确/符号通道；R8 语义缓存默认不开。遗留钩子/阻塞：① DASHSCOPE_API_KEY 未配置，bailian-websearch MCP 不可用（连续第三次会话）→洞察降级 webfetch 定向取证；② 框架采集需『发布+部署+重启宿主』才生效（当前常驻 MCP 为旧代码，插件也未注册）；③ 洞察全文尚未落 docs/。commits 29e5615（R7 工作）/a9d6b7b/a696cab/000a58c（框架 profiler）/7f3ff60/8621a60（瘦身记录器）/7648158（汇总为一份日志+宿主插件）；洞察/框架 T2 记忆 overseer-mem-agent-cost-harness-001，框架组件 agent-cost-profiler-001。",
+      "description": "项目总管工作记忆摘要（2026-09-23 会话三，幂等覆盖）：两个交付。（A）业界技术洞察（派单 insight-lead-001，五步法；本会话无子 Agent 派发→Lead 亲自执行五步）：场景=大仓（无界内容源、多为 Agent 注入）+ 策展 KG（仅语义目录/路由层、不覆盖全仓），Agent 在 KG 语义检索↔仓 grep/glob/read 两后端往返，成本在往返轮次。核心结论：①业界无即插即用单一方案，是一批可组合技术；②业界降本几乎全是『提高单轮命中』或『压缩无效上下文』，天然与 retrieval-recall-first 红线兼容；凡缩池/截断/跳重排换速→掉召回。三杠杆框架：命中率↑/累积上下文↓/单位成本↓。最硬证据：混合+rerank 检索失败率 5.7%→1.9%；observation masking 在 SWE-bench Verified 上成本减半且解出率持平/略优；Zep/Mem0 写入时记忆 token −90%/延迟 −90%；Aider repo map 默认 1k token 路由全仓；MS GraphRAG 进维护模式。最大证据缺口：无一手来源直接测量『仓+KG 两后端往返轮次』端到端 A/B（故先做 R7）。洞察里程碑 insight-lead-milestone-two-backend-roundtrip-001。（B）R7 度量 harness 首刀（仓内）：scripts/agent-cost-eval.js + data/eval-seeds/agent-cost-seed.json（10 题：4 图内/4 仓内/2 图仓联合，每题 oracle 证据集）+ tests/agent-cost-eval.test.js（AT-agent-cost-eval-01..06）；图落视图 agent-cost-eval-view-001 + WP agent-cost-eval-wp-001。实测基线（复用 28 条真实导航会话）：28/28 召回、精度 6.6%、token 4689、时延 6997ms、轮次 3.2、工具调用 2.6、后端往返 0——导航会话仅挂图 MCP、未触发仓检索，正暴露现有评测未覆盖两后端往返的缺口。（C）框架化（本会话末，人类伙伴三轮校正定稿）：度量做成框架能力，随 argo-deploy 下发；**唯一采集器 = OpenCode 宿主插件** argo/plugins/argo-cost-collector.js（install-argo.ps1 注册），经 tool.execute.before/after 记录**每一个工具调用**（MCP 接口调用 / 写图调用 / 仓侧 read·grep·glob 全都记）+ event 记录 assistant tokens/cost；写入单一日志 <workspace>/.argo/temp/agent-cost-log.ndjson（追加、5MB 轮转、ARGO_COST_PROFILER=0 关）。**明确不在 MCP 服务端采集**：MCP 只看得到图侧、看不到仓侧工具与 token 用量，单边记录不完整（故已删除 agentCostProfiler.js 与 callTool 钩子）。记录 schema：type=tool{tool,backend(graph|repo|framework|other),kind,durationMs,ok,args{keys,bytes},resultBytes,resultTokens,sessionID?,callID?} / type=usage{tokens,cost}；args 绝不记原始取值；只观测不改检索。交付：argo/scripts/graph-rag/agentCostLog.js（单一日志+宿主钩子 createHostCollectorHooks）+ argo/plugins/argo-cost-collector.js + install-argo.ps1 + docs/agent-cost-profiler.md + tests/agent-cost-log.test.js（AT-agent-cost-log-01..04，4/4；含 AT 断言 MCP 服务端未被打点）+ tests/argo-deploy.test.js（断言部署与注册）；图谱组件 agent-cost-profiler-001。人类伙伴使用：后台自采→直接去该固定路径取一份日志发回。边界：tool hook 只对经宿主会话发起的调用触发；不经宿主的后台 MCP 进程不在内。关键决策：先度量(R7 前置)再优化；优化序 R4 观察掩码→R1 一次往返编排契约→R2 检索增强（先 rerank 现状；hybrid 已裁决 HYBRID=0，中文单字词法泄漏，须带校准再议）→R3 stub 增量+时间+回跳→R5 检索隔离子 Agent→R6 仓侧精确/符号通道；R8 语义缓存默认不开。遗留钩子/阻塞：① DASHSCOPE_API_KEY 未配置，bailian-websearch MCP 不可用（连续第三次会话）；② 框架采集需『发布+部署+重启宿主』才生效；③ 洞察全文尚未落 docs/。commits 29e5615（R7 工作）/a9d6b7b/a696cab/000a58c（框架 profiler）/7f3ff60/8621a60（瘦身）/7648158（汇总为一份）/131bfdc（最终：只留宿主插件）；T2 记忆 overseer-mem-agent-cost-harness-001，框架组件 agent-cost-profiler-001。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4265,7 +4265,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-23",
-          "description": "会话三收尾：业界洞察 + R7 度量→框架内建单一日志（宿主插件全采集，一次取全）"
+          "description": "会话三收尾：业界洞察 + R7 → 框架内建单一日志（仅宿主插件，MCP 不采集）"
         },
         {
           "name": "commit",
@@ -9115,6 +9115,11 @@
           "name": "commit",
           "value": "7648158",
           "description": "（人类伙伴校正2）汇成一份、一次取全：单一日志 <workspace>/.argo/temp/agent-cost-log.ndjson；宿主插件 argo-cost-collector.js 采集全部工具调用（图+仓）+ token/cost，MCP 兼底仅无插件时写（marker 防重）；仍无 MCP 取数接口/CLI"
+        },
+        {
+          "name": "commit",
+          "value": "131bfdc",
+          "description": "（人类伙伴最终裁决）只留宿主插件：MCP 侧不采集（单边不完整）；单一日志 agent-cost-log.ndjson 由 argo-cost-collector.js 全量记录（含写图调用与 token 用量）"
         }
       ]
     },
@@ -9169,6 +9174,11 @@
           "name": "commit",
           "value": "7648158",
           "description": "argo/scripts/graph-rag/agentCostLog.js; argo/scripts/graph-rag/agentCostProfiler.js; argo/plugins/argo-cost-collector.js; argo/scripts/argo-mcp-server.js; install-argo.ps1; docs/agent-cost-profiler.md; tests/agent-cost-log.test.js; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; archgraph.qea（汇总为一份日志 agent-cost-log.ndjson：宿主插件全采集 + MCP 兼底 + marker 防重）"
+        },
+        {
+          "name": "commit",
+          "value": "131bfdc",
+          "description": "argo/plugins/argo-cost-collector.js; argo/scripts/graph-rag/agentCostLog.js; argo/scripts/argo-mcp-server.js（去除 MCP 侧钩子）; docs/agent-cost-profiler.md; tests/agent-cost-log.test.js; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; archgraph.qea（最终：只留宿主插件为唯一采集器；删除 agentCostProfiler.js）"
         }
       ]
     }
