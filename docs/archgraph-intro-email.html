@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ArchGraph 上手介绍：把项目当容器，和 Agent 一起把事做好</title>
+<style>
+  :root {
+    --ink: #1b2733;
+    --muted: #5b6b7b;
+    --line: #d7dee6;
+    --accent: #0b5cad;
+    --accent-soft: #eef4fb;
+    --code-bg: #f4f7fa;
+    --green: #059669;
+    --violet: #7c3aed;
+    --orange: #ea580c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0; background: #eef1f4;
+    font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink); font-size: 15px; line-height: 1.72;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 22px 14px 40px; }
+  .card {
+    background: #ffffff; border: 1px solid var(--line); border-radius: 14px;
+    padding: 30px 34px 34px; box-shadow: 0 6px 22px rgba(27,39,51,.06);
+  }
+  .kicker { font-size: 12px; letter-spacing: 2px; color: var(--accent); font-weight: 700; }
+  h1 { font-size: 25px; line-height: 1.3; margin: 6px 0 6px; }
+  .subtitle { font-size: 15px; color: var(--muted); margin: 0 0 14px; }
+  .hedge { height: 4px; width: 92px; background: var(--accent); border-radius: 2px; margin: 4px 0 20px; }
+  .envelope {
+    border: 1px solid var(--line); background: var(--accent-soft);
+    border-radius: 8px; padding: 12px 14px; font-size: 13px; color: var(--muted); margin: 0 0 22px;
+  }
+  .envelope b { color: var(--ink); }
+  h2 {
+    font-size: 18.5px; margin: 30px 0 10px; padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent); color: var(--accent);
+  }
+  h3 { font-size: 15.5px; margin: 18px 0 6px; color: #14324f; }
+  p { margin: 9px 0; }
+  .lead { font-size: 16px; color: #24435f; }
+  ul, ol { margin: 8px 0 8px 22px; padding: 0; }
+  li { margin: 5px 0; }
+  code, kbd { font-family: "Cascadia Mono", Consolas, "Courier New", monospace; font-size: 13px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; overflow-x: auto; font-size: 13px; line-height: 1.55;
+  }
+  pre code { background: none; border: none; padding: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #eef2f6; font-weight: 600; }
+  .callout { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 10px 14px; margin: 14px 0; border-radius: 0 8px 8px 0; }
+  .callout.good { border-left-color: var(--green); background: #ecfdf5; }
+  .callout.warn { border-left-color: var(--orange); background: #fff7ed; }
+  .tag { display: inline-block; font-size: 11.5px; color: #fff; background: var(--accent); border-radius: 4px; padding: 1px 7px; margin-right: 6px; vertical-align: middle; }
+  .tag.g { background: var(--green); }
+  .tag.v { background: var(--violet); }
+  .tag.o { background: var(--orange); }
+  figure { margin: 16px 0; }
+  figure svg { width: 100%; height: auto; display: block; }
+  .figure-card { border: 1px solid var(--line); border-radius: 10px; background: #fcfdff; padding: 12px 14px 6px; }
+  .diagram-title { font-size: 14px; font-weight: 700; color: var(--accent); margin: 0 0 8px; }
+  figcaption { font-size: 12.5px; color: var(--muted); margin: 8px 2px 2px; }
+  svg text { font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif; }
+  .pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .pillar { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #fbfdff; }
+  .pillar h4 { margin: 0 0 4px; color: var(--accent); font-size: 14.5px; }
+  .pillar p { margin: 0; font-size: 13px; color: var(--muted); }
+  .sign { margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; }
+  .footer { margin-top: 22px; font-size: 12px; color: var(--muted); text-align: center; }
+  @media (max-width: 620px) { .pillars { grid-template-columns: 1fr; } .card { padding: 22px 18px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+
+    <div class="kicker">ARCHGRAPH · 上手介绍</div>
+    <h1>把「一个项目」当作一个容器，和 Agent 一起把事做好</h1>
+    <p class="subtitle">一封邮件讲清：它是什么、怎么用、用了之后能带来什么</p>
+    <div class="hedge"></div>
+
+    <div class="envelope">
+      <b>收件人</b>：胡东华 &lt;胡东华@华为.com&gt;　|　<b>主题</b>：ArchGraph 上手介绍：把项目当容器，和 Agent 一起把事做好<br />
+      <b>一句话</b>：Agent 已经很能干了，但它缺一张「人和它都看得懂、还能被机器执行」的施工图。ArchGraph 就是这张图，以及围绕它的一整套工作方法。
+    </div>
+
+    <p class="lead">东华，你好：</p>
+    <p>最近我们在推进一套新的协作方式——<b>ArchGraph（ARGO 工具链）</b>。它不要求你先成为 AI 专家，只要求你换一个视角看待「项目」和「Agent」。这封邮件想用最短的篇幅，帮你建立三件事：<b>它是什么、怎么装怎么用、能带来什么价值</b>。后台是怎么构建的、用了哪些技术组件，这里先不展开，重点放在「怎么用好」。</p>
+
+    <!-- ===================== 1. 核心理念 ===================== -->
+    <h2>一、核心理念：以「项目」为单元、为容器</h2>
+    <p>这是大家第一次接触时最需要转过来的一个弯：<b>我们不再把 Agent 当成一个「聊天窗口」，而是把它放进一个「项目容器」里。</b></p>
+    <ul>
+      <li><b>项目即容器</b>：每个项目自带一张「项目地图」（知识图谱）。你用 <b>OpenCode、Cursor</b>（也支持 Copilot、DeepSeek Harness、OpenClaw）打开这个项目，就像打开一间办公室。</li>
+      <li><b>同一张图</b>：你和 Agent 看的是同一张地图——你看全局（目标、角色、职责），Agent 看与当前任务相关的局部。目标对齐不再靠反复开会，而是结构化的。</li>
+      <li><b>上下文不丢</b>：换人、换工具、换会话，项目里的这份共识都还在，不会随聊天记录一起消失。</li>
+    </ul>
+
+    <figure>
+      <div class="figure-card">
+        <div class="diagram-title">图 1 · 一个项目 = 一个容器，人、Agent 与「项目地图」都在其中</div>
+        <svg viewBox="0 0 960 340" role="img" aria-label="项目容器示意">
+          <defs>
+            <marker id="e1" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0 0 L9 4 L0 8 z" fill="#0b5cad" /></marker>
+            <marker id="e1s" markerWidth="10" markerHeight="8" refX="1" refY="4" orient="auto"><path d="M9 0 L0 4 L9 8 z" fill="#0b5cad" /></marker>
+          </defs>
+          <rect x="0" y="0" width="960" height="340" fill="#ffffff" />
+          <text x="40" y="40" font-size="13" font-weight="700" fill="#14324f">项目（容器）</text>
+          <rect x="36" y="56" width="888" height="246" rx="14" fill="#f8fbff" stroke="#0b5cad" stroke-width="1.6" stroke-dasharray="7,5" />
+
+          <rect x="70" y="130" width="210" height="104" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+          <text x="175" y="166" font-size="14" font-weight="700" fill="#1b2733" text-anchor="middle">人类伙伴</text>
+          <text x="175" y="190" font-size="11.5" fill="#5b6b7b" text-anchor="middle">定方向 · 裁决</text>
+          <text x="175" y="211" font-size="11.5" fill="#5b6b7b" text-anchor="middle">观察 · 约束 · 纠偏</text>
+
+          <rect x="356" y="116" width="248" height="132" rx="12" fill="#eef4fb" stroke="#0b5cad" stroke-width="2.4" />
+          <text x="480" y="152" font-size="14.5" font-weight="700" fill="#0b5cad" text-anchor="middle">意图架构图</text>
+          <text x="480" y="173" font-size="12" fill="#40586f" text-anchor="middle">「项目地图」· 单一事实源</text>
+          <text x="480" y="198" font-size="11.5" fill="#5b6b7b" text-anchor="middle">元素 / 关系 / 视图</text>
+          <text x="480" y="219" font-size="11.5" fill="#5b6b7b" text-anchor="middle">结构化 · 可校验 · 可执行</text>
+
+          <rect x="680" y="130" width="210" height="104" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+          <text x="785" y="166" font-size="14" font-weight="700" fill="#1b2733" text-anchor="middle">编程 Agent</text>
+          <text x="785" y="190" font-size="11.5" fill="#5b6b7b" text-anchor="middle">定位 · 执行 · 交付</text>
+          <text x="785" y="211" font-size="11.5" fill="#5b6b7b" text-anchor="middle">测试先行 · 提交回登记</text>
+
+          <path d="M282 182 L 352 182" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#e1)" marker-start="url(#e1s)" />
+          <path d="M678 182 L 608 182" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#e1)" marker-start="url(#e1s)" />
+
+          <text x="480" y="286" font-size="12" fill="#5b6b7b" text-anchor="middle">用 OpenCode / Cursor 打开这个项目 → Agent 就在项目里，基于同一张地图和你对话</text>
+        </svg>
+      </div>
+      <figcaption>项目是一个自带「项目地图」的容器；人和 Agent 围绕同一张图协作，共识不随会话丢失。</figcaption>
+    </figure>
+
+    <!-- ===================== 2. 基础操作 ===================== -->
+    <h2>二、基础操作：安装 → 部署 → 前置准备 → 初始化</h2>
+    <p>整体上只需要记住一句：<b>装一次，之后每个新项目只做一次「初始化」。</b></p>
+
+    <h3>第 ① 步：安装（一条命令）</h3>
+    <pre><code>npm install -g archgraph-argo</code></pre>
+    <p>要求本机已安装 <b>Node.js 18 或以上</b>。</p>
+
+    <h3>第 ② 步：部署（一条命令）</h3>
+    <pre><code>argo-deploy</code></pre>
+    <p>它会自动把工具链、技能、规则注册到你常用的编程工具里——<b>GitHub Copilot、Cursor、OpenCode、DeepSeek Harness、OpenClaw</b>。这就是「一份源、多端运行」：不同人用不同工具，也能共享同一套工作方法。</p>
+
+    <h3>第 ③ 步：前置准备（只为开启「语义检索」能力）</h3>
+    <p>其余能力开箱即用，只有「让 Agent 按意思去检索项目知识」这一项需要两项基础准备：</p>
+    <table>
+      <thead><tr><th style="width:28%">准备项</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><b>Neo4j 图数据库</b></td><td>存放项目地图的结构化投影，供按结构查询使用。用你自己已有或新起的 Neo4j 实例即可。</td></tr>
+        <tr><td><b>向量 / 嵌入服务</b></td><td>让 Agent「按意思找」能力的基础。支持任意 OpenAI 兼容端点：<b>可沿用云服务，也可在内网自建</b>，面向离线、私有化部署。</td></tr>
+        <tr><td><b>配置</b> <code>~/.argo/.env</code></td><td>把上面的地址与密钥填进去。部署时会引导你填写；已有内容会被保留，之后也可手改再重新部署。</td></tr>
+      </tbody>
+    </table>
+    <div class="callout good"><b>内网友好</b>：我们在内网/离线环境下的自建向量服务有完整部署指引，不需要依赖公网服务也能跑通。</div>
+
+    <h3>第 ④ 步：初始化工作区（每个新项目一次）</h3>
+    <p>在一个新项目里，让 Agent 执行一次初始化（<code>argo init</code>）。它会自动：建立起始的「项目地图」、完成首次同步、初始化检索能力并做一次自检。<b>从这一刻起，这个项目就有「记忆」了。</b></p>
+
+    <figure>
+      <div class="figure-card">
+        <div class="diagram-title">图 2 · 从 0 到可用：四步点亮一个项目</div>
+        <svg viewBox="0 0 960 300" role="img" aria-label="安装部署流程">
+          <defs>
+            <marker id="e2" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0 0 L9 4 L0 8 z" fill="#64748b" /></marker>
+          </defs>
+          <rect x="0" y="0" width="960" height="300" fill="#ffffff" />
+          <text x="40" y="34" font-size="13" font-weight="700" fill="#14324f">四步点亮一个项目</text>
+
+          <rect x="20" y="70" width="200" height="150" rx="10" fill="#e8f1ff" stroke="#2563eb" stroke-width="1.6" />
+          <text x="120" y="102" font-size="14" font-weight="700" fill="#1e40af" text-anchor="middle">① 安装</text>
+          <text x="120" y="132" font-size="11" fill="#3b5680" text-anchor="middle">npm install -g</text>
+          <text x="120" y="150" font-size="11" fill="#3b5680" text-anchor="middle">archgraph-argo</text>
+          <text x="120" y="182" font-size="10.5" fill="#5b6b7b" text-anchor="middle">需要 Node.js 18+</text>
+          <text x="120" y="203" font-size="10.5" fill="#94a3b8" text-anchor="middle">一次即可</text>
+
+          <rect x="260" y="70" width="200" height="150" rx="10" fill="#e8f1ff" stroke="#2563eb" stroke-width="1.6" />
+          <text x="360" y="102" font-size="14" font-weight="700" fill="#1e40af" text-anchor="middle">② 部署</text>
+          <text x="360" y="132" font-size="11" fill="#3b5680" text-anchor="middle">argo-deploy</text>
+          <text x="360" y="160" font-size="10.5" fill="#5b6b7b" text-anchor="middle">自动注册 MCP / 技能 /</text>
+          <text x="360" y="178" font-size="10.5" fill="#5b6b7b" text-anchor="middle">规则到各编程工具</text>
+          <text x="360" y="203" font-size="10.5" fill="#94a3b8" text-anchor="middle">一份源 · 多端运行</text>
+
+          <rect x="500" y="70" width="200" height="150" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="1.6" />
+          <text x="600" y="102" font-size="14" font-weight="700" fill="#9a3412" text-anchor="middle">③ 前置准备</text>
+          <text x="600" y="132" font-size="11" fill="#7c4a21" text-anchor="middle">~/.argo/.env</text>
+          <text x="600" y="160" font-size="10.5" fill="#5b6b7b" text-anchor="middle">Neo4j 图数据库</text>
+          <text x="600" y="178" font-size="10.5" fill="#5b6b7b" text-anchor="middle">+ 向量服务（内网可自建）</text>
+          <text x="600" y="203" font-size="10.5" fill="#94a3b8" text-anchor="middle">仅语义检索需要</text>
+
+          <rect x="740" y="70" width="200" height="150" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.6" />
+          <text x="840" y="102" font-size="14" font-weight="700" fill="#065f46" text-anchor="middle">④ 初始化</text>
+          <text x="840" y="132" font-size="11" fill="#3f6257" text-anchor="middle">argo init</text>
+          <text x="840" y="160" font-size="10.5" fill="#5b6b7b" text-anchor="middle">建起始图谱 + 首次同步</text>
+          <text x="840" y="178" font-size="10.5" fill="#5b6b7b" text-anchor="middle">+ 自检</text>
+          <text x="840" y="203" font-size="10.5" fill="#94a3b8" text-anchor="middle">每个新项目一次</text>
+
+          <path d="M222 145 L 256 145" fill="none" stroke="#64748b" stroke-width="1.6" marker-end="url(#e2)" />
+          <path d="M462 145 L 496 145" fill="none" stroke="#64748b" stroke-width="1.6" marker-end="url(#e2)" />
+          <path d="M702 145 L 736 145" fill="none" stroke="#64748b" stroke-width="1.6" marker-end="url(#e2)" />
+
+          <text x="480" y="266" font-size="12" fill="#5b6b7b" text-anchor="middle">装一次 → 之后每个新项目只需第 ④ 步，「这个项目就有记忆了」</text>
+        </svg>
+      </div>
+      <figcaption>安装、部署各一条命令；前置准备只为语义检索；初始化每个新项目做一次即可。</figcaption>
+    </figure>
+
+    <!-- ===================== 3. 知识图谱与资产 ===================== -->
+    <h2>三、知识图谱与资产构建：仓库 + 图谱 = 整个资产</h2>
+    <p>用起来之后，你会发现产出不再只是「代码」。<b>Agent 的记忆、以及你和 Agent 协作得出的设计方案，都会被记录进项目的知识图谱。</b></p>
+    <ul>
+      <li><b>记忆会沉淀</b>：Agent 的工作记忆、长期记忆与归档，都挂在项目图谱上，可以按需回忆，而不是淹没在聊天记录里。</li>
+      <li><b>设计共识会沉淀</b>：谁负责什么、为什么这么设计、验收标准是什么，都写进同一张图，成为可追溯、可交接的项目共识。</li>
+      <li><b>资产 = 仓库 + 图谱</b>：代码仓库（代码、文档、测试）与知识图谱合在一起，才是一个项目的完整资产。</li>
+    </ul>
+    <div class="callout"><b>为什么这很重要</b>：知识不再锁在某个人脑子里，也不锁在某一次对话里——它属于项目本身，能被人和 Agent 反复取用。</div>
+
+    <figure>
+      <div class="figure-card">
+        <div class="diagram-title">图 3 · 数据流：交流与执行 → 图谱沉淀 → 按需召回 → 反哺下一步</div>
+        <svg viewBox="0 0 960 470" role="img" aria-label="数据流与资产示意图">
+          <defs>
+            <marker id="e3" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0 0 L9 4 L0 8 z" fill="#0b5cad" /></marker>
+            <marker id="e3g" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0 0 L9 4 L0 8 z" fill="#059669" /></marker>
+            <marker id="e3o" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0 0 L9 4 L0 8 z" fill="#ea580c" /></marker>
+          </defs>
+          <rect x="0" y="0" width="960" height="470" fill="#ffffff" />
+
+          <rect x="60" y="30" width="250" height="86" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+          <text x="185" y="62" font-size="13.5" font-weight="700" fill="#1b2733" text-anchor="middle">人类伙伴</text>
+          <text x="185" y="86" font-size="11" fill="#5b6b7b" text-anchor="middle">提需求 · 裁决 · 纠偏</text>
+
+          <rect x="650" y="30" width="250" height="86" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+          <text x="775" y="62" font-size="13.5" font-weight="700" fill="#1b2733" text-anchor="middle">编程 Agent</text>
+          <text x="775" y="86" font-size="11" fill="#5b6b7b" text-anchor="middle">执行 · 交付 · 排错</text>
+
+          <path d="M185 116 L 300 168" fill="none" stroke="#ea580c" stroke-width="1.6" marker-end="url(#e3o)" />
+          <path d="M775 116 L 660 168" fill="none" stroke="#ea580c" stroke-width="1.6" marker-end="url(#e3o)" />
+          <text x="300" y="150" font-size="11" fill="#ea580c">写：记忆 · 决策 · 提交回登记</text>
+
+          <rect x="250" y="176" width="460" height="140" rx="12" fill="#eef4fb" stroke="#0b5cad" stroke-width="2.4" />
+          <text x="480" y="210" font-size="14.5" font-weight="700" fill="#0b5cad" text-anchor="middle">知识图谱（项目大脑）</text>
+          <text x="480" y="238" font-size="11.5" fill="#40586f" text-anchor="middle">Agent 记忆（工作 / 长期 / 归档）</text>
+          <text x="480" y="259" font-size="11.5" fill="#40586f" text-anchor="middle">设计决策 · 职责与协作 · 验收标准</text>
+          <text x="480" y="280" font-size="11.5" fill="#40586f" text-anchor="middle">每次提交的台账（可追溯）</text>
+
+          <path d="M300 316 L 185 360" fill="none" stroke="#059669" stroke-width="1.6" marker-end="url(#e3g)" />
+          <path d="M660 316 L 775 360" fill="none" stroke="#059669" stroke-width="1.6" marker-end="url(#e3g)" />
+          <text x="300" y="345" font-size="11" fill="#059669">读：语义检索 · 按需召回 · 上下文</text>
+
+          <rect x="60" y="366" width="380" height="72" rx="9" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+          <text x="250" y="396" font-size="12.5" font-weight="700" fill="#1b2733" text-anchor="middle">代码仓库</text>
+          <text x="250" y="418" font-size="11" fill="#5b6b7b" text-anchor="middle">代码 / 文档 / 测试</text>
+
+          <rect x="520" y="366" width="380" height="72" rx="9" fill="#ecfdf5" stroke="#059669" stroke-width="1.8" />
+          <text x="710" y="396" font-size="12.5" font-weight="700" fill="#065f46" text-anchor="middle">资产 = 仓库 + 图谱</text>
+          <text x="710" y="418" font-size="11" fill="#3f6257" text-anchor="middle">两者合在一起，才是项目的完整资产</text>
+
+          <path d="M445 402 L 516 402" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#e3g)" />
+        </svg>
+      </div>
+      <figcaption>协作与执行通过「写」沉淀进图谱，再通过「读」按需召回；仓库加图谱共同构成项目资产。</figcaption>
+    </figure>
+
+    <!-- ===================== 4. 业务理解与进化 ===================== -->
+    <h2>四、业务理解与进化：它越用越懂你</h2>
+    <p>这套方法的妙处在于「可养成」：</p>
+    <ol>
+      <li><b>遇到歧义，先聊清楚，别急着动手。</b>把目标和边界跟 Agent 对齐，让它反过来复述理解、提出澄清问题。</li>
+      <li><b>聊到一定程度，再下命令。</b>当它足够了解业务，你就可以直接安排任务，它会沿着已经对齐的地图去执行。</li>
+      <li><b>做错了，反馈一次，它就记住。</b>错误与教训会被写进图谱记忆，下次遇到同类事情不再重犯。</li>
+    </ol>
+    <div class="callout warn"><b>真实的例子</b>：部署过程中踩过的坑（某个工具端口每次不同、某段脚本中文乱码）被记入长期记忆后，后续会话会自动规避同类问题；每次代码提交也会自动把「改了什么」回登记到地图上的对应元素。这类经验一旦沉淀，就不需要每个人重新踩一遍。</div>
+
+    <figure>
+      <div class="figure-card">
+        <div class="diagram-title">图 4 · 人 ↔ Agent ↔ 图谱：从「有歧义」到「它懂了」的交互时序</div>
+        <svg viewBox="0 0 960 560" role="img" aria-label="人机交互与记忆节拍时序图">
+          <defs>
+            <marker id="e4" markerWidth="10" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0 0 L9 4 L0 8 z" fill="#0b5cad" /></marker>
+            <marker id="e4b" markerWidth="10" markerHeight="8" refX="1" refY="4" orient="auto"><path d="M9 0 L0 4 L9 8 z" fill="#0b5cad" /></marker>
+            <marker id="e4o" markerWidth="11" markerHeight="9" refX="9" refY="4.5" orient="auto"><path d="M0 0 L10 4.5 L0 9 z" fill="#ea580c" /></marker>
+          </defs>
+          <rect x="0" y="0" width="960" height="560" fill="#ffffff" />
+
+          <rect x="70" y="24" width="180" height="44" rx="8" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+          <text x="160" y="52" font-size="13.5" font-weight="700" fill="#1b2733" text-anchor="middle">人类伙伴</text>
+          <rect x="390" y="24" width="180" height="44" rx="8" fill="#f1f5f9" stroke="#475569" stroke-width="1.5" />
+          <text x="480" y="52" font-size="13.5" font-weight="700" fill="#1b2733" text-anchor="middle">编程 Agent</text>
+          <rect x="710" y="24" width="180" height="44" rx="8" fill="#eef4fb" stroke="#0b5cad" stroke-width="2" />
+          <text x="800" y="52" font-size="13.5" font-weight="700" fill="#0b5cad" text-anchor="middle">知识图谱</text>
+
+          <line x1="160" y1="68" x2="160" y2="516" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="5,5" />
+          <line x1="480" y1="68" x2="480" y2="516" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="5,5" />
+          <line x1="800" y1="68" x2="800" y2="516" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="5,5" />
+
+          <path d="M160 122 L 476 122" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#e4)" />
+          <text x="318" y="114" font-size="11.5" fill="#1b2733" text-anchor="middle">① 提出需求（允许先有歧义）</text>
+
+          <path d="M480 172 L 164 172" fill="none" stroke="#0b5cad" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#e4b)" />
+          <text x="318" y="164" font-size="11.5" fill="#5b6b7b" text-anchor="middle">② 复述理解 / 请求澄清</text>
+
+          <path d="M160 222 L 476 222" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#e4)" />
+          <text x="318" y="214" font-size="11.5" fill="#1b2733" text-anchor="middle">③ 纠正 / 确认方向</text>
+
+          <path d="M480 272 L 796 272" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#e4)" />
+          <text x="638" y="264" font-size="11.5" fill="#1b2733" text-anchor="middle">④ 把决策与要点写入记忆</text>
+
+          <path d="M480 322 L 164 322" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#e4b)" />
+          <text x="318" y="314" font-size="11.5" fill="#1b2733" text-anchor="middle">⑤ 完成任务并交付</text>
+
+          <path d="M160 392 L 476 392" fill="none" stroke="#ea580c" stroke-width="2" marker-end="url(#e4o)" />
+          <text x="318" y="384" font-size="12" font-weight="700" fill="#ea580c" text-anchor="middle">⑥ 明确告知：本次会话结束</text>
+
+          <path d="M480 442 L 796 442" fill="none" stroke="#0b5cad" stroke-width="1.6" marker-end="url(#e4)" />
+          <text x="638" y="434" font-size="11.5" fill="#1b2733" text-anchor="middle">⑦ 收口本次记忆，供下次恢复</text>
+
+          <rect x="70" y="474" width="820" height="58" rx="9" fill="#fff7ed" stroke="#ea580c" stroke-width="1.4" />
+          <text x="480" y="500" font-size="12" fill="#9a3412" text-anchor="middle" font-weight="700">交互纪律：Agent 感知不到会话是否结束，所以结束时请明确「打个招呼」</text>
+          <text x="480" y="520" font-size="11" fill="#7c4a21" text-anchor="middle">会话开始时它会自动恢复上次记忆；工作中遇到关键决策与踩坑会即时记录</text>
+        </svg>
+      </div>
+      <figcaption>歧义靠交流消解，教训靠记忆沉淀；会话结束需人明确告知，Agent 才能可靠收口。</figcaption>
+    </figure>
+
+    <!-- ===================== 5. 交互纪律 ===================== -->
+    <h2>五、交互纪律：一句「本次会话结束」很关键</h2>
+    <p>这是唯一一条需要特别养成的习惯，但它决定了「记忆」是否可靠：</p>
+    <ul>
+      <li><b>会话开始</b>：Agent 会自动恢复上次的工作记忆与会话钩子，你不需要手动交代前情。</li>
+      <li><b>工作中</b>：遇到关键决策、踩坑与修复，它会当场把要点记下来，这是最可靠的骨干。</li>
+      <li><b>会话结束</b>：<b>请明确告诉它「本次会话结束」。</b>因为它无法感知会话是否真的结束；只有收到这个信号，它才会把这次的关键内容收口写进记忆。</li>
+    </ul>
+    <div class="callout"><b>记住这一条就够了</b>：一次汇报/任务告一段落时，加一句「本次会话结束」。这不是客套，是让经验被保存下来的开关。</div>
+
+    <!-- ===================== 6. 价值 ===================== -->
+    <h2>六、用了之后，你能得到什么</h2>
+    <div class="pillars">
+      <div class="pillar">
+        <h4>起步快</h4>
+        <p>新项目几分钟就能建好「项目地图」，Agent 有据可依，不再「跑偏了也没感觉」。</p>
+      </div>
+      <div class="pillar">
+        <h4>交接稳</h4>
+        <p>每个产出都能追溯到地图上的元素和提交记录，评审与接手不用再翻聊天记录。</p>
+      </div>
+      <div class="pillar">
+        <h4>越用越省</h4>
+        <p>踩过的坑、定过的方案会沉淀成经验，下次自动复用，团队不必重复踩同一遍。</p>
+      </div>
+      <div class="pillar">
+        <h4>可规模化</h4>
+        <p>一套方法多端运行，经验还能以「子图」的形式在项目之间复用，形成组织级能力资产。</p>
+      </div>
+    </div>
+
+    <!-- ===================== 7. 下一步 ===================== -->
+    <h2>七、建议的下一步</h2>
+    <ol>
+      <li><b>确认环境</b>：让平台/IT 侧确认内网是否具备 Node.js、Neo4j 与内网向量服务（离线部署有现成指引）。</li>
+      <li><b>选一个小项目试点</b>：我陪你完整走一遍「安装 → 部署 → 初始化 → 第一个任务」，半小时内就能看到效果。</li>
+      <li><b>跑通后推广</b>：把试点经验固化成团队模板，再扩展到更多项目。</li>
+    </ol>
+
+    <div class="sign">
+      <p>如果你愿意，回我一句你方便的时间，我来安排第一次一起上手。</p>
+      <p>顺祝工作顺利！<br />（你的署名）</p>
+    </div>
+
+    <div class="footer">本邮件为 ArchGraph 框架使用介绍 · 图文由 HTML 内联渲染 · 内部交流使用</div>
+
+  </div>
+</div>
+</body>
+</html>
