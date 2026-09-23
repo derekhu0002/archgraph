@@ -93,6 +93,31 @@ function eventTime(e) {
   return typeof e.timestamp === 'number' ? e.timestamp : null;
 }
 
+function isExportJson(text) {
+  const t = String(text || '').trim();
+  if (!t.startsWith('{')) return false;
+  try { const j = JSON.parse(t); return !!(j && Array.isArray(j.messages)); } catch (_) { return false; }
+}
+
+// Accept BOTH the live event stream (opencode run --format json, NDJSON) and the
+// session export JSON (opencode export -> { info, messages:[{info, parts:[...]}] }).
+function exportToNdjson(text) {
+  const j = JSON.parse(text);
+  const ev = [];
+  for (const m of j.messages || []) {
+    const info = m.info || {};
+    const ts = info.time && (info.time.created || info.time.completed);
+    for (const p of m.parts || []) {
+      if (!p || typeof p !== 'object') continue;
+      if (p.type === 'tool') ev.push({ type: 'tool', timestamp: (p.state && p.state.time && p.state.time.end) || ts, part: p });
+      else if (p.type === 'step-start') ev.push({ type: 'step_start', timestamp: ts, part: p });
+      else if (p.type === 'text') ev.push({ type: 'text', timestamp: ts, part: p });
+    }
+    if (info.role === 'assistant' && info.tokens) ev.push({ type: 'step_finish', timestamp: info.time && info.time.completed, part: { tokens: info.tokens, cost: info.cost } });
+  }
+  return ev.map(e => JSON.stringify(e)).join('\n') + '\n';
+}
+
 function parseSession(text) {
   const raw = String(text || '');
   const toolCalls = [];
@@ -281,7 +306,8 @@ function fmtMs(ms) {
 
 function writeBundle(opts) {
   const workspace = opts.workspace || process.cwd();
-  const sessionText = fs.readFileSync(opts.session, 'utf8');
+  const rawInput = fs.readFileSync(opts.session, 'utf8');
+  const sessionText = isExportJson(rawInput) ? exportToNdjson(rawInput) : rawInput;
   const session = parseSession(sessionText);
   const sessionId = opts.sessionId || inferSessionId(sessionText) || 'session';
   const outDir = opts.out || path.join(workspace, '.argo', 'temp', 'diagnosis', sessionId);
@@ -351,6 +377,6 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { BUNDLE_VERSION, SCHEMA_VERSION, parseSession, classifyQuery, backendOf, signature, diagnose, renderDiagnosis, writeBundle, sliceCostLog, main };
+module.exports = { BUNDLE_VERSION, SCHEMA_VERSION, parseSession, classifyQuery, backendOf, signature, diagnose, renderDiagnosis, writeBundle, sliceCostLog, isExportJson, exportToNdjson, main };
 
 if (require.main === module) process.exit(main());

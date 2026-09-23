@@ -39,6 +39,7 @@ node ~/.argo/scripts/agentSearchDiagnose.js --session <session.ndjson> \
 ```
 
 脚本**只读**会话与日志，写出上面的 bundle 目录，输出概览与启发式 hints。
+支持两种输入：`opencode export` 的会话 JSON（`{info, messages}`）与 `opencode run --format json` 的事件流 NDJSON。
 
 ### 3. 复核并补充诊断总结（Agent）
 

@@ -63,6 +63,27 @@ test('AT-agent-search-diagnosis-03: cost-log slice is filtered to the session', 
   assert.ok(!slice.includes('"sessionID":"b"'));
 });
 
+test('AT-agent-search-diagnosis-05: accepts the opencode export JSON form ({info, messages})', () => {
+  const exp = {
+    info: { id: 'ses_x' },
+    messages: [
+      { info: { role: 'assistant', tokens: { input: 100, output: 10, reasoning: 0 }, time: { completed: 2000 } },
+        parts: [
+          { type: 'step-start' },
+          { type: 'tool', tool: 'argo_queryNeo4jGraph', state: { status: 'completed', time: { start: 1000, end: 1500 }, input: { cypher: 'MATCH (n) RETURN n' }, output: 'row' } },
+        ] },
+    ],
+  };
+  const text = JSON.stringify(exp);
+  assert.equal(diag.isExportJson(text), true);
+  const s = diag.parseSession(diag.exportToNdjson(text));
+  assert.equal(s.toolCalls.length, 1);
+  assert.equal(s.toolCalls[0].tool, 'argo_queryNeo4jGraph');
+  assert.equal(s.toolCalls[0].durationMs, 500);
+  assert.equal(s.steps, 1);
+  assert.equal(s.tokensIn, 100);
+});
+
 test('AT-agent-search-diagnosis-04: the skill + script ship with the framework', () => {
   assert.ok(fs.existsSync(path.join(ROOT, 'argo', 'skills', 'agent-search-diagnosis', 'SKILL.md')), 'skill must exist');
   assert.ok(fs.existsSync(path.join(ROOT, 'argo', 'scripts', 'agentSearchDiagnose.js')), 'script must exist');
