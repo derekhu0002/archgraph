@@ -87,6 +87,10 @@
         {
           "view_id": "graph-consistency-tech-ref-001",
           "view_name": "图谱一致性校验技术参考（SHACL/OWL/SWRL/RDF）"
+        },
+        {
+          "view_id": "agent-cost-eval-view-001",
+          "view_name": "Agent 成本—召回度量（跨图仓两后端）"
         }
       ]
     },
@@ -5260,7 +5264,7 @@
       "id": "insight-lead-wm-summary-001",
       "name": "洞察Lead工作记忆摘要",
       "type": "Business Object",
-      "description": "洞察Lead T1 工作记忆摘要（2026-09-20，知识图谱『写入时逻辑矛盾检测』业界洞察）：1) 本轮=人类诉求『写入时除查重外能否检查与已有图谱的逻辑矛盾』（矛盾≠重复：非对称蕴含/否定 vs 对称相似度）。按麦肯锡五步法完成正式洞察→LTM milestone insight-lead-milestone-write-time-contradiction-001（commit d0c1c45，交付 docs/graph-write-time-contradiction-insight.md + tests/graph-write-time-contradiction-insight.test.js，AT-write-contradiction-insight-01..10 全绿，validateSystemArchitecture 通过）。核心结论=『有，但分层』：写时阻塞在形式化约束层/三元组库事务层最成熟（RDF4J ShaclSail 于 commit() 校验违反即抛异常回滚；Stardog ICV guard mode 修改时强制约束使事务失败；GraphDB commit() 抛校验报告；本体 CI 用 ROBOT reason 对 incoherency 非零退出），但只有『确定性可阻塞』子集（值冲突/基数/互斥/封闭/显式 not·negative）能硬阻塞，其余为建议型 advisory；全 DL 一致性靠离线/显式 reasoner（HermiT/Openllet/ELK；OWL2 EL/RL 可多项式+增量）；Neo4j/Neptune 无原生矛盾检测（H4 证伪）；LLM/NLI 仅建议型有误报，KGE 面向 link prediction 非一致性；开放难题=多跳/并发涌现矛盾（RDF4J 记录并发事务可共同违反，需 SNAPSHOT+写锁）。裁决=ArchGraph 现有 L0/L1 去重、结构校验、无损门禁正确但缺 L2 矛盾门；建议三层落地（L2-A 确定性可阻塞不变量 / L2-B 建议型 advisory 带 severity / L2-C 全局审计）+ 前置条件（标注样本/AT、recall-first、fail-open、单写者、绝不用相似度判矛盾）。2) 关键卡点：BAILIAN MCP 本会话不可用（工具未挂载 + DASHSCOPE_API_KEY 未设 + 端点 401），改用 webfetch 真实抓取 20 个一手来源并如实标注；Wikidata 约束页 4 次 transport error 已声明为覆盖缺口。3) 交付：报告+KG 登记+commit d0c1c45 已登记元素；仅洞察、未实施 L2 改造。4) 经验：①矛盾是可形式化可判定（OWL disjointness/functional/NPA；OWL2 RL 以 false 表 contradiction），业界写时阻塞成熟但默认建议优先、阻塞 opt-in、按 severity 分级；②工程难点在并发/多跳涌现矛盾与隔离，须单写者；③LLM/KGE 不能当确定性矛盾判据。",
+      "description": "洞察Lead T1 工作记忆摘要（2026-09-23，洞察『大仓+策展KG 两后端往返性能优化』）：1) 本轮=人类诉求『仓内容持续增长且多为 Agent 注入、策展 KG 仅作语义目录/路由层，如何在不牺牲召回/精度下减少 KG↔仓 两后端往返轮次、降 token 与时延』。按麦肯锡五步法完成：问题陈述 Q0 → MECE 五支议题树（检索/代码仓检索/编排记忆/写入时索引/评测）→ 假设 H1–H12 → webfetch 真实抓取 23 个一手来源验证 → 综合（无单一产品，须按三杠杆组合：命中率↑/累积上下文↓/单位成本↓）。2) 关键卡点（连续第三次会话）：BAILIAN WebSearch MCP 仍不可用（bailian-websearch 工具未挂载 + DASHSCOPE_API_KEY 未设 + 端点需 Bearer），改用 webfetch 并如实标注；缺口=无检索 API 排序聚合、中文社区/YouTube 未覆盖、『仓+策展KG』精确设定下的跨后端往返直接度量未取证。3) 交付：本轮洞察结论（结论先行 + 对比表 + R1–R10 落地建议）已交付人类伙伴 project-overseer-001；里程碑元素 insight-lead-milestone-two-backend-roundtrip-001 已登记入 T2（insight-lead-ltm-001）；仓库报告 docs/*.md + 可执行 AT + git commit 待人类伙伴确认后补（未擅自 commit）。4) 经验：①业界降本机制几乎都是『提高单轮命中率/压缩无效上下文』而非『缩小候选池』，与红线兼容；②observation masking ≈/优于 LLM 摘要（SWE-bench Verified 成本减半）——优先试轻方案；③精确/符号检索（grep-first）与语义检索互补非替代，Anthropic 明言 runtime exploration 慢于预计算检索→须 hybrid；④多 Agent 仅适合检索隔离型（Cursor Explore / Claude Code 子 Agent），并行决策型被 Cognition 明确反对；⑤三大掉召回点=截断/观察掩码误删/语义缓存假命中，须 recall-first 校准与 cost-aware eval（oracle 全量搜索作上界）。5) 上一轮里程碑（写入时逻辑矛盾检测，commit d0c1c45，元素 insight-lead-milestone-write-time-contradiction-001）已归档于 T2。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -8966,6 +8970,89 @@
           "type": "Acceptance Test"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "name": "insightMethod",
+          "value": "McKinsey 5-step (define/decompose/hypothesize/validate/synthesize)"
+        },
+        {
+          "name": "retrievalChannel",
+          "value": "webfetch (BAILIAN WebSearch MCP unavailable: tool not mounted + DASHSCOPE_API_KEY unset + endpoint requires Bearer); 23 primary sources"
+        },
+        {
+          "name": "topic",
+          "value": "large repo + curated KG: reduce cross-backend round-trips without recall loss"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered-in-session (repo doc + executable AT + git commit pending human go-ahead)"
+        }
+      ],
+      "description": "里程碑（2026-09-23，洞察Lead insight-lead-001 编排麦肯锡新五步法）：洞察『大仓（内容持续增长、大部分由 Agent 注入）+ 策展 KG（仅作语义目录/路由层、不覆盖全仓）场景下，业界有哪些技术/方案能在不牺牲召回/精度的前提下，降低 Agent 在 KG 语义检索↔仓 grep/glob/read 两后端之间的往返轮次，从而降低 token 与端到端时延』。①界定=问题陈述 Q0（目标/范围/成功标准/红线：禁止以缩小候选池/截断/跳重排/降覆盖换速度）。②拆解=MECE 五支议题树（A 检索与上下文策略 / B 代码·文档仓专用检索 / C Agent 编排与记忆 / D 写入时索引 KG-over-Repo / E 评测与可观测），覆盖检索/记忆/编排/评测四类。③假设 H1–H12。④验证=BAILIAN WebSearch MCP 本会话不可用（bailian-websearch 工具未挂载 + DASHSCOPE_API_KEY 未设 + 端点需 Bearer；opencode.json 已配置但无 credential），改用 webfetch 真实抓取 23 个一手来源（Anthropic 工程博客×5：Contextual Retrieval / Effective context engineering / Multi-agent research system / Building effective agents / Writing tools for agents + Claude 平台 context-management 公告；Cursor 官方文档 Search/Instant Grep/Explore subagent；Aider repo map 官方文档；Sourcegraph 官方 Code Search Capabilities；Microsoft GraphRAG 仓库；LightRAG 论文+仓库；RAPTOR / HippoRAG / Late Chunking / MemGPT / Zep-Graphiti / Mem0 / LongMemEval / Observation Masking 论文；Chroma Context Rot 报告；GPTCache 仓库；SWE-bench 官方站；tau-bench 论文；Langfuse 文档；OpenTelemetry GenAI semconv 仓库；Cognition《Don't Build Multi-Agents》），未以模型记忆冒充；缺口=无检索 API 排序聚合，中文社区/YouTube 未覆盖，且未找到在『仓+策展KG』精确设定下直接测量跨后端往返的单一方案（未取证）。⑤结论=『有，但无单一产品；须按三杠杆组合』：(I) 命中率↑（减少无效往返）：hybrid BM25+vector+rerank（Anthropic 官方：top-20 检索失败率 5.7%→2.9% 加 contextual BM25、→1.9% 加重排，是提高召回不是降召回）、contextual retrieval、late chunking、图结构检索（HippoRAG 单步检索≈/优于 IRCoT 而便宜 10–30×、快 6–13×；LightRAG 增量更新；RAPTOR QuALITY +20%）。(II) 累积上下文↓：observation masking 在 SWE-bench Verified 把成本减半且解出率≈/略优于 LLM 摘要（arXiv:2508.21433）；Anthropic context editing 内部 agentic search +29%、叠加 memory +39%、100 轮 web search token −84%；Chroma 18 模型实证 context rot（聚焦 ~300 token 输入显著优于 ~113k 全量）。(III) 单位成本↓：prompt caching（延迟 >2×、成本至多 −90%）、语义缓存（GPTCache 厂方称 10×/100×，须校准假命中）。代码仓共识=精确/符号优先（Cursor Instant Grep 称优于 ripgrep；Sourcegraph 全文+RE2+symbol/Zoekt；Anthropic just-in-time glob/grep 绕过 stale index）+ repo map 做全局路由（Aider 以文件依赖图 PageRank 选重要符号、默认 1k token 预算）。KG-over-Repo 写入时语义 stub 在业界强同构：Zep/Graphiti 时序 KG（LongMemEval +18.5%、延迟 −90%）、Mem0（p95 延迟 −91%、token −90%+）、LightRAG 增量、GraphRAG 社区摘要。最重要张力=Anthropic 多 Agent 研究任务 +90.2% vs Cognition『不要构建多 Agent』；裁决=检索隔离型子 Agent（Cursor Explore、Claude Code 子 Agent）安全，并行写入/决策型多 Agent 危险。裁决：ArchGraph 现有合并/无损/去重门禁正确；建议 R1–R10（两后端一次往返契约+停止判据、图检索加 hybrid+rerank、写入语义 stub 规范与增量、observation masking 优先于摘要、子 Agent 隔离+文件系统产物交接、精确/符号通道、cost-aware eval 以 oracle 全量搜索为上界、缓存分级、轮次预算、反模式清单）；三大易掉召回点=截断、观察掩码误删、语义缓存假命中，均须 recall-first 校准。未决=轮次减少的直接端到端 A/B 一手度量缺失。",
+      "id": "insight-lead-milestone-two-backend-roundtrip-001",
+      "name": "里程碑：大仓+策展KG 两后端往返性能优化业界洞察",
+      "type": "Business Object"
+    },
+    {
+      "id": "agent-cost-eval-wp-001",
+      "name": "实现 Agent 成本—召回度量 harness（R7，跨图仓两后端）",
+      "type": "Work Package",
+      "parent": "1249",
+      "description": "R7 度量 harness（2026-09-23，项目总管，承接业界洞察 insight-lead-milestone-two-backend-roundtrip-001 的 R7）。场景：仓内容持续增长且多为 Agent 注入，意图图仅作语义目录/路由层、不覆盖全仓，Agent 在 KG 语义检索 ↔ 仓 grep/glob/read 两后端间往返，成本集中在往返轮次与累积上下文。交付：scripts/agent-cost-eval.js + data/eval-seeds/agent-cost-seed.json（10 题：4 图内事实 / 4 仓内事实 / 2 图仓联合；每题声明 oracle 证据集 = 元素·view id + 仓文件路径）+ tests/agent-cost-eval.test.js（AT-agent-cost-eval-01..06）。口径：对真实 Agent 会话（opencode run --format json 的 NDJSON）确定性评分——turns / 工具调用（按 graph|repo 后端分类）/ 后端往返次数 roundTrips（graph↔repo 相邻切换）/ token（含 reasoning）/ 时延 / 证据召回率 evidenceRecall（对 oracle 上界）与精度 evidencePrecision；并可复用既有 navigation-seed（target 作 oracle）。红线：与 retrieval-recall-first 一致，任何以缩池/截断换速若造成召回缺口，必须由 aggregate.failedTasks.missing 显式暴露，不得掩盖。实测基线（复用 28 条真实 Agent 导航会话 results/navigation-agent-raw）：成功率 28/28、平均召回 100%、平均精度 6.6%、平均 token 4689、平均时延 6997ms、平均轮次 3.2、平均工具调用 2.6、后端往返 0——导航会话仅挂图 MCP、未触发仓检索，正暴露现有评测未覆盖「两后端往返」的缺口。",
+      "testcases": [
+        {
+          "name": "AT-agent-cost-eval-01",
+          "description": "GIVEN R7 度量 SEED（data/eval-seeds/agent-cost-seed.json）；WHEN 校验 SEED 并解析每题 oracle；THEN SEED 结构合法，且每个 oracle 元素 id 都存在于 canonical 图、每个 oracle 仓路径都在磁盘上（oracle 作为召回上界可达）。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-eval.test.js",
+          "acceptanceCriteria": "tests/agent-cost-eval.test.js"
+        },
+        {
+          "name": "AT-agent-cost-eval-02",
+          "description": "GIVEN 真实 Agent 会话（opencode run NDJSON）；WHEN 解析轨迹并对工具做后端分类；THEN 正确识别 graph（getSystemArchitecture/queryNeo4jGraph/getIntentElementContext/getArchitectureViewContext/memory_search）与 repo（read/grep/glob…），并抽取 turns/token(input·output·reasoning)/时延。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-eval.test.js",
+          "acceptanceCriteria": "tests/agent-cost-eval.test.js"
+        },
+        {
+          "name": "AT-agent-cost-eval-03",
+          "description": "GIVEN 一段完整会话（先图后仓）；WHEN 对任务 oracle 评分；THEN 证据召回=1 且成功，roundTrips=1（graph→repo 一次切换），byBackend 计数正确，firstHitIndex 指向首次命中 oracle 的调用，且surface 多余证据会降低精度。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-eval.test.js",
+          "acceptanceCriteria": "tests/agent-cost-eval.test.js"
+        },
+        {
+          "name": "AT-agent-cost-eval-04",
+          "description": "GIVEN 一段只搜图、未搜仓的会话（召回缺口）；WHEN 评分；THEN 成功率=false、evidenceRecall<1、missing 明确列出缺失证据，且 aggregate.failedTasks 暴露该缺口（守门：不掩盖召回损失）。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-eval.test.js",
+          "acceptanceCriteria": "tests/agent-cost-eval.test.js"
+        },
+        {
+          "name": "AT-agent-cost-eval-05",
+          "description": "GIVEN 多条任务评分结果；WHEN 构建 cost/recall 曲线；THEN 结果按 token 升序、cumulativeTokens 单调不减、并记录累计成功率；token 估计为确定性启发式。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-eval.test.js",
+          "acceptanceCriteria": "tests/agent-cost-eval.test.js"
+        },
+        {
+          "name": "AT-agent-cost-eval-06",
+          "description": "GIVEN canonical 图与仓库根；WHEN 构建证据字典（universe）；THEN universe 合并图内 id（元素+view）与仓内文件路径，且路径统一为 posix 分隔。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-eval.test.js",
+          "acceptanceCriteria": "tests/agent-cost-eval.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -10923,7 +11010,8 @@
         "insight-lead-milestone-reverse-ea2kg-001",
         "insight-lead-milestone-tablet-app-001",
         "insight-lead-milestone-multiagent-delegation-001",
-        "insight-lead-milestone-write-time-contradiction-001"
+        "insight-lead-milestone-write-time-contradiction-001",
+        "insight-lead-milestone-two-backend-roundtrip-001"
       ],
       "included_relationships": []
     },
@@ -11054,6 +11142,15 @@
         "semantic-web-validation-learning-guide-001"
       ],
       "included_relationships": []
+    },
+    {
+      "view_id": "agent-cost-eval-view-001",
+      "view_name": "Agent 成本—召回度量（跨图仓两后端）",
+      "parent_element_id": "1249",
+      "description": "R7 度量视图（2026-09-23）：跨「意图图（KG 语义目录/路由层）+ 仓（无界内容源，多数由 Agent 注入）」两后端的 Agent 成本—召回度量。以任务 oracle 证据集为召回上界，对真实 Agent 会话做确定性评分（轮次 / 工具调用按图|仓分类 / 后端往返次数 / token / 时延 / 证据召回率与精度），用于在不牺牲召回的前提下定位并验证性能优化。",
+      "included_elements": [
+        "agent-cost-eval-wp-001"
+      ]
     }
   ]
 }

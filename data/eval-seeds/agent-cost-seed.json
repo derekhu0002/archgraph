@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "seedId": "archgraph-agent-cost-seed",
+  "name": "Agent 成本—召回度量评测集（跨图/仓两后端）",
+  "version": "1.0.0",
+  "status": "active",
+  "description": "R7 度量 harness 的任务语料：每题声明必须被召回的【oracle 证据集】——图内元素/view id（elements）与仓内文件路径（repoPaths）。harness 以 oracle 为召回上界，对真实 Agent 会话（opencode run NDJSON）做确定性评分：轮次/工具调用（按图/仓后端分类）/后端往返次数/token/时延 + 证据召回率与精度。红线：以 oracle 证明『不降召回』，任何缩池换速都必须被本 harness 暴露为召回缺口。",
+  "dimensions": [
+    { "key": "graph", "name": "图内事实", "en": "Graph Fact", "description": "答案只存在于意图图（元素/view）" },
+    { "key": "repo", "name": "仓内事实", "en": "Repo Fact", "description": "答案只存在于仓库内容（文档/脚本），图上无对应" },
+    { "key": "joint", "name": "图仓联合", "en": "Graph + Repo", "description": "必须同时检索图与仓才能补齐全部证据（最易触发两后端往返）" }
+  ],
+  "questions": [
+    {
+      "id": "AC-01",
+      "dimension": "图内事实",
+      "dimensionKey": "graph",
+      "label": "项目愿景元素 id",
+      "question": "在 ArchGraph 意图图中定位「项目愿景：为 AGENT 提供长期记忆系统」元素，报告其 id。",
+      "given": "项目愿景元素是长期记忆系统的北极星",
+      "when": "语义/结构检索愿景元素",
+      "then": "命中元素 overseer-vision-001",
+      "retrievalHint": "getSystemArchitecture purpose=general intent=「项目愿景 为 AGENT 提供长期记忆系统」",
+      "oracle": { "elements": ["overseer-vision-001"], "repoPaths": [] }
+    },
+    {
+      "id": "AC-02",
+      "dimension": "图内事实",
+      "dimensionKey": "graph",
+      "label": "长期记忆评测视图 id",
+      "question": "定位「长期记忆评测」视图，报告其 view_id。",
+      "given": "长期记忆评测视图聚合了评测工作包",
+      "when": "按视图名检索",
+      "then": "命中视图 memory-eval-view-001",
+      "retrievalHint": "getArchitectureViewContext view_id=memory-eval-view-001",
+      "oracle": { "elements": ["memory-eval-view-001"], "repoPaths": [] }
+    },
+    {
+      "id": "AC-03",
+      "dimension": "图内事实",
+      "dimensionKey": "graph",
+      "label": "洞察Lead 的 Business Actor id",
+      "question": "定位业界技术洞察团队的编排角色「洞察Lead」，报告其 Business Actor id。",
+      "given": "洞察Lead 采用麦肯锡五步法编排洞察流程",
+      "when": "语义检索「洞察Lead 业界技术洞察 编排」",
+      "then": "命中元素 insight-lead-001",
+      "retrievalHint": "getSystemArchitecture purpose=general intent=「洞察Lead 编排 洞察团队」",
+      "oracle": { "elements": ["insight-lead-001"], "repoPaths": [] }
+    },
+    {
+      "id": "AC-04",
+      "dimension": "图内事实",
+      "dimensionKey": "graph",
+      "label": "语义混合检索组件 id",
+      "question": "定位「语义混合检索（Hybrid Semantic Retrieval）」组件，报告其元素 id。",
+      "given": "混合检索 = 词法 full-text + 向量 RRF 融合",
+      "when": "语义检索「语义混合检索 hybrid 向量 词法」",
+      "then": "命中元素 hybrid-semantic-retrieval-001",
+      "retrievalHint": "getSystemArchitecture purpose=general intent=「语义混合检索 hybrid 向量 词法 RRF」",
+      "oracle": { "elements": ["hybrid-semantic-retrieval-001"], "repoPaths": [] }
+    },
+    {
+      "id": "AC-05",
+      "dimension": "仓内事实",
+      "dimensionKey": "repo",
+      "label": "三层记忆约定文档",
+      "question": "项目关于 ACTOR 三层记忆（T1 工作记忆 / T2 长期记忆 / T3 档案）的约定写在哪个文档？给出文件路径。",
+      "given": "三层记忆模型见 docs 下的设计文档",
+      "when": "在仓内检索「三层记忆 工作记忆 长期记忆 档案」",
+      "then": "命中 docs/actor-memory-tiers.md",
+      "retrievalHint": "grep/glob 于 docs 下检索 T1/T2/T3 记忆分层",
+      "oracle": { "elements": [], "repoPaths": ["docs/actor-memory-tiers.md"] }
+    },
+    {
+      "id": "AC-06",
+      "dimension": "仓内事实",
+      "dimensionKey": "repo",
+      "label": "长期记忆评测基线调研结论文档",
+      "question": "调研 AGENT 长期记忆评测基线（LongMemEval/LOCOMO/BEAM）的结论文档路径是什么？",
+      "given": "评测基线结论已落成文档",
+      "when": "在仓内检索「LongMemEval LOCOMO BEAM 评测基线」",
+      "then": "命中 docs/memory-eval-benchmarks.md",
+      "retrievalHint": "grep「LongMemEval」于 docs 下",
+      "oracle": { "elements": [], "repoPaths": ["docs/memory-eval-benchmarks.md"] }
+    },
+    {
+      "id": "AC-07",
+      "dimension": "仓内事实",
+      "dimensionKey": "repo",
+      "label": "记忆评测 harness 脚本路径",
+      "question": "长期记忆评测 harness 的可执行脚本路径是什么？",
+      "given": "评测 harness 位于 scripts 下",
+      "when": "在仓内检索「memory eval run 记忆评测 harness」",
+      "then": "命中 scripts/memory-eval-run.js",
+      "retrievalHint": "glob scripts/*memory-eval*",
+      "oracle": { "elements": [], "repoPaths": ["scripts/memory-eval-run.js"] }
+    },
+    {
+      "id": "AC-08",
+      "dimension": "仓内事实",
+      "dimensionKey": "repo",
+      "label": "框架总览文档",
+      "question": "介绍 ArchGraph 框架整体定位与能力的总览文档路径是什么？",
+      "given": "框架总览在 docs 下",
+      "when": "在仓内检索「ArchGraph 框架 总览 定位 能力」",
+      "then": "命中 docs/archgraph-framework-overview.md",
+      "retrievalHint": "glob docs/*framework-overview*",
+      "oracle": { "elements": [], "repoPaths": ["docs/archgraph-framework-overview.md"] }
+    },
+    {
+      "id": "AC-09",
+      "dimension": "图仓联合",
+      "dimensionKey": "joint",
+      "label": "记忆评测：脚本 + 图内工作包 + 视图",
+      "question": "记忆评测 harness 的脚本路径、它在图中的工作包元素、以及它所属的评测视图，三者都要给出。",
+      "given": "评测交付同时登记在仓（脚本）与图（工作包/视图）",
+      "when": "先图检索定位工作包/视图，再仓检索定位脚本",
+      "then": "命中 elements=[memory-eval-run-wp-001, memory-eval-view-001] 且 repoPaths=[scripts/memory-eval-run.js]",
+      "retrievalHint": "getSystemArchitecture 定位评测工作包 + glob scripts/memory-eval-run.js",
+      "oracle": { "elements": ["memory-eval-run-wp-001", "memory-eval-view-001"], "repoPaths": ["scripts/memory-eval-run.js"] }
+    },
+    {
+      "id": "AC-10",
+      "dimension": "图仓联合",
+      "dimensionKey": "joint",
+      "label": "导航 AGENT 评测：工作包 + SEED + harness",
+      "question": "完整 ArchGraph AGENT 导航评测：它在图中的工作包元素、评测集 SEED 文件、以及 agent 评测 harness 脚本，三者都要给出。",
+      "given": "该评测的题集 SEED 与 harness 在仓内，工作包登记在图上",
+      "when": "先图检索定位工作包，再仓检索定位 SEED 与 harness",
+      "then": "命中 elements=[navigation-agent-eval-wp-001] 且 repoPaths=[data/eval-seeds/navigation-seed.json, sandbox/navigation-agent-eval.js]",
+      "retrievalHint": "getSystemArchitecture 定位导航评测工作包 + glob SEED/harness",
+      "oracle": { "elements": ["navigation-agent-eval-wp-001"], "repoPaths": ["data/eval-seeds/navigation-seed.json", "sandbox/navigation-agent-eval.js"] }
+    }
+  ]
+}
