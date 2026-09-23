@@ -9114,38 +9114,45 @@
       ]
     },
     {
-      "description": "ARGO 框架内建的后台 Agent 成本记录器（2026-09-23，项目总管；承接业界洞察 insight-lead-milestone-two-backend-roundtrip-001 的 R7）。目的：让任意项目零配置后台记录 Agent 调用成本，日志写在固定路径供人类伙伴直接取用；**不提供取数接口**（无 MCP 工具、无 CLI）。机制：框架 MCP 服务端在每次工具调用后向 <workspace>/.argo/temp/argo-cost-trace.ndjson 追加一行紧凑记录（at/pid/tool/backend(graph|framework|other)/kind(read|write|framework|other)/durationMs/ok/errorKind/args（仅键名+字节数+语义 intent 预览，绝不记原始取值）/resultBytes/resultTokens），追加式、按大小轮转（默认 5MB，ARGO_COST_TRACE_MAX_BYTES）、默认开（ARGO_COST_PROFILER=0 关）。只观测已产出结果，绝不改检索/缩候选/改内容，异常均吞噬。交付：argo/scripts/graph-rag/agentCostProfiler.js（接入 argo-mcp-server.js 的 callTool 单一分发点，try/finally 旁路）+ docs/agent-cost-profiler.md + tests/agent-cost-profiler.test.js（AT-agent-cost-profiler-01..04）；随 argo/scripts 自动部署（tests/argo-deploy.test.js 断言）。人类伙伴使用：后台自采→需要时直接去该固定路径取 NDJSON 发回分析。",
+      "description": "ARGO 框架内建的 Agent 成本汇总日志（2026-09-23，项目总管；承接业界洞察 insight-lead-milestone-two-backend-roundtrip-001 的 R7）。设计：把「Agent 成本」度量汇成**一份日志、一个固定路径**，人类伙伴一次取全，无需逐处拼凑；**不提供取数接口**（无 MCP 工具、无 CLI）。固定路径：<workspace>/.argo/temp/agent-cost-log.ndjson（追加式、默认 5MB 轮转为 .1、ARGO_COST_PROFILER=0 关）。两个来源写同一文件、各带 source：①host —— OpenCode 插件 argo/plugins/argo-cost-collector.js，经 tool.execute.before/after 采集**全部工具调用（图侧+仓侧）**与 event 的 assistant tokens/cost；②mcp —— ARGO MCP 服务端（agentCostProfiler.js）兜底，仅当宿主采集器未激活时写（宿主写标记 .agent-cost-host-collector，marker 过期 12h 失效），避免重复计数。记录 schema：公共 at/pid/source/type；type=tool {tool,backend(graph|repo|framework|other),kind(read|write|framework|other),durationMs,ok,errorKind?,args{keys,bytes,intentPreview?},resultBytes,resultTokens,sessionID?,callID?}；type=usage {messageID,tokens{input,output,reasoning,cache},cost}。args 仅键名+字节数+intent 预览，绝不记原始取值。只观测已产出结果，不改检索/缩候选/改内容。交付：argo/scripts/graph-rag/agentCostLog.js（单一日志 + 宿主钩子逻辑 createHostCollectorHooks）+ agentCostProfiler.js（MCP 兜底）+ argo/plugins/argo-cost-collector.js（OpenCode 插件）+ argo/scripts/argo-mcp-server.js（callTool 旁路）+ install-argo.ps1（注册插件）+ docs/agent-cost-profiler.md + tests/agent-cost-log.test.js（AT-agent-cost-log-01..05）+ tests/argo-deploy.test.js（断言部署与注册）。",
       "id": "agent-cost-profiler-001",
       "name": "Agent 成本 Profiler（框架内建后台度量）",
       "parent": "1961",
       "testcases": [
         {
-          "name": "AT-agent-cost-profiler-01",
-          "description": "GIVEN 工具名（含 mcp__ 前缀）；WHEN 分类；THEN 正确归类 backend（graph/framework/other）与 kind（read/write/framework/other）。",
+          "name": "AT-agent-cost-log-01",
+          "description": "GIVEN 工具名（含 mcp__ 前缀）；WHEN 分类并定位日志路径；THEN 单一固定路径为 <workspace>/.argo/temp/agent-cost-log.ndjson，且 backend 覆盖 graph/repo/framework/other、kind 覆盖 read/write。",
           "type": "Acceptance Test",
-          "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js"
+          "Input": "tests/agent-cost-log.test.js",
+          "acceptanceCriteria": "tests/agent-cost-log.test.js"
         },
         {
-          "name": "AT-agent-cost-profiler-02",
-          "description": "GIVEN 启用的记录器；WHEN 记录一次工具调用；THEN 追加 NDJSON 到固定路径（含 backend/kind/duration/resultTokens，且绝不记原始参数取值）；ARGO_COST_PROFILER=0 时不写；超限时轮转为 .1。",
+          "name": "AT-agent-cost-log-02",
+          "description": "GIVEN 汇总日志；WHEN appendRecord；THEN 写入唯一固定文件（带 source/at）；ARGO_COST_PROFILER=0 时不写；超限轮转为 .1。",
           "type": "Acceptance Test",
-          "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js"
+          "Input": "tests/agent-cost-log.test.js",
+          "acceptanceCriteria": "tests/agent-cost-log.test.js"
         },
         {
-          "name": "AT-agent-cost-profiler-03",
-          "description": "GIVEN 已记录的轨迹；WHEN readTrace；THEN 返回记录数组且含 backend/kind/resultTokens 与失败信息。",
+          "name": "AT-agent-cost-log-03",
+          "description": "GIVEN 宿主采集钩子；WHEN 依次发生一个图调用、一个仓调用与一个 assistant usage 事件；THEN 三者写入同一份日志（两类 backend 都在），并含时长/返回 token/usage 的 tokens·cost；dispose 清除 marker。",
           "type": "Acceptance Test",
-          "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js"
+          "Input": "tests/agent-cost-log.test.js",
+          "acceptanceCriteria": "tests/agent-cost-log.test.js"
         },
         {
-          "name": "AT-agent-cost-profiler-04",
-          "description": "GIVEN 框架 MCP 服务端；WHEN 检查接线；THEN callTool 旁路调用 traceToolCall，且不新增任何日志取数 MCP 工具/CLI（模块不暴露 summarize/parseHostSession/scoreEvidence/main），记录器随 argo/scripts 包发布。",
+          "name": "AT-agent-cost-log-04",
+          "description": "GIVEN 无宿主采集器；WHEN MCP 兼底记录；THEN 写 source=mcp 且绝不记录原始参数取值；GIVEN 宿主采集器已激活（marker）；WHEN 同一工具调用；THEN MCP 兼底静默不写（日志不重复计数）。",
           "type": "Acceptance Test",
-          "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js"
+          "Input": "tests/agent-cost-log.test.js",
+          "acceptanceCriteria": "tests/agent-cost-log.test.js"
+        },
+        {
+          "name": "AT-agent-cost-log-05",
+          "description": "GIVEN 框架 MCP 服务端/插件/安装器；WHEN 检查接线；THEN 服务端旁路调用 traceToolCall、插件使用 createHostCollectorHooks 与 markHostCollector 且挂 tool.execute.after/event、安装器注册 argo-cost-collector.js，且不新增任何日志取数 MCP 工具。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-log.test.js",
+          "acceptanceCriteria": "tests/agent-cost-log.test.js"
         }
       ],
       "type": "Application Component",

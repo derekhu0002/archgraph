@@ -102,10 +102,14 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     assert.ok(fs.existsSync(path.join(argoRoot, 'schema', 'SystemArchitecture.schema.json')));
     // 2) scripts
     assert.ok(fs.existsSync(path.join(argoRoot, 'scripts', 'argo-mcp-server.js')));
-    // 2a) the framework agent-cost profiler ships with the toolchain (background measurement).
+    // 2a) the framework agent-cost log + MCP fallback writer ship with the toolchain (background measurement).
+    assert.ok(
+      fs.existsSync(path.join(argoRoot, 'scripts', 'graph-rag', 'agentCostLog.js')),
+      'the consolidated agent-cost log must be deployed with argo/scripts',
+    );
     assert.ok(
       fs.existsSync(path.join(argoRoot, 'scripts', 'graph-rag', 'agentCostProfiler.js')),
-      'the agent-cost profiler must be deployed with argo/scripts',
+      'the agent-cost profiler fallback must be deployed with argo/scripts',
     );
     // 2b) defaults (workspace bootstrap templates)
     assert.ok(fs.existsSync(path.join(argoRoot, 'defaults', 'design', 'KG', 'SystemArchitecture.json')));
@@ -207,10 +211,15 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     // 9b) argo plugins deploy to ~/.argo/plugins and the wakeup plugin is
     // registered in the OpenCode config plugin array.
     assert.ok(fs.existsSync(path.join(pluginsRoot, 'argo-wakeup.js')), 'argo-wakeup plugin must be deployed');
+    assert.ok(fs.existsSync(path.join(pluginsRoot, 'argo-cost-collector.js')), 'agent-cost collector plugin must be deployed');
     assert.ok(Array.isArray(openCode.plugin), 'OpenCode config must declare a plugin array');
     assert.ok(
       openCode.plugin.some(entry => entry.endsWith('argo-wakeup.js')),
       'OpenCode config must register the argo-wakeup plugin',
+    );
+    assert.ok(
+      openCode.plugin.some(entry => entry.endsWith('argo-cost-collector.js')),
+      'OpenCode config must register the agent-cost collector plugin',
     );
 
   } finally {

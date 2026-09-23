@@ -1109,5 +1109,14 @@ if (Test-Path $wakeupPluginPath) {
     Write-Host "argo-wakeup plugin registered -> $OpenCodeConfigPath"
 }
 
+# Agent-cost collector: the complete host-side writer of the single consolidated
+# agent-cost log (<workspace>/.argo/temp/agent-cost-log.ndjson).
+$costCollectorPath = Join-Path $PluginsRoot 'argo-cost-collector.js'
+if (Test-Path $costCollectorPath) {
+    Write-Host '==> Registering argo-cost-collector plugin in OpenCode'
+    Register-OpenCodePlugin -ConfigPath $OpenCodeConfigPath -PluginFilePath $costCollectorPath
+    Write-Host "argo-cost-collector plugin registered -> $OpenCodeConfigPath"
+}
+
 Write-Host ''
 Write-Host 'Argo deployment complete.'
