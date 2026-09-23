@@ -9388,6 +9388,11 @@
           "name": "commit",
           "value": "ed62235",
           "description": "package.json（release 0.26.0）"
+        },
+        {
+          "name": "commit",
+          "value": "b982aa3",
+          "description": "argo/scripts/agentSearchDiagnose.js（新增 isExportJson/exportToNdjson：接受 opencode export 的 {info,messages} JSON）; tests/agent-search-diagnosis.test.js（AT-05）; argo/skills/agent-search-diagnosis/SKILL.md"
         }
       ]
     }
