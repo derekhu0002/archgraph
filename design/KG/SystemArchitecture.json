@@ -4246,7 +4246,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-23 会话二）：多份沟通材料交付，均发送 hudonghua@huawei.com；新增子视图 comm-2026-09-view-001（parent 1249；因 view 180 成员触顶 15 而拆分）。\nA. 框架使用介绍邮件（WP wp-archgraph-intro-email-001）：docs/archgraph-intro-email.html；痛点→愿景→方案→图怎么帮；排版参照 SOC-DEMO VSOC 邮件；commit 8dc97c0。\nB. 组织形态畅想（WP wp-org-federation-vision-001，status=superseded）。\nC. 方案与测评意见（WP wp-graph-position-paper-001；全文 BO graph-position-paper-001）：docs/graph-position-paper.html；四段=业界问题→方案（意图架构图谱）→框架细节→测评与交付；commits 720772f/7ba9f50。\nD. 科研论文（WP wp-graph-agent-paper-001；全文 BO graph-agent-paper-001）：docs/graph-agent-paper.html；结构对齐顶级论文（摘要/引言/相关工作/方法/实验设置/结果与分析/讨论与局限/结论与展望/参考文献）；评测以 4 张数据图表（表格 bar）+ 文字说明；数值：recall@1 94.6%/recall@5 99.4%/MRR 0.967，重排后 99.3%–100%；阈值 0.70（0.686/0.833）；记忆 31 题 100%、拒答 100%、约 5.7ms；对照 LongMemEval/LOCOMO/BEAM；commits 304c06e/7ba9f50。\n关键决策/教训：① 对外/对内 HTML 邮件排版一律参照 SOC-DEMO VSOC 邮件（全内联样式 + 渐变页首 + 分节标题条 + 卡片/提示框）；② 邮件客户端丢弃内联 SVG/CSS grid → 数据图表用表格 bar（td width%/bgcolor）实现；③ 收件地址禁用非 ASCII；④ **术语纪律：不得引入与项目无关、也非业界认可的词。人类伙伴指出『本真图谱』不当——已全量替换为项目自身术语『意图架构图谱（Intent Architecture Graph）』（README/framework-overview/introduction 均用此词）。今后一律用项目/业界既有术语。**；⑤ 人类伙伴澄清：无「政策家人/政策加人」、删「盖楼 vs 口服药」；⑥ **图视图成员上限 15**：view 180 触顶 → 拆出子视图 comm-2026-09-view-001（并同步改 4 个测试 VIEW_ID）；⑦ 新增元素均触发同型语义软门禁，以 allowDuplicate+justification 放行；⑧ 本机 Playwright 仅装 chromium-1243，需显式 executablePath。\n遗留钩子：① 框架侧 MCP 工具契约 schema 对齐（文档层）；② 服务器无 GitHub 凭证，push 需 deploy key；③ 服务器 graph_submit/graph_update 的 graphs/catalog 未回主仓；④ D4 信任圈层、中心可复制后置；⑤ 规则改动需 argo-deploy 才传播；⑥ 科研论文可考虑投稿/英文版/更大样本与跨项目评测。\n记忆层级：本摘要在 T1；T2 overseer-ltm-001/overseer-rules-001/overseer-product-001；T2 经验 overseer-email-format-ref-001。commits：8dc97c0/16de3f9/720772f/304c06e/7ba9f50。",
+      "description": "项目总管工作记忆摘要（2026-09-23 会话二，续）：论文《面向 Agent 工程的一张意图架构图：写入治理、检索优化与可信记忆的实证研究》全面重写并发送 hudonghua@huawei.com。\n重写四要求（人类伙伴）：① 学人类学术行文（去 AI 味）；② 增加与业界的对比评测；③ 修正逻辑（原本把我们的机制写成『业界方向』，让人误以为我们没做）；④ 先分解任务、委派子 Agent，再归纳成文。\n执行：用 Task 并行派 3 个 general 子 Agent——(a) 人类学术行文风格指南（读 arXiv 1706.03762/2005.11401/2410.05779 + 本仓文档）；(b) 业界基准数据（LongMemEval/LoCoMo/BEAM/Mem0/GraphRAG/LightRAG，带来源与口径告警）；(c) 逻辑/定位审计（列出被错置于『相关工作』的我方成果 + 修正大纲）。项目总管据此成文。\n成果：docs/graph-agent-paper.html（VSOC 邮件格式，4 张数据图表 + 3 张表）；结构=摘要/1 引言/2 相关工作（仅真实 prior art）/3 方法/4 实验设置/5 结果与对比/6 讨论与局限/7 结论与展望/参考文献；新增能力维度对照表（表1）与公开数值参考表（表2，显式声明非同分布、不构成头对头）+ 默认配置表（表3）；新增局限节（单项目图谱/样本小/外部分布异/写入治理缺对照/最高结果非默认配置）。AT tests/graph-agent-paper.test.js 10/10。commits 2997263（重写）。\n关键教训/决策：① 论文行文：段落承接、去口号对仗、去滥用列表、诚实限定；数字带基线/样本量/口径；反直觉结果如实讨论。② 相关工作只写他人工作，我方机制一律归入方法/贡献（勿把自身成果裞成『业界方向』）。③ 对比要诚实：不同基准/指标不可横比，宁做能力维度对照 + 带告警的参考数值表。④ 委派：大写作任务先分解→并行子 Agent 研究→项目总管归纳成文（有效降上下文压力）。⑤ 术语纪律：用项目/业界既有术语（意图架构图谱 Intent Architecture Graph），不造词。⑥ 邮件格式参照 SOC-DEMO VSOC；图表用表格 bar（邮件安全）。⑦ 图视图成员上限 15（子视图 comm-2026-09-view-001）。\n遗留钩子：① 论文待补：写入治理开/关对照实验、更大样本与跨项目评测（人类已要求）；② 框架侧 MCP 工具契约 schema 对齐；③ 服务器无 GitHub 凭证（push 需 deploy key）；④ 服务器 graphs/catalog 未回主仓；⑤ D4 信任圈层后置。\n记忆层级：T1（本元素）；T2 overseer-ltm-001/overseer-rules-001/overseer-product-001；T2 经验 overseer-email-format-ref-001、overseer-paper-writing-001。commits：…/7ba9f50/2997263。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4269,7 +4269,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-23",
-          "description": "会话收尾：框架介绍邮件 + 方案与测评意见 + 科研论文（均已发送）；术语统一为『意图架构图谱（Intent Architecture Graph）』"
+          "description": "会话收尾：论文重写（人类行文 + 对比评测 + 逻辑修正；子 Agent 并行分工）已发送"
         },
         {
           "name": "commit",
@@ -9665,6 +9665,11 @@
           "name": "commit",
           "value": "7ba9f50",
           "description": "docs/graph-agent-paper.html; design/KG/SystemArchitecture.json（术语修正）"
+        },
+        {
+          "name": "commit",
+          "value": "2997263",
+          "description": "docs/graph-agent-paper.html; design/KG/SystemArchitecture.json（论文重写）"
         }
       ],
       "description": "科研论文（内部研究稿）全文（重写版）：面向 Agent 工程的一张意图架构图——写入治理、检索优化与可信记忆的实证研究。改进：① 行文改为人类学术风格（段落承接、诚实限定、去除口号式对仗与过度列表）；② 新增对比评测（内部消融 + 能力维度对照表 + 公开数值参考表，并显式声明非同分布）；③ 修正逻辑：我方的机制从『相关工作』中移出，相关工作只写真实 prior art（RAG/GraphRAG/LightRAG/Mem0/LongMemEval/LOCOMO/BEAM/ArchiMate/RRF）；④ 新增局限节（单项目图谱/样本小/外部分布异/写入治理缺对照/最高结果非默认配置）。正文全文见 attributes.paper；邮件版 HTML 见 attributes.doc。",
@@ -9696,7 +9701,7 @@
         {
           "name": "deliveryStatus",
           "value": "email-sent",
-          "description": "已发送（主题：研究稿：面向 Agent 工程的意图架构图谱）"
+          "description": "重写版已发送（主题：研究稿：面向 Agent 工程的一张意图架构图）"
         },
         {
           "name": "deliveryChannel",
@@ -9706,6 +9711,11 @@
           "name": "commit",
           "value": "7ba9f50",
           "description": "docs/graph-agent-paper.html; tests/graph-agent-paper.test.js（术语修正：本真图谱→意图架构图谱）"
+        },
+        {
+          "name": "commit",
+          "value": "2997263",
+          "description": "docs/graph-agent-paper.html; tests/graph-agent-paper.test.js（重写：人类行文 + 对比评测 + 逻辑修正）"
         }
       ],
       "description": "面向人类伙伴（hudonghua）的科研论文（内部研究稿，重写版）：《面向 Agent 工程的一张意图架构图：写入治理、检索优化与可信记忆的实证研究》。本轮按人类伙伴要求全面重写：① 学习人类学术行文（段落承接、诚实限定、去除口号对仗与滥用列表）；② 新增对比评测（内部消融图 + 能力维度对照表 + 公开数值参考表（LongMemEval/LoCoMo/BEAM/Mem0/GraphRAG/LightRAG），显式声明非同分布）；③ 修正逻辑：我方机制从『相关工作』移出，相关工作仅写真实 prior art；④ 新增局限节。写前由 3 个子 Agent 并行研究（行文风格指南 / 业界基准数据 / 逻辑审计），再由项目总管归纳成文。产出 docs/graph-agent-paper.html（VSOC 邮件格式邮件安全 HTML，4 张数据图表），全文存于 graph-agent-paper-001，配套可执行验收测试 tests/graph-agent-paper.test.js。",
@@ -9721,6 +9731,28 @@
           "type": "Acceptance Test"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "docs/graph-agent-paper.html; tests/graph-agent-paper.test.js; design/KG/SystemArchitecture.json",
+          "name": "commit",
+          "value": "2997263"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "可复用经验（2026-09-23，项目总管）：写科研论文/重型长文的方法。\n① 先分解再委派：大型写作别一个 Agent 硬写；先分解为『行文风格 / 数据采集 / 逻辑审计』等子任务，用 Task 并行派 general 子 Agent，项目总管归纳成文（有效降低单 Agent 上下文压力）。\n② 人类学术行文（去 AI 味）：一段一个论点、首句为主张句；段间用实义连接（然而/因此）而非序号；正文勿滥用项目符号；删空词（赋能/革命性/极致/无缝）与 slogan 式对仗；数字带基线/样本量/口径；反直觉结果如实讨论；局限单列一节、逐条对应效度威胁。\n③ 相关工作边界：只写真实 prior art（RAG/GraphRAG/Mem0/LongMemEval/ArchiMate/RRF 等）；我方机制必须归入方法/贡献，**绝不把自家成果写成『业界方向』**（否则读者误以为我们没做）。\n④ 对比要诚实：不同基准/指标/judge 不可横比；宁做『能力维度』定性对照 + 带告警的公开数值参考表，并显式声明非同分布、不构成头对头。基线要自己实跑（向量/混合/重排作为消融）；未实跑外部系统要写明。\n⑤ 结构：摘要→1 引言（问题→现有不足→本文方法→贡献）→2 相关工作→3 方法→4 实验设置→5 结果与对比→6 讨论与局限→7 结论与展望→参考文献。\n⑥ 术语只用项目/业界既有（如意图架构图谱 Intent Architecture Graph），不造词。",
+      "id": "overseer-paper-writing-001",
+      "name": "可复用经验：科研/重型长文写作方法（先分解再委派 + 人类行文 + 诚实对比 + 相关工作边界）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -11443,7 +11475,8 @@
         "overseer-default-pm-actor-001",
         "overseer-federation-vision-001",
         "overseer-federation-center-design-001",
-        "overseer-email-format-ref-001"
+        "overseer-email-format-ref-001",
+        "overseer-paper-writing-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
