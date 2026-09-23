@@ -9450,6 +9450,13 @@
           "description": "GIVEN 语义检索与 queryNeo4jGraph 路径；WHEN 核对；THEN 投影仅用于结构 builder，语义检索（匹配面）与用户显式 Cypher 均不被裁剪。",
           "name": "AT-agent-read-projection-03",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-read-projection.test.js",
+          "acceptanceCriteria": "tests/agent-read-projection.test.js",
+          "description": "GIVEN 语义检索返回的业务摘要（含命中 seed 与闭包邻居）；WHEN buildBusinessSemanticSummary；THEN 仅命中元素保留 status/functionalPoints/testCoverage（匹配面），闭包邻居裁剪这些派生字段并标 bookkeepingOmitted；id/name/description 始终保留。",
+          "name": "AT-agent-read-projection-04",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Application Component",
@@ -9458,6 +9465,11 @@
           "name": "commit",
           "value": "3a3e7b6",
           "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/agent-read-projection.test.js; tests/architecture-view-context.test.js; scripts/memory-eval-run.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "commit",
+          "value": "e0b2e82",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js（summarizeElement/summarizeElements：派生字段仅命中元素保留，闭包邻居裁剪 + bookkeepingOmitted；导出 buildBusinessSemanticSummary）; tests/agent-read-projection.test.js（AT-04）"
         }
       ]
     }
