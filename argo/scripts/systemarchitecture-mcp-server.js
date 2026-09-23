@@ -629,29 +629,42 @@ function validateDocument(document, schema, options = {}) {
 // also NOT the semantic match surface — semantic retrieval embeds attributes and
 // testcase descriptions (semanticRecordText.js), so semantic results keep them;
 // and the focus element of an intent-element read always keeps its own.
+function byteLenLocal(value) {
+  try { return Buffer.byteLength(JSON.stringify(value)); } catch (_) { return 0; }
+}
+
 function projectAgentFields(record, opts = {}) {
   const value = clone(record);
   let omittedAttributes = 0;
   let omittedTestcases = 0;
+  let omittedBytes = 0;
   if (!opts.includeAttributes && Array.isArray(value.attributes) && value.attributes.length) {
     omittedAttributes = value.attributes.length;
+    omittedBytes += byteLenLocal(value.attributes);
     delete value.attributes;
   }
   if (!opts.includeTestcases && Array.isArray(value.testcases) && value.testcases.length) {
     omittedTestcases = value.testcases.length;
+    omittedBytes += byteLenLocal(value.testcases);
     delete value.testcases;
   }
-  return { value, omittedAttributes, omittedTestcases };
+  return { value, omittedAttributes, omittedTestcases, omittedBytes };
 }
 
 function buildAgentProjection(omitted) {
   if (!omitted || (omitted.attributes === 0 && omitted.testcases === 0)) {
     return null;
   }
+  // Only attach the explanation when the omission actually saves more than the
+  // note costs, so trimming a read can NEVER make it larger (cross-scenario
+  // no-degradation). The opt-in flags are documented in the tool description.
+  if ((omitted.bytes || 0) < 160) {
+    return null;
+  }
   return {
     attributesOmitted: omitted.attributes,
     testcasesOmitted: omitted.testcases,
-    note: 'Member attributes/testcases are bookkeeping (commit/session/release ledgers, acceptance cases) and are omitted from this structural read by default. Pass includeAttributes:true / includeTestcases:true to include them verbatim. Semantic retrieval already embeds their text, so semantic hits keep them.',
+    note: 'includeAttributes/includeTestcases=true to include (omitted by default; semantic hits keep them).',
   };
 }
 
@@ -740,7 +753,7 @@ function buildIntentElementContext(context, args = {}) {
   const subgraph = buildNativeSubgraph(context.document, includedElementIds, includedRelationshipIds);
   const includeAttributes = args.includeAttributes === true;
   const includeTestcases = args.includeTestcases === true;
-  const omitted = { attributes: 0, testcases: 0 };
+  const omitted = { attributes: 0, testcases: 0, bytes: 0 };
   if (!(includeAttributes && includeTestcases)) {
     subgraph.elements = subgraph.elements.map((element) => {
       if (element.id === focusElement.id) {
@@ -749,11 +762,13 @@ function buildIntentElementContext(context, args = {}) {
       const projected = projectAgentFields(element, { includeAttributes, includeTestcases });
       omitted.attributes += projected.omittedAttributes;
       omitted.testcases += projected.omittedTestcases;
+      omitted.bytes += projected.omittedBytes;
       return projected.value;
     });
     subgraph.relationships = subgraph.relationships.map((relationship) => {
       const projected = projectAgentFields(relationship, { includeAttributes });
       omitted.attributes += projected.omittedAttributes;
+      omitted.bytes += projected.omittedBytes;
       return projected.value;
     });
   }
@@ -851,11 +866,12 @@ function buildViewContext(context, args = {}) {
 
   const includeAttributes = args.includeAttributes === true;
   const includeTestcases = args.includeTestcases === true;
-  const omitted = { attributes: 0, testcases: 0 };
+  const omitted = { attributes: 0, testcases: 0, bytes: 0 };
   const project = (record) => {
     const projected = projectAgentFields(record, { includeAttributes, includeTestcases });
     omitted.attributes += projected.omittedAttributes;
     omitted.testcases += projected.omittedTestcases;
+    omitted.bytes += projected.omittedBytes;
     return projected.value;
   };
 
