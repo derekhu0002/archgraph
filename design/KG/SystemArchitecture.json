@@ -9423,6 +9423,43 @@
           "description": "design/KG/SystemArchitecture.json; tests/memory-retrieval-profile.test.js（AT-framework-optimization-cross-scenario-01）"
         }
       ]
+    },
+    {
+      "description": "框架读取层优化：对**结构型读取**（getArchitectureViewContext / getIntentElementContext）默认剔除 Agent 用不着的“账本”字段，而不是摘要（保留字段逐字原样）。背景：全图字段字节占比 description 40.6% / attributes 38.1% / testcases 14.1%——attributes（commit/session/release 台账）+ testcases 合计 ~52% 对结构读取无用（实测 view 174 读 16,098 vs 58,884 字节，**−72.7%**）。匹配感知（关键）：语义检索将 attributes 与 testcase 描述**编入向量文本**（semanticRecordText.js），因此语义命中必须保留它们；queryNeo4jGraph 为用户显式投影、不裁剪；getIntentElementContext 的**焦点元素始终保留自身 attributes/testcases**，仅对邻接元素裁剪。可逆：默认返回 result.projection 说明（attributesOmitted/testcasesOmitted + 如何取），并新增 includeAttributes/includeTestcases 显式取回。非摘要、不改候选集与排序 → 与 retrieval-recall-first 一致；对 S1–S8 全场景统一生效（非单会话定制）。交付：argo/scripts/systemarchitecture-mcp-server.js（projectAgentFields/buildAgentProjection + 两个 builder 接入 + schema）; argo/scripts/argo-mcp-server.js（schema）; tests/agent-read-projection.test.js（AT-01..03）。",
+      "id": "agent-read-projection-001",
+      "name": "结构读取字段投影（默认剔除账本字段 + 匹配感知 + opt-in）",
+      "parent": "1961",
+      "testcases": [
+        {
+          "Input": "tests/agent-read-projection.test.js",
+          "acceptanceCriteria": "tests/agent-read-projection.test.js",
+          "description": "GIVEN 含账本字段的 view；WHEN 默认读；THEN 成员的 attributes/testcases 被剔、result.projection 报省略数并说明如何取；WHEN includeAttributes/includeTestcases=true；THEN 逐字恢复且无 projection 说明；description/name 不变。",
+          "name": "AT-agent-read-projection-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-read-projection.test.js",
+          "acceptanceCriteria": "tests/agent-read-projection.test.js",
+          "description": "GIVEN 一个自带账本字段的元素；WHEN getIntentElementContext 读它；THEN **焦点元素保留**自身 attributes（只对邻接元素裁剪）。",
+          "name": "AT-agent-read-projection-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-read-projection.test.js",
+          "acceptanceCriteria": "tests/agent-read-projection.test.js",
+          "description": "GIVEN 语义检索与 queryNeo4jGraph 路径；WHEN 核对；THEN 投影仅用于结构 builder，语义检索（匹配面）与用户显式 Cypher 均不被裁剪。",
+          "name": "AT-agent-read-projection-03",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Application Component",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "3a3e7b6",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; tests/agent-read-projection.test.js; tests/architecture-view-context.test.js; scripts/memory-eval-run.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -11526,7 +11563,8 @@
         "memory-retrieval-eval-framework-001",
         "graph-gain-regime-boundary-001",
         "agent-search-diagnosis-skill-001",
-        "framework-optimization-cross-scenario-001"
+        "framework-optimization-cross-scenario-001",
+        "agent-read-projection-001"
       ]
     }
   ]
