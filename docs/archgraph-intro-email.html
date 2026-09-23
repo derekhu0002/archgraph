@@ -1,269 +1,233 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>以项目为中心，让 AI 越用越懂你</title>
-<style>
-  body { margin: 0; padding: 0; background: #eef1f5;
-    font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: #1b2733; font-size: 15px; line-height: 1.75; }
-  .wrap { max-width: 788px; margin: 0 auto; padding: 18px; }
-  .card { background: #ffffff; border: 1px solid #e4e9f0; border-radius: 14px; overflow: hidden; }
-  .hero { background: #0b5cad; background: linear-gradient(135deg, #0b5cad 0%, #1d4ed8 100%); color: #ffffff; padding: 28px 34px 26px; }
-  .hero .kicker { color: #cfe0ff; font-size: 12px; letter-spacing: 3px; font-weight: 700; }
-  .hero h1 { color: #ffffff; font-size: 24px; line-height: 1.34; margin: 8px 0 6px; }
-  .hero .sub { color: #dbe7ff; font-size: 14.5px; margin: 0; }
-  .body { padding: 22px 34px 34px; }
-  h2 { font-size: 18px; color: #0f2a45; margin: 34px 0 12px; }
-  h2 .n { display: inline-block; min-width: 22px; text-align: center; background: #0b5cad; color: #ffffff;
-    border-radius: 7px; font-size: 14px; font-weight: 700; padding: 2px 9px; margin-right: 10px; }
-  h3 { font-size: 15.5px; color: #0b5cad; margin: 22px 0 6px; }
-  p { margin: 10px 0; }
-  .lead { font-size: 15.5px; color: #24435f; }
-  ul, ol { margin: 8px 0 8px 22px; padding: 0; }
-  li { margin: 6px 0; }
-  code { font-family: "Cascadia Mono", Consolas, "Courier New", monospace; font-size: 13px;
-    background: #f4f7fa; border: 1px solid #e4e9f0; border-radius: 4px; padding: 1px 6px; color: #0f2a45; }
-  pre { background: #0f2a45; color: #e6eefb; border-radius: 9px; padding: 13px 16px; overflow-x: auto;
-    font-size: 13px; line-height: 1.6; margin: 10px 0; }
-  pre code { background: none; border: none; padding: 0; color: #e6eefb; }
-  table.text { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
-  table.text th, table.text td { border: 1px solid #e4e9f0; padding: 9px 11px; text-align: left; vertical-align: top; }
-  table.text th { background: #f2f6fb; font-weight: 600; color: #0f2a45; }
-  .callout { border-left: 4px solid #0b5cad; background: #f0f6ff; padding: 12px 16px; margin: 16px 0;
-    border-radius: 8px; color: #24435f; }
-  .callout.warn { border-left-color: #ea580c; background: #fff6ed; color: #7c4a21; }
-  .callout.good { border-left-color: #059669; background: #edfbf3; color: #0f5132; }
-  .callout b { color: inherit; }
+<style media="all" type="text/css">
+  body { margin: 0; padding: 0; background-color: #f4f5f6;
+    font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px; line-height: 1.6; color: #2b2f36; -webkit-font-smoothing: antialiased; }
+  .container { max-width: 640px; margin: 0 auto; padding: 24px 12px; }
+  .main { background: #ffffff; border: 1px solid #e6e8eb; border-radius: 14px; }
+  .wrapper { padding: 30px 32px; }
+  h1 { font-size: 21px; line-height: 1.45; margin: 0 0 6px; color: #14171a; }
+  .sub { font-size: 14px; color: #7a7f87; margin: 0 0 24px; }
+  h2 { font-size: 17px; line-height: 1.5; margin: 36px 0 12px; padding-bottom: 8px;
+    border-bottom: 1px solid #e6e8eb; color: #14171a; }
+  h3 { font-size: 15.5px; margin: 22px 0 6px; color: #14171a; }
+  p { margin: 0 0 16px; }
+  .lead { font-size: 16.5px; color: #14171a; }
+  ul, ol { margin: 0 0 16px 20px; padding: 0; }
+  li { margin: 7px 0; }
+  a { color: #0867ec; text-decoration: underline; }
+  code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 13px; background: #f4f5f7; border: 1px solid #e6e8eb; border-radius: 4px; padding: 1px 5px; }
+  pre { background: #f7f8fa; border: 1px solid #e6e8eb; border-radius: 8px; padding: 12px 14px;
+    font-size: 13px; line-height: 1.6; overflow: auto; margin: 0 0 16px; }
+  pre code { background: none; border: none; padding: 0; }
+  .note { background: #f7f8fa; border: 1px solid #e6e8eb; border-radius: 8px; padding: 12px 14px;
+    color: #4a5057; font-size: 14.5px; margin: 0 0 16px; }
+  .quote { border-left: 3px solid #cfd6df; padding: 2px 0 2px 14px; color: #5b6169; margin: 0 0 16px; }
+  .muted { color: #7a7f87; font-size: 12px; }
 
-  /* ---- email-safe diagrams (tables, no SVG, no external images) ---- */
-  .dia { margin: 18px 0; }
-  .dia-card { border: 1px solid #e4e9f0; border-radius: 12px; background: #fbfcfe; padding: 14px 14px 10px; }
-  .dia-title { font-size: 13.5px; font-weight: 700; color: #0b5cad; margin: 0 0 12px; }
-  table.diagram { width: 100%; border-collapse: separate; border-spacing: 9px; margin: 0; }
+  /* diagrams — simple, one accent, table-based (renders everywhere) */
+  .dia { margin: 0 0 22px; }
+  .dia-cap { font-size: 12.5px; color: #8a9098; margin: 8px 0 0; }
+  table.diagram { width: 100%; border-collapse: separate; border-spacing: 8px; margin: 0; }
   table.diagram td { vertical-align: middle; }
-  .box { border: 1px solid #dbe3ee; border-radius: 10px; background: #f7f9fc; padding: 12px 10px;
-    text-align: center; font-size: 13px; }
-  .box b { color: #0f2a45; font-size: 13.5px; }
-  .muted { color: #64748b; font-size: 11.5px; line-height: 1.6; }
-  .box.accent { background: #eaf2ff; border-color: #9dc0f0; }
-  .box.warn { background: #fff3e8; border-color: #f6c79a; }
-  .box.good { background: #e9f9f1; border-color: #9ad9bb; }
-  .arrow { text-align: center; color: #0b5cad; font-size: 20px; font-weight: 700; width: 34px; }
-  .flow { text-align: center; color: #ea580c; font-size: 12px; font-weight: 700; padding: 5px 0; }
-  .flow.good { color: #059669; }
-  .note { text-align: center; color: #64748b; font-size: 12px; padding-top: 3px; }
-  .dash { border: 1px dashed #9dc0f0; border-radius: 12px; background: #f5f9ff; }
-  .dia-cap { color: #0b5cad; font-weight: 700; font-size: 13px; padding: 10px 14px 0; }
-  table.seq { width: 100%; border-collapse: collapse; margin: 0; font-size: 12.5px; }
-  table.seq th { background: #0b5cad; color: #ffffff; font-weight: 600; text-align: center; padding: 9px; border: 1px solid #0b5cad; }
-  table.seq td { border: 1px solid #e4e9f0; padding: 8px 10px; vertical-align: middle; }
-  .seq-from { background: #f2f7ff; color: #1b2733; }
-  .seq-arrow { text-align: center; color: #0b5cad; font-weight: 700; width: 54px; font-size: 11.5px; }
-  .seq-empty { background: #ffffff; }
-  tr.seq-hot td { background: #fff6ed; }
-  tr.seq-hot td.seq-arrow { color: #ea580c; }
-  figcaption { font-size: 12.5px; color: #64748b; margin: 8px 2px 2px; }
+  .box { border: 1px solid #e6e8eb; border-radius: 8px; background: #fafbfc; padding: 11px 10px;
+    text-align: center; font-size: 13.5px; line-height: 1.55; color: #2b2f36; }
+  .box b { color: #14171a; }
+  .box.key { border-color: #bcd3f5; background: #f2f7ff; }
+  .arrow { text-align: center; color: #9aa1aa; font-size: 18px; width: 30px; }
+  .flow { text-align: center; color: #9aa1aa; font-size: 12.5px; padding: 4px 0; }
+  table.seq { width: 100%; border-collapse: collapse; margin: 0; font-size: 13px;
+    border: 1px solid #e6e8eb; border-radius: 8px; }
+  table.seq th { background: #f4f5f7; text-align: left; padding: 9px 11px; font-weight: 600;
+    color: #14171a; border-bottom: 1px solid #e6e8eb; }
+  table.seq td { padding: 9px 11px; border-bottom: 1px solid #eef0f3; vertical-align: middle; }
+  table.seq tr:last-child td { border-bottom: none; }
+  .seq-arrow { color: #9aa1aa; width: 60px; }
+  .seq-hot td { background: #fdf6ef; }
 
-  table.value { width: 100%; border-collapse: separate; border-spacing: 10px; margin: 6px 0; }
-  table.value td { background: #f7f9fc; border: 1px solid #e4e9f0; border-radius: 10px; padding: 14px 15px;
-    font-size: 13.5px; vertical-align: top; width: 50%; }
-  table.value b { color: #0b5cad; font-size: 14px; }
-
-  .sign { margin-top: 30px; padding-top: 16px; border-top: 1px solid #e4e9f0; }
-  .footer { margin-top: 22px; font-size: 12px; color: #64748b; text-align: center; }
+  .divider { border: 0; border-top: 1px solid #e6e8eb; margin: 30px 0 0; }
+  .footer { padding: 16px 6px 4px; color: #9a9ea6; font-size: 13px; text-align: center; }
+  @media only screen and (max-width: 640px) {
+    .container { padding: 10px 8px; }
+    .wrapper { padding: 20px 18px; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr><td align="center">
+      <div class="container">
+        <div class="main">
+          <div class="wrapper">
 
-    <div class="hero">
-      <div class="kicker">内部交流 · 上手介绍</div>
-      <h1>以项目为中心，让 AI 越用越懂你</h1>
-      <p class="sub">一封邮件讲清：它能带来什么、怎么开始用</p>
-    </div>
+            <h1>以项目为中心，让 AI 越用越懂你</h1>
+            <p class="sub">这封邮件讲清：它能带来什么、怎么开始用</p>
 
-    <div class="body">
+            <p>大家好：</p>
+            <p class="lead">如果我们能让 AI 像一位熟悉你项目的同事那样工作——<b>不用每次从头解释背景，它记得住你们聊过和定过的事，做完还能把经验留给下一位接手的人</b>——每天能少掉多少重复沟通？这封邮件介绍的，就是这样一种做法，大约 5 分钟读完。</p>
 
-      <p>大家好：</p>
-      <p class="lead">这套做法带来的好处很直接：<b>让 AI 围绕你的项目来工作，越用越懂你的业务，反复解释背景和来回返工会明显减少；用过的经验还能留下来，团队里谁接手都能接着往下走。</b>下面分三步讲：先说大家可能遇到的麻烦，再说我们的办法，最后讲具体怎么做，大约 5 分钟能读完。</p>
+            <!-- ============ 1. 痛点 ============ -->
+            <h2>一、先说痛点</h2>
+            <p>用 AI 帮忙做事的同学，大概都碰到过这些情况：</p>
+            <ul>
+              <li>聊了半天，它还是不太懂我们的项目和业务，给的东西比较空泛；</li>
+              <li>每次都得从头把背景讲一遍，像换了个完全不认识的人；</li>
+              <li>它做的和我们想要的常常差一点，来回改，还说不清到底哪儿偏了；</li>
+              <li>同一个错误，这次改了，下次它还会犯；</li>
+              <li>事情做完，经验没留下，换个人上手又得重新趟一遍。</li>
+            </ul>
+            <div class="note">这些问题的共同点：AI 缺少一个「懂你项目」的长期上下文——它记住的往往只是某一次对话，而不是你的项目。</div>
 
-      <!-- ===================== 1. 痛点 ===================== -->
-      <h2><span class="n">1</span>先说大家可能遇到的麻烦</h2>
-      <p>用 AI 帮忙做事的同学，大概都碰到过这些情况：</p>
-      <ul>
-        <li>聊了半天，它还是不太懂我们的项目和业务，给的东西比较空泛；</li>
-        <li>每次都得从头把背景讲一遍，像换了个完全不认识的人；</li>
-        <li>它做的和我们想要的常常差一点，来回改，还说不清到底哪儿偏了；</li>
-        <li>同一个错误，这次改了，下次它还会犯；</li>
-        <li>事情做完，经验没留下，换个人上手又得重新趟一遍。</li>
-      </ul>
-      <div class="callout warn"><b>这些问题有个共同点</b>：AI 缺少一个「懂你项目」的长期上下文——它记住的往往只是某一次对话，而不是你的项目。</div>
+            <!-- ============ 2. 愿景 ============ -->
+            <h2>二、再讲愿景</h2>
+            <p>我们想要的，不是一个更会聊天的机器人，而是一个<b>真正懂你项目</b>的伙伴：</p>
+            <ul>
+              <li><b>不用每次从头解释</b>：一打开就知道这个项目的来龙去脉；</li>
+              <li><b>越用越懂你</b>：你说过的业务、讨论过的方案，它会吸收并记住；</li>
+              <li><b>能独立行动</b>：了解到位之后，你可以放手让它去做；</li>
+              <li><b>经验能留下</b>：踩过的坑、定过的方案会沉淀下来，谁接手都能接着用。</li>
+            </ul>
 
-      <!-- ===================== 2. 方案 ===================== -->
-      <h2><span class="n">2</span>我们的方案：以项目为中心，让它越来越懂你</h2>
-      <p>思路很朴素：<b>把「一个项目」当作一个容器</b>，让 AI 在这个容器里边聊边学、越用越懂。</p>
-      <ul>
-        <li><b>以项目为中心</b>：项目的背景、目标、约定，都归拢在项目自己的「地图」里；</li>
-        <li><b>围着项目聊天</b>：你用平时熟悉的工具（比如 OpenCode、Cursor）打开这个项目，就可以和它围绕这个项目交流、做事；</li>
-        <li><b>越用越懂你</b>：你说过的业务、讨论过的方案，它都会吸收并记下来；等你觉得它了解得差不多了，就可以放手让它独立去行动；</li>
-        <li><b>同一张地图</b>：你和它看的是同一张项目地图，不用反复对齐；换人、换电脑、隔一段时间再来，上下文都不会丢。</li>
-      </ul>
+            <!-- ============ 3. 建议方案 ============ -->
+            <h2>三、我们建议的解决方案</h2>
+            <p>做法很朴素：<b>把「一个项目」当作一个容器</b>，让 AI 在这个容器里边聊边学、越用越懂。</p>
+            <ul>
+              <li><b>以项目为中心</b>：项目的背景、目标、约定，都归拢在项目自己的「一张图」里；</li>
+              <li><b>围着项目交流</b>：你用平时熟悉的工具（比如 OpenCode、Cursor）打开这个项目，就可以和它围绕这个项目聊天、做事；</li>
+              <li><b>同一张图</b>：你和它看的是同一张项目地图，不用反复对齐；换人、换电脑、隔一段时间再来，上下文都不会丢。</li>
+            </ul>
 
-      <figure class="dia">
-        <div class="dia-card">
-          <div class="dia-title">图 1 · 一个项目 = 一个容器：你、AI 与「项目地图」都在其中</div>
-          <table class="diagram dash" role="presentation">
-            <tr><td class="dia-cap" colspan="5">项目（容器）</td></tr>
-            <tr>
-              <td class="box" style="width:22%"><b>你（和同事）</b><br><span class="muted">定方向 · 做决定<br>观察 · 纠偏</span></td>
-              <td class="arrow">↔</td>
-              <td class="box accent" style="width:36%"><b>项目地图</b><br><span class="muted">背景 / 目标 / 约定<br>越用越全 · 谁都能看懂<br>所有交流都以它为准</span></td>
-              <td class="arrow">↔</td>
-              <td class="box" style="width:22%"><b>AI</b><br><span class="muted">照着地图做事<br>做过的都记下来</span></td>
-            </tr>
-            <tr><td class="note" colspan="5">用 OpenCode / Cursor 打开这个项目 → 和它围绕这个项目聊天、做事</td></tr>
-          </table>
+            <figure class="dia">
+              <table class="diagram" role="presentation">
+                <tr>
+                  <td class="box" style="width:26%"><b>你（和同事）</b><br><span class="muted">定方向 · 做决定 · 纠偏</span></td>
+                  <td class="arrow">↔</td>
+                  <td class="box key" style="width:40%"><b>项目地图</b><br><span class="muted">背景 / 目标 / 约定<br>越用越全 · 谁都能看懂</span></td>
+                  <td class="arrow">↔</td>
+                  <td class="box" style="width:26%"><b>AI</b><br><span class="muted">照着地图做事<br>做过的都记下来</span></td>
+                </tr>
+              </table>
+              <div class="dia-cap">图 1 · 一个项目 = 一个容器：你、AI 与「项目地图」都在其中</div>
+            </figure>
+
+            <!-- ============ 4. 具体的图怎么帮到大家 ============ -->
+            <h2>四、具体来说，这套「图」怎么帮到大家</h2>
+            <p>这里的「图」，指的是每个项目自己的一张<b>知识图谱</b>。它带来的帮助很实在：</p>
+            <ul>
+              <li><b>它会替你记住</b>：你和它的每一次交流、每一个决定、每一次改动，都会记进项目自己的知识图谱里；</li>
+              <li><b>需要时自动取回</b>：下次不用你重复解释，它会自己把这些找回来；</li>
+              <li><b>资产 = 代码仓库 + 项目知识图谱</b>：两者合在一起，才是一个项目的完整资产，可追溯、可交接。</li>
+            </ul>
+
+            <figure class="dia">
+              <table class="diagram" role="presentation">
+                <tr>
+                  <td class="box" style="width:46%"><b>你（和同事）</b><br><span class="muted">提需求 · 做决定 · 纠偏</span></td>
+                  <td class="arrow">↔</td>
+                  <td class="box" style="width:46%"><b>AI</b><br><span class="muted">做事 · 交付 · 排错</span></td>
+                </tr>
+                <tr><td class="flow" colspan="3">↓　记下来：每次交流 · 每个决定 · 每次改动</td></tr>
+                <tr><td class="box key" colspan="3"><b>项目知识图谱（项目大脑）</b><br><span class="muted">业务与背景 · 讨论过的方案 · 做过的决定 · 改过的记录</span></td></tr>
+                <tr><td class="flow" colspan="3">↑　取回来：需要时自动找回 · 不用重复解释</td></tr>
+                <tr>
+                  <td class="box"><b>代码仓库</b><br><span class="muted">代码 / 文档 / 测试</span></td>
+                  <td class="arrow">+</td>
+                  <td class="box"><b>资产 = 仓库 + 图谱</b><br><span class="muted">两者合在一起，才是完整资产</span></td>
+                </tr>
+              </table>
+              <div class="dia-cap">图 2 · 数据流：交流与做事 → 记进图谱 → 需要时取回 → 反哺下一步</div>
+            </figure>
+
+            <h3>4.1　怎么开始用：四步就能跑起来</h3>
+            <p><b>第 ① 步：安装（一条命令）</b></p>
+            <pre><code>npm install -g archgraph-argo</code></pre>
+            <p>要求电脑上已装好 <b>Node.js 18 或以上</b>。</p>
+
+            <p><b>第 ② 步：部署（一条命令）</b></p>
+            <pre><code>argo-deploy</code></pre>
+            <p>它会自动适配你平时用的工具——<b>Copilot、Cursor、OpenCode、DeepSeek Harness、OpenClaw</b>。也就是说，<b>同一套方法，不管谁用什么工具都能用</b>。</p>
+
+            <p><b>第 ③ 步：前置准备（为了让 AI 能「按意思找信息」）</b></p>
+            <p>其余能力装好即用，只有这一项需要 IT 帮忙准备两样东西，然后把地址填进一个配置文件：</p>
+            <ul>
+              <li><b>图数据库</b>：存放项目地图，供按结构查询。用已有或新起一个实例（例如 Neo4j）即可；</li>
+              <li><b>语义检索服务</b>：让 AI 能「按意思找信息」，既能用云端服务，也能在内网自建；</li>
+              <li>把上面的地址填进 <code>~/.argo/.env</code>，部署时会引导填写，已有内容会保留。</li>
+            </ul>
+            <div class="note"><b>内网友好</b>：内网 / 离线环境下的自建方案，我们准备了完整的部署指引，不依赖公网也能跑通。</div>
+
+            <p><b>第 ④ 步：初始化（每个新项目一次）</b></p>
+            <p>在一个新项目里，让它执行一次初始化（<code>argo init</code>）。它会自动建好这个项目的「地图」并做一次自检。<b>从这一刻起，这个项目就有记忆了。</b></p>
+
+            <figure class="dia">
+              <table class="diagram" role="presentation">
+                <tr>
+                  <td class="box" style="width:21%"><b>① 安装</b><br><span class="muted">一条命令装好<br>需 Node.js 18+</span></td>
+                  <td class="arrow">→</td>
+                  <td class="box" style="width:21%"><b>② 部署</b><br><span class="muted">一条命令完成<br>自动适配你常用的工具</span></td>
+                  <td class="arrow">→</td>
+                  <td class="box" style="width:21%"><b>③ 前置准备</b><br><span class="muted">填一个配置文件<br>图数据库 + 语义检索</span></td>
+                  <td class="arrow">→</td>
+                  <td class="box key" style="width:21%"><b>④ 初始化</b><br><span class="muted">建好项目地图 + 自检<br>每个新项目一次</span></td>
+                </tr>
+              </table>
+              <div class="dia-cap">图 3 · 从零到可用：四步点亮一个项目（装一次，之后每个新项目只需第 ④ 步）</div>
+            </figure>
+
+            <h3>4.2　用起来的一个小习惯：会话结束时说一声</h3>
+            <p>这套方法的核心是「<b>越用越懂你</b>」，用起来也很简单：</p>
+            <ol>
+              <li><b>遇到说不清、有歧义的地方，先聊清楚，别急着让它动手。</b>把目标和边界讲明白，让它反过来复述一下、向你确认；</li>
+              <li><b>聊到一定程度，再让它去做。</b>它足够了解业务之后，你就可以直接安排任务；</li>
+              <li><b>做错了，指出来一次，它就记住。</b>下次遇到同类事情不再犯。</li>
+            </ol>
+            <div class="note">一个真实的小例子：部署时踩过的坑（某个工具的端口每次不一样、某段脚本中文会乱码）被记下来之后，后续会自动避开同类问题；每次改动也会自动留下记录，其他人就不用重新踩一遍。</div>
+
+            <figure class="dia">
+              <table class="seq" role="presentation">
+                <tr><th style="width:42%">你</th><th style="width:16%">方向</th><th style="width:42%">AI / 项目地图</th></tr>
+                <tr><td>① 说出需求（一开始说不清也没关系）</td><td class="seq-arrow">你 ▶ AI</td><td></td></tr>
+                <tr><td></td><td class="seq-arrow">你 ◀ AI</td><td>② 它复述理解、请你确认</td></tr>
+                <tr><td>③ 纠正 / 确认方向</td><td class="seq-arrow">你 ▶ AI</td><td></td></tr>
+                <tr><td></td><td class="seq-arrow">AI ▶ 地图</td><td>④ 把决定和要点记下来</td></tr>
+                <tr><td></td><td class="seq-arrow">你 ◀ AI</td><td>⑤ 完成，交付给你</td></tr>
+                <tr class="seq-hot"><td><b>⑥ 明确说一声：本次会话结束</b></td><td class="seq-arrow">你 ▶ AI</td><td></td></tr>
+                <tr><td></td><td class="seq-arrow">AI ▶ 地图</td><td>⑦ 把这轮内容收好、记住</td></tr>
+              </table>
+              <div class="dia-cap">图 4 · 你 ↔ AI ↔ 项目地图：从「说不清」到「它懂了」的交互时序</div>
+            </figure>
+            <div class="note"><b>就这一条小习惯</b>：一次交流告一段落时，加一句「本次会话结束」。这不是客套，而是让它把这一轮沉淀下来的开关——它没法自己判断会话有没有结束。</div>
+
+            <h3>4.3　你能得到的价值</h3>
+            <ul>
+              <li><b>起步快</b>：新项目几分钟就能建好「项目地图」，AI 有据可依，不再「跑偏了也没感觉」；</li>
+              <li><b>交接稳</b>：每个产出都能追溯到地图上的记录，评审与接手不用再翻聊天记录；</li>
+              <li><b>越用越省</b>：踩过的坑、定过的方案会沉淀成经验，下次自动复用，团队不必重复踩同一遍；</li>
+              <li><b>可规模化</b>：一套方法多端可用，经验还能在项目之间复用，慢慢积累成团队的能力资产。</li>
+            </ul>
+
+            <h3>4.4　建议的下一步</h3>
+            <ol>
+              <li><b>确认环境</b>：请平台 / IT 侧确认内网是否具备 Node.js，以及一个图数据库和一个语义检索服务（离线部署有现成指引）；</li>
+              <li><b>选一个小项目试点</b>：我们一起完整走一遍「安装 → 部署 → 初始化 → 第一个任务」，半小时内就能看到效果；</li>
+              <li><b>跑通后再推广</b>：把试点经验固化成团队模板，再扩展到更多项目。</li>
+            </ol>
+
+            <hr class="divider" />
+            <p style="margin:20px 0 16px;">欢迎大家随时找我交流，也欢迎把试用中的问题反馈给我；我来安排第一次一起上手。</p>
+            <p style="margin:0;">顺祝工作顺利！<br />（署名）</p>
+
+          </div>
         </div>
-        <figcaption>项目是一个自带「地图」的容器；你和 AI 围绕同一张图协作，共识不随对话丢失。</figcaption>
-      </figure>
-
-      <p>它沉淀下来的东西也很实在：<b>你和它的每一次交流、每一个决定、每一次改动，都会被记到项目自己的知识图谱里。</b></p>
-      <ul>
-        <li><b>记忆会留下</b>：聊过的业务、做过的决定，需要时按需取回，而不是淹没在某一次的聊天记录里；</li>
-        <li><b>共识会留下</b>：谁负责什么、为什么这么定、做到什么程度算完成，都写在同一张图上，可追溯、可交接；</li>
-        <li><b>资产 = 代码仓库 + 项目知识图谱</b>：两者合在一起，才是一个项目的完整资产。</li>
-      </ul>
-
-      <figure class="dia">
-        <div class="dia-card">
-          <div class="dia-title">图 2 · 数据流：交流与做事 → 记进图谱 → 需要时取回 → 反哺下一步</div>
-          <table class="diagram" role="presentation">
-            <tr>
-              <td class="box" style="width:46%"><b>你（和同事）</b><br><span class="muted">提需求 · 做决定 · 纠偏</span></td>
-              <td class="arrow">↔</td>
-              <td class="box" style="width:46%"><b>AI</b><br><span class="muted">做事 · 交付 · 排错</span></td>
-            </tr>
-            <tr><td class="flow" colspan="3">↓　记下来：每次交流 · 每个决定 · 每次改动</td></tr>
-            <tr>
-              <td class="box accent" colspan="3"><b>项目知识图谱（项目大脑）</b><br><span class="muted">业务与背景 · 讨论过的方案 · 做过的决定 · 改过的记录（可追溯）</span></td>
-            </tr>
-            <tr><td class="flow good" colspan="3">↑　取回来：需要时自动找回 · 不用重复解释</td></tr>
-            <tr>
-              <td class="box"><b>代码仓库</b><br><span class="muted">代码 / 文档 / 测试</span></td>
-              <td class="arrow">+</td>
-              <td class="box good"><b>资产 = 仓库 + 图谱</b><br><span class="muted">两者合在一起，才是完整资产</span></td>
-            </tr>
-          </table>
-        </div>
-        <figcaption>交流与做事通过「记」沉淀进图谱，再通过「取」按需召回；仓库加图谱共同构成项目资产。</figcaption>
-      </figure>
-
-      <!-- ===================== 3. 具体怎么做 ===================== -->
-      <h2><span class="n">3</span>具体怎么做</h2>
-
-      <h3>3.1　四步就能跑起来</h3>
-      <p><b>第 ① 步：安装（一条命令）</b></p>
-      <pre><code>npm install -g archgraph-argo</code></pre>
-      <p>要求电脑上已装好 <b>Node.js 18 或以上</b>。</p>
-
-      <p><b>第 ② 步：部署（一条命令）</b></p>
-      <pre><code>argo-deploy</code></pre>
-      <p>它会自动适配你平时用的工具——<b>Copilot、Cursor、OpenCode、DeepSeek Harness、OpenClaw</b>。也就是说，<b>同一套方法，不管谁用什么工具都能用</b>。</p>
-
-      <p><b>第 ③ 步：前置准备（为了让 AI 能「按意思找信息」）</b></p>
-      <p>其余能力装好即用，只有这一项需要 IT 帮忙准备两样东西，然后把地址填进一个配置文件：</p>
-      <table class="text">
-        <thead><tr><th style="width:28%">准备项</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><b>图数据库</b></td><td>用来存放项目地图，供按结构查询。用已有或新起一个实例（例如 Neo4j）即可。</td></tr>
-          <tr><td><b>语义检索服务</b></td><td>让 AI 能「按意思找信息」。既能用云端服务，也能在内网自建。</td></tr>
-          <tr><td><b>配置文件</b> <code>~/.argo/.env</code></td><td>把上面的地址填进去。部署时会引导填写；已有内容会保留，之后也能改。</td></tr>
-        </tbody>
-      </table>
-      <div class="callout good"><b>内网友好</b>：内网 / 离线环境下的自建方案，我们准备了完整的部署指引，不依赖公网也能跑通。</div>
-
-      <p><b>第 ④ 步：初始化（每个新项目一次）</b></p>
-      <p>在一个新项目里，让它执行一次初始化（<code>argo init</code>）。它会自动建好这个项目的「地图」并做一次自检。<b>从这一刻起，这个项目就有记忆了。</b></p>
-
-      <figure class="dia">
-        <div class="dia-card">
-          <div class="dia-title">图 3 · 从零到可用：四步点亮一个项目</div>
-          <table class="diagram" role="presentation">
-            <tr>
-              <td class="box" style="width:21%"><b>① 安装</b><br><span class="muted">一条命令装好<br>电脑需装 Node.js 18+<br>一次即可</span></td>
-              <td class="arrow">→</td>
-              <td class="box" style="width:21%"><b>② 部署</b><br><span class="muted">一条命令完成<br>自动适配你常用的工具<br>一套方法 · 多端可用</span></td>
-              <td class="arrow">→</td>
-              <td class="box warn" style="width:21%"><b>③ 前置准备</b><br><span class="muted">填一个配置文件<br>图数据库 + 语义检索服务<br>内网可自建 · 仅此功能需要</span></td>
-              <td class="arrow">→</td>
-              <td class="box good" style="width:21%"><b>④ 初始化</b><br><span class="muted">建好项目地图 + 自检<br>每个新项目一次</span></td>
-            </tr>
-            <tr><td class="note" colspan="7">装一次 → 之后每个新项目只需第 ④ 步，这个项目就有记忆了</td></tr>
-          </table>
-        </div>
-        <figcaption>安装、部署各一条命令；前置准备为可选能力；初始化每个新项目做一次即可。</figcaption>
-      </figure>
-
-      <h3>3.2　用起来的一个小习惯：会话结束时说一声</h3>
-      <p>这套方法的核心是「<b>越用越懂你</b>」，用起来也很简单：</p>
-      <ol>
-        <li><b>遇到说不清、有歧义的地方，先聊清楚，别急着让它动手。</b>把目标和边界讲明白，让它反过来复述一下、向你确认。</li>
-        <li><b>聊到一定程度，再让它去做。</b>它足够了解业务之后，你就可以直接安排任务，它会顺着已经对齐的方向执行。</li>
-        <li><b>做错了，指出来一次，它就记住。</b>错误和教训会被记进记忆，下次遇到同类事情不再犯。</li>
-      </ol>
-      <div class="callout warn"><b>真实的例子</b>：部署时踩过的坑（某个工具的端口每次不一样、某段脚本中文会乱码）被记下来之后，后续会自动避开同类问题；每次改动也会自动留下记录。这类经验一旦沉淀，其他人就不用重新踩一遍。</div>
-
-      <figure class="dia">
-        <div class="dia-card">
-          <div class="dia-title">图 4 · 你 ↔ AI ↔ 项目地图：从「说不清」到「它懂了」的交互时序</div>
-          <table class="seq" role="presentation">
-            <tr><th style="width:40%">你</th><th style="width:20%">方向</th><th style="width:40%">AI / 项目地图</th></tr>
-            <tr><td class="seq-from">① 说出需求（一开始说不清也没关系）</td><td class="seq-arrow">你 ▶ AI</td><td class="seq-empty"></td></tr>
-            <tr><td class="seq-empty"></td><td class="seq-arrow">你 ◀ AI</td><td class="seq-from">② 它复述理解、请你确认</td></tr>
-            <tr><td class="seq-from">③ 纠正 / 确认方向</td><td class="seq-arrow">你 ▶ AI</td><td class="seq-empty"></td></tr>
-            <tr><td class="seq-empty"></td><td class="seq-arrow">AI ▶ 地图</td><td class="seq-from">④ 把决定和要点记下来</td></tr>
-            <tr><td class="seq-empty"></td><td class="seq-arrow">你 ◀ AI</td><td class="seq-from">⑤ 完成，交付给你</td></tr>
-            <tr class="seq-hot"><td>⑥ 明确说一声：本次会话结束</td><td class="seq-arrow">你 ▶ AI</td><td class="seq-empty"></td></tr>
-            <tr><td class="seq-empty"></td><td class="seq-arrow">AI ▶ 地图</td><td class="seq-from">⑦ 把这轮内容收好、记住</td></tr>
-          </table>
-          <div class="note" style="color:#9a3412">小纪律：AI 没法自己判断会话有没有结束，所以结束时请明确说一声「本次会话结束」</div>
-        </div>
-        <figcaption>说不清的地方靠交流消解，教训靠记忆沉淀；会话结束需明确告知，它才会可靠地把内容记下来。</figcaption>
-      </figure>
-      <div class="callout"><b>就这一条小习惯</b>：一次交流告一段落时，加一句「本次会话结束」。这不是客套，而是让它把这一轮沉淀下来的开关。</div>
-
-      <h3>3.3　你能得到的价值</h3>
-      <table class="value">
-        <tbody>
-          <tr>
-            <td><b>起步快</b><br>新项目几分钟就能建好「项目地图」，AI 有据可依，不再「跑偏了也没感觉」。</td>
-            <td><b>交接稳</b><br>每个产出都能追溯到地图上的记录，评审与接手不用再翻聊天记录。</td>
-          </tr>
-          <tr>
-            <td><b>越用越省</b><br>踩过的坑、定过的方案会沉淀成经验，下次自动复用，团队不必重复踩同一遍。</td>
-            <td><b>可规模化</b><br>一套方法多端可用，经验还能在项目之间复用，慢慢积累成团队的能力资产。</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3>3.4　建议的下一步</h3>
-      <ol>
-        <li><b>确认环境</b>：请平台 / IT 侧确认内网是否具备 Node.js，以及一个图数据库和一个语义检索服务（离线部署有现成指引）。</li>
-        <li><b>选一个小项目试点</b>：我们一起完整走一遍「安装 → 部署 → 初始化 → 第一个任务」，半小时内就能看到效果。</li>
-        <li><b>跑通后再推广</b>：把试点经验固化成团队模板，再扩展到更多项目。</li>
-      </ol>
-
-      <div class="sign">
-        <p>欢迎大家随时找我交流，也欢迎把试用中的问题反馈给我；我来安排第一次一起上手。</p>
-        <p>顺祝工作顺利！<br />（署名）</p>
+        <div class="footer">本邮件为内部交流使用 · 欢迎转发给相关同事</div>
       </div>
-
-      <div class="footer">本邮件为内部交流使用 · 欢迎转发给相关同事</div>
-
-    </div>
-  </div>
-</div>
+    </td></tr>
+  </table>
 </body>
 </html>

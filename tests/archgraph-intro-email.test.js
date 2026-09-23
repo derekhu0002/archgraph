@@ -67,6 +67,7 @@ test('intro-email: conveys the project-as-container core idea and the harnesses'
   const html = readHtml();
   assert.match(html, /以项目为中心/, 'should present the project-centric idea');
   assert.match(html, /麻烦|痛点/, 'should open with the pain points');
+  assert.match(html, /愿景/, 'should state the vision before the solution');
   assert.match(html, /容器/, 'should frame the project as a container');
   assert.match(html, /OpenCode/, 'should name OpenCode');
   assert.match(html, /Cursor/, 'should name Cursor');
@@ -92,7 +93,7 @@ test('intro-email: states the session-end interaction discipline', () => {
   // THEN it explicitly asks the human to announce session end
   const html = readHtml();
   assert.match(html, /会话结束/, 'should cover session end');
-  assert.match(html, /明确(告知|通知|告诉)|打个招呼/, 'should ask for an explicit session-end signal');
+  assert.match(html, /明确(告知|通知|告诉|说一声)|打个招呼/, 'should ask for an explicit session-end signal');
   assert.match(html, /小习惯|纪律/, 'should present the session-end habit as a discipline');
 });
 
