@@ -9125,6 +9125,11 @@
           "name": "release",
           "value": "archgraph-argo@0.25.0",
           "description": "发布+部署完成：npm 5055189f、全局 0.25.0、argo-deploy 22/22；argo-cost-collector 插件已注册；待宿主重启"
+        },
+        {
+          "name": "commit",
+          "value": "2a38863",
+          "description": "记忆检索 A/B 评测（MCP 关 vs 开）首轮：本仓 10 题，OFF 90%/90%/tok8030/14.5s；ON 80%/80%/tok12638/65.0s——本仓图 JSON 在仓内使 grep 命图内 id 极廉，MCP 无召回增益反增成本；方差极大需预热+重复。WP memory-retrieval-ab-wp-001"
         }
       ]
     },
@@ -9225,7 +9230,18 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Work Package"
+      "type": "Work Package",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "2a38863",
+          "description": "scripts/memory-retrieval-ab.js; tests/memory-retrieval-ab.test.js; design/KG/SystemArchitecture.json; archgraph.qea（首轮 A/B：本仓 10 题，OFF 90%/90% tok8030 wall14.5s；ON 80%/80% tok12638 wall65.0s）"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ]
     }
   ],
   "relationships": [
