@@ -9196,6 +9196,36 @@
           "description": "package.json（release archgraph-argo 0.25.0）"
         }
       ]
+    },
+    {
+      "description": "记忆检索 A/B 评测（2026-09-23，项目总管，承接业界洞察 insight-lead-milestone-two-backend-roundtrip-001）：对同一批任务、同一模型、同一提示，对比『MCP 关』与『MCP 开』两臂的 token/时间/轮次/tool 分布 与 证据召回/精度。公平性：两臂同一 opencode agent、同模型、同中性提示（不含只有开臂才可满足的 argo 中心规则）、同仓、隔离 HOME/config、--pure；唯一变量=是否挂 argo MCP。交付 scripts/memory-retrieval-ab.js（复用 R7 评分 agent-cost-eval.js）+ tests/memory-retrieval-ab.test.js（AT-memory-retrieval-ab-01..03）。首轮（本仓，10 题=4 图内/4 仓内/2 图仓联合，deepseek-flash，单次）：OFF 成功率 90%/召回 90%/精度 4.3%/token 8030/墙钟 14.5s/轮次 3.5/工具 4.4；ON 成功率 80%/召回 80%/精度 4.0%/token 12638/墙钟 65.0s/轮次 4.3/工具 5.7/后端往返 0.5。观察：本仓把 canonical 图 JSON 放在仓内，grep 可极低成本命中图内 id → MCP 此场景未带来召回增益、反而增加 token/时延；方差极大（ON 出现 109–316s 离群，疑 MCP 语义查询/rerank 冷启动+API 抖动）；两臂各有单题召回失败（模型抖动）。结论：需『预热+重复取中位数+更大/更兴构任务集+区分图内 vs 语义合成任务』才能定论；MCP 价值预期出现在『大仓/内容不在图内』而非图 JSON 就在仓内的场景。首轮原始会话 results/ab-<id>-<arm>.ndjson，报告 results/memory-retrieval-ab-report.json。",
+      "id": "memory-retrieval-ab-wp-001",
+      "name": "实现记忆检索 A/B 评测（MCP 关 vs 开）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/memory-retrieval-ab.test.js",
+          "acceptanceCriteria": "tests/memory-retrieval-ab.test.js",
+          "description": "GIVEN A/B harness 参数；WHEN 解析 --limit/--tasks/--model/--keep；THEN 正确反映到选项。",
+          "name": "AT-memory-retrieval-ab-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/memory-retrieval-ab.test.js",
+          "acceptanceCriteria": "tests/memory-retrieval-ab.test.js",
+          "description": "GIVEN 写入两臂配置；WHEN 比较 off/on；THEN 模型与 provider 相同，唯一差异是 on 臂挂载 argo MCP（单变量）。",
+          "name": "AT-memory-retrieval-ab-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/memory-retrieval-ab.test.js",
+          "acceptanceCriteria": "tests/memory-retrieval-ab.test.js",
+          "description": "GIVEN harness 与任务集；WHEN 检查；THEN 复用 R7 scorer（agent-cost-eval.js）且每题均有 oracle。",
+          "name": "AT-memory-retrieval-ab-03",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -11294,7 +11324,8 @@
       "description": "R7 度量视图（2026-09-23）：跨「意图图（KG 语义目录/路由层）+ 仓（无界内容源，多数由 Agent 注入）」两后端的 Agent 成本—召回度量。以任务 oracle 证据集为召回上界，对真实 Agent 会话做确定性评分（轮次 / 工具调用按图|仓分类 / 后端往返次数 / token / 时延 / 证据召回率与精度），用于在不牺牲召回的前提下定位并验证性能优化。",
       "included_elements": [
         "agent-cost-eval-wp-001",
-        "agent-cost-profiler-001"
+        "agent-cost-profiler-001",
+        "memory-retrieval-ab-wp-001"
       ]
     }
   ]
