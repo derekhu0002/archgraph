@@ -8840,17 +8840,22 @@
           "name": "commit",
           "value": "e8639ef",
           "description": "docs/archgraph-intro-email.html; tests/archgraph-intro-email.test.js（重构为邮件安全排版：表格示意图取代内联 SVG；称呼改『大家好』群发）"
+        },
+        {
+          "name": "commit",
+          "value": "5f052c0",
+          "description": "docs/archgraph-intro-email.html; tests/archgraph-intro-email.test.js（重写：先痛点后方案、浅显语言、弱化术语、称呼『大家好』）"
         }
       ],
-      "description": "面向利益相关者（同事，对 AI/Agent 有基本认知、但不了解技术细节）的 ArchGraph 框架使用介绍邮件（群发）：以『项目为单元/容器』的核心理念为主线，讲清 ① 基础操作（安装 archgraph-argo → argo-deploy → 前置准备 Neo4j + 向量服务 + 配置 ~/.argo/.env → argo init 初始化工作区）；② 核心理念（以项目为单元、为容器，用 OpenCode/Cursor 打开项目并与 Agent 基于同一张项目地图对话）；③ 知识图谱与资产构建（Agent 记忆与协作设计写入图谱，资产 = 代码仓库 + 知识图谱）；④ 业务理解与进化（通过交流消解歧义、反馈入记忆不再重犯）；⑤ 交互纪律（会话结束需明确告知 Agent）。称呼为『大家好』（面向多位同事）；突出目标、弱化技术细节；配 4 张邮件安全的表格示意图（项目容器、四步安装部署、资产数据流、人机交互时序），不依赖内联 SVG 与外链图片，以兼容邮件客户端渲染。产出 docs/archgraph-intro-email.html（自包含 HTML），配套可执行验收测试 tests/archgraph-intro-email.test.js。",
+      "description": "面向利益相关者（同事，对 AI/Agent 有基本认知、但不了解技术细节）的 ArchGraph 框架使用介绍邮件（群发）。叙述主张：先痛点后方案、语言浅显、弱化产品与术语（不出现 ARGO / 架构术语），把方法作为建议性解决方案介绍；开场直接说明好处（让 AI 围绕项目工作、越用越懂、减少反复解释与返工、经验可沉淀交接）。内容：① 用 AI 的常见痛点（不懂项目、每次从头解释、反复返工、同错再犯、经验不留）；② 办法（以项目为中心、项目当容器、用 OpenCode/Cursor 打开项目聊天、越用越懂、同一张地图）；③ 怎么开始用（安装 npm install -g archgraph-argo → 部署 argo-deploy → 前置准备 图数据库+语义检索服务 ~/.argo/.env → 初始化 argo init）；④ 沉淀为资产（知识图谱，资产=仓库+图谱）；⑤ 让它越来越懂你 + 交互纪律（会话结束需明确告知）；⑥ 价值（起步快/交接稳/越用越省/可规模化）；⑦ 下一步。称呼『大家好』；配 4 张邮件安全表格示意图（项目容器/四步开始/资产数据流/人机交互时序），不依赖内联 SVG 与外链图片。产出 docs/archgraph-intro-email.html（自包含 HTML），配套可执行验收测试 tests/archgraph-intro-email.test.js。",
       "id": "wp-archgraph-intro-email-001",
       "name": "编制 ArchGraph 框架使用介绍邮件（面向利益相关者）",
       "parent": "1249",
       "testcases": [
         {
-          "acceptanceCriteria": "tests/archgraph-intro-email.test.js",
-          "description": "GIVEN ArchGraph 框架使用介绍邮件的仓库交付物 docs/archgraph-intro-email.html；WHEN 读取 HTML 并检查意图图谱元素；THEN HTML 为自包含、收件人为多位同事（称呼『大家好』）、采用邮件安全排版（不含内联 SVG 与外链图片）、覆盖五大内容（基础操作安装/部署/前置准备、项目为单元/容器核心理念、知识图谱与资产=仓库+图谱、业务理解与进化、会话结束交互纪律），包含安装部署命令（npm install -g archgraph-argo / argo-deploy / argo init）、面向利益相关者的价值实例与至少 4 张表格示意图（项目容器/安装流程/数据流/人机交互时序）；图谱中元素为 Work Package、含 doc 属性与 GIVEN-WHEN-THEN 用例，且是视图 180 的成员。",
           "Input": "tests/archgraph-intro-email.test.js",
+          "acceptanceCriteria": "tests/archgraph-intro-email.test.js",
+          "description": "GIVEN ArchGraph 框架使用介绍邮件的仓库交付物 docs/archgraph-intro-email.html；WHEN 读取 HTML 并检查意图图谱元素；THEN HTML 为自包含、收件人为多位同事（称呼『大家好』）、邮件安全排版（不含内联 SVG 与外链图片）、先痛点后方案；覆盖五大内容（基础操作安装/部署/前置准备/初始化、以项目为中心/项目当容器的办法、知识图谱与资产=仓库+图谱、越用越懂与交互纪律、价值与下一步），包含命令（npm install -g archgraph-argo / argo-deploy / argo init）与至少 4 张表格示意图；图谱中元素为 Work Package、含 doc 属性与 GIVEN-WHEN-THEN 用例，且是视图 180 的成员。",
           "name": "AT-wp-archgraph-intro-email-001-01",
           "type": "Acceptance Test"
         }
