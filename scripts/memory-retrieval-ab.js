@@ -56,6 +56,47 @@ function resolveArgoEnv() {
   return { ...globalEnv, ...repoEnv };
 }
 
+// The exact env FILE the MCP should trust. Because each arm runs with an
+// isolated HOME (single-variable fairness), the MCP's getArgoEnvPath() would
+// otherwise fall back to a repo-local `argo/.env` that may be unreadable, and
+// every graph tool would fail with SEMANTIC_OPERATOR_ERROR. We therefore hand
+// the on arm an explicit ARGO_ENV_FILE.
+function argoEnvFilePath() {
+  const globalEnv = path.join(os.homedir(), '.argo', '.env');
+  if (fs.existsSync(globalEnv)) return globalEnv;
+  const repoEnv = path.join(ROOT, '.argo', '.env');
+  if (fs.existsSync(repoEnv)) return repoEnv;
+  return null;
+}
+
+// Pure: the opencode invocation args for a headless arm. `--auto` auto-approves
+// permissions so tools never sit waiting for approval (which would contaminate
+// wall-time and turn counts); `--pure` keeps host plugins out for fairness.
+function buildRunArgs(model, prompt) {
+  return ['run', '--pure', '--auto', '--format', 'json', '-m', `ab/${model}`, prompt];
+}
+
+// Pure: the process environment for one arm. Both arms share the isolated HOME;
+// ONLY the on arm receives the graph configuration (ARGO_REPO_ROOT + the argo
+// env values + ARGO_ENV_FILE), so the single measured variable stays "is the
+// argo MCP mounted".
+function buildArmEnv(arm, home, argoEnv, envFile) {
+  const env = {
+    ...process.env,
+    USERPROFILE: home,
+    HOME: home,
+    XDG_CONFIG_HOME: path.join(home, '.config'),
+    APPDATA: path.join(home, 'AppData'),
+    LOCALAPPDATA: path.join(home, 'AppData', 'Local'),
+  };
+  if (arm === 'on') {
+    env.ARGO_REPO_ROOT = ROOT;
+    Object.assign(env, argoEnv);
+    if (envFile) env.ARGO_ENV_FILE = envFile;
+  }
+  return env;
+}
+
 function parseArgs(argv) {
   const a = { limit: 0, tasks: null, seed: SEED_PATH, model: 'deepseek-flash', keep: false };
   for (let i = 0; i < argv.length; i++) {
@@ -103,20 +144,12 @@ function writeArmConfig(arm, { model, argoEnv }) {
 
 const NEUTRAL_HEADER = 'You are working in this repository. Find the requested information using the tools available to you, then answer concisely and end with the concrete answer (exact ids / file paths). Do not guess.';
 
-function runTask(arm, home, task, { model, argoEnv }) {
+function runTask(arm, home, task, { model, argoEnv, envFile }) {
   const prompt = `${NEUTRAL_HEADER}\n\nRequest: ${task.question}`;
-  const env = {
-    ...process.env,
-    USERPROFILE: home,
-    HOME: home,
-    XDG_CONFIG_HOME: path.join(home, '.config'),
-    APPDATA: path.join(home, 'AppData'),
-    LOCALAPPDATA: path.join(home, 'AppData', 'Local'),
-    ...(arm === 'on' ? { ARGO_REPO_ROOT: ROOT, ...argoEnv } : {}),
-  };
+  const env = buildArmEnv(arm, home, argoEnv, envFile);
   const started = Date.now();
   const bin = fs.existsSync(OPENCODE_BIN) ? OPENCODE_BIN : 'opencode';
-  const res = spawnSync(bin, ['run', '--pure', '--format', 'json', '-m', `ab/${model}`, prompt], {
+  const res = spawnSync(bin, buildRunArgs(model, prompt), {
     cwd: ROOT, env, encoding: 'utf8', timeout: 600000, maxBuffer: 64 * 1024 * 1024, shell: !fs.existsSync(OPENCODE_BIN),
   });
   const raw = String(res.stdout || '');
@@ -153,6 +186,7 @@ function main(argv) {
   if (args.limit > 0) tasks = tasks.slice(0, args.limit);
 
   const argoEnv = resolveArgoEnv();
+  const envFile = argoEnvFilePath();
   const universe = buildUniverse({ repoRoot: ROOT, graphPath: GRAPH_PATH });
   const arms = ['off', 'on'];
   const homes = {};
@@ -161,7 +195,7 @@ function main(argv) {
   const rows = [];
   for (const task of tasks) {
     for (const arm of arms) {
-      const r = runTask(arm, homes[arm], task, { model: args.model, argoEnv });
+      const r = runTask(arm, homes[arm], task, { model: args.model, argoEnv, envFile });
       const scored = scoreTask(r.parsed, { id: task.id, dimension: task.dimension, oracle: task.oracle }, universe);
       const row = {
         taskId: task.id, dimension: task.dimension, arm,
@@ -241,6 +275,6 @@ function main(argv) {
   return 0;
 }
 
-module.exports = { parseArgs, resolveArgoEnv, writeArmConfig, runTask, groupByScenario, main };
+module.exports = { parseArgs, resolveArgoEnv, argoEnvFilePath, buildRunArgs, buildArmEnv, writeArmConfig, runTask, groupByScenario, main };
 
 if (require.main === module) process.exit(main());
