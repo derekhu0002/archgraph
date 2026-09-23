@@ -113,6 +113,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     // 3) argo-init skill (+ global ea-human-reconcile skill)
     assert.ok(fs.existsSync(path.join(skillsRoot, 'argo-init', 'SKILL.md')));
     assert.ok(fs.existsSync(path.join(skillsRoot, 'ea-human-reconcile', 'SKILL.md')), 'Copilot ea-human-reconcile skill must be deployed');
+    assert.ok(fs.existsSync(path.join(skillsRoot, 'agent-search-diagnosis', 'SKILL.md')), 'Copilot agent-search-diagnosis skill must be deployed');
     // 4) global rule
     assert.ok(fs.existsSync(path.join(promptsRoot, 'archgraph.instructions.md')));
 
@@ -186,6 +187,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     // 8) OpenCode skill + global rule.
     assert.ok(fs.existsSync(path.join(openCodeSkillsRoot, 'argo-init', 'SKILL.md')), 'OpenCode skill must be deployed');
     assert.ok(fs.existsSync(path.join(openCodeSkillsRoot, 'ea-human-reconcile', 'SKILL.md')), 'OpenCode ea-human-reconcile skill must be deployed');
+    assert.ok(fs.existsSync(path.join(openCodeSkillsRoot, 'agent-search-diagnosis', 'SKILL.md')), 'OpenCode agent-search-diagnosis skill must be deployed');
     assert.ok(fs.existsSync(openCodeAgentsPath), 'OpenCode global AGENTS.md must be written');
     assert.match(fs.readFileSync(openCodeAgentsPath, 'utf8'), /ArchGraph ARGO Workflow Rules/);
 

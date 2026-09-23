@@ -788,8 +788,11 @@ $skillDest = Join-Path $SkillsRoot 'argo-init'
 Write-Host "[4/22] argo\skills\argo-init -> $skillDest"
 Copy-Tree -Source $skillSrc -Destination $skillDest
 $reconcileSkillSrc = Join-Path (Join-Path $argoDir 'skills') 'ea-human-reconcile'
+$diagSkillSrc = Join-Path (Join-Path $argoDir 'skills') 'agent-search-diagnosis'
 Write-Host '  argo\skills\ea-human-reconcile -> $SkillsRoot\ea-human-reconcile (EA human draft reconcile skill)'
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $SkillsRoot 'ea-human-reconcile')
+Write-Host '  argo\skills\agent-search-diagnosis -> $SkillsRoot\agent-search-diagnosis (agent search diagnosis skill)'
+Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $SkillsRoot 'agent-search-diagnosis')
 
 $ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
 $ruleDest = Join-Path $PromptsRoot 'archgraph.instructions.md'
@@ -807,6 +810,8 @@ Write-Host "[7/22] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
 Copy-Tree -Source $skillSrc -Destination $cursorSkillDest
 Write-Host '  argo\skills\ea-human-reconcile -> $CursorSkillsRoot\ea-human-reconcile (Cursor)'
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $CursorSkillsRoot 'ea-human-reconcile')
+Write-Host '  argo\skills\agent-search-diagnosis -> $CursorSkillsRoot\agent-search-diagnosis (Cursor)'
+Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $CursorSkillsRoot 'agent-search-diagnosis')
 
 $mcpBridgeSrc = Join-Path $argoDir 'mcp-bridges'
 $mcpBridgeDest = Join-Path $CursorMcpBridgesRoot ''
@@ -818,6 +823,8 @@ Write-Host "[8/22] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
 Copy-Tree -Source $skillSrc -Destination $openCodeSkillDest
 Write-Host '  argo\skills\ea-human-reconcile -> $OpenCodeSkillsRoot\ea-human-reconcile (OpenCode)'
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $OpenCodeSkillsRoot 'ea-human-reconcile')
+Write-Host '  argo\skills\agent-search-diagnosis -> $OpenCodeSkillsRoot\agent-search-diagnosis (OpenCode)'
+Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $OpenCodeSkillsRoot 'agent-search-diagnosis')
 
 Write-Host "[9/22] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
 Add-AgentsRule -AgentsPath $OpenCodeAgentsPath -RulePath $ruleSrc
@@ -857,6 +864,8 @@ if ($SkipDsh) {
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $dshSkillDest
     Write-Host '  argo\skills\ea-human-reconcile -> $DshHome\skills\ea-human-reconcile (DeepSeek Harness skill)'
     Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-reconcile') -Destination (Join-Path (Join-Path $DshHome 'skills') 'ea-human-reconcile')
+    Write-Host '  argo\skills\agent-search-diagnosis -> $DshHome\skills\agent-search-diagnosis (DeepSeek Harness skill)'
+    Copy-Tree -Source $diagSkillSrc -Destination (Join-Path (Join-Path $DshHome 'skills') 'agent-search-diagnosis')
 
     Write-Host "[17/22] argo\rules\<WakeupGuideline> -> $DshHome\plugins\dsh-argo-wakeup\index.js (DeepSeek Harness wakeup plugin)"
     $wakeupDshPath = New-DshWakeupPlugin -DshHome $DshHome -RuleText $ruleSrcContent
@@ -918,8 +927,10 @@ if ($SkipOpenClaw) {
 
     Write-Host "[21/22] argo\skills\argo-init -> $openClawSkillDest (OpenClaw managed skill, all agents)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $openClawSkillDest
-    Write-Host '  argo\skills\ea-human-reconcile -> $OpenClawHome\skills\ea-human-reconcile (OpenClaw managed skill, all agents)'
-    Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-reconcile') -Destination (Join-Path (Join-Path $OpenClawHome 'skills') 'ea-human-reconcile')
+Write-Host '  argo\skills\ea-human-reconcile -> $OpenClawHome\skills\ea-human-reconcile (OpenClaw managed skill, all agents)'
+Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-reconcile') -Destination (Join-Path (Join-Path $OpenClawHome 'skills') 'ea-human-reconcile')
+Write-Host '  argo\skills\agent-search-diagnosis -> $OpenClawHome\skills\agent-search-diagnosis (OpenClaw managed skill, all agents)'
+Copy-Tree -Source $diagSkillSrc -Destination (Join-Path (Join-Path $OpenClawHome 'skills') 'agent-search-diagnosis')
 
     Write-Host '  OpenClaw injects AGENTS.md into Project Context on every session, so the wakeup'
     Write-Host '  gate (UNCONDITIONAL STARTUP GATE) is active on the next OpenClaw session; restart'

@@ -15,6 +15,7 @@
     "argo/mcp-bridges",
     "argo/skills/argo-init",
     "argo/skills/ea-human-reconcile",
+    "argo/skills/agent-search-diagnosis",
     "argo/rules",
     "argo/package.json",
     "argo/.env.example",

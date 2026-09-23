@@ -9336,6 +9336,43 @@
           "description": "design/KG/SystemArchitecture.json（边界元素）; tests/memory-retrieval-profile.test.js（AT-memory-retrieval-profile-04）; archgraph.qea"
         }
       ]
+    },
+    {
+      "description": "Agent 搜索诊断 Skill（2026-09-23，项目总管）。把**一次 Agent 会话**变成一份自包含的『诊断包』：现场出诊断总结 + 聚合关键数据到一个目录，用户打包回传即可进一步分析优化。数据源（人类伙伴选：两者结合）：主=宿主会话 NDJSON（opencode export，含每个工具完整入参/输出+时间戳+tokens）；辅=框架后台日志 <workspace>/.argo/temp/agent-cost-log.ndjson。输出（固定目录，bundle 版本 temp2.2）：<workspace>/.argo/temp/diagnosis/<session-id>/{diagnosis.md, metrics.json, session.ndjson, cost-log.slice.ndjson, manifest.json}。脚本 argo/scripts/agentSearchDiagnose.js（零依赖、确定性、只读）：算 轮次/工具调用(图·仓)/后端往返/双轨耗时(model·mcp·repo)/token 随轮次增长/过度搜索信号(重复调用、重复读同一文件、空结果·失败、最长无进展连续)/最贵调用，并写 diagnosis.md（含启发式建议，供 Agent 复核补解读）。SKILL.md 流程：导出会话→跑脚本→Agent 复核补『根因解读』→交付 bundle 路径供打包。部署：随 argo-deploy 下发到 Copilot/Cursor/OpenCode/DSH/OpenClaw（package.json files + install-argo.ps1 均已加）。验收 tests/agent-search-diagnosis.test.js（AT-01..04）。定位：与 R7 harness（批量化 A/B）、成本日志（后台指标）互补——本 skill 面向『单会话现场诊断』。",
+      "id": "agent-search-diagnosis-skill-001",
+      "name": "agent-search-diagnosis（Agent 搜索诊断 Skill）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/agent-search-diagnosis.test.js",
+          "acceptanceCriteria": "tests/agent-search-diagnosis.test.js",
+          "description": "GIVEN 含重复/空结果的会话；WHEN diagnose；THEN 得出 轮次/工具调用/后端往返/双轨耗时(model·mcp·repo)/token 增长/过度搜索信号(重复、空手、无进展连续)/最贵调用。",
+          "name": "AT-agent-search-diagnosis-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-search-diagnosis.test.js",
+          "acceptanceCriteria": "tests/agent-search-diagnosis.test.js",
+          "description": "GIVEN 会话与日志；WHEN writeBundle；THEN 在固定目录 <ws>/.argo/temp/diagnosis/<sid>/ 产出 diagnosis.md/metrics.json/session.ndjson/cost-log.slice.ndjson/manifest.json（bundle 版本 temp2.2）。",
+          "name": "AT-agent-search-diagnosis-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-search-diagnosis.test.js",
+          "acceptanceCriteria": "tests/agent-search-diagnosis.test.js",
+          "description": "GIVEN 后台日志；WHEN 切片；THEN cost-log.slice.ndjson 仅保留属于该会话的记录。",
+          "name": "AT-agent-search-diagnosis-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-search-diagnosis.test.js",
+          "acceptanceCriteria": "tests/agent-search-diagnosis.test.js",
+          "description": "GIVEN 框架包与安装器；WHEN 检查；THEN skill+脚本存在、npm files 包含该 skill、install-argo 将其部署到各宿主。",
+          "name": "AT-agent-search-diagnosis-04",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Skill"
     }
   ],
   "relationships": [
@@ -11437,7 +11474,8 @@
         "agent-cost-profiler-001",
         "memory-retrieval-ab-wp-001",
         "memory-retrieval-eval-framework-001",
-        "graph-gain-regime-boundary-001"
+        "graph-gain-regime-boundary-001",
+        "agent-search-diagnosis-skill-001"
       ]
     }
   ]
