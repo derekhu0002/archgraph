@@ -47,3 +47,18 @@ test('AT-memory-retrieval-profile-03: the two comparison designs are documented 
   // comparison (A-repo vs B-repo) is a distinct design recorded in the KG.
   assert.match(src, /single variable = the memory backend/i, 'harness must state its single-variable design');
 });
+
+test('AT-memory-retrieval-profile-04: the regime/interaction boundary (why Graph gain is hard to isolate) is recorded', () => {
+  const graph = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'KG', 'SystemArchitecture.json'), 'utf8'));
+  const els = graph.elements || [];
+  const boundary = els.find(e => e.id === 'graph-gain-regime-boundary-001');
+  assert.ok(boundary, 'the regime/interaction boundary element must exist');
+  const d = boundary.description || '';
+  for (const k of ['交互协议', '知识库质量', '纵向', '重建', '捕获']) {
+    assert.ok(d.includes(k), `boundary note must mention ${k}`);
+  }
+  // the refined claim is: produce a better-retrievable KB that does not degrade at scale
+  assert.ok(d.includes('更好检索') || d.includes('不退化'), 'boundary note must reframe the claim');
+  const fw = els.find(e => e.id === 'memory-retrieval-eval-framework-001');
+  assert.ok(fw, 'the scenario×scale×metric profile framework element must exist');
+});

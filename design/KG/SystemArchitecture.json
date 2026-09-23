@@ -9313,6 +9313,22 @@
           "description": "data/eval-seeds/agent-cost-seed.json（scenario/scale 标签）; scripts/memory-retrieval-ab.js（groupByScenario 剖面）; tests/memory-retrieval-profile.test.js（AT-01..03）; design/KG/SystemArchitecture.json; archgraph.qea"
         }
       ]
+    },
+    {
+      "description": "Graph 增益的可测边界（2026-09-23，项目总管，对评测框架 memory-retrieval-eval-framework-001 的补充）。【为什么 Graph 增益难以干净隔离】A-graph 不只是检索组件，而是一套**制度**：①它规范 Agent 如何生产/提炼/组织知识（塑造仓的内容与结构）；②它规范**人与 Agent 的交互协议**（人提醒 Agent 何时该记什么、会话结束提醒收尾→Agent 写图）。因此『仓=知识库』是被 (规则 + MCP + 人机协议) 三方共同塑造的产物。任何对照制度（哪怕是明确指定的 B）也会以不同方式塑造交互与结构。→ **不存在『只换检索机制』的干净反事实**；E1 只测工具增量、E2/E2' 是制度对照而非机制隔离。【据此的三个对象】①检索机制（grep vs MCP，可隔离、低价值）；②知识库质量（制度产物：覆盖/结构/溯源/新鲜/冗余）；③交互协议（制度的机制：规则 + 人机触发）。检索性能 = f(机制, 知识库质量)，框架优势主要在②，而②由建仓过程与③共同产生。【把主张重构】从『我们检索更快/更准』改为『我们产出并维持一个**更好检索、且随规模不退化**的知识库』，并按此评测。【可行的评测策略】A. 同制度纵向（longitudinal）：同一项目随时间/规模增长，量『检索能力 vs 知识库规模』与『该记的有没有记住』；B. 跳制度同源重建（E2）：同一原始素材→分别按 A 制度与**明确指定的** B 制度建仓，比 (检索剖面, 知识库质量, 建仓成本, 人力)；C. 知识库召回 oracle（recapture）：定义『一个好知识库本应包含的知识项』，量各制度的**捕获率**——直接测『记住该记的』，与检索部分解耦。【新增指标（知识库质量）】coverage（应存在项覆盖率）、structure（图连通/视图归属）、provenance（commit+path 关联）、freshness（陈旧度）、redundancy（去重）。这些并入剖面矩阵。",
+      "id": "graph-gain-regime-boundary-001",
+      "name": "Graph 增益的可测边界：制度/交互维度与知识库质量",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/memory-retrieval-profile.test.js",
+          "acceptanceCriteria": "tests/memory-retrieval-profile.test.js",
+          "description": "GIVEN 评测框架与边界元素；WHEN 读图谱校验；THEN 边界元素存在且描述涵盖交互协议/知识库质量/纵向/E2重建/捕获，并已重构主张（更好检索、随规模不退化）。",
+          "name": "AT-memory-retrieval-profile-04",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -11413,7 +11429,8 @@
         "agent-cost-eval-wp-001",
         "agent-cost-profiler-001",
         "memory-retrieval-ab-wp-001",
-        "memory-retrieval-eval-framework-001"
+        "memory-retrieval-eval-framework-001",
+        "graph-gain-regime-boundary-001"
       ]
     }
   ]
