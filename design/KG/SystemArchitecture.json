@@ -9492,6 +9492,11 @@
           "name": "commit",
           "value": "b736ad9",
           "description": "package.json（release 0.26.1）"
+        },
+        {
+          "name": "commit",
+          "value": "baf2488",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js（projection note 仅在节省≥160B 时附，消除负收益；omitted.bytes）; scripts/read-projection-gain.js（量化测试）; tests/read-projection-gain.test.js（AT-01..02）。实测：全 65 视图默认读 -51.5%（med 36.4/p90 73.7/max 84.5）；含 20 个账本重元素的合并 -42%（节 149k tokens / 85 次读）；语义 15/15 命中带 matchedSnippet（均 62 tokens）"
         }
       ]
     }
