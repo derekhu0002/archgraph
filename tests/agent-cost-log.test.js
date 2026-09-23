@@ -8,7 +8,6 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const log = require('../argo/scripts/graph-rag/agentCostLog.js');
-const profiler = require('../argo/scripts/graph-rag/agentCostProfiler.js');
 
 function tmpWorkspace() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'argo-cost-log-'));
@@ -18,10 +17,11 @@ function logFileFor(root) {
   return path.join(root, '.argo', 'temp', 'agent-cost-log.ndjson');
 }
 
-// External-view acceptance tests for the consolidated agent-cost log: every
-// source writes ONE file at a fixed path (so the user fetches one thing), the
-// host collector captures all tool calls on both backends, the MCP fallback
-// never double-counts, and nothing changes retrieval.
+// External-view acceptance tests for the consolidated agent-cost log. By the
+// user's decision there is NO MCP-side instrumentation: only the OpenCode host
+// plugin records, because only it sees EVERY action (MCP calls, graph writes,
+// repository calls) plus token usage — an MCP-only record would be incomplete.
+// The tests assert: one fixed path, complete host capture, and no MCP hook.
 
 test('AT-agent-cost-log-01: one fixed path; tools classify across both backends', () => {
   const ws = tmpWorkspace();
@@ -66,74 +66,54 @@ test('AT-agent-cost-log-02: appendRecord writes the single file, honors disable,
   }
 });
 
-test('AT-agent-cost-log-03: host collector records every tool call (both backends) + token usage', () => {
+test('AT-agent-cost-log-03: host hooks record EVERY action — MCP call, graph write, repo call, usage', () => {
   const ws = tmpWorkspace();
   try {
-    log.markHostCollector(ws);
-    assert.equal(log.hostCollectorActive(ws), true, 'marking activates the host collector');
     const hooks = log.createHostCollectorHooks(ws);
-    // a graph call and a repo call, in order
+    // an MCP read (getSystemArchitecture), a graph write, and a repo call, in order
     hooks.before({ callID: 'c1', sessionID: 's', tool: 'argo_getSystemArchitecture', args: { query: { intent: 'x' } } });
     hooks.after({ callID: 'c1', sessionID: 's', tool: 'argo_getSystemArchitecture' }, { output: 'found overseer-vision-001' });
-    hooks.before({ callID: 'c2', sessionID: 's', tool: 'grep', args: { pattern: 'foo' } });
-    hooks.after({ callID: 'c2', sessionID: 's', tool: 'grep' }, { output: 'a'.repeat(80) });
+    hooks.before({ callID: 'c2', sessionID: 's', tool: 'argo_applySystemArchitectureMutation', args: { mutations: [] } });
+    hooks.after({ callID: 'c2', sessionID: 's', tool: 'argo_applySystemArchitectureMutation' }, { output: '{"status":"passed"}' });
+    hooks.before({ callID: 'c3', sessionID: 's', tool: 'grep', args: { pattern: 'foo' } });
+    hooks.after({ callID: 'c3', sessionID: 's', tool: 'grep' }, { output: 'a'.repeat(80) });
     // assistant usage event
     hooks.event({ event: { properties: { info: { id: 'm1', role: 'assistant', sessionID: 's', tokens: { input: 100, output: 20, reasoning: 5 }, cost: 0.02 } } } });
 
     const { records } = log.readLog(ws);
     const tools = records.filter(r => r.type === 'tool');
-    assert.equal(tools.length, 2);
-    assert.deepEqual(tools.map(r => r.backend), ['graph', 'repo'], 'both backends land in the ONE log');
-    assert.equal(tools[1].kind, 'read');
-    assert.ok(tools[1].resultTokens > 0);
+    assert.equal(tools.length, 3, 'every action is recorded (MCP call, graph write, repo call)');
+    assert.deepEqual(tools.map(r => `${r.backend}/${r.kind}`), ['graph/read', 'graph/write', 'repo/read']);
+    assert.ok(tools[2].resultTokens > 0);
     assert.ok(typeof tools[0].durationMs === 'number');
     const usage = records.filter(r => r.type === 'usage');
     assert.equal(usage.length, 1);
     assert.equal(usage[0].tokens.input, 100);
     assert.equal(usage[0].cost, 0.02);
-
-    hooks.dispose();
-    assert.equal(log.hostCollectorActive(ws), false, 'dispose clears the marker');
   } finally { fs.rmSync(ws, { recursive: true, force: true }); }
 });
 
-test('AT-agent-cost-log-04: MCP fallback records only when no host collector, and never logs raw args', () => {
-  const ws = tmpWorkspace();
-  try {
-    // no host marker -> MCP fallback writes source:"mcp"
-    profiler.traceToolCall(ws, {
-      tool: 'getSystemArchitecture', args: { query: { intent: '项目愿景' }, apiKey: 'super-secret' },
-      result: { content: [{ type: 'text', text: 'found overseer-vision-001' }] }, durationMs: 12,
-    });
-    let recs = log.readLog(ws).records;
-    assert.equal(recs.length, 1);
-    assert.equal(recs[0].source, 'mcp');
-    assert.equal(recs[0].args.intentPreview, '项目愿景');
-    assert.ok(!JSON.stringify(recs[0]).includes('super-secret'), 'raw argument values must never be logged');
-
-    // host collector active -> MCP fallback stays silent (no double-counting)
-    log.markHostCollector(ws);
-    profiler.traceToolCall(ws, { tool: 'read', args: {}, result: null, durationMs: 1 });
-    assert.equal(log.readLog(ws).records.length, 1, 'MCP fallback must not write while a host collector owns the log');
-  } finally { fs.rmSync(ws, { recursive: true, force: true }); }
-});
-
-test('AT-agent-cost-log-05: server wires the recorder; the plugin ships+registers; no log-retrieval interface', () => {
+test('AT-agent-cost-log-04: the MCP server is NOT instrumented; the plugin ships, registers, and is the sole writer', () => {
+  // GIVEN the framework MCP server
   const server = fs.readFileSync(path.join(ROOT, 'argo', 'scripts', 'argo-mcp-server.js'), 'utf8');
-  assert.match(server, /agentCostProfiler\.js/, 'server must require the recorder');
-  assert.match(server, /traceToolCall\(/, 'server must trace tool calls');
+  // THEN it carries NO agent-cost instrumentation (the host plugin is the only writer)
+  assert.doesNotMatch(server, /agentCostProfiler/, 'no MCP-side profiler may remain');
+  assert.doesNotMatch(server, /agentCostLog/, 'no MCP-side log hook may remain');
   assert.doesNotMatch(server, /getAgentCostDigest/, 'no log-retrieval MCP tool may be added');
+  // AND the recorder module exposes only record/read helpers (no summarise/CLI/marker surface)
+  for (const absent of ['summarize', 'parseHostSession', 'scoreEvidence', 'main', 'hostCollectorActive', 'markHostCollector']) {
+    assert.equal(typeof log[absent], 'undefined', `recorder must not expose ${absent}`);
+  }
 
-  // the plugin ships with the framework and wires the shared host hooks
+  // the host plugin ships with the framework and wires the shared host hooks
   const pluginPath = path.join(ROOT, 'argo', 'plugins', 'argo-cost-collector.js');
   assert.ok(fs.existsSync(pluginPath), 'the host collector plugin must exist');
   const plugin = fs.readFileSync(pluginPath, 'utf8');
   assert.match(plugin, /createHostCollectorHooks/, 'plugin must use the shared host hooks');
-  assert.match(plugin, /markHostCollector/, 'plugin must mark host-collector activity');
   assert.match(plugin, /tool\.execute\.after/, 'plugin must record tool calls');
   assert.match(plugin, /\bevent\b/, 'plugin must record usage events');
 
-  // and the installer registers it (so a deploy activates the complete collector)
+  // and the installer registers it (a deploy activates the complete collector)
   const installer = fs.readFileSync(path.join(ROOT, 'install-argo.ps1'), 'utf8');
   assert.match(installer, /argo-cost-collector\.js/, 'installer must register the collector plugin');
 });

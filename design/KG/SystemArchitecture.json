@@ -9119,7 +9119,7 @@
       ]
     },
     {
-      "description": "ARGO 框架内建的 Agent 成本汇总日志（2026-09-23，项目总管；承接业界洞察 insight-lead-milestone-two-backend-roundtrip-001 的 R7）。设计：把「Agent 成本」度量汇成**一份日志、一个固定路径**，人类伙伴一次取全，无需逐处拼凑；**不提供取数接口**（无 MCP 工具、无 CLI）。固定路径：<workspace>/.argo/temp/agent-cost-log.ndjson（追加式、默认 5MB 轮转为 .1、ARGO_COST_PROFILER=0 关）。两个来源写同一文件、各带 source：①host —— OpenCode 插件 argo/plugins/argo-cost-collector.js，经 tool.execute.before/after 采集**全部工具调用（图侧+仓侧）**与 event 的 assistant tokens/cost；②mcp —— ARGO MCP 服务端（agentCostProfiler.js）兜底，仅当宿主采集器未激活时写（宿主写标记 .agent-cost-host-collector，marker 过期 12h 失效），避免重复计数。记录 schema：公共 at/pid/source/type；type=tool {tool,backend(graph|repo|framework|other),kind(read|write|framework|other),durationMs,ok,errorKind?,args{keys,bytes,intentPreview?},resultBytes,resultTokens,sessionID?,callID?}；type=usage {messageID,tokens{input,output,reasoning,cache},cost}。args 仅键名+字节数+intent 预览，绝不记原始取值。只观测已产出结果，不改检索/缩候选/改内容。交付：argo/scripts/graph-rag/agentCostLog.js（单一日志 + 宿主钩子逻辑 createHostCollectorHooks）+ agentCostProfiler.js（MCP 兜底）+ argo/plugins/argo-cost-collector.js（OpenCode 插件）+ argo/scripts/argo-mcp-server.js（callTool 旁路）+ install-argo.ps1（注册插件）+ docs/agent-cost-profiler.md + tests/agent-cost-log.test.js（AT-agent-cost-log-01..05）+ tests/argo-deploy.test.js（断言部署与注册）。",
+      "description": "ARGO 框架内建的 Agent 成本汇总日志（2026-09-23，项目总管；承接业界洞察 insight-lead-milestone-two-backend-roundtrip-001 的 R7）。设计：把「Agent 成本」度量汇成一份日志、一个固定路径，人类伙伴一次取全；不提供取数接口（无 MCP 工具、无 CLI）。**唯一采集器 = OpenCode 宿主插件** argo/plugins/argo-cost-collector.js（install-argo.ps1 注册）：经 tool.execute.before/after 记录**每一个工具调用**（MCP 接口调用 / 写图调用 / 仓侧 read·grep·glob 全都记）+ event 记录 assistant tokens/cost。**明确不在 MCP 服务端做采集**：MCP 只看得到图侧、看不到仓侧工具与 token 用量，单边记录不完整。固定路径 <workspace>/.argo/temp/agent-cost-log.ndjson（追加式、默认 5MB 轮转为 .1、ARGO_COST_PROFILER=0 关）。记录 schema：公共 at/pid/source(host)/type；type=tool{tool,backend(graph|repo|framework|other),kind(read|write|framework|other),durationMs,ok,args{keys,bytes},resultBytes,resultTokens,sessionID?,callID?}；type=usage{messageID,tokens{input,output,reasoning,cache},cost}；args 绝不记原始取值。只观测已产出结果，不改检索/缩候选/改内容。边界：tool hook 只对经宿主会话发起的调用触发；不经宿主的后台 MCP 进程不在内。交付：argo/scripts/graph-rag/agentCostLog.js（单一日志+宿主钩子 createHostCollectorHooks）+ argo/plugins/argo-cost-collector.js（唯一采集器）+ install-argo.ps1（注册插件）+ docs/agent-cost-profiler.md + tests/agent-cost-log.test.js（AT-agent-cost-log-01..04）+ tests/argo-deploy.test.js（断言部署与注册）。",
       "id": "agent-cost-profiler-001",
       "name": "Agent 成本 Profiler（框架内建后台度量）",
       "parent": "1961",
@@ -9140,21 +9140,14 @@
         },
         {
           "name": "AT-agent-cost-log-03",
-          "description": "GIVEN 宿主采集钩子；WHEN 依次发生一个图调用、一个仓调用与一个 assistant usage 事件；THEN 三者写入同一份日志（两类 backend 都在），并含时长/返回 token/usage 的 tokens·cost；dispose 清除 marker。",
+          "description": "GIVEN 宿主采集钩子；WHEN 依次发生 MCP 读调用、写图调用、仓侧调用与一个 assistant usage 事件；THEN 四者均写入同一份日志，工具记录的 backend/kind 依次为 graph/read、graph/write、repo/read，并含时长/返回 token/usage 的 tokens·cost。",
           "type": "Acceptance Test",
           "Input": "tests/agent-cost-log.test.js",
           "acceptanceCriteria": "tests/agent-cost-log.test.js"
         },
         {
           "name": "AT-agent-cost-log-04",
-          "description": "GIVEN 无宿主采集器；WHEN MCP 兼底记录；THEN 写 source=mcp 且绝不记录原始参数取值；GIVEN 宿主采集器已激活（marker）；WHEN 同一工具调用；THEN MCP 兼底静默不写（日志不重复计数）。",
-          "type": "Acceptance Test",
-          "Input": "tests/agent-cost-log.test.js",
-          "acceptanceCriteria": "tests/agent-cost-log.test.js"
-        },
-        {
-          "name": "AT-agent-cost-log-05",
-          "description": "GIVEN 框架 MCP 服务端/插件/安装器；WHEN 检查接线；THEN 服务端旁路调用 traceToolCall、插件使用 createHostCollectorHooks 与 markHostCollector 且挂 tool.execute.after/event、安装器注册 argo-cost-collector.js，且不新增任何日志取数 MCP 工具。",
+          "description": "GIVEN 框架 MCP 服务端与插件；WHEN 检查接线；THEN MCP 服务端不包含任何成本采集代码（无 agentCostProfiler/agentCostLog/取数工具），记录模块不暴露 summarize/CLI/marker 等接口，插件使用 createHostCollectorHooks 且挂 tool.execute.after/event、安装器注册 argo-cost-collector.js。",
           "type": "Acceptance Test",
           "Input": "tests/agent-cost-log.test.js",
           "acceptanceCriteria": "tests/agent-cost-log.test.js"

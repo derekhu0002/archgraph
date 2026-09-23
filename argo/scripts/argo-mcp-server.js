@@ -403,30 +403,6 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
   } catch {
     // diagnostics are best-effort; never block a tool call
   }
-  const startedAt = Date.now();
-  let result;
-  let failure = null;
-  try {
-    result = await dispatchTool(name, args, progressToken, dependencies);
-    return result;
-  } catch (error) {
-    failure = error;
-    throw error;
-  } finally {
-    // Background agent-cost profiling (framework, zero-config). Observes the
-    // already-produced result only: it never changes retrieval, candidates, or
-    // content; any failure is swallowed so it cannot affect a tool call.
-    try {
-      require('./graph-rag/agentCostProfiler.js').traceToolCall(resolveWorkspaceRoot(args), {
-        tool: name, args, result, error: failure, durationMs: Date.now() - startedAt,
-      });
-    } catch {
-      // best-effort only
-    }
-  }
-}
-
-async function dispatchTool(name, args = {}, progressToken = null, dependencies = undefined) {
   if (name === 'initializeWorkspace') {
     const workspace = await initializeWorkspace(resolveWorkspaceRoot(args));
     // Deterministic argo-init harness report (Neo4j structural sync, semantic

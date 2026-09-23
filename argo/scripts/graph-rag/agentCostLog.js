@@ -9,19 +9,15 @@
 // the two backends (graph: getSystemArchitecture / getIntentElementContext /
 // getArchitectureViewContext / queryNeo4jGraph / memory_search; repository:
 // read / grep / glob), not by the size of either backend. To optimise without
-// hurting recall we must measure that. Rather than scatter instrumentation and
-// make the user fetch from several places, every source writes ONE stream at a
-// fixed, known path:
+// hurting recall we must measure that — in ONE place the user fetches once:
 //
 //     <workspace>/.argo/temp/agent-cost-log.ndjson
 //
-// Sources (each record carries `source`):
-//   - "host": the OpenCode plugin argo/plugins/argo-cost-collector.js. It sees
-//     EVERY tool call (both backends) plus assistant token/cost usage, so under
-//     OpenCode it is the complete single collector.
-//   - "mcp":  the ARGO MCP server, a fallback for hosts without the plugin. It
-//     is suppressed while a host collector is active (marker file below) so the
-//     one log never double-counts.
+// WHO WRITES: the OpenCode plugin argo/plugins/argo-cost-collector.js. Every
+// tool call the agent makes — MCP interface calls, graph writes, and repository
+// calls alike — is a host tool, so the plugin records ALL of them, plus the
+// assistant's token/cost usage. There is deliberately NO MCP-side instrumentation
+// (a record without the host side would be incomplete and thus misleading).
 //
 // Posture (mirrors mcpCrashDiagnostics): best-effort, never throws, never logs
 // secret values, and NEVER changes retrieval (it observes results only).
@@ -30,9 +26,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const LOG_FILE_NAME = 'agent-cost-log.ndjson';
-const HOST_MARKER_NAME = '.agent-cost-host-collector';
 const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
-const HOST_MARKER_STALE_MS = 12 * 60 * 60 * 1000;
 
 const GRAPH_TOOLS = ['getSystemArchitecture', 'getIntentElementContext', 'getArchitectureViewContext', 'queryNeo4jGraph', 'memory_search'];
 const GRAPH_WRITE_TOOLS = [
@@ -61,12 +55,8 @@ function logFilePath(workspaceRoot) {
   return path.join(tempDir(workspaceRoot), LOG_FILE_NAME);
 }
 
-function hostMarkerPath(workspaceRoot) {
-  return path.join(tempDir(workspaceRoot), HOST_MARKER_NAME);
-}
-
-// Pure, total classification used by every source. Host tool names may be
-// prefixed (e.g. mcp__argo__getSystemArchitecture), so match by substring.
+// Pure, total classification. Host tool names may be prefixed (e.g.
+// mcp__argo__getSystemArchitecture), so match by substring.
 function classifyTool(tool) {
   const name = String(tool || '');
   const hit = (list) => list.some(t => name.includes(t));
@@ -99,38 +89,10 @@ function appendRecord(workspaceRoot, record) {
     const file = logFilePath(workspaceRoot);
     fs.mkdirSync(path.dirname(file), { recursive: true });
     rotateIfNeeded(file, maxBytes());
-    const line = JSON.stringify({
-      at: new Date().toISOString(),
-      pid: process.pid,
-      ...record,
-    }) + '\n';
+    const line = JSON.stringify({ at: new Date().toISOString(), pid: process.pid, ...record }) + '\n';
     fs.appendFileSync(file, line, 'utf8');
   } catch (_) {
     // best-effort only
-  }
-}
-
-// The host collector marks its activity so the MCP fallback does not duplicate.
-function markHostCollector(workspaceRoot) {
-  if (!workspaceRoot) return;
-  try {
-    fs.mkdirSync(tempDir(workspaceRoot), { recursive: true });
-    fs.writeFileSync(hostMarkerPath(workspaceRoot), JSON.stringify({ at: new Date().toISOString(), pid: process.pid }) + '\n', 'utf8');
-  } catch (_) { /* best-effort */ }
-}
-
-function clearHostCollector(workspaceRoot) {
-  if (!workspaceRoot) return;
-  try { fs.rmSync(hostMarkerPath(workspaceRoot), { force: true }); } catch (_) { /* best-effort */ }
-}
-
-function hostCollectorActive(workspaceRoot) {
-  if (!workspaceRoot) return false;
-  try {
-    const st = fs.statSync(hostMarkerPath(workspaceRoot));
-    return (Date.now() - st.mtimeMs) < HOST_MARKER_STALE_MS;
-  } catch (_) {
-    return false;
   }
 }
 
@@ -158,10 +120,9 @@ function keysOf(value) {
   return (value && typeof value === 'object' && !Array.isArray(value)) ? Object.keys(value).sort() : [];
 }
 
-// Host-collector hook logic (used by the OpenCode plugin, and unit-tested in
-// CJS). It records EVERY host tool call on both backends plus assistant
-// token/cost usage into the single consolidated log. Kept here (not in the ESM
-// plugin) so it stays plainly testable and shares the exact same schema.
+// Host-collector hook logic (used by the OpenCode plugin; unit-tested in CJS).
+// It records EVERY host tool call — MCP interface calls, graph writes, and
+// repository calls alike — plus assistant token/cost usage into the single log.
 function createHostCollectorHooks(workspaceRoot) {
   const starts = new Map();
   const seenUsage = new Set();
@@ -208,15 +169,11 @@ function createHostCollectorHooks(workspaceRoot) {
         });
       }
     },
-    dispose() {
-      clearHostCollector(workspaceRoot);
-    },
   };
 }
 
 module.exports = {
-  LOG_FILE_NAME, HOST_MARKER_NAME,
-  enabled, tempDir, logFilePath, hostMarkerPath, classifyTool, estimateTokens,
-  appendRecord, markHostCollector, clearHostCollector, hostCollectorActive, readLog,
-  createHostCollectorHooks,
+  LOG_FILE_NAME,
+  enabled, tempDir, logFilePath, classifyTool, estimateTokens,
+  appendRecord, readLog, createHostCollectorHooks,
 };
