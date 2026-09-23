@@ -9328,7 +9328,14 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Business Object"
+      "type": "Business Object",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "eadca13",
+          "description": "design/KG/SystemArchitecture.json（边界元素）; tests/memory-retrieval-profile.test.js（AT-memory-retrieval-profile-04）; archgraph.qea"
+        }
+      ]
     }
   ],
   "relationships": [
