@@ -9109,59 +9109,38 @@
       ]
     },
     {
-      "description": "ARGO 框架内建的后台 Agent 成本度量组件（2026-09-23，项目总管；承接业界洞察 insight-lead-milestone-two-backend-roundtrip-001 的 R7）。目的：把「Agent 成本—召回」度量做成框架能力，随 argo-deploy 下发，任意项目零配置自动采集。机制：框架 MCP 服务端在每次工具调用后向 <workspace>/.argo/temp/argo-cost-trace.ndjson 追加一条紧凑记录（tool/backend(graph|framework|repo|other)/kind(read|write)/durationMs/ok/resultBytes/resultTokens/args 仅键名+语义 intent 预览），追加式、按大小轮转（默认 5MB，ARGO_COST_TRACE_MAX_BYTES），默认开、ARGO_COST_PROFILER=0 关。只观测已产出结果，绝不改检索/缩候选/改内容，异常均吞噬。取数：MCP 工具 getAgentCostDigest 或 CLI（hostLogPath 并入宿主会话→turns/两后端工具分布/后端往返 roundTrips/会话 token·时延；seedPath+universePath 按 oracle 算 evidenceRecall/Precision/missing）。红线：任何缩池/截断换速造成召回缺口必须由 missing / evidenceRecall<1 显式暴露。交付：argo/scripts/graph-rag/agentCostProfiler.js（接入 argo-mcp-server.js 的 callTool 单一分发点 + getAgentCostDigest 工具）+ docs/agent-cost-profiler.md + tests/agent-cost-profiler.test.js（AT-agent-cost-profiler-01..07）；随 argo/scripts 自动部署（tests/argo-deploy.test.js 断言）。",
+      "description": "ARGO 框架内建的后台 Agent 成本记录器（2026-09-23，项目总管；承接业界洞察 insight-lead-milestone-two-backend-roundtrip-001 的 R7）。目的：让任意项目零配置后台记录 Agent 调用成本，日志写在固定路径供人类伙伴直接取用；**不提供取数接口**（无 MCP 工具、无 CLI）。机制：框架 MCP 服务端在每次工具调用后向 <workspace>/.argo/temp/argo-cost-trace.ndjson 追加一行紧凑记录（at/pid/tool/backend(graph|framework|other)/kind(read|write|framework|other)/durationMs/ok/errorKind/args（仅键名+字节数+语义 intent 预览，绝不记原始取值）/resultBytes/resultTokens），追加式、按大小轮转（默认 5MB，ARGO_COST_TRACE_MAX_BYTES）、默认开（ARGO_COST_PROFILER=0 关）。只观测已产出结果，绝不改检索/缩候选/改内容，异常均吞噬。交付：argo/scripts/graph-rag/agentCostProfiler.js（接入 argo-mcp-server.js 的 callTool 单一分发点，try/finally 旁路）+ docs/agent-cost-profiler.md + tests/agent-cost-profiler.test.js（AT-agent-cost-profiler-01..04）；随 argo/scripts 自动部署（tests/argo-deploy.test.js 断言）。人类伙伴使用：后台自采→需要时直接去该固定路径取 NDJSON 发回分析。",
       "id": "agent-cost-profiler-001",
       "name": "Agent 成本 Profiler（框架内建后台度量）",
       "parent": "1961",
       "testcases": [
         {
-          "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js",
-          "description": "GIVEN 工具名（含 mcp__ 前缀）；WHEN 分类；THEN 正确归类 backend（graph/framework/repo/other）与 kind（read/write）。",
           "name": "AT-agent-cost-profiler-01",
-          "type": "Acceptance Test"
+          "description": "GIVEN 工具名（含 mcp__ 前缀）；WHEN 分类；THEN 正确归类 backend（graph/framework/other）与 kind（read/write/framework/other）。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-profiler.test.js",
+          "acceptanceCriteria": "tests/agent-cost-profiler.test.js"
         },
         {
-          "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js",
-          "description": "GIVEN 启用的 profiler；WHEN 记录一次工具调用；THEN 追加 NDJSON（含 backend/kind/duration/resultTokens 且不记原始参数取值）；ARGO_COST_PROFILER=0 时不写；超限时轮转为 .1。",
           "name": "AT-agent-cost-profiler-02",
-          "type": "Acceptance Test"
+          "description": "GIVEN 启用的记录器；WHEN 记录一次工具调用；THEN 追加 NDJSON 到固定路径（含 backend/kind/duration/resultTokens，且绝不记原始参数取值）；ARGO_COST_PROFILER=0 时不写；超限时轮转为 .1。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-profiler.test.js",
+          "acceptanceCriteria": "tests/agent-cost-profiler.test.js"
         },
         {
-          "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js",
-          "description": "GIVEN 多条轨迹记录；WHEN summarize；THEN 按 tool/backend/kind 汇总，含延迟 p50/p95/max、返回 token、最贵工具 Top。",
           "name": "AT-agent-cost-profiler-03",
-          "type": "Acceptance Test"
+          "description": "GIVEN 已记录的轨迹；WHEN readTrace；THEN 返回记录数组且含 backend/kind/resultTokens 与失败信息。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-profiler.test.js",
+          "acceptanceCriteria": "tests/agent-cost-profiler.test.js"
         },
         {
-          "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js",
-          "description": "GIVEN 宿主会话 NDJSON（opencode run --format json）；WHEN parseHostSession；THEN 得出 turns/工具调用/两后端分布/后端往返 roundTrips/会话 token/时延。",
           "name": "AT-agent-cost-profiler-04",
-          "type": "Acceptance Test"
-        },
-        {
+          "description": "GIVEN 框架 MCP 服务端；WHEN 检查接线；THEN callTool 旁路调用 traceToolCall，且不新增任何日志取数 MCP 工具/CLI（模块不暴露 summarize/parseHostSession/scoreEvidence/main），记录器随 argo/scripts 包发布。",
+          "type": "Acceptance Test",
           "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js",
-          "description": "GIVEN 任务 oracle（{elements,repoPaths}）与宿主会话语料；WHEN scoreEvidence；THEN 返回 evidenceRecall/Precision，且缺失证据在 missing 显式暴露（召回缺口不可隐）。",
-          "name": "AT-agent-cost-profiler-05",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js",
-          "description": "GIVEN 宿主会话指标 + 图侧轨迹摘要；WHEN mergeHostSession；THEN 合并出跨后端视图（host vs trace 调用数、往返、token）。",
-          "name": "AT-agent-cost-profiler-06",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "tests/agent-cost-profiler.test.js",
-          "acceptanceCriteria": "tests/agent-cost-profiler.test.js",
-          "description": "GIVEN 框架 MCP 服务端；WHEN 检查接线；THEN callTool 旁路调用 traceToolCall、声明并分发 getAgentCostDigest 工具，且 profiler 随 argo/scripts 包发布。",
-          "name": "AT-agent-cost-profiler-07",
-          "type": "Acceptance Test"
+          "acceptanceCriteria": "tests/agent-cost-profiler.test.js"
         }
       ],
       "type": "Application Component",

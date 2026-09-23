@@ -63,7 +63,6 @@ const SYSTEM_ARCHITECTURE_TOOL_NAMES = new Set([
   'queryNeo4jGraph',
   'memory_search',
 ]);
-const PROFILER_TOOL_NAMES = new Set(['getAgentCostDigest']);
 
 const TOOLS = [
   {
@@ -266,20 +265,6 @@ const TOOLS = [
       required: ['view_id'],
       properties: {
         view_id: { type: 'string' },
-        architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
-      },
-      additionalProperties: false,
-    },
-  },
-  {
-    name: 'getAgentCostDigest',
-    description: 'Return the background agent-cost digest for this workspace: Argo MCP tool calls by backend (graph/framework) and kind (read/write), latency p50/p95, and returned tokens, collected automatically by the server. Optionally pass hostLogPath (an exported opencode run --format json NDJSON session) to add cross-backend metrics (turns, graph-vs-repo tool mix, backend round-trips, session tokens/latency), and seedPath (a task/oracle JSON) to score evidence recall/precision against the oracle. This never changes retrieval results — it only reports what was already produced.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        hostLogPath: { type: 'string', description: 'Optional path to an exported host session NDJSON (opencode run --format json) to merge cross-backend metrics.' },
-        seedPath: { type: 'string', description: 'Optional path to a task/oracle JSON ({questions:[{id,oracle:{elements,repoPaths}}]}) to score evidence recall/precision.' },
-        universePath: { type: 'string', description: 'Optional path to a JSON {ids,paths} evidence dictionary used for precision (defaults to the oracle).' },
         architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
       },
       additionalProperties: false,
@@ -488,27 +473,6 @@ async function dispatchTool(name, args = {}, progressToken = null, dependencies 
   }
   if (SYSTEM_ARCHITECTURE_TOOL_NAMES.has(name)) {
     return systemArchitectureMcp.callTool(name, args, dependencies);
-  }
-  if (PROFILER_TOOL_NAMES.has(name)) {
-    const profiler = require('./graph-rag/agentCostProfiler.js');
-    const workspaceRoot = resolveWorkspaceRoot(args);
-    const summary = profiler.summarize(workspaceRoot);
-    const payload = { ...summary };
-    if (args && args.hostLogPath) {
-      const hostText = fs.readFileSync(args.hostLogPath, 'utf8');
-      const host = profiler.parseHostSession(hostText);
-      payload.host = host;
-      payload.crossBackend = profiler.mergeHostSession(host, summary);
-      if (args.seedPath) {
-        const seed = JSON.parse(fs.readFileSync(args.seedPath, 'utf8'));
-        const universe = args.universePath ? JSON.parse(fs.readFileSync(args.universePath, 'utf8')) : null;
-        payload.evidence = (seed.questions || []).map((q) => {
-          const oracle = q.oracle || (q.target ? { elements: [q.target.id], repoPaths: [] } : {});
-          return { id: q.id, oracle, ...profiler.scoreEvidence(oracle, hostText, universe) };
-        });
-      }
-    }
-    return toolResult(payload);
   }
   throw new Error(`Unknown tool: ${name}`);
 }

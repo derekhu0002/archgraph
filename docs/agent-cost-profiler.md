@@ -1,62 +1,51 @@
-# Agent Cost Profiler（框架内建：后台自动度量）
+# Agent Cost Recorder（框架内建：后台记录到固定路径）
 
 > 归属：ARGO 框架（随 `argo-deploy` 下发到 `~/.argo/scripts/graph-rag/agentCostProfiler.js`）。
-> 目的：把「Agent 成本—召回」度量做成**框架能力**，让任意项目都能在自己的仓里后台自动采集，
-> 再把结果回传用于分析优化——而不是只能在本仓跑一次性脚本。
+> **设计原则：只记录，不提供取数接口**——不新增 MCP 工具、不提供 CLI。日志写在固定路径，需要时直接去取。
 
 ## 为什么
 
 在真实项目里，Agent 的活动范围是**整个仓（无界内容源）**，而意图图（KG）只是**语义目录/路由层**，
 并不覆盖全仓。于是 Agent 会在两个后端之间往返：KG 语义检索 ↔ 仓 `read`/`grep`/`glob`。
 **成本主要发生在往返轮次上**（轮次一多，累积上下文使 token 近平方级膨胀）。要优化而不伤召回，
-必须先把它量化出来。
+必须先把它记录下来。
 
-## 采什么、怎么采（零配置）
+## 记录到哪
 
-框架 MCP 服务端在**每次工具调用**后追加一条紧凑记录到：
+固定路径（每个工作区各自一份）：
 
 ```
 <workspace>/.argo/temp/argo-cost-trace.ndjson
 ```
 
-- 记录字段：`tool / backend(graph|framework|repo|other) / kind(read|write) / durationMs / ok / resultBytes / resultTokens / args(仅键名 + 语义 intent 预览，绝不记原始取值)`
-- 追加式、按大小轮转（默认 5 MB，`ARGO_COST_TRACE_MAX_BYTES`）。
-- **只观测已经产出的结果**，不改检索、不缩候选、不改内容；任何异常都被吞掉，绝不影响工具调用。
+- 追加式；按大小轮转（默认 5 MB，`ARGO_COST_TRACE_MAX_BYTES`），轮转后旧文件为 `argo-cost-trace.ndjson.1`。
 - 默认开启；`ARGO_COST_PROFILER=0` 关闭。
+- **只观测已经产出的结果**，不改检索、不缩候选、不改内容；任何异常都被吞掉，绝不影响工具调用。
 
-> 说明：仓库侧工具（`read`/`grep`/`glob`）由宿主执行，MCP 看不到；把它们纳入统计需要
-> 导出宿主会话日志（见下）。
+## 每条记录（一行 JSON）记什么
 
-## 取结果（发给分析方）
+| 字段 | 含义 |
+|---|---|
+| `at` / `pid` | 时间戳 / 进程 |
+| `tool` | 工具名 |
+| `backend` | `graph`（架构图工具）/ `framework`（校验、初始化）/ `other` |
+| `kind` | `read` / `write` / `framework` / `other` |
+| `durationMs` | 该次调用耗时 |
+| `ok` / `errorKind` | 成功与否；失败时错误类型 |
+| `args.keys` / `args.bytes` | 入参的键名与字节数（**绝不记录原始取值**） |
+| `args.intentPreview` | 语义检索的 intent 预览（≤120 字符，便于分析） |
+| `resultBytes` / `resultTokens` | 返回内容大小与粗略 token 估算 |
 
-**方式 A：MCP 工具（推荐）**
-调用 `getAgentCostDigest`，可选参数：
-- `hostLogPath`：导出的宿主会话 NDJSON（`opencode run --format json` 的原始事件流），加入跨后端指标；
-- `seedPath`：项目自备的任务/oracle JSON（`{questions:[{id, oracle:{elements,repoPaths}}]}`），按 oracle 计算证据召回/精度；
-- `universePath`：`{ids,paths}` 证据字典（用于精度，缺省则用 oracle）。
+`resultTokens` 为确定性启发式：CJK 约 1 token/字，其余约 1 token/4 字符。
 
-**方式 B：命令行**
+## 怎么用
 
-```bash
-node ~/.argo/scripts/graph-rag/agentCostProfiler.js report \
-  --workspace <项目根> \
-  [--host-log <会话.ndjson>] \
-  [--seed <任务-oracle.json>] [--universe <字典.json>] [--json]
-```
+1. 正常使用你的项目（框架 MCP 后台自动记录，无需任何操作）。
+2. 需要分析时，把该路径下的 `argo-cost-trace.ndjson`（必要时连同 `.1`）取走发回即可。
 
-## 输出口径
-
-- **图侧（自动）**：调用总数/错误数、按 `backend` 与 `kind` 汇总、延迟 p50·p95·max、返回 token、最贵工具 Top5。
-- **跨后端（给 host-log 时）**：轮次 `turns`、工具调用数（graph vs repo）、**后端往返次数 `roundTrips`（graph↔repo 相邻切换）**、会话 token（含 reasoning）、端到端时延。
-- **召回（给 seed 时）**：`evidenceRecall`（对 oracle 上界）、`evidencePrecision`、`missing`。
+> 说明：仓库侧工具（`read`/`grep`/`glob`）由宿主执行，MCP 看不到，因此不在本记录内；
+> 本记录聚焦**图侧**调用（次数、按工具/后端/读写分布、耗时、返回 token）。
 
 ## 红线（与 retrieval-recall-first 一致）
 
-- 度量**只增不改**：不得为了好看而缩小候选/截断内容。
-- 任何以缩池/截断换速、造成召回缺口的优化，**必须**由 `missing` / `evidenceRecall < 1` 显式暴露，不得掩盖。
-
-## 与项目自备评测的关系
-
-项目可把任务语料（含 oracle 证据集）作为 seed 放进仓里；框架负责**后台自动采集 + 汇总 + 回传**，
-项目只需在需要分析时提供宿主会话日志与 seed。二者组合即得到完整的「成本—召回」四元组：
-**轮次 / 工具调用（按后端）/ 后端往返 / token·时延 / 证据召回率**。
+记录**只增不改**：不得为了好看而缩小候选/截断内容；本记录只观测结果，不影响召回。
