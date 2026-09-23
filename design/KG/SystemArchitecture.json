@@ -9267,8 +9267,8 @@
         },
         {
           "name": "pitfall",
-          "value": "ab-on-arm-semantic-error-invalidates-pass",
-          "description": "首轮 A/B 的 ON 臂原始会话中 argo_memory_search 报 SEMANTIC_OPERATOR_ERROR（action: Correct readiness and retry）——即 ON 臂语义检索实际失败、回退到仓工具，首轮对照因此无效。复现/修正：评测前必须使该 workspace 的语义生命周期 Aligned（argo-init/预热），并在报告中以 toolErrors 门禁：若 ON 臂 graph 工具失败>0 则该样本作废，不得归因于『MCP 无增益』。"
+          "value": "ab-headless-permission-stall-and-timing-contamination",
+          "description": "诊断 20 条 ab-* 会话发现：①20 条 headless `opencode run` 未加 --auto → 危险工具（bash/grep）在等审批/超时，出现 error+极长耗时（如 AC-01-on 单个 grep 报 error 但“耗时”296s；AC-02-off 两 grep 各~42s）→ A/B 的时间/成功率被污染；修正：A/B harness 必须加 --auto（或按工具白名单自动允许）。②事件 `state.time{start,end}` 含“等待/审批”时间，不能等同工具实际工作时长；诊断/计时需排除 error 调用并把“等待型长耗时”单列（stall），不与模型耗时混算。③ON 臂 argo_getSystemArchitecture/memory_search 报 SEMANTIC_OPERATOR_ERROR → 评测前必须确保语义生命周期 Aligned。"
         },
         {
           "name": "commit",
@@ -9378,6 +9378,16 @@
           "name": "commit",
           "value": "d0564a4",
           "description": "argo/scripts/agentSearchDiagnose.js; argo/skills/agent-search-diagnosis/SKILL.md; install-argo.ps1; package.json; tests/agent-search-diagnosis.test.js; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.26.0",
+          "description": "npm 5055189f→本版 shasum 见 npm；全局 0.26.0；argo-deploy 22/22；skill 已部署 ~/.config/opencode/skills/agent-search-diagnosis/SKILL.md，脚本 ~/.argo/scripts/agentSearchDiagnose.js；待宿主重启加载"
+        },
+        {
+          "name": "commit",
+          "value": "ed62235",
+          "description": "package.json（release 0.26.0）"
         }
       ]
     }
