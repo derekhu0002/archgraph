@@ -14,7 +14,7 @@ const GRAPH = JSON.parse(
 const ELEMENT_ID = 'wp-archgraph-intro-email-001';
 const ELEMENT_NAME = '编制 ArchGraph 框架使用介绍邮件（面向利益相关者）';
 const VIEW_ID = '180';
-const RECIPIENT = '胡东华@华为.com';
+const RECIPIENT = 'hudonghua@huawei.com';
 
 function readHtml() {
   assert.ok(existsSync(HTML_DOC), 'intro email HTML should exist');
@@ -39,7 +39,7 @@ test('intro-email: is a self-contained HTML document addressed to the stakeholde
   assert.match(html, /<!DOCTYPE html>/i, 'should be a complete HTML document');
   assert.match(html, /<html\b/i, 'should declare an html root');
   assert.match(html, /胡东华/, 'should name the recipient');
-  assert.match(html, /胡东华@华为\.com/, 'should carry the recipient address');
+  assert.match(html, /hudonghua@huawei\.com/, 'should carry the recipient address');
 });
 
 test('intro-email: teaches the four basic-operation steps with real commands', () => {
