@@ -330,6 +330,8 @@ function intentElementContextInputSchema() {
       dependentDepth: { type: 'number', description: 'Default: 1. Semantic dependents that rely on the focus element.' },
       associationDepth: { type: 'number', description: 'Default: 1. Association neighbors are expanded at least one layer.' },
       associationNeighborDependencyDepth: { type: 'number', description: 'Default: 0. Optional dependency expansion from association neighbors.' },
+      includeAttributes: { type: 'boolean', description: 'Default: false. Include `attributes` (commit/session/release ledgers) verbatim; omitted by default from this structural read (the focus element always keeps its own).' },
+      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim; omitted by default from this structural read.' },
     },
     additionalProperties: false,
   };

@@ -461,6 +461,8 @@ function intentElementContextInputSchema() {
       dependentDepth: { type: 'number', description: 'Default: 1. Semantic dependents that rely on the focus element.' },
       associationDepth: { type: 'number', description: 'Default: 1. Association neighbors are expanded at least one layer.' },
       associationNeighborDependencyDepth: { type: 'number', description: 'Default: 0. Optional dependency expansion from association neighbors.' },
+      includeAttributes: { type: 'boolean', description: 'Default: false. Include `attributes` (commit/session/release ledgers) verbatim. Omitted by default from this structural read; the focus element always keeps its own. Semantic retrieval embeds attributes, so semantic hits keep them.' },
+      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim. Omitted by default from this structural read (bookkeeping); pass true when you need acceptance cases. Semantic retrieval embeds testcase descriptions, so semantic hits keep them.' },
     },
     additionalProperties: false,
   };
@@ -475,6 +477,8 @@ function viewContextInputSchema() {
       view_id: { type: 'string', description: 'The id of the view to resolve.' },
       includeParentElement: { type: 'boolean', description: 'Default: true. Resolve the parent element referenced by the view.' },
       includeChildViews: { type: 'boolean', description: 'Default: false. Include child views declared by member elements through subdiagram_views.' },
+      includeAttributes: { type: 'boolean', description: 'Default: false. Include member/relationship `attributes` (commit/session/release ledgers) verbatim. Omitted by default from this structural read (bookkeeping); pass true when you need provenance.' },
+      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim. Omitted by default from this structural read; pass true for acceptance-case lookups.' },
       includeEaGeometry: { type: 'boolean', description: 'Default: false (opt-in). When true, additionally resolve the diagram GEOMETRY (element boxes + connector line routes) for this view from the workspace EA model (.qea) and return it under a `geometry` field aligned by schema id with the resolved members. Each geometry relationship carries: `path` (the EA route from t_diagramlinks.Path, "" when EA auto-routes), `points` (the parsed [{x,y}] waypoints), `edge` (the EDGE route-style token or null) and `geometry` (the raw SX/SY/EX/EY override string, which contains NO waypoints). By default the EA model is never touched and no `geometry` field is returned; a missing EA model/diagram yields geometry.present=false, never an error.' },
     },
     additionalProperties: false,
@@ -615,6 +619,42 @@ function validateDocument(document, schema, options = {}) {
   return errors;
 }
 
+// Agent-facing projection of canonical records for STRUCTURAL reads (view
+// membership / intent-element subgraph). `attributes` (commit/session/release
+// ledgers) and `testcases` are bookkeeping: measured as ~52% of the element
+// bytes but NOT needed to answer structural reads, so they are omitted by
+// default and returned only on opt-in (includeAttributes / includeTestcases).
+//
+// This is NOT summarisation: every retained field is returned verbatim. It is
+// also NOT the semantic match surface — semantic retrieval embeds attributes and
+// testcase descriptions (semanticRecordText.js), so semantic results keep them;
+// and the focus element of an intent-element read always keeps its own.
+function projectAgentFields(record, opts = {}) {
+  const value = clone(record);
+  let omittedAttributes = 0;
+  let omittedTestcases = 0;
+  if (!opts.includeAttributes && Array.isArray(value.attributes) && value.attributes.length) {
+    omittedAttributes = value.attributes.length;
+    delete value.attributes;
+  }
+  if (!opts.includeTestcases && Array.isArray(value.testcases) && value.testcases.length) {
+    omittedTestcases = value.testcases.length;
+    delete value.testcases;
+  }
+  return { value, omittedAttributes, omittedTestcases };
+}
+
+function buildAgentProjection(omitted) {
+  if (!omitted || (omitted.attributes === 0 && omitted.testcases === 0)) {
+    return null;
+  }
+  return {
+    attributesOmitted: omitted.attributes,
+    testcasesOmitted: omitted.testcases,
+    note: 'Member attributes/testcases are bookkeeping (commit/session/release ledgers, acceptance cases) and are omitted from this structural read by default. Pass includeAttributes:true / includeTestcases:true to include them verbatim. Semantic retrieval already embeds their text, so semantic hits keep them.',
+  };
+}
+
 function buildIntentElementContext(context, args = {}) {
   const profile = args.profile || 'generic-agent';
   const focusResult = resolveFocusElement(context.document, args);
@@ -697,7 +737,27 @@ function buildIntentElementContext(context, args = {}) {
     associationDepth,
   });
 
-  return {
+  const subgraph = buildNativeSubgraph(context.document, includedElementIds, includedRelationshipIds);
+  const includeAttributes = args.includeAttributes === true;
+  const includeTestcases = args.includeTestcases === true;
+  const omitted = { attributes: 0, testcases: 0 };
+  if (!(includeAttributes && includeTestcases)) {
+    subgraph.elements = subgraph.elements.map((element) => {
+      if (element.id === focusElement.id) {
+        return element; // the focus element keeps its own bookkeeping
+      }
+      const projected = projectAgentFields(element, { includeAttributes, includeTestcases });
+      omitted.attributes += projected.omittedAttributes;
+      omitted.testcases += projected.omittedTestcases;
+      return projected.value;
+    });
+    subgraph.relationships = subgraph.relationships.map((relationship) => {
+      const projected = projectAgentFields(relationship, { includeAttributes });
+      omitted.attributes += projected.omittedAttributes;
+      return projected.value;
+    });
+  }
+  const result = {
     status: 'passed',
     query: {
       architecturePath: context.graphPath.relativePath,
@@ -711,12 +771,15 @@ function buildIntentElementContext(context, args = {}) {
       traversalMode: 'archimate-semantic',
     },
     focusElementId: focusElement.id,
-    subgraph: buildNativeSubgraph(context.document, includedElementIds, includedRelationshipIds),
+    subgraph,
     boundary,
     explorationHints,
     workContext: {},
     diagnostics: [],
   };
+  const projection = buildAgentProjection(omitted);
+  if (projection) result.projection = projection;
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -786,12 +849,22 @@ function buildViewContext(context, args = {}) {
   const elementById = new Map((document.elements || []).map(element => [element.id, element]));
   const relationshipById = new Map((document.relationships || []).map(relationship => [relationship.id, relationship]));
 
+  const includeAttributes = args.includeAttributes === true;
+  const includeTestcases = args.includeTestcases === true;
+  const omitted = { attributes: 0, testcases: 0 };
+  const project = (record) => {
+    const projected = projectAgentFields(record, { includeAttributes, includeTestcases });
+    omitted.attributes += projected.omittedAttributes;
+    omitted.testcases += projected.omittedTestcases;
+    return projected.value;
+  };
+
   const elements = [];
   const missingElementIds = [];
   for (const elementId of view.included_elements || []) {
     const element = elementById.get(elementId);
     if (element) {
-      elements.push(clone(element));
+      elements.push(project(element));
     } else {
       missingElementIds.push(elementId);
     }
@@ -802,7 +875,7 @@ function buildViewContext(context, args = {}) {
   for (const relationshipId of view.included_relationships || []) {
     const relationship = relationshipById.get(relationshipId);
     if (relationship) {
-      relationships.push(clone(relationship));
+      relationships.push(project(relationship));
     } else {
       missingRelationshipIds.push(relationshipId);
     }
@@ -812,7 +885,7 @@ function buildViewContext(context, args = {}) {
   let parentElement = null;
   if (includeParentElement && view.parent_element_id) {
     const parent = elementById.get(view.parent_element_id);
-    parentElement = parent ? clone(parent) : null;
+    parentElement = parent ? project(parent) : null;
   }
 
   const includeChildViews = args.includeChildViews === true;
@@ -847,6 +920,8 @@ function buildViewContext(context, args = {}) {
   if (args.includeEaGeometry === true) {
     result.geometry = readEaViewGeometry(context.workspaceRoot, viewId);
   }
+  const projection = buildAgentProjection(omitted);
+  if (projection) result.projection = projection;
   return result;
 }
 

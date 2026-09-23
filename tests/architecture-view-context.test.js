@@ -82,7 +82,7 @@ test('architecture-view-context: resolves complete view membership by view_id', 
   assert.equal(childViews.status, 'passed');
   assert.deepEqual(
     childViews.childViews.map(view => view.view_id).sort(),
-    ['169', '174', '176', '178', '179', '180', '1800', '298', '432', '434', 'argo-workflow-rules-view', 'diagram-skills-view-001', 'ea-tooling-wps-001', 'memory-eval-view-001', 'openclaw-adaptation', 'self-evolution-sandbox-view-001', 'tb-eval-view-001']
+    ['169', '174', '176', '178', '179', '180', '1800', '298', '432', '434', 'agent-cost-eval-view-001', 'argo-workflow-rules-view', 'diagram-skills-view-001', 'ea-tooling-wps-001', 'framework-defaults-view-001', 'graph-consistency-tech-ref-001', 'memory-eval-view-001', 'openclaw-adaptation', 'self-evolution-sandbox-view-001', 'tb-eval-view-001']
   );
 
   const missing = callPayload(responses, 6);

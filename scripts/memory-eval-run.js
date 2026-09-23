@@ -146,8 +146,8 @@ const QUESTIONS = [
     id: 'MQ-17', dimension: '知识更新', label: 'view 429 当前多少子视图？',
     retrieval: [{ tool: 'getArchitectureViewContext', args: { view_id: '429', includeChildViews: true } }],
     requirements: [
-      { step: 0, type: 'childViewCount', value: 15 },
-      { step: 0, type: 'contains', values: ['tb-eval-view-001', 'memory-eval-view-001', 'self-evolution-sandbox-view-001'] },
+      { step: 0, type: 'childViewCount', value: 20 },
+      { step: 0, type: 'contains', values: ['tb-eval-view-001', 'memory-eval-view-001', 'self-evolution-sandbox-view-001', 'agent-cost-eval-view-001', 'framework-defaults-view-001', 'graph-consistency-tech-ref-001'] },
     ],
   },
   {
@@ -235,7 +235,7 @@ const QUESTIONS = [
       { tool: 'getArchitectureViewContext', args: { view_id: 'overseer-ltm-001' } },
     ],
     requirements: [
-      { step: 0, type: 'contains', values: ['overseer-vision-001', 'overseer-archimate-role-001', 'overseer-mem-eval-001', 'overseer-query-rules-001', 'overseer-content-storage-001', 'overseer-subgraph-semantic-001', 'overseer-wiki-eval-001'] },
+      { step: 0, type: 'contains', values: ['overseer-vision-001', 'overseer-archimate-role-001', 'overseer-wiki-eval-001', 'overseer-memory-tiers-001', 'overseer-retrieval-recall-first-001', 'overseer-federation-vision-001'] },
     ],
   },
   // ── 维度 7：两步回忆（T2 recall，框架级）──
