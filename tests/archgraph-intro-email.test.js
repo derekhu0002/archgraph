@@ -31,15 +31,16 @@ function isGivenWhenThen(text) {
   return /GIVEN/.test(text) && /WHEN/.test(text) && /THEN/.test(text);
 }
 
-test('intro-email: is a self-contained HTML document addressed to the stakeholder', () => {
-  // GIVEN the framework introduction email is an HTML file
+test('intro-email: is a self-contained, email-safe HTML document addressed to colleagues', () => {
+  // GIVEN the framework introduction email is a broadcast to many colleagues
   // WHEN the source is inspected
-  // THEN it is a complete HTML document that names the recipient
+  // THEN it is complete, greets the group, and avoids constructs mail clients strip
   const html = readHtml();
   assert.match(html, /<!DOCTYPE html>/i, 'should be a complete HTML document');
   assert.match(html, /<html\b/i, 'should declare an html root');
-  assert.match(html, /胡东华/, 'should name the recipient');
-  assert.match(html, /hudonghua@huawei\.com/, 'should carry the recipient address');
+  assert.match(html, /大家好/, 'should greet the group, not one individual');
+  assert.doesNotMatch(html, /<svg\b/i, 'should avoid inline SVG (stripped by many mail clients)');
+  assert.doesNotMatch(html, /<img\b/i, 'should not depend on external images');
 });
 
 test('intro-email: teaches the four basic-operation steps with real commands', () => {
@@ -101,14 +102,15 @@ test('intro-email: states the goal and stakeholder value', () => {
   assert.match(html, /起步快|交接稳|越用越省|可规模化/, 'should give concrete value points');
 });
 
-test('intro-email: pairs the narrative with inline SVG diagrams', () => {
-  // GIVEN the user asked for illustrative diagrams
+test('intro-email: pairs the narrative with email-safe diagrams', () => {
+  // GIVEN the user asked for illustrative diagrams that survive mail clients
   // WHEN the HTML is inspected
-  // THEN at least four inline SVG figures are embedded and labelled
+  // THEN at least four table-based diagrams are embedded and labelled
   const html = readHtml();
-  const svgCount = (html.match(/<svg\b/g) || []).length;
+  const diagramCount =
+    (html.match(/class="diagram/g) || []).length + (html.match(/class="seq"/g) || []).length;
   const figureCount = (html.match(/<figure\b/g) || []).length;
-  assert.ok(svgCount >= 4, `should embed at least 4 inline SVG diagrams (found ${svgCount})`);
+  assert.ok(diagramCount >= 4, `should embed at least 4 diagram tables (found ${diagramCount})`);
   assert.ok(figureCount >= 4, `should wrap them in at least 4 figures (found ${figureCount})`);
   assert.match(html, /图 1/, 'should label figure 1');
   assert.match(html, /图 4/, 'should label figure 4');
