@@ -4238,7 +4238,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-23 会话二：框架使用介绍邮件）：\n目标（人类伙伴）：为多位同事编制一封 HTML 邮件介绍这套方法并发送；四条约束：① 开场不出现 archgraph/ARGO 等产品名；② 大逻辑：痛点→愿景→建议方案→最后具体的图怎么帮；③ 开场先站听众视角讲好处；④ 排版直接参照姊妹项目 SOC-DEMO 刚发出的 VSOC 介绍邮件格式。\n最终交付：docs/archgraph-intro-email.html——视觉与结构均照搬 SOC-DEMO/artifacts/vsoc_demo/send_vsoc_intro_email.py 内嵌的 VSOC 邮件：860px 白卡片 + 渐变页首带胶囊标识；**全内联样式**（无 style 块/无类；邮件客户端兼容）；分节标题 19px + 3px 强调色下边线；『一句话概括』提示框；2×2 边框卡片；浅灰步骤框；图一律用表格（无内联 SVG/外链图片）。内容：痛点→愿景→方案（以项目为中心/容器）→图怎么帮（记住/取回/资产=仓库+图谱；四步上手 npm install -g archgraph-argo → argo-deploy → 前置准备 图数据库+语义检索 ~/.argo/.env → argo init；会话结束说一声；价值；下一步）；称呼「大家好」。已发送 hudonghua@huawei.com（smtp.126.com:465）。验收 tests/archgraph-intro-email.test.js 9/9。\n关键决策/教训：① 人类伙伴明确指出排版参照姊妹项目 SOC-DEMO 的 VSOC 邮件（发件渠道也是同一 126 邮箱）——以后对外 HTML 邮件排版优先照这个范本，别自创；② 邮件客户端会丢弃内联 SVG 与 CSS grid/多 class 样式 → 图一律用表格 + 全内联样式；③ 结构多轮迭代（多节→三段→痛点/愿景/方案/图怎么帮）；④ 开头不出现产品名（已加验收断言）；⑤ 本机 Playwright 仅装 chromium-1243，需显式 executablePath；⑥ 新增 WP 触发同型语义软门禁，以 allowDuplicate+justification 放行。\n遗留钩子（承接上会话）：① 框架侧 MCP 工具契约 schema 对齐（文档层）；② 服务器无 GitHub 凭证，push 需 deploy key；③ 服务器 graph_submit/graph_update 的 graphs/catalog 未回主仓；④ D4 信任圈层、中心可复制后置；⑤ 规则改动需 argo-deploy 才传播。\n记忆层级：本摘要在 T1；长期记忆在 T2 overseer-ltm-001/overseer-rules-001/overseer-product-001。commits：6a6c02a/4da3e11/e8639ef/e21ab27/5f052c0/2d6c5c7/596789b/aac016d/8dc97c0。",
+      "description": "项目总管工作记忆摘要（2026-09-23 会话二）：两个内容交付，均已发送 hudonghua@huawei.com。\nA. 框架使用介绍邮件（WP wp-archgraph-intro-email-001）：docs/archgraph-intro-email.html；四条约束（开场无产品名；痛点→愿景→建议方案→具体的图怎么帮；开场先好处；排版直接参照姊妹项目 SOC-DEMO 的 VSOC 邮件格式）；发送脚本 scripts/send-html-email.js；AT tests/archgraph-intro-email.test.js（9/9）；commits 6a6c02a/4da3e11/e8639ef/e21ab27/5f052c0/2d6c5c7/596789b/aac016d/8dc97c0。\nB. 新型组织形态过渡畅想文章（WP wp-org-federation-vision-001；全文 Business Object org-federation-vision-article-001）：docs/org-federation-vision.html；主题=以「项目」为基本 block、「一人成军」背景下，以「国家联邦」比喻构建新型组织（①联盟中枢；②项目即国家；③以项目为基本组织），探讨从「人的组织」过渡到「政策家人」的组织形态（项目化切入；盖楼 vs 口服药），含 L1→L4 路径与 8 类风险试探；AT tests/org-federation-vision.test.js（9/9）；commit 16de3f9。\n关键决策/教训：① 人类伙伴明确要求对外/对内 HTML 邮件排版参照 SOC-DEMO VSOC 邮件（全内联样式 + 渐变页首 + 分节标题条 + 卡片/提示框），勿自创；② 邮件客户端丢弃内联 SVG/CSS grid → 图用表格；③ 收件地址禁用非 ASCII（中文地址会退信）；④ 「政策家人」为人类伙伴新提法，已按『人 + 政策 + AI 的复合成员』理解并在邮件末尾请其校正（**待人类伙伴回执校正**）；⑤ 跨项目可参考姊妹项目：SOC-DEMO 邮件范本、跨项目 Agent 投递机制；⑥ 新增元素均触发同型语义软门禁，以 allowDuplicate+justification 放行；⑦ 本机 Playwright 仅装 chromium-1243，需显式 executablePath。\n遗留钩子（承接上会话 + 本会话）：① 待人类伙伴校正「政策家人」含义（可能需修文章）；② 框架侧 MCP 工具契约 schema 对齐（文档层）；③ 服务器无 GitHub 凭证，push 需 deploy key；④ 服务器 graph_submit/graph_update 的 graphs/catalog 未回主仓；⑤ D4 信任圈层、中心可复制后置；⑥ 规则改动需 argo-deploy 才传播。\n记忆层级：本摘要在 T1（overseer-wm-001）；长期记忆在 T2 overseer-ltm-001/overseer-rules-001/overseer-product-001；新增 T2 经验元素 overseer-email-format-ref-001。commits：6a6c02a/4da3e11/e8639ef/e21ab27/5f052c0/2d6c5c7/596789b/aac016d/8dc97c0/16de3f9。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4261,7 +4261,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-23",
-          "description": "会话收尾：框架使用介绍邮件（排版直接参照姊妹项目 SOC-DEMO 的 VSOC 邮件格式；痛点/愿景/方案/图怎么帮；已发送）"
+          "description": "会话收尾：① 框架使用介绍邮件（参照 SOC-DEMO VSOC 格式）；② 新型组织形态过渡畅想文章（项目即国家/组织即联邦；已发送）"
         },
         {
           "name": "commit",
@@ -8910,6 +8910,11 @@
         {
           "name": "article",
           "value": "从「人的组织」到「项目的联邦」——以「项目」为基本 block 的新型组织形态过渡畅想（意见）\n\n一句话概括：当「一个人 + AI + 一套规则」就能干过去一个团队的活，组织的最小单元就该从「人」升级为「项目」；而把无数个项目粘成组织的，不是权力，而是引用与规则。\n\n一、一个基本判断：为什么要换组织形态\n「一人成军」正在发生：一个人加上 AI 与一套清晰的规则，就能承担过去一个团队的工作量。当这件事成立，「以人为最小单元」的组织形态开始失灵——它默认「多一个人＝多一份产能」，而真正稀缺的是上下文、规则与协作方式的复用。\n在「人的时代」，组织像盖楼：高成本、长周期、难改；今天很多工作已变成「口服药」：轻、快、可复制。但我们仍在用「盖楼」的方式组织「口服药」——大量事情并没有真正回到项目来做项目化运作，而是散落在部门、岗位与临时沟通里。\n判断：需要一次「回到项目」的组织形态过渡——不是再加一层管理，而是换一种基本单元。\n\n二、畅想：组织即联邦，项目即国家\n① 设立一个联盟中枢：只做三件事——成员注册与退出、成员相互可见、跨国规则与仲裁；只持有联邦元数据，不持有成员国内容。\n② 每个国家就是一个项目：各有「地形」（背景、目标、人才、资产），内政自治，各有分工与优劣。\n③ 以项目为基本组织，自下而上把组织建起来：不是先画部门再塞人，而是由一个个项目自然生长、结盟而成。\n最小「联邦法则」三条：跨国引用有绝对坐标＋版本指纹；共同语言（同构类型体系与建模语言）；默认拒绝的「海关」（先拒绝、再显式邦交授予；对内先给再收窄，对外先拒绝再授予）。\n联邦的粘合剂不是权力，而是引用与规则（不合并、不拷贝，交流走引用）。\n\n三、形态过渡：从「人的组织」到「政策家人」\n把组织形态从「人的组织」过渡到「政策家人」：不再让「人」当唯一最小单元，而是让「政策（规则/制度）」与「人」一起成为组织的常态成员——规则不再是墙上的文件，而是与人、AI 并肩协作的「家人」。\n过渡的第一步是「项目化」：先把工作真正装回「项目」这个容器，在一个项目里让「人＋AI＋规则」围绕同一套上下文协作。\n过渡路径四段：L1 单项目（一人/小组＋AI，围绕一个项目容器）→ L2 项目内多角色（职责/技能/验收写进图，AI 承担多个同事角色）→ L3 项目间互助（项目之间以引用互借知识与能力）→ L4 组织级联邦（中枢登记成员、授权可见、规则仲裁）。\n之所以现在谈，是因为成本变了：过去跨国协作要盖楼，今天更接近口服药——引用一次、复用一次。\n\n四、可能遇到的问题\n中心悖论：中枢越方便越容易长成超级图/超级部门（红线：中心只存元数据）；协作摩擦：默认拒绝最安全也最反人性，需最小授权模板与信任策略；引用漂移：引用会悬空，需版本指纹/墓碑账本/降级；人的位置：人会不会被工具化，关键是把人放在定方向、做裁决、纠偏的位置；度量与激励：跨项目复用与联邦贡献如何被看见和回报；责任与合规：跨海关数据流动、责任归属与审计；身份与文化：从「部门人」到「国家人」的认同摩擦；失败模式：中心变超级图、联邦沦为孤岛、规则无人遵守。\n\n五、建议的起步\n① 先立「联邦法则 v0」（引用坐标＋共同语言＋默认拒绝）；② 选 2–3 个项目做样板国，只做只读引用；③ 建最小中枢（成员/授权/可见，不碰内容）；④ 跑通一次真实的跨国互助闭环；⑤ 再谈规模化与考核。\n\n结语\n把组织从「人的集合」变成「项目的联邦」，是一次组织哲学的切换：从「管人」转向「定规则、给上下文、让项目自生长」。值得先用一两个项目试起来。"
+        },
+        {
+          "name": "commit",
+          "value": "16de3f9",
+          "description": "docs/org-federation-vision.html; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "畅想文章（意见）全文：从「人的组织」到「项目的联邦」——以「项目」为基本 block 的新型组织形态过渡。以「一人成军」为背景判断，以「国家联邦」为比喻（联盟中枢/项目即国家/以项目为基本组织），提出从「人的组织」过渡到「政策家人」的组织形态，给出 L1→L4 过渡路径与风险清单。正文全文见 attributes.article；邮件版 HTML 见 attributes.doc。",
@@ -8932,6 +8937,20 @@
         {
           "name": "articleRef",
           "value": "org-federation-vision-article-001"
+        },
+        {
+          "name": "commit",
+          "value": "16de3f9",
+          "description": "docs/org-federation-vision.html; tests/org-federation-vision.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "email-sent",
+          "description": "已发送（主题：畅想：从「人的组织」到「项目的联邦」）"
+        },
+        {
+          "name": "deliveryChannel",
+          "value": "smtp.126.com:465（hdhscu@126.com 发送至 hudonghua@huawei.com）"
         }
       ],
       "description": "面向人类伙伴（hudonghua）的新型组织形态过渡畅想文章（意见）。主题：以「项目」为基本 block，基于「一人成军」愿景构建新型组织结构；以「国家联邦」为比喻探讨（①设立联盟中枢；②每个国家就是一个项目；③以项目为基本组织把整个组织建起来），并探讨从「人的组织形态」过渡到「政策家人」组织形态的方式（从项目化切入；建筑时代 vs 口服药类比）。文风：畅想 + 风险试探（列出中心悖论/协作摩擦/引用漂移/人的位置/度量激励/责任合规/身份文化/失败模式等），并给出 L1→L4 过渡路径与五步起步建议。产出 docs/org-federation-vision.html（参照 SOC-DEMO VSOC 邮件格式的邮件安全 HTML，2 张表示意图），文章全文存于 org-federation-vision-article-001，配套可执行验收测试 tests/org-federation-vision.test.js。",
