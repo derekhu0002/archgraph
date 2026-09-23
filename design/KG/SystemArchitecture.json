@@ -9524,6 +9524,11 @@
           "name": "commit",
           "value": "8fe9c04",
           "description": "release 0.26.2 登记；相关元素 agent-read-projection-001/agent-search-diagnosis-skill-001/agent-cost-profiler-001/memory-retrieval-eval-framework-001"
+        },
+        {
+          "name": "commit",
+          "value": "216f8b9",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（本会话记忆落地：T2 里程碑 + T1 摘要覆盖写；含下一会话完整测试待办钩子）"
         }
       ]
     }
