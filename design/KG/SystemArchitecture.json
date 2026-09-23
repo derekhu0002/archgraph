@@ -4242,7 +4242,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-23 会话，幂等覆盖）。【目标】把「Agent 成本—召回」从度量做到优化落地。【交付/发布，均已 npm publish + argo-deploy + 重启】0.25.0 框架单一日志 <ws>/.argo/temp/agent-cost-log.ndjson（仅宿主插件 argo-cost-collector 采集全部工具调用（图+仓）+ token 用量；MCP 侧不采集；无 MCP 工具/CLI）；0.26.0 agent-search-diagnosis skill（单会话诊断包 diagnosis.md/metrics.json/session.ndjson/cost-log.slice/manifest.json，bundle temp2.2；humanWait 单列、上下文尖峰标记、opencode export JSON 兼容）；0.26.1 结构读投影 + 语义命中 matchedSnippet；0.26.2 投影 note 门控（只在省≥160B 时附；裁剪永不使读取变大，min 降幅=0）。【读取投影要点】getArchitectureViewContext/getIntentElementContext 默认剔除 attributes/testcases（焦点元素保留自身），opt-in includeAttributes/includeTestcases；匹配感知：语义检索命中保留（匹配面）、queryNeo4jGraph 不动；语义命中带 matchedSnippet（~62 tokens 代 ~5,400 tokens 回查）。量化：视图读 −51.5%（min0/med36.4/p90 73.7/max84.5），合并 −42%（85 读省 ~149k tokens）。【评测框架】memory-retrieval-eval-framework-001（场景 S1–S8 × 规模 small/large × 指标；E1 机制对照/E2 制度对照）；graph-gain-regime-boundary-001（Graph 增益不可干净隔离：机制/知识库质量/人机协议三对象）；原则 framework-optimization-cross-scenario-001（优化不得跨场景劣化，场景×规模剖面验证）；R7 harness scripts/agent-cost-eval.js + data/eval-seeds/agent-cost-seed.json；A/B scripts/memory-retrieval-ab.js（--auto/预热/重复/门禁）；度量 scripts/read-projection-gain.js。【待办钩子，接手优先】① **人类伙伴将在下一个会话做一次完整测试（明确要求）——届时按评测框架给出场景×规模剖面与结论**；② DASHSCOPE_API_KEY 未配置，BAILIAN 取证不可用（连续多次会话）；③ 第 2 项宿主级读缓存（内容寻址 memoization）暂缓（读过≠仍在上下文，需宿主处理 compaction）；④ 优化 #2/#3（批量写图+一次校验、重复只读去重）未做。【记忆层级】T1 本摘要；T2 overseer-retrieval-001（含里程碑 overseer-milestone-read-projection-001）。相关元素：agent-search-diagnosis-skill-001、agent-read-projection-001、agent-cost-profiler-001、memory-retrieval-ab-wp-001、agent-cost-eval-wp-001、memory-retrieval-eval-framework-001、graph-gain-regime-boundary-001、framework-optimization-cross-scenario-001。",
+      "description": "项目总管工作记忆摘要（2026-09-24 会话，幂等覆盖）。【目标】按评测框架做一次完整/长时间测试。【Phase1 健康】图 286 元素/65 视图/105 关系；validate 通过；语义(memory_search)/结构/scope 检索可用（scope 语义查 agent-cost-eval-view-001 返回空，待复核）。【Phase2 全量回归】npm test 611 测试 578 过 22 败（7 文件）——P2-1 高：eatool/EA-jsscript/import-from-kg.js 被提交 463b1f7(msg 'S') 删除，19 条 ea-import-* 断言失败（可从 6971c3b 恢复）；P2-2：ARGO_COST_PROFILER/ARGO_COST_TRACE_MAX_BYTES 未纳入 env 分类（也不在 .env.example）；P2-3：overseer-ltm-layering 期望成员未随 overseer-email-format-ref-001 加入核心 LTM 更新；P2-4：excalidraw-diagram 上游 skill 未在用户级部署（环境）。【Phase3 架构验收】204 全跑 197 过 7 败（同根因；runner 按文件粒度评分致 AT-env-coverage-02 连带失败；runner 自动重写 deliveryStatus，把 email-sent+描述降级为 delivered → P3-1 溯源丢失，已 git 回退）。【Phase4 记忆评测】31/31 100%，压缩 97.2%，均时延 317ms。【Phase5 检索】vector r@1 95.2 / hybrid 96.0（775 题）；rerank(deepseek-flash, 120 样本) r@1 100、MRR 1.0、0 失败。【Phase6 读取投影】视图 −51.6% / intent −18.8% / 合并 −42.1%，min 0（读取不会变大）。【Phase7 A/B】首轮 ON 臂全图工具 SEMANTIC_OPERATOR_ERROR(10) 污染 → 诊断根因：harness 隔离 HOME 致 MCP getArgoEnvPath() 回退到 ACL 受限不可读的仓库 argo/.env；修复(037d4e7：ON 臂注入 ARGO_ENV_FILE + headless --auto)后重跑干净 A/B：两臂 success/recall 100%；OFF tok14951 wall62.0s turns5.6 tools7.9 err9 vs ON tok12250 wall9.3s turns3.4 tools4.5 err0 rt0.3 → ON 令牌 −18%/轮次 −39%/工具 −43%/0 错误；但 OFF 被 opencode grep 工具 ripgrep 冷启动失败（回退 Get-ChildItem 慢扫）污染，E1 成本仍不完全可信；召回无差异——本仓 canonical JSON 在仓内，grep 可低成本命中，印证框架所述 E1 系统性低估。【待办钩子，接手优先】① 是否修复 P2-1/P2-2/P2-3（恢复 import-from-kg.js、补 env 分类、同步 layering 测试）；② 硬化 A/B：OFF 臂 grep 失败处理 + state.time 等待污染（tool>wall）；③ scoped 语义查视图空结果复核。【记忆层级】T1 本摘要；T2 overseer-retrieval-001（memory-retrieval-ab-wp-001 的 pitfall-resolution/eval-clean-run）。相关元素：memory-retrieval-ab-wp-001、memory-retrieval-eval-framework-001、agent-cost-eval-wp-001、agent-read-projection-001、overseer-ltm-layering、env-file-key-governance-001。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4264,7 +4264,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-23",
+          "value": "2026-09-24",
           "description": "会话收尾：读取投影/命中回带/诊断 skill/评测框架落地（0.25.0–0.26.2）；下一会话完整测试"
         },
         {
@@ -4520,6 +4520,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "037d4e7",
+          "description": "scripts/memory-retrieval-ab.js; tests/memory-retrieval-ab.test.js（A/B harness 隔离 HOME 下 ARGO_ENV_FILE 修复 + --auto；AT-05/06）"
         }
       ],
       "testcases": [
@@ -9247,6 +9252,20 @@
           "type": "Acceptance Test",
           "Input": "tests/agent-cost-eval.test.js",
           "acceptanceCriteria": "tests/agent-cost-eval.test.js"
+        },
+        {
+          "name": "AT-memory-retrieval-ab-05",
+          "type": "Acceptance Test",
+          "Input": "tests/memory-retrieval-ab.test.js",
+          "acceptanceCriteria": "tests/memory-retrieval-ab.test.js",
+          "description": "GIVEN 隔离 HOME 的 A/B 臂；WHEN 构建 on 臂进程环境；THEN 注入 ARGO_ENV_FILE 指向 sanctioned env 文件（使 MCP getArgoEnvPath 不回退到不可读的仓库 argo/.env），且 off 臂不含图配置（单变量）。"
+        },
+        {
+          "name": "AT-memory-retrieval-ab-06",
+          "type": "Acceptance Test",
+          "Input": "tests/memory-retrieval-ab.test.js",
+          "acceptanceCriteria": "tests/memory-retrieval-ab.test.js",
+          "description": "GIVEN headless opencode 调用参数；WHEN buildRunArgs；THEN 参数含 --auto（工具自动批准，避免等待污染计时）、--pure（公平）、--format json 与 ab/<model>。"
         }
       ],
       "type": "Work Package",
@@ -9274,6 +9293,21 @@
           "name": "commit",
           "value": "be77239",
           "description": "scripts/memory-retrieval-ab.js; data/eval-seeds/agent-cost-seed.json; tests/memory-retrieval-profile.test.js（按场景×规模×指标剖面 + E1/E2 对照设计；下一步先做 S4 图仓合成）"
+        },
+        {
+          "name": "commit",
+          "value": "037d4e7",
+          "description": "scripts/memory-retrieval-ab.js; tests/memory-retrieval-ab.test.js（ON 臂注入 ARGO_ENV_FILE 修复隔离 HOME 下 SEMANTIC_OPERATOR_ERROR + headless --auto；新增 AT-05/06）"
+        },
+        {
+          "name": "pitfall-resolution",
+          "value": "ab-on-arm-argo-env-file",
+          "description": "症状：A/B ON 臂所有图工具报 SEMANTIC_OPERATOR_ERROR（首轮 10 处）。根因：harness 为公平隔离 HOME → MCP getArgoEnvPath()（argo/scripts/argo-paths.js:108）优先 <homedir>/.argo/.env，隔离后不存在，遂回退到仓库内 ACL 受限、不可读的 argo/.env → 语义生命周期就绪失败，所有图工具（含 queryNeo4jGraph）失败。修复：ON 臂显式 ARGO_ENV_FILE 指向真实 sanctioned env 文件（已在隔离 HOME 下验证 queryNeo4jGraph/memory_search/getSystemArchitecture 全部通过）；headless 加 --auto。遗留：OFF 臂 opencode grep 工具报 ripgrep execution failed（bash rg 可用）→ 回退 Get-ChildItem -Recurse 慢扫，污染成本基线；state.time 含等待致 tool>wall，计时拆分不可靠。"
+        },
+        {
+          "name": "eval-clean-run",
+          "value": "ab-ten-task-2026-09-24",
+          "description": "修复后干净 A/B（10 题×2 臂，deepseek-flash）：两臂 success/recall 均 100%；OFF tok14951 wall62.0s turns5.6 tools7.9 err9（g0/r79）；ON tok12250 wall9.3s turns3.4 tools4.5 err0 rt0.3（g18/r27）。ON 令牌 −18%、轮次 −39%、工具 −43%、0 错误。但 OFF 成本被前几次任务的 grep 工具失败/慢扫污染（S2/S1 剖面：OFF repo 631s vs ON 19s），故 E1 成本结论仍不完全可信；召回无差异——本仓 canonical JSON 在仓内，grep 可低成本命中图内 id，印证框架所述 E1 系统性低估。"
         }
       ]
     },
