@@ -9482,6 +9482,16 @@
           "name": "commit",
           "value": "a34ad0b",
           "description": "argo/scripts/systemarchitecture-mcp-server.js（bookkeepingSnippet/tokenizeForMatch + 语义摘要命中回带 matchedSnippet + memoryHitCard 回带）; tests/agent-read-projection.test.js（AT-04/05）"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.26.1",
+          "description": "npm publish（含结构读投影 + 语义命中回带 matchedSnippet）；全局安装 + argo-deploy 22/22；~/.argo/scripts/systemarchitecture-mcp-server.js 已含 projectAgentFields/bookkeepingSnippet/includeAttributes（已核验）；待宿主重启生效"
+        },
+        {
+          "name": "commit",
+          "value": "b736ad9",
+          "description": "package.json（release 0.26.1）"
         }
       ]
     }
