@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
-<title>ArchGraph 上手介绍：把项目当容器，和 Agent 一起把事做好</title>
+<title>以项目为中心，让 AI 越用越懂你</title>
 <style>
   body { margin: 0; padding: 0; background: #f2f4f7;
     font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -51,7 +51,7 @@
   table.seq td, table.seq th { border: 1px solid #d7dee6; padding: 7px 9px; vertical-align: middle; }
   table.seq th { background: #eef2f6; font-weight: 600; text-align: center; color: #1b2733; }
   .seq-from { background: #eef4fb; }
-  .seq-arrow { text-align: center; color: #64748b; font-weight: 700; width: 44px; }
+  .seq-arrow { text-align: center; color: #64748b; font-weight: 700; width: 46px; }
   .seq-empty { background: #ffffff; }
   tr.seq-hot td { background: #fff7ed; }
   tr.seq-hot td.seq-arrow { color: #ea580c; }
@@ -65,109 +65,121 @@
   <div class="card">
 
     <div class="kicker">ARCHGRAPH · 上手介绍</div>
-    <h1>把「一个项目」当作一个容器，和 Agent 一起把事做好</h1>
-    <p class="subtitle">一封邮件讲清：它是什么、怎么用、用了之后能带来什么</p>
+    <h1>以项目为中心，让 AI 越用越懂你</h1>
+    <p class="subtitle">一封邮件讲清：它能带来什么、怎么开始用</p>
 
     <p>大家好：</p>
-    <p>最近我们在推进一套新的协作方式——<b>ArchGraph（ARGO 工具链）</b>。它不要求大家先成为 AI 专家，只要求换一个视角看待「项目」和「Agent」。这封邮件想用最短的篇幅，帮大家建立三件事：<b>它是什么、怎么装怎么用、能带来什么价值</b>。后台是怎么构建的、用了哪些技术组件，这里先不展开，重点放在「怎么用好」。</p>
+    <p>最近我们在内部试用一套新的工作方式，想推荐给大家。它的好处很直接：<b>让 AI 围绕你的项目来工作，越用越懂你的业务，反复解释背景和来回返工会明显减少；用过的经验也能留下来，团队里谁接手都能接着往下走。</b>下面用一封信讲清它为什么有用、以及怎么开始用，大约 5 分钟能读完。</p>
 
-    <!-- ===================== 1. 核心理念 ===================== -->
-    <h2>一、核心理念：以「项目」为单元、为容器</h2>
-    <p>这是大家第一次接触时最需要转过来的一个弯：<b>我们不再把 Agent 当成一个「聊天窗口」，而是把它放进一个「项目容器」里。</b></p>
+    <!-- ===================== 1. 痛点 ===================== -->
+    <h2>一、先说大家可能遇到的麻烦</h2>
+    <p>用 AI 帮忙做事的同学，大概都碰到过这些情况：</p>
     <ul>
-      <li><b>项目即容器</b>：每个项目自带一张「项目地图」（知识图谱）。你用 <b>OpenCode、Cursor</b>（也支持 Copilot、DeepSeek Harness、OpenClaw）打开这个项目，就像打开一间办公室。</li>
-      <li><b>同一张图</b>：你和 Agent 看的是同一张地图——你看全局（目标、角色、职责），Agent 看与当前任务相关的局部。目标对齐不再靠反复开会，而是结构化的。</li>
-      <li><b>上下文不丢</b>：换人、换工具、换会话，项目里的这份共识都还在，不会随聊天记录一起消失。</li>
+      <li>聊了半天，它还是不太懂我们的项目和业务，给的东西比较空泛；</li>
+      <li>每次都得从头把背景讲一遍，像换了个完全不认识的人；</li>
+      <li>它做的和我们想要的常常差一点，来回改，还说不清到底哪儿偏了；</li>
+      <li>同一个错误，这次改了，下次它还会犯；</li>
+      <li>事情做完，经验没留下，换个人上手又得重新趟一遍。</li>
+    </ul>
+    <div class="callout"><b>这些问题有个共同点</b>：AI 缺少一个「懂你项目」的长期上下文——它记住的不是你的项目，而只是某一次对话。</div>
+
+    <!-- ===================== 2. 方案/核心理念 ===================== -->
+    <h2>二、我们的办法：以项目为中心，让它慢慢变懂</h2>
+    <p>思路很朴素：<b>把「一个项目」当作一个容器</b>，让 AI 在这个容器里边聊边学。</p>
+    <ul>
+      <li><b>以项目为中心</b>：项目的背景、目标、约定，都归拢在项目自己的「地图」里；</li>
+      <li><b>围着项目聊天</b>：你用平时熟悉的工具（比如 OpenCode、Cursor）打开这个项目，就可以和它围绕这个项目交流、做事；</li>
+      <li><b>越用越懂你</b>：你说过的业务、讨论过的方案，它都会吸收并记下来；等你觉得它了解得差不多了，就可以放手让它独立去行动；</li>
+      <li><b>同一张地图</b>：你和它看的是同一张项目地图，不用反复对齐；换人、换电脑、隔一段时间再来，上下文都不会丢。</li>
     </ul>
 
     <figure class="dia">
       <div class="dia-card">
-        <div class="dia-title">图 1 · 一个项目 = 一个容器，人、Agent 与「项目地图」都在其中</div>
+        <div class="dia-title">图 1 · 一个项目 = 一个容器：你、AI 助手与「项目地图」都在其中</div>
         <table class="diagram dash" role="presentation">
           <tr><td class="dia-cap" colspan="5">项目（容器）</td></tr>
           <tr>
-            <td class="box" style="width:22%"><b>人类伙伴</b><br><span class="muted">定方向 · 裁决<br>观察 · 约束 · 纠偏</span></td>
+            <td class="box" style="width:22%"><b>你（和同事）</b><br><span class="muted">定方向 · 做决定<br>观察 · 纠偏</span></td>
             <td class="arrow">↔</td>
-            <td class="box accent" style="width:36%"><b>意图架构图</b><br><span class="muted">「项目地图」· 单一事实源<br>元素 / 关系 / 视图<br>结构化 · 可校验 · 可执行</span></td>
+            <td class="box accent" style="width:36%"><b>项目地图</b><br><span class="muted">项目的背景 / 目标 / 约定<br>越用越全 · 谁都能看懂<br>所有交流都以它为准</span></td>
             <td class="arrow">↔</td>
-            <td class="box" style="width:22%"><b>编程 Agent</b><br><span class="muted">定位 · 执行 · 交付<br>测试先行 · 提交回登记</span></td>
+            <td class="box" style="width:22%"><b>AI 助手</b><br><span class="muted">照着地图做事<br>做过的都记下来</span></td>
           </tr>
-          <tr><td class="note" colspan="5">用 OpenCode / Cursor 打开这个项目 → Agent 就在项目里，基于同一张地图和你对话</td></tr>
+          <tr><td class="note" colspan="5">用 OpenCode / Cursor 打开这个项目 → 和它围绕这个项目聊天、做事</td></tr>
         </table>
       </div>
-      <figcaption>项目是一个自带「项目地图」的容器；人和 Agent 围绕同一张图协作，共识不随会话丢失。</figcaption>
+      <figcaption>项目是一个自带「地图」的容器；你和 AI 围绕同一张图协作，共识不随对话丢失。</figcaption>
     </figure>
 
-    <!-- ===================== 2. 基础操作 ===================== -->
-    <h2>二、基础操作：安装 → 部署 → 前置准备 → 初始化</h2>
-    <p>整体上只需要记住一句：<b>装一次，之后每个新项目只做一次「初始化」。</b></p>
+    <!-- ===================== 3. 基础操作 ===================== -->
+    <h2>三、怎么开始用：四步就能跑起来</h2>
 
     <h3>第 ① 步：安装（一条命令）</h3>
     <pre><code>npm install -g archgraph-argo</code></pre>
-    <p>要求本机已安装 <b>Node.js 18 或以上</b>。</p>
+    <p>要求电脑上已装好 <b>Node.js 18 或以上</b>。</p>
 
     <h3>第 ② 步：部署（一条命令）</h3>
     <pre><code>argo-deploy</code></pre>
-    <p>它会自动把工具链、技能、规则注册到你常用的编程工具里——<b>GitHub Copilot、Cursor、OpenCode、DeepSeek Harness、OpenClaw</b>。这就是「一份源、多端运行」：不同人用不同工具，也能共享同一套工作方法。</p>
+    <p>它会自动适配你平时用的工具——<b>Copilot、Cursor、OpenCode、DeepSeek Harness、OpenClaw</b>。也就是说，<b>同一套方法，不管谁用什么工具都能用</b>。</p>
 
-    <h3>第 ③ 步：前置准备（只为开启「语义检索」能力）</h3>
-    <p>其余能力开箱即用，只有「让 Agent 按意思去检索项目知识」这一项需要两项基础准备：</p>
+    <h3>第 ③ 步：前置准备（为了让 AI 能「按意思找信息」）</h3>
+    <p>其余能力装好即用，只有这一项需要 IT 帮忙准备两样东西，然后把地址填进一个配置文件：</p>
     <table class="text">
       <thead><tr><th style="width:28%">准备项</th><th>说明</th></tr></thead>
       <tbody>
-        <tr><td><b>Neo4j 图数据库</b></td><td>存放项目地图的结构化投影，供按结构查询使用。用你自己已有或新起的 Neo4j 实例即可。</td></tr>
-        <tr><td><b>向量 / 嵌入服务</b></td><td>让 Agent「按意思找」能力的基础。支持任意 OpenAI 兼容端点：<b>可沿用云服务，也可在内网自建</b>，面向离线、私有化部署。</td></tr>
-        <tr><td><b>配置</b> <code>~/.argo/.env</code></td><td>把上面的地址与密钥填进去。部署时会引导你填写；已有内容会被保留，之后也可手改再重新部署。</td></tr>
+        <tr><td><b>图数据库</b></td><td>用来存放项目地图，供按结构查询。用已有或新起一个实例（例如 Neo4j）即可。</td></tr>
+        <tr><td><b>语义检索服务</b></td><td>让 AI 能「按意思找信息」。既能用云端服务，也能在内网自建。</td></tr>
+        <tr><td><b>配置文件</b> <code>~/.argo/.env</code></td><td>把上面的地址填进去。部署时会引导填写；已有内容会保留，之后也能改。</td></tr>
       </tbody>
     </table>
-    <div class="callout good"><b>内网友好</b>：我们在内网/离线环境下的自建向量服务有完整部署指引，不需要依赖公网服务也能跑通。</div>
+    <div class="callout good"><b>内网友好</b>：内网 / 离线环境下的自建方案，我们准备了完整的部署指引，不依赖公网也能跑通。</div>
 
-    <h3>第 ④ 步：初始化工作区（每个新项目一次）</h3>
-    <p>在一个新项目里，让 Agent 执行一次初始化（<code>argo init</code>）。它会自动：建立起始的「项目地图」、完成首次同步、初始化检索能力并做一次自检。<b>从这一刻起，这个项目就有「记忆」了。</b></p>
+    <h3>第 ④ 步：初始化（每个新项目一次）</h3>
+    <p>在一个新项目里，让它执行一次初始化（<code>argo init</code>）。它会自动建好这个项目的「地图」并做一次自检。<b>从这一刻起，这个项目就有记忆了。</b></p>
 
     <figure class="dia">
       <div class="dia-card">
-        <div class="dia-title">图 2 · 从 0 到可用：四步点亮一个项目</div>
+        <div class="dia-title">图 2 · 从零到可用：四步点亮一个项目</div>
         <table class="diagram" role="presentation">
           <tr>
-            <td class="box" style="width:21%"><b>① 安装</b><br><span class="muted"><code>npm install -g</code><br><code>archgraph-argo</code><br>需要 Node.js 18+ · 一次即可</span></td>
+            <td class="box" style="width:21%"><b>① 安装</b><br><span class="muted"><code>npm install -g</code><br><code>archgraph-argo</code><br>电脑需装 Node.js 18+ · 一次即可</span></td>
             <td class="arrow">→</td>
-            <td class="box" style="width:21%"><b>② 部署</b><br><span class="muted"><code>argo-deploy</code><br>自动注册 MCP / 技能 / 规则到各工具<br>一份源 · 多端运行</span></td>
+            <td class="box" style="width:21%"><b>② 部署</b><br><span class="muted"><code>argo-deploy</code><br>自动适配你常用的工具<br>一套方法 · 多端可用</span></td>
             <td class="arrow">→</td>
-            <td class="box warn" style="width:21%"><b>③ 前置准备</b><br><span class="muted"><code>~/.argo/.env</code><br>Neo4j 图数据库<br>+ 向量服务（内网可自建）<br>仅语义检索需要</span></td>
+            <td class="box warn" style="width:21%"><b>③ 前置准备</b><br><span class="muted">填一个配置文件<br>图数据库 + 语义检索服务<br>内网可自建 · 仅此功能需要</span></td>
             <td class="arrow">→</td>
-            <td class="box good" style="width:21%"><b>④ 初始化</b><br><span class="muted"><code>argo init</code><br>建起始图谱 + 首次同步<br>+ 自检<br>每个新项目一次</span></td>
+            <td class="box good" style="width:21%"><b>④ 初始化</b><br><span class="muted"><code>argo init</code><br>建好项目地图 + 自检<br>每个新项目一次</span></td>
           </tr>
-          <tr><td class="note" colspan="7">装一次 → 之后每个新项目只需第 ④ 步，「这个项目就有记忆了」</td></tr>
+          <tr><td class="note" colspan="7">装一次 → 之后每个新项目只需第 ④ 步，这个项目就有记忆了</td></tr>
         </table>
       </div>
-      <figcaption>安装、部署各一条命令；前置准备只为语义检索；初始化每个新项目做一次即可。</figcaption>
+      <figcaption>安装、部署各一条命令；前置准备为可选能力；初始化每个新项目做一次即可。</figcaption>
     </figure>
 
-    <!-- ===================== 3. 知识图谱与资产 ===================== -->
-    <h2>三、知识图谱与资产构建：仓库 + 图谱 = 整个资产</h2>
-    <p>用起来之后，你会发现产出不再只是「代码」。<b>Agent 的记忆、以及你和 Agent 协作得出的设计方案，都会被记录进项目的知识图谱。</b></p>
+    <!-- ===================== 4. 资产 ===================== -->
+    <h2>四、它会沉淀成你的资产</h2>
+    <p>用起来之后你会发现，产出不再只是「代码」。<b>你和它的每一次交流、每一个决定、每一次改动，都会被记到项目自己的知识图谱里。</b></p>
     <ul>
-      <li><b>记忆会沉淀</b>：Agent 的工作记忆、长期记忆与归档，都挂在项目图谱上，可以按需回忆，而不是淹没在聊天记录里。</li>
-      <li><b>设计共识会沉淀</b>：谁负责什么、为什么这么设计、验收标准是什么，都写进同一张图，成为可追溯、可交接的项目共识。</li>
-      <li><b>资产 = 仓库 + 图谱</b>：代码仓库（代码、文档、测试）与知识图谱合在一起，才是一个项目的完整资产。</li>
+      <li><b>记忆会留下</b>：它会记住聊过的业务和做过的决定，需要时按需取回，而不是淹没在某一次的聊天记录里；</li>
+      <li><b>共识会留下</b>：谁负责什么、为什么这么定、做到什么程度算完成，都写在同一张图上，可追溯、可交接；</li>
+      <li><b>资产 = 代码仓库 + 项目知识图谱</b>：两者合在一起，才是一个项目的完整资产。</li>
     </ul>
-    <div class="callout"><b>为什么这很重要</b>：知识不再锁在某个人脑子里，也不锁在某一次对话里——它属于项目本身，能被人和 Agent 反复取用。</div>
+    <div class="callout"><b>为什么这很重要</b>：知识不再只锁在某个人脑子里，也不锁在某一次对话里——它属于项目本身，谁都能接着用。</div>
 
     <figure class="dia">
       <div class="dia-card">
-        <div class="dia-title">图 3 · 数据流：交流与执行 → 图谱沉淀 → 按需召回 → 反哺下一步</div>
+        <div class="dia-title">图 3 · 数据流：交流与做事 → 记进图谱 → 需要时取回 → 反哺下一步</div>
         <table class="diagram" role="presentation">
           <tr>
-            <td class="box" style="width:46%"><b>人类伙伴</b><br><span class="muted">提需求 · 裁决 · 纠偏</span></td>
+            <td class="box" style="width:46%"><b>你（和同事）</b><br><span class="muted">提需求 · 做决定 · 纠偏</span></td>
             <td class="arrow">↔</td>
-            <td class="box" style="width:46%"><b>编程 Agent</b><br><span class="muted">执行 · 交付 · 排错</span></td>
+            <td class="box" style="width:46%"><b>AI 助手</b><br><span class="muted">做事 · 交付 · 排错</span></td>
           </tr>
-          <tr><td class="flow" colspan="3">↓　写：记忆 · 决策 · 提交回登记</td></tr>
+          <tr><td class="flow" colspan="3">↓　记下来：每次交流 · 每个决定 · 每次改动</td></tr>
           <tr>
-            <td class="box accent" colspan="3"><b>知识图谱（项目大脑）</b><br><span class="muted">Agent 记忆（工作 / 长期 / 归档）· 设计决策 · 职责与协作 · 验收标准 · 每次提交的台账（可追溯）</span></td>
+            <td class="box accent" colspan="3"><b>项目知识图谱（项目大脑）</b><br><span class="muted">业务与背景 · 讨论过的方案 · 做过的决定 · 改过的记录（可追溯）</span></td>
           </tr>
-          <tr><td class="flow good" colspan="3">↑　读：语义检索 · 按需召回 · 上下文</td></tr>
+          <tr><td class="flow good" colspan="3">↑　取回来：需要时自动找回 · 不用重复解释</td></tr>
           <tr>
             <td class="box"><b>代码仓库</b><br><span class="muted">代码 / 文档 / 测试</span></td>
             <td class="arrow">+</td>
@@ -175,58 +187,50 @@
           </tr>
         </table>
       </div>
-      <figcaption>协作与执行通过「写」沉淀进图谱，再通过「读」按需召回；仓库加图谱共同构成项目资产。</figcaption>
+      <figcaption>交流与做事通过「记」沉淀进图谱，再通过「取」按需召回；仓库加图谱共同构成项目资产。</figcaption>
     </figure>
 
-    <!-- ===================== 4. 业务理解与进化 ===================== -->
-    <h2>四、业务理解与进化：它越用越懂你</h2>
-    <p>这套方法的妙处在于「可养成」：</p>
+    <!-- ===================== 5. 越用越懂 + 纪律 ===================== -->
+    <h2>五、怎么让它越来越懂你（外加一条「交互纪律」）</h2>
+    <p>这套方法的核心就是「<b>越用越懂你</b>」，用起来其实很简单：</p>
     <ol>
-      <li><b>遇到歧义，先聊清楚，别急着动手。</b>把目标和边界跟 Agent 对齐，让它反过来复述理解、提出澄清问题。</li>
-      <li><b>聊到一定程度，再下命令。</b>当它足够了解业务，你就可以直接安排任务，它会沿着已经对齐的地图去执行。</li>
-      <li><b>做错了，反馈一次，它就记住。</b>错误与教训会被写进图谱记忆，下次遇到同类事情不再重犯。</li>
+      <li><b>遇到说不清、有歧义的地方，先聊清楚，别急着让它动手。</b>把目标和边界讲明白，让它反过来复述一下、向你确认。</li>
+      <li><b>聊到一定程度，再让它去做。</b>它足够了解业务之后，你就可以直接安排任务，它会顺着已经对齐的方向执行。</li>
+      <li><b>做错了，指出来一次，它就记住。</b>错误和教训会被记进记忆，下次遇到同类事情不再犯。</li>
     </ol>
-    <div class="callout warn"><b>真实的例子</b>：部署过程中踩过的坑（某个工具端口每次不同、某段脚本中文乱码）被记入长期记忆后，后续会话会自动规避同类问题；每次代码提交也会自动把「改了什么」回登记到地图上的对应元素。这类经验一旦沉淀，就不需要每个人重新踩一遍。</div>
+    <div class="callout warn"><b>真实的例子</b>：部署时踩过的坑（某个工具的端口每次不一样、某段脚本中文会乱码）被记下来之后，后续会自动避开同类问题；每次改动也会自动留下记录。这类经验一旦沉淀，其他人就不用重新踩一遍。</div>
 
     <figure class="dia">
       <div class="dia-card">
-        <div class="dia-title">图 4 · 人 ↔ Agent ↔ 图谱：从「有歧义」到「它懂了」的交互时序</div>
+        <div class="dia-title">图 4 · 你 ↔ AI 助手 ↔ 项目地图：从「说不清」到「它懂了」的交互时序</div>
         <table class="seq" role="presentation">
-          <tr><th style="width:40%">人类伙伴</th><th style="width:20%">方向</th><th style="width:40%">编程 Agent / 知识图谱</th></tr>
-          <tr><td class="seq-from">① 提出需求（允许先有歧义）</td><td class="seq-arrow">人 ▶ Agent</td><td class="seq-empty"></td></tr>
-          <tr><td class="seq-empty"></td><td class="seq-arrow">人 ◀ Agent</td><td class="seq-from">② 复述理解 / 请求澄清</td></tr>
-          <tr><td class="seq-from">③ 纠正 / 确认方向</td><td class="seq-arrow">人 ▶ Agent</td><td class="seq-empty"></td></tr>
-          <tr><td class="seq-empty"></td><td class="seq-arrow">Agent ▶ 图谱</td><td class="seq-from">④ 把决策与要点写入记忆</td></tr>
-          <tr><td class="seq-empty"></td><td class="seq-arrow">人 ◀ Agent</td><td class="seq-from">⑤ 完成任务并交付</td></tr>
-          <tr class="seq-hot"><td>⑥ 明确告知：本次会话结束</td><td class="seq-arrow">人 ▶ Agent</td><td class="seq-empty"></td></tr>
-          <tr><td class="seq-empty"></td><td class="seq-arrow">Agent ▶ 图谱</td><td class="seq-from">⑦ 收口本次记忆，供下次恢复</td></tr>
+          <tr><th style="width:40%">你</th><th style="width:20%">方向</th><th style="width:40%">AI 助手 / 项目地图</th></tr>
+          <tr><td class="seq-from">① 说出需求（一开始说不清也没关系）</td><td class="seq-arrow">你 ▶ 助手</td><td class="seq-empty"></td></tr>
+          <tr><td class="seq-empty"></td><td class="seq-arrow">你 ◀ 助手</td><td class="seq-from">② 它复述理解、请你确认</td></tr>
+          <tr><td class="seq-from">③ 纠正 / 确认方向</td><td class="seq-arrow">你 ▶ 助手</td><td class="seq-empty"></td></tr>
+          <tr><td class="seq-empty"></td><td class="seq-arrow">助手 ▶ 地图</td><td class="seq-from">④ 把决定和要点记下来</td></tr>
+          <tr><td class="seq-empty"></td><td class="seq-arrow">你 ◀ 助手</td><td class="seq-from">⑤ 完成，交付给你</td></tr>
+          <tr class="seq-hot"><td>⑥ 明确说一声：本次会话结束</td><td class="seq-arrow">你 ▶ 助手</td><td class="seq-empty"></td></tr>
+          <tr><td class="seq-empty"></td><td class="seq-arrow">助手 ▶ 地图</td><td class="seq-from">⑦ 把这轮内容收好、记住</td></tr>
         </table>
-        <div class="note" style="color:#9a3412">交互纪律：Agent 感知不到会话是否结束，所以结束时请明确「打个招呼」</div>
+        <div class="note" style="color:#9a3412">小纪律：AI 没法自己判断会话有没有结束，所以结束时请明确说一声「本次会话结束」</div>
       </div>
-      <figcaption>歧义靠交流消解，教训靠记忆沉淀；会话结束需人明确告知，Agent 才能可靠收口。</figcaption>
+      <figcaption>说不清的地方靠交流消解，教训靠记忆沉淀；会话结束需明确告知，它才会可靠地把内容记下来。</figcaption>
     </figure>
 
-    <!-- ===================== 5. 交互纪律 ===================== -->
-    <h2>五、交互纪律：一句「本次会话结束」很关键</h2>
-    <p>这是唯一一条需要特别养成的习惯，但它决定了「记忆」是否可靠：</p>
-    <ul>
-      <li><b>会话开始</b>：Agent 会自动恢复上次的工作记忆与会话钩子，你不需要手动交代前情。</li>
-      <li><b>工作中</b>：遇到关键决策、踩坑与修复，它会当场把要点记下来，这是最可靠的骨干。</li>
-      <li><b>会话结束</b>：<b>请明确告诉它「本次会话结束」。</b>因为它无法感知会话是否真的结束；只有收到这个信号，它才会把这次的关键内容收口写进记忆。</li>
-    </ul>
-    <div class="callout"><b>记住这一条就够了</b>：一次汇报/任务告一段落时，加一句「本次会话结束」。这不是客套，是让经验被保存下来的开关。</div>
+    <div class="callout"><b>就这一条小习惯</b>：一次交流告一段落时，加一句「本次会话结束」。这不是客套，而是让它把这一轮沉淀下来的开关。</div>
 
     <!-- ===================== 6. 价值 ===================== -->
-    <h2>六、用了之后，能得到什么</h2>
+    <h2>六、它能给你带来的价值</h2>
     <table class="text">
       <tbody>
         <tr>
-          <td style="width:50%"><b>起步快</b><br>新项目几分钟就能建好「项目地图」，Agent 有据可依，不再「跑偏了也没感觉」。</td>
-          <td><b>交接稳</b><br>每个产出都能追溯到地图上的元素和提交记录，评审与接手不用再翻聊天记录。</td>
+          <td style="width:50%"><b>起步快</b><br>新项目几分钟就能建好「项目地图」，AI 有据可依，不再「跑偏了也没感觉」。</td>
+          <td><b>交接稳</b><br>每个产出都能追溯到地图上的记录，评审与接手不用再翻聊天记录。</td>
         </tr>
         <tr>
           <td><b>越用越省</b><br>踩过的坑、定过的方案会沉淀成经验，下次自动复用，团队不必重复踩同一遍。</td>
-          <td><b>可规模化</b><br>一套方法多端运行，经验还能以「子图」的形式在项目之间复用，形成组织级能力资产。</td>
+          <td><b>可规模化</b><br>一套方法多端可用，经验还能在项目之间复用，慢慢积累成团队的能力资产。</td>
         </tr>
       </tbody>
     </table>
@@ -234,14 +238,14 @@
     <!-- ===================== 7. 下一步 ===================== -->
     <h2>七、建议的下一步</h2>
     <ol>
-      <li><b>确认环境</b>：请平台/IT 侧确认内网是否具备 Node.js、Neo4j 与内网向量服务（离线部署有现成指引）。</li>
+      <li><b>确认环境</b>：请平台 / IT 侧确认内网是否具备 Node.js，以及一个图数据库和一个语义检索服务（离线部署有现成指引）。</li>
       <li><b>选一个小项目试点</b>：我们一起完整走一遍「安装 → 部署 → 初始化 → 第一个任务」，半小时内就能看到效果。</li>
-      <li><b>跑通后推广</b>：把试点经验固化成团队模板，再扩展到更多项目。</li>
+      <li><b>跑通后再推广</b>：把试点经验固化成团队模板，再扩展到更多项目。</li>
     </ol>
 
     <div class="sign">
       <p>欢迎大家随时找我交流，也欢迎把试用中的问题反馈给我；我来安排第一次一起上手。</p>
-      <p>顺祝工作顺利！<br />ArchGraph 项目组</p>
+      <p>顺祝工作顺利！<br />（署名）</p>
     </div>
 
     <div class="footer">本邮件为 ArchGraph 框架使用介绍 · 内部交流使用 · 欢迎转发给相关同事</div>

@@ -54,7 +54,7 @@ test('intro-email: teaches the four basic-operation steps with real commands', (
   assert.match(html, /前置准备/, 'should have a prerequisites section');
   assert.match(html, /Node\.js 18/, 'should state the Node.js requirement');
   assert.match(html, /Neo4j/, 'should name the Neo4j prerequisite');
-  assert.match(html, /向量/, 'should name the embedding/vector prerequisite');
+  assert.match(html, /语义检索/, 'should name the semantic-search / embedding prerequisite');
   assert.match(html, /自建|离线|内网/, 'should mention self-hosted / offline embedding');
 });
 
@@ -63,7 +63,8 @@ test('intro-email: conveys the project-as-container core idea and the harnesses'
   // WHEN the HTML is inspected
   // THEN the container idea and the supported tools are spelled out
   const html = readHtml();
-  assert.match(html, /核心理念/, 'should present the core idea');
+  assert.match(html, /以项目为中心/, 'should present the project-centric idea');
+  assert.match(html, /麻烦|痛点/, 'should open with the pain points');
   assert.match(html, /容器/, 'should frame the project as a container');
   assert.match(html, /OpenCode/, 'should name OpenCode');
   assert.match(html, /Cursor/, 'should name Cursor');
