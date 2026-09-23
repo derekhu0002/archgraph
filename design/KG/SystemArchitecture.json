@@ -9485,8 +9485,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.26.1",
-          "description": "npm publish（含结构读投影 + 语义命中回带 matchedSnippet）；全局安装 + argo-deploy 22/22；~/.argo/scripts/systemarchitecture-mcp-server.js 已含 projectAgentFields/bookkeepingSnippet/includeAttributes（已核验）；待宿主重启生效"
+          "value": "archgraph-argo@0.26.2",
+          "description": "npm publish + 全局安装 + argo-deploy 22/22；~/.argo/scripts/systemarchitecture-mcp-server.js 已含 omittedBytes 门控与短 note（已核验）；裁剪永不使读取变大（min 降幅=0）；待宿主重启生效"
         },
         {
           "name": "commit",
@@ -9497,6 +9497,11 @@
           "name": "commit",
           "value": "baf2488",
           "description": "argo/scripts/systemarchitecture-mcp-server.js（projection note 仅在节省≥160B 时附，消除负收益；omitted.bytes）; scripts/read-projection-gain.js（量化测试）; tests/read-projection-gain.test.js（AT-01..02）。实测：全 65 视图默认读 -51.5%（med 36.4/p90 73.7/max 84.5）；含 20 个账本重元素的合并 -42%（节 149k tokens / 85 次读）；语义 15/15 命中带 matchedSnippet（均 62 tokens）"
+        },
+        {
+          "name": "commit",
+          "value": "5254f75",
+          "description": "package.json（release 0.26.2）"
         }
       ]
     }
