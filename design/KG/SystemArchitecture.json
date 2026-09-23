@@ -4246,7 +4246,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-23 会话二）：多份沟通材料交付，均发送 hudonghua@huawei.com；新增子视图 comm-2026-09-view-001（parent 1249；因 view 180 成员触顶 15 而拆分，已将其后新增的 2026-09 沟通类元素从 180 移入）。\nA. 框架使用介绍邮件（WP wp-archgraph-intro-email-001）：docs/archgraph-intro-email.html；痛点→愿景→方案→图怎么帮；排版参照 SOC-DEMO VSOC 邮件；commit 8dc97c0。\nB. 组织形态畅想（WP wp-org-federation-vision-001，status=superseded）：docs/org-federation-vision.html（因错别字/无关内容被重写替代）。\nC. 方案与测评意见（WP wp-graph-position-paper-001；全文 BO graph-position-paper-001）：docs/graph-position-paper.html；四段=业界问题→方案（本真图谱）→框架细节→测评与交付；commit 720772f。\nD. 科研论文（WP wp-graph-agent-paper-001；全文 BO graph-agent-paper-001）：docs/graph-agent-paper.html；结构对齐顶级论文（摘要/引言/相关工作/方法/实验设置/结果与分析/讨论与局限/结论与展望/参考文献）；评测以 4 张数据图表（表格 bar）+ 文字说明；数值：recall@1 94.6%/recall@5 99.4%/MRR 0.967，重排后 99.3%–100%；阈值 0.70（0.686/0.833）；记忆 31 题 100%、拒答 100%、约 5.7ms；对照 LongMemEval/LOCOMO/BEAM；commit 304c06e。\n关键决策/教训：① 对外/对内 HTML 邮件排版一律参照 SOC-DEMO VSOC 邮件（全内联样式 + 渐变页首 + 分节标题条 + 卡片/提示框）；② 邮件客户端丢弃内联 SVG/CSS grid → 数据图表用表格 bar（td width%/bgcolor）实现；③ 收件地址禁用非 ASCII；④ 人类伙伴澄清：无「政策家人/政策加人」、删「盖楼 vs 口服药」；结构=业界问题→解决方案→框架细节→测评与交付，并叠加顶级论文结构；⑤ 保留『本真图谱』作为已实现核心概念；⑥ **图视图成员上限 15**：view 180 触顶 → 拆出子视图 comm-2026-09-view-001，并同步修改 4 个测试的 VIEW_ID；⑦ 新增元素均触发同型语义软门禁，以 allowDuplicate+justification 放行；⑧ 本机 Playwright 仅装 chromium-1243，需显式 executablePath。\n遗留钩子：① 框架侧 MCP 工具契约 schema 对齐（文档层）；② 服务器无 GitHub 凭证，push 需 deploy key；③ 服务器 graph_submit/graph_update 的 graphs/catalog 未回主仓；④ D4 信任圈层、中心可复制后置；⑤ 规则改动需 argo-deploy 才传播；⑥ 科研论文可考虑正式投稿/英文版/更大样本评测。\n记忆层级：本摘要在 T1；T2 overseer-ltm-001/overseer-rules-001/overseer-product-001；T2 经验 overseer-email-format-ref-001。commits：8dc97c0/16de3f9/720772f/304c06e（及更早 6a6c02a/4da3e11/e8639ef/e21ab27/5f052c0/2d6c5c7/596789b/aac016d）。",
+      "description": "项目总管工作记忆摘要（2026-09-23 会话二）：多份沟通材料交付，均发送 hudonghua@huawei.com；新增子视图 comm-2026-09-view-001（parent 1249；因 view 180 成员触顶 15 而拆分）。\nA. 框架使用介绍邮件（WP wp-archgraph-intro-email-001）：docs/archgraph-intro-email.html；痛点→愿景→方案→图怎么帮；排版参照 SOC-DEMO VSOC 邮件；commit 8dc97c0。\nB. 组织形态畅想（WP wp-org-federation-vision-001，status=superseded）。\nC. 方案与测评意见（WP wp-graph-position-paper-001；全文 BO graph-position-paper-001）：docs/graph-position-paper.html；四段=业界问题→方案（意图架构图谱）→框架细节→测评与交付；commits 720772f/7ba9f50。\nD. 科研论文（WP wp-graph-agent-paper-001；全文 BO graph-agent-paper-001）：docs/graph-agent-paper.html；结构对齐顶级论文（摘要/引言/相关工作/方法/实验设置/结果与分析/讨论与局限/结论与展望/参考文献）；评测以 4 张数据图表（表格 bar）+ 文字说明；数值：recall@1 94.6%/recall@5 99.4%/MRR 0.967，重排后 99.3%–100%；阈值 0.70（0.686/0.833）；记忆 31 题 100%、拒答 100%、约 5.7ms；对照 LongMemEval/LOCOMO/BEAM；commits 304c06e/7ba9f50。\n关键决策/教训：① 对外/对内 HTML 邮件排版一律参照 SOC-DEMO VSOC 邮件（全内联样式 + 渐变页首 + 分节标题条 + 卡片/提示框）；② 邮件客户端丢弃内联 SVG/CSS grid → 数据图表用表格 bar（td width%/bgcolor）实现；③ 收件地址禁用非 ASCII；④ **术语纪律：不得引入与项目无关、也非业界认可的词。人类伙伴指出『本真图谱』不当——已全量替换为项目自身术语『意图架构图谱（Intent Architecture Graph）』（README/framework-overview/introduction 均用此词）。今后一律用项目/业界既有术语。**；⑤ 人类伙伴澄清：无「政策家人/政策加人」、删「盖楼 vs 口服药」；⑥ **图视图成员上限 15**：view 180 触顶 → 拆出子视图 comm-2026-09-view-001（并同步改 4 个测试 VIEW_ID）；⑦ 新增元素均触发同型语义软门禁，以 allowDuplicate+justification 放行；⑧ 本机 Playwright 仅装 chromium-1243，需显式 executablePath。\n遗留钩子：① 框架侧 MCP 工具契约 schema 对齐（文档层）；② 服务器无 GitHub 凭证，push 需 deploy key；③ 服务器 graph_submit/graph_update 的 graphs/catalog 未回主仓；④ D4 信任圈层、中心可复制后置；⑤ 规则改动需 argo-deploy 才传播；⑥ 科研论文可考虑投稿/英文版/更大样本与跨项目评测。\n记忆层级：本摘要在 T1；T2 overseer-ltm-001/overseer-rules-001/overseer-product-001；T2 经验 overseer-email-format-ref-001。commits：8dc97c0/16de3f9/720772f/304c06e/7ba9f50。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4269,7 +4269,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-23",
-          "description": "会话收尾：框架介绍邮件 + 方案与测评意见 + 科研论文（均已发送）；新增子视图 comm-2026-09-view-001"
+          "description": "会话收尾：框架介绍邮件 + 方案与测评意见 + 科研论文（均已发送）；术语统一为『意图架构图谱（Intent Architecture Graph）』"
         },
         {
           "name": "commit",
@@ -9625,6 +9625,11 @@
         {
           "name": "deliveryChannel",
           "value": "smtp.126.com:465（hdhscu@126.com 发送至 hudonghua@huawei.com）"
+        },
+        {
+          "name": "commit",
+          "value": "7ba9f50",
+          "description": "docs/graph-position-paper.html; tests/graph-position-paper.test.js（术语修正：本真图谱→意图架构图谱）"
         }
       ],
       "description": "面向人类伙伴（hudonghua）的方案与测评材料（意见），由原『组织形态过渡畅想文章』重写而来：废弃「政策家人/政策加人」与「盖楼 vs 口服药」无关内容，按四段结构重写——①提出问题（业界问题）；②解决方案（意图架构图谱 + 知识库作为记忆系统与设计图纸 + 人与 AI 基于架构讨论、有图可依；保留以项目为基本 block 的方向）；③框架细节（写入门禁：去重/无损/墓碑；读取优化：子图限定/三层记忆/两步回忆/阈值 0.70/混合检索/重排；检出率与召回率指标与努力）；④测评与交付（对齐 LongMemEval/LOCOMO/BEAM；自建题集/剖面评测/对照实验；结果；可执行回归）。产出 docs/graph-position-paper.html（邮件安全 HTML，2 张表示意图），全文存于 graph-position-paper-001，配套可执行验收测试 tests/graph-position-paper.test.js。",
@@ -9655,6 +9660,11 @@
           "name": "commit",
           "value": "304c06e",
           "description": "docs/graph-agent-paper.html; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "7ba9f50",
+          "description": "docs/graph-agent-paper.html; design/KG/SystemArchitecture.json（术语修正）"
         }
       ],
       "description": "科研论文（内部研究稿）全文：面向 Agent 工程的意图架构图谱——写入治理、检索优化与可信记忆的实证研究。结构对齐顶级论文：摘要/1 引言/2 相关工作/3 方法/4 实验设置/5 结果与分析/6 讨论与局限/7 结论与展望/参考文献。评测以数据图表呈现（4 张 bar chart）并配文字说明：检索 recall@1 94.6%、recall@5 99.4%、MRR 0.967，重排后 99.3%–100%；阈值标定 0.70（分离 0.686/0.833）；记忆 31 题 100%、拒答 100%、约 5.7ms；对照 LongMemEval/LOCOMO/BEAM。正文全文见 attributes.paper；邮件版 HTML 见 attributes.doc。",
@@ -9691,6 +9701,11 @@
         {
           "name": "deliveryChannel",
           "value": "smtp.126.com:465（hdhscu@126.com 发送至 hudonghua@huawei.com）"
+        },
+        {
+          "name": "commit",
+          "value": "7ba9f50",
+          "description": "docs/graph-agent-paper.html; tests/graph-agent-paper.test.js（术语修正：本真图谱→意图架构图谱）"
         }
       ],
       "description": "面向人类伙伴（hudonghua）的科研论文（内部研究稿）：《面向 Agent 工程的意图架构图谱：写入治理、检索优化与可信记忆的实证研究》。参考顶级论文写法（摘要 → 引言 → 相关工作 → 方法 → 实验设置 → 结果与分析 → 讨论与局限 → 结论与展望 → 参考文献），评测部分以数据图表（4 张邮件安全 bar chart）+ 文字说明科学呈现：检索 recall@1 94.6%/recall@5 99.4%/MRR 0.967（重排后 99.3%–100%）；阈值标定 0.70（分离 0.686/0.833）；记忆 31 题 100%、拒答 100%、约 5.7ms；对照 LongMemEval/LOCOMO/BEAM。同时保留『业界问题→方案→框架细节→测评』主线。产出 docs/graph-agent-paper.html（VSOC 邮件格式的邮件安全 HTML），全文存于 graph-agent-paper-001，配套可执行验收测试 tests/graph-agent-paper.test.js。",
