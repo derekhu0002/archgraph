@@ -9457,6 +9457,13 @@
           "description": "GIVEN 语义检索返回的业务摘要（含命中 seed 与闭包邻居）；WHEN buildBusinessSemanticSummary；THEN 仅命中元素保留 status/functionalPoints/testCoverage（匹配面），闭包邻居裁剪这些派生字段并标 bookkeepingOmitted；id/name/description 始终保留。",
           "name": "AT-agent-read-projection-04",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-read-projection.test.js",
+          "acceptanceCriteria": "tests/agent-read-projection.test.js",
+          "description": "GIVEN 带账本字段的 memory_search 命中；WHEN 构建 memoryHitCard；THEN 附 matchedSnippet（源自与该 query 相关的 attribute/testcase）；无账本时无 snippet。",
+          "name": "AT-agent-read-projection-05",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Application Component",
@@ -9470,6 +9477,11 @@
           "name": "commit",
           "value": "e0b2e82",
           "description": "argo/scripts/systemarchitecture-mcp-server.js（summarizeElement/summarizeElements：派生字段仅命中元素保留，闭包邻居裁剪 + bookkeepingOmitted；导出 buildBusinessSemanticSummary）; tests/agent-read-projection.test.js（AT-04）"
+        },
+        {
+          "name": "commit",
+          "value": "a34ad0b",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js（bookkeepingSnippet/tokenizeForMatch + 语义摘要命中回带 matchedSnippet + memoryHitCard 回带）; tests/agent-read-projection.test.js（AT-04/05）"
         }
       ]
     }
