@@ -9056,6 +9056,13 @@
           "type": "Acceptance Test",
           "Input": "tests/agent-cost-eval.test.js",
           "acceptanceCriteria": "tests/agent-cost-eval.test.js"
+        },
+        {
+          "name": "AT-agent-cost-eval-07",
+          "description": "GIVEN 会话中带 state.time{start,end} 与 status 的工具事件；WHEN parseTrajectory；THEN 得出每次工具耗时/是否失败，并拆出 toolTimeMs、toolErrors、byBackendTime（graph=MCP 工具耗时 / repo=仓工具耗时），供模型耗时与记忆后端耗时分离。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-eval.test.js",
+          "acceptanceCriteria": "tests/agent-cost-eval.test.js"
         }
       ],
       "attributes": [
@@ -9228,6 +9235,13 @@
           "description": "GIVEN harness 与任务集；WHEN 检查；THEN 复用 R7 scorer（agent-cost-eval.js）且每题均有 oracle。",
           "name": "AT-memory-retrieval-ab-03",
           "type": "Acceptance Test"
+        },
+        {
+          "name": "AT-memory-retrieval-ab-04",
+          "description": "GIVEN 两臂原始会话；WHEN 统计；THEN 报告拆出模型耗时（wall − Σ工具耗时）与 MCP 工具耗时、仓工具耗时，并统计工具失败数（用于判定该臂语义检索是否真的成功）。",
+          "type": "Acceptance Test",
+          "Input": "tests/agent-cost-eval.test.js",
+          "acceptanceCriteria": "tests/agent-cost-eval.test.js"
         }
       ],
       "type": "Work Package",

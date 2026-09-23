@@ -150,12 +150,19 @@ function main(argv) {
         tokens: scored.tokens, tokensIn: r.parsed.tokensIn, tokensOut: r.parsed.tokensOut, tokensReasoning: r.parsed.tokensReasoning,
         wallMs: r.wallMs, eventMs: scored.latencyMs, turns: scored.turns, toolCalls: scored.toolCalls,
         byBackend: scored.byBackend, roundTrips: scored.roundTrips,
+        // timing split: model time vs MCP(graph) tool time vs repo tool time
+        toolTimeMs: r.parsed.toolTimeMs || 0,
+        modelMs: Math.max(0, r.wallMs - (r.parsed.toolTimeMs || 0)),
+        mcpToolMs: (r.parsed.byBackendTime && r.parsed.byBackendTime.graph) || 0,
+        repoToolMs: (r.parsed.byBackendTime && r.parsed.byBackendTime.repo) || 0,
+        toolErrors: r.parsed.toolErrors || 0,
+        toolDurations: r.parsed.toolCalls.map(c => ({ tool: c.tool, ms: c.durationMs, ok: c.ok })),
         tools: [...new Set(r.parsed.toolCalls.map(c => c.tool))],
         answer: (r.parsed.fullText || '').slice(0, 400),
         exit: r.exit,
       };
       rows.push(row);
-      console.log(`[ab] ${task.id} ${arm}: ok=${row.success} recall=${row.evidenceRecall} tok=${row.tokens} wall=${(row.wallMs / 1000).toFixed(1)}s turns=${row.turns} tools=${row.toolCalls}(g${row.byBackend.graph}/r${row.byBackend.repo}/o${row.byBackend.other}) rt=${row.roundTrips}`);
+      console.log(`[ab] ${task.id} ${arm}: ok=${row.success} recall=${row.evidenceRecall} tok=${row.tokens} wall=${(row.wallMs / 1000).toFixed(1)}s (model=${(row.modelMs / 1000).toFixed(1)}s mcp=${(row.mcpToolMs / 1000).toFixed(1)}s repo=${(row.repoToolMs / 1000).toFixed(1)}s) turns=${row.turns} tools=${row.toolCalls}(g${row.byBackend.graph}/r${row.byBackend.repo}/o${row.byBackend.other}) err=${row.toolErrors} rt=${row.roundTrips}`);
       fs.writeFileSync(path.join(ROOT, 'results', `ab-${task.id}-${arm}.ndjson`), r.raw, 'utf8');
     }
   }
@@ -173,6 +180,8 @@ function main(argv) {
       avgEvidencePrecision: avg(r => r.evidencePrecision),
       avgTokens: avg(r => r.tokens), totalTokens: rs.reduce((a, r) => a + r.tokens, 0),
       avgWallMs: avg(r => r.wallMs), avgEventMs: avg(r => r.eventMs),
+      avgModelMs: avg(r => r.modelMs), avgMcpToolMs: avg(r => r.mcpToolMs), avgRepoToolMs: avg(r => r.repoToolMs),
+      totalToolErrors: rs.reduce((a, r) => a + r.toolErrors, 0),
       avgTurns: avg(r => r.turns), avgToolCalls: avg(r => r.toolCalls), avgRoundTrips: avg(r => r.roundTrips),
       byBackend: rs.reduce((a, r) => ({ graph: a.graph + r.byBackend.graph, repo: a.repo + r.byBackend.repo, other: a.other + r.byBackend.other }), { graph: 0, repo: 0, other: 0 }),
     };
@@ -198,7 +207,7 @@ function main(argv) {
   console.log('\n=== A/B summary (MCP off vs on) ===');
   for (const arm of arms) {
     const s = summary[arm];
-    console.log(`${arm.toUpperCase()}: success=${(s.successRate * 100).toFixed(1)}% recall=${(s.avgEvidenceRecall * 100).toFixed(1)}% precision=${(s.avgEvidencePrecision * 100).toFixed(1)}% | tokens=${s.avgTokens} wall=${(s.avgWallMs / 1000).toFixed(1)}s turns=${s.avgTurns} tools=${s.avgToolCalls} rt=${s.avgRoundTrips} backend(g${s.byBackend.graph}/r${s.byBackend.repo}/o${s.byBackend.other})`);
+    console.log(`${arm.toUpperCase()}: success=${(s.successRate * 100).toFixed(1)}% recall=${(s.avgEvidenceRecall * 100).toFixed(1)}% precision=${(s.avgEvidencePrecision * 100).toFixed(1)}% | tokens=${s.avgTokens} wall=${(s.avgWallMs / 1000).toFixed(1)}s = model ${(s.avgModelMs / 1000).toFixed(1)}s + mcp ${(s.avgMcpToolMs / 1000).toFixed(1)}s + repo ${(s.avgRepoToolMs / 1000).toFixed(1)}s | turns=${s.avgTurns} tools=${s.avgToolCalls} err=${s.totalToolErrors} rt=${s.avgRoundTrips} backend(g${s.byBackend.graph}/r${s.byBackend.repo}/o${s.byBackend.other})`);
   }
   console.log(`report: ${REPORT_PATH}`);
   return 0;

@@ -129,6 +129,14 @@ function backendOf(tool) {
   return 'other';
 }
 
+function toolRecord(tool, line, part) {
+  const st = (part && part.state) || {};
+  const tm = st.time || {};
+  const durationMs = (typeof tm.start === 'number' && typeof tm.end === 'number') ? Math.max(0, tm.end - tm.start) : null;
+  const ok = st.status ? st.status !== 'error' : true;
+  return { tool, backend: backendOf(tool), raw: line, durationMs, ok, error: st.error ? String(st.error).slice(0, 160) : null };
+}
+
 function eventTime(e) {
   const candidates = [e.time, e.part && e.part.time, e.part && e.part.state && e.part.state.time];
   for (const t of candidates) {
@@ -157,9 +165,9 @@ function parseTrajectory(text) {
     if (part && part.type === 'text' && part.text) texts.push(part.text);
     if (part && part.type === 'tool') {
       const tool = part.tool || part.name || (part.state && part.state.tool) || 'tool';
-      toolCalls.push({ tool, backend: backendOf(tool), raw: t });
+      toolCalls.push(toolRecord(tool, t, part));
     }
-    if (e.type === 'tool_use' && e.tool) toolCalls.push({ tool: e.tool, backend: backendOf(e.tool), raw: t });
+    if (e.type === 'tool_use' && e.tool) toolCalls.push(toolRecord(e.tool, t, part));
     if (e.type === 'step_start') steps += 1;
     if (e.type === 'step_finish') {
       const fin = (e.part && e.part.finish) ? e.part.finish : (e.part || e);
@@ -177,7 +185,16 @@ function parseTrajectory(text) {
 
   const tokens = tokensIn + tokensOut + tokensReasoning;
   const latencyMs = (tMin !== null && tMax !== null && tMax >= tMin) ? (tMax - tMin) : null;
-  return { rawText: raw, texts, fullText: texts.join('\n').trim(), toolCalls, steps, tokensIn, tokensOut, tokensReasoning, tokens, cost, latencyMs };
+  const byBackendTime = { graph: 0, repo: 0, other: 0 };
+  let toolTimeMs = 0;
+  let toolErrors = 0;
+  for (const c of toolCalls) {
+    const d = c.durationMs || 0;
+    toolTimeMs += d;
+    if (byBackendTime[c.backend] != null) byBackendTime[c.backend] += d;
+    if (c.ok === false) toolErrors += 1;
+  }
+  return { rawText: raw, texts, fullText: texts.join('\n').trim(), toolCalls, steps, tokensIn, tokensOut, tokensReasoning, tokens, cost, latencyMs, toolTimeMs, toolErrors, byBackendTime };
 }
 
 // ── evidence extraction + scoring ─────────────────────────────────────────────

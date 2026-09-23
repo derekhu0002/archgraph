@@ -128,6 +128,23 @@ test('AT-agent-cost-eval-05: cost/recall curve is monotonic in cumulative tokens
   assert.ok(estimateTokens('中文ab') >= 3);
 });
 
+test('AT-agent-cost-eval-07: tool timing split (model vs MCP vs repo) from state.time', () => {
+  // GIVEN a session whose tool parts carry state.time + status (opencode NDJSON)
+  const t = parseTrajectory(ndjson([
+    { type: 'message.part', part: { type: 'tool', tool: 'argo_getSystemArchitecture', state: { status: 'completed', time: { start: 1000, end: 2500 } } } },
+    { type: 'message.part', part: { type: 'tool', tool: 'grep', state: { status: 'error', error: 'boom', time: { start: 3000, end: 3100 } } } },
+  ]));
+  // THEN per-tool duration/ok and the backend time split are captured
+  assert.equal(t.toolCalls[0].durationMs, 1500);
+  assert.equal(t.toolCalls[0].ok, true);
+  assert.equal(t.toolCalls[1].durationMs, 100);
+  assert.equal(t.toolCalls[1].ok, false);
+  assert.equal(t.toolTimeMs, 1600);
+  assert.equal(t.toolErrors, 1);
+  assert.equal(t.byBackendTime.graph, 1500, 'MCP tool time');
+  assert.equal(t.byBackendTime.repo, 100, 'repo tool time');
+});
+
 test('AT-agent-cost-eval-06: universe builder merges graph ids and repo paths', () => {
   const u = buildUniverse({ graphPath: GRAPH_PATH, repoRoot: ROOT });
   assert.ok(u.ids.has('project-overseer-001'), 'graph ids must be in the universe');
