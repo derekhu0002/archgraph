@@ -9063,6 +9063,11 @@
           "name": "commit",
           "value": "29e5615",
           "description": "scripts/agent-cost-eval.js; data/eval-seeds/agent-cost-seed.json; tests/agent-cost-eval.test.js; design/KG/SystemArchitecture.json; archgraph.qea（R7 度量 harness 首刀：跨图仓成本—召回 + oracle 上界 + 可执行 AT-agent-cost-eval-01..06；实测基线复用 28 条真实导航会话）"
+        },
+        {
+          "name": "commit",
+          "value": "000a58c",
+          "description": "argo/scripts/graph-rag/agentCostProfiler.js; argo/scripts/argo-mcp-server.js; docs/agent-cost-profiler.md; tests/agent-cost-profiler.test.js（R7 升级为框架能力：后台自动采集 + getAgentCostDigest；项目只需提供宿主日志与 seed）"
         }
       ]
     },
@@ -9149,7 +9154,14 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Application Component"
+      "type": "Application Component",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "000a58c",
+          "description": "argo/scripts/graph-rag/agentCostProfiler.js; argo/scripts/argo-mcp-server.js; docs/agent-cost-profiler.md; tests/agent-cost-profiler.test.js; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; archgraph.qea（框架内建后台成本 Profiler + getAgentCostDigest + AT-07）"
+        }
+      ]
     }
   ],
   "relationships": [
