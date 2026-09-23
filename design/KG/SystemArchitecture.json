@@ -9269,6 +9269,11 @@
           "name": "pitfall",
           "value": "ab-on-arm-semantic-error-invalidates-pass",
           "description": "首轮 A/B 的 ON 臂原始会话中 argo_memory_search 报 SEMANTIC_OPERATOR_ERROR（action: Correct readiness and retry）——即 ON 臂语义检索实际失败、回退到仓工具，首轮对照因此无效。复现/修正：评测前必须使该 workspace 的语义生命周期 Aligned（argo-init/预热），并在报告中以 toolErrors 门禁：若 ON 臂 graph 工具失败>0 则该样本作废，不得归因于『MCP 无增益』。"
+        },
+        {
+          "name": "commit",
+          "value": "be77239",
+          "description": "scripts/memory-retrieval-ab.js; data/eval-seeds/agent-cost-seed.json; tests/memory-retrieval-profile.test.js（按场景×规模×指标剖面 + E1/E2 对照设计；下一步先做 S4 图仓合成）"
         }
       ]
     },
@@ -9300,7 +9305,14 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Business Object"
+      "type": "Business Object",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "be77239",
+          "description": "data/eval-seeds/agent-cost-seed.json（scenario/scale 标签）; scripts/memory-retrieval-ab.js（groupByScenario 剖面）; tests/memory-retrieval-profile.test.js（AT-01..03）; design/KG/SystemArchitecture.json; archgraph.qea"
+        }
+      ]
     }
   ],
   "relationships": [
