@@ -9393,6 +9393,11 @@
           "name": "commit",
           "value": "b982aa3",
           "description": "argo/scripts/agentSearchDiagnose.js（新增 isExportJson/exportToNdjson：接受 opencode export 的 {info,messages} JSON）; tests/agent-search-diagnosis.test.js（AT-05）; argo/skills/agent-search-diagnosis/SKILL.md"
+        },
+        {
+          "name": "commit",
+          "value": "a62e4ca",
+          "description": "argo/scripts/agentSearchDiagnose.js（humanWait 单列、contextBlowup 标记、queryClass 细化）; tests/agent-search-diagnosis.test.js（AT-06）"
         }
       ]
     },
@@ -9410,7 +9415,14 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Principle"
+      "type": "Principle",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "878e780",
+          "description": "design/KG/SystemArchitecture.json; tests/memory-retrieval-profile.test.js（AT-framework-optimization-cross-scenario-01）"
+        }
+      ]
     }
   ],
   "relationships": [
