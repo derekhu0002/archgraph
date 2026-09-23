@@ -75,3 +75,30 @@ test('AT-agent-read-projection-03: semantic retrieval and raw Cypher are NOT pru
   assert.ok(projCalls >= 3, 'projection used by the structural builders');
   assert.ok(!/buildSystemArchitecture[\s\S]{0,400}projectAgentFields/.test(src), 'semantic builder must not prune');
 });
+
+test('AT-agent-read-projection-04: semantic hits keep attribute/testcase-derived fields; neighbours drop them', () => {
+  const sem = require('../argo/scripts/systemarchitecture-mcp-server.js');
+  const source = {
+    seedsByType: { elements: [{ id: 'hit-1' }], views: [], relationships: [] },
+    provenance: { objects: [{ objectType: 'Element', objectId: 'hit-1', firstInclusionReason: 'semantic-seed', supplementaryReasons: [] }] },
+    closure: {
+      elements: [
+        { id: 'hit-1', name: 'Hit', type: 'Business Object', description: 'the hit', attributes: [{ name: 'commit', value: 'abc' }], testcases: [{ name: 'AT-1', description: 'covers' }] },
+        { id: 'n-1', name: 'Neighbour', type: 'Business Object', description: 'neighbour', attributes: [{ name: 'commit', value: 'zzz' }], testcases: [{ name: 'AT-2', description: 'x' }] },
+      ],
+    },
+  };
+  const s = sem.buildBusinessSemanticSummary(source, { purpose: 'general', intent: 'x' });
+  const els = s.businessObjects.elements;
+  const hit = els.find(e => e.id === 'hit-1');
+  const neighbour = els.find(e => e.id === 'n-1');
+  assert.ok(hit, 'hit element present');
+  assert.ok(Array.isArray(hit.testCoverage), 'hit keeps testcase-derived fields');
+  assert.ok('functionalPoints' in hit, 'hit keeps attribute-derived fields');
+  assert.equal(neighbour.testCoverage, undefined, 'neighbour drops testcase-derived fields');
+  assert.equal(neighbour.functionalPoints, undefined, 'neighbour drops attribute-derived fields');
+  assert.equal(neighbour.bookkeepingOmitted, true, 'neighbour is flagged as omitted');
+  // identity/description are always kept
+  assert.equal(neighbour.name, 'Neighbour');
+  assert.equal(neighbour.descriptionSummary, 'neighbour');
+});

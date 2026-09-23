@@ -3792,11 +3792,23 @@ function inferObjectTypeFromSeedType(type) {
 }
 
 function summarizeElements(source, hitReasonByKey, limit) {
+  // Semantic subgraph rule: the attribute/testcase-DERIVED fields (status /
+  // functionalPoints / testCoverage) are the match surface for the HIT elements
+  // only; closure neighbours drop them (bookkeepingOmitted) — mirroring the
+  // structural-read projection (focus keeps its own, neighbours are pruned).
+  const hitIds = new Set();
+  for (const [type, seeds] of Object.entries((source && source.seedsByType) || {})) {
+    if (type !== 'elements' && type !== 'element') continue;
+    for (const seed of Array.isArray(seeds) ? seeds : []) {
+      const raw = seed && (seed.id || seed.objectId || seed.canonicalIdentity);
+      if (typeof raw === 'string' && raw) hitIds.add(raw.includes(':') ? raw.split(':').pop() : raw);
+    }
+  }
   return uniqueById([
     ...(((source.closure && source.closure.elements) || [])),
     ...((((source.viewClosure && source.viewClosure.views) || []).flatMap(view => view.memberElements || []))),
     ...((((source.endpointClosure && source.endpointClosure.relationships) || []).flatMap(relationship => [relationship.source, relationship.target]).filter(Boolean))),
-  ], 'id').slice(0, limit).map(element => summarizeElement(element, hitReasonByKey));
+  ], 'id').slice(0, limit).map(element => summarizeElement(element, hitReasonByKey, hitIds));
 }
 
 function summarizeRelationships(source, hitReasonByKey, limit) {
@@ -3812,22 +3824,31 @@ function summarizeViews(source, hitReasonByKey, limit) {
     .map(view => summarizeView(view, hitReasonByKey));
 }
 
-function summarizeElement(element, hitReasonByKey) {
+function summarizeElement(element, hitReasonByKey, hitIds = null) {
   const attributes = attributesMap(element);
   const reasons = hitReasonByKey.get(`Element:${element.id}`) || {};
-  return Object.freeze({
+  const isHit = !hitIds || hitIds.size === 0 || hitIds.has(element.id);
+  const base = {
     id: element.id,
     name: element.name,
     type: element.type,
     descriptionSummary: summarizeText(element.description),
-    status: attributes.deliveryStatus || attributes.status,
-    functionalPoints: Object.freeze(Object.entries(attributes)
-      .filter(([name]) => name.startsWith('functionalPoint'))
-      .map(([, value]) => value)),
-    testCoverage: summarizeTestcases(element.testcases),
     hitReason: reasons.firstInclusionReason,
     supplementaryReasons: Object.freeze(reasons.supplementaryReasons || []),
-  });
+  };
+  if (isHit) {
+    return Object.freeze({
+      ...base,
+      status: attributes.deliveryStatus || attributes.status,
+      functionalPoints: Object.freeze(Object.entries(attributes)
+        .filter(([name]) => name.startsWith('functionalPoint'))
+        .map(([, value]) => value)),
+      testCoverage: summarizeTestcases(element.testcases),
+    });
+  }
+  const hasBookkeeping = Object.keys(attributes).length > 0
+    || (Array.isArray(element.testcases) && element.testcases.length > 0);
+  return Object.freeze({ ...base, ...(hasBookkeeping ? { bookkeepingOmitted: true } : {}) });
 }
 
 function summarizeRelationship(relationship, hitReasonByKey) {
@@ -4314,6 +4335,7 @@ module.exports = {
   GET_SYSTEM_ARCHITECTURE_OUTPUT_SCHEMA,
   TOOLS,
   applyMutations,
+  buildBusinessSemanticSummary,
   buildSemanticDedupAdvisory,
   selectCreatedElementAdds,
   evaluateSemanticDedupGate,
