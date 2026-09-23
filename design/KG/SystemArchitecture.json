@@ -9075,6 +9075,11 @@
           "name": "commit",
           "value": "000a58c",
           "description": "argo/scripts/graph-rag/agentCostProfiler.js; argo/scripts/argo-mcp-server.js; docs/agent-cost-profiler.md; tests/agent-cost-profiler.test.js（R7 升级为框架能力：后台自动采集 + getAgentCostDigest；项目只需提供宿主日志与 seed）"
+        },
+        {
+          "name": "commit",
+          "value": "925186b",
+          "description": "scripts/agent-cost-eval.js; tests/agent-cost-eval.test.js（耗时拆分：per-tool duration/ok + toolTimeMs/toolErrors/byBackendTime，供模型 vs MCP vs 仓耗时分离）"
         }
       ]
     },
@@ -9254,6 +9259,16 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "925186b",
+          "description": "scripts/memory-retrieval-ab.js; tests/agent-cost-eval.test.js（报告 wall=model+mcp+repo 与工具失败数）"
+        },
+        {
+          "name": "pitfall",
+          "value": "ab-on-arm-semantic-error-invalidates-pass",
+          "description": "首轮 A/B 的 ON 臂原始会话中 argo_memory_search 报 SEMANTIC_OPERATOR_ERROR（action: Correct readiness and retry）——即 ON 臂语义检索实际失败、回退到仓工具，首轮对照因此无效。复现/修正：评测前必须使该 workspace 的语义生命周期 Aligned（argo-init/预热），并在报告中以 toolErrors 门禁：若 ON 臂 graph 工具失败>0 则该样本作废，不得归因于『MCP 无增益』。"
         }
       ]
     }
