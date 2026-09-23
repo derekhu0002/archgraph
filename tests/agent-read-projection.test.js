@@ -98,7 +98,26 @@ test('AT-agent-read-projection-04: semantic hits keep attribute/testcase-derived
   assert.equal(neighbour.testCoverage, undefined, 'neighbour drops testcase-derived fields');
   assert.equal(neighbour.functionalPoints, undefined, 'neighbour drops attribute-derived fields');
   assert.equal(neighbour.bookkeepingOmitted, true, 'neighbour is flagged as omitted');
+  assert.ok(typeof hit.matchedSnippet === 'string' && hit.matchedSnippet.length > 0, 'hit carries WHY it matched');
+  assert.equal(neighbour.matchedSnippet, undefined, 'neighbour carries no matchedSnippet');
   // identity/description are always kept
   assert.equal(neighbour.name, 'Neighbour');
   assert.equal(neighbour.descriptionSummary, 'neighbour');
+});
+
+test('AT-agent-read-projection-05: memory_search hits carry the matching bookkeeping snippet', () => {
+  const sem = require('../argo/scripts/systemarchitecture-mcp-server.js');
+  const element = {
+    id: 'm1', name: 'Memo', type: 'Business Object', semanticScore: 0.9,
+    description: 'a short description',
+    attributes: [{ name: 'decision', value: 'retrieval recall first', description: 'never trade recall for speed' }],
+    testcases: [{ name: 'AT-m1', description: 'recall must not drop' }],
+  };
+  const card = sem.memoryHitCard(element, 800, 'retrieval recall');
+  assert.equal(card.id, 'm1');
+  assert.ok(typeof card.matchedSnippet === 'string', 'matchedSnippet present when bookkeeping exists');
+  assert.match(card.matchedSnippet, /decision/, 'snippet surfaces the attribute');
+  // no bookkeeping -> no snippet
+  const bare = sem.memoryHitCard({ id: 'm2', name: 'Bare', type: 'Business Object', semanticScore: 0.5, description: 'x' }, 800, 'q');
+  assert.equal(bare.matchedSnippet, undefined);
 });

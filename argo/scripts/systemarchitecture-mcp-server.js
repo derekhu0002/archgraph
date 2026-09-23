@@ -2825,7 +2825,7 @@ async function memorySearchTool(args = {}, dependencies = undefined) {
     .filter(element => element && typeof element.semanticScore === 'number')
     .sort((left, right) => right.semanticScore - left.semanticScore)
     .slice(0, topK)
-    .map(element => Object.freeze(memoryHitCard(element, maxDescLen)));
+    .map(element => Object.freeze(memoryHitCard(element, maxDescLen, query)));
   return {
     status: 'passed',
     query,
@@ -2838,7 +2838,7 @@ async function memorySearchTool(args = {}, dependencies = undefined) {
 // Build one compact memory hit: id/name/type/score + an excerpt of the
 // description bounded by maxDescLen, plus the full text length so the caller
 // knows how much content exists and can decide whether to expand.
-function memoryHitCard(element, maxDescLen) {
+function memoryHitCard(element, maxDescLen, query) {
   const description = typeof element.description === 'string' ? element.description : '';
   const descriptionLength = description.length;
   let excerpt = '';
@@ -2857,6 +2857,13 @@ function memoryHitCard(element, maxDescLen) {
     if (maxDescLen > 0 && descriptionLength > maxDescLen) {
       card.truncated = true;
     }
+  }
+  // A memory match may be driven by an attribute/testcase (both are embedded);
+  // surface the matching bookkeeping text so the agent sees WHY it hit without
+  // a second call.
+  const snippet = bookkeepingSnippet(element, 'Element', query);
+  if (snippet) {
+    card.matchedSnippet = snippet;
   }
   return card;
 }
@@ -3365,11 +3372,31 @@ function buildBusinessSemanticSummary(retrieved, query = {}) {
       supplementaryReasons: Array.isArray(item.supplementaryReasons) ? [...item.supplementaryReasons] : [],
     },
   ]));
+  const recordById = new Map();
+  const putRecord = (objectType, record, id) => { if (record && id) recordById.set(`${objectType}:${id}`, record); };
+  for (const element of (source.closure && source.closure.elements) || []) putRecord('Element', element, element.id);
+  for (const view of (source.viewClosure && source.viewClosure.views) || []) {
+    putRecord('View', view, view.view_id);
+    for (const member of view.memberElements || []) putRecord('Element', member, member.id);
+    for (const member of view.memberRelationships || []) putRecord('ArchitectureRelationship', member, member.id);
+  }
+  for (const relationship of (source.endpointClosure && source.endpointClosure.relationships) || []) {
+    putRecord('ArchitectureRelationship', relationship, relationship.id);
+    if (relationship.source) putRecord('Element', relationship.source, relationship.source.id);
+    if (relationship.target) putRecord('Element', relationship.target, relationship.target.id);
+  }
+  const ctx = {
+    query,
+    recordById,
+    hitElementIds: buildHitIdSet(source, 'elements'),
+    hitRelationshipIds: buildHitIdSet(source, 'relationships'),
+    hitViewIds: buildHitIdSet(source, 'views'),
+  };
   const seedLimit = businessSummaryLimit(query);
-  const semanticSeeds = summarizeSeeds(source.seedsByType, hitReasonByKey, seedLimit);
-  const elements = summarizeElements(source, hitReasonByKey, seedLimit * 2);
-  const relationships = summarizeRelationships(source, hitReasonByKey, seedLimit * 2);
-  const views = summarizeViews(source, hitReasonByKey, seedLimit);
+  const semanticSeeds = summarizeSeeds(source.seedsByType, hitReasonByKey, seedLimit, ctx);
+  const elements = summarizeElements(source, hitReasonByKey, seedLimit * 2, ctx);
+  const relationships = summarizeRelationships(source, hitReasonByKey, seedLimit * 2, ctx);
+  const views = summarizeViews(source, hitReasonByKey, seedLimit, ctx);
   const includedObjectIds = Object.freeze([
     ...elements.map(item => item.id),
     ...relationships.map(item => item.id),
@@ -3763,7 +3790,70 @@ function businessSummaryLimit(query) {
   return Number.isInteger(supplied) && supplied > 0 ? Math.min(supplied, 50) : 8;
 }
 
-function summarizeSeeds(seedsByType = {}, hitReasonByKey, limit) {
+// A hit may be driven by an attribute/testcase (both are embedded), so surface
+// the matching bookkeeping text on HIT records only — so the agent sees WHY it
+// matched without a second lookup. Never attached to pruned neighbours.
+function tokenizeForMatch(text) {
+  const tokens = new Set();
+  const s = String(text || '');
+  for (const word of s.toLowerCase().match(/[a-z0-9]{3,}/g) || []) tokens.add(word);
+  for (const run of s.match(/[\u4e00-\u9fff]{2,}/g) || []) {
+    tokens.add(run);
+    for (let i = 0; i + 2 <= run.length; i += 1) tokens.add(run.slice(i, i + 2));
+  }
+  return [...tokens];
+}
+
+function bookkeepingSnippet(record, objectType, query, maxLen = 240) {
+  if (!record || typeof record !== 'object') return null;
+  const candidates = [];
+  if (objectType === 'ArchitectureRelationship' || objectType === 'Relationship') {
+    if (typeof record.statement === 'string' && record.statement.trim()) candidates.push(record.statement.trim());
+    if (typeof record.description === 'string' && record.description.trim()) candidates.push(record.description.trim());
+  }
+  for (const attribute of Array.isArray(record.attributes) ? record.attributes : []) {
+    if (!attribute || typeof attribute.name !== 'string') continue;
+    const text = (typeof attribute.value === 'string' && attribute.value.trim())
+      || (typeof attribute.description === 'string' && attribute.description.trim()) || '';
+    if (text) candidates.push(`${attribute.name}: ${text}`);
+  }
+  for (const testcase of Array.isArray(record.testcases) ? record.testcases : []) {
+    if (!testcase) continue;
+    const text = typeof testcase === 'string'
+      ? testcase
+      : (testcase.description || testcase.coverage || testcase.name || '');
+    if (typeof text === 'string' && text.trim()) candidates.push(`AT ${testcase.name || ''}: ${text.trim()}`.trim());
+  }
+  if (!candidates.length) return null;
+  const q = typeof query === 'string' ? query : (query && query.intent) || '';
+  const tokens = tokenizeForMatch(q);
+  const scored = candidates.map((text, index) => {
+    const lower = text.toLowerCase();
+    let overlap = 0;
+    for (const token of tokens) if (lower.includes(token)) overlap += 1;
+    return { text, overlap, index };
+  }).sort((a, b) => (b.overlap - a.overlap) || (b.text.length - a.text.length) || (a.index - b.index));
+  let out = '';
+  for (const entry of scored) {
+    if (out && out.length + entry.text.length + 2 > maxLen) break;
+    out = out ? `${out} | ${entry.text}` : entry.text;
+    if (out.length >= maxLen) break;
+  }
+  if (!out) return null;
+  return out.length > maxLen ? `${out.slice(0, maxLen - 3)}...` : out;
+}
+
+function buildHitIdSet(source, typeKey) {
+  const set = new Set();
+  const seeds = (source && source.seedsByType && source.seedsByType[typeKey]) || [];
+  for (const seed of Array.isArray(seeds) ? seeds : []) {
+    const raw = seed && (seed.id || seed.objectId || seed.canonicalIdentity);
+    if (typeof raw === 'string' && raw) set.add(raw.includes(':') ? raw.split(':').pop() : raw);
+  }
+  return set;
+}
+
+function summarizeSeeds(seedsByType = {}, hitReasonByKey, limit, ctx = {}) {
   return Object.freeze(Object.fromEntries(Object.entries(seedsByType).map(([type, seeds]) => [
     type,
     Object.freeze((Array.isArray(seeds) ? seeds : [])
@@ -3772,14 +3862,18 @@ function summarizeSeeds(seedsByType = {}, hitReasonByKey, limit) {
       .slice(0, limit)
       .map(seed => {
         const objectType = seed.objectType || seed.channel || inferObjectTypeFromSeedType(type);
-        const objectId = seed.id || seed.objectId || seed.canonicalIdentity;
+        const rawId = seed.id || seed.objectId || seed.canonicalIdentity;
+        const objectId = typeof rawId === 'string' && rawId.includes(':') ? rawId.split(':').pop() : rawId;
         const reasons = hitReasonByKey.get(`${objectType}:${objectId}`) || {};
+        const record = ctx.recordById ? ctx.recordById.get(`${objectType}:${objectId}`) : null;
+        const snippet = record ? bookkeepingSnippet(record, objectType, ctx.query) : null;
         return Object.freeze({
           objectId,
           objectType,
           score: typeof seed.score === 'number' ? seed.score : undefined,
           hitReason: reasons.firstInclusionReason || 'semantic-seed',
           supplementaryReasons: Object.freeze(reasons.supplementaryReasons || []),
+          ...(snippet ? { matchedSnippet: snippet } : {}),
         });
       })),
   ])));
@@ -3791,31 +3885,25 @@ function inferObjectTypeFromSeedType(type) {
   return 'Element';
 }
 
-function summarizeElements(source, hitReasonByKey, limit) {
+function summarizeElements(source, hitReasonByKey, limit, ctx = {}) {
   // Semantic subgraph rule: the attribute/testcase-DERIVED fields (status /
-  // functionalPoints / testCoverage) are the match surface for the HIT elements
-  // only; closure neighbours drop them (bookkeepingOmitted) — mirroring the
-  // structural-read projection (focus keeps its own, neighbours are pruned).
-  const hitIds = new Set();
-  for (const [type, seeds] of Object.entries((source && source.seedsByType) || {})) {
-    if (type !== 'elements' && type !== 'element') continue;
-    for (const seed of Array.isArray(seeds) ? seeds : []) {
-      const raw = seed && (seed.id || seed.objectId || seed.canonicalIdentity);
-      if (typeof raw === 'string' && raw) hitIds.add(raw.includes(':') ? raw.split(':').pop() : raw);
-    }
-  }
+  // functionalPoints / testCoverage) and the matchedSnippet are the match
+  // surface for the HIT elements only; closure neighbours drop them
+  // (bookkeepingOmitted) — mirroring the structural-read projection.
+  const hitIds = ctx.hitElementIds || buildHitIdSet(source, 'elements');
   return uniqueById([
     ...(((source.closure && source.closure.elements) || [])),
     ...((((source.viewClosure && source.viewClosure.views) || []).flatMap(view => view.memberElements || []))),
     ...((((source.endpointClosure && source.endpointClosure.relationships) || []).flatMap(relationship => [relationship.source, relationship.target]).filter(Boolean))),
-  ], 'id').slice(0, limit).map(element => summarizeElement(element, hitReasonByKey, hitIds));
+  ], 'id').slice(0, limit).map(element => summarizeElement(element, hitReasonByKey, hitIds, ctx));
 }
 
-function summarizeRelationships(source, hitReasonByKey, limit) {
+function summarizeRelationships(source, hitReasonByKey, limit, ctx = {}) {
+  const hitIds = ctx.hitRelationshipIds || buildHitIdSet(source, 'relationships');
   return uniqueById([
     ...(((source.endpointClosure && source.endpointClosure.relationships) || [])),
     ...((((source.viewClosure && source.viewClosure.views) || []).flatMap(view => view.memberRelationships || []))),
-  ], 'id').slice(0, limit).map(relationship => summarizeRelationship(relationship, hitReasonByKey));
+  ], 'id').slice(0, limit).map(relationship => summarizeRelationship(relationship, hitReasonByKey, hitIds, ctx));
 }
 
 function summarizeViews(source, hitReasonByKey, limit) {
@@ -3824,7 +3912,7 @@ function summarizeViews(source, hitReasonByKey, limit) {
     .map(view => summarizeView(view, hitReasonByKey));
 }
 
-function summarizeElement(element, hitReasonByKey, hitIds = null) {
+function summarizeElement(element, hitReasonByKey, hitIds = null, ctx = {}) {
   const attributes = attributesMap(element);
   const reasons = hitReasonByKey.get(`Element:${element.id}`) || {};
   const isHit = !hitIds || hitIds.size === 0 || hitIds.has(element.id);
@@ -3837,6 +3925,7 @@ function summarizeElement(element, hitReasonByKey, hitIds = null) {
     supplementaryReasons: Object.freeze(reasons.supplementaryReasons || []),
   };
   if (isHit) {
+    const snippet = bookkeepingSnippet(element, 'Element', ctx.query);
     return Object.freeze({
       ...base,
       status: attributes.deliveryStatus || attributes.status,
@@ -3844,6 +3933,7 @@ function summarizeElement(element, hitReasonByKey, hitIds = null) {
         .filter(([name]) => name.startsWith('functionalPoint'))
         .map(([, value]) => value)),
       testCoverage: summarizeTestcases(element.testcases),
+      ...(snippet ? { matchedSnippet: snippet } : {}),
     });
   }
   const hasBookkeeping = Object.keys(attributes).length > 0
@@ -3851,9 +3941,9 @@ function summarizeElement(element, hitReasonByKey, hitIds = null) {
   return Object.freeze({ ...base, ...(hasBookkeeping ? { bookkeepingOmitted: true } : {}) });
 }
 
-function summarizeRelationship(relationship, hitReasonByKey) {
+function summarizeRelationship(relationship, hitReasonByKey, hitIds = null, ctx = {}) {
   const reasons = hitReasonByKey.get(`ArchitectureRelationship:${relationship.id}`) || {};
-  return Object.freeze({
+  const base = {
     id: relationship.id,
     name: relationship.name,
     type: relationship.type,
@@ -3861,7 +3951,13 @@ function summarizeRelationship(relationship, hitReasonByKey) {
     target_id: relationship.target_id,
     hitReason: reasons.firstInclusionReason,
     supplementaryReasons: Object.freeze(reasons.supplementaryReasons || []),
-  });
+  };
+  const isHit = !hitIds || hitIds.size === 0 || hitIds.has(relationship.id);
+  if (!isHit) {
+    return Object.freeze(base);
+  }
+  const snippet = bookkeepingSnippet(relationship, 'ArchitectureRelationship', ctx.query);
+  return Object.freeze({ ...base, ...(snippet ? { matchedSnippet: snippet } : {}) });
 }
 
 function summarizeView(view, hitReasonByKey) {
