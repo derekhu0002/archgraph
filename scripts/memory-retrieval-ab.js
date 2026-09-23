@@ -125,6 +125,26 @@ function runTask(arm, home, task, { model, argoEnv }) {
   return { raw, parsed, wallMs, exit: res.status, stderr: String(res.stderr || '').slice(0, 800) };
 }
 
+// Scenario profile: aggregate the SAME metrics per scenario (S1..S8), overall
+// and per arm, so "capability" is a profile (scenario × metric), not one number.
+function groupByScenario(rows) {
+  const out = {};
+  const add = (b, r) => {
+    b.tasks += 1; b.success += r.success ? 1 : 0; b.recall += r.evidenceRecall;
+    b.tokens += r.tokens; b.wallMs += r.wallMs; b.modelMs += r.modelMs;
+    b.mcpToolMs += r.mcpToolMs; b.repoToolMs += r.repoToolMs; b.toolErrors += r.toolErrors;
+  };
+  const zero = () => ({ tasks: 0, success: 0, recall: 0, tokens: 0, wallMs: 0, modelMs: 0, mcpToolMs: 0, repoToolMs: 0, toolErrors: 0, byArm: {} });
+  for (const r of rows) {
+    const key = r.scenario || 'unknown';
+    const b = out[key] || (out[key] = zero());
+    add(b, r);
+    const a = b.byArm[r.arm] || (b.byArm[r.arm] = zero());
+    add(a, r);
+  }
+  return out;
+}
+
 function main(argv) {
   const args = parseArgs(argv || process.argv.slice(2));
   const seed = JSON.parse(fs.readFileSync(args.seed, 'utf8'));
@@ -145,6 +165,7 @@ function main(argv) {
       const scored = scoreTask(r.parsed, { id: task.id, dimension: task.dimension, oracle: task.oracle }, universe);
       const row = {
         taskId: task.id, dimension: task.dimension, arm,
+        scenario: task.scenario || 'unknown', scale: task.scale || 'unknown',
         success: scored.success, evidenceRecall: scored.evidenceRecall, evidencePrecision: scored.evidencePrecision,
         missing: scored.missing,
         tokens: scored.tokens, tokensIn: r.parsed.tokensIn, tokensOut: r.parsed.tokensOut, tokensReasoning: r.parsed.tokensReasoning,
@@ -200,7 +221,7 @@ function main(argv) {
     };
   });
 
-  const report = { generatedAt: new Date().toISOString(), model: args.model, tasks: tasks.map(t => t.id), summary, deltas, rows };
+  const report = { generatedAt: new Date().toISOString(), model: args.model, tasks: tasks.map(t => t.id), summary, byScenario: groupByScenario(rows), deltas, rows };
   fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
   fs.writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2));
 
@@ -210,9 +231,16 @@ function main(argv) {
     console.log(`${arm.toUpperCase()}: success=${(s.successRate * 100).toFixed(1)}% recall=${(s.avgEvidenceRecall * 100).toFixed(1)}% precision=${(s.avgEvidencePrecision * 100).toFixed(1)}% | tokens=${s.avgTokens} wall=${(s.avgWallMs / 1000).toFixed(1)}s = model ${(s.avgModelMs / 1000).toFixed(1)}s + mcp ${(s.avgMcpToolMs / 1000).toFixed(1)}s + repo ${(s.avgRepoToolMs / 1000).toFixed(1)}s | turns=${s.avgTurns} tools=${s.avgToolCalls} err=${s.totalToolErrors} rt=${s.avgRoundTrips} backend(g${s.byBackend.graph}/r${s.byBackend.repo}/o${s.byBackend.other})`);
   }
   console.log(`report: ${REPORT_PATH}`);
+  console.log('\n=== per-scenario profile (scenario × arm) ===');
+  const prof = groupByScenario(rows);
+  for (const [scen, b] of Object.entries(prof)) {
+    for (const [arm, a] of Object.entries(b.byArm)) {
+      console.log(`${scen} ${arm}: n=${a.tasks} success=${(a.success / a.tasks * 100).toFixed(0)}% recall=${(a.recall / a.tasks * 100).toFixed(0)}% tok=${Math.round(a.tokens / a.tasks)} wall=${(a.wallMs / a.tasks / 1000).toFixed(1)}s(model ${(a.modelMs / a.tasks / 1000).toFixed(1)}+mcp ${(a.mcpToolMs / a.tasks / 1000).toFixed(1)}+repo ${(a.repoToolMs / a.tasks / 1000).toFixed(1)}) err=${a.toolErrors}`);
+    }
+  }
   return 0;
 }
 
-module.exports = { parseArgs, resolveArgoEnv, writeArmConfig, runTask, main };
+module.exports = { parseArgs, resolveArgoEnv, writeArmConfig, runTask, groupByScenario, main };
 
 if (require.main === module) process.exit(main());

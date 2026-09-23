@@ -9271,6 +9271,36 @@
           "description": "首轮 A/B 的 ON 臂原始会话中 argo_memory_search 报 SEMANTIC_OPERATOR_ERROR（action: Correct readiness and retry）——即 ON 臂语义检索实际失败、回退到仓工具，首轮对照因此无效。复现/修正：评测前必须使该 workspace 的语义生命周期 Aligned（argo-init/预热），并在报告中以 toolErrors 门禁：若 ON 臂 graph 工具失败>0 则该样本作废，不得归因于『MCP 无增益』。"
         }
       ]
+    },
+    {
+      "description": "记忆检索能力剖面评测框架（2026-09-23，项目总管）。定位：把『Graph/记忆检索能力』从单一总分改为**剖面**——同一指标集在不同场景、不同仓规模下分别定合格线。三条轴：场景 scenario × 仓规模 scale × 指标 metrics。【场景】S1 精确/结构定位（图；id/name/type/视图成员/父链，宜 ~1 次结构调用）；S2 语义定位（图；模糊/改写）；S3 多跳导航（图；沿关系/父链多跳）；S4 图仓合成（图定位+仓取内容）；S5 时间/版本/冲突；S6 拒答/边界；S7 写入/登记；S8 仓内内容定位（仓；文档/脚本内容）。【规模】scale∈{small,large}——同一场景在大仓下检索空间更大、grep 边际成本上升，合格线与度量需分别定。【指标】公共：success/evidenceRecall/evidencePrecision/firstHit/turns/toolCallsByBackend/roundTrips/tokens(total·in·out·reasoning)/latency(model·mcp·repo)/toolErrors/abstention。按场景定主指标：S1=成功率·精度·首次命中；S2=召回@k·首次命中·误命中；S3=证据链召回·越界率；S4=证据召回(图+仓 oracle)·后端往返数；S5=顺序/最新正确性·陈旧误用率；S6=拒答正确率·幻觉率·误拒率；S7=走 MCP·无损门禁触发·commit 登记完整；S8=证据召回·轮次·token。【对照设计】E1 同仓开/关 MCP（机制对照）：同仓、同模型、同提示、隔离配置，唯一变量=是否挂 argo MCP——只测『MCP 工具的增量』；**因仓本身已按 A-graph 规则塑形，结构红利在关臂也被 grep 吃到，E1 会系统性低估框架价值（首轮已现）**，不能作为框架优势的证明。E2 制度对照（框架总价值，人类伙伴真正关心的）：带 A-graph 建立的仓(A) vs 未用 A-graph 建立的仓(B)，各自用其原生检索；控制变量=同一原始素材、同一 Agent/模型、同一任务集；记录两仓建仓成本与结构差异；**承认内容/结构差异是制度的一部分、不可完全消解**。可选 E2' 消融：从 A 仓剥离 curation（图 JSON/摘要/commit 账本）得到 B'，同底内容下比 ON vs OFF-curated，减小内容差异。注：图 JSON 保留在仓内可被检索（人类伙伴决定，不做读取限制）。【门禁】toolErrors=0（否则该样本作废，如首轮 ON 臂 SEMANTIC_OPERATOR_ERROR）；预热丢弃；重复取中位数。【落地】评测集 task 带 scenario/scale 标签（data/eval-seeds/agent-cost-seed.json 已加）；harness scripts/memory-retrieval-ab.js 按场景×臂聚合（groupByScenario）；tests/memory-retrieval-profile.test.js（AT-01..03）。下一步：先做 S4 图仓合成。",
+      "id": "memory-retrieval-eval-framework-001",
+      "name": "记忆检索能力剖面评测框架（场景×规模×指标 + E1/E2 对照设计）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/memory-retrieval-profile.test.js",
+          "acceptanceCriteria": "tests/memory-retrieval-profile.test.js",
+          "description": "GIVEN 评测任务集；WHEN 校验；THEN 每题均带合法 scenario（S1..S8）与 scale（small/large）标签。",
+          "name": "AT-memory-retrieval-profile-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/memory-retrieval-profile.test.js",
+          "acceptanceCriteria": "tests/memory-retrieval-profile.test.js",
+          "description": "GIVEN 两臂运行行；WHEN groupByScenario；THEN 按 场景×臂 聚合同一指标集（含 toolErrors 与 model/mcp/repo 耗时拆分），构成剖面而非单一总分。",
+          "name": "AT-memory-retrieval-profile-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/memory-retrieval-profile.test.js",
+          "acceptanceCriteria": "tests/memory-retrieval-profile.test.js",
+          "description": "GIVEN harness 与图谱框架元素；WHEN 核对；THEN E1（同仓机制对照，单变量=是否挂 MCP）与 E2（制度对照，A 仓 vs B 仓）两种设计均被记录且分清，且图 JSON 不被读取限制。",
+          "name": "AT-memory-retrieval-profile-03",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -11370,7 +11400,8 @@
       "included_elements": [
         "agent-cost-eval-wp-001",
         "agent-cost-profiler-001",
-        "memory-retrieval-ab-wp-001"
+        "memory-retrieval-ab-wp-001",
+        "memory-retrieval-eval-framework-001"
       ]
     }
   ]
