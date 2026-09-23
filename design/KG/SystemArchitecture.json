@@ -9372,7 +9372,14 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Skill"
+      "type": "Skill",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "d0564a4",
+          "description": "argo/scripts/agentSearchDiagnose.js; argo/skills/agent-search-diagnosis/SKILL.md; install-argo.ps1; package.json; tests/agent-search-diagnosis.test.js; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        }
+      ]
     }
   ],
   "relationships": [
