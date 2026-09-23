@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>以项目为基本 block，让 Agent 有图可依——方案与测评</title>
+</head>
+<body style="margin:0;padding:0;background:#eef1f5;font-family:'Microsoft YaHei','Segoe UI',Arial,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f5;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="860" cellpadding="0" cellspacing="0" style="width:860px;max-width:100%;background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 14px rgba(15,36,64,.08);font-family:'Microsoft YaHei','Segoe UI',Arial,sans-serif;color:#1f2937;line-height:1.75;">
+
+  <!-- Header -->
+  <tr><td style="background:#0f2b4c;background:linear-gradient(135deg,#0f2b4c,#1d4e89);padding:34px 44px;">
+    <div style="display:inline-block;border:1px solid rgba(255,255,255,.45);border-radius:20px;padding:2px 14px;font-size:12px;letter-spacing:1px;color:#dbe8f7;margin-bottom:14px;">方案与测评</div>
+    <div style="font-size:25px;font-weight:700;color:#ffffff;line-height:1.4;">以项目为基本 block，让 Agent 有图可依</div>
+    <div style="font-size:15px;color:#b9cde6;margin-top:10px;">从业界问题，到我们的方案、框架细节与测评结果</div>
+  </td></tr>
+
+  <!-- Intro -->
+  <tr><td style="padding:26px 44px 6px;">
+    <p style="margin:0;font-size:15px;">您好：</p>
+    <p style="margin:10px 0 0;font-size:15px;">把我们对「以项目为基本 block」这一方向的思考，连同已落地的框架方法与测评结果，整理成这份材料给您好参考。全文分四部分：<strong>先讲业界的一个问题，再讲我们的解决方案，然后讲框架细节，最后给出测评与交付</strong>。</p>
+  </td></tr>
+
+  <!-- 1 -->
+  <tr><td style="padding:26px 44px 0;">
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">一、提出问题：业界的一个问题</div>
+    <p style="margin:0 0 10px;font-size:14.5px;">今天用 Agent 干活，真正卡住的往往不是「模型够不够强」，而是<strong>它没有一份可信、可执行、可追溯的「项目上下文」</strong>。行业主流做法有两种，都不太够用：</p>
+    <div style="background:#f8fafc;border:1px solid #e3e8ef;border-radius:8px;padding:14px 18px;font-size:14px;">
+      <div style="padding:6px 0;">· <strong>把资料塞进向量库 / RAG</strong>：能「按意思找」，但找回来的是零散片段，缺结构、缺关系，也说不清依据与来龙去脉；</div>
+      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;">· <strong>把上下文堆进超长提示词</strong>：一次性有效，无法沉淀、无法复用，还会随会话丢失。</div>
+    </div>
+    <p style="margin:12px 0 8px;font-size:14.5px;">结果就是四个老问题：<strong>意图漂移</strong>（越做越偏，人难察觉）、<strong>黑盒执行</strong>（读了什么、为什么这么改，说不清）、<strong>验收靠感觉</strong>（缺少可执行、可回归的标准）、<strong>经验不沉淀</strong>（换个人、换一次会话又从零开始）。</p>
+    <div style="background:#f2f7fd;border-left:5px solid #1d4e89;border-radius:6px;padding:14px 18px;font-size:14px;">
+      <strong style="color:#0f2b4c;">再往上一层看：</strong>组织想「以项目为单位」协作和复用，也缺一个共同底座——每个项目如果各说各话、知识各存各处，项目之间就无法互认、互借、复用。
+    </div>
+  </td></tr>
+
+  <!-- 2 -->
+  <tr><td style="padding:26px 44px 0;">
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">二、解决方案：我们怎么做</div>
+    <p style="margin:0 0 12px;font-size:14.5px;">我们的答案是：<strong>给每个项目一张「本真图谱」，让知识库同时成为 AI 的记忆系统与设计图纸。</strong></p>
+    <div style="background:#f8fafc;border:1px solid #e3e8ef;border-radius:8px;padding:14px 18px;font-size:14px;">
+      <div style="padding:7px 0;"><strong style="color:#1d4e89;">本真图谱（已实现）</strong>　每个项目里有一张唯一事实源的图谱——用企业架构标准建模，元素、关系、视图都有类型、可校验；它承载项目「本真」的意图与事实，不是一堆散落的文本。</div>
+      <div style="padding:7px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">知识库 = 记忆系统 + 设计图纸</strong>　它既是 AI 的长期记忆（记得住聊过、定过的事），也是项目的设计图纸（设计决策、职责、验收标准都写在图上）。</div>
+      <div style="padding:7px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">人与 AI 基于架构讨论，让 Agent「有图可依」</strong>　人看全局、AI 看与任务相关的局部，但面对的是同一张图；目标对齐不再靠反复解释，而是结构化的。</div>
+      <div style="padding:7px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">方向：以项目为基本 block</strong>　顺着这个底座继续走，组织的基本单元可以从「人」升级为「项目」——项目即国家、组织即联邦：中枢只登记成员与授权，项目之间以「引用」互借能力，而不是把内容合并或拷贝。</div>
+    </div>
+
+    <figure class="dia" style="margin:16px 0 0;">
+      <table class="diagram" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:8px 0;font-size:13.5px;">
+        <tr>
+          <td style="width:26%;vertical-align:middle;"><div style="border:1px solid #dbe4f0;border-radius:8px;background:#f7fafd;padding:12px 10px;text-align:center;line-height:1.6;"><strong style="color:#0f2b4c;">人（和同事）</strong><br><span style="color:#6b7a8d;font-size:12px;">定方向 · 做裁决 · 纠偏</span></div></td>
+          <td style="width:30px;text-align:center;color:#9aa9bd;font-size:18px;font-weight:700;">↔</td>
+          <td style="width:40%;vertical-align:middle;"><div style="border:1px solid #1d4e89;border-radius:8px;background:#eaf2fb;padding:12px 10px;text-align:center;line-height:1.6;"><strong style="color:#0f2b4c;">本真图谱（项目知识库）</strong><br><span style="color:#6b7a8d;font-size:12px;">记忆系统 + 设计图纸 · 唯一事实源</span></div></td>
+          <td style="width:30px;text-align:center;color:#9aa9bd;font-size:18px;font-weight:700;">↔</td>
+          <td style="width:26%;vertical-align:middle;"><div style="border:1px solid #dbe4f0;border-radius:8px;background:#f7fafd;padding:12px 10px;text-align:center;line-height:1.6;"><strong style="color:#0f2b4c;">AI（Agent）</strong><br><span style="color:#6b7a8d;font-size:12px;">有图可依 · 照图做事</span></div></td>
+        </tr>
+      </table>
+      <figcaption style="font-size:12.5px;color:#7a8798;margin:8px 0 0;">图 1 · 人、AI 与本真图谱：围绕同一张图协作，「有图可依」</figcaption>
+    </figure>
+
+    <div style="background:#f2f7fd;border-left:5px solid #1d4e89;border-radius:6px;padding:14px 18px;font-size:14px;margin-top:12px;">
+      <strong style="color:#0f2b4c;">坦诚地说，还有硬问题要面对：</strong>联邦中枢怎么避免长成「超级图」、项目之间「默认拒绝」会不会造成协作摩擦、引用会不会悬空漂移、以及人在新的组织形态里的位置。这些不回避，但已不属于本文范围，后续单独探讨。
+    </div>
+  </td></tr>
+
+  <!-- 3 -->
+  <tr><td style="padding:26px 44px 0;">
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">三、框架细节：Graph 与我们的方法</div>
+    <p style="margin:0 0 12px;font-size:14.5px;">「有图可依」要成立，关键在这张图<strong>写得进去、取得出来、而且取得准</strong>。下面三小节分别讲写入、读取与指标。</p>
+
+    <figure class="dia" style="margin:0 0 18px;">
+      <table class="diagram" role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:8px 0;font-size:13px;">
+        <tr>
+          <td style="width:30%;vertical-align:middle;"><div style="border:1px solid #dbe4f0;border-radius:8px;background:#f7fafd;padding:12px 8px;text-align:center;line-height:1.55;"><strong style="color:#0f2b4c;">① 写入</strong><br><span style="color:#6b7a8d;font-size:12px;">去重 · 无损 · 墓碑<br>让图不腐化</span></div></td>
+          <td style="width:30px;text-align:center;color:#9aa9bd;font-size:18px;font-weight:700;">→</td>
+          <td style="width:30%;vertical-align:middle;"><div style="border:1px solid #dbe4f0;border-radius:8px;background:#f7fafd;padding:12px 8px;text-align:center;line-height:1.55;"><strong style="color:#0f2b4c;">② 读取</strong><br><span style="color:#6b7a8d;font-size:12px;">子图限定 · 三层记忆 · 两步回忆<br>省 Token、提性能</span></div></td>
+          <td style="width:30px;text-align:center;color:#9aa9bd;font-size:18px;font-weight:700;">→</td>
+          <td style="width:30%;vertical-align:middle;"><div style="border:1px solid #1d4e89;border-radius:8px;background:#eaf2fb;padding:12px 8px;text-align:center;line-height:1.55;"><strong style="color:#0f2b4c;">③ 指标</strong><br><span style="color:#6b7a8d;font-size:12px;">召回 · 检出 · 排序质量<br>顶上去且不牺牲准确</span></div></td>
+        </tr>
+      </table>
+      <figcaption style="font-size:12.5px;color:#7a8798;margin:8px 0 0;">图 2 · 框架三段：写入门禁 → 读取优化 → 检索指标</figcaption>
+    </figure>
+
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:6px 0 8px;">3.1　写入时的门禁机制（让图不腐化）</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13.5px;border-collapse:collapse;border:1px solid #e3e8ef;">
+      <tr style="background:#f4f7fb;color:#0f2b4c;font-weight:700;">
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;width:26%;">门禁</td>
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">做什么</td>
+      </tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>去重门禁</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">写入默认「复用」：完全重复（同类型 + 同名称）直接复用既有对象；同类型的近似新对象会被软门禁拦下并给出候选，须显式放行并说明理由才能创建。复用是默认，重复要解释。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>无损门禁</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">写入不静默丢内容：结构化字段按名称合并，标量文本受保护，「省略 ≠ 删除」；确需删减时必须显式确认。</td></tr>
+      <tr><td style="padding:8px 12px;"><strong>墓碑账本</strong></td><td style="padding:8px 12px;">破坏性删除（元素/关系/视图）进入可恢复账本，完整对象留痕，可回溯、可恢复。</td></tr>
+    </table>
+    <p style="margin:0 0 0;font-size:13.5px;color:#5b6b7f;">效果：图不会因重复或误删而臃肿、腐化，语义召回也就能保持精准。</p>
+
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">3.2　读取时优化 Token 与性能的方法</div>
+    <div style="background:#f8fafc;border:1px solid #e3e8ef;border-radius:8px;padding:14px 18px;font-size:14px;">
+      <div style="padding:6px 0;"><strong style="color:#1d4e89;">按「子图」限定检索范围</strong>　检索可限定在某张视图或某个元素子树内，避免全图铺开、返回过多内容。</div>
+      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">三层记忆，按需加载</strong>　工作记忆（会话开始只加载紧凑摘要，约 2–4K token）→ 长期记忆（命中才召回）→ 档案；不把全量记忆一次塞进上下文。</div>
+      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">两步回忆</strong>　先语义定位拿到紧凑卡片，再按需取全文，避免「一上来就拉全文」的 token 浪费。</div>
+      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">种子阈值标定（0.70）</strong>　过滤掉无关内容（实测无关探针 ≤0.69、相关目标 ≥0.83，取最大召回点 0.70），无关命中降为 0，而相关召回不降。</div>
+      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">混合检索 + 重排</strong>　向量「按意思找」与词法「按精确 token 找」并行融合；候选集再经一次 LLM 重排，把最相关的顶到最前（失败自动回退，不阻塞）。</div>
+      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">通道并发 + 投影瘦身</strong>　多通道并发执行缩短时延；向量投影去除大字段，修复大图谱下的内存问题。</div>
+    </div>
+    <div style="background:#f2f7fd;border-left:5px solid #1d4e89;border-radius:6px;padding:12px 18px;font-size:13.5px;margin-top:10px;">
+      <strong style="color:#0f2b4c;">一条底线：</strong>所有优化都不得牺牲检出率与召回率——宁可多花性能，也不靠「缩小候选池、截断内容、跳过重排」换速度。
+    </div>
+
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px">3.3　检出率与召回率：指标与我们的努力</div>
+    <p style="margin:0 0 10px;font-size:14px;">我们把「检索那一步」量化成一组标准指标：<strong>recall@1 / recall@5</strong>（前 1 / 前 5 命中率）、<strong>MRR</strong>（首个正确结果的排位质量）、<strong>Precision / Hit Rate@K</strong>（准确率与命中率）。努力都围绕一个目标：<strong>把召回与检出顶上去，且不牺牲准确</strong>。</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13.5px;border-collapse:collapse;border:1px solid #e3e8ef;">
+      <tr style="background:#f4f7fb;color:#0f2b4c;font-weight:700;">
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">方法</td>
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">实测（仓库内评测）</td>
+      </tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>向量检索基线</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">recall@1 <strong>94.6%</strong>、recall@5 <strong>99.4%</strong>、MRR <strong>0.967</strong></td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>混合检索（向量 + 词法）</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">recall@1 约 <strong>96%</strong>（小幅提升；基线已高，按宿主金丝雀开启）</td></tr>
+      <tr><td style="padding:8px 12px;"><strong>二次重排（LLM）</strong></td><td style="padding:8px 12px;">recall@1 最高 <strong>99.3%–100%</strong>，recall@5 100%、MRR 0.997（对提示/模型敏感，默认关、调优后启用）</td></tr>
+    </table>
+  </td></tr>
+
+  <!-- 4 -->
+  <tr><td style="padding:26px 44px 0;">
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">四、测评与交付</div>
+
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:6px 0 8px;">4.1　测评方法</div>
+    <div style="background:#f8fafc;border:1px solid #e3e8ef;border-radius:8px;padding:14px 18px;font-size:14px;">
+      <div style="padding:6px 0;"><strong style="color:#1d4e89;">对齐业界基准</strong>　以长期记忆领域的公认基准（LongMemEval / LOCOMO / BEAM）为标尺，采用「摄入 → 检索 → 评判」（judge LLM 对照标准答案）的公认流水线；头部成绩（约 92%–94%）作为「世界级」的量化参照。</div>
+      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">可执行评测集</strong>　自建题集覆盖信息抽取、多会话推理、时间推理、知识更新、拒答等维度，每题写成可回放的用例。</div>
+      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">剖面评测</strong>　不止看一个总分：把指标按「场景 × 仓规模 × 指标」分场景定合格线（结构定位 / 语义定位 / 多跳导航 / 图仓合成 / 拒答 / 写入登记 …）。</div>
+      <div style="padding:6px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">对照实验</strong>　同题、同模型、同提示，只改一个变量（如是否挂载图谱工具），用对照证明「机制带来的增量」。</div>
+    </div>
+
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">4.2　测评结果</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13.5px;border-collapse:collapse;border:1px solid #e3e8ef;">
+      <tr style="background:#f4f7fb;color:#0f2b4c;font-weight:700;">
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;width:32%;">维度</td>
+        <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">结果</td>
+      </tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>记忆检索正确率</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">整体 <strong>100%</strong>（31 题），拒答准确率 100%</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>检索召回（recall@1 / @5）</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">94.6% / 99.4%（向量基线）；重排后 recall@1 → 99.3%–100%</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>排序质量（MRR）</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">0.967；重排后 0.997</td></tr>
+      <tr><td style="padding:8px 12px;"><strong>时延</strong></td><td style="padding:8px 12px;">平均约 5.7ms（评测 harness，读路径）</td></tr>
+    </table>
+
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">4.3　交付与回归</div>
+    <p style="margin:0;font-size:14.5px;">上述测评都固化成<strong>可执行用例</strong>（检索基线、记忆评测、重排对比等），随每次改动自动回归——所以指标不是一次性的漂亮数字，而是能被持续守住的门线。测试口径与题集都在仓库内，可复现、可复核。</p>
+  </td></tr>
+
+  <!-- Closing -->
+  <tr><td style="padding:26px 44px 0;">
+    <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">结语</div>
+    <p style="margin:0;font-size:14.5px;">一句话收束：<strong>给项目一张「本真图谱」，让它同时成为 AI 的记忆与设计图纸——AI 就能有图可依，人也能基于架构与它讨论；而写有门禁、读有优化、检索有指标、交付有回归，才让这件事真正可用于工程。</strong>后续我们会在单项目上继续打磨指标，并逐步探索「以项目为基本 block」的组织级协作。</p>
+  </td></tr>
+
+  <!-- Footer -->
+  <tr><td style="padding:24px 44px 30px;">
+    <div style="border-top:1px solid #eef1f5;padding-top:14px;font-size:12.5px;color:#7a8798;">
+      本文为内部材料，供探讨与参考；指标均来自仓库内可执行评测，欢迎指正。
+    </div>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

@@ -8960,6 +8960,11 @@
         {
           "name": "deliveryChannel",
           "value": "smtp.126.com:465（hdhscu@126.com 发送至 hudonghua@huawei.com）"
+        },
+        {
+          "name": "status",
+          "value": "superseded",
+          "description": "被 wp-graph-position-paper-001 重写替代（按人类伙伴反馈：去除政策家人/口服药等无关内容，改为四段结构）"
         }
       ],
       "description": "面向人类伙伴（hudonghua）的新型组织形态过渡畅想文章（意见）。主题：以「项目」为基本 block，基于「一人成军」愿景构建新型组织结构；以「国家联邦」为比喻探讨（①设立联盟中枢；②每个国家就是一个项目；③以项目为基本组织把整个组织建起来），并探讨从「人的组织形态」过渡到「政策家人」组织形态的方式（从项目化切入；建筑时代 vs 口服药类比）。文风：畅想 + 风险试探（列出中心悖论/协作摩擦/引用漂移/人的位置/度量激励/责任合规/身份文化/失败模式等），并给出 L1→L4 过渡路径与五步起步建议。产出 docs/org-federation-vision.html（参照 SOC-DEMO VSOC 邮件格式的邮件安全 HTML，2 张表示意图），文章全文存于 org-federation-vision-article-001，配套可执行验收测试 tests/org-federation-vision.test.js。",
@@ -9563,6 +9568,53 @@
           "name": "commit",
           "value": "216f8b9",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（本会话记忆落地：T2 里程碑 + T1 摘要覆盖写；含下一会话完整测试待办钩子）"
+        }
+      ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "docs/graph-position-paper.html",
+          "name": "doc"
+        },
+        {
+          "name": "article",
+          "value": "以项目为基本 block，让 Agent 有图可依——方案与测评（意见）\n\n一、提出问题：业界的一个问题\n今天用 Agent 干活，真正卡住的往往不是「模型够不够强」，而是它没有一份可信、可执行、可追溯的「项目上下文」。行业主流做法两种都不够用：把资料塞进向量库/RAG（能按意思找，但零散、缺结构、缺关系与依据）；把上下文堆进超长提示词（一次性有效，无法沉淀复用，随会话丢失）。结果就是四个老问题：意图漂移、黑盒执行、验收靠感觉、经验不沉淀。再往上一层看：组织想以项目为单位协作与复用，也缺一个共同底座——各项目各说各话、知识各存各处，就无法互认、互借、复用。\n\n二、解决方案：我们怎么做\n给每个项目一张「本真图谱」，让知识库同时成为 AI 的记忆系统与设计图纸。\n- 本真图谱（已实现）：每个项目里唯一事实源的一张图谱，用企业架构标准建模，元素/关系/视图都有类型、可校验，承载项目本真的意图与事实。\n- 知识库 = 记忆系统 + 设计图纸：既是 AI 的长期记忆（记得住聊过、定过的事），也是项目的设计图纸（设计决策、职责、验收标准都写在图上）。\n- 人与 AI 基于架构讨论，让 Agent「有图可依」：人看全局、AI 看任务相关的局部，面对同一张图；目标对齐不再靠反复解释。\n- 方向：以项目为基本 block：组织基本单元可从「人」升级为「项目」——项目即国家、组织即联邦；中枢只登记成员与授权，项目之间以引用互借能力，不合并、不拷贝。\n坦诚地说，还有硬问题：联邦中枢如何避免长成超级图、默认拒绝会不会造成协作摩擦、引用会不会悬空漂移、以及人在新组织形态里的位置；本文不回避，但留待后续单独探讨。\n\n三、框架细节：Graph 与我们的方法\n3.1 写入时的门禁机制（让图不腐化）\n- 去重门禁：写入默认复用；完全重复直接复用；同类型近似新对象被软门禁拦下并给出候选，须显式放行并说明理由。\n- 无损门禁：写入不静默丢内容；结构化字段按名称合并；标量文本受保护；省略≠删除；确需删减时须显式确认。\n- 墓碑账本：破坏性删除（元素/关系/视图）进入可恢复账本，完整对象留痕，可回溯、可恢复。\n3.2 读取时优化 Token 与性能的方法\n- 按子图限定检索范围（视图或元素子树），避免全图铺开。\n- 三层记忆按需加载：工作记忆（会话开始只加载紧凑摘要，约 2–4K token）→ 长期记忆（命中才召回）→ 档案。\n- 两步回忆：先语义定位拿到紧凑卡片，再按需取全文。\n- 种子阈值标定 0.70：过滤无关内容（无关探针 ≤0.69、相关目标 ≥0.83），无关命中降为 0、相关召回不降。\n- 混合检索（向量+词法）与二次重排（LLM listwise，失败自动回退，不阻塞）。\n- 通道并发与向量投影瘁身，修复大图谱内存问题。\n- 底线：所有优化都不得牺牲检出率与召回率。\n3.3 检出率与召回率：指标与我们的努力\n指标：recall@1 / recall@5、MRR、Precision / Hit Rate@K。努力围绕一个目标：把召回与检出顶上去，且不牺牲准确。\n实测：向量基线 recall@1 94.6%、recall@5 99.4%、MRR 0.967；混合检索 recall@1 约 96%；二次重排 recall@1 最高 99.3%–100%（recall@5 100%、MRR 0.997；对提示/模型敏感，默认关）。\n\n四、测评与交付\n4.1 测评方法：对齐业界基准（LongMemEval / LOCOMO / BEAM）与「摄入→检索→评判」流水线（judge LLM 对照标准答案；头部约 92%–94% 作为世界级量化参照）；自建可执行题集（信息抽取/多会话推理/时间推理/知识更新/拒答）；剖面评测（场景×仓规模×指标）；对照实验（同题同模型同提示，只改一个变量证明机制增量）。\n4.2 测评结果：记忆检索正确率整体 100%（31 题）、拒答 100%；检索召回 94.6%/99.4%（重排后 99.3%–100%）；MRR 0.967（重排后 0.997）；平均时延约 5.7ms。\n4.3 交付与回归：上述测评固化为可执行用例，随每次改动自动回归；评测口径与题集在仓库内，可复现可复核。\n\n结语\n给项目一张本真图谱，让它同时成为 AI 的记忆与设计图纸——AI 就能有图可依，人也能基于架构与它讨论；写有门禁、读有优化、检索有指标、交付有回归，才让这件事真正可用于工程。"
+        }
+      ],
+      "description": "方案与测评材料（意见）全文：以项目为基本 block，让 Agent 有图可依。四部分——①业界问题（缺可信可执行可追溯的项目上下文；RAG 零散、超长提示不可沉淀）；②解决方案（本真图谱 = 唯一事实源、已实现；知识库=记忆系统+设计图纸；人与 AI 基于架构讨论、有图可依；方向=以项目为基本 block）；③框架细节（写入时的门禁机制：去重/无损/墓碑；读取时优化 Token 与性能：子图限定/三层记忆/两步回忆/阈值 0.70/混合检索/重排/通道并发；检出率与召回率指标与努力）；④测评与交付（对齐 LongMemEval/LOCOMO/BEAM；剖面评测与对照实验；结果；可执行回归）。正文全文见 attributes.article；邮件版 HTML 见 attributes.doc。",
+      "id": "graph-position-paper-001",
+      "name": "方案与测评材料：以项目为基本 block，让 Agent 有图可依（全文）",
+      "parent": "1249",
+      "type": "Business Object"
+    },
+    {
+      "type": "Work Package",
+      "attributes": [
+        {
+          "name": "doc",
+          "value": "docs/graph-position-paper.html"
+        },
+        {
+          "name": "recipient",
+          "value": "hudonghua@huawei.com"
+        },
+        {
+          "name": "articleRef",
+          "value": "graph-position-paper-001"
+        }
+      ],
+      "description": "面向人类伙伴（hudonghua）的方案与测评材料（意见），由原『组织形态过渡畅想文章』重写而来：废弃「政策家人/政策加人」与「盖楼 vs 口服药」无关内容，按四段结构重写——①提出问题（业界问题）；②解决方案（本真图谱 + 知识库作为记忆系统与设计图纸 + 人与 AI 基于架构讨论、有图可依；保留以项目为基本 block 的方向）；③框架细节（写入门禁：去重/无损/墓碑；读取优化：子图限定/三层记忆/两步回忆/阈值 0.70/混合检索/重排；检出率与召回率指标与努力）；④测评与交付（对齐 LongMemEval/LOCOMO/BEAM；自建题集/剖面评测/对照实验；结果；可执行回归）。产出 docs/graph-position-paper.html（邮件安全 HTML，2 张表示意图），全文存于 graph-position-paper-001，配套可执行验收测试 tests/graph-position-paper.test.js。",
+      "id": "wp-graph-position-paper-001",
+      "name": "撰写『以项目为基本 block，让 Agent 有图可依』方案与测评材料（意见）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/graph-position-paper.test.js",
+          "acceptanceCriteria": "tests/graph-position-paper.test.js",
+          "description": "GIVEN 方案与测评材料的仓库交付物 docs/graph-position-paper.html；WHEN 读取 HTML 并检查意图图谱元素；THEN HTML 自包含、邮件安全（无内联 SVG/外链图片）；严格按『业界问题→解决方案→框架细节→测评与交付』四段；覆盖本真图谱/记忆系统/设计图纸/有图可依/以项目为基本 block；写入门禁（去重/无损/墓碑）、读取优化（Token/三层记忆/阈值）、检出率与召回率指标（recall@1/MRR）；测评方法与结果（LongMemEval/拒答/94.6%/99.4%/回归）；不含『家人/政策加人/口服液』；含至少 2 张表示意图；图谱中元素为 Work Package、含 doc 属性与 GIVEN-WHEN-THEN 用例，且是视图 180 的成员。",
+          "name": "AT-wp-graph-position-paper-001-01",
+          "type": "Acceptance Test"
         }
       ]
     }
@@ -10668,7 +10720,9 @@
         "wp-federation-framework-side-001",
         "wp-archgraph-intro-email-001",
         "org-federation-vision-article-001",
-        "wp-org-federation-vision-001"
+        "wp-org-federation-vision-001",
+        "graph-position-paper-001",
+        "wp-graph-position-paper-001"
       ],
       "included_relationships": [
         "skill-insight-informs-2783"
