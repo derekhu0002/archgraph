@@ -4334,8 +4334,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.19.1",
-          "description": "视图成员唯一性不变量（对标 EA 同一图一元素/连接仅一次）：graph-semantics 校验拒绝重复成员；updateView/addView 成员去重；qea 投影防双插。新增 graph-semantics-validation-001。commits b6c6466/204f426/393b6ff。实机证明语义软门禁：新组件默认被拦（0.8819 vs graph-write-dedup-gate），以 allowDuplicate+justification 放行；同类谱系（发布里程碑）同理需显式放行。"
+          "value": "archgraph-argo@0.25.0",
+          "description": "2026-09-23 发布+部署完成（npm shasum 5055189f、全局安装、argo-deploy 22/22、argo-cost-collector 插件已注册）；框架单一日志 agent-cost-log.ndjson 待宿主重启后开始采集。commits dc70ca3(版本)/131bfdc(仅宿主插件)"
         },
         {
           "name": "commit",
@@ -9120,6 +9120,11 @@
           "name": "commit",
           "value": "131bfdc",
           "description": "（人类伙伴最终裁决）只留宿主插件：MCP 侧不采集（单边不完整）；单一日志 agent-cost-log.ndjson 由 argo-cost-collector.js 全量记录（含写图调用与 token 用量）"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.25.0",
+          "description": "发布+部署完成：npm 5055189f、全局 0.25.0、argo-deploy 22/22；argo-cost-collector 插件已注册；待宿主重启"
         }
       ]
     },
@@ -9179,6 +9184,16 @@
           "name": "commit",
           "value": "131bfdc",
           "description": "argo/plugins/argo-cost-collector.js; argo/scripts/graph-rag/agentCostLog.js; argo/scripts/argo-mcp-server.js（去除 MCP 侧钩子）; docs/agent-cost-profiler.md; tests/agent-cost-log.test.js; tests/argo-deploy.test.js; design/KG/SystemArchitecture.json; archgraph.qea（最终：只留宿主插件为唯一采集器；删除 agentCostProfiler.js）"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.25.0",
+          "description": "npm publish shasum 5055189fad6de83f7eec818bda2e6fc5c17e9aca；全局安装 + argo-deploy 22/22；已注册 argo-cost-collector 插件（~/.config/opencode/opencode.json）与部署 agentCostLog.js/插件；~/.argo/scripts/argo-mcp-server.js 未含任何采集代码（0 引用）；待人类伙伴重启宿主加载插件开始采集"
+        },
+        {
+          "name": "commit",
+          "value": "dc70ca3",
+          "description": "package.json（release archgraph-argo 0.25.0）"
         }
       ]
     }
