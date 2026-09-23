@@ -9395,6 +9395,22 @@
           "description": "argo/scripts/agentSearchDiagnose.js（新增 isExportJson/exportToNdjson：接受 opencode export 的 {info,messages} JSON）; tests/agent-search-diagnosis.test.js（AT-05）; argo/skills/agent-search-diagnosis/SKILL.md"
         }
       ]
+    },
+    {
+      "description": "原则（2026-09-23，人类伙伴确立，长期有效）：**框架优化不得为优化单个会话/单个场景而劣化其他场景**。每项优化方案必须：（1）声明它作用于哪些场景（S1 精确结构 / S2 语义定位 / S3 多跳 / S4 图仓合成 / S5 时间版本 / S6 拒答 / S7 写入登记 / S8 仓内内容）×仓规模(small/large)；（2）给出不会劣化其他场景的理由（机制上为何安全，如只改“呈现层”不改候选集；或只增不减）；（3）用按场景剖面（scenario × scale × metrics）A/B 或回归证明“该场景改善且其余场景不降”——以证据为准，不接受仅单会话的肉眼改善。与 retrieval-recall-first 一致：不得以缩池/截断牺牲召回。落地：诊断/评测一律出剖面而非单分；变更前声明影响面，变更后按剖面回归。",
+      "id": "framework-optimization-cross-scenario-001",
+      "name": "原则：框架优化不得跨场景劣化（场景×规模剖面验证）",
+      "parent": "1962",
+      "testcases": [
+        {
+          "Input": "tests/memory-retrieval-profile.test.js",
+          "acceptanceCriteria": "tests/memory-retrieval-profile.test.js",
+          "description": "GIVEN 优化前后两版；WHEN 校验；THEN 必须按场景×规模出剖面且逐场景对比（不只看单会话）；原则元素存在且被引用。",
+          "name": "AT-framework-optimization-cross-scenario-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Principle"
     }
   ],
   "relationships": [
@@ -11497,7 +11513,8 @@
         "memory-retrieval-ab-wp-001",
         "memory-retrieval-eval-framework-001",
         "graph-gain-regime-boundary-001",
-        "agent-search-diagnosis-skill-001"
+        "agent-search-diagnosis-skill-001",
+        "framework-optimization-cross-scenario-001"
       ]
     }
   ]

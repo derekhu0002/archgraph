@@ -48,6 +48,15 @@ test('AT-memory-retrieval-profile-03: the two comparison designs are documented 
   assert.match(src, /single variable = the memory backend/i, 'harness must state its single-variable design');
 });
 
+test('AT-framework-optimization-cross-scenario-01: the no-cross-scenario-regression principle is recorded', () => {
+  const graph = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'KG', 'SystemArchitecture.json'), 'utf8'));
+  const el = (graph.elements || []).find(e => e.id === 'framework-optimization-cross-scenario-001');
+  assert.ok(el, 'the cross-scenario principle element must exist');
+  assert.equal(el.type, 'Principle');
+  const d = el.description || '';
+  for (const k of ['场景', '规模', '劣化', '召回']) assert.ok(d.includes(k), `principle must mention ${k}`);
+});
+
 test('AT-memory-retrieval-profile-04: the regime/interaction boundary (why Graph gain is hard to isolate) is recorded', () => {
   const graph = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'KG', 'SystemArchitecture.json'), 'utf8'));
   const els = graph.elements || [];
