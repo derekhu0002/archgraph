@@ -12,7 +12,7 @@ const GRAPH = JSON.parse(
 );
 
 const ELEMENT_ID = 'wp-graph-agent-paper-001';
-const ELEMENT_NAME = '撰写『面向 Agent 工程的本真图谱』科研论文（问题/方案/框架/实验）';
+const ELEMENT_NAME = '撰写『面向 Agent 工程的意图架构图谱』科研论文（问题/方案/框架/实验）';
 const ARTICLE_ID = 'graph-agent-paper-001';
 const VIEW_ID = 'comm-2026-09-view-001';
 
@@ -84,7 +84,7 @@ test('paper: aligns with industry memory benchmarks', () => {
 
 test('paper: method covers the authentic graph, write gates and read optimization', () => {
   const html = readHtml();
-  assert.match(html, /本真图谱/, 'should name the authentic graph');
+  assert.match(html, /意图架构图谱/, 'should name the authentic graph');
   assert.match(html, /去重/, 'should cover dedup');
   assert.match(html, /无损/, 'should cover lossless');
   assert.match(html, /墓碑/, 'should cover tombstone');
@@ -107,7 +107,7 @@ test('paper: the full text is stored in the graph', () => {
   const text = (bo.attributes || []).find((a) => a.name === 'paper');
   assert.ok(text, 'paper element should carry the full text');
   assert.ok(text.value.length > 1200, 'stored paper text should be substantial');
-  assert.match(text.value, /本真图谱/, 'stored text should contain the core term');
+  assert.match(text.value, /意图架构图谱/, 'stored text should contain the core term');
   assert.match(text.value, /recall@1|召回/, 'stored text should contain the metrics');
 });
 

@@ -49,7 +49,7 @@ test('position-paper: follows the four-part structure (problem / solution / deta
 
 test('position-paper: solution names the authentic graph and the no-policy-family framing', () => {
   const html = readHtml();
-  assert.match(html, /本真图谱/, 'should name the authentic (source-of-truth) graph');
+  assert.match(html, /意图架构图谱/, 'should name the authentic (source-of-truth) graph');
   assert.match(html, /记忆系统/, 'should frame the knowledge base as a memory system');
   assert.match(html, /设计图纸/, 'should frame it as the design blueprint');
   assert.match(html, /有图可依/, 'should state "the Agent has a graph to rely on"');
@@ -112,7 +112,7 @@ test('position-paper: the full text is stored in the graph', () => {
   const text = (bo.attributes || []).find((a) => a.name === 'article');
   assert.ok(text, 'article element should carry the full text');
   assert.ok(text.value.length > 800, 'stored text should be substantial');
-  assert.match(text.value, /本真图谱/, 'stored text should contain the core term');
+  assert.match(text.value, /意图架构图谱/, 'stored text should contain the core term');
   assert.match(text.value, /召回/, 'stored text should contain the recall discussion');
 });
 

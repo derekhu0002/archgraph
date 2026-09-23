@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>面向 Agent 工程的本真图谱：写入治理、检索优化与可信记忆的实证研究</title>
+<title>面向 Agent 工程的意图架构图谱：写入治理、检索优化与可信记忆的实证研究</title>
 </head>
 <body style="margin:0;padding:0;background:#eef1f5;font-family:'Microsoft YaHei','Segoe UI',Arial,sans-serif;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f5;">
@@ -13,7 +13,7 @@
   <!-- Header -->
   <tr><td style="background:#0f2b4c;background:linear-gradient(135deg,#0f2b4c,#1d4e89);padding:34px 46px;">
     <div style="display:inline-block;border:1px solid rgba(255,255,255,.45);border-radius:20px;padding:2px 14px;font-size:12px;letter-spacing:1px;color:#dbe8f7;margin-bottom:16px;">研究稿 · 实证研究</div>
-    <div style="font-size:24px;font-weight:700;color:#ffffff;line-height:1.45;">面向 Agent 工程的本真图谱：<br>写入治理、检索优化与可信记忆的实证研究</div>
+    <div style="font-size:24px;font-weight:700;color:#ffffff;line-height:1.45;">面向 Agent 工程的意图架构图谱：<br>写入治理、检索优化与可信记忆的实证研究</div>
     <div style="font-size:14px;color:#b9cde6;margin-top:12px;">项目组 · 2026 年 9 月 · 内部研究稿</div>
   </td></tr>
 
@@ -21,7 +21,7 @@
   <tr><td style="padding:26px 46px 0;">
     <div style="background:#f2f7fd;border-left:5px solid #1d4e89;border-radius:6px;padding:16px 20px;font-size:14px;">
       <div style="font-weight:700;color:#0f2b4c;font-size:15px;margin-bottom:6px;">摘要</div>
-      <p style="margin:0;">面向 Agent 的工程实践中，真正的瓶颈不是「模型能力」，而是 Agent 缺少一份可信、可执行、可追溯的<strong>项目上下文</strong>；主流方案（向量库 / RAG、超长提示词）在结构、依据与沉淀能力上存在系统性缺口。本文提出以<strong>本真图谱</strong>（Intent Architecture Graph，唯一事实源、ArchiMate 3.2 建模）为核心的方案，并系统给出三部分机制：<strong>写入治理</strong>（去重 / 无损 / 墓碑三道门禁）、<strong>读取优化</strong>（子图限定、三层记忆、两步回忆、语义阈值标定、混合检索与二次重排）、<strong>检索指标</strong>（recall@1/@5、MRR、Precision/HitRate）。在仓库内可执行评测上，向量检索基线 top-1 召回 <strong>94.6%</strong>、top-5 <strong>99.4%</strong>、MRR <strong>0.967</strong>；引入二次重排后 top-1 召回提升至 <strong>99.3%（最高 100%）</strong>；记忆检索正确率 <strong>100%</strong>、拒答准确率 100%、平均时延约 <strong>5.7ms</strong>。结果与长期记忆领域的公认基准（LongMemEval / LOCOMO / BEAM）进行了对照。本文的贡献是：把「让 Agent 有图可依」从理念落为一组<strong>可度量、可回归</strong>的工程机制。</p>
+      <p style="margin:0;">面向 Agent 的工程实践中，真正的瓶颈不是「模型能力」，而是 Agent 缺少一份可信、可执行、可追溯的<strong>项目上下文</strong>；主流方案（向量库 / RAG、超长提示词）在结构、依据与沉淀能力上存在系统性缺口。本文提出以<strong>意图架构图谱</strong>（Intent Architecture Graph，唯一事实源、ArchiMate 3.2 建模）为核心的方案，并系统给出三部分机制：<strong>写入治理</strong>（去重 / 无损 / 墓碑三道门禁）、<strong>读取优化</strong>（子图限定、三层记忆、两步回忆、语义阈值标定、混合检索与二次重排）、<strong>检索指标</strong>（recall@1/@5、MRR、Precision/HitRate）。在仓库内可执行评测上，向量检索基线 top-1 召回 <strong>94.6%</strong>、top-5 <strong>99.4%</strong>、MRR <strong>0.967</strong>；引入二次重排后 top-1 召回提升至 <strong>99.3%（最高 100%）</strong>；记忆检索正确率 <strong>100%</strong>、拒答准确率 100%、平均时延约 <strong>5.7ms</strong>。结果与长期记忆领域的公认基准（LongMemEval / LOCOMO / BEAM）进行了对照。本文的贡献是：把「让 Agent 有图可依」从理念落为一组<strong>可度量、可回归</strong>的工程机制。</p>
     </div>
   </td></tr>
 
@@ -30,7 +30,7 @@
     <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">1　引言</div>
     <p style="margin:0 0 10px;font-size:14.5px;">让 Agent 承担真实项目工作时，四个问题反复出现：<strong>意图漂移</strong>（长任务中逐步偏离目标）、<strong>黑盒执行</strong>（依据与决策不可观测）、<strong>验收靠感觉</strong>（缺少可执行、可回归的标准）、<strong>经验不沉淀</strong>（换人换会话即从零开始）。它们的共同根源，是缺少一份<strong>人和机器都能读懂、且能被机器执行</strong>的项目上下文。</p>
     <p style="margin:0 0 10px;font-size:14.5px;">既有做法两侧都不充分：向量库 / RAG 长于「按语义找」，但返回的是零散片段，缺结构、缺关系、缺依据；超长提示词一次性有效，无法沉淀与复用。一句话，二者都没有提供「单一事实源」。</p>
-    <p style="margin:0 0 6px;font-size:14.5px;">本文的出发点很朴素：<strong>给每个项目一张本真图谱，让知识库同时成为 Agent 的记忆系统与设计图纸，使其「有图可依」。</strong>围绕这一目标，本文的贡献如下：</p>
+    <p style="margin:0 0 6px;font-size:14.5px;">本文的出发点很朴素：<strong>给每个项目一张意图架构图谱，让知识库同时成为 Agent 的记忆系统与设计图纸，使其「有图可依」。</strong>围绕这一目标，本文的贡献如下：</p>
     <div style="background:#f8fafc;border:1px solid #e3e8ef;border-radius:8px;padding:14px 18px;font-size:14px;">
       <div style="padding:5px 0;"><strong style="color:#1d4e89;">C1　写入治理</strong>：提出「去重 → 无损 → 墓碑」三道写入门禁，保证图谱在长期写入下不腐化（§3.2）。</div>
       <div style="padding:5px 0;border-top:1px dashed #e3e8ef;"><strong style="color:#1d4e89;">C2　读取优化</strong>：给出子图限定、三层记忆、两步回忆、阈值标定、混合检索与二次重排的组合方法，在省 Token / 提性能的同时不牺牲召回（§3.3）。</div>
@@ -59,8 +59,8 @@
   <tr><td style="padding:26px 46px 0;">
     <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">3　方法</div>
 
-    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:6px 0 8px;">3.1　本真图谱（单一事实源）</div>
-    <p style="margin:0 0 10px;font-size:14.5px;">每个项目维护一张<strong>本真图谱</strong>：元素（人 / 角色 / 工作包 / 技能 / 规则 / 组件…）与关系（指派 / 触发 / 关联…）均有类型、可校验；视图（Viewpoint 的投影）约束成员；元素上挂载<strong>可执行验收用例</strong>。人和 Agent 面对同一张图——人看全局，Agent 看与任务相关的局部。</p>
+    <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:6px 0 8px;">3.1　意图架构图谱（单一事实源）</div>
+    <p style="margin:0 0 10px;font-size:14.5px;">每个项目维护一张<strong>意图架构图谱</strong>：元素（人 / 角色 / 工作包 / 技能 / 规则 / 组件…）与关系（指派 / 触发 / 关联…）均有类型、可校验；视图（Viewpoint 的投影）约束成员；元素上挂载<strong>可执行验收用例</strong>。人和 Agent 面对同一张图——人看全局，Agent 看与任务相关的局部。</p>
 
     <div style="font-size:16px;font-weight:700;color:#0f2b4c;margin:22px 0 8px;">3.2　写入治理：三道门禁（C1）</div>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13.5px;border-collapse:collapse;border:1px solid #e3e8ef;">
@@ -95,7 +95,7 @@
         <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;width:22%;">项</td>
         <td style="padding:9px 12px;border-bottom:1px solid #e3e8ef;">设置</td>
       </tr>
-      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>数据 / 任务</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">① 检索黄金集（由项目本真图谱自动派生，含名称 / 描述 / 关系 / 视图四类查询）；② 150 样本四路对比集（向量 / 混合 / 重排）；③ 80 样本重排模型对比集；④ 记忆评测题集 31 题（信息抽取 / 多会话推理 / 时间推理 / 知识更新 / 拒答）。</td></tr>
+      <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>数据 / 任务</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">① 检索黄金集（由项目意图架构图谱自动派生，含名称 / 描述 / 关系 / 视图四类查询）；② 150 样本四路对比集（向量 / 混合 / 重排）；③ 80 样本重排模型对比集；④ 记忆评测题集 31 题（信息抽取 / 多会话推理 / 时间推理 / 知识更新 / 拒答）。</td></tr>
       <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>指标</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">recall@1、recall@5、MRR（排序质量）、Precision / Hit Rate@K；记忆侧：正确率、拒答准确率、平均时延。</td></tr>
       <tr><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;"><strong>基线</strong></td><td style="padding:8px 12px;border-bottom:1px solid #eef1f5;">向量检索（topK=8）、混合检索（向量 + BM25 + RRF）、二次重排（LLM listwise）；外部对齐 LongMemEval / LOCOMO / BEAM 头条成绩。</td></tr>
       <tr><td style="padding:8px 12px;"><strong>实现</strong></td><td style="padding:8px 12px;">检索经统一只读接口；评测 harness 零外部数据库运行时依赖，只读、可复现；所有指标固化为可执行回归。</td></tr>
@@ -253,7 +253,7 @@
   <!-- 7 Conclusion -->
   <tr><td style="padding:26px 46px 0;">
     <div style="font-size:19px;font-weight:700;color:#0f2b4c;border-bottom:3px solid #1d4e89;padding-bottom:8px;margin-bottom:12px;">7　结论与展望</div>
-    <p style="margin:0 0 10px;font-size:14.5px;">本文以<strong>本真图谱</strong>为单一事实源，给出写入治理、读取优化与量化评测的一体化机制：写有门禁（去重 / 无损 / 墓碑）、读有优化（子图 / 三层记忆 / 两步回忆 / 阈值 / 重排）、检索有指标（recall@1 94.6% → 重排后 99.3%–100%）、记忆有基准（100%，对齐业界基准），并全部固化为可执行回归。</p>
+    <p style="margin:0 0 10px;font-size:14.5px;">本文以<strong>意图架构图谱</strong>为单一事实源，给出写入治理、读取优化与量化评测的一体化机制：写有门禁（去重 / 无损 / 墓碑）、读有优化（子图 / 三层记忆 / 两步回忆 / 阈值 / 重排）、检索有指标（recall@1 94.6% → 重排后 99.3%–100%）、记忆有基准（100%，对齐业界基准），并全部固化为可执行回归。</p>
     <p style="margin:0;font-size:14.5px;"><strong>展望：</strong>下一步是在更大规模、多项目（以项目为基本 block、组织级联邦）的场景下验证检索与记忆，并把「跨项目引用不漂移」纳入正式评测。</p>
   </td></tr>
 
