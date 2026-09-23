@@ -13,7 +13,7 @@ const GRAPH = JSON.parse(
 
 const ELEMENT_ID = 'wp-archgraph-intro-email-001';
 const ELEMENT_NAME = '编制 ArchGraph 框架使用介绍邮件（面向利益相关者）';
-const VIEW_ID = '180';
+const VIEW_ID = 'comm-2026-09-view-001';
 const RECIPIENT = 'hudonghua@huawei.com';
 
 function readHtml() {

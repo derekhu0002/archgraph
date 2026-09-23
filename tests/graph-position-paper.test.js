@@ -14,7 +14,7 @@ const GRAPH = JSON.parse(
 const ELEMENT_ID = 'wp-graph-position-paper-001';
 const ELEMENT_NAME = '撰写『以项目为基本 block，让 Agent 有图可依』方案与测评材料（意见）';
 const ARTICLE_ID = 'graph-position-paper-001';
-const VIEW_ID = '180';
+const VIEW_ID = 'comm-2026-09-view-001';
 
 function readHtml() {
   assert.ok(existsSync(HTML_DOC), 'position paper HTML should exist');

@@ -14,7 +14,7 @@ const GRAPH = JSON.parse(
 const ELEMENT_ID = 'wp-org-federation-vision-001';
 const ELEMENT_NAME = '撰写『项目即国家、组织即联邦』新型组织形态过渡畅想文章（意见）';
 const ARTICLE_ID = 'org-federation-vision-article-001';
-const VIEW_ID = '180';
+const VIEW_ID = 'comm-2026-09-view-001';
 
 function readHtml() {
   assert.ok(existsSync(HTML_DOC), 'org-federation vision HTML should exist');

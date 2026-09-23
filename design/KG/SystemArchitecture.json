@@ -91,6 +91,10 @@
         {
           "view_id": "agent-cost-eval-view-001",
           "view_name": "Agent 成本—召回度量（跨图仓两后端）"
+        },
+        {
+          "view_id": "comm-2026-09-view-001",
+          "view_name": "沟通材料（2026-09）"
         }
       ]
     },
@@ -9636,6 +9640,53 @@
           "type": "Acceptance Test"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "docs/graph-agent-paper.html",
+          "name": "doc"
+        },
+        {
+          "name": "paper",
+          "value": "面向 Agent 工程的本真图谱：写入治理、检索优化与可信记忆的实证研究（内部研究稿，项目组，2026-09）\n\n摘要：面向 Agent 的工程实践中，真正的瓶颈不是「模型能力」，而是 Agent 缺少一份可信、可执行、可追溯的项目上下文；主流方案（向量库/RAG、超长提示词）在结构、依据与沉淀能力上存在系统性缺口。本文提出以本真图谱（ArchiMate 3.2 建模、唯一事实源）为核心的方案，并系统给出三部分机制：写入治理（去重/无损/墓碑）、读取优化（子图限定、三层记忆、两步回忆、语义阈值标定、混合检索与二次重排）、检索指标（recall@1/@5、MRR、Precision/HitRate）。实测：向量检索基线 top-1 召回 94.6%、top-5 99.4%、MRR 0.967；二次重排后 top-1 提升至 99.3%（最高 100%）；记忆检索正确率 100%、拒答 100%、平均时延约 5.7ms；并与 LongMemEval/LOCOMO/BEAM 对照。贡献：把「让 Agent 有图可依」落为一组可度量、可回归的工程机制。\n\n1 引言：四个老问题——意图漂移、黑盒执行、验收靠感觉、经验不沉淀；共同根源是缺少人和机器都能读懂、且能被机器执行的项目上下文。既有做法两侧不充分：向量库/RAG 长于按语义找但返回零散片段、缺结构缺依据；超长提示词一次性有效、无法沉淀复用。出发点：给每个项目一张本真图谱，让知识库同时成为 Agent 的记忆系统与设计图纸。贡献 C1 写入治理、C2 读取优化、C3 量化评测、C4 可回归交付。\n\n2 相关工作：RAG；GraphRAG（多从文本抽取图，图本身不是人与 Agent 共同维护的工程事实源）；Agent 长期记忆（LongMemEval/LOCOMO/BEAM，本文沿用指标口径但把记忆与设计图纸统一在一张图上）；企业架构建模（ArchiMate 3.2 作为公共语言并扩展出可执行可治理的读写机制）。差异：把结构×治理×检索×度量作为整体交付，并强调不牺牲召回。\n\n3 方法：3.1 本真图谱（元素/关系/视图有类型可校验，挂载可执行验收用例；人看全局、Agent 看局部）。3.2 写入治理三道门禁：去重（默认复用；同型语义近似软门禁，须显式放行）、无损（结构化 merge、省略≠删除、显式确认）、墓碑（可恢复账本）。3.3 读取优化：子图限定、三层记忆、两步回忆、阈值标定、混合检索+二次重排、通道并发与投影瘦身；硬约束=不牺牲召回。\n\n4 实验设置：数据/任务（检索黄金集；150 样本四路对比；80 样本重排对比；31 题记忆题集）；指标（recall@1/@5、MRR、Precision/HitRate；记忆正确率/拒答/时延）；基线（向量 topK=8、混合检索 RRF、LLM 重排；外部 LongMemEval/LOCOMO/BEAM）；实现（统一只读接口、评测 harness 零外部数据库依赖、指标固化为回归）。\n\n5 结果与分析：5.1 检索质量：向量基线 top-1 95.3%（top-5 100%），重排（混合）99.3%、MRR 0.997；单独对向量重排略降（92.7%），说明重排应与混合检索配合。分对象：关系 100%、描述 98.4%、视图 98%、名称 92.0%（弱项）。5.2 阈值标定：无关上界 0.686、相关下界 0.833，取 0.70；无关命中 0、相关召回 8/8。5.3 记忆评测：31 题整体 100%、拒答 100%、平均时延约 5.7ms；图 4 与 LongMemEval 94.4%、LOCOMO 92.5%、BEAM(1M) 70.1% 并列（口径不同仅供参照）。5.4 消融与默认配置：混合检索增量有限（约 +0.4~1.2 点），重排对提示/模型敏感、小样本噪声大 → 默认关、金丝雀开启；指标以可执行用例固化并回归。\n\n6 讨论与局限：价值=可度量可回归；效度威胁：单一项目图谱、样本量偏小、外部基准口径不同、阈值与 embedding 模型绑定需重标定。\n\n7 结论与展望：写有门禁、读有优化、检索有指标、记忆有基准，并全部固化为可执行回归；展望在更大规模、多项目（以项目为基本 block、组织级联邦）下验证，并把跨项目引用不漂移纳入评测。\n\n参考文献：[1] LongMemEval ICLR2025 arXiv:2410.10813；[2] LOCOMO；[3] BEAM；[4] Vaswani et al. Attention Is All You Need, NeurIPS 2017, arXiv:1706.03762；[5] Cormack et al. RRF；[6] The Open Group ArchiMate 3.2。"
+        }
+      ],
+      "description": "科研论文（内部研究稿）全文：面向 Agent 工程的本真图谱——写入治理、检索优化与可信记忆的实证研究。结构对齐顶级论文：摘要/1 引言/2 相关工作/3 方法/4 实验设置/5 结果与分析/6 讨论与局限/7 结论与展望/参考文献。评测以数据图表呈现（4 张 bar chart）并配文字说明：检索 recall@1 94.6%、recall@5 99.4%、MRR 0.967，重排后 99.3%–100%；阈值标定 0.70（分离 0.686/0.833）；记忆 31 题 100%、拒答 100%、约 5.7ms；对照 LongMemEval/LOCOMO/BEAM。正文全文见 attributes.paper；邮件版 HTML 见 attributes.doc。",
+      "id": "graph-agent-paper-001",
+      "name": "科研论文：面向 Agent 工程的本真图谱（写入治理/检索优化/可信记忆实证）",
+      "parent": "1249",
+      "type": "Business Object"
+    },
+    {
+      "type": "Work Package",
+      "attributes": [
+        {
+          "name": "doc",
+          "value": "docs/graph-agent-paper.html"
+        },
+        {
+          "name": "recipient",
+          "value": "hudonghua@huawei.com"
+        },
+        {
+          "name": "paperRef",
+          "value": "graph-agent-paper-001"
+        }
+      ],
+      "description": "面向人类伙伴（hudonghua）的科研论文（内部研究稿）：《面向 Agent 工程的本真图谱：写入治理、检索优化与可信记忆的实证研究》。参考顶级论文写法（摘要 → 引言 → 相关工作 → 方法 → 实验设置 → 结果与分析 → 讨论与局限 → 结论与展望 → 参考文献），评测部分以数据图表（4 张邮件安全 bar chart）+ 文字说明科学呈现：检索 recall@1 94.6%/recall@5 99.4%/MRR 0.967（重排后 99.3%–100%）；阈值标定 0.70（分离 0.686/0.833）；记忆 31 题 100%、拒答 100%、约 5.7ms；对照 LongMemEval/LOCOMO/BEAM。同时保留『业界问题→方案→框架细节→测评』主线。产出 docs/graph-agent-paper.html（VSOC 邮件格式的邮件安全 HTML），全文存于 graph-agent-paper-001，配套可执行验收测试 tests/graph-agent-paper.test.js。",
+      "id": "wp-graph-agent-paper-001",
+      "name": "撰写『面向 Agent 工程的本真图谱』科研论文（问题/方案/框架/实验）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/graph-agent-paper.test.js",
+          "acceptanceCriteria": "tests/graph-agent-paper.test.js",
+          "description": "GIVEN 科研论文的仓库交付物 docs/graph-agent-paper.html；WHEN 读取 HTML 并检查意图图谱元素；THEN HTML 自包含、邮件安全（无内联 SVG/外链图片）；结构含 摘要/引言/相关工作/方法/实验设置/结果与分析/讨论与局限/结论与展望/参考文献；以至少 4 张数据图表（表格 bar）呈现并配文字说明；引用实测数值（94.6%/99.4%/99.3%/0.967/0.70/5.7ms）与业界基准（LongMemEval/LOCOMO/BEAM）；方法覆盖本真图谱/去重/无损/墓碑/三层记忆/召回；图谱中元素为 Work Package、含 doc 属性与 GIVEN-WHEN-THEN 用例，且是视图 comm-2026-09-view-001 的成员。",
+          "name": "AT-wp-graph-agent-paper-001-01",
+          "type": "Acceptance Test"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -10736,12 +10787,7 @@
         "2784",
         "wp-framework-overview-001",
         "wp-archgraph-introduction-pdf-001",
-        "wp-federation-framework-side-001",
-        "wp-archgraph-intro-email-001",
-        "org-federation-vision-article-001",
-        "wp-org-federation-vision-001",
-        "graph-position-paper-001",
-        "wp-graph-position-paper-001"
+        "wp-federation-framework-side-001"
       ],
       "included_relationships": [
         "skill-insight-informs-2783"
@@ -11744,6 +11790,21 @@
         "agent-search-diagnosis-skill-001",
         "framework-optimization-cross-scenario-001",
         "agent-read-projection-001"
+      ]
+    },
+    {
+      "view_id": "comm-2026-09-view-001",
+      "view_name": "沟通材料（2026-09）",
+      "parent_element_id": "1249",
+      "description": "2026-09 产出的对内/对外沟通材料：框架使用介绍邮件、组织形态过渡畅想（已废弃）、方案与测评材料、科研论文等。",
+      "included_elements": [
+        "wp-archgraph-intro-email-001",
+        "wp-org-federation-vision-001",
+        "org-federation-vision-article-001",
+        "wp-graph-position-paper-001",
+        "graph-position-paper-001",
+        "graph-agent-paper-001",
+        "wp-graph-agent-paper-001"
       ]
     }
   ]
