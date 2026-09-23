@@ -41,6 +41,8 @@ test('intro-email: is a self-contained, email-safe HTML document addressed to co
   assert.match(html, /大家好/, 'should greet the group, not one individual');
   assert.doesNotMatch(html, /<svg\b/i, 'should avoid inline SVG (stripped by many mail clients)');
   assert.doesNotMatch(html, /<img\b/i, 'should not depend on external images');
+  const header = html.split(/<h2\b/i)[0];
+  assert.doesNotMatch(header, /archgraph|archimate|\bARGO\b/i, 'should not surface product names at the top');
 });
 
 test('intro-email: teaches the four basic-operation steps with real commands', () => {
@@ -91,7 +93,7 @@ test('intro-email: states the session-end interaction discipline', () => {
   const html = readHtml();
   assert.match(html, /会话结束/, 'should cover session end');
   assert.match(html, /明确(告知|通知|告诉)|打个招呼/, 'should ask for an explicit session-end signal');
-  assert.match(html, /交互纪律/, 'should present it as a discipline');
+  assert.match(html, /小习惯|纪律/, 'should present the session-end habit as a discipline');
 });
 
 test('intro-email: states the goal and stakeholder value', () => {
