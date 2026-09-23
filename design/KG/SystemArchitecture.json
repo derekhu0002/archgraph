@@ -4242,7 +4242,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-24 会话，幂等覆盖）。【目标】按评测框架做一次完整/长时间测试。【Phase1 健康】图 286 元素/65 视图/105 关系；validate 通过；语义(memory_search)/结构/scope 检索可用（scope 语义查 agent-cost-eval-view-001 返回空，待复核）。【Phase2 全量回归】npm test 611 测试 578 过 22 败（7 文件）——P2-1 高：eatool/EA-jsscript/import-from-kg.js 被提交 463b1f7(msg 'S') 删除，19 条 ea-import-* 断言失败（可从 6971c3b 恢复）；P2-2：ARGO_COST_PROFILER/ARGO_COST_TRACE_MAX_BYTES 未纳入 env 分类（也不在 .env.example）；P2-3：overseer-ltm-layering 期望成员未随 overseer-email-format-ref-001 加入核心 LTM 更新；P2-4：excalidraw-diagram 上游 skill 未在用户级部署（环境）。【Phase3 架构验收】204 全跑 197 过 7 败（同根因；runner 按文件粒度评分致 AT-env-coverage-02 连带失败；runner 自动重写 deliveryStatus，把 email-sent+描述降级为 delivered → P3-1 溯源丢失，已 git 回退）。【Phase4 记忆评测】31/31 100%，压缩 97.2%，均时延 317ms。【Phase5 检索】vector r@1 95.2 / hybrid 96.0（775 题）；rerank(deepseek-flash, 120 样本) r@1 100、MRR 1.0、0 失败。【Phase6 读取投影】视图 −51.6% / intent −18.8% / 合并 −42.1%，min 0（读取不会变大）。【Phase7 A/B】首轮 ON 臂全图工具 SEMANTIC_OPERATOR_ERROR(10) 污染 → 诊断根因：harness 隔离 HOME 致 MCP getArgoEnvPath() 回退到 ACL 受限不可读的仓库 argo/.env；修复(037d4e7：ON 臂注入 ARGO_ENV_FILE + headless --auto)后重跑干净 A/B：两臂 success/recall 100%；OFF tok14951 wall62.0s turns5.6 tools7.9 err9 vs ON tok12250 wall9.3s turns3.4 tools4.5 err0 rt0.3 → ON 令牌 −18%/轮次 −39%/工具 −43%/0 错误；但 OFF 被 opencode grep 工具 ripgrep 冷启动失败（回退 Get-ChildItem 慢扫）污染，E1 成本仍不完全可信；召回无差异——本仓 canonical JSON 在仓内，grep 可低成本命中，印证框架所述 E1 系统性低估。【待办钩子，接手优先】① 是否修复 P2-1/P2-2/P2-3（恢复 import-from-kg.js、补 env 分类、同步 layering 测试）；② 硬化 A/B：OFF 臂 grep 失败处理 + state.time 等待污染（tool>wall）；③ scoped 语义查视图空结果复核。【记忆层级】T1 本摘要；T2 overseer-retrieval-001（memory-retrieval-ab-wp-001 的 pitfall-resolution/eval-clean-run）。相关元素：memory-retrieval-ab-wp-001、memory-retrieval-eval-framework-001、agent-cost-eval-wp-001、agent-read-projection-001、overseer-ltm-layering、env-file-key-governance-001。",
+      "description": "项目总管工作记忆摘要（2026-09-23 会话二）：多个内容交付，均发送 hudonghua@huawei.com。\nA. 框架使用介绍邮件（WP wp-archgraph-intro-email-001）：docs/archgraph-intro-email.html；结构痛点→愿景→方案→图怎么帮；排版参照 SOC-DEMO VSOC 邮件格式；AT tests/archgraph-intro-email.test.js（9/9）；末版 commit 8dc97c0。\nB. 组织形态过渡畅想（WP wp-org-federation-vision-001，已被替代）：docs/org-federation-vision.html；因含错别字与无关内容（政策家人/口服药），已被 C 重写替代（status=superseded）。\nC. 方案与测评材料（WP wp-graph-position-paper-001；全文 BO graph-position-paper-001）：docs/graph-position-paper.html；四段结构=业界问题→解决方案（本真图谱 + 知识库=记忆系统+设计图纸 + 有图可依 + 以项目为基本 block）→框架细节（写入门禁 去重/无损/墓碑；读取优化 Token/三层记忆/阈值 0.70/混合检索/重排；检出率与召回率 recall@1 94.6%/recall@5 99.4%/MRR 0.967、重排→99.3–100%）→测评与交付（LongMemEval/LOCOMO/BEAM；31 题 100%、拒答 100%、约 5.7ms；可执行回归）；AT tests/graph-position-paper.test.js（9/9）；commit 720772f。\n关键决策/教训：① 人类伙伴明确对外/对内 HTML 邮件排版参照 SOC-DEMO VSOC 邮件（全内联样式 + 渐变页首 + 分节标题条 + 卡片/提示框），勿自创；② 邮件客户端丢弃内联 SVG/CSS grid → 图用表格；③ 收件地址禁用非 ASCII；④ 人类伙伴澄清：**无「政策家人/政策加人」，删；「盖楼 vs 口服药」类比与本文章上下文无关，删**；⑤ 文章结构固定为「业界问题→解决方案→框架细节→测评与交付」；⑥ 保留『本真图谱』作为已实现的核心概念；⑦ 新增元素均触发同型语义软门禁，以 allowDuplicate+justification 放行；⑧ 本机 Playwright 仅装 chromium-1243，需显式 executablePath。\n遗留钩子（承接上会话 + 本会话）：① 框架侧 MCP 工具契约 schema 对齐（文档层）；② 服务器无 GitHub 凭证，push 需 deploy key；③ 服务器 graph_submit/graph_update 的 graphs/catalog 未回主仓；④ D4 信任圈层、中心可复制后置；⑤ 规则改动需 argo-deploy 才传播。\n记忆层级：本摘要在 T1；长期记忆在 T2 overseer-ltm-001/overseer-rules-001/overseer-product-001；T2 经验元素 overseer-email-format-ref-001。commits：6a6c02a/4da3e11/e8639ef/e21ab27/5f052c0/2d6c5c7/596789b/aac016d/8dc97c0/16de3f9/720772f。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4264,8 +4264,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-09-24",
-          "description": "会话收尾：读取投影/命中回带/诊断 skill/评测框架落地（0.25.0–0.26.2）；下一会话完整测试"
+          "value": "2026-09-23",
+          "description": "会话收尾：① 框架使用介绍邮件（参照 SOC-DEMO VSOC 格式）；② 组织形态畅想（已废弃）；③ 『以项目为基本 block，让 Agent 有图可依』方案与测评材料（已发送）"
         },
         {
           "name": "commit",
@@ -9580,6 +9580,11 @@
         {
           "name": "article",
           "value": "以项目为基本 block，让 Agent 有图可依——方案与测评（意见）\n\n一、提出问题：业界的一个问题\n今天用 Agent 干活，真正卡住的往往不是「模型够不够强」，而是它没有一份可信、可执行、可追溯的「项目上下文」。行业主流做法两种都不够用：把资料塞进向量库/RAG（能按意思找，但零散、缺结构、缺关系与依据）；把上下文堆进超长提示词（一次性有效，无法沉淀复用，随会话丢失）。结果就是四个老问题：意图漂移、黑盒执行、验收靠感觉、经验不沉淀。再往上一层看：组织想以项目为单位协作与复用，也缺一个共同底座——各项目各说各话、知识各存各处，就无法互认、互借、复用。\n\n二、解决方案：我们怎么做\n给每个项目一张「本真图谱」，让知识库同时成为 AI 的记忆系统与设计图纸。\n- 本真图谱（已实现）：每个项目里唯一事实源的一张图谱，用企业架构标准建模，元素/关系/视图都有类型、可校验，承载项目本真的意图与事实。\n- 知识库 = 记忆系统 + 设计图纸：既是 AI 的长期记忆（记得住聊过、定过的事），也是项目的设计图纸（设计决策、职责、验收标准都写在图上）。\n- 人与 AI 基于架构讨论，让 Agent「有图可依」：人看全局、AI 看任务相关的局部，面对同一张图；目标对齐不再靠反复解释。\n- 方向：以项目为基本 block：组织基本单元可从「人」升级为「项目」——项目即国家、组织即联邦；中枢只登记成员与授权，项目之间以引用互借能力，不合并、不拷贝。\n坦诚地说，还有硬问题：联邦中枢如何避免长成超级图、默认拒绝会不会造成协作摩擦、引用会不会悬空漂移、以及人在新组织形态里的位置；本文不回避，但留待后续单独探讨。\n\n三、框架细节：Graph 与我们的方法\n3.1 写入时的门禁机制（让图不腐化）\n- 去重门禁：写入默认复用；完全重复直接复用；同类型近似新对象被软门禁拦下并给出候选，须显式放行并说明理由。\n- 无损门禁：写入不静默丢内容；结构化字段按名称合并；标量文本受保护；省略≠删除；确需删减时须显式确认。\n- 墓碑账本：破坏性删除（元素/关系/视图）进入可恢复账本，完整对象留痕，可回溯、可恢复。\n3.2 读取时优化 Token 与性能的方法\n- 按子图限定检索范围（视图或元素子树），避免全图铺开。\n- 三层记忆按需加载：工作记忆（会话开始只加载紧凑摘要，约 2–4K token）→ 长期记忆（命中才召回）→ 档案。\n- 两步回忆：先语义定位拿到紧凑卡片，再按需取全文。\n- 种子阈值标定 0.70：过滤无关内容（无关探针 ≤0.69、相关目标 ≥0.83），无关命中降为 0、相关召回不降。\n- 混合检索（向量+词法）与二次重排（LLM listwise，失败自动回退，不阻塞）。\n- 通道并发与向量投影瘁身，修复大图谱内存问题。\n- 底线：所有优化都不得牺牲检出率与召回率。\n3.3 检出率与召回率：指标与我们的努力\n指标：recall@1 / recall@5、MRR、Precision / Hit Rate@K。努力围绕一个目标：把召回与检出顶上去，且不牺牲准确。\n实测：向量基线 recall@1 94.6%、recall@5 99.4%、MRR 0.967；混合检索 recall@1 约 96%；二次重排 recall@1 最高 99.3%–100%（recall@5 100%、MRR 0.997；对提示/模型敏感，默认关）。\n\n四、测评与交付\n4.1 测评方法：对齐业界基准（LongMemEval / LOCOMO / BEAM）与「摄入→检索→评判」流水线（judge LLM 对照标准答案；头部约 92%–94% 作为世界级量化参照）；自建可执行题集（信息抽取/多会话推理/时间推理/知识更新/拒答）；剖面评测（场景×仓规模×指标）；对照实验（同题同模型同提示，只改一个变量证明机制增量）。\n4.2 测评结果：记忆检索正确率整体 100%（31 题）、拒答 100%；检索召回 94.6%/99.4%（重排后 99.3%–100%）；MRR 0.967（重排后 0.997）；平均时延约 5.7ms。\n4.3 交付与回归：上述测评固化为可执行用例，随每次改动自动回归；评测口径与题集在仓库内，可复现可复核。\n\n结语\n给项目一张本真图谱，让它同时成为 AI 的记忆与设计图纸——AI 就能有图可依，人也能基于架构与它讨论；写有门禁、读有优化、检索有指标、交付有回归，才让这件事真正可用于工程。"
+        },
+        {
+          "name": "commit",
+          "value": "720772f",
+          "description": "docs/graph-position-paper.html; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "方案与测评材料（意见）全文：以项目为基本 block，让 Agent 有图可依。四部分——①业界问题（缺可信可执行可追溯的项目上下文；RAG 零散、超长提示不可沉淀）；②解决方案（本真图谱 = 唯一事实源、已实现；知识库=记忆系统+设计图纸；人与 AI 基于架构讨论、有图可依；方向=以项目为基本 block）；③框架细节（写入时的门禁机制：去重/无损/墓碑；读取时优化 Token 与性能：子图限定/三层记忆/两步回忆/阈值 0.70/混合检索/重排/通道并发；检出率与召回率指标与努力）；④测评与交付（对齐 LongMemEval/LOCOMO/BEAM；剖面评测与对照实验；结果；可执行回归）。正文全文见 attributes.article；邮件版 HTML 见 attributes.doc。",
@@ -9602,6 +9607,20 @@
         {
           "name": "articleRef",
           "value": "graph-position-paper-001"
+        },
+        {
+          "name": "commit",
+          "value": "720772f",
+          "description": "docs/graph-position-paper.html; tests/graph-position-paper.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "email-sent",
+          "description": "已发送（主题：以项目为基本 block，让 Agent 有图可依——方案与测评）"
+        },
+        {
+          "name": "deliveryChannel",
+          "value": "smtp.126.com:465（hdhscu@126.com 发送至 hudonghua@huawei.com）"
         }
       ],
       "description": "面向人类伙伴（hudonghua）的方案与测评材料（意见），由原『组织形态过渡畅想文章』重写而来：废弃「政策家人/政策加人」与「盖楼 vs 口服药」无关内容，按四段结构重写——①提出问题（业界问题）；②解决方案（本真图谱 + 知识库作为记忆系统与设计图纸 + 人与 AI 基于架构讨论、有图可依；保留以项目为基本 block 的方向）；③框架细节（写入门禁：去重/无损/墓碑；读取优化：子图限定/三层记忆/两步回忆/阈值 0.70/混合检索/重排；检出率与召回率指标与努力）；④测评与交付（对齐 LongMemEval/LOCOMO/BEAM；自建题集/剖面评测/对照实验；结果；可执行回归）。产出 docs/graph-position-paper.html（邮件安全 HTML，2 张表示意图），全文存于 graph-position-paper-001，配套可执行验收测试 tests/graph-position-paper.test.js。",
