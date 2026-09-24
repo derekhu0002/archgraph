@@ -341,6 +341,11 @@
           "name": "commit",
           "value": "d9769af",
           "description": "index.html; tests/website.test.js; README.md; docs/archgraph-framework-overview.md（首页/README/总纲对外刷新到 0.26.2：联邦共享、精益读取、成本可观测三类新能力卡片 + Community 联邦说明；仓库 About description/topics 同步刷新）"
+        },
+        {
+          "name": "commit",
+          "value": "56b874b",
+          "description": "index.html（about/feature 改用 core-model.svg；Capabilities 新增 3 张能力示意图：联邦/三层记忆/精益读取；.about-img/.feature-media 改深色）；tests/website.test.js"
         }
       ],
       "testcases": [
@@ -534,6 +539,16 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "56b874b",
+          "description": "docs/diagrams/global-architecture.svg（重画为深色 Layered Viewpoint：人类/AGENT/ARGO MCP/graph/Neo4j/ArchiMate 3.2/EA + Federation）；scripts/gen-diagrams.js（新增可复现生成器，替代 excalidraw 源）；docs/diagrams/global-architecture.excalidraw（删除，git 历史可回）；README.md（Editable source→scripts/gen-diagrams.js）；tests/architecture-diagram.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "945d4a4",
+          "description": "scripts/gen-diagrams.js（生成器随 core-model 布局修正同步；global-architecture.svg 内容未变）"
         }
       ],
       "testcases": [
@@ -1230,6 +1245,16 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "56b874b",
+          "description": "docs/diagrams/core-model.svg（新增深色核心模型图，README/主页改用之，替换 image.png）；scripts/gen-diagrams.js；README.md; index.html; tests/architecture-diagram.test.js; tests/website.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "945d4a4",
+          "description": "docs/diagrams/core-model.svg（修正右外侧 describes 标签被 Target Project 框裁切——重排右侧布局：面板 168..760、Target Project 826..950）；scripts/gen-diagrams.js"
         }
       ],
       "testcases": []
