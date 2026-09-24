@@ -4256,7 +4256,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-23 会话二，续）：论文《面向 Agent 工程的一张意图架构图：写入治理、检索优化与可信记忆的实证研究》全面重写并发送 hudonghua@huawei.com。\n重写四要求（人类伙伴）：① 学人类学术行文（去 AI 味）；② 增加与业界的对比评测；③ 修正逻辑（原本把我们的机制写成『业界方向』，让人误以为我们没做）；④ 先分解任务、委派子 Agent，再归纳成文。\n执行：用 Task 并行派 3 个 general 子 Agent——(a) 人类学术行文风格指南（读 arXiv 1706.03762/2005.11401/2410.05779 + 本仓文档）；(b) 业界基准数据（LongMemEval/LoCoMo/BEAM/Mem0/GraphRAG/LightRAG，带来源与口径告警）；(c) 逻辑/定位审计（列出被错置于『相关工作』的我方成果 + 修正大纲）。项目总管据此成文。\n成果：docs/graph-agent-paper.html（VSOC 邮件格式，4 张数据图表 + 3 张表）；结构=摘要/1 引言/2 相关工作（仅真实 prior art）/3 方法/4 实验设置/5 结果与对比/6 讨论与局限/7 结论与展望/参考文献；新增能力维度对照表（表1）与公开数值参考表（表2，显式声明非同分布、不构成头对头）+ 默认配置表（表3）；新增局限节（单项目图谱/样本小/外部分布异/写入治理缺对照/最高结果非默认配置）。AT tests/graph-agent-paper.test.js 10/10。commits 2997263（重写）。\n关键教训/决策：① 论文行文：段落承接、去口号对仗、去滥用列表、诚实限定；数字带基线/样本量/口径；反直觉结果如实讨论。② 相关工作只写他人工作，我方机制一律归入方法/贡献（勿把自身成果裞成『业界方向』）。③ 对比要诚实：不同基准/指标不可横比，宁做能力维度对照 + 带告警的参考数值表。④ 委派：大写作任务先分解→并行子 Agent 研究→项目总管归纳成文（有效降上下文压力）。⑤ 术语纪律：用项目/业界既有术语（意图架构图谱 Intent Architecture Graph），不造词。⑥ 邮件格式参照 SOC-DEMO VSOC；图表用表格 bar（邮件安全）。⑦ 图视图成员上限 15（子视图 comm-2026-09-view-001）。\n遗留钩子：① 论文待补：写入治理开/关对照实验、更大样本与跨项目评测（人类已要求）；② 框架侧 MCP 工具契约 schema 对齐；③ 服务器无 GitHub 凭证（push 需 deploy key）；④ 服务器 graphs/catalog 未回主仓；⑤ D4 信任圈层后置。\n记忆层级：T1（本元素）；T2 overseer-ltm-001/overseer-rules-001/overseer-product-001；T2 经验 overseer-email-format-ref-001、overseer-paper-writing-001。commits：…/7ba9f50/2997263。",
+      "description": "项目总管工作记忆摘要（2026-09-25 会话）：对外呈现全面刷新到 0.26.2 实际能力。\n背景：README.md 与 index.html 上次刷新停在 0.24.0（313420b，09-19），此后 132 commits、版本 0.26.2；多项已交付能力未对外体现。\n范围（人类伙伴确认四项全选）：① GitHub 仓库 About；② README.md + index.html；③ 仓库内总纲 docs/archgraph-framework-overview.md；④ 社区站/graph-wiki 图资产仓库。\n新增能力（均有证据）：联邦（CoreRule 12，register/discover/authorize/read by reference，默认拒绝，0.24.3）；agent-cost-log 单一日志 + agent-search-diagnosis 技能（0.25.0/0.26.0）；结构读取投影 + 语义命中 matchedSnippet（0.26.1/0.26.2）；可选 hybrid(RRF)+LLM rerank（0.20.x，默认关）。\n执行：先更新验收测试（tests/readme.test.js、tests/website.test.js、tests/framework-overview.test.js 新增断言）→ 再改文档；homepage Capabilities 增 4 卡（联邦/精益读取/成本可观测/召回优先调优）、Community 补联邦；README What is this 补分层记忆+联邦、Community 补联邦注册中心；总纲『落地与生态』补三条。\n验收：3 个测试文件 26/26 通过；validateSystemArchitecture passed。\n提交：archgraph d9769af（6 文件）+ cff11b0（KG 登记 1318/1321/wp-framework-overview-001）；graph-wiki 10bd116（README：联邦协作 + 实时资产 2 成员 10 资产）。\nGitHub About：description 改为『framework + long-term memory on one ArchiMate 3.2 intent graph via single MCP』；topics 11→18（+openclaw/archimate/mcp/knowledge-graph/graph-rag/enterprise-architect/long-term-memory）；homepage 保持 archgraph.org。\n遗留钩子：① 未 push（archgraph 与 graph-wiki 均仅本地提交；主页经 GitHub Pages 需 push 才上线）——待人类伙伴确认；② graph-wiki 图谱侧 commit 登记未做（本会话 ARGO MCP 服务 archgraph 图，graph-wiki 属其自身 Actor/kb-admin 会话）；③ 社区站 Docusaurus 为 MCP 动态页，无需静态刷新。\n记忆层级：T1（本元素）；T2 overseer-ltm-001 / overseer-product-001。commits：d9769af/cff11b0/10bd116。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -9768,6 +9768,24 @@
       "name": "可复用经验：科研/重型长文写作方法（先分解再委派 + 人类行文 + 诚实对比 + 相关工作边界）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "delivered"
+        }
+      ],
+      "description": "里程碑（2026-09-25，项目总管）：把对外呈现刷新到 0.26.2 实际能力。范围四项（人类伙伴确认全选）：① GitHub 仓库 About（description 改为 framework + long-term memory on one ArchiMate 3.2 intent graph via single MCP；topics 11→18 新增 openclaw/archimate/mcp/knowledge-graph/graph-rag/enterprise-architect/long-term-memory；homepage 保持 archgraph.org）；② README.md + index.html（Capabilities 增 4 卡：联邦图谱共享/精益读取/成本可观测/召回优先调优；Community 补联邦；README What is this 补分层记忆+联邦、Community 补联邦注册中心）；③ docs/archgraph-framework-overview.md（『落地与生态』补联邦协作/可观测与成本/精益读取，updated→2026-09-25）；④ graph-wiki README（联邦协作 quick-start + 实时资产 2 成员/10 资产 + 联邦成员页）。\n方法：AcceptanceTestFirst——先改 3 个测试文件（readme/website/framework-overview）新增断言，再改文档；Tier 2（测试行为变更）。\n验收：26/26 通过；validateSystemArchitecture passed。\n提交：d9769af（6 文件）+ cff11b0（KG 登记）；graph-wiki 10bd116。\n决策：新增能力『默认补入』但保持诚实——hybrid/rerank 明确标为可选（默认关），未夸大为默认能力；README 保持简洁，细节归主页。\n遗留：未 push（需人类伙伴确认）；graph-wiki 图谱侧登记归其自身 Actor。commits d9769af/cff11b0/10bd116。",
+      "id": "overseer-site-refresh-0.26.2-001",
+      "name": "里程碑：对外呈现刷新到 0.26.2（仓库 About / README / 主页 / 总纲 / graph-wiki）",
+      "parent": "project-overseer-001",
+      "testcases": [],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -11491,7 +11509,8 @@
         "overseer-federation-vision-001",
         "overseer-federation-center-design-001",
         "overseer-email-format-ref-001",
-        "overseer-paper-writing-001"
+        "overseer-paper-writing-001",
+        "overseer-site-refresh-0.26.2-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
