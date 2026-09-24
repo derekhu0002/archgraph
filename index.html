@@ -301,6 +301,26 @@
           <h3>Model your agents too</h3>
           <p>Represent agents as Business Actors and Roles with their own memory sub-views, assignments, and work packages — harness design and product design in one model.</p>
         </div>
+        <div class="card reveal">
+          <div class="icon"><svg width="40" height="40" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="6" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="12" r="4" stroke="currentColor" stroke-width="1.2"/><circle cx="38" cy="12" r="4" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="36" r="4" stroke="currentColor" stroke-width="1.2"/><circle cx="38" cy="36" r="4" stroke="currentColor" stroke-width="1.2"/><path d="M19 20l-6-5M29 20l6-5M19 28l-6 5M29 28l6 5" stroke="currentColor" stroke-width="1" opacity="0.7"/></svg></div>
+          <h3>Federated graph sharing</h3>
+          <p>Publish a reusable architecture subgraph to a federated registry, and read another project's opened content <strong>by reference</strong> — register, discover, authorize, read. Access is denied by default, nothing is copied or merged, and every member keeps its own graph sovereign.</p>
+        </div>
+        <div class="card reveal">
+          <div class="icon"><svg width="40" height="40" viewBox="0 0 48 48" fill="none"><rect x="9" y="10" width="30" height="7" rx="2" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="21" width="30" height="7" rx="2" stroke="currentColor" stroke-width="1.2" opacity="0.55"/><rect x="9" y="32" width="30" height="7" rx="2" stroke="currentColor" stroke-width="1.2" opacity="0.3" stroke-dasharray="3 3"/><path d="M13 13.5h6M13 24.5h6" stroke="currentColor" stroke-width="1" opacity="0.7" stroke-linecap="round"/></svg></div>
+          <h3>Reads return only what you need</h3>
+          <p>Structural reads omit bookkeeping (commit and testcase ledgers) unless you ask for it, and semantic hits carry a <code class="inline">matchedSnippet</code> showing <em>why</em> a result matched — so agents spend context only where it pays.</p>
+        </div>
+        <div class="card reveal">
+          <div class="icon"><svg width="40" height="40" viewBox="0 0 48 48" fill="none"><path d="M10 38V22M20 38V14M30 38V26M40 38V18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M8 40h32" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="20" cy="14" r="2" fill="currentColor"/><circle cx="40" cy="18" r="2" fill="currentColor" opacity="0.6"/></svg></div>
+          <h3>See what the agent spent</h3>
+          <p>An in-build log records every tool call and its token cost to one file per workspace, and the <code class="inline">agent-search-diagnosis</code> skill turns a session into a self-contained diagnosis bundle — over-searching, wasted rounds, and graph&harr;repo round-trips become visible.</p>
+        </div>
+        <div class="card reveal">
+          <div class="icon"><svg width="40" height="40" viewBox="0 0 48 48" fill="none"><path d="M12 34l8-9 7 5 9-14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 16h4v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 9v30h30" stroke="currentColor" stroke-width="1" opacity="0.5" stroke-linecap="round"/></svg></div>
+          <h3>Recall-first retrieval tuning</h3>
+          <p>An opt-in second stage adds hybrid (vector + lexical) fusion and an LLM reranker with fail-open guards. Tuning never shrinks the candidate pool — recall can only go up, never down.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -390,7 +410,7 @@ argo-deploy</pre>
     <div class="container">
       <p class="kicker">05 · Community</p>
       <h2>Built in the open.</h2>
-      <p class="lead">ArchGraph runs on open co-building. The community shares and reuses <strong>architecture subgraphs</strong> across projects — so architecture knowledge is built together, not in silos.</p>
+      <p class="lead">ArchGraph runs on open co-building. The community shares and reuses <strong>architecture subgraphs</strong> across projects — so architecture knowledge is built together, not in silos. Sharing is <strong>federated</strong>: each project keeps its graph sovereign and other members read opened content <strong>by reference</strong>.</p>
       <div class="grid">
         <div class="card">
           <h3><a href="https://argo.derekworkspacev5.com/archgraph/" target="_blank" rel="noopener">Community site</a></h3>

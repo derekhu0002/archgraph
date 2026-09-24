@@ -8,8 +8,10 @@ ArchGraph builds a **unified language** that puts harness design and target prod
 **one model** — so you get a single view to work and observe, and real control over your agents.
 
 It doubles as a **long-term memory for coding agents**: an ArchiMate 3.2 intent graph exposed through
-a single read/write MCP interface. Writes are deduplicated, so the graph stays clean and semantic
-recall stays precise. See the [home page](https://archgraph.org/) for the full capability set.
+a single read/write MCP interface. Memory is tiered — a compact working memory restored at session
+start, a long-term memory recalled on demand — and writes are deduplicated, so the graph stays clean
+and semantic recall stays precise. Reusable subgraphs can also be shared across projects through a
+federated registry. See the [home page](https://archgraph.org/) for the full capability set.
 
 ![alt text](docs/diagrams/image.png)
 
@@ -92,6 +94,11 @@ subgraphs** across projects, and follow the governance & contribution guides:
 - **Community site** — https://argo.derekworkspacev5.com/archgraph/ (subgraph library, docs, blog)
 - **graph-wiki repository** — https://github.com/derekhu0002/graph-wiki (graph-asset home: contribute
   a subgraph from your project, or pull one back to reuse)
+
+Sharing is **federated**: each project keeps its own graph sovereign and publishes subgraphs to a
+registry, where other members register, discover, and read opened content **by reference** —
+register, discover, authorize, read. Access is **denied by default**, and nothing is copied or merged.
+Browse the [federation members](https://argo.derekworkspacev5.com/archgraph/federation).
 
 ## License
 

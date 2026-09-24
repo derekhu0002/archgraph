@@ -77,7 +77,17 @@ test('framework-overview-series-map: overview carries the series map that organi
   // WHEN the body is inspected
   // THEN it contains a series map linking the follow-up pieces to the two lines
   const md = readFileSync(OVERVIEW, 'utf8');
-
   assert.match(md, /系列地图/, 'overview should contain a series map section');
   assert.match(md, /多 Harness/, 'series map should include the harness/interop piece');
+});
+
+test('framework-overview-federation-observability: overview covers federation, observability and lean reads', () => {
+  // GIVEN the framework now federates graphs and measures agent cost and retrieval
+  // WHEN the overview body is inspected
+  // THEN federation (by reference), cost observability and token-efficient reads are present
+  const md = readFileSync(OVERVIEW, 'utf8');
+  assert.match(md, /联邦/, 'should cover federated graph sharing');
+  assert.match(md, /按引用/, 'should state federation shares by reference');
+  assert.match(md, /token/i, 'should cover cost observability (tool calls + tokens)');
+  assert.match(md, /matchedSnippet/, 'should cover token-efficient reads (matched snippet)');
 });

@@ -4,7 +4,7 @@ digest: "把 Agent 工程里割裂的『架构』与『AI』两条线，收拢�
 status: "draft"
 audience: "开发者 / 架构师 / AI 工程实践者"
 series: "ArchGraph 框架介绍系列"
-updated: "2026-09-16"
+updated: "2026-09-25"
 ---
 
 # ArchGraph 总纲
@@ -121,7 +121,9 @@ ArchGraph 的内容体系可以拆成两条线。理解这两条线，就理解�
 
 - **多 Harness 一套源**：一条 `argo-deploy` 把 ARGO MCP、Skills、Rules、Agents 部署到 GitHub Copilot、Cursor、OpenCode、DeepSeek Harness、OpenClaw。一份源文件，多端运行。
 - **EA 互操作**：与 Enterprise Architect 双向投影，专业建模工具里的图可以在 ArchGraph 工作流中被读取与回写。
-- **知识复用**：可分享的子图工作包（角色、流程、目标、约束、测试的完整语义网络）可在项目与社区之间导出、复用与组合。
+- **知识复用与联邦**：可分享的子图工作包（角色、流程、目标、约束、测试的完整语义网络）可在项目与社区之间导出、复用与组合。更进一步，社区以**联邦**方式协作——每个项目保持自己的图主权，通过注册中心登记、发现、授权，并**按引用**读取彼此开放的子图（register / discover / authorize / read）；访问默认拒绝，不复制、不合并。
+- **可观测与成本**：框架内置后台日志，把每次工具调用与其 token 成本写入工作区单一 `agent-cost-log.ndjson`；配套的 `agent-search-diagnosis` 技能可把一次会话转成自包含诊断包，让"过度搜索 / 无效轮次 / 图↔仓往返"可见、可优化。
+- **精益读取**：结构读取默认省略账本字段（commit / testcase），语义命中附带 `matchedSnippet` 说明"为何命中"——让 Agent 只在有价值处消耗上下文。
 - **内容体系**：本文所属的「框架介绍系列」，加上既有的官宣、创新点、多角色、社区、Skill 共演化、洞察报告等文章，正在**逐步收拢进同一套体系**，以本文为总纲重新组织。
 
 ---

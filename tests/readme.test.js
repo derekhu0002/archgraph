@@ -102,3 +102,15 @@ test('readme: concisely frames the graph as an agent long-term memory with dedup
   assert.match(section, /deduplicat/i, 'should mention write deduplication');
   assert.match(section, /recall stays precise/i, 'should tie dedup to precise recall');
 });
+
+test('readme: community section documents the federated graph-sharing registry', () => {
+  // GIVEN the community shares reusable subgraphs through a federated registry (CoreRule 12)
+  // WHEN a reader opens the Community section
+  // THEN it explains federation: register/discover/authorize/read by reference, denied by default
+  const section = sectionAfter(README, 'Community');
+  assert.ok(section, 'README should have a Community section');
+  assert.match(section, /federat/i, 'should name the federated sharing model');
+  assert.match(section, /register/, 'should mention registering a subgraph');
+  assert.match(section, /by reference/i, 'should state that reads return a reference, not a copy');
+  assert.match(section, /denied by default/i, 'should state that cross-member access is denied by default');
+});

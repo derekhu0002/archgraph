@@ -187,3 +187,16 @@ test('insight-subpage: home page links to the insight report subpage', () => {
   assert.match(subpage, /GraphRAG/, 'subpage should discuss GraphRAG');
   assert.match(subpage, /80% more truthful/, 'subpage should cite the NICD study');
 });
+
+test('newer-capabilities: homepage documents federation, lean reads and cost observability', () => {
+  // GIVEN the framework has grown federation, token-efficient reads and cost observability since the last refresh
+  // WHEN a visitor opens the homepage
+  // THEN Capabilities names federated sharing, the matched snippet, and the cost/diagnosis tooling
+  const section = HTML.slice(HTML.indexOf('id="capabilities"'), HTML.indexOf('id="install"'));
+  assert.match(section, /federat/i, 'should mention federated graph sharing');
+  assert.match(section, /by reference/i, 'should state federation reads are by reference');
+  assert.match(section, /denied by default/i, 'should state cross-member access is denied by default');
+  assert.match(section, /matchedSnippet/, 'should mention the semantic hit matched snippet');
+  assert.match(section, /token/, 'should mention token cost observability');
+  assert.match(section, /diagnos/i, 'should mention the agent-search-diagnosis capability');
+});
