@@ -336,6 +336,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "d9769af",
+          "description": "index.html; tests/website.test.js; README.md; docs/archgraph-framework-overview.md（首页/README/总纲对外刷新到 0.26.2：联邦共享、精益读取、成本可观测三类新能力卡片 + Community 联邦说明；仓库 About description/topics 同步刷新）"
         }
       ],
       "testcases": [
@@ -488,6 +493,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "d9769af",
+          "description": "README.md; tests/readme.test.js（What is this 补分层记忆 + 联邦共享；Community 补联邦注册中心 register/discover/authorize/read by reference；新增 AT-readme federated 断言）"
         }
       ],
       "testcases": [
@@ -7841,6 +7851,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "d9769af",
+          "description": "docs/archgraph-framework-overview.md; tests/framework-overview.test.js（总纲『落地与生态』补联邦协作/可观测与成本/精益读取；updated→2026-09-25；新增 AT）"
         }
       ],
       "description": "ArchGraph 框架介绍系列的总纲。以《ArchGraph 总纲：用一张意图架构图，统一 Agent 工程》统一整个系列的叙事与术语：覆盖架构线（AML 把 ArchiMate 3.2 扩成 Agent 建模语言 / 产品与 Harness 统一模型 / 视图与视角）与 AI 线（图谱即记忆·三层记忆 / GraphRAG 检索 / 语义与结构双通道）两条主线，以及四道工程约束（定位先行 / 验收先行 / 变更可证 / 写入无害）。给出系列地图，用于逐步把既有文章（官宣、8 创新、多角色、社区、Skill 共演化、洞察报告）整合进同一体系。产出仓库草稿 docs/archgraph-framework-overview.md（status=draft），配套可执行验收测试 tests/framework-overview.test.js。",
