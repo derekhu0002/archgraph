@@ -43,16 +43,25 @@ test('install-section: homepage shows npm install/deploy near the top', () => {
   assert.match(HTML, /QWEN_KEY/, 'should mention the embedding API key');
 });
 
-test('about-image: homepage embeds the core-model image under What is this?', () => {
+test('about-image: homepage embeds the core-model diagram under What is this?', () => {
   // GIVEN the project positions itself as a unified language for harness and product design
   // WHEN a visitor opens the homepage
-  // THEN the What is this? section embeds the core-model image
-  assert.match(HTML, /docs\/diagrams\/image\.png/, 'homepage should embed the core-model image');
+  // THEN the What is this? section embeds the core-model diagram
+  assert.match(HTML, /docs\/diagrams\/core-model\.svg/, 'homepage should embed the core-model diagram');
   assert.ok(
-    HTML.indexOf('docs/diagrams/image.png') > HTML.indexOf('id="about"') &&
-    HTML.indexOf('docs/diagrams/image.png') < HTML.indexOf('id="install"'),
-    'image should appear inside the What is this? section'
+    HTML.indexOf('docs/diagrams/core-model.svg') > HTML.indexOf('id="about"') &&
+    HTML.indexOf('docs/diagrams/core-model.svg') < HTML.indexOf('id="install"'),
+    'diagram should appear inside the What is this? section'
   );
+});
+
+test('capability-diagrams: homepage spotlights the capability illustrations', () => {
+  // GIVEN federation, three-tier memory and lean reads have dedicated dark illustrations
+  // WHEN a visitor opens the homepage
+  // THEN the Capabilities section embeds all three SVGs
+  for (const file of ['cap-federation.svg', 'cap-memory-tiers.svg', 'cap-lean-reads.svg']) {
+    assert.match(HTML, new RegExp('docs/diagrams/' + file.replace('.', '\\.')), `homepage should embed ${file}`);
+  }
 });
 
 test('openclaw-support: homepage mentions OpenClaw in install', () => {

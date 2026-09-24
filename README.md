@@ -13,7 +13,7 @@ start, a long-term memory recalled on demand — and writes are deduplicated, so
 and semantic recall stays precise. Reusable subgraphs can also be shared across projects through a
 federated registry. See the [home page](https://archgraph.org/) for the full capability set.
 
-![alt text](docs/diagrams/image.png)
+![ArchGraph core model — harness design and product design in one graph](docs/diagrams/core-model.svg)
 
 ## Architecture
 
@@ -23,7 +23,7 @@ engineering:
 
 ![Global architecture — Layered Viewpoint](docs/diagrams/global-architecture.svg)
 
-Editable source: [`docs/diagrams/global-architecture.excalidraw`](docs/diagrams/global-architecture.excalidraw)
+Editable source: [`scripts/gen-diagrams.js`](scripts/gen-diagrams.js)
 
 ## Supported Harnesses
 

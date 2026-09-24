@@ -125,7 +125,7 @@
     .statement h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -0.03em; margin: 22px auto 16px; max-width: 820px; }
     .statement p { color: var(--muted); max-width: 720px; margin: 0 auto 8px; }
 
-    .about-img { width: 100%; max-width: 940px; display: block; margin: 30px auto 0; border: 1px solid var(--border); border-radius: 14px; background: #fff; }
+    .about-img { width: 100%; max-width: 940px; display: block; margin: 30px auto 0; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
 
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; transition: border-color 0.25s ease, transform 0.25s ease; }
@@ -138,8 +138,15 @@
     .feature.reverse .feature-media { order: 2; }
     .feature h3 { font-size: 1.3rem; margin: 0 0 10px; letter-spacing: -0.02em; }
     .feature p { color: var(--muted); margin: 0 0 10px; }
-    .feature-media { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: #fff; }
+    .feature-media { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); }
     .feature-media img { display: block; width: 100%; height: auto; }
+
+    .spotlights { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 30px; }
+    .spotlight { margin: 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); transition: border-color 0.25s ease; }
+    .spotlight:hover { border-color: var(--border-strong); }
+    .spotlight img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--border); }
+    .spotlight figcaption { padding: 14px 16px; color: var(--muted); font-size: 0.88rem; }
+    .spotlight figcaption strong { color: var(--text); }
 
     pre.code { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; overflow-x: auto; font-family: var(--mono); font-size: 13px; color: var(--code); margin: 0 0 14px; }
     code.inline { font-family: var(--mono); font-size: 0.88em; background: rgba(255, 255, 255, 0.06); padding: 1px 6px; border-radius: 5px; }
@@ -251,7 +258,7 @@
       <p class="kicker">What is this?</p>
       <h2>A unified language for harness and product design.</h2>
       <p class="lead">ArchGraph puts harness design and target product design into <strong>one model</strong> — so you get a single view to work and observe, and real control over your agents. It doubles as the agent's long-term memory: an ArchiMate 3.2 graph exposed through a read/write MCP interface, with deduplicated writes so recall stays precise.</p>
-      <img class="about-img" src="docs/diagrams/image.png" alt="ArchGraph core model" />
+      <img class="about-img" src="docs/diagrams/core-model.svg" alt="ArchGraph core model — one model for harness and product design" />
     </div>
   </section>
 
@@ -322,6 +329,20 @@
           <p>An opt-in second stage adds hybrid (vector + lexical) fusion and an LLM reranker with fail-open guards. Tuning never shrinks the candidate pool — recall can only go up, never down.</p>
         </div>
       </div>
+      <div class="spotlights">
+        <figure class="spotlight reveal">
+          <img src="docs/diagrams/cap-federation.svg" alt="Federated graph sharing" />
+          <figcaption><strong>Federated graph sharing</strong> — publish a subgraph to the registry, then read another project's opened content by reference. Denied by default; nothing is copied or merged.</figcaption>
+        </figure>
+        <figure class="spotlight reveal">
+          <img src="docs/diagrams/cap-memory-tiers.svg" alt="Three-tier agent memory" />
+          <figcaption><strong>Three-tier memory</strong> — only a compact T1 working memory is loaded at session start; T2 is recalled on demand; T3 is explicit-retrieval-only.</figcaption>
+        </figure>
+        <figure class="spotlight reveal">
+          <img src="docs/diagrams/cap-lean-reads.svg" alt="Lean, matched reads" />
+          <figcaption><strong>Lean, matched reads</strong> — bookkeeping ledgers are omitted by default and semantic hits carry a <code class="inline">matchedSnippet</code>, so context is spent only where it pays.</figcaption>
+        </figure>
+      </div>
     </div>
   </section>
 
@@ -364,7 +385,7 @@ argo-deploy</pre>
           <h3>Traceable by default</h3>
           <p>Acceptance tests come first and are executable GIVEN-WHEN-THEN. Every repository change is committed, and the commit id plus related file paths are registered back onto the architecture element it touched — so the graph is its own audit trail.</p>
         </div>
-        <div class="feature-media"><img src="docs/diagrams/image.png" alt="ArchGraph core model" /></div>
+        <div class="feature-media"><img src="docs/diagrams/core-model.svg" alt="ArchGraph core model — one model for harness and product design" /></div>
       </div>
     </div>
   </section>
