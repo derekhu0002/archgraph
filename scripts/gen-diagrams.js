@@ -162,27 +162,27 @@ function genCoreModel() {
   b.push(text(30, 42, 'One model for harness and product design', { size: 21, weight: 700 }));
   b.push(text(30, 64, 'Harness Design and Target System Design in a single ArchiMate 3.2 intent graph', { size: 12, fill: C.muted }));
 
-  b.push(box(168, 92, 624, 300, C.violet, { dash: '8 7', width: 1.2, fillOverride: 'rgba(167,139,250,0.05)' }));
+  b.push(box(168, 92, 592, 300, C.violet, { dash: '8 7', width: 1.2, fillOverride: 'rgba(167,139,250,0.05)' }));
   b.push(text(184, 116, 'Intent Architecture Graph · one model · one view', { size: 11.5, fill: C.violet.s, weight: 600, letter: 0.5 }));
 
-  b.push(box(206, 146, 244, 82, C.blue) + blabel(206, 146, 244, 82, 'Harness Design', ['the agent roles · skills · rules']));
-  b.push(box(516, 146, 244, 82, C.green) + blabel(516, 146, 244, 82, 'Target System Design', ['the product components · functions']));
-  b.push(arrow(450, 187, 516, 187, { stroke: C.violet.s, marker: 'm-violet' }));
-  b.push(elabel(483, 177, 'describes'));
+  b.push(box(206, 146, 234, 82, C.blue) + blabel(206, 146, 234, 82, 'Harness Design', ['the agent roles · skills · rules']));
+  b.push(box(516, 146, 228, 82, C.green) + blabel(516, 146, 228, 82, 'Target System Design', ['the product components · functions']));
+  b.push(arrow(440, 187, 516, 187, { stroke: C.violet.s, marker: 'm-violet' }));
+  b.push(elabel(478, 177, 'describes'));
 
-  b.push(box(300, 282, 360, 72, C.violet) + blabel(300, 282, 360, 72, 'Intent Architecture Graph', ['ArchiMate 3.2 · single source of truth']));
-  b.push(arrow(330, 228, 400, 282, { stroke: C.blue.s, marker: 'm-blue' }));
-  b.push(arrow(636, 228, 560, 282, { stroke: C.green.s, marker: 'm-green' }));
+  b.push(box(284, 282, 360, 72, C.violet) + blabel(284, 282, 360, 72, 'Intent Architecture Graph', ['ArchiMate 3.2 · single source of truth']));
+  b.push(arrow(300, 228, 340, 282, { stroke: C.blue.s, marker: 'm-blue' }));
+  b.push(arrow(640, 228, 580, 282, { stroke: C.green.s, marker: 'm-green' }));
 
   b.push(box(20, 168, 124, 92, C.cyan) + blabel(20, 168, 124, 92, 'AgentHarness', ['the coding agent']));
-  b.push(box(812, 168, 124, 92, C.green) + blabel(812, 168, 124, 92, 'Target Project', ['the product']));
+  b.push(box(826, 168, 124, 92, C.green) + blabel(826, 168, 124, 92, 'Target Project', ['the product']));
   b.push(arrow(144, 206, 206, 190, { stroke: C.cyan.s, marker: 'm-cyan' }));
-  b.push(elabel(184, 224, 'Access', { anchor: 'middle' }));
-  b.push(arrow(760, 190, 812, 206, { stroke: C.green.s, marker: 'm-green' }));
-  b.push(elabel(786, 224, 'describes'));
+  b.push(elabel(164, 178, 'Access', { anchor: 'end' }));
+  b.push(arrow(744, 190, 826, 206, { stroke: C.green.s, marker: 'm-green' }));
+  b.push(elabel(793, 178, 'describes'));
 
-  b.push(`<path d="M82,260 L82,470 L874,470 L874,260" fill="none" stroke="${C.cyan.s}" stroke-width="1.6" marker-end="url(#m-cyan)"/>`);
-  b.push(elabel(478, 486, 'creates'));
+  b.push(`<path d="M82,260 L82,470 L888,470 L888,260" fill="none" stroke="${C.cyan.s}" stroke-width="1.6" marker-end="url(#m-cyan)"/>`);
+  b.push(elabel(485, 486, 'creates'));
 
   return svg('0 0 960 540', 'ArchGraph core model — one unified language', b.join('\n'));
 }
