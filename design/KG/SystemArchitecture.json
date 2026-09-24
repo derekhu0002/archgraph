@@ -4281,7 +4281,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-25 会话）：对外呈现全面刷新到 0.26.2 实际能力。\n背景：README.md 与 index.html 上次刷新停在 0.24.0（313420b，09-19），此后 132 commits、版本 0.26.2；多项已交付能力未对外体现。\n范围（人类伙伴确认四项全选）：① GitHub 仓库 About；② README.md + index.html；③ 仓库内总纲 docs/archgraph-framework-overview.md；④ 社区站/graph-wiki 图资产仓库。\n新增能力（均有证据）：联邦（CoreRule 12，register/discover/authorize/read by reference，默认拒绝，0.24.3）；agent-cost-log 单一日志 + agent-search-diagnosis 技能（0.25.0/0.26.0）；结构读取投影 + 语义命中 matchedSnippet（0.26.1/0.26.2）；可选 hybrid(RRF)+LLM rerank（0.20.x，默认关）。\n执行：先更新验收测试（tests/readme.test.js、tests/website.test.js、tests/framework-overview.test.js 新增断言）→ 再改文档；homepage Capabilities 增 4 卡（联邦/精益读取/成本可观测/召回优先调优）、Community 补联邦；README What is this 补分层记忆+联邦、Community 补联邦注册中心；总纲『落地与生态』补三条。\n验收：3 个测试文件 26/26 通过；validateSystemArchitecture passed。\n提交：archgraph d9769af（6 文件）+ cff11b0（KG 登记 1318/1321/wp-framework-overview-001）；graph-wiki 10bd116（README：联邦协作 + 实时资产 2 成员 10 资产）。\nGitHub About：description 改为『framework + long-term memory on one ArchiMate 3.2 intent graph via single MCP』；topics 11→18（+openclaw/archimate/mcp/knowledge-graph/graph-rag/enterprise-architect/long-term-memory）；homepage 保持 archgraph.org。\n遗留钩子：① 未 push（archgraph 与 graph-wiki 均仅本地提交；主页经 GitHub Pages 需 push 才上线）——待人类伙伴确认；② graph-wiki 图谱侧 commit 登记未做（本会话 ARGO MCP 服务 archgraph 图，graph-wiki 属其自身 Actor/kb-admin 会话）；③ 社区站 Docusaurus 为 MCP 动态页，无需静态刷新。\n记忆层级：T1（本元素）；T2 overseer-ltm-001 / overseer-product-001。commits：d9769af/cff11b0/10bd116。",
+      "description": "项目总管工作记忆摘要（2026-09-25 会话）：对外呈现两轮刷新。\n【第一轮】仓库 About/README/主页/总纲/graph-wiki 刷新到 0.26.2（新增联邦共享/精益读取/成本可观测/召回优先调优）。commits d9769af/cff11b0/10bd116。\n【第二轮·主页图片重画】人类伙伴反馈主页图片不好看且与实际不符。诊断：global-architecture.svg 是浅色手绘 Excalidraw 导出、与深色主页冲突；image.png 为 2026-09-01 栅格图、滞后于现状。方案（人类确认：主页两张 + 新能力示意图，深色科技风）：新增可复现生成器 scripts/gen-diagrams.js，产出 5 张自包含深色 SVG——core-model.svg（替代 image.png 引用）、重画 global-architecture.svg（Layered Viewpoint：人类/AGENT/ARGO MCP/graph/Neo4j/ArchiMate 3.2/EA + Federation）、cap-federation.svg、cap-memory-tiers.svg、cap-lean-reads.svg；主页 Capabilities 加 3 张 spotlight 图 + .about-img/.feature-media 改深色；README 改引 core-model.svg、Editable source 指向生成器；删除 global-architecture.excalidraw（git 历史可回）。\n方法/工具：architecture-diagram 设计系统（深底 #0a0e1a + 语义色 + 等宽字体）；用 headless Chromium(getBBox) 程序化校验文本溢出/重叠（5 张全 ok），resvg 渲染 PNG 预览并视觉自检（发现并修复 core-model 外侧 describes 标签被 Target Project 框裁切）。commits 56b874b（重画）+ 945d4a4（修复）+ 0226f9a（KG 登记 1318/1330/1362）。\n验收：tests/architecture-diagram.test.js（core-model.svg + 生成器 + 深色 + 能力图）、tests/website.test.js（core-model.svg + spotlight）等 25/25 通过；validateSystemArchitecture passed。\n遗留钩子：① 仍未 push（archgraph + graph-wiki 均本地提交）——待人类伙伴确认；② image.png 保留未删（wechat 文档/测试用作 banner 回退），但已不被 README/主页引用；③ graph-wiki 图谱侧登记未做。\n记忆层级：T1（本元素）；T2 overseer-ltm-001 / overseer-product-001。commits：d9769af/cff11b0/10bd116/56b874b/945d4a4/0226f9a。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -9811,6 +9811,24 @@
       "parent": "project-overseer-001",
       "testcases": [],
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "delivered"
+        }
+      ],
+      "description": "里程碑（2026-09-25，项目总管）：把主页图片重画为深色科技风、与实际相符。背景：人类伙伴反馈主页图片不好看且与实际不符；旧 global-architecture.svg 为浅色手绘 Excalidraw 导出，与深色主页冲突；image.png 为 2026-09-01 栅格图、内容滞后。交付：可复现生成器 scripts/gen-diagrams.js；5 张自包含深色 SVG（core-model / global-architecture / cap-federation / cap-memory-tiers / cap-lean-reads）；主页 Capabilities 新增 3 张 spotlight 图与深色媒体容器；README 引用 core-model.svg、Editable source→生成器；删除 global-architecture.excalidraw。方法：architecture-diagram 设计系统 + headless Chromium(getBBox) 程序化布局校验（无溢出/重叠）+ resvg 渲染 PNG 视觉自检（修复 core-model 外侧 describes 标签裁切）。验收：25/25 通过；validate passed。commits 56b874b/945d4a4/0226f9a。遗留：未 push（待确认）；image.png 保留但不再引用；graph-wiki 图谱侧登记归其自身 Actor。",
+      "id": "overseer-diagram-redraw-dark-001",
+      "name": "里程碑：主页图片重画为深色 SVG（核心模型 / 全局架构 / 3 张能力图）",
+      "parent": "project-overseer-001",
+      "testcases": [],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -11535,7 +11553,8 @@
         "overseer-federation-center-design-001",
         "overseer-email-format-ref-001",
         "overseer-paper-writing-001",
-        "overseer-site-refresh-0.26.2-001"
+        "overseer-site-refresh-0.26.2-001",
+        "overseer-diagram-redraw-dark-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
