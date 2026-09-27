@@ -9837,6 +9837,24 @@
       "parent": "project-overseer-001",
       "testcases": [],
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "298 Harness 补齐 11 条读/写机制关系",
+          "name": "commit",
+          "value": "3fb9c4a"
+        },
+        {
+          "description": "1961 登记 commit 3fb9c4a",
+          "name": "commit",
+          "value": "ac44952"
+        }
+      ],
+      "description": "里程碑（2026-09-27，项目总管）：人类伙伴指出 Graph 框架核心设计（读写检索机制）应在 View 中显式呈现——外部调用 Graph 检索/写入接口 → 接口内部执行的一系列检索/写入过程。核查：机制组件平铺在唯一视图 298 Harness（parent Grouping 1961 Harness），但 included_relationships=[]，语义→Hybrid→Rank 顺序与写入链路在图上无连线；且视图中缺「外部调用方 + MCP 接口」入口元素。本次按人类裁决『只在 298 内补关系』：为 298 补齐 11 条关系（commit 3fb9c4a）——读链路 Triggering（默认语义检索→语义混合检索/RRF→语义二阶段重排）、读数据来源 Serving（语义投影、可配置嵌入提供者 → 默认语义检索；结构投影 → 只读 Cypher 查询 → 社区索引）、写链路 Triggering（图谱校验服务→写入去重门禁→无损写入门禁→语义/向量投影生命周期）、配置/部署轻关联 Association/Realization。validateSystemArchitecture 通过；元素 1961 登记 commit。遗留：①入口契约（外部调用方/MCP 接口 Application Interface·Service）尚未建模，读链路起点仅为基座组件；②成员 2010 gpt-researcher 分组、1962 AgentOrganization 与本机制无关，未连线。经验：本仓 addRelationship 必须带 source_name/target_name/id/type，且 statement 必须精确等于 `<source.name> --(<type>)--> <target.name>`（名字含中文全角括号须逐字匹配）。",
+      "id": "overseer-harness-view-relations-001",
+      "name": "里程碑：Harness 视图（298）读写机制连线",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -11992,7 +12010,8 @@
         "overseer-mem-semantic-threshold-calibration-001",
         "overseer-semantic-projection-oom-001",
         "overseer-mem-agent-cost-harness-001",
-        "overseer-milestone-read-projection-001"
+        "overseer-milestone-read-projection-001",
+        "overseer-harness-view-relations-001"
       ],
       "included_relationships": []
     },
