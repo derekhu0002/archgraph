@@ -95,6 +95,10 @@
         {
           "view_id": "comm-2026-09-view-001",
           "view_name": "沟通材料（2026-09）"
+        },
+        {
+          "view_id": "doubao-adaptation",
+          "view_name": "Doubao Harness Adaptation"
         }
       ]
     },
@@ -9855,6 +9859,43 @@
       "id": "overseer-harness-view-relations-001",
       "name": "里程碑：Harness 视图（298）读写机制连线",
       "type": "Business Object"
+    },
+    {
+      "description": "为 ArchGraph 增加对豆包（Doubao）桌面版 agent 模式（agent_infra + 本地沙箱运行时，~/.doubao/agent_mode/workspace）的适配。已侦察确认（本机 2.30.4）：① 技能 = Anthropic Agent Skills 规范（SKILL.md，YAML frontmatter 只允许 name+description；可选 scripts/references/assets；渐进式披露），用户技能默认根 <workspace>/.user_skills，另有全局根 ~/Doubao/skills；② MCP 受支持（app/mcp_helper.dll 存在），但 server 注册机制（本地配置文件 vs 账号云端 UI）尚未定位；③ 无 AGENTS.md 或每会话注入的常驻规则文件，故 WakeupGuideline/无条件启动门暂无等价挂点，需降级。分两阶段：P1（已确认，本次实现）install-argo.ps1 新增豆包部署段——把 argo-init / ea-human-reconcile / agent-search-diagnosis 三个技能以 frontmatter 归一化（只保留 name+description）后部署到 <DoubaoWorkspace>/.user_skills 与 <DoubaoHome>/skills，支持 -SkipDoubao 与 -DoubaoHome/-DoubaoWorkspace 参数；P2（待 P0 确认）按豆包实际 MCP 机制注册 argo MCP server（stdio: node argo-mcp-server.js + env.ARGO_REPO_ROOT）。目标对齐既有 OpenClaw 适配（WP 2780）与 ARGO 部署脚本（WP 1361）的部署模式，无回归。",
+      "id": "doubao-harness-adaptation-001",
+      "name": "增加 ArchGraph 对豆包 Harness（桌面版 agent 模式）的适配",
+      "parent": "1249",
+      "testcases": [
+        {
+          "acceptanceCriteria": "tests/argo-doubao.test.js",
+          "description": "GIVEN 豆包桌面版 agent 模式的用户技能根（<workspace>/.user_skills 与 ~/Doubao/skills）；WHEN install-argo.ps1 部署豆包集成；THEN argo-init / ea-human-reconcile / agent-search-diagnosis 三个技能的 SKILL.md 被写入 <DoubaoWorkspace>/.user_skills/<name>/ 与 <DoubaoHome>/skills/<name>/，且 frontmatter 只保留 name 与 description（剥离 argument-hint、disable-model-invocation 等豆包规范不接受的字段），name/description 的值逐字保留。",
+          "Input": "tests/argo-doubao.test.js",
+          "name": "AT-doubao-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/argo-doubao.test.js",
+          "description": "GIVEN 传入 -SkipDoubao；WHEN 运行 install-argo.ps1；THEN 不写入任何豆包技能目录（<DoubaoWorkspace>/.user_skills 与 <DoubaoHome>/skills 下均不存在 argo-init 等技能），且脚本以退出码 0 正常结束。",
+          "Input": "tests/argo-doubao.test.js",
+          "name": "AT-doubao-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/argo-doubao.test.js",
+          "description": "GIVEN 技能源文件含中文/非 ASCII（em dash U+2014 等）；WHEN 部署到豆包技能根；THEN 目标 SKILL.md 以 UTF-8 无 BOM 写入，中文逐字保留且不出现 U+FFFD 替换字符。",
+          "Input": "tests/argo-doubao.test.js",
+          "name": "AT-doubao-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/argo-doubao.test.js",
+          "description": "GIVEN 豆包技能根已部署过一版；当 SKILL.md 源更新后再运行 install-argo.ps1；THEN 目标 SKILL.md 被幂等刷新为当前版本（内容与源一致），不产生重复目录或残余旧字段。",
+          "Input": "tests/argo-doubao.test.js",
+          "name": "AT-doubao-04",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -12099,6 +12140,15 @@
         "graph-position-paper-001",
         "graph-agent-paper-001",
         "wp-graph-agent-paper-001"
+      ]
+    },
+    {
+      "description": "为 ArchGraph 适配豆包（Doubao）桌面版 agent 模式宿主的工作包视图。豆包 Harness 扩展点：技能 = Anthropic Agent Skills 规范（SKILL.md，frontmatter 只允许 name+description，默认根 <workspace>/.user_skills；另有全局根 ~/Doubao/skills）；MCP 由 mcp_helper 支持（配置机制待定）；无 AGENTS.md/唤醒门挂点。",
+      "parent_element_id": "1249",
+      "view_id": "doubao-adaptation",
+      "view_name": "Doubao Harness Adaptation",
+      "included_elements": [
+        "doubao-harness-adaptation-001"
       ]
     }
   ]

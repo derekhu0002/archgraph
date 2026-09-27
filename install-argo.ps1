@@ -25,6 +25,9 @@ param(
     [string]$OpenClawWorkspace = "$env:USERPROFILE\.openclaw\workspace",
     [string]$OpenClawRepoRoot = '',
     [switch]$SkipOpenClaw,
+    [string]$DoubaoHome = "$env:USERPROFILE\Doubao",
+    [string]$DoubaoWorkspace = "$env:LOCALAPPDATA\Doubao\User Data\Default\.doubao\agent_mode\workspace",
+    [switch]$SkipDoubao,
     [string]$McpPath,
     [string]$GraphMcpUrl = 'https://argo.derekworkspacev5.com/mcp'
 )
@@ -370,6 +373,69 @@ function Write-OpenClawAgentRule {
         [string]$RuleText
     )
     Write-ArchGraphRuleBlock -DestPath (Join-Path $OpenClawWorkspace 'AGENTS.md') -RuleText $RuleText -Label 'OpenClaw rule'
+}
+
+function Convert-SkillFile {
+    # Normalize an ArchGraph SKILL.md for the Doubao (desktop agent mode) skill
+    # system. Doubao follows the Anthropic Agent Skills spec: the YAML
+    # frontmatter may contain ONLY `name` and `description` (see the built-in
+    # skill-creator-for-work skill); any other field is rejected. The ArchGraph
+    # skills additionally carry VS Code / OpenCode-only fields (argument-hint,
+    # disable-model-invocation), so strip the frontmatter down to name +
+    # description while keeping the body verbatim and the values byte-intact.
+    param(
+        [string]$SourceFile,
+        [string]$DestinationFile
+    )
+    $content = Get-Content $SourceFile -Raw -Encoding UTF8
+    $m = [regex]::Match($content, '(?s)^---\s*\r?\n(.*?)\r?\n---\s*\r?\n(.*)$')
+    if (-not $m.Success) {
+        Copy-Item -Force -Path $SourceFile -Destination $DestinationFile
+        return
+    }
+    $front = $m.Groups[1].Value
+    $body = $m.Groups[2].Value
+
+    $name = ''
+    $desc = ''
+    $nm = [regex]::Match($front, '(?m)^name:\s*(.*)$')
+    if ($nm.Success) { $name = $nm.Groups[1].Value.Trim().Trim('"').Trim("'") }
+    # Keep the description value verbatim (including any surrounding quotes) so
+    # non-ASCII and internal punctuation survive the round-trip byte-for-byte.
+    $dm = [regex]::Match($front, '(?m)^description:\s*(.*)$')
+    if ($dm.Success) { $desc = $dm.Groups[1].Value.Trim() }
+
+    $newFront = "---`r`n"
+    if ($name) { $newFront += "name: $name`r`n" }
+    if ($desc) { $newFront += "description: $desc`r`n" }
+    $newFront += "---`r`n"
+
+    $result = $newFront + "`r`n" + $body
+    [System.IO.File]::WriteAllText($DestinationFile, $result, (New-Object System.Text.UTF8Encoding $false))
+}
+
+function Copy-DoubaoSkills {
+    # Deploy the ArchGraph skills into a Doubao skill root. Doubao adopts the
+    # Anthropic Agent Skills layout: one folder per skill containing SKILL.md
+    # (plus optional scripts/references/assets). The metadata (name +
+    # description) is always in context; the body loads only when the skill
+    # triggers. SKILL.md is normalized via Convert-SkillFile; any bundled
+    # resources are copied verbatim so the skill folder is self-contained.
+    param(
+        [string]$Root,
+        [string]$SourceSkillsRoot,
+        [string[]]$SkillNames,
+        [string]$Label
+    )
+    foreach ($skill in $SkillNames) {
+        $src = Join-Path $SourceSkillsRoot $skill
+        if (-not (Test-Path (Join-Path $src 'SKILL.md'))) { continue }
+        $destDir = Join-Path $Root $skill
+        New-Item -ItemType Directory -Force -Path $destDir | Out-Null
+        Copy-Item -Recurse -Force -Path (Join-Path $src '*') -Destination $destDir
+        Convert-SkillFile -SourceFile (Join-Path $src 'SKILL.md') -DestinationFile (Join-Path $destDir 'SKILL.md')
+    }
+    Write-Host "  argo skills -> $Root ($Label)"
 }
 
 function Write-OpenClawMcpConfig {
@@ -935,6 +1001,31 @@ Copy-Tree -Source $diagSkillSrc -Destination (Join-Path (Join-Path $OpenClawHome
     Write-Host '  OpenClaw injects AGENTS.md into Project Context on every session, so the wakeup'
     Write-Host '  gate (UNCONDITIONAL STARTUP GATE) is active on the next OpenClaw session; restart'
     Write-Host '  the OpenClaw gateway (openclaw gateway restart) if it is already running.'
+}
+
+if ($SkipDoubao) {
+    Write-Host 'Skipped Doubao integration (-SkipDoubao).'
+} else {
+    # Doubao (desktop agent mode) skill discovery. Doubao adopts the Anthropic
+    # Agent Skills spec and loads user skills from
+    #   <workspace>/.user_skills/<name>/SKILL.md  (per-session workspace root)
+    # plus a global user root
+    #   ~/Doubao/skills/<name>/SKILL.md
+    # Skills are the ONLY fully ported integration surface: Doubao exposes no
+    # AGENTS.md-equivalent always-on instruction file (so the WakeupGuideline /
+    # unconditional startup gate has no hook), and its MCP server registration
+    # mechanism is still being pinned down (P2). Only a real SKILL.md folder is
+    # deployed; the frontmatter is normalized to name + description.
+    $doubaoSkills = @('argo-init', 'ea-human-reconcile', 'agent-search-diagnosis')
+    $doubaoSkillsSrc = Join-Path $argoDir 'skills'
+    Write-Host '==> Deploying Doubao (desktop agent mode) integration'
+    Copy-DoubaoSkills -Root (Join-Path $DoubaoWorkspace '.user_skills') -SourceSkillsRoot $doubaoSkillsSrc -SkillNames $doubaoSkills -Label 'workspace .user_skills'
+    Copy-DoubaoSkills -Root (Join-Path $DoubaoHome 'skills') -SourceSkillsRoot $doubaoSkillsSrc -SkillNames $doubaoSkills -Label 'global ~/Doubao/skills'
+    Write-Host '  Doubao injects each skill''s name + description into context and loads the'
+    Write-Host '  body on trigger; new skills are picked up on the next agent session.'
+    Write-Host '  note: Doubao has no AGENTS.md-equivalent always-on rule file, so the ARGO'
+    Write-Host '  WakeupGuideline / unconditional startup gate is not deployed (no hook);'
+    Write-Host '  MCP registration (argo server) is tracked separately (P2, pending mechanism).'
 }
 
 if ($SkipDeps) {
