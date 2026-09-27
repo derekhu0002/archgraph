@@ -10881,6 +10881,116 @@
       "target_id": "overseer-federation-vision-001",
       "target_name": "愿景延伸：联邦式组织级图谱（项目即国家，组织即联邦）",
       "type": "Association"
+    },
+    {
+      "id": "harness-read-semantic-to-hybrid-001",
+      "name": "Triggering",
+      "source_id": "default-semantic-retrieval-001",
+      "source_name": "默认语义检索（Default Semantic Retrieval：purpose-aware 阈值 + topK）",
+      "statement": "默认语义检索（Default Semantic Retrieval：purpose-aware 阈值 + topK） --(Triggering)--> 语义混合检索（Hybrid Semantic Retrieval）",
+      "target_id": "hybrid-semantic-retrieval-001",
+      "target_name": "语义混合检索（Hybrid Semantic Retrieval）",
+      "type": "Triggering"
+    },
+    {
+      "id": "harness-read-hybrid-to-rerank-001",
+      "name": "Triggering",
+      "source_id": "hybrid-semantic-retrieval-001",
+      "source_name": "语义混合检索（Hybrid Semantic Retrieval）",
+      "statement": "语义混合检索（Hybrid Semantic Retrieval） --(Triggering)--> 语义二阶段重排（Rerank）",
+      "target_id": "semantic-rerank-001",
+      "target_name": "语义二阶段重排（Rerank）",
+      "type": "Triggering"
+    },
+    {
+      "id": "harness-read-projection-serves-default-001",
+      "name": "Serving",
+      "source_id": "neo4j-semantic-projection-store",
+      "source_name": "Neo4j Semantic Projection Reconciliation",
+      "statement": "Neo4j Semantic Projection Reconciliation --(Serving)--> 默认语义检索（Default Semantic Retrieval：purpose-aware 阈值 + topK）",
+      "target_id": "default-semantic-retrieval-001",
+      "target_name": "默认语义检索（Default Semantic Retrieval：purpose-aware 阈值 + topK）",
+      "type": "Serving"
+    },
+    {
+      "id": "harness-read-embedding-serves-default-001",
+      "name": "Serving",
+      "source_id": "configurable-embedding-provider-001",
+      "source_name": "可配置语义嵌入提供者（Configurable Embedding Provider）",
+      "statement": "可配置语义嵌入提供者（Configurable Embedding Provider） --(Serving)--> 默认语义检索（Default Semantic Retrieval：purpose-aware 阈值 + topK）",
+      "target_id": "default-semantic-retrieval-001",
+      "target_name": "默认语义检索（Default Semantic Retrieval：purpose-aware 阈值 + topK）",
+      "type": "Serving"
+    },
+    {
+      "id": "harness-query-sync-serves-cypher-001",
+      "name": "Serving",
+      "source_id": "neo4j-sync-store",
+      "source_name": "Neo4j Structural Sync Store",
+      "statement": "Neo4j Structural Sync Store --(Serving)--> Neo4j Cypher Query Interface",
+      "target_id": "neo4j-cypher-query-interface",
+      "target_name": "Neo4j Cypher Query Interface",
+      "type": "Serving"
+    },
+    {
+      "id": "harness-query-cypher-serves-community-001",
+      "name": "Serving",
+      "source_id": "neo4j-cypher-query-interface",
+      "source_name": "Neo4j Cypher Query Interface",
+      "statement": "Neo4j Cypher Query Interface --(Serving)--> 图谱社区索引（Neo4j GDS）",
+      "target_id": "community-index-001",
+      "target_name": "图谱社区索引（Neo4j GDS）",
+      "type": "Serving"
+    },
+    {
+      "id": "harness-write-validate-to-dedup-001",
+      "name": "Triggering",
+      "source_id": "graph-semantics-validation-001",
+      "source_name": "图谱校验服务（Graph Semantics）",
+      "statement": "图谱校验服务（Graph Semantics） --(Triggering)--> 图谱写入去重门禁",
+      "target_id": "graph-write-dedup-gate",
+      "target_name": "图谱写入去重门禁",
+      "type": "Triggering"
+    },
+    {
+      "id": "harness-write-dedup-to-lossless-001",
+      "name": "Triggering",
+      "source_id": "graph-write-dedup-gate",
+      "source_name": "图谱写入去重门禁",
+      "statement": "图谱写入去重门禁 --(Triggering)--> 无损写入门禁",
+      "target_id": "lossless-write-gate",
+      "target_name": "无损写入门禁",
+      "type": "Triggering"
+    },
+    {
+      "id": "harness-write-lossless-to-projection-001",
+      "name": "Triggering",
+      "source_id": "lossless-write-gate",
+      "source_name": "无损写入门禁",
+      "statement": "无损写入门禁 --(Triggering)--> Neo4j Semantic Projection Reconciliation",
+      "target_id": "neo4j-semantic-projection-store",
+      "target_name": "Neo4j Semantic Projection Reconciliation",
+      "type": "Triggering"
+    },
+    {
+      "id": "harness-config-envkey-to-embedding-001",
+      "name": "Association",
+      "source_id": "env-file-key-governance-001",
+      "source_name": "环境文件键覆盖治理（Env File Key Coverage Governance）",
+      "statement": "环境文件键覆盖治理（Env File Key Coverage Governance） --(Association)--> 可配置语义嵌入提供者（Configurable Embedding Provider）",
+      "target_id": "configurable-embedding-provider-001",
+      "target_name": "可配置语义嵌入提供者（Configurable Embedding Provider）",
+      "type": "Association"
+    },
+    {
+      "id": "harness-config-offline-deploy-realizes-embedding-001",
+      "name": "Realization",
+      "source_id": "offline-embedding-deployment-001",
+      "source_name": "内网自建 Embedding 部署方案（Offline Self-hosted Embedding Deployment）",
+      "statement": "内网自建 Embedding 部署方案（Offline Self-hosted Embedding Deployment） --(Realization)--> 可配置语义嵌入提供者（Configurable Embedding Provider）",
+      "target_id": "configurable-embedding-provider-001",
+      "target_name": "可配置语义嵌入提供者（Configurable Embedding Provider）",
+      "type": "Realization"
     }
   ],
   "views": [
@@ -11319,7 +11429,19 @@
         "env-file-key-governance-001",
         "default-semantic-retrieval-001"
       ],
-      "included_relationships": []
+      "included_relationships": [
+        "harness-read-semantic-to-hybrid-001",
+        "harness-read-hybrid-to-rerank-001",
+        "harness-read-projection-serves-default-001",
+        "harness-read-embedding-serves-default-001",
+        "harness-query-sync-serves-cypher-001",
+        "harness-query-cypher-serves-community-001",
+        "harness-write-validate-to-dedup-001",
+        "harness-write-dedup-to-lossless-001",
+        "harness-write-lossless-to-projection-001",
+        "harness-config-envkey-to-embedding-001",
+        "harness-config-offline-deploy-realizes-embedding-001"
+      ]
     },
     {
       "view_id": "429",
