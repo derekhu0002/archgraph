@@ -9895,7 +9895,22 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Work Package"
+      "type": "Work Package",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "84a8c6d",
+          "description": "P1 skills deployment (verified slice); files: install-argo.ps1, tests/argo-doubao.test.js, design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "partial"
+        },
+        {
+          "name": "status",
+          "value": "IN_PROGRESS"
+        }
+      ]
     }
   ],
   "relationships": [
