@@ -438,6 +438,63 @@ function Copy-DoubaoSkills {
     Write-Host "  argo skills -> $Root ($Label)"
 }
 
+function Write-DoubaoMcpRecipe {
+    # Doubao's desktop agent mode registers MCP servers through its in-app UI
+    # (自定义连接器: 传输类型 STDIO / 命令 / 参数 / 环境变量), NOT through a config
+    # file, so the installer cannot auto-register. This writes the exact
+    # connector values to a reference file and prints a copy-paste recipe the
+    # human enters once. The argo server is spawned as a local stdio child and
+    # is pinned to the repository root via ARGO_REPO_ROOT (Doubao does not
+    # advertise MCP roots), mirroring the OpenClaw fixed-workspace handling.
+    # graph-mcp (remote Streamable HTTP) is exposed through the same stdio
+    # bridge the Cursor deployment uses.
+    param(
+        [string]$RecipePath,
+        [string]$ArgoServer,
+        [string]$RepoRoot,
+        [string]$BridgePath,
+        [string]$GraphMcpUrl
+    )
+    $argoServerSlash = ($ArgoServer -replace '\\', '/')
+    $connectors = @(
+        [ordered]@{
+            serverName = 'argo'
+            transport  = 'STDIO'
+            command    = 'node'
+            args       = @($argoServerSlash)
+            env        = [ordered]@{ ARGO_REPO_ROOT = $RepoRoot }
+        }
+    )
+    if ($BridgePath) {
+        $connectors += [ordered]@{
+            serverName = 'graph-mcp'
+            transport  = 'STDIO'
+            command    = 'node'
+            args       = @(($BridgePath -replace '\\', '/'))
+            env        = [ordered]@{ GRAPH_MCP_URL = $GraphMcpUrl }
+        }
+    }
+    $recipe = [ordered]@{
+        host       = 'Doubao desktop (agent mode) - custom connector (自定义连接器), manual in-app registration'
+        note       = 'Open Doubao agent mode -> MCP/connector settings -> add a custom connector -> enter the values below (transport 传输类型 = STDIO). Requires Node.js on PATH. Doubao custom connectors run only on the local machine.'
+        connectors = $connectors
+    }
+    New-Item -ItemType Directory -Force -Path (Split-Path $RecipePath) | Out-Null
+    [System.IO.File]::WriteAllText($RecipePath, ($recipe | ConvertTo-Json -Depth 8), (New-Object System.Text.UTF8Encoding $false))
+    Write-Host "  Doubao MCP connector recipe -> $RecipePath"
+    Write-Host '  Register once in the Doubao app (自定义连接器, 传输类型 STDIO):'
+    Write-Host '    服务器名称: argo'
+    Write-Host '    命令: node'
+    Write-Host "    参数: $argoServerSlash"
+    Write-Host "    环境变量: ARGO_REPO_ROOT=$RepoRoot"
+    if ($BridgePath) {
+        Write-Host '    服务器名称: graph-mcp'
+        Write-Host '    命令: node'
+        Write-Host "    参数: $($BridgePath -replace '\\', '/')"
+        Write-Host "    环境变量: GRAPH_MCP_URL=$GraphMcpUrl"
+    }
+}
+
 function Write-OpenClawMcpConfig {
     # Register the argo MCP server under mcp.servers.argo in
     # ~/.openclaw/openclaw.json. OpenClaw is a fixed-workspace host: its
@@ -1011,11 +1068,11 @@ if ($SkipDoubao) {
     #   <workspace>/.user_skills/<name>/SKILL.md  (per-session workspace root)
     # plus a global user root
     #   ~/Doubao/skills/<name>/SKILL.md
-    # Skills are the ONLY fully ported integration surface: Doubao exposes no
-    # AGENTS.md-equivalent always-on instruction file (so the WakeupGuideline /
-    # unconditional startup gate has no hook), and its MCP server registration
-    # mechanism is still being pinned down (P2). Only a real SKILL.md folder is
-    # deployed; the frontmatter is normalized to name + description.
+    # Doubao exposes no AGENTS.md-equivalent always-on instruction file, so the
+    # WakeupGuideline / unconditional startup gate has no hook (skills are the
+    # fully ported surface). MCP servers are registered through Doubao's in-app
+    # custom connector UI (STDIO), not a config file, so the installer emits a
+    # copy-paste connector recipe instead of writing a config.
     $doubaoSkills = @('argo-init', 'ea-human-reconcile', 'agent-search-diagnosis')
     $doubaoSkillsSrc = Join-Path $argoDir 'skills'
     Write-Host '==> Deploying Doubao (desktop agent mode) integration'
@@ -1023,9 +1080,14 @@ if ($SkipDoubao) {
     Copy-DoubaoSkills -Root (Join-Path $DoubaoHome 'skills') -SourceSkillsRoot $doubaoSkillsSrc -SkillNames $doubaoSkills -Label 'global ~/Doubao/skills'
     Write-Host '  Doubao injects each skill''s name + description into context and loads the'
     Write-Host '  body on trigger; new skills are picked up on the next agent session.'
+    $doubaoBridgePath = Join-Path (Join-Path $argoDir 'mcp-bridges') 'graph-mcp-stdio.js'
+    if (-not (Test-Path $doubaoBridgePath)) { $doubaoBridgePath = '' }
+    if (-not (Test-Path (Join-Path $repoRoot 'design\KG\SystemArchitecture.json'))) {
+        Write-Warning "  $repoRoot is not an ArchGraph workspace; set ARGO_REPO_ROOT in the Doubao connector to the repository you want served."
+    }
+    Write-DoubaoMcpRecipe -RecipePath (Join-Path $ArgoRoot 'doubao-mcp.json') -ArgoServer (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js') -RepoRoot $repoRoot -BridgePath $doubaoBridgePath -GraphMcpUrl $GraphMcpUrl
     Write-Host '  note: Doubao has no AGENTS.md-equivalent always-on rule file, so the ARGO'
-    Write-Host '  WakeupGuideline / unconditional startup gate is not deployed (no hook);'
-    Write-Host '  MCP registration (argo server) is tracked separately (P2, pending mechanism).'
+    Write-Host '  WakeupGuideline / unconditional startup gate is not deployed (no hook).'
 }
 
 if ($SkipDeps) {

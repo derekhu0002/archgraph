@@ -9861,7 +9861,7 @@
       "type": "Business Object"
     },
     {
-      "description": "为 ArchGraph 增加对豆包（Doubao）桌面版 agent 模式（agent_infra + 本地沙箱运行时，~/.doubao/agent_mode/workspace）的适配。已侦察确认（本机 2.30.4）：① 技能 = Anthropic Agent Skills 规范（SKILL.md，YAML frontmatter 只允许 name+description；可选 scripts/references/assets；渐进式披露），用户技能默认根 <workspace>/.user_skills，另有全局根 ~/Doubao/skills；② MCP 受支持（app/mcp_helper.dll 存在），但 server 注册机制（本地配置文件 vs 账号云端 UI）尚未定位；③ 无 AGENTS.md 或每会话注入的常驻规则文件，故 WakeupGuideline/无条件启动门暂无等价挂点，需降级。分两阶段：P1（已确认，本次实现）install-argo.ps1 新增豆包部署段——把 argo-init / ea-human-reconcile / agent-search-diagnosis 三个技能以 frontmatter 归一化（只保留 name+description）后部署到 <DoubaoWorkspace>/.user_skills 与 <DoubaoHome>/skills，支持 -SkipDoubao 与 -DoubaoHome/-DoubaoWorkspace 参数；P2（待 P0 确认）按豆包实际 MCP 机制注册 argo MCP server（stdio: node argo-mcp-server.js + env.ARGO_REPO_ROOT）。目标对齐既有 OpenClaw 适配（WP 2780）与 ARGO 部署脚本（WP 1361）的部署模式，无回归。",
+      "description": "为 ArchGraph 增加对豆包（Doubao）桌面版 agent 模式（agent_infra + 本地沙箱运行时，~/.doubao/agent_mode/workspace）的适配。已侦察确认（本机 2.30.4）：① 技能 = Anthropic Agent Skills 规范（SKILL.md，YAML frontmatter 只允许 name+description；可选 scripts/references/assets；渐进式披露），用户技能默认根 <workspace>/.user_skills，另有全局根 ~/Doubao/skills；② MCP 受支持（app/mcp_helper.dll 存在），且自定义连接器支持本地 STDIO（命令 command + 参数 + 环境变量 env），但仅能通过豆包 App 内 UI 手动注册（无配置文件），故由部署器产出连接器配方；③ 无 AGENTS.md 或每会话注入的常驻规则文件，故 WakeupGuideline 无条件启动门无等价挂点，需降级。P1（已实现）install-argo.ps1 新增豆包部署段——Convert-SkillFile 把 argo-init / ea-human-reconcile / agent-search-diagnosis 三个技能以 frontmatter 归一化（只保留 name+description，剥离 argument-hint/disable-model-invocation）后部署到 <DoubaoWorkspace>/.user_skills 与 <DoubaoHome>/skills，并写 doubao-mcp.json 连接器配方（argo: STDIO node argo-mcp-server.js + env.ARGO_REPO_ROOT；graph-mcp: STDIO 经 mcp-bridges/graph-mcp-stdio.js + env.GRAPH_MCP_URL），支持 -SkipDoubao 与 -DoubaoHome/-DoubaoWorkspace 参数；MCP server 由用户在豆包 App 内一次性录入。目标对齐既有 OpenClaw 适配（WP 2780）与 ARGO 部署脚本（WP 1361）的部署模式，无回归。",
       "id": "doubao-harness-adaptation-001",
       "name": "增加 ArchGraph 对豆包 Harness（桌面版 agent 模式）的适配",
       "parent": "1249",
@@ -9892,6 +9892,13 @@
           "description": "GIVEN 豆包技能根已部署过一版；当 SKILL.md 源更新后再运行 install-argo.ps1；THEN 目标 SKILL.md 被幂等刷新为当前版本（内容与源一致），不产生重复目录或残余旧字段。",
           "Input": "tests/argo-doubao.test.js",
           "name": "AT-doubao-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/argo-doubao.test.js",
+          "description": "GIVEN 豆包自定义连接器为 App 内 UI 手动注册（STDIO，无配置文件）；WHEN install-argo.ps1 部署豆包集成；THEN 写出参考配方 <ArgoRoot>/doubao-mcp.json，含 argo 连接器（serverName=argo, transport=STDIO, command=node, args=[<ArgoRoot>/scripts/argo-mcp-server.js], env.ARGO_REPO_ROOT=<repoRoot>）与 graph-mcp 连接器（command=node, args=[mcp-bridges/graph-mcp-stdio.js], env.GRAPH_MCP_URL=https://argo.derekworkspacev5.com/mcp）；传入 -SkipDoubao 时不写该配方。",
+          "Input": "tests/argo-doubao.test.js",
+          "name": "AT-doubao-05",
           "type": "Acceptance Test"
         }
       ],

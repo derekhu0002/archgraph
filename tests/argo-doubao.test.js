@@ -143,6 +143,27 @@ test('install-argo.ps1 deploys the ArchGraph skills into both Doubao skill roots
     const argoInit = fs.readFileSync(path.join(workspaceSkills, 'argo-init', 'SKILL.md'), 'utf8');
     assert.match(argoInit, /[\u4e00-\u9fff]/, 'CJK characters must survive the deploy');
     assert.doesNotMatch(argoInit, /\uFFFD/, 'no U+FFFD replacement characters may appear');
+
+    // AT-doubao-05: Doubao registers MCP servers through its in-app custom
+    // connector UI (STDIO), not a config file, so the installer emits a
+    // copy-paste recipe: argo (stdio node argo-mcp-server.js, pinned to the
+    // repository root via ARGO_REPO_ROOT) and the graph-mcp stdio bridge.
+    const recipePath = path.join(paths.argoRoot, 'doubao-mcp.json');
+    assert.ok(fs.existsSync(recipePath), 'the Doubao MCP connector recipe must be written');
+    const recipe = JSON.parse(fs.readFileSync(recipePath, 'utf8'));
+    assert.ok(Array.isArray(recipe.connectors) && recipe.connectors.length >= 1,
+      'the recipe must list the connectors to register');
+    const argo = recipe.connectors.find((c) => c.serverName === 'argo');
+    assert.ok(argo, 'the recipe must include the argo connector');
+    assert.equal(argo.transport, 'STDIO');
+    assert.equal(argo.command, 'node');
+    assert.ok(argo.args[0].endsWith('argo-mcp-server.js'));
+    assert.equal(argo.env.ARGO_REPO_ROOT, ROOT,
+      'the argo connector must pin ARGO_REPO_ROOT to the repository root');
+    const graphMcp = recipe.connectors.find((c) => c.serverName === 'graph-mcp');
+    assert.ok(graphMcp, 'the recipe must include the graph-mcp connector');
+    assert.equal(graphMcp.env.GRAPH_MCP_URL, 'https://argo.derekworkspacev5.com/mcp');
+    assert.ok(graphMcp.args[0].endsWith('graph-mcp-stdio.js'));
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
@@ -160,6 +181,8 @@ test('install-argo.ps1 -SkipDoubao skips the Doubao deployment entirely', () => 
       'workspace skill must not be deployed when skipped');
     assert.ok(!fs.existsSync(path.join(paths.doubaoHome, 'skills', 'argo-init', 'SKILL.md')),
       'global skill must not be deployed when skipped');
+    assert.ok(!fs.existsSync(path.join(paths.argoRoot, 'doubao-mcp.json')),
+      'the Doubao MCP connector recipe must not be written when skipped');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
