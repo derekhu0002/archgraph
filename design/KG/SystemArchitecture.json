@@ -2697,6 +2697,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "ce7c330",
+          "description": "AD-f single-source convergence: scripts/gen-dsh-plugins.js; dsh-argo-wakeup/index.js (regenerated); dsh-argo-workspace/index.js; install-argo.ps1 (copy instead of inline templates, Get-WakeupGuideline removed); package.json (gen:dsh-plugins + prepack); tests/dsh-plugin-single-source.test.js; tests/argo-deploy.test.js; docs/dsh-plugin-design.md; docs/dsh-plugin-code-review.md"
         }
       ]
     },
