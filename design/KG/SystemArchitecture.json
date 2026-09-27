@@ -9921,6 +9921,11 @@
           "name": "commit",
           "value": "f2a3aa3",
           "description": "P2 MCP connector recipe (<ArgoRoot>/doubao-mcp.json); files: install-argo.ps1, tests/argo-doubao.test.js, design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "118fb50",
+          "description": "Doubao connector recipe uses deployed ~/.argo paths (bridge -> <ArgoRoot>/mcp-bridges); files: install-argo.ps1, tests/argo-doubao.test.js"
         }
       ]
     },
