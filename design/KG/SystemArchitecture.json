@@ -9931,6 +9931,10 @@
           "name": "commit",
           "value": "93dfdf8",
           "description": "Doubao argo connector follows the selected workspace (no pinned ARGO_REPO_ROOT); files: install-argo.ps1, tests/argo-doubao.test.js"
+        },
+        {
+          "name": "validation",
+          "value": "2026-09-27: Doubao custom connector (argo, STDIO, no pinned ARGO_REPO_ROOT) correctly resolves the selected workspace - MCP workspace-following verified by the human partner."
         }
       ]
     },
