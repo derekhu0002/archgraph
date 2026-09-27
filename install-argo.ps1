@@ -438,6 +438,26 @@ function Copy-DoubaoSkills {
     Write-Host "  argo skills -> $Root ($Label)"
 }
 
+function Convert-RuleToSkill {
+    # Package the single-source ARGO rule file (argo/rules/archgraph.instructions.md)
+    # as a Doubao entry skill. Doubao keeps ONLY a skill's name + description in
+    # context permanently (the body loads when the skill triggers) and it
+    # forbids angle brackets in the description. So the frontmatter carries a
+    # mandatory trigger description (the STEP 0 gate + the "load before any
+    # intent-graph read/write" mandate) and the body is the rule text verbatim
+    # (frontmatter stripped). This is the closest Doubao allows to an always-on
+    # rule: Doubao has no system-prompt / AGENTS.md hook.
+    param(
+        [string]$RuleFile,
+        [string]$DestinationFile
+    )
+    $rule = Get-Content $RuleFile -Raw -Encoding UTF8
+    $body = Get-MarkdownBody -Content $rule
+    $description = 'MANDATORY entry skill for the ARGO / ArchGraph intent graph. Whenever the workspace is an ArchGraph workspace (contains design/KG/SystemArchitecture.json) or the argo MCP tools (mcp__argo__*) are available, you MUST load this skill BEFORE reading, querying or writing the architecture graph. STEP 0 gate: identify your Business Actor through the argo MCP and restore your working memory first, then follow this skill for KG-first retrieval, the ARGO red lines, acceptance-test-first work, deduplicated and lossless graph writes, and commit tracing.'
+    $front = "---`r`nname: archgraph-argo`r`ndescription: `"$description`"`r`n---`r`n"
+    [System.IO.File]::WriteAllText($DestinationFile, ($front + "`r`n" + $body), (New-Object System.Text.UTF8Encoding $false))
+}
+
 function Write-DoubaoMcpRecipe {
     # Doubao's desktop agent mode registers MCP servers through its in-app UI
     # (自定义连接器: 传输类型 STDIO / 命令 / 参数 / 环境变量), NOT through a config
@@ -1081,6 +1101,17 @@ if ($SkipDoubao) {
     Write-Host '==> Deploying Doubao (desktop agent mode) integration'
     Copy-DoubaoSkills -Root (Join-Path $DoubaoWorkspace '.user_skills') -SourceSkillsRoot $doubaoSkillsSrc -SkillNames $doubaoSkills -Label 'workspace .user_skills'
     Copy-DoubaoSkills -Root (Join-Path $DoubaoHome 'skills') -SourceSkillsRoot $doubaoSkillsSrc -SkillNames $doubaoSkills -Label 'global ~/Doubao/skills'
+    # Entry skill: the single-source ARGO rules packaged as a Doubao skill whose
+    # always-in-context description states the STEP 0 gate and the mandate to
+    # load it before any intent-graph read/write. This is the closest Doubao
+    # allows to an always-on rule (skills have no system-prompt hook).
+    $doubaoRule = Join-Path $argoDir 'rules\archgraph.instructions.md'
+    foreach ($doubaoRoot in @((Join-Path $DoubaoWorkspace '.user_skills'), (Join-Path $DoubaoHome 'skills'))) {
+        $entryDir = Join-Path $doubaoRoot 'archgraph-argo'
+        New-Item -ItemType Directory -Force -Path $entryDir | Out-Null
+        Convert-RuleToSkill -RuleFile $doubaoRule -DestinationFile (Join-Path $entryDir 'SKILL.md')
+        Write-Host "  entry skill (ARGO rules) -> $(Join-Path $entryDir 'SKILL.md')"
+    }
     Write-Host '  Doubao injects each skill''s name + description into context and loads the'
     Write-Host '  body on trigger; new skills are picked up on the next agent session.'
     $doubaoBridgeDir = Join-Path $ArgoRoot 'mcp-bridges'

@@ -121,6 +121,31 @@ test('install-argo.ps1 deploys the ArchGraph skills into both Doubao skill roots
       assert.ok(fs.existsSync(gl), `global skills/${skill}/SKILL.md must be deployed`);
     }
 
+    // AT-doubao-06: the ARGO entry skill (single-source rules) is deployed to
+    // both roots. Doubao keeps only a skill's name + description permanently in
+    // context, so the description must state the STEP 0 gate and the mandate to
+    // load the skill before any intent-graph read/write (and it must not contain
+    // angle brackets); the body carries the rule text verbatim.
+    for (const root of [workspaceSkills, globalSkills]) {
+      const entry = path.join(root, 'archgraph-argo', 'SKILL.md');
+      assert.ok(fs.existsSync(entry), `ARGO entry skill must be deployed: ${entry}`);
+      const { frontmatter, body } = readFrontmatter(entry);
+      assert.match(frontmatter, /^name:\s*archgraph-argo\s*$/m,
+        'entry skill name must be archgraph-argo');
+      const descMatch = frontmatter.match(/^description:\s*(.*)$/m);
+      assert.ok(descMatch, 'entry skill must carry a description (its only always-on context)');
+      const desc = descMatch[1].replace(/^"|"$/g, '');
+      assert.ok(desc.length <= 1024, 'Doubao description max is 1024 characters');
+      assert.ok(!desc.includes('<') && !desc.includes('>'),
+        'Doubao description must not contain angle brackets');
+      assert.match(desc, /STEP 0/, 'the description must state the STEP 0 gate');
+      assert.match(desc, /MUST load this skill/i, 'the description must mandate loading the skill');
+      assert.doesNotMatch(frontmatter, /^applyTo:/m,
+        'the VS Code-only applyTo field must be stripped from the skill frontmatter');
+      assert.match(body, /UNCONDITIONAL STARTUP GATE/, 'the body must carry the rules verbatim');
+      assert.match(body, /<CoreRules>/, 'the body must carry the core rules');
+    }
+
     // AT-doubao-01: the frontmatter is normalized to name + description only;
     // the ArchGraph-only fields (argument-hint, disable-model-invocation) are
     // stripped because Doubao rejects any other field.
@@ -197,6 +222,8 @@ test('install-argo.ps1 -SkipDoubao skips the Doubao deployment entirely', () => 
       'global skill must not be deployed when skipped');
     assert.ok(!fs.existsSync(path.join(paths.argoRoot, 'doubao-mcp.json')),
       'the Doubao MCP connector recipe must not be written when skipped');
+    assert.ok(!fs.existsSync(path.join(paths.doubaoWorkspace, '.user_skills', 'archgraph-argo', 'SKILL.md')),
+      'the ARGO entry skill must not be deployed when skipped');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
@@ -232,8 +259,8 @@ test('install-argo.ps1 refreshes an existing Doubao skill in place (idempotent)'
     // No duplicate skill folders created by the refresh.
     assert.deepEqual(
       fs.readdirSync(path.join(paths.doubaoWorkspace, '.user_skills')).sort(),
-      ['agent-search-diagnosis', 'argo-init', 'ea-human-reconcile'],
-      'the skill root must contain exactly the three ArchGraph skills',
+      ['agent-search-diagnosis', 'archgraph-argo', 'argo-init', 'ea-human-reconcile'],
+      'the skill root must contain exactly the four ArchGraph skills',
     );
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
