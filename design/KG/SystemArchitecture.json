@@ -4320,7 +4320,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-09-27",
-          "description": "会话收尾：论文重写（人类行文 + 对比评测 + 逻辑修正；子 Agent 并行分工）已发送"
+          "description": "会话收尾（ARGO MCP 本仓功能验证）：读/写链路与护栏实测通过，常驻 MCP 已证绑定 D:\\Projects\\archgraph；commits 2cb7e63/3417cf6/c46349b。"
         },
         {
           "name": "commit",
