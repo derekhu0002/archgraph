@@ -1080,7 +1080,9 @@ if ($SkipDoubao) {
     Copy-DoubaoSkills -Root (Join-Path $DoubaoHome 'skills') -SourceSkillsRoot $doubaoSkillsSrc -SkillNames $doubaoSkills -Label 'global ~/Doubao/skills'
     Write-Host '  Doubao injects each skill''s name + description into context and loads the'
     Write-Host '  body on trigger; new skills are picked up on the next agent session.'
-    $doubaoBridgePath = Join-Path (Join-Path $argoDir 'mcp-bridges') 'graph-mcp-stdio.js'
+    $doubaoBridgeDir = Join-Path $ArgoRoot 'mcp-bridges'
+    Copy-Tree -Source (Join-Path $argoDir 'mcp-bridges') -Destination $doubaoBridgeDir
+    $doubaoBridgePath = Join-Path $doubaoBridgeDir 'graph-mcp-stdio.js'
     if (-not (Test-Path $doubaoBridgePath)) { $doubaoBridgePath = '' }
     if (-not (Test-Path (Join-Path $repoRoot 'design\KG\SystemArchitecture.json'))) {
         Write-Warning "  $repoRoot is not an ArchGraph workspace; set ARGO_REPO_ROOT in the Doubao connector to the repository you want served."

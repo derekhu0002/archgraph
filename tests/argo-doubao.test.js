@@ -158,12 +158,22 @@ test('install-argo.ps1 deploys the ArchGraph skills into both Doubao skill roots
     assert.equal(argo.transport, 'STDIO');
     assert.equal(argo.command, 'node');
     assert.ok(argo.args[0].endsWith('argo-mcp-server.js'));
+    // The connector must reference the deployed toolchain under the user's
+    // ~/.argo directory (here: the temp -ArgoRoot), never the source repo path.
+    const argoRootSlash = paths.argoRoot.replace(/\\/g, '/');
+    assert.ok(argo.args[0].startsWith(argoRootSlash),
+      `argo connector must run the deployed server under <ArgoRoot>, got ${argo.args[0]}`);
     assert.equal(argo.env.ARGO_REPO_ROOT, ROOT,
       'the argo connector must pin ARGO_REPO_ROOT to the repository root');
     const graphMcp = recipe.connectors.find((c) => c.serverName === 'graph-mcp');
     assert.ok(graphMcp, 'the recipe must include the graph-mcp connector');
     assert.equal(graphMcp.env.GRAPH_MCP_URL, 'https://argo.derekworkspacev5.com/mcp');
     assert.ok(graphMcp.args[0].endsWith('graph-mcp-stdio.js'));
+    assert.ok(graphMcp.args[0].startsWith(`${argoRootSlash}/mcp-bridges`),
+      `graph-mcp bridge must live under <ArgoRoot>/mcp-bridges, got ${graphMcp.args[0]}`);
+    // The bridge is actually deployed next to the recipe's reference.
+    assert.ok(fs.existsSync(path.join(paths.argoRoot, 'mcp-bridges', 'graph-mcp-stdio.js')),
+      'the graph-mcp stdio bridge must be deployed under <ArgoRoot>/mcp-bridges');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
