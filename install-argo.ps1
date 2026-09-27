@@ -442,16 +442,19 @@ function Write-DoubaoMcpRecipe {
     # Doubao's desktop agent mode registers MCP servers through its in-app UI
     # (自定义连接器: 传输类型 STDIO / 命令 / 参数 / 环境变量), NOT through a config
     # file, so the installer cannot auto-register. This writes the exact
-    # connector values to a reference file and prints a copy-paste recipe the
-    # human enters once. The argo server is spawned as a local stdio child and
-    # is pinned to the repository root via ARGO_REPO_ROOT (Doubao does not
-    # advertise MCP roots), mirroring the OpenClaw fixed-workspace handling.
+    # connector values to a reference file and prints a copy-paste recipe.
+    #
+    # The argo server is a local stdio child with NO fixed workspace: Doubao's
+    # MCP client (rmcp) supports the MCP `roots` handshake and passes a
+    # `workingDirectory` when spawning a stdio connector, so argo follows the
+    # workspace the user selected in Doubao - exactly like the OpenCode (roots)
+    # and DeepSeek Harness (injected workspaceRoot) hosts. ARGO_REPO_ROOT is
+    # therefore NOT pinned; it remains available as an optional override.
     # graph-mcp (remote Streamable HTTP) is exposed through the same stdio
     # bridge the Cursor deployment uses.
     param(
         [string]$RecipePath,
         [string]$ArgoServer,
-        [string]$RepoRoot,
         [string]$BridgePath,
         [string]$GraphMcpUrl
     )
@@ -462,7 +465,6 @@ function Write-DoubaoMcpRecipe {
             transport  = 'STDIO'
             command    = 'node'
             args       = @($argoServerSlash)
-            env        = [ordered]@{ ARGO_REPO_ROOT = $RepoRoot }
         }
     )
     if ($BridgePath) {
@@ -477,6 +479,7 @@ function Write-DoubaoMcpRecipe {
     $recipe = [ordered]@{
         host       = 'Doubao desktop (agent mode) - custom connector (自定义连接器), manual in-app registration'
         note       = 'Open Doubao agent mode -> MCP/connector settings -> add a custom connector -> enter the values below (transport 传输类型 = STDIO). Requires Node.js on PATH. Doubao custom connectors run only on the local machine.'
+        workspace  = 'The argo connector has no fixed workspace: it follows the workspace selected in Doubao (MCP roots / connector workingDirectory), the same way OpenCode (roots) and DeepSeek Harness (injected workspaceRoot) do. To pin a fixed workspace instead, add env ARGO_REPO_ROOT=<absolute project path>.'
         connectors = $connectors
     }
     New-Item -ItemType Directory -Force -Path (Split-Path $RecipePath) | Out-Null
@@ -486,7 +489,7 @@ function Write-DoubaoMcpRecipe {
     Write-Host '    服务器名称: argo'
     Write-Host '    命令: node'
     Write-Host "    参数: $argoServerSlash"
-    Write-Host "    环境变量: ARGO_REPO_ROOT=$RepoRoot"
+    Write-Host '    (workspace: follows the workspace selected in Doubao)'
     if ($BridgePath) {
         Write-Host '    服务器名称: graph-mcp'
         Write-Host '    命令: node'
@@ -1084,10 +1087,9 @@ if ($SkipDoubao) {
     Copy-Tree -Source (Join-Path $argoDir 'mcp-bridges') -Destination $doubaoBridgeDir
     $doubaoBridgePath = Join-Path $doubaoBridgeDir 'graph-mcp-stdio.js'
     if (-not (Test-Path $doubaoBridgePath)) { $doubaoBridgePath = '' }
-    if (-not (Test-Path (Join-Path $repoRoot 'design\KG\SystemArchitecture.json'))) {
-        Write-Warning "  $repoRoot is not an ArchGraph workspace; set ARGO_REPO_ROOT in the Doubao connector to the repository you want served."
-    }
-    Write-DoubaoMcpRecipe -RecipePath (Join-Path $ArgoRoot 'doubao-mcp.json') -ArgoServer (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js') -RepoRoot $repoRoot -BridgePath $doubaoBridgePath -GraphMcpUrl $GraphMcpUrl
+    Write-DoubaoMcpRecipe -RecipePath (Join-Path $ArgoRoot 'doubao-mcp.json') -ArgoServer (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js') -BridgePath $doubaoBridgePath -GraphMcpUrl $GraphMcpUrl
+    Write-Host '  the argo connector has no fixed workspace: it follows the workspace you'
+    Write-Host '  select in Doubao (MCP roots / connector workingDirectory), like OpenCode/DSH.'
     Write-Host '  note: Doubao has no AGENTS.md-equivalent always-on rule file, so the ARGO'
     Write-Host '  WakeupGuideline / unconditional startup gate is not deployed (no hook).'
 }

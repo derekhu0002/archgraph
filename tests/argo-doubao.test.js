@@ -163,8 +163,12 @@ test('install-argo.ps1 deploys the ArchGraph skills into both Doubao skill roots
     const argoRootSlash = paths.argoRoot.replace(/\\/g, '/');
     assert.ok(argo.args[0].startsWith(argoRootSlash),
       `argo connector must run the deployed server under <ArgoRoot>, got ${argo.args[0]}`);
-    assert.equal(argo.env.ARGO_REPO_ROOT, ROOT,
-      'the argo connector must pin ARGO_REPO_ROOT to the repository root');
+    // The argo connector must NOT pin a fixed workspace: it follows the
+    // workspace selected in Doubao (MCP roots / connector workingDirectory),
+    // exactly like the OpenCode (roots) and DeepSeek Harness (injected
+    // workspaceRoot) hosts. ARGO_REPO_ROOT stays an optional override.
+    assert.equal(argo.env, undefined,
+      'the argo connector must not pin ARGO_REPO_ROOT (Doubao is a workspace-following host)');
     const graphMcp = recipe.connectors.find((c) => c.serverName === 'graph-mcp');
     assert.ok(graphMcp, 'the recipe must include the graph-mcp connector');
     assert.equal(graphMcp.env.GRAPH_MCP_URL, 'https://argo.derekworkspacev5.com/mcp');
