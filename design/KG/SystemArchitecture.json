@@ -9911,6 +9911,13 @@
           "value": "IN_PROGRESS"
         }
       ]
+    },
+    {
+      "id": "overseer-doubao-adaptation-001",
+      "name": "里程碑：ArchGraph 适配豆包桌面版 agent 模式（P1 技能已交付）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-09-27，项目总管）：将 ArchGraph 适配到豆包（Doubao）桌面版 agent 模式。\n【侦察（本机 2.30.4，D:\\doubao）】豆包 agent 模式由原生 agent_infra.dll + 本地沙箱运行时（sbox / sandbox_runtime，内置 node/python、file/grep/shell 工具）驱动；工作区 %LOCALAPPDATA%\\Doubao\\User Data\\Default\\.doubao\\agent_mode\\workspace\\，含 .skills（100+ 内置）、.user_skills（用户）、experience、.sessions\\<id>\\{board.md, memory\\MEMORY.md, agents\\<id>\\...}（原生多 Agent + 任务板 + 记忆）。全局技能根 ~/Doubao/skills。\n【关键事实】① 技能 = Anthropic Agent Skills 规范：SKILL.md 的 YAML frontmatter 只允许 name+description（权威来源：内置 skill-creator-for-work/SKILL.md），可选 scripts/references/assets，渐进式披露；用户技能默认根 <workspace>/.user_skills/<name>。② MCP 受支持（app/mcp_helper.dll；Web 资源 s1-mcp-app-node / s2-mcp-apps-service），但 server 注册机制（本地配置文件 vs 账号云端 UI）未定位。③ 无 AGENTS.md 或每会话注入的常驻规则文件 → WakeupGuideline/无条件启动门无挂点，需降级。\n【P1 交付】install-argo.ps1 新增豆包段：Convert-SkillFile（frontmatter 归一为 name+description，剥离 argument-hint/disable-model-invocation，值逐字保留）+ Copy-DoubaoSkills，把 argo-init / ea-human-reconcile / agent-search-diagnosis 部署到 <DoubaoWorkspace>/.user_skills 与 <DoubaoHome>/skills；新增参数 -SkipDoubao / -DoubaoHome / -DoubaoWorkspace。测试 tests/argo-doubao.test.js 3/3 通过（AT-doubao-01..04）；受影响回归 argo-openclaw/argo-deploy/ea-human-reconcile-skill/agent-search-diagnosis 等 39 通过 6 跳过；validateSystemArchitecture passed。\n【图谱】新 view doubao-adaptation（parent=1249）+ WP doubao-harness-adaptation-001 + AT-doubao-01..04（语义 dedup 命中 WP 2780/1361，按『每宿主一 WP』惯例 allowDuplicate 建独立 WP）。\n【遗留 P2】按豆包实际 MCP 机制注册 argo MCP server（stdio: node argo-mcp-server.js + env.ARGO_REPO_ROOT）。commits 84a8c6d（实现）+ 4d67157（KG 登记）。"
     }
   ],
   "relationships": [
@@ -11758,7 +11765,8 @@
         "overseer-email-format-ref-001",
         "overseer-paper-writing-001",
         "overseer-site-refresh-0.26.2-001",
-        "overseer-diagram-redraw-dark-001"
+        "overseer-diagram-redraw-dark-001",
+        "overseer-doubao-adaptation-001"
       ],
       "included_relationships": [
         "overseer-wiki-eval-rel-001",
