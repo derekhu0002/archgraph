@@ -9900,6 +9900,13 @@
           "Input": "tests/argo-doubao.test.js",
           "name": "AT-doubao-05",
           "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/argo-doubao.test.js",
+          "description": "GIVEN 豆包只有技能的 name+description 常驻上下文（无 system prompt / AGENTS.md 挂点）；WHEN install-argo.ps1 部署豆包集成；THEN 把单源规则 argo/rules/archgraph.instructions.md 打包为入口技能 archgraph-argo/SKILL.md 并部署到 <DoubaoWorkspace>/.user_skills 与 <DoubaoHome>/skills，frontmatter 仅含 name=archgraph-argo 与 description（≤1024 字符、不含尖括号、含 STEP 0 门与‘MUST load this skill’的强制说明、无 applyTo），body 为规则原文（含 UNCONDITIONAL STARTUP GATE 与 <CoreRules>）；传入 -SkipDoubao 时不写入口技能。",
+          "Input": "tests/argo-doubao.test.js",
+          "name": "AT-doubao-06",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Work Package",
@@ -9935,6 +9942,11 @@
         {
           "name": "validation",
           "value": "2026-09-27: Doubao custom connector (argo, STDIO, no pinned ARGO_REPO_ROOT) correctly resolves the selected workspace - MCP workspace-following verified by the human partner."
+        },
+        {
+          "name": "commit",
+          "value": "236b225",
+          "description": "Doubao ARGO entry skill archgraph-argo (rules + STEP 0 gate in the always-in-context description); files: install-argo.ps1, tests/argo-doubao.test.js"
         }
       ]
     },
@@ -9943,7 +9955,7 @@
       "name": "里程碑：ArchGraph 适配豆包桌面版 agent 模式（P1 技能已交付）",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "里程碑（2026-09-27，项目总管）：将 ArchGraph 适配到豆包（Doubao）桌面版 agent 模式。\n【侦察（本机 2.30.4，D:\\doubao）】豆包 agent 模式由原生 agent_infra.dll + 本地沙箱运行时（sbox / sandbox_runtime，内置 node/python、file/grep/shell 工具）驱动；工作区 %LOCALAPPDATA%\\Doubao\\User Data\\Default\\.doubao\\agent_mode\\workspace\\，含 .skills（100+ 内置）、.user_skills（用户）、experience、.sessions\\<id>\\{board.md, memory\\MEMORY.md, agents\\<id>\\...}（原生多 Agent + 任务板 + 记忆）。全局技能根 ~/Doubao/skills。\n【关键事实】① 技能 = Anthropic Agent Skills 规范：SKILL.md 的 YAML frontmatter 只允许 name+description（权威来源：内置 skill-creator-for-work/SKILL.md），可选 scripts/references/assets，渐进式披露；用户技能默认根 <workspace>/.user_skills/<name>。② MCP 受支持（app/mcp_helper.dll；客户端 rmcp 3.0.0，支持 roots 握手 + STDIO workingDirectory；Web 资源 s1-mcp-app-node / s2-mcp-apps-service），自定义连接器仅支持本地。③ 无 AGENTS.md 或每会话注入的常驻规则文件 → WakeupGuideline/无条件启动门无挂点，需降级。\n【P1 交付】install-argo.ps1 新增豆包段：Convert-SkillFile（frontmatter 归一为 name+description，剥离 argument-hint/disable-model-invocation，值逐字保留）+ Copy-DoubaoSkills，把 argo-init / ea-human-reconcile / agent-search-diagnosis 部署到 <DoubaoWorkspace>/.user_skills 与 <DoubaoHome>/skills；新增参数 -SkipDoubao / -DoubaoHome / -DoubaoWorkspace。测试 tests/argo-doubao.test.js 3/3 通过（AT-doubao-01..04）；受影响回归 argo-openclaw/argo-deploy/ea-human-reconcile-skill/agent-search-diagnosis 等 39 通过 6 跳过；validateSystemArchitecture passed。\n【图谱】新 view doubao-adaptation（parent=1249）+ WP doubao-harness-adaptation-001 + AT-doubao-01..04（语义 dedup 命中 WP 2780/1361，按『每宿主一 WP』惯例 allowDuplicate 建独立 WP）。\n【P2 决议+修订（2026-09-27）】豆包自定义连接器支持本地 STDIO（命令 command + 参数 + 环境变量 env），但仅能 App 内 UI 手动注册（无配置文件）→ 部署器产出配方 <ArgoRoot>/doubao-mcp.json（argo: STDIO node argo-mcp-server.js，不写死工作区——豆包 MCP 客户端 rmcp 3.0.0 支持 roots 握手 + STDIO workingDirectory，跟随豆包所选工作区，同 OpenCode/DSH，ARGO_REPO_ROOT 仅作可选覆盖；graph-mcp: STDIO 经 <ArgoRoot>/mcp-bridges/graph-mcp-stdio.js + env.GRAPH_MCP_URL），由人类在豆包 App 内录入；AT-doubao-05 覆盖。\n【坑】install-argo.ps1 为无 BOM UTF-8，PS 5.1 按 ANSI 读取时，单引号字符串若以全角右括号 ）紧贴闭合引号会吞引号导致整脚本解析失败——Write-Host 文案改用 ASCII。\ncommits 84a8c6d（P1）+ 4d67157（KG 登记）+ f2a3aa3（P2 配方）+ 118fb50（~/.argo 标准路径）+ 93dfdf8（跟随工作区）。",
+      "description": "里程碑（2026-09-27，项目总管）：将 ArchGraph 适配到豆包（Doubao）桌面版 agent 模式。\n【侦察（本机 2.30.4，D:\\doubao）】豆包 agent 模式由原生 agent_infra.dll + 本地沙箱运行时（sbox / sandbox_runtime，内置 node/python、file/grep/shell 工具）驱动；工作区 %LOCALAPPDATA%\\Doubao\\User Data\\Default\\.doubao\\agent_mode\\workspace\\，含 .skills（100+ 内置）、.user_skills（用户）、experience、.sessions\\<id>\\{board.md, memory\\MEMORY.md, agents\\<id>\\...}（原生多 Agent + 任务板 + 记忆）。全局技能根 ~/Doubao/skills。\n【关键事实】① 技能 = Anthropic Agent Skills 规范：SKILL.md 的 YAML frontmatter 允许 name/description/license/allowed-tools/metadata（权威来源：内置 skill-creator-for-work/SKILL.md；官方 quick_validate.py），可选 scripts/references/assets，渐进式披露；description ≤1024 且禁 `<`/`>`；用户技能默认根 <workspace>/.user_skills/<name>。② MCP 受支持（app/mcp_helper.dll；客户端 rmcp 3.0.0，支持 roots 握手 + STDIO workingDirectory；Web 资源 s1-mcp-app-node / s2-mcp-apps-service），自定义连接器仅支持本地。③ 无 AGENTS.md / ~/.doubao / system-prompt 文件 → 无本地常驻规则挂点，WakeupGuideline 无条件启动门只能落入技能 description。\n【P1 交付】install-argo.ps1 新增豆包段：Convert-SkillFile（frontmatter 归一为 name+description，剥离 argument-hint/disable-model-invocation）+ Copy-DoubaoSkills，把 argo-init / ea-human-reconcile / agent-search-diagnosis 部署到 <DoubaoWorkspace>/.user_skills 与 <DoubaoHome>/skills；新增参数 -SkipDoubao / -DoubaoHome / -DoubaoWorkspace。测试 tests/argo-doubao.test.js 3/3 通过（AT-doubao-01..04）；受影响回归 argo-openclaw/argo-deploy/ea-human-reconcile-skill/agent-search-diagnosis 等 39 通过 6 跳过；validateSystemArchitecture passed。\n【图谱】新 view doubao-adaptation（parent=1249）+ WP doubao-harness-adaptation-001 + AT-doubao-01..04（语义 dedup 命中 WP 2780/1361，按『每宿主一 WP』惯例 allowDuplicate 建独立 WP）。\n【P2 决议+修订（2026-09-27）】豆包自定义连接器支持本地 STDIO（命令 command + 参数 + 环境变量 env），但仅能 App 内 UI 手动注册（无配置文件）→ 部署器产出配方 <ArgoRoot>/doubao-mcp.json（argo: STDIO node argo-mcp-server.js，不写死工作区——豆包 MCP 客户端 rmcp 3.0.0 支持 roots 握手 + STDIO workingDirectory，跟随豆包所选工作区，同 OpenCode/DSH，ARGO_REPO_ROOT 仅作可选覆盖；graph-mcp: STDIO 经 <ArgoRoot>/mcp-bridges/graph-mcp-stdio.js + env.GRAPH_MCP_URL），由人类在豆包 App 内录入；AT-doubao-05 覆盖。人类实测 argo 连接器能正确定位当前工作区。\n【规则部署（2026-09-27）】豆包 agent 上下文分 4 段（messages / system_prompt / tools / skills，证据 s2-context-window-indicator.js）→ 技能进 skills 段，**不等于 system prompt**；本机无全局规则 / system prompt 文件，用户级机制只有技能根 ~/Doubao/skills 与 <workspace>/.user_skills（均 App 首启自建）。只有技能 name+description 常驻上下文。决策（人类确认）：规则+图谱用法做成入口技能 archgraph-argo——description 放 STEP 0 门 + ‘MUST load this skill’ 强制说明，body 放规则原文；不做 MCP instructions 探针。install-argo.ps1 新增 Convert-RuleToSkill 部署到两个技能根；AT-doubao-06 覆盖。\n【坑】install-argo.ps1 为无 BOM UTF-8，PS 5.1 按 ANSI 读取时，单引号字符串若以全角右括号 ）紧贴闭合引号会吞引号导致整脚本解析失败——Write-Host 文案改用 ASCII。\ncommits 84a8c6d（P1）+ 4d67157（KG 登记）+ f2a3aa3（P2 配方）+ 118fb50（~/.argo 标准路径）+ 93dfdf8（跟随工作区）+ 236b225（入口技能）。",
       "attributes": [
         {
           "name": "commit",
@@ -9954,6 +9966,11 @@
           "name": "commit",
           "value": "93dfdf8",
           "description": "Doubao argo connector follows the selected workspace; files: install-argo.ps1, tests/argo-doubao.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "236b225",
+          "description": "Doubao ARGO entry skill archgraph-argo (rules in the always-in-context description); files: install-argo.ps1, tests/argo-doubao.test.js"
         }
       ]
     }
