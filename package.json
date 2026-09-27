@@ -45,7 +45,9 @@
     "playwright": "1.61.1"
   },
   "scripts": {
-    "test": "node --test \"tests/*.test.js\""
+    "test": "node --test \"tests/*.test.js\"",
+    "gen:dsh-plugins": "node scripts/gen-dsh-plugins.js",
+    "prepack": "node scripts/gen-dsh-plugins.js"
   },
   "engines": {
     "node": ">=18"

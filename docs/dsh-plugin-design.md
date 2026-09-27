@@ -166,6 +166,18 @@ export async function apply(ctx, config) {
 > **已处置（Reviewer R-1，Major）**：Reviewer 确认 `require('neo4j-driver')` 在两处语义检索路径（`argo/scripts/systemarchitecture-mcp-server.js:2751`、`argo/scripts/graph-rag/defaultSemanticRetrieval.js:239`）无 try/catch 保护，`dsh plugin add` 安装用户配置 Neo4j 后会抛 `MODULE_NOT_FOUND`（Developer 先前「优雅降级」的判断只覆盖「未配置凭证」分支，不覆盖「已配置但驱动未安装」分支）。已按本 AD-e 既定方案把 `neo4j-driver` 从 `devDependencies` 提升到根 `dependencies`。
 - **被否方案**：本阶段即重写 `install-argo.ps1` 让它拷贝仓库根模块（扩大变更面、引入回归风险，延后到后续重构）。
 
+### AD-f：单一事实源收敛（生成器 + 拷贝 + 防漂移测试）—— 处置 AD-e 风险 #1 与 R-2
+
+- **背景（已发生的分叉）**：AD-e 记录、R-2 复核的「单一事实源漂移」已实际发生。`dsh-argo-wakeup/index.js`（包内 bundle 副本）仍是旧门文案（"greetings, casual chat…"），而规则文件 `<WakeupGuideline>` 早已改为 T1 记忆分层版；同时 `~/.dsh/plugins/*` 又由 `install-argo.ps1` 内联模板现场生成（其 workspace 变体还缺 `import.meta.url` 回退链）。结果同名插件的文本/代码共有三份 wakeup、两份 workspace，互不一致。
+- **决策**：把「生成源」收敛为一份，其余全部派生——生成器 + 拷贝 + 防漂移测试：
+  1. wakeup 门文案的唯一真源是 `argo/rules/archgraph.instructions.md` 的 `<WakeupGuideline>`；`scripts/gen-dsh-plugins.js` 从规则渲染 `dsh-argo-wakeup/index.js`（入库产物，不手改）。
+  2. workspace 桥的唯一真源是 `dsh-argo-workspace/index.js`（手写，无生成）。
+  3. `install-argo.ps1` 的 `New-DshWakeupPlugin` / `New-DshWorkspaceBridge` 由「内联模板生成」改为**拷贝**上述两个入库产物，部署副本与包内副本逐字节一致；仅供内联模板使用的 `Get-WakeupGuideline` 随之删除。
+  4. **触发时机**：修改规则后，在同一次提交运行 `node scripts/gen-dsh-plugins.js` 并提交产物；`npm pack/publish` 经 `prepack` 幂等再生成一次。git 直装（`dsh plugin add github:...`）不触发 `prepack`，其正确性由「入库产物 + 防漂移测试」保证。
+  5. 防漂移测试 `tests/dsh-plugin-single-source.test.js`：①插件 `WAKEUP_GATE` 值 == 规则 `<WakeupGuideline>` 值（归一化）；②生成器 `--check` 干净（入库产物与生成结果一致）；③installer 只做拷贝、不再内联模板。
+- **对 AD-e 的影响**：AD-e 曾把「重写 install-argo.ps1」列为被否方案（延后）。AD-f 即该后续重构，现已执行；`argo-deploy` 对外行为（部署两个插件 + 管好受管块）保持不变，`tests/argo-deploy.test.js` 增补「部署副本与包内副本逐字节相等」断言，无回归。
+- **被否方案**：仅加防漂移测试、保留 installer 内联模板（漂移只被检测而非消除，部署副本仍非逐字节同源）；让插件运行时读取规则文件（`~/.dsh/plugins` 部署侧无规则文件，运行时路径不可靠）。
+
 ## 3. 与验收测试对应关系
 
 | 验收用例（WP 2767） | 本设计覆盖点 | 交付物 |
@@ -176,6 +188,7 @@ export async function apply(ctx, config) {
 | AT-2767-04 入口模块 | AD-c：仓库根 `dsh-argo-workspace/index.js` / `dsh-argo-wakeup/index.js` 导出 `apply`、`exports` 子路径 | 两个入口模块（实现） |
 | AT-2767-05 话题标签 | 非设计交付（开发者打 `dsh-plugin` 标签） | — |
 | AT-2767-06 无回归 | AD-e：`install-argo.ps1` / `argo-deploy` 保持不变 | 本设计声明（无代码改动） |
+| AT-2767-08 单一事实源 | AD-f：生成器 + 拷贝 + 防漂移测试 | `scripts/gen-dsh-plugins.js`、`install-argo.ps1`、`dsh-argo-wakeup/index.js`、`tests/dsh-plugin-single-source.test.js` |
 
 ## 4. 设计阶段验收标准（GIVEN-WHEN-THEN，可执行）
 
@@ -184,6 +197,7 @@ export async function apply(ctx, config) {
 - **ADES-3（bundle 可解析）**：GIVEN patch 行以包名引用；WHEN 检查 `exports`；THEN 存在 `./dsh-argo-workspace` 与 `./dsh-argo-wakeup` 子路径映射到 `dsh-argo-*/index.js`，且入口模块为 ESM（目录级 `{"type":"module"}`）而不改根包 CommonJS 形态。
 - **ADES-4（无构建/无回归）**：GIVEN 纯 JS 零构建；WHEN 检查发布策略；THEN 无 `prepare` 脚本，`dsh plugin add github:derekhu0002/archgraph` 源码直装可用，且 `install-argo.ps1` / `argo-deploy` 既有 DSH 部署路径不变。
 - **ADES-5（可执行性）**：GIVEN 设计文档已就绪；WHEN 执行 `node tests/dsh-plugin-design.test.js`；THEN 全部断言通过（设计文档关键决策内容为 GIVEN-WHEN-THEN 可验证）。
+- **ADES-6（单一事实源）**：GIVEN wakeup 门文案唯一真源为规则文件；WHEN 检查生成器、入库产物与 installer；THEN `scripts/gen-dsh-plugins.js` 能从规则渲染 `dsh-argo-wakeup/index.js` 且 `--check` 干净，`install-argo.ps1` 仅拷贝两个入库产物、无内联模板，`node tests/dsh-plugin-single-source.test.js` 全部通过。
 
 ## 5. 实现清单（交开发者）
 
@@ -192,3 +206,4 @@ export async function apply(ctx, config) {
 3. 仓库根 `dsh-argo-workspace/index.js` + `dsh-argo-workspace/package.json`、`dsh-argo-wakeup/index.js` + `dsh-argo-wakeup/package.json`：从 `install-argo.ps1` 模板逐字迁移，`dsh-argo-workspace` 增补 `import.meta.url` serverPath 默认值（见 AD-b / AD-c）。
 4. 验证 `node --test tests/dsh-plugin-publish.test.js`（bundle-manifest / bundle-patch / bundle-entry）与 `node --test "tests/*.test.js"`（无回归）通过；给 GitHub 仓库打 `dsh-plugin` 标签（AT-2767-05）。
 5. 回登记：git commit 后把「commit id + 相关文件路径」登记到 WP 2767 的 `commit` 属性。
+6. 单一事实源收敛（AD-f，处置 R-2）：新增 `scripts/gen-dsh-plugins.js`；重新生成 `dsh-argo-wakeup/index.js`；`install-argo.ps1` 的两个 `New-Dsh*` 改为拷贝入库产物并删除 `Get-WakeupGuideline`；新增 `tests/dsh-plugin-single-source.test.js`；`package.json` 增 `gen:dsh-plugins` 与 `prepack`。

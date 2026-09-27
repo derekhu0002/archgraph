@@ -435,7 +435,8 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     assert.match(patch, /file:\/\/\//, 'must reference the generated plugin via file: URL');
     assert.match(patch, /END ArchGraph ARGO deployment/, 'managed block end marker must be present');
 
-    // 4b) wakeup plugin generated from the rule's <WakeupGuideline> block.
+    // 4b) wakeup plugin is copied verbatim from the single-source bundle
+    // artifact (whose gate text is generated from the rule's <WakeupGuideline>).
     const wakeup = fs.readFileSync(
       path.join(dshHome, 'plugins', 'dsh-argo-wakeup', 'index.js'),
       'utf8',
@@ -444,6 +445,11 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     assert.match(wakeup, /export const inject = \['systemPrompt'\]/, 'plugin must inject the prompt registry');
     assert.match(wakeup, /order: -90/, 'gate section must sit right after the harness identity');
     assert.match(wakeup, /WAKEUP_GATE|STARTUP GATE/, 'plugin must carry the gate text from the rule');
+    assert.equal(
+      wakeup,
+      fs.readFileSync(path.join(ROOT, 'dsh-argo-wakeup', 'index.js'), 'utf8'),
+      'deployed wakeup plugin must be byte-identical to the single-source bundle artifact',
+    );
 
     // 4c) workspace bridge plugin connects directly to the argo server and
     // injects the session workspace as the per-call workspaceRoot.
@@ -459,6 +465,11 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     assert.doesNotMatch(bridge, /mcp__argo-core__/, 'bridge must not create internal tool names');
     assert.match(bridge, /workspaceRoot/, 'bridge must inject workspaceRoot into every call');
     assert.match(bridge, /header\?\.cwd/, 'bridge must read the session workspace from the durable session header (SessionHeader.cwd, not requestHeader())');
+    assert.equal(
+      bridge,
+      fs.readFileSync(path.join(ROOT, 'dsh-argo-workspace', 'index.js'), 'utf8'),
+      'deployed workspace bridge must be byte-identical to the single-source bundle artifact',
+    );
 
 
     // 6) idempotency: a second run must not duplicate the managed block.

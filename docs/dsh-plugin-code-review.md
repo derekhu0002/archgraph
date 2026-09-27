@@ -89,3 +89,10 @@ README 未补 `dsh plugin add` 说明（可选，见问题清单 R-6）。
 - `argo/scripts/argo-paths.js`：`getArgoRoot()` = `path.resolve(__dirname, '..')`（`<pkg>/argo`），server 从包内启动即自包含。
 - 部署工件 `~/.dsh/plugins/dsh-argo-workspace/index.js`（133 行）与仓库副本（141 行）差异仅 3 处：新增 `fileURLToPath` import、`DEFAULT_SERVER_PATH` 常量、回退链表达式。
 - 部署工件 `~/.dsh/plugins/dsh-argo-wakeup/index.js` 与仓库副本逐字一致。
+
+---
+
+## 后续处置（follow-up）
+
+- **R-2（唤醒门双源漂移）已处置**：实测确认分叉已发生——`dsh-argo-wakeup/index.js`（包内 bundle 副本）仍为旧门文案，规则文件 `<WakeupGuideline>` 已更新；`install-argo.ps1` 又以内联模板生成 `~/.dsh/plugins/*`（workspace 变体还缺 `import.meta.url` 回退链），共三份 wakeup / 两份 workspace。已按 `docs/dsh-plugin-design.md` AD-f 收敛：新增 `scripts/gen-dsh-plugins.js`（规则 → `dsh-argo-wakeup/index.js`）；`install-argo.ps1` 两个 `New-Dsh*` 由内联模板改为拷贝入库产物；删除仅供内联模板使用的 `Get-WakeupGuideline`；新增防漂移测试 `tests/dsh-plugin-single-source.test.js`。
+- 触发时机：规则变更的同一次提交运行 `node scripts/gen-dsh-plugins.js` 并提交产物；`npm pack/publish` 经 `prepack` 幂等再生成；git 直装不触发 `prepack`，靠入库产物 + 防漂移测试兜底。
