@@ -99,6 +99,10 @@
         {
           "view_id": "doubao-adaptation",
           "view_name": "Doubao Harness Adaptation"
+        },
+        {
+          "view_id": "argo-mcp-verification",
+          "view_name": "ARGO MCP Verification（本仓功能验证）"
         }
       ]
     },
@@ -9973,6 +9977,76 @@
           "description": "Doubao ARGO entry skill archgraph-argo (rules in the always-in-context description); files: install-argo.ps1, tests/argo-doubao.test.js"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "name": "verificationDate",
+          "value": "2026-09-27"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "name": "verificationResult",
+          "value": "AT-regression-2026-09-27-green",
+          "description": "本仓 AT 回归（2026-09-27，node 直跑各用例文件）：mcp-interface-behavior 2/2、architecture-element-mutation 14/14、architecture-view-mutation 4/4、architecture-dedup-gate 8/8、architecture-dedup-semantic 通过、lossless-write-gate 9/9、neo4j-cypher-query 17/17、acceptance-guardian 4/4、argo-mcp-tools 6/6（stdio MCP 协议路径）；validateSystemArchitecture passed（exitCode 0）。注：本沙箱默认禁止管道子进程 stdio（EPERM），argo-mcp-tools 需放宽沙箱后运行，属环境限制非产品缺陷。"
+        }
+      ],
+      "description": "ARGO MCP 功能验证（2026-09-27，项目总管，本仓 archgraph）：人类伙伴要求在当前项目验证 ARGO MCP（阿狗 MCP）功能是否正常。结论=正常（读/写两条链路与护栏实测通过），并已证明常驻 MCP 实例绑定本仓。绑定证据：①常驻 MCP 进程在 <workspace>/.argo/temp/mcp-phase.json 逐调用写入相位（与本会话调用一一对应）；②validateSystemArchitecture 回传 workspaceRoot=D:\\\\Projects\\\\archgraph；③queryNeo4jGraph 的 ArchitectureGraph.source_path=design/KG/SystemArchitecture.json、database=archgraph，计数与仓内文件一致；④已部署 ~/.argo/scripts 与仓内 argo/scripts 同名服务 sha256 逐字节一致。读链路：语义检索（含 scope 收敛）、元素上下文、视图上下文（含本仓 archgraph.qea 几何）、只读 Cypher、memory_search、validate 全通。写链路（受控探针）：dryRun 不落盘（摘要前后一致）、精确重复复用既有元素（未新建、独立审计 duplicate 组=0）、无损门禁拦截未确认缩减、写后 qea/Neo4j/embedding 投影自动跟随。实测发现：①addArchitectureElement 要求 element.id 非空（requireId），而规则描述为按自然键 find-or-create——调用方必须自带 id，命中重复时该 id 被丢弃并回传 reusedId/requestedId；②成功写入路径的紧凑响应不含 mutations/reusedId（dryRun 路径含），调用方无法从响应判断新建 vs 复用；③一次等价 no-op 写入会把 canonical 文件行尾整体 CRLF→LF 重写（886282→874049 字节，内容 strChars 增量 0、元素/关系/视图不变），非内容丢失但产生整文件 diff 噪声；④L1 语义去重门禁在真实图谱上出现假阳性：本工作包被同为 Work Package 的 1357『提供AML参考实现』以 0.858（阈值 0.85）拦截，两者无语义关联——已按规则显式 allowDuplicate+justification 放行。",
+      "id": "argo-mcp-verification-001",
+      "name": "ARGO MCP 功能验证（本仓 archgraph 实时自检）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/argo-mcp-tools.test.js",
+          "acceptanceCriteria": "tests/argo-mcp-tools.test.js",
+          "description": "GIVEN 常驻 ARGO MCP server；WHEN 读取 tools/list；THEN 架构读写/校验/检索工具全部在列，无遗失或回退注册。",
+          "name": "AT-mcp-verify-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/mcp-interface-behavior.test.js",
+          "acceptanceCriteria": "tests/mcp-interface-behavior.test.js",
+          "description": "GIVEN 图谱中稳定元素 id；WHEN getIntentElementContext；THEN 返回以该元素为中心的语义子图；未知 id → status failed 且带明确错误。",
+          "name": "AT-mcp-verify-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/neo4j-cypher-query.test.js",
+          "acceptanceCriteria": "tests/neo4j-cypher-query.test.js",
+          "description": "GIVEN 只读 Cypher 查询接口；WHEN 提交写子句；THEN 明确拒绝（READ_ONLY_CYPHER_REQUIRED）；database 按 per-call workspaceRoot 推导，投影陈旧时自动恢复。",
+          "name": "AT-mcp-verify-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/architecture-dedup-gate.test.js",
+          "acceptanceCriteria": "tests/architecture-dedup-gate.test.js",
+          "description": "GIVEN 已存在同 (type,name) 元素；WHEN addElement 默认 reuse；THEN 不新建、复用既有 id 并挂入目标 view。",
+          "name": "AT-mcp-verify-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/lossless-write-gate.test.js",
+          "acceptanceCriteria": "tests/lossless-write-gate.test.js",
+          "description": "GIVEN 元素含多行 description；WHEN 未确认地缩减文本；THEN blocked；acknowledgeLoss 放行；结构化 token 真删仍拦。",
+          "name": "AT-mcp-verify-05",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/acceptance-guardian.test.js",
+          "acceptanceCriteria": "tests/acceptance-guardian.test.js",
+          "description": "GIVEN 每个 ARGO MCP 接口与核心交付；WHEN 检查验收看护登记；THEN 每一接口都有可执行功能守门用例，且图内挂载 AT 均为可执行裸路径。",
+          "name": "AT-mcp-verify-06",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -11135,6 +11209,16 @@
       "target_id": "configurable-embedding-provider-001",
       "target_name": "可配置语义嵌入提供者（Configurable Embedding Provider）",
       "type": "Realization"
+    },
+    {
+      "id": "argo-mcp-verification-guardian-assoc-001",
+      "name": "verifies via",
+      "source_id": "argo-mcp-verification-001",
+      "source_name": "ARGO MCP 功能验证（本仓 archgraph 实时自检）",
+      "statement": "ARGO MCP 功能验证（本仓 archgraph 实时自检） --(Association)--> 验收看护服务（Acceptance Guardianship）",
+      "target_id": "acceptance-guardian-001",
+      "target_name": "验收看护服务（Acceptance Guardianship）",
+      "type": "Association"
     }
   ],
   "views": [
@@ -12228,6 +12312,20 @@
       "included_elements": [
         "doubao-harness-adaptation-001"
       ]
+    },
+    {
+      "description": "ARGO MCP 功能验证（本仓 archgraph）工作包视图：承载『在当前项目验证 ARGO MCP 读写功能是否正常』的工作包与验收用例，覆盖工具面注册、读接口语义/结构行为、只读 Cypher 护栏、写图去重门禁、无损写入门禁与工作区绑定证据。",
+      "included_elements": [
+        "argo-mcp-verification-001",
+        "acceptance-guardian-001"
+      ],
+      "included_relationships": [
+        "argo-mcp-verification-guardian-assoc-001"
+      ],
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "view_id": "argo-mcp-verification",
+      "view_name": "ARGO MCP Verification（本仓功能验证）"
     }
   ]
 }
