@@ -1330,6 +1330,14 @@
           "view_id": "298",
           "view_name": "Harness"
         }
+      ],
+      "description": "Harness 分组：承载 ARGO/ArchGraph 框架自身的机制设计视图（view 298 Harness）。视图内以关系显式化两条核心链路：读（默认语义检索 → 语义混合检索/RRF → 语义二阶段重排；由语义投影与可配置嵌入提供者 Serving/供数据；结构投影 Serving 只读 Cypher 查询 → 社区索引）；写（图谱校验 → 写入去重门禁 → 无损写入门禁 → 语义/向量投影生命周期）。2026-09-27 首次为 view 298 补齐 11 条关系（commit 3fb9c4a），此前仅有平铺成员、无连线。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "3fb9c4a",
+          "description": "为 view 298 Harness 补齐读/写机制链路关系（11 条：Triggering/Serving/Realization/Association）"
+        }
       ]
     },
     {
