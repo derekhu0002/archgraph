@@ -102,21 +102,6 @@ function buildBundle(kind, dir, workspaceRoot) {
     }
   }
 
-  // A schema bundle may ship its OWN default/bootstrap graph, used by argo init
-  // when the workspace has no design/KG/SystemArchitecture.json. Declared via
-  // config.defaultGraph, else the conventional <bundle>/default/SystemArchitecture.json.
-  let defaultGraphPath = null;
-  const defaultGraphRelative = typeof config.defaultGraph === 'string' && config.defaultGraph.trim() !== ''
-    ? config.defaultGraph.trim()
-    : path.join('default', 'SystemArchitecture.json');
-  const defaultGraphCandidate = path.resolve(dir, defaultGraphRelative);
-  if (isFile(defaultGraphCandidate)) {
-    defaultGraphPath = {
-      absolutePath: defaultGraphCandidate,
-      relativePath: relativeLabel(workspaceRoot, defaultGraphCandidate),
-    };
-  }
-
   return {
     kind,
     dir,
@@ -137,7 +122,6 @@ function buildBundle(kind, dir, workspaceRoot) {
     guidePath: guidePath
       ? { absolutePath: guidePath, relativePath: relativeLabel(workspaceRoot, guidePath) }
       : null,
-    defaultGraphPath,
   };
 }
 

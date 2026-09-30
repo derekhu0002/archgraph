@@ -79,12 +79,6 @@ function writeCustomBundle(workspaceRoot, options = {}) {
   if (options.rules) {
     fs.writeFileSync(path.join(schemaDir, 'argob-rules.json'), JSON.stringify(options.rules, null, 2));
   }
-  if (options.defaultGraph) {
-    const defaultDir = path.join(schemaDir, 'default');
-    fs.mkdirSync(defaultDir, { recursive: true });
-    const graph = options.defaultGraph === true ? customGraph() : options.defaultGraph;
-    fs.writeFileSync(path.join(defaultDir, 'SystemArchitecture.json'), JSON.stringify(graph, null, 2));
-  }
   return schemaDir;
 }
 
@@ -354,9 +348,10 @@ test('AT argob-schema: the .qea projection maps custom types generically (never 
 });
 
 test('AT argob-schema: initializeWorkspace reports the resolved schema (kind + language)', async () => {
-  // GIVEN a workspace with its own schema bundle
+  // GIVEN a workspace with its own schema bundle (and a user-authored graph)
   const custom = makeTempWorkspace();
-  writeCustomBundle(custom, { defaultGraph: true });
+  writeCustomBundle(custom);
+  writeGraph(custom, customGraph());
   // WHEN the workspace is initialized
   const customResult = await argoMcp.initializeWorkspace(custom);
   // THEN the result names the active schema
@@ -375,36 +370,40 @@ test('AT argob-schema: initializeWorkspace reports the resolved schema (kind + l
   assert.equal(plainResult.schema.actorElementType, 'Business Actor');
 });
 
-test('AT argob-schema: the default bundle declares a default graph', () => {
-  // GIVEN the default bundle
-  // WHEN resolved
-  const bundle = resolveSchemaBundle(ROOT);
-  // THEN it points at the bundled ArgoBument default graph
-  assert.ok(bundle.defaultGraphPath, 'default bundle must declare a default graph');
-  assert.match(bundle.defaultGraphPath.relativePath.replace(/\\/g, '/'), /defaults\/design\/KG\/SystemArchitecture\.json$/);
-});
-
-test('AT argob-schema: a custom bundle default graph bootstraps a fresh workspace', async () => {
-  // GIVEN a custom bundle that ships its own default graph, and a workspace with no graph
+test('AT argob-schema: the built-in default schema auto-provides the packaged graph on a fresh workspace', async () => {
+  // GIVEN a workspace with no schema override and no graph
   const ws = makeTempWorkspace();
-  writeCustomBundle(ws, { defaultGraph: true });
-  assert.ok(!fs.existsSync(path.join(ws, 'design', 'KG', 'SystemArchitecture.json')));
   // WHEN initialized
   const result = await argoMcp.initializeWorkspace(ws);
-  // THEN the SCHEMA's own default graph is copied (not the ArchiMate one), and it validates
+  // THEN the built-in ArgoBument default graph is copied
+  assert.equal(result.schema.kind, 'default');
+  assert.ok(result.createdFiles.includes('design/KG/SystemArchitecture.json'));
+  const graph = JSON.parse(fs.readFileSync(path.join(ws, 'design', 'KG', 'SystemArchitecture.json'), 'utf8'));
+  assert.ok(graph.elements.some(e => e.type === 'Business Actor'));
+});
+
+test('AT argob-schema: a custom schema with a user-authored graph initializes; the packaged graph is never copied', async () => {
+  // GIVEN a custom schema and a user-authored graph
+  const ws = makeTempWorkspace();
+  writeCustomBundle(ws);
+  writeGraph(ws, customGraph());
+  // WHEN initialized
+  const result = await argoMcp.initializeWorkspace(ws);
+  // THEN it uses the user's graph and copies nothing
   assert.equal(result.schema.kind, 'workspace');
-  assert.ok(result.createdFiles.includes('design/KG/SystemArchitecture.json'), JSON.stringify(result.createdFiles));
+  assert.ok(!result.createdFiles.includes('design/KG/SystemArchitecture.json'), 'must not copy the packaged default graph');
   const graph = JSON.parse(fs.readFileSync(path.join(ws, 'design', 'KG', 'SystemArchitecture.json'), 'utf8'));
   assert.deepEqual(graph.elements.map(e => e.type).sort(), ['Service Node', 'Team Node']);
 });
 
-test('AT argob-schema: a custom bundle without a default graph fails closed on a fresh workspace', async () => {
-  // GIVEN a custom bundle with no default graph and a workspace with no graph
+test('AT argob-schema: a custom schema without a graph fails closed (no packaged-graph copy)', async () => {
+  // GIVEN a custom schema and a workspace with no graph
   const ws = makeTempWorkspace();
   writeCustomBundle(ws);
   // WHEN initialized
-  // THEN it fails closed (never injects a mismatched ArchiMate graph)
-  await assert.rejects(argoMcp.initializeWorkspace(ws), /No default graph for schema/);
+  // THEN it fails closed instead of injecting the mismatched packaged graph
+  await assert.rejects(argoMcp.initializeWorkspace(ws), /No default graph for the custom schema/);
+  assert.ok(!fs.existsSync(path.join(ws, 'design', 'KG', 'SystemArchitecture.json')));
 });
 
 test('AT argob-schema: the repository default graph still validates against the default bundle', () => {

@@ -14,7 +14,6 @@ const {
 } = require('./repositoryArgoEnvironment.js');
 const {
   loadSchemaBundleAndOntology,
-  resolveSchemaBundle,
 } = require('./argob-schema.js');
 const {
   getWorkspaceRoot,
@@ -522,24 +521,23 @@ async function initializeWorkspace(workspaceRoot) {
   const graphTargetPath = path.join(workspaceRoot, ...WORKSPACE_GRAPH_PATH_SEGMENTS);
   const graphRelativePath = normalizeRelativePath(path.relative(workspaceRoot, graphTargetPath));
   if (!fs.existsSync(graphTargetPath)) {
-    // The default graph MUST come from the ACTIVE schema bundle: the built-in
-    // ArgoBument template for the default schema, or the bundle's own default
-    // graph for a custom schema. If the schema provides none, fail closed (never
-    // inject a mismatched ArchiMate graph into a custom-schema workspace).
-    let activeBundle = null;
-    try { activeBundle = resolveSchemaBundle(workspaceRoot); } catch { activeBundle = null; }
-    const graphSourcePath = activeBundle && activeBundle.defaultGraphPath
-      ? activeBundle.defaultGraphPath.absolutePath
-      : (activeBundle && activeBundle.kind === 'default' ? resolveGraphDefaultSourcePath() : null);
-    if (!graphSourcePath) {
-      const label = activeBundle ? `${activeBundle.kind} / ${(activeBundle.config && activeBundle.config.language) || 'unknown'}` : 'unknown';
+    // Only the built-in ArgoBument default schema auto-provides a graph (the
+    // packaged default). For any custom / replaced schema the graph is the user's
+    // own: never copy the packaged (mismatched) graph — fail closed if missing.
+    let ontology = null;
+    try { ontology = loadSchemaBundleAndOntology(workspaceRoot).ontology; } catch { ontology = null; }
+    const usesPackagedDefaultGraph = !!ontology && ontology.kind === 'default' && ontology.dialect === 'archimate-class-matrix';
+    if (!usesPackagedDefaultGraph) {
+      const label = ontology ? `${ontology.kind} / ${ontology.language}` : 'unknown';
       const error = new Error(
-        `No default graph for schema (${label}): the workspace has no ${graphRelativePath} and the schema bundle provides no default graph. ` +
-        `Add ${graphRelativePath} to the workspace, or ship one in the bundle at <bundle>/default/SystemArchitecture.json (or set argob.config.json "defaultGraph").`,
+        `No default graph for the custom schema (${label}): the workspace has no ${graphRelativePath}. ` +
+        'A custom schema must author its own graph; the packaged default graph is not copied because it would not match the schema. ' +
+        `Add ${graphRelativePath} to the workspace.`,
       );
       error.code = 'NO_DEFAULT_GRAPH';
       throw error;
     }
+    const graphSourcePath = resolveGraphDefaultSourcePath();
     await fs.promises.mkdir(path.dirname(graphTargetPath), { recursive: true });
     await fs.promises.copyFile(graphSourcePath, graphTargetPath);
     createdFiles.push(graphRelativePath);

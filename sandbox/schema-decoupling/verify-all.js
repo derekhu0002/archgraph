@@ -399,25 +399,15 @@ async function main() {
     return { kind: sch.schemaKind, language: sch.schemaLanguage, actorElementType: sch.actorElementType };
   });
 
-  // The default graph must be schema-appropriate and fail-closed when absent.
-  await record('custom bundle default graph bootstraps a fresh workspace; missing default fails closed', async () => {
-    // A. bundle WITH a default graph + fresh workspace -> the bundle's graph is copied & validates
-    mustRun('sh', ['-c', 'rm -rf /ws-bootstrap && mkdir -p /ws-bootstrap/.argo && cp -r /work/custom-schema/.argo/schema /ws-bootstrap/.argo/schema']);
-    useDatabase('/ws-bootstrap', 'argob-schema-bootstrap');
-    await dropDatabase('argob-schema-bootstrap');
-    const a = await mcpSession([{ key: 'init', name: 'initializeWorkspace', arguments: { workspaceRoot: '/ws-bootstrap' } }], { ARGO_REPO_ROOT: '/ws-bootstrap', NODE_PATH }, { timeoutMs: 240000 });
-    const initA = assertNotFailed(a.init, 'initializeWorkspace(bootstrap)');
-    if (!initA.schema || initA.schema.kind !== 'workspace' || initA.schema.language !== 'Team Graph') throw new Error(`bootstrap schema wrong: ${JSON.stringify(initA.schema)}`);
-    const g = JSON.parse(fs.readFileSync('/ws-bootstrap/design/KG/SystemArchitecture.json', 'utf8'));
-    const types = g.elements.map((e) => e.type).sort();
-    if (!types.includes('Team Node')) throw new Error(`bundle default graph not copied: ${JSON.stringify(types)}`);
-
-    // B. bundle WITHOUT a default graph + fresh workspace -> fail closed (no mismatched ArchiMate graph)
-    mustRun('sh', ['-c', 'rm -rf /ws-nograph && mkdir -p /ws-nograph/.argo && cp -r /work/custom-schema/.argo/schema /ws-nograph/.argo/schema && rm -rf /ws-nograph/.argo/schema/default']);
+  // A custom schema must author its own graph; init never copies the packaged
+  // (mismatched) graph and fails closed when the graph is missing.
+  await record('custom schema without a graph fails closed (no packaged-graph copy)', async () => {
+    mustRun('sh', ['-c', 'rm -rf /ws-nograph && mkdir -p /ws-nograph/.argo && cp -r /work/custom-schema/.argo/schema /ws-nograph/.argo/schema']);
     const b = await mcpSession([{ key: 'init', name: 'initializeWorkspace', arguments: { workspaceRoot: '/ws-nograph' } }], { ARGO_REPO_ROOT: '/ws-nograph', NODE_PATH }, { timeoutMs: 120000 });
     const text = JSON.stringify(b.init);
-    if (!/No default graph for schema/.test(text)) throw new Error(`expected fail-closed 'No default graph', got: ${text.slice(0, 500)}`);
-    return { bootstrap: 'ok', failClosed: 'ok' };
+    if (!/No default graph for the custom schema/.test(text)) throw new Error(`expected fail-closed 'No default graph', got: ${text.slice(0, 500)}`);
+    if (fs.existsSync('/ws-nograph/design/KG/SystemArchitecture.json')) throw new Error('the packaged graph must NOT be copied into a custom-schema workspace');
+    return { failClosed: 'ok', packagedGraphCopied: false };
   });
 
   const failed = steps.filter((s) => s.status === 'failed');
