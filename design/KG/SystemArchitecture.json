@@ -103,6 +103,10 @@
         {
           "view_id": "argo-mcp-verification",
           "view_name": "ARGO MCP Verification（本仓功能验证）"
+        },
+        {
+          "view_id": "schema-bundle-decoupling-001",
+          "view_name": "Schema/Ontology 解耦（schema bundle）"
         }
       ]
     },
@@ -10093,6 +10097,67 @@
       "name": "里程碑：ARGO MCP 本仓功能验证（读/写链路实测 + 4 项发现）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "wp-schema-bundle-decoupling-001",
+      "name": "schema/建模语言解耦为 schema bundle（默认 ArgoBument + 仓内 .argo/schema 覆盖）",
+      "type": "Work Package",
+      "description": "将 ARGO 工具链从硬编码的 ArgoBument 建模语言解耦：默认仍是内置 ArgoBument（ArchiMate 3.2 + ARGO），工作区若自带 .argo/schema/ schema bundle 则该仓使用自有 schema（元素/关系类型、端点规则、根视图名、单视图元素上限随 bundle）。核心：新增 argo/scripts/argob-schema.js（resolveSchemaBundle / loadSchemaBundleAndOntology / resolveTypeEnums，优先级 ARGO_SCHEMA_DIR > 仓内 .argo/schema > 默认）；graph-semantics.js 由 ontology 参数化（默认行为逐字节不变）；validateSystemArchitecture.js 与 systemarchitecture-mcp-server.js 按工作区解析 bundle 并用于校验与 guidance；queryNeo4jGraph {schema:true} 返回解析后语言/枚举/guide（新增 schemaKind/schemaLanguage/schemaDir/guidePath）；MCP/validator 工具描述、规则 <Ontology>、唤醒闸门（ARGO_ACTOR_ELEMENT_TYPE）、skills 去 ArchiMate 硬编码；自定义 schema 下 .qea 投影显式跳过；ARGO_SCHEMA_DIR / ARGO_ACTOR_ELEMENT_TYPE 归类 host-only env。交付 docs/schema-bundle-decoupling.md（含耦合清单与残留项）。验收：tests/argob-schema-bundle.test.js 12 例（默认/覆盖/优先级/自定义类型/端点矩阵开关/自定义矩阵/单视图上限/MCP 面）；Docker 沙箱 sandbox/schema-decoupling（node v24 + opencode 1.18.29，6/6：47 测试通过、部署态 MCP 自定义语言 TeamA Ontology 校验通过、默认回退 ArchiMate 3.2/64、opencode mcp list 报告 argo connected）；本机全量回归无新增失败（剩余失败为改动前既有：EA import 工具链、cost-log env 键、图谱内容漂移）。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "95f63a4",
+          "description": "feat(schema): decouple modeling language into per-repo schema bundles — argo/scripts/argob-schema.js; argo/scripts/graph-semantics.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/validateSystemArchitecture.js; argo/scripts/validator-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; argo/schema/argob.config.json; argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; argo/skills/argo-init/SKILL.md; argo/skills/ea-human-reconcile/SKILL.md; tests/argob-schema-bundle.test.js; sandbox/schema-decoupling/Dockerfile; sandbox/schema-decoupling/verify.js; docs/schema-bundle-decoupling.md"
+        },
+        {
+          "name": "verification",
+          "value": "docker-sandbox",
+          "description": "sandbox/schema-decoupling 容器验证 6/6（node v24.21.0 + opencode 1.18.29）：47/47 测试通过；部署态 MCP 自定义 schema 校验通过（workspace/TeamA Ontology）；默认回退（default/ArchiMate 3.2/64）；opencode mcp list -> argo connected。报告 results/schema-decoupling-report.json（gitignored，可重跑生成）。"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-schema-bundle-01",
+          "description": "GIVEN 一个未提供自有 schema 的工作区；WHEN 解析 schema bundle 并运行 MCP 校验；THEN 使用默认 ArgoBument（kind=default、语言 ArchiMate 3.2、64 元素/11 关系枚举），canonical 图校验通过。",
+          "type": "Acceptance Test",
+          "Input": "tests/argob-schema-bundle.test.js",
+          "acceptanceCriteria": "tests/argob-schema-bundle.test.js"
+        },
+        {
+          "name": "AT-schema-bundle-02",
+          "description": "GIVEN 工作区在 .argo/schema 自定义 schema（自有元素/关系类型）；WHEN 校验使用自定义类型的图并尝试默认 ArchiMate 类型；THEN 自定义类型通过、默认类型被拒（提示自定义语言）。",
+          "type": "Acceptance Test",
+          "Input": "tests/argob-schema-bundle.test.js",
+          "acceptanceCriteria": "tests/argob-schema-bundle.test.js"
+        },
+        {
+          "name": "AT-schema-bundle-03",
+          "description": "GIVEN bundle 的 argob.config.json 配置端点矩阵开/关/自定义矩阵与单视图元素上限、以及 ARGO_SCHEMA_DIR；WHEN 校验；THEN 不变量按 bundle 生效（关=宽松、自定义矩阵=按矩阵拒绝、上限=自定义值），且 ARGO_SCHEMA_DIR 优先于工作区 bundle。",
+          "type": "Acceptance Test",
+          "Input": "tests/argob-schema-bundle.test.js",
+          "acceptanceCriteria": "tests/argob-schema-bundle.test.js"
+        },
+        {
+          "name": "AT-schema-bundle-04",
+          "description": "GIVEN 已部署到 ~/.argo 的 MCP（node + opencode 运行时）；WHEN 对自定义/默认工作区调用 queryNeo4jGraph {schema:true} 与 validateSystemArchitecture，并 opencode mcp list；THEN 返回解析后的语言/枚举并校验通过，opencode 报告 argo connected。",
+          "type": "Acceptance Test",
+          "Input": "tests/argob-schema-bundle.test.js",
+          "acceptanceCriteria": "tests/argob-schema-bundle.test.js"
+        }
+      ]
+    },
+    {
+      "id": "doc-schema-bundle-decoupling-001",
+      "name": "Schema/建模语言解耦设计文档（schema bundle）",
+      "type": "Artifact",
+      "description": "docs/schema-bundle-decoupling.md：schema bundle 机制（解析优先级、argob.config.json / argob-rules.json / guide、不变量开关）、耦合清单（12 项：schema 路径解析、类型枚举重复、端点矩阵、graph-semantics 不变量、MCP guidance、queryNeo4jGraph、工具描述、<Ontology>、唤醒闸门 actor 类型、skills、.qea 投影、env 归类）及残留项（Neo4j 标签、runArchitectureTests 依赖序启发式、EA round-trip 仍 ArchiMate 专用）。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "95f63a4",
+          "description": "docs/schema-bundle-decoupling.md"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -12373,6 +12438,17 @@
       "parent_element_name": "Implementation and Migration Viewpoint",
       "view_id": "argo-mcp-verification",
       "view_name": "ARGO MCP Verification（本仓功能验证）"
+    },
+    {
+      "view_id": "schema-bundle-decoupling-001",
+      "view_name": "Schema/Ontology 解耦（schema bundle）",
+      "parent_element_id": "1249",
+      "parent_element_name": "Implementation and Migration Viewpoint",
+      "description": "将 ARGO 工具链从固定建模语言（ArgoBument = ArchiMate 3.2 + ARGO）解耦为 schema bundle：默认使用内置 ArgoBument；工作区若提供 <workspace>/.argo/schema/ 则使用该仓自有 schema（可选 argob.config.json / argob-rules.json / guide）。解析优先级 ARGO_SCHEMA_DIR > 工作区 .argo/schema > 默认。",
+      "included_elements": [
+        "wp-schema-bundle-decoupling-001",
+        "doc-schema-bundle-decoupling-001"
+      ]
     }
   ]
 }
