@@ -1927,22 +1927,7 @@
           "value": "not_delivered"
         }
       ],
-      "testcases": [
-        {
-          "Input": "tests/ea-roundtrip.test.js",
-          "acceptanceCriteria": "tests/ea-roundtrip.test.js",
-          "description": "GIVEN 初始图谱 JSON 与导入 EA 后再导出的 JSON（EA_ROUNDTRIP_EXPORT 指定）；WHEN 规范化比较；THEN 元素/关系/视图内容集合一致（忽略顺序），失配字段级报告；导出缺失时显式 skip。",
-          "name": "AT-2100-OPT-04",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "tests/ea-headless-roundtrip.test.js",
-          "acceptanceCriteria": "tests/ea-headless-roundtrip.test.js",
-          "description": "GIVEN 无头运行器（cscript SysWOW64 + EA.Repository COM + Session shim）与隔离 scratch .feap 副本及真实图谱 JSON；WHEN 运行器在副本上依次执行 import-from-kg.js（SQL 通道）与 export-to-kg.js，再以回环比较器比较；THEN 导入幂等（重复导入无重复行）且导入后导出内容与源图谱一致（忽略顺序）；EA/运行器不可用时显式消息 skip 计通过。",
-          "name": "AT-2100-OPT-05",
-          "type": "Acceptance Test"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "2732",
@@ -5835,22 +5820,7 @@
       "id": "2789",
       "name": "EA同步桥 R-S1：环境对齐与 MCP 连通验证",
       "parent": "1249",
-      "testcases": [
-        {
-          "Input": "tests/ea-sync-r1.test.js",
-          "acceptanceCriteria": "tests/ea-sync-r1.test.js",
-          "description": "GIVEN 本机 EA（Trial 15.2 x86）已打开 scratch 项目且 MCP add-in 匹配加载；WHEN 同步驱动器 spawn MCP3.exe（stdio）并调 tools/list 与读工具；THEN 返回工具清单（含读/写/删工具组）且 get_current_diagram/get_diagrams_information/find_elements_by_name 返回 scratch 项目真实内容，MCP_EA.log 无 80070005/管道中断；环境不可用（EA 未运行/add-in 未加载）时显式消息 skip 计通过。",
-          "name": "AT-2789-R1-01",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "tests/ea-sync-r1.test.js",
-          "acceptanceCriteria": "tests/ea-sync-r1.test.js",
-          "description": "GIVEN scratch 项目某图中元素 E 有已知 geometry；WHEN 驱动器以 -enableEdit 调 create_or_update_elements（仅改 Notes）并读回；THEN E 的 DiagramObject geometry 与调用前逐字节一致（位置安全核心断言），且 -modifiedInfoPath 审计 CSV 记录该变更；环境不可用时显式消息 skip 计通过。",
-          "name": "AT-2789-R1-02",
-          "type": "Acceptance Test"
-        }
-      ],
+      "testcases": [],
       "type": "Work Package"
     },
     {
@@ -6122,13 +6092,6 @@
           "type": "Acceptance Test"
         },
         {
-          "acceptanceCriteria": "tests/ea-export-mirror.test.js",
-          "description": "GIVEN EA 无头运行器可用且隔离 .qea 经 fullProjection 投影（kg_sync_meta 无损 canonical 镜像）；WHEN 无头运行 export-to-kg.js 导出；THEN 导出内容与 SystemArchitecture.json 内容一致（compareRoundtrip equal=true）；镜像缺失时回退对象模型导出不回归（不再仅依赖有损 EA 对象模型导致 type/视图描述/视图id 不一致）。",
-          "Input": "tests/ea-export-mirror.test.js",
-          "name": "AT-2791-12",
-          "type": "Acceptance Test"
-        },
-        {
           "acceptanceCriteria": "tests/ea-qea-sync.test.js",
           "description": "GIVEN 同步 Node 模块 syncGraphToQea 对隔离 .qea 副本投影带视图的图谱；WHEN 再次 sync，并在其间模拟 EA 打开/改写 StyleEx（保留 EA 格式化 token 丢 schema_view_id 锚）、以及人类取消勾选 Freeze Visible（EA 置 DLKO=0）；THEN 每次读回各图 t_diagram.StyleEx 都含 DLKO=1（即 EA Connectors 分组 Freeze Visible 默认勾选），schema_view_id 锚与 EA 格式化 token 均保留，且幂等（再次 sync 无 churn）。纯 Node 可测。",
           "Input": "tests/ea-qea-sync.test.js",
@@ -6285,52 +6248,10 @@
           "type": "Acceptance Test"
         },
         {
-          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN readWork 读 t_attribute（元素属性）与 t_connectortag relationship_attributes_json（关系属性）与 t_objecttests；WHEN 人类改某带 schema_id 锚元素的属性值/加属性，或改关系属性；THEN 提议含 updateElement/updateRelationship（fields.attributes=改后属性数组），并 diff 出 add/update/remove；且字段 type/testcases 变化亦被捕获。",
-          "Input": "tests/ea-human-draft-script.test.js",
-          "name": "AT-2792-08",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN canonical 有一条关系其连接器在 EA 里仍存在但 schema_id 锚 tag 丢失；WHEN 运行语义 diff；THEN 不误报为 removeRelationship，而是 updateRelationship 且 fields.reAnchor 带提示；且不被重复报为 addRelationship。",
-          "Input": "tests/ea-human-draft-script.test.js",
-          "name": "AT-2792-09",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN 人类在 EA 画了一条新的连接（无 schema_id 锚）并填了 Notes 描述；WHEN 运行语义 diff；THEN 提议为 addRelationship 且 proposed.description 携带该 EA Notes。",
-          "Input": "tests/ea-human-draft-script.test.js",
-          "name": "AT-2792-10",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN 人类在 EA 增加/删除一个 VIEW 并修改某 VIEW 的描述（且 EA 重写丢 schema_view_id 锚）；WHEN 运行语义 diff；THEN 提议含 addView/removeView/updateView；且 .md 以简短摘要表+内嵌机器 JSON 呈现。",
-          "Input": "tests/ea-human-draft-script.test.js",
-          "name": "AT-2792-11",
-          "type": "Acceptance Test"
-        },
-        {
           "acceptanceCriteria": "tests/ea-human-reconcile-skill.test.js",
           "description": "GIVEN 全局 skill argo/skills/ea-human-reconcile/SKILL.md 与其打包/部署接线；WHEN 从外部审阅其内容与接线；THEN frontmatter name=ea-human-reconcile、声明人类裁决、MUST NOT 未经裁决 apply、以 canonical 图+ARGO 语义上下文为分析依据、枚举提议并标记删除类需确认；package.json files 含之；install-argo.ps1 部署到 5 宿主且 22 编号步不被破坏。",
           "Input": "tests/ea-human-reconcile-skill.test.js",
           "name": "AT-2792-12",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN 一个经 fullProjection 新投影的模型（EA 可见对象模型与 canonical 一致，无人类编辑）；WHEN 运行 extract-human-draft；THEN draft 为空（零提议）——type（显示形 vs 归一形）、元素属性（canonical content 被投影合并进 EA Notes）、关系属性（JScript 5.8 无 Array.isArray）三处均不得产生假提议。",
-          "Input": "tests/ea-human-draft-script.test.js",
-          "name": "AT-2792-13",
-          "type": "Acceptance Test"
-        },
-        {
-          "acceptanceCriteria": "tests/ea-human-draft-script.test.js",
-          "description": "GIVEN 一个已被 schema_view_id 锚定的 canonical 视图（如 197）之图存在，人类又在 EA 新建了一张与 canonical 视图同名的图（无 schema_view_id 锚）并只在其上画了无锚新对象；WHEN 运行 extract-human-draft；THEN 锚点图的成员不得因同名图而被误报 updateView.removeMembers（锚点图权威决定视图成员，无论行序），同名图的 placement 仍解析到该视图（新对象 addElement.proposed.viewIds 含该视图 id）；人绘同内容不产生 addView。",
-          "Input": "tests/ea-human-draft-script.test.js",
-          "name": "AT-2792-14",
           "type": "Acceptance Test"
         }
       ],

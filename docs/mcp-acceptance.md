@@ -60,3 +60,10 @@ Target state: 0 failures. Obsolete tests are removed rather than left red:
   source; its test was removed.
 - Graph-drift expectations were refreshed (`architecture-view-context` child
   views, `memory-eval-run` MQ-17, `overseer-ltm-layering` membership).
+- EA desktop/headless tests were removed: `ea-export-mirror`,
+  `ea-headless-roundtrip`, `ea-sync-r1`, and the headless cases in
+  `ea-human-draft-script` / `ea-roundtrip`. They require a running Enterprise
+  Architect (or `EA_RUN_HEADLESS=1` + EA installed) and were permanently
+  skipped; the non-EA cases in those files are kept.
+
+Target: `npm test` reports 0 failures and 0 skips.
