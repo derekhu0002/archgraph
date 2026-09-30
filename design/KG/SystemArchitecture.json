@@ -10123,6 +10123,21 @@
           "name": "commit",
           "value": "2089547",
           "description": "design/KG/SystemArchitecture.json + archgraph.qea（WP schema-bundle-decoupling-001 / view schema-bundle-decoupling-001 / doc 元素的图谱登记）"
+        },
+        {
+          "name": "commit",
+          "value": "259b5c9",
+          "description": "bundle-declared actorElementType + fail-closed bundle validation + custom-schema example — argo/scripts/argob-schema.js; argo/schema/argob.config.json; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/validateSystemArchitecture.js; argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; tests/argob-schema-bundle.test.js (17); sandbox/schema-decoupling/verify.js; docs/schema-bundle-decoupling.md; custom-schema/**"
+        },
+        {
+          "name": "commit",
+          "value": "c743bcc",
+          "description": ".gitignore 忽略嵌套 **/.argo/temp/（custom-schema 测试产生的 MCP 诊断）"
+        },
+        {
+          "name": "actorContract",
+          "value": "required-or-null",
+          "description": "每个 custom schema bundle 必须声明 actorElementType（默认 Business Actor，或显式 null 表示无 actor 概念）；bundleValidation 装载时 fail-closed 校验（actorElementType 必须属于元素类型枚举；端点矩阵不得引用未知类型），经 queryNeo4jGraph{schema:true} 报告。示例见 custom-schema/（Team Graph，actorElementType=Agent Node）。"
         }
       ],
       "testcases": [
@@ -10171,6 +10186,11 @@
           "name": "commit",
           "value": "2089547",
           "description": "design/KG/SystemArchitecture.json + archgraph.qea（doc 元素图谱登记）"
+        },
+        {
+          "name": "commit",
+          "value": "259b5c9",
+          "description": "docs/schema-bundle-decoupling.md（新增 actor contract 小节 + custom-schema 示例说明）"
         }
       ]
     },
@@ -10198,6 +10218,16 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "259b5c9",
+          "description": "bundle-declared actorElementType + fail-closed bundle validation + custom-schema example（验收：17 AT + Docker 7/7）"
+        },
+        {
+          "name": "commit",
+          "value": "c743bcc",
+          "description": ".gitignore 忽略嵌套 **/.argo/temp/"
         }
       ],
       "description": "里程碑（2026-09-30，项目总管，分支 develop-separate-schema）：把 ARGO 工具链从硬编码的 ArgoBument 建模语言解耦为 schema bundle——默认用内置 ArgoBument（ArchiMate 3.2 + ARGO）；工作区自带 <workspace>/.argo/schema/（SystemArchitecture.schema.json + 可选 argob.config.json/argob-rules.json/guide）则用该仓自有 schema。解析优先级 ARGO_SCHEMA_DIR > 仓内 .argo/schema > 默认。\n【关键决策】① 复用既有（此前为死代码的）仓内 .argo/schema 覆盖路径（人类伙伴裁决），未新造 .argob 目录；② 默认路径逐字节保持——规则数据仍来自 archimate32-rules.js，只有自定义 bundle 才走新逻辑；③ 不变量（端点矩阵/statement 语法/根视图名/单视图元素上限）由 bundle 配置，自定义 schema 默认宽松；④ .qea 投影对非 ArchiMate 工作区显式跳过；⑤ Neo4j 标签/runArchitectureTests 依赖序启发式列为已文档化残留。\n【交付】argo/scripts/argob-schema.js（resolveSchemaBundle/loadSchemaBundleAndOntology/resolveTypeEnums）；graph-semantics.js ontology 参数化；validateSystemArchitecture.js / systemarchitecture-mcp-server.js 按工作区解析 bundle 并校验+guidance；queryNeo4jGraph{schema:true} 增 schemaKind/schemaLanguage/schemaDir/guidePath；工具描述/规则<Ontology>/唤醒闸门(ARGO_ACTOR_ELEMENT_TYPE)/skills 去 ArchiMate 硬编码；.env 归类 ARGO_SCHEMA_DIR/ARGO_ACTOR_ELEMENT_TYPE；docs/schema-bundle-decoupling.md。\n【验证】tests/argob-schema-bundle.test.js 12 例；Docker 沙箱 sandbox/schema-decoupling（基于 opencode-sandbox 镜像，容器内 node v24.21.0 + opencode 1.18.29，~/.argo 部署态）6/6：47 测试通过、部署态 MCP 自定义语言 TeamA Ontology 校验通过、默认回退 ArchiMate 3.2/64、opencode mcp list 报 argo connected；本机全量回归无新增失败（剩余为改动前既有：EA import 工具链、cost-log env 键、图谱内容漂移）。\n【经验/坑】① 本机 Docker Desktop 引擎需手动拉起（Start-Process Docker Desktop.exe，~30-60s）；② bind-mount 整个仓（含 .qea/tarball/node_modules）到容器极慢——只拷代码子集（tar 子目录）并排除 ACL 受限的 argo/.env；③ 容器内 MCP 需 neo4j-driver——用 vendor 内置 tgz 在 ~/.argo 安装，NODE_PATH 指向 ~/.argo/node_modules；④ opencode 无 API key 也能用 `opencode mcp list` 验证 MCP 连接；⑤ PowerShell 管道 Select-Object -Last 会缓冲到结束，诊断挂起用 docker run -d + docker logs。\ncommits 95f63a4（代码+测试+沙箱+文档）/ 2089547（图谱登记）/ 0e4e241（commit 登记）。",
