@@ -6,7 +6,7 @@ applyTo: "**"
 
 <WakeupGuideline>
 STEP 0 — UNCONDITIONAL STARTUP GATE. Applies to the very first message of every session, greetings and chat included; never skip, defer, or treat it as optional.
-1. Your first tool call MUST be an ARGO MCP query that lists all Actor elements. The Actor element type is reported by `queryNeo4jGraph` with `{schema:true}` as `actorElementType` (`Business Actor` under the default ArgoBument schema, or whatever the workspace's own `.argo/schema` bundle declares; `null` means that schema has no Actor concept — then skip Actor identification). Confirm which Actor you are; if unsure, ask your human partner before anything else.
+1. Your first tool call MUST resolve the workspace schema and list its Actors: `queryNeo4jGraph` with `{schema:true}` → read `actorElementType` (`null` = no Actor concept, skip Actor identification), then query that element type. Confirm which Actor you are; if unsure, ask your human partner before anything else.
 2. Restore memory: load ONLY the T1 working-memory digest — your T1 summary, the most recent/active memory cards, and any session hooks (unfinished items from the last session). Do NOT bulk-load the T2 long-term memory or T3 archive; recall them on demand via `memory_search`, then read full content with `getIntentElementContext`. T2 is a recall target, not as a bulk context load.
 3. If the Actor's `agent` attribute differs from your type, switch to it or delegate per `<CoperationGuideline>` item 2.
 4. If the ARGO MCP is unavailable or errors, say so before doing anything else.
@@ -29,10 +29,11 @@ Non-negotiable red lines (MUST). Never skip, simplify, or silently violate them;
 </CoreRules>
 
 <Ontology>
-Your modeling language is the default ArgoBument schema: ArchiMate 3.2 plus ARGO extensions. Reference files live under ~/.argo (Windows: %USERPROFILE%\.argo):
-1. Legal graph structure: ~/.argo/schema/SystemArchitecture.schema.json
-2. Element/relationship type definitions: ~/.argo/schema/archimate3.2.md
-A repository may override the whole modeling language by shipping its own schema bundle under <workspace>/.argo/schema/: a SystemArchitecture.schema.json plus an optional argob.config.json (language name, enum locations, guide, invariant switches), an optional argob-rules.json (element/relationship type metadata and endpoint legality), and an optional guide. When that bundle exists it replaces the default schema for that repository alone — its element/relationship types, endpoint rules, root-view name and per-view element limit govern every read and write, and its guide replaces archimate3.2.md. Never assume ArchiMate types when a workspace bundle is in effect: resolve the actual language first (`queryNeo4jGraph` with `{schema:true}` reports the resolved schema kind, language, type enums, `actorElementType`, `bundleValidation` and guide path). The Actor element type is the bundle's `actorElementType` (default `Business Actor`; `null` = the schema has no actor concept; host override ARGO_ACTOR_ELEMENT_TYPE). If `bundleValidation.status` is `failed`, the workspace schema itself is misconfigured (e.g. `actorElementType` names a type the bundle does not define): report it to the human partner and do not write until it is fixed.
+Resolve the workspace modeling language before acting; do not assume ArchiMate. `queryNeo4jGraph` with `{schema:true}` returns `schemaKind`, `schemaLanguage`, the element/relationship type enums, `actorElementType`, `bundleValidation` and `guidePath`.
+1. `schemaKind` `default`: the built-in ArgoBument language (ArchiMate 3.2 + ARGO). Reference files under ~/.argo: structure `~/.argo/schema/SystemArchitecture.schema.json`; types `~/.argo/schema/archimate3.2.md`.
+2. `schemaKind` `workspace`/`override`: the repository's own schema bundle. Its element/relationship types, endpoint rules, root-view name, per-view element limit and guide govern every read and write — never assume ArchiMate types here.
+3. `actorElementType` is the element type whose members are Actors (default `Business Actor`; `null` = no actor concept → skip Actor identification). Host override: ARGO_ACTOR_ELEMENT_TYPE.
+4. If `bundleValidation.status` is `failed`, the workspace schema is misconfigured: report it to the human partner and do not write until it is fixed.
 </Ontology>
 
 <CriticalReasoningGuideline>
