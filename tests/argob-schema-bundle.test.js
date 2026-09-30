@@ -347,6 +347,34 @@ test('AT argob-schema: the .qea projection maps custom types generically (never 
   assert.equal(qeaLib.relationshipMap('Triggering').connectorType, 'ControlFlow');
 });
 
+test('AT argob-schema: the default ontology declares the ArchiMate delivery dependencies', () => {
+  // GIVEN the default bundle (ArchiMate class matrix)
+  const { ontology } = loadSchemaBundleAndOntology(ROOT);
+  // THEN it declares the ArchiMate dependency mapping (preserves prior behaviour)
+  assert.deepEqual(ontology.deliveryDependencies.sourceDependsOnTarget, ['Access', 'Assignment', 'Specialization', 'Composition', 'Aggregation']);
+  assert.deepEqual(ontology.deliveryDependencies.targetDependsOnSource, ['Serving', 'Realization', 'Flow', 'Triggering', 'Influence']);
+});
+
+test('AT argob-schema: a custom bundle declares its OWN delivery dependencies', () => {
+  // GIVEN the shipped custom example (Team Graph)
+  const { ontology } = loadSchemaBundleAndOntology(path.join(ROOT, 'custom-schema'));
+  // THEN runArchitectureTests / semantic edges use the schema's own relationship types
+  assert.deepEqual(ontology.deliveryDependencies.sourceDependsOnTarget, ['Depends On', 'Assigned To']);
+  assert.deepEqual(ontology.deliveryDependencies.targetDependsOnSource, []);
+  assert.equal(ontology.bundleValidation.status, 'passed');
+});
+
+test('AT argob-schema: deliveryDependencies referencing unknown relationship types fails validation', () => {
+  // GIVEN a custom bundle whose deliveryDependencies names a relationship it does not define
+  const workspace = makeTempWorkspace();
+  writeCustomBundle(workspace, { config: { deliveryDependencies: { sourceDependsOnTarget: ['Depends On', 'Nonexistent'] } } });
+  // WHEN the ontology is built
+  const { ontology } = loadSchemaBundleAndOntology(workspace);
+  // THEN bundle validation fails closed
+  assert.equal(ontology.bundleValidation.status, 'failed');
+  assert.ok(ontology.bundleValidation.errors.some(e => e.includes("deliveryDependencies.sourceDependsOnTarget references unknown relationship type 'Nonexistent'")), JSON.stringify(ontology.bundleValidation));
+});
+
 test('AT argob-schema: initializeWorkspace reports the resolved schema (kind + language)', async () => {
   // GIVEN a workspace with its own schema bundle (and a user-authored graph)
   const custom = makeTempWorkspace();

@@ -422,13 +422,21 @@ async function writeArchitectureGraph(graphPath, graph) {
 /**
  * Dependency direction for delivery:
  * For element X, its upstream dependencies = elements X needs to be delivered first.
- * Mirrors resolveSemanticEdges from systemarchitecture-mcp-server.js.
- *
- *   - Access, Assignment, Specialization, Composition, Aggregation: source depends on target
- *   - Serving, Realization, Flow, Triggering, Influence: target depends on source
+ * The mapping comes from the ACTIVE schema bundle's `deliveryDependencies`
+ * (argob.config.json), not hardcoded ArchiMate names, so a custom schema can
+ * declare its own relationship types (e.g. "Depends On"). The default ArgoBument
+ * bundle declares the ArchiMate mapping.
  */
-const DEPENDENCY_TYPES_SOURCE_DEPENDS_ON_TARGET = new Set(['Access', 'Assignment', 'Specialization', 'Composition', 'Aggregation']);
-const DEPENDENCY_TYPES_TARGET_DEPENDS_ON_SOURCE = new Set(['Serving', 'Realization', 'Flow', 'Triggering', 'Influence']);
+const DELIVERY_DEPENDENCIES = (() => {
+    try {
+        const { loadSchemaBundleAndOntology } = require('./argob-schema.js');
+        return loadSchemaBundleAndOntology(repoRoot).ontology.deliveryDependencies;
+    } catch {
+        return { sourceDependsOnTarget: [], targetDependsOnSource: [] };
+    }
+})();
+const DEPENDENCY_TYPES_SOURCE_DEPENDS_ON_TARGET = new Set(DELIVERY_DEPENDENCIES.sourceDependsOnTarget);
+const DEPENDENCY_TYPES_TARGET_DEPENDS_ON_SOURCE = new Set(DELIVERY_DEPENDENCIES.targetDependsOnSource);
 
 /**
  * Resolve upstream dependencies for a single element.

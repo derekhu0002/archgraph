@@ -7,6 +7,10 @@
   "relationshipTypeEnumKey": "archimateRelationshipType",
   "actorElementType": "Business Actor",
   "guide": "archimate3.2.md",
+  "deliveryDependencies": {
+    "sourceDependsOnTarget": ["Access", "Assignment", "Specialization", "Composition", "Aggregation"],
+    "targetDependsOnSource": ["Serving", "Realization", "Flow", "Triggering", "Influence"]
+  },
   "invariants": {
     "statementGrammar": true,
     "endpointMatrix": true,

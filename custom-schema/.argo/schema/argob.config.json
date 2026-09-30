@@ -5,6 +5,10 @@
   "language": "Team Graph",
   "actorElementType": "Agent Node",
   "guide": "ARGOB.md",
+  "deliveryDependencies": {
+    "sourceDependsOnTarget": ["Depends On", "Assigned To"],
+    "targetDependsOnSource": []
+  },
   "invariants": {
     "statementGrammar": true,
     "endpointMatrix": true,

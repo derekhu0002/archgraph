@@ -678,7 +678,7 @@ function buildIntentElementContext(context, args = {}) {
   const dependentDepth = normalizeDepth(args.dependentDepth, 1);
   const associationDepth = Math.max(1, normalizeDepth(args.associationDepth, 1));
   const associationNeighborDependencyDepth = normalizeDepth(args.associationNeighborDependencyDepth, 0);
-  const graphIndex = buildGraphIndex(context.document);
+  const graphIndex = buildGraphIndex(context.document, context.ontology);
   const focusElement = focusResult.element;
   const includedElementIds = new Set([focusElement.id]);
   const includedRelationshipIds = new Set();
@@ -990,7 +990,7 @@ function normalizeDepth(value, defaultValue) {
   return Math.floor(numericValue);
 }
 
-function buildGraphIndex(document) {
+function buildGraphIndex(document, ontology) {
   const relationshipById = new Map();
   const elementById = new Map((document.elements || []).map(element => [element.id, element]));
   const relationshipsByElementId = new Map();
@@ -999,8 +999,18 @@ function buildGraphIndex(document) {
     addIndexedRelationship(relationshipsByElementId, relationship.source_id, relationship);
     addIndexedRelationship(relationshipsByElementId, relationship.target_id, relationship);
   }
-  return { elementById, relationshipById, relationshipsByElementId };
+  const deliveryDependencies = ontology && ontology.deliveryDependencies
+    ? ontology.deliveryDependencies
+    : DEFAULT_DELIVERY_DEPENDENCIES;
+  return { elementById, relationshipById, relationshipsByElementId, deliveryDependencies };
 }
+
+// Dependency direction for the semantic-edge walk comes from the active schema
+// bundle's deliveryDependencies; this is the ArgoBument fallback by default.
+const DEFAULT_DELIVERY_DEPENDENCIES = Object.freeze({
+  sourceDependsOnTarget: Object.freeze(['Access', 'Assignment', 'Specialization', 'Composition', 'Aggregation']),
+  targetDependsOnSource: Object.freeze(['Serving', 'Realization', 'Flow', 'Triggering', 'Influence']),
+});
 
 function addIndexedRelationship(index, elementId, relationship) {
   if (!index.has(elementId)) {
@@ -1056,8 +1066,9 @@ function resolveSemanticEdges(elementId, graphIndex) {
       continue;
     }
 
-    const sourceDependsOnTarget = ['Access', 'Assignment', 'Specialization', 'Composition', 'Aggregation'].includes(relationshipType);
-    const targetDependsOnSource = ['Serving', 'Realization', 'Flow', 'Triggering', 'Influence'].includes(relationshipType);
+    const deliveryDependencies = graphIndex.deliveryDependencies || DEFAULT_DELIVERY_DEPENDENCIES;
+    const sourceDependsOnTarget = deliveryDependencies.sourceDependsOnTarget.includes(relationshipType);
+    const targetDependsOnSource = deliveryDependencies.targetDependsOnSource.includes(relationshipType);
     if (sourceDependsOnTarget) {
       edges.push({ kind: isSource ? 'dependency' : 'dependent', neighborId, relationship });
       continue;

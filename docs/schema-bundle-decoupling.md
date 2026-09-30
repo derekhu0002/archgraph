@@ -73,6 +73,13 @@ Implementation: `argo/scripts/argob-schema.js` → `resolveSchemaBundle`,
   `endpointMatrix: <matrix present>`, `rootViewName: "SystemArchitecture"`,
   `maxElementsPerView: 15`. Set `rootViewName: null` (no name requirement) and
   `maxElementsPerView: null` (unlimited) to disable.
+- `deliveryDependencies` — which relationship types express a delivery
+  dependency and in which direction (`sourceDependsOnTarget` /
+  `targetDependsOnSource`). Consumed by `runArchitectureTests` (delivery-status
+  ordering) and the MCP semantic-edge walk. The default bundle declares the
+  ArchiMate mapping; a custom bundle declares its own (e.g. `Depends On`). If a
+  bundle declares none, tests still run in declaration order (no ordering
+  constraint). Referenced relationship types are validated (fail-closed).
 
 ### The actor contract (bundle validation)
 
@@ -153,10 +160,11 @@ So after `argo init` / the argo-init skill, the reported `schema.kind` is
 - **Neo4j projection labels** (`Element` / `ArchitectureRelationship` / `View`,
   `ARCHIMATE_RELATES`) are structural, not vocabulary — they stay fixed so the
   read/query surface is stable for every ontology.
-- **`runArchitectureTests.js` delivery-order heuristics** use the ArchiMate
-  relationship sets to compute test ordering. A custom ontology with different
-  relationship names yields no ordering edges (tests still run, in declaration
-  order) — safe degradation, not a validation bypass.
+- **`runArchitectureTests` delivery ordering** is now schema-declared, not
+  hardcoded: the bundle's `deliveryDependencies` (default bundle = the ArchiMate
+  mapping) drive both the test-runner's delivery status and the MCP
+  semantic-edge dependency walk. A custom schema that declares none runs tests in
+  declaration order (safe, no failure).
 - **EA round-trip tooling** (`ea-qea-sync-lib.js`, `eatool/*`) maps ArchiMate
   stereotypes to EA shapes precisely. It is not a blocker for custom schemas:
   unknown element types project to a generic EA `Class` whose stereotype is the

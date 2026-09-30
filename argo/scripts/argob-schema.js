@@ -37,6 +37,35 @@ const DEFAULT_LANGUAGE = 'ArchiMate 3.2';
 const DEFAULT_ROOT_VIEW_NAME = 'SystemArchitecture';
 const DEFAULT_MAX_ELEMENTS_PER_VIEW = 15;
 const DEFAULT_ACTOR_ELEMENT_TYPE = 'Business Actor';
+
+// Which relationship types express a delivery dependency and in which direction.
+// Declared per bundle via argob.config.json "deliveryDependencies"; the default
+// ArgoBument bundle keeps the ArchiMate mapping below (previous behaviour).
+const ARCHIMATE_DELIVERY_DEPENDENCIES = Object.freeze({
+  sourceDependsOnTarget: Object.freeze(['Access', 'Assignment', 'Specialization', 'Composition', 'Aggregation']),
+  targetDependsOnSource: Object.freeze(['Serving', 'Realization', 'Flow', 'Triggering', 'Influence']),
+});
+
+function resolveDeliveryDependencies(config, dialect) {
+  const raw = config && typeof config.deliveryDependencies === 'object' && config.deliveryDependencies !== null
+    ? config.deliveryDependencies
+    : null;
+  if (raw) {
+    return {
+      sourceDependsOnTarget: Array.isArray(raw.sourceDependsOnTarget) ? raw.sourceDependsOnTarget.slice() : [],
+      targetDependsOnSource: Array.isArray(raw.targetDependsOnSource) ? raw.targetDependsOnSource.slice() : [],
+    };
+  }
+  if (dialect === 'archimate-class-matrix') {
+    return {
+      sourceDependsOnTarget: ARCHIMATE_DELIVERY_DEPENDENCIES.sourceDependsOnTarget.slice(),
+      targetDependsOnSource: ARCHIMATE_DELIVERY_DEPENDENCIES.targetDependsOnSource.slice(),
+    };
+  }
+  // Custom schema with no declared dependency semantics: no delivery ordering
+  // (tests still run, in declaration order).
+  return { sourceDependsOnTarget: [], targetDependsOnSource: [] };
+}
 const ELEMENT_ENUM_KEYS = ['archimateElementType', 'elementType', 'elementTypes'];
 const RELATIONSHIP_ENUM_KEYS = ['archimateRelationshipType', 'relationshipType', 'relationshipTypes'];
 
@@ -229,7 +258,7 @@ function resolveActorElementType(config) {
   return DEFAULT_ACTOR_ELEMENT_TYPE;
 }
 
-function validateBundle({ language, dialect, elementTypes, relationshipTypes, actorElementType, matrix }) {
+function validateBundle({ language, dialect, elementTypes, relationshipTypes, actorElementType, matrix, deliveryDependencies }) {
   const errors = [];
   const elementTypeList = Array.isArray(elementTypes) ? elementTypes : [];
   const relationshipTypeList = Array.isArray(relationshipTypes) ? relationshipTypes : [];
@@ -274,7 +303,25 @@ function validateBundle({ language, dialect, elementTypes, relationshipTypes, ac
     }
   }
 
+  errors.push(...validateDeliveryDependencies(language, relationshipTypeList, deliveryDependencies));
+
   return { status: errors.length === 0 ? 'passed' : 'failed', errors };
+}
+
+function validateDeliveryDependencies(language, relationshipTypeList, deliveryDependencies) {
+  const errors = [];
+  if (!deliveryDependencies || typeof deliveryDependencies !== 'object') {
+    return errors;
+  }
+  const relSet = new Set(relationshipTypeList);
+  for (const key of ['sourceDependsOnTarget', 'targetDependsOnSource']) {
+    for (const type of Array.isArray(deliveryDependencies[key]) ? deliveryDependencies[key] : []) {
+      if (!relSet.has(type)) {
+        errors.push(`schema bundle '${language}' deliveryDependencies.${key} references unknown relationship type '${type}'`);
+      }
+    }
+  }
+  return errors;
 }
 
 function buildClassMatrixOntology(bundle) {
@@ -338,6 +385,7 @@ function buildClassMatrixOntology(bundle) {
   const elementTypes = Array.from(elementTypeMetadata.keys());
   const relationshipTypes = Array.from(relationshipCategoryByType.keys());
   const actorElementType = resolveActorElementType(bundle.config);
+  const deliveryDependencies = resolveDeliveryDependencies(bundle.config, 'archimate-class-matrix');
   return finalizeOntology({
     kind: bundle.kind,
     dialect: 'archimate-class-matrix',
@@ -348,7 +396,8 @@ function buildClassMatrixOntology(bundle) {
     elementTypes,
     relationshipTypes,
     actorElementType,
-    bundleValidation: validateBundle({ language, dialect: 'archimate-class-matrix', elementTypes, relationshipTypes, actorElementType, matrix: null }),
+    deliveryDependencies,
+    bundleValidation: validateBundle({ language, dialect: 'archimate-class-matrix', elementTypes, relationshipTypes, actorElementType, matrix: null, deliveryDependencies }),
     elementTypeMetadata,
     relationshipCategoryByType,
     isSupportedElementType,
@@ -406,6 +455,7 @@ function buildTypeMatrixOntology(bundle) {
   const actorElementType = resolveActorElementType(config);
   const elementTypes = Array.from(elementTypeMetadata.keys());
   const relationshipTypes = Array.from(relationshipCategoryByType.keys());
+  const deliveryDependencies = resolveDeliveryDependencies(config, 'type-matrix');
   const getArchiMateClass = (elementOrType) => {
     const type = typeof elementOrType === 'string' ? elementOrType : elementOrType && elementOrType.type;
     return type;
@@ -443,7 +493,8 @@ function buildTypeMatrixOntology(bundle) {
     elementTypes,
     relationshipTypes,
     actorElementType,
-    bundleValidation: validateBundle({ language, dialect: 'type-matrix', elementTypes, relationshipTypes, actorElementType, matrix }),
+    deliveryDependencies,
+    bundleValidation: validateBundle({ language, dialect: 'type-matrix', elementTypes, relationshipTypes, actorElementType, matrix, deliveryDependencies }),
     elementTypeMetadata,
     relationshipCategoryByType,
     isSupportedElementType: (type) => elementTypeMetadata.has(type),

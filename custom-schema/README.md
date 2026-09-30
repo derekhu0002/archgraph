@@ -51,6 +51,7 @@ queryNeo4jGraph { "schema": true }
 | `language` | recommended | Display name used in validation messages / MCP guidance. |
 | `actorElementType` | yes* | The element type the ARGO wakeup gate uses to identify an agent. Default `Business Actor`. Set to `null` (explicit opt-out) only if the schema genuinely has **no** actor concept. |
 | `invariants` | no | `statementGrammar`, `endpointMatrix`, `rootViewName`, `maxElementsPerView`. |
+| `deliveryDependencies` | no | Which relationship types express a delivery dependency (`sourceDependsOnTarget` / `targetDependsOnSource`) for `runArchitectureTests` ordering; here `Depends On`/`Assigned To`. |
 | `argob-rules.json` | no | `elementTypeMetadata`, `relationshipCategoryByType`, `relationshipTargetMatrix`. |
 | `<repo>/design/KG/SystemArchitecture.json` | **yes (you author it)** | With a custom schema, `argo init` does **not** copy the packaged default graph (it would not match). If the workspace has no graph, init **fails closed** — you must create it. |
 
