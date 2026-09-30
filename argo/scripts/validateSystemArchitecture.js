@@ -47,14 +47,14 @@ function main() {
     validateViewElementLimits(document, errors, { ontology });
 
     if (errors.length > 0) {
-        console.error('SystemArchitecture validation failed:');
+        console.error(`SystemArchitecture validation failed [schema: ${bundle.kind} / ${ontology.language}]:`);
         for (const error of errors) {
             console.error(`- ${error}`);
         }
         process.exit(1);
     }
 
-    console.log('SystemArchitecture validation passed for: design/KG/SystemArchitecture.json');
+    console.log(`SystemArchitecture validation passed for: design/KG/SystemArchitecture.json [schema: ${bundle.kind} / ${ontology.language}]`);
 }
 
 function parseJson(filePath, label) {

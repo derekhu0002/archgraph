@@ -339,7 +339,12 @@ async function main() {
       toolsSeen.add('initializeWorkspace');
       const report = init.report || init;
       if (report && report.status && report.status !== 'ok') throw new Error(`init status=${report.status}: ${JSON.stringify(report).slice(0, 700)}`);
-      return { status: report && report.status, neo4j: report && report.neo4j && report.neo4j.status, semantic: report && report.semanticLifecycle && report.semanticLifecycle.state };
+      // The init result must name the active schema (default vs custom + language).
+      const schemaInfo = report.schemaBundle || init.schemaBundle || init.schema;
+      if (!schemaInfo || schemaInfo.kind !== cfg.schema.kind) throw new Error(`init schema.kind=${schemaInfo && schemaInfo.kind} expected ${cfg.schema.kind}: ${JSON.stringify(schemaInfo)}`);
+      if (schemaInfo.language !== cfg.schema.language) throw new Error(`init schema.language=${schemaInfo.language} expected ${cfg.schema.language}`);
+      if (schemaInfo.actorElementType !== cfg.schema.actor) throw new Error(`init schema.actorElementType=${schemaInfo.actorElementType} expected ${cfg.schema.actor}`);
+      return { status: report && report.status, neo4j: report && report.neo4j && report.neo4j.status, semantic: report && report.semanticLifecycle && report.semanticLifecycle.state, schema: { kind: schemaInfo.kind, language: schemaInfo.language, dialect: schemaInfo.dialect, actorElementType: schemaInfo.actorElementType } };
     });
 
     await record(`all 19 MCP interfaces — ${cfg.label}`, async () => {
@@ -355,6 +360,22 @@ async function main() {
       return detail;
     });
   }
+
+  // Replace the INSTALLED default bundle (~/.argo/schema) with a custom bundle and
+  // prove a plain workspace (no .argo/schema) now adopts it -> the default schema
+  // is replaceable, not hard-wired.
+  await record('the installed default bundle is replaceable (swap ~/.argo/schema)', async () => {
+    delete process.env.ARGO_SCHEMA_DIR;
+    mustRun('sh', ['-c', `rm -rf ${ARGO}/schema && cp -r ${WORK}/custom-schema/.argo/schema ${ARGO}/schema && mkdir -p /ws-replaced/design/KG && cp ${WORK}/custom-schema/design/KG/SystemArchitecture.json /ws-replaced/design/KG/SystemArchitecture.json`]);
+    const out = await mcpSession([
+      { key: 'schema', name: 'queryNeo4jGraph', arguments: { workspaceRoot: '/ws-replaced', schema: true } },
+    ], { ARGO_REPO_ROOT: '/ws-replaced', NODE_PATH }, { timeoutMs: 60000 });
+    const sch = out.schema.schema || {};
+    if (sch.schemaKind !== 'default') throw new Error(`expected kind=default after swap, got ${sch.schemaKind}`);
+    if (sch.schemaLanguage !== 'Team Graph') throw new Error(`expected replaced default language 'Team Graph', got ${sch.schemaLanguage}`);
+    if (sch.actorElementType !== 'Agent Node') throw new Error(`expected replaced default actor 'Agent Node', got ${sch.actorElementType}`);
+    return { kind: sch.schemaKind, language: sch.schemaLanguage, actorElementType: sch.actorElementType };
+  });
 
   const failed = steps.filter((s) => s.status === 'failed');
   const skipped = failed.some((s) => /^SKIP:/.test(s.error || ''));

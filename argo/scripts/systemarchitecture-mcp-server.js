@@ -2284,9 +2284,9 @@ function resolveQeaProjectionTarget(context) {
   const none = (reason, hasEaSignals) => ({ target: null, reason, hasEaSignals: !!hasEaSignals });
   try {
     const ontology = context && context.ontology;
-    if (ontology && ontology.kind === 'custom') {
-      // The .qea projection maps ArchiMate stereotypes to EA shapes; a workspace
-      // schema with its own ontology has no such mapping, so skip it explicitly.
+    if (ontology && ontology.dialect && ontology.dialect !== 'archimate-class-matrix') {
+      // The .qea projection maps ArchiMate stereotypes to EA shapes; a schema with
+      // its own ontology has no such mapping, so skip it explicitly.
       return none(`workspace schema '${ontology.language || 'custom'}' is not the default ArchiMate schema; .qea projection skipped`, false);
     }
     const workspaceRoot = String(context && context.workspaceRoot ? context.workspaceRoot : '');
@@ -3126,6 +3126,7 @@ function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
       archimateRelationshipTypes: enums.relationshipTypes,
       schemaLanguage: (bundle.config && bundle.config.language) || null,
       schemaKind: bundle.kind,
+      schemaDialect: ontology.dialect,
       actorElementType: ontology.actorElementType,
       bundleValidation: ontology.bundleValidation,
     };

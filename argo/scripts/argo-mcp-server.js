@@ -13,6 +13,9 @@ const {
   loadRepositoryArgoEnvironment,
 } = require('./repositoryArgoEnvironment.js');
 const {
+  loadSchemaBundleAndOntology,
+} = require('./argob-schema.js');
+const {
   getWorkspaceRoot,
   hasStaticWorkspace,
   resolveArgoPath,
@@ -421,6 +424,10 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
     return toolResult({
       status: report.status,
       workspaceRoot: workspace.workspaceRoot,
+      // The resolved modeling language for this workspace (default ArgoBument vs
+      // the repository's own .argo/schema bundle) so init names the active schema.
+      schema: workspace.schema,
+      schemaBundle: report.schemaBundle,
       targetEaName: workspace.targetEaName,
       createdFiles: workspace.createdFiles,
       updatedFiles: workspace.updatedFiles,
@@ -482,6 +489,12 @@ function resolveQeaProjectionTarget(workspaceRoot) {
 // argo init .qea FULL projection (mirrors Neo4j initial full sync): wipes the whole target
 // .qea then rebuilds it purely from the canonical graph. Non-fatal by contract.
 function runQeaFullProjection(workspaceRoot, graphTargetPath) {
+  try {
+    const { ontology } = loadSchemaBundleAndOntology(workspaceRoot);
+    if (ontology.dialect && ontology.dialect !== 'archimate-class-matrix') {
+      return { status: 'noop', reason: `schema '${ontology.language}' is not ArchiMate; .qea projection skipped` };
+    }
+  } catch { /* fall through to the normal path */ }
   const target = resolveQeaProjectionTarget(workspaceRoot);
   const script = path.join(__dirname, 'ea-qea-sync.js');
   if (!target || !fs.existsSync(script)) {
@@ -553,8 +566,28 @@ async function initializeWorkspace(workspaceRoot) {
   } catch (error) {
     qeaFullProjection = { status: 'failed', error: String(error && error.message ? error.message : error) };
   }
+  // Report which schema this workspace resolves to (default ArgoBument vs a
+  // repository's own .argo/schema bundle) so the caller/human can see the active
+  // modeling language right after init.
+  let schema;
+  try {
+    const { bundle, ontology } = loadSchemaBundleAndOntology(workspaceRoot);
+    schema = {
+      kind: bundle.kind,
+      language: ontology.language,
+      dialect: ontology.dialect,
+      dir: bundle.relativeDir,
+      guide: bundle.guidePath ? bundle.guidePath.relativePath : null,
+      actorElementType: ontology.actorElementType,
+      bundleValidation: ontology.bundleValidation ? ontology.bundleValidation.status : null,
+    };
+  } catch (error) {
+    schema = { kind: 'unknown', error: String(error && error.message ? error.message : error) };
+  }
+
   return {
     workspaceRoot,
+    schema,
     qeaFullProjection,
     targetEaName,
     createdFiles,

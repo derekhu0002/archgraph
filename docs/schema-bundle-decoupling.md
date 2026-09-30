@@ -98,17 +98,33 @@ hosts that cannot query first (e.g. the static OpenCode wakeup hook).
 ### Built-in default bundle
 
 `argo/schema/argob.config.json` describes the default bundle (language
-`ArchiMate 3.2`, guide `archimate3.2.md`, endpoint matrix on). Its rules data
-still comes from `argo/scripts/archimate32-rules.js`, so the default path is
-byte-for-byte behaviour-compatible with the previous release.
+`ArchiMate 3.2`, guide `archimate3.2.md`, endpoint matrix on). Its rule data now
+ships as **data** in `argo/schema/argob-rules.json` (dialect
+`archimate-class-matrix`), not code: `argo/scripts/archimate32-rules.js` is only
+a legacy fallback for installs without that file. Because the default bundle is
+therefore a plain data bundle, it is **replaceable file-for-file** exactly like a
+custom one — swapping `~/.argo/schema/` (or `ARGO_SCHEMA_DIR`) changes the
+default language, not just a per-repo override.
+
+### Reporting the active schema
+
+The active schema is surfaced wherever a user needs to see it:
+
+- `initializeWorkspace` result → `schema: { kind, language, dialect, dir, guide, actorElementType, bundleValidation }` (also inside the harness report as `schemaBundle`).
+- `validateSystemArchitecture` prints `… passed … [schema: <kind> / <language>]`.
+- `queryNeo4jGraph { "schema": true }` → `schemaKind`, `schemaLanguage`, `schemaDialect`, `actorElementType`, `bundleValidation`.
+
+So after `argo init` / the argo-init skill, the reported `schema.kind` is
+`default` (built-in ArgoBument) or `workspace` (the repository's own bundle), and
+`schema.language` is its name (e.g. `ArchiMate 3.2` or `Team Graph`).
 
 ## 3. Coupling inventory (survey) and resolution
 
 | # | Coupling point | Before | Now |
 | --- | --- | --- | --- |
 | 1 | Schema path resolution | bundled-first; the repo-local `.argo/schema` override was unreachable dead code (`systemarchitecture-mcp-server.js:resolveSchemaPath`, `validateSystemArchitecture.js`) | `argob-schema.js` resolves `.argo/schema` (and `ARGO_SCHEMA_DIR`) **before** the default |
-| 2 | Element/relationship type enums | duplicated in `SystemArchitecture.schema.json`, `archimate32-rules.js`, `ea-qea-sync-lib.js`, `generateArchitectureDiffPlantuml.js`, `eatool/.../export-to-kg.js` | the **validation path** now reads the resolved bundle's enums; the default bundle keeps its data module |
-| 3 | Endpoint legality matrix | hardcoded `archimate32-rules.js` only | supplied per bundle (`argob-rules.json`); default unchanged; custom bundles default to permissive |
+| 2 | Element/relationship type enums | duplicated in `SystemArchitecture.schema.json`, `archimate32-rules.js`, `ea-qea-sync-lib.js`, `generateArchitectureDiffPlantuml.js`, `eatool/.../export-to-kg.js` | the **validation path** now reads the resolved bundle's enums; the default bundle's data moved to `argob-rules.json` (module kept only as fallback) |
+| 3 | Endpoint legality matrix | hardcoded `archimate32-rules.js` only | supplied per bundle (`argob-rules.json`, class- or type-keyed); default unchanged; custom bundles default to permissive |
 | 4 | `graph-semantics.js` invariants | hardcoded language name, `SystemArchitecture` root view, 15-element limit | parameterised by the ontology (`ontology.invariants`, `ontology.language`) |
 | 5 | MCP guidance strings | hardcoded "ArchiMate 3.2 relationship matrix" / "15 elements" / "SystemArchitecture" | derived from the resolved ontology (`addGuidanceForError(.., ontology)`) |
 | 6 | `queryNeo4jGraph {schema:true}` | read enums from a fixed `$defs.archimateElementType` | reads the resolved bundle; reports `schemaKind`, `schemaLanguage`, `schemaDir`, `guidePath` |
@@ -164,14 +180,17 @@ and the live MCP projection.
 - `verify.js` — 7 checks: toolchain install, schema acceptance tests + MCP
   regressions, deployed MCP custom-vs-default resolution, the shipped example,
   and `opencode mcp list` loading the deployed server.
-- `verify-all.js` — full surface under the **Team Graph** custom schema against
-  a **real Neo4j + real embedding provider**: `initializeWorkspace` (Neo4j sync
-  + semantic lifecycle), `getSystemArchitecture` (semantic retrieval over custom
-  content), `getIntentElementContext`, `getArchitectureViewContext`,
-  `queryNeo4jGraph` (`{schema:true}` and Cypher), `memory_search`,
-  `validateSystemArchitecture` (before/after writes), every write tool
-  (element/relationship/view add·update·remove, preview, apply), and
-  `runArchitectureTests`. Run:
+- `verify-all.js` — 8 checks: the full surface under **both** schema modes
+  (A custom Team Graph, B default ArgoBument) against a **real Neo4j + real
+  embedding provider**, each exercising all 19 MCP tools: `initializeWorkspace`
+  (Neo4j sync + semantic lifecycle, and asserts the result reports the active
+  schema kind/language), `getSystemArchitecture` (semantic retrieval),
+  `getIntentElementContext`, `getArchitectureViewContext`, `queryNeo4jGraph`
+  (`{schema:true}` and Cypher), `memory_search`, `validateSystemArchitecture`
+  (before/after writes), every write tool (element/relationship/view
+  add·update·remove, preview, apply), and `runArchitectureTests`. It also
+  replaces the installed `~/.argo/schema` with a custom bundle and proves a
+  plain workspace adopts it (the default is replaceable). Run:
 
   ```
   docker run --rm --entrypoint node \

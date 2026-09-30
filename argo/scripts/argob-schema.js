@@ -229,7 +229,7 @@ function resolveActorElementType(config) {
   return DEFAULT_ACTOR_ELEMENT_TYPE;
 }
 
-function validateBundle({ language, kind, elementTypes, relationshipTypes, actorElementType, matrix }) {
+function validateBundle({ language, dialect, elementTypes, relationshipTypes, actorElementType, matrix }) {
   const errors = [];
   const elementTypeList = Array.isArray(elementTypes) ? elementTypes : [];
   const relationshipTypeList = Array.isArray(relationshipTypes) ? relationshipTypes : [];
@@ -255,8 +255,8 @@ function validateBundle({ language, kind, elementTypes, relationshipTypes, actor
     errors.push(`schema bundle '${language}' actorElementType must be a non-empty string or null; got ${JSON.stringify(actorElementType)}`);
   }
 
-  // The endpoint matrix (custom bundles only) must only reference declared types.
-  if (kind !== 'default' && matrix && typeof matrix === 'object') {
+  // The endpoint matrix (type-keyed bundles only) must only reference declared types.
+  if (dialect !== 'archimate-class-matrix' && matrix && typeof matrix === 'object') {
     for (const [relationshipType, targetsBySource] of Object.entries(matrix)) {
       if (!relationshipTypeList.includes(relationshipType)) {
         errors.push(`relationshipTargetMatrix references unknown relationship type '${relationshipType}'`);
@@ -277,16 +277,70 @@ function validateBundle({ language, kind, elementTypes, relationshipTypes, actor
   return { status: errors.length === 0 ? 'passed' : 'failed', errors };
 }
 
-function buildDefaultOntology(bundle) {
-  const rules = require('./archimate32-rules.js');
+function buildClassMatrixOntology(bundle) {
   const language = typeof bundle.config.language === 'string' && bundle.config.language.trim() !== ''
     ? bundle.config.language.trim()
     : DEFAULT_LANGUAGE;
-  const elementTypes = Array.from(rules.elementTypeMetadata.keys());
-  const relationshipTypes = Array.from(rules.relationshipCategoryByType.keys());
+  const rules = bundle.rules;
+  let elementTypeMetadata;
+  let relationshipCategoryByType;
+  let isSupportedElementType;
+  let isSupportedRelationshipType;
+  let getMetadata;
+  let getArchiMateClass;
+  let validateRelationshipEndpointTypes;
+
+  if (rules) {
+    // Data-driven default: the bundle ships its own rule data (argob-rules.json),
+    // so the DEFAULT schema is replaceable file-for-file exactly like a custom one.
+    const classByType = rules.archimateClassByElementType || {};
+    const classMatrix = rules.relationshipTargetMatrix || {};
+    elementTypeMetadata = new Map(Object.entries(rules.elementTypeMetadata || {}));
+    relationshipCategoryByType = new Map(Object.entries(rules.relationshipCategoryByType || {}));
+    isSupportedElementType = (type) => elementTypeMetadata.has(type);
+    isSupportedRelationshipType = (type) => relationshipCategoryByType.has(type);
+    getMetadata = (element) => elementTypeMetadata.get(element && element.type) || {};
+    getArchiMateClass = (elementOrType) => {
+      const type = typeof elementOrType === 'string' ? elementOrType : elementOrType && elementOrType.type;
+      return classByType[type];
+    };
+    validateRelationshipEndpointTypes = (relationship, source, target) => {
+      if (!relationship || !source || !target) {
+        return [];
+      }
+      const type = relationship.type;
+      if (!relationshipCategoryByType.has(type)) {
+        return ['relationships \'' + relationship.id + '\' uses unsupported ArchiMate relationship type \'' + type + '\''];
+      }
+      const sourceClass = getArchiMateClass(source);
+      const targetClass = getArchiMateClass(target);
+      if (!sourceClass || !targetClass) {
+        return [];
+      }
+      const allowedTargets = classMatrix[type] && classMatrix[type][sourceClass];
+      if (!allowedTargets || !allowedTargets.some((allowed) => allowed === targetClass || allowed === 'ModelConcept')) {
+        return ['relationships \'' + relationship.id + '\' violates ArchiMate 3.2 relationship matrix: ' + source.type + ' \'' + source.name + '\' cannot ' + type + ' ' + target.type + ' \'' + target.name + '\''];
+      }
+      return [];
+    };
+  } else {
+    // Legacy fallback: an installation without argob-rules.json uses the bundled module.
+    const mod = require('./archimate32-rules.js');
+    elementTypeMetadata = mod.elementTypeMetadata;
+    relationshipCategoryByType = mod.relationshipCategoryByType;
+    isSupportedElementType = mod.isSupportedElementType;
+    isSupportedRelationshipType = mod.isSupportedRelationshipType;
+    getMetadata = mod.getMetadata;
+    getArchiMateClass = mod.getArchiMateClass;
+    validateRelationshipEndpointTypes = mod.validateRelationshipEndpointTypes;
+  }
+
+  const elementTypes = Array.from(elementTypeMetadata.keys());
+  const relationshipTypes = Array.from(relationshipCategoryByType.keys());
   const actorElementType = resolveActorElementType(bundle.config);
   return finalizeOntology({
-    kind: 'default',
+    kind: bundle.kind,
+    dialect: 'archimate-class-matrix',
     language,
     elementTypeErrorLabel: 'ArchiMate',
     relationshipTypeErrorLabel: 'ArchiMate',
@@ -294,14 +348,14 @@ function buildDefaultOntology(bundle) {
     elementTypes,
     relationshipTypes,
     actorElementType,
-    bundleValidation: validateBundle({ language, kind: 'default', elementTypes, relationshipTypes, actorElementType, matrix: null }),
-    elementTypeMetadata: rules.elementTypeMetadata,
-    relationshipCategoryByType: rules.relationshipCategoryByType,
-    isSupportedElementType: rules.isSupportedElementType,
-    isSupportedRelationshipType: rules.isSupportedRelationshipType,
-    getMetadata: rules.getMetadata,
-    getArchiMateClass: rules.getArchiMateClass,
-    validateRelationshipEndpointTypes: rules.validateRelationshipEndpointTypes,
+    bundleValidation: validateBundle({ language, dialect: 'archimate-class-matrix', elementTypes, relationshipTypes, actorElementType, matrix: null }),
+    elementTypeMetadata,
+    relationshipCategoryByType,
+    isSupportedElementType,
+    isSupportedRelationshipType,
+    getMetadata,
+    getArchiMateClass,
+    validateRelationshipEndpointTypes,
     invariants: resolveInvariants(bundle.config, {
       statementGrammar: true,
       endpointMatrix: true,
@@ -311,7 +365,7 @@ function buildDefaultOntology(bundle) {
   });
 }
 
-function buildCustomOntology(bundle) {
+function buildTypeMatrixOntology(bundle) {
   const config = bundle.config || {};
   const language = typeof config.language === 'string' && config.language.trim() !== ''
     ? config.language.trim()
@@ -380,7 +434,8 @@ function buildCustomOntology(bundle) {
   }
 
   return finalizeOntology({
-    kind: 'custom',
+    kind: bundle.kind,
+    dialect: 'type-matrix',
     language,
     elementTypeErrorLabel: language,
     relationshipTypeErrorLabel: language,
@@ -388,7 +443,7 @@ function buildCustomOntology(bundle) {
     elementTypes,
     relationshipTypes,
     actorElementType,
-    bundleValidation: validateBundle({ language, kind: 'custom', elementTypes, relationshipTypes, actorElementType, matrix }),
+    bundleValidation: validateBundle({ language, dialect: 'type-matrix', elementTypes, relationshipTypes, actorElementType, matrix }),
     elementTypeMetadata,
     relationshipCategoryByType,
     isSupportedElementType: (type) => elementTypeMetadata.has(type),
@@ -434,7 +489,16 @@ function finalizeOntology(ontology) {
 const ontologyCache = new Map();
 
 function buildOntology(bundle) {
-  return bundle.kind === 'default' ? buildDefaultOntology(bundle) : buildCustomOntology(bundle);
+  const rules = bundle.rules;
+  if (rules && rules.dialect === 'archimate-class-matrix') {
+    return buildClassMatrixOntology(bundle);
+  }
+  if (rules) {
+    return buildTypeMatrixOntology(bundle);
+  }
+  // No rules file: the default bundle falls back to the bundled module; a custom
+  // bundle without rules is validated permissively (types from schema enums).
+  return bundle.kind === 'default' ? buildClassMatrixOntology(bundle) : buildTypeMatrixOntology(bundle);
 }
 
 function loadSchemaBundleAndOntology(workspaceRoot, options = {}) {

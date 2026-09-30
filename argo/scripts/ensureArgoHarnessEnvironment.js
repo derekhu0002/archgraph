@@ -56,6 +56,20 @@ async function runHarnessReport({ checkOnly, workspaceRoot, includeBootstrap }) 
 
   try {
     report.harnessEnvironment = loadRepositoryArgoEnvironment(workspaceRoot);
+    try {
+      const { bundle, ontology } = require('./argob-schema.js').loadSchemaBundleAndOntology(workspaceRoot);
+      report.schemaBundle = {
+        kind: bundle.kind,
+        language: ontology.language,
+        dialect: ontology.dialect,
+        dir: bundle.relativeDir,
+        guide: bundle.guidePath ? bundle.guidePath.relativePath : null,
+        actorElementType: ontology.actorElementType,
+        bundleValidation: ontology.bundleValidation ? ontology.bundleValidation.status : null,
+      };
+    } catch (schemaError) {
+      report.schemaBundle = { kind: 'unknown', error: String(schemaError && schemaError.message ? schemaError.message : schemaError) };
+    }
     if (includeBootstrap) {
       report.workspaceBootstrap = await ensureWorkspaceBootstrap({ checkOnly, workspaceRoot });
     }

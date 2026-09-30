@@ -21,7 +21,9 @@ const {
   resolveSchemaBundle,
   resolveTypeEnums,
   loadSchemaBundleAndOntology,
+  buildOntology,
 } = require('../argo/scripts/argob-schema.js');
+const argoMcp = require('../argo/scripts/argo-mcp-server.js');
 const {
   validateGraphSemantics,
   validateArchiMateEndpointMatrix,
@@ -290,6 +292,66 @@ test('AT argob-schema: MCP validateSystemArchitecture fails when a graph uses a 
   // THEN it fails and names the custom language
   assert.equal(payload.status, 'failed');
   assert.ok(String(payload.stderr || '').includes('unsupported TeamA Ontology element type'), String(payload.stderr || '').slice(0, 500));
+});
+
+test('AT argob-schema: the shipped default bundle is data-driven (argob-rules.json)', () => {
+  // GIVEN the default bundle
+  // WHEN its ontology is resolved
+  const { bundle, ontology } = loadSchemaBundleAndOntology(ROOT);
+  const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'argo', 'schema', 'argob-rules.json'), 'utf8'));
+  // THEN the rule data ships as JSON (class matrix dialect), not code, so the
+  // default can be replaced file-for-file like any custom bundle
+  assert.equal(rules.dialect, 'archimate-class-matrix');
+  assert.equal(Object.keys(rules.elementTypeMetadata).length, 64);
+  assert.equal(bundle.kind, 'default');
+  assert.equal(ontology.dialect, 'archimate-class-matrix');
+  assert.equal(ontology.elementTypes.length, 64);
+  assert.equal(ontology.relationshipTypes.length, 11);
+});
+
+test('AT argob-schema: a default bundle carrying its own type-matrix rules is used as-is (replaceable default)', () => {
+  // GIVEN a default-located bundle whose rules use the type-matrix dialect
+  const synthetic = {
+    kind: 'default',
+    config: { language: 'My Default Ontology' },
+    schemaDocument: {},
+    rules: {
+      dialect: 'type-matrix',
+      elementTypeMetadata: { 'Thing': { layer: 'X' } },
+      relationshipCategoryByType: { 'Links': 'C' },
+      relationshipTargetMatrix: { Links: { Thing: ['Thing'] } },
+    },
+  };
+  // WHEN the ontology is built
+  const ontology = buildOntology(synthetic);
+  // THEN it follows the bundle's own data (not the built-in ArchiMate code)
+  assert.equal(ontology.kind, 'default');
+  assert.equal(ontology.dialect, 'type-matrix');
+  assert.equal(ontology.language, 'My Default Ontology');
+  assert.deepEqual(ontology.elementTypes, ['Thing']);
+  assert.deepEqual(ontology.relationshipTypes, ['Links']);
+});
+
+test('AT argob-schema: initializeWorkspace reports the resolved schema (kind + language)', async () => {
+  // GIVEN a workspace with its own schema bundle
+  const custom = makeTempWorkspace();
+  writeCustomBundle(custom);
+  // WHEN the workspace is initialized
+  const customResult = await argoMcp.initializeWorkspace(custom);
+  // THEN the result names the active schema
+  assert.equal(customResult.schema.kind, 'workspace');
+  assert.equal(customResult.schema.language, 'TeamA Ontology');
+  assert.equal(customResult.schema.dialect, 'type-matrix');
+  assert.equal(customResult.schema.actorElementType, 'Team Node');
+
+  // GIVEN a workspace without its own schema
+  const plain = makeTempWorkspace();
+  const plainResult = await argoMcp.initializeWorkspace(plain);
+  // THEN it reports the default ArgoBument schema
+  assert.equal(plainResult.schema.kind, 'default');
+  assert.equal(plainResult.schema.language, 'ArchiMate 3.2');
+  assert.equal(plainResult.schema.dialect, 'archimate-class-matrix');
+  assert.equal(plainResult.schema.actorElementType, 'Business Actor');
 });
 
 test('AT argob-schema: the repository default graph still validates against the default bundle', () => {
