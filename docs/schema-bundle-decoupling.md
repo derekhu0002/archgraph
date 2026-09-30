@@ -131,8 +131,8 @@ So after `argo init` / the argo-init skill, the reported `schema.kind` is
 | 7 | Tool descriptions | named `.argo/schema/SystemArchitecture.schema.json` / ArchiMate | reference the workspace-resolved bundle |
 | 8 | Rules `<Ontology>` | declared ArchiMate only | documents the default + `.argo/schema` override + `ARGO_ACTOR_ELEMENT_TYPE` |
 | 9 | Wakeup gate / actor type | hardcoded `Business Actor` | `ARGO_ACTOR_ELEMENT_TYPE` (default `Business Actor`); gate text notes the schema's actor type |
-| 10 | Skills (`ea-human-reconcile`, `argo-init`) | example Cypher + steps assumed ArchiMate | resolve the workspace language first; `.qea` projection documented as skipped for custom schemas |
-| 11 | `.qea` projection | always attempted | explicitly skipped (`noop` + reason) when the workspace schema is not the default ArchiMate schema |
+| 10 | Skills (`ea-human-reconcile`, `argo-init`) | example Cypher + steps assumed ArchiMate | resolve the workspace language first; `.qea` projection documented as generic (runs for any schema) |
+| 11 | `.qea` projection | always attempted | always attempted; custom types map generically (unknown element → EA `Class` + stereotype = type name; unknown relationship → `Association`), so it is NOT skipped for custom schemas |
 | 12 | Env classification | — | `ARGO_SCHEMA_DIR`, `ARGO_ACTOR_ELEMENT_TYPE` classified as host-only keys |
 
 ### Residual couplings (documented, intentional)
@@ -145,8 +145,10 @@ So after `argo init` / the argo-init skill, the reported `schema.kind` is
   relationship names yields no ordering edges (tests still run, in declaration
   order) — safe degradation, not a validation bypass.
 - **EA round-trip tooling** (`ea-qea-sync-lib.js`, `eatool/*`) maps ArchiMate
-  stereotypes to EA shapes. It remains ArchiMate-specific; the `.qea` projection
-  is skipped for custom-schema workspaces.
+  stereotypes to EA shapes precisely. It is not a blocker for custom schemas:
+  unknown element types project to a generic EA `Class` whose stereotype is the
+  type name, and unknown relationship types project to `Association`, so `.qea`
+  projection runs for every schema (no skip).
 
 ## 4. Authoring a workspace schema (example)
 

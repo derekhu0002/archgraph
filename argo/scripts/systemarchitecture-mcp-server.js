@@ -2283,12 +2283,6 @@ function summarizeDocument(document) {
 function resolveQeaProjectionTarget(context) {
   const none = (reason, hasEaSignals) => ({ target: null, reason, hasEaSignals: !!hasEaSignals });
   try {
-    const ontology = context && context.ontology;
-    if (ontology && ontology.dialect && ontology.dialect !== 'archimate-class-matrix') {
-      // The .qea projection maps ArchiMate stereotypes to EA shapes; a schema with
-      // its own ontology has no such mapping, so skip it explicitly.
-      return none(`workspace schema '${ontology.language || 'custom'}' is not the default ArchiMate schema; .qea projection skipped`, false);
-    }
     const workspaceRoot = String(context && context.workspaceRoot ? context.workspaceRoot : '');
     if (!workspaceRoot || !fs.existsSync(workspaceRoot)) { return none('workspace root unavailable: ' + workspaceRoot, true); }
     const graphAbsolute = context.graphPath && context.graphPath.absolutePath ? context.graphPath.absolutePath : null;

@@ -489,12 +489,6 @@ function resolveQeaProjectionTarget(workspaceRoot) {
 // argo init .qea FULL projection (mirrors Neo4j initial full sync): wipes the whole target
 // .qea then rebuilds it purely from the canonical graph. Non-fatal by contract.
 function runQeaFullProjection(workspaceRoot, graphTargetPath) {
-  try {
-    const { ontology } = loadSchemaBundleAndOntology(workspaceRoot);
-    if (ontology.dialect && ontology.dialect !== 'archimate-class-matrix') {
-      return { status: 'noop', reason: `schema '${ontology.language}' is not ArchiMate; .qea projection skipped` };
-    }
-  } catch { /* fall through to the normal path */ }
   const target = resolveQeaProjectionTarget(workspaceRoot);
   const script = path.join(__dirname, 'ea-qea-sync.js');
   if (!target || !fs.existsSync(script)) {

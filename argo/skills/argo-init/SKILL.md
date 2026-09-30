@@ -21,7 +21,7 @@ disable-model-invocation: true
 - **MUST** 报告 `mcp` / `systemArchitecture` / `neo4j` / `qeaFullProjection` / `semanticLifecycle` / `subdiagramViews` 与整体 `status`。
 - **MUST** 核验并报告：① `.qea` 投影是否成功（`qeaFullProjection.status`），且投影目标 `qeaFullProjection.qea` 是否为**本仓库自己的 .qea 文件**（解析自 `ARGO_EA_QEA` 或仓库根唯一 `*.qea`）；目标不是本仓库文件或投影失败 → 报告为告警/失败，不得视为 init 成功。
 - **MUST** 核验并报告：Neo4j 投影目标数据库名（`neo4j.database`）是否**与本仓库名一致**（仓库 basename == 数据库名）；不一致 → 报告为告警/失败。
-- **MUST** 说明建模语言：默认使用 ArgoBument（ArchiMate 3.2 + ARGO）；当工作区自带 `<workspace>/.argo/schema/` schema bundle 时，canonical 校验按该自定义 schema 执行，且 `.qea` 全量投影会**按设计跳过**（仓库自带 schema 非 ArchiMate，无 EA 形状映射），此时 `qeaFullProjection` 报告 `noop` 属预期，不作为失败。
+- **MUST** 说明建模语言：默认使用 ArgoBument（ArchiMate 3.2 + ARGO）；当工作区自带 `<workspace>/.argo/schema/` schema bundle 时，canonical 校验按该自定义 schema 执行。`.qea` 全量投影对**任何** schema 都会执行（通用映射：未知元素类型 → EA `Class` + stereotype=类型名；未知关系类型 → `Association`），不因自定义 schema 而跳过。
 - **MUST NOT** 读取、打印或复述 `.env` 中的 secret 值；排查时只允许报告 key 是否存在、ACL 主体。
 - **MUST NOT** 通过 shell 手工执行 WORKSPACE 外的初始化脚本或一组无关命令来替代 `initializeWorkspace`（除非报告显示底层脚本自身失败需要排查）。
 

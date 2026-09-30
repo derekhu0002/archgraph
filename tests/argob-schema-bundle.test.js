@@ -24,6 +24,7 @@ const {
   buildOntology,
 } = require('../argo/scripts/argob-schema.js');
 const argoMcp = require('../argo/scripts/argo-mcp-server.js');
+const qeaLib = require('../argo/scripts/ea-qea-sync-lib.js');
 const {
   validateGraphSemantics,
   validateArchiMateEndpointMatrix,
@@ -330,6 +331,20 @@ test('AT argob-schema: a default bundle carrying its own type-matrix rules is us
   assert.equal(ontology.language, 'My Default Ontology');
   assert.deepEqual(ontology.elementTypes, ['Thing']);
   assert.deepEqual(ontology.relationshipTypes, ['Links']);
+});
+
+test('AT argob-schema: the .qea projection maps custom types generically (never skipped)', () => {
+  // GIVEN a custom ontology whose types/relationships are unknown to the ArchiMate mapper
+  // WHEN the .qea projection mapping is applied
+  // THEN it degrades to a generic EA shape (Class + stereotype = type name; Association)
+  //      instead of failing or being skipped, so projection runs for any schema
+  assert.equal(qeaLib.elementObjectType('Team Node'), 'Class');
+  assert.equal(qeaLib.elementStereotype('Team Node'), 'TeamNode');
+  assert.equal(qeaLib.elementObjectType('Business Actor'), 'Class');
+  assert.equal(qeaLib.elementStereotype('Business Actor'), 'BusinessActor');
+  assert.equal(qeaLib.relationshipMap('Depends On').connectorType, 'Association');
+  assert.equal(qeaLib.relationshipMap('Assignment').connectorType, 'Association');
+  assert.equal(qeaLib.relationshipMap('Triggering').connectorType, 'ControlFlow');
 });
 
 test('AT argob-schema: initializeWorkspace reports the resolved schema (kind + language)', async () => {

@@ -344,7 +344,10 @@ async function main() {
       if (!schemaInfo || schemaInfo.kind !== cfg.schema.kind) throw new Error(`init schema.kind=${schemaInfo && schemaInfo.kind} expected ${cfg.schema.kind}: ${JSON.stringify(schemaInfo)}`);
       if (schemaInfo.language !== cfg.schema.language) throw new Error(`init schema.language=${schemaInfo.language} expected ${cfg.schema.language}`);
       if (schemaInfo.actorElementType !== cfg.schema.actor) throw new Error(`init schema.actorElementType=${schemaInfo.actorElementType} expected ${cfg.schema.actor}`);
-      return { status: report && report.status, neo4j: report && report.neo4j && report.neo4j.status, semantic: report && report.semanticLifecycle && report.semanticLifecycle.state, schema: { kind: schemaInfo.kind, language: schemaInfo.language, dialect: schemaInfo.dialect, actorElementType: schemaInfo.actorElementType } };
+      // The .qea projection must run for ANY schema (generic mapping), never skip.
+      const qea = init.qeaFullProjection || report.qeaFullProjection;
+      if (!qea || qea.status !== 'ok') throw new Error(`.qea projection not ok for ${cfg.schema.kind} schema: ${JSON.stringify(qea)}`);
+      return { status: report && report.status, qeaProjection: qea.status, neo4j: report && report.neo4j && report.neo4j.status, semantic: report && report.semanticLifecycle && report.semanticLifecycle.state, schema: { kind: schemaInfo.kind, language: schemaInfo.language, dialect: schemaInfo.dialect, actorElementType: schemaInfo.actorElementType } };
     });
 
     await record(`all 19 MCP interfaces — ${cfg.label}`, async () => {
