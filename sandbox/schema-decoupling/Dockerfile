@@ -16,5 +16,5 @@ ENV HOME=/root \
     ARGO_REPO_ROOT=/ws-custom
 
 WORKDIR /opt/verify
-COPY verify.js /opt/verify/verify.js
+COPY verify.js verify-all.js /opt/verify/
 ENTRYPOINT ["node", "/opt/verify/verify.js"]

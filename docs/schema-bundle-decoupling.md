@@ -153,10 +153,32 @@ different schemas.
 
 ## 5. Verification
 
-Executable acceptance tests: `tests/argob-schema-bundle.test.js` (12 cases)
-cover default resolution, workspace override, `ARGO_SCHEMA_DIR` precedence,
-custom-type accept/reject, endpoint-matrix on/off, custom matrix enforcement,
-per-view limit, and the live MCP surface (`queryNeo4jGraph {schema:true}` and
-`validateSystemArchitecture`). The full suite is unchanged except for these
-additions (remaining failures pre-date this branch: EA-import tooling, cost-log
-env keys, and graph-content drift).
+**Schema resolution** — `tests/argob-schema-bundle.test.js` (17 cases): default
+resolution, workspace override, `ARGO_SCHEMA_DIR` precedence, custom-type
+accept/reject, actor contract / bundle validation, endpoint-matrix on/off,
+custom matrix enforcement, per-view limit, the shipped `custom-schema/` example,
+and the live MCP projection.
+
+**Docker (isolated, node + opencode)** — `sandbox/schema-decoupling/`:
+
+- `verify.js` — 7 checks: toolchain install, schema acceptance tests + MCP
+  regressions, deployed MCP custom-vs-default resolution, the shipped example,
+  and `opencode mcp list` loading the deployed server.
+- `verify-all.js` — full surface under the **Team Graph** custom schema against
+  a **real Neo4j + real embedding provider**: `initializeWorkspace` (Neo4j sync
+  + semantic lifecycle), `getSystemArchitecture` (semantic retrieval over custom
+  content), `getIntentElementContext`, `getArchitectureViewContext`,
+  `queryNeo4jGraph` (`{schema:true}` and Cypher), `memory_search`,
+  `validateSystemArchitecture` (before/after writes), every write tool
+  (element/relationship/view add·update·remove, preview, apply), and
+  `runArchitectureTests`. Run:
+
+  ```
+  docker run --rm --entrypoint node \
+    -v "<repo>:/repo:ro" -v "<repo>/results:/results" \
+    -v "<HOME>/.argo/.env:/env/argo.env:ro" \
+    archgraph-schema-verify /opt/verify/verify-all.js
+  ```
+
+The full Node suite is otherwise unchanged (remaining failures pre-date this
+branch: EA-import tooling, cost-log env keys, graph-content drift).
