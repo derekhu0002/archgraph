@@ -4277,7 +4277,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（2026-09-30 会话 · schema/建模语言解耦）：任务——fork 分支 develop-separate-schema，把 ArgoBument 建模语言从工具链解耦；定制与默认 schema 下所有 MCP 接口（含语义检索/写入/校验）都必须正常；默认 schema 也可替换；初始化后要看出用的哪个 schema；默认图强校验。\\n【交付】argob-schema.js（bundle 解析 + ontology 构建 + validateBundle fail-closed）；argo/schema/argob-rules.json（默认规则数据化, dialect=archimate-class-matrix）→ 默认可整包替换；graph-semantics.js ontology 参数化；MCP/validator 按工作区解析并校验+guidance；规则<Ontology>/唤醒闸门/skills（均 agent-facing 行为契约，非人类文档）；custom-schema/ 示例；docs/schema-bundle-decoupling.md；sandbox/schema-decoupling/{Dockerfile,verify.js,verify-all.js}。\\n【actor 契约】argob.config.json actorElementType（默认 Business Actor；null=无 actor）；fail-closed 校验。\\n【.qea 投影】通用（未知类型→EA Class+stereotype=类型名；未知关系→Association），不因自定义 schema 跳过。\\n【默认图（终态）】只有内置 ArgoBument 默认 schema（kind=default 且 dialect=archimate-class-matrix）缺图时拷打包默认图；其他任何 schema（仓内 .argo/schema / ARGO_SCHEMA_DIR / 被替换的非 ArchiMate 默认）都不拷贝、要求用户自建 design/KG/SystemArchitecture.json，缺则 fail-closed（NO_DEFAULT_GRAPH，消息透出）。已弃用 bundle defaultGraph 机制。\\n【schema 报告】initializeWorkspace 返回 schema{kind,language,dialect,dir,guide,actorElementType,bundleValidation}；validateSystemArchitecture 打印 [schema: kind/language]；queryNeo4jGraph{schema:true} 增 schemaDialect；argo-init skill MUST 报告。\\n【MCP 19 接口】initializeWorkspace, runArchitectureTests, getSystemArchitecture, getIntentElementContext, preview/applySystemArchitectureMutation, add/update/removeArchitectureElement, add/update/removeArchitectureRelationship, add/update/removeArchitectureView, getArchitectureViewContext, queryNeo4jGraph, memory_search, validateSystemArchitecture。\\n【验收】tests/argob-schema-bundle.test.js 25/25；Docker verify-all.js 9/9（双场景各 19 接口 + 换默认 schema + 自定义缺图 fail-closed；每个 init 前 drop 隔离库）；verify.js 7/7；本机全量回归无新增失败。\\n【关键决策】复用 .argo/schema 覆盖；默认行为零回归；默认规则数据化以支持整包替换；.qea 通用；默认图仅内置默认拷贝、自定义 fail-closed；规则/skill 是给 Agent 的行为契约（非人类文档）。\\n【坑】Docker Desktop 引擎需手动拉起；容器只拷代码子集并排除 ACL 受限 repo argo/.env（改挂可读 ~/.argo/.env）；Neo4j 库名禁下划线；语义生命周期需 ARGO_LIVE_PROVIDER_E2E=1 且每次 init 前 drop 库（否则 SEMANTIC_QUERYABILITY_NOT_VERIFIED）；容器内 neo4j-driver 从 vendor tgz 装 + NODE_PATH；opencode 无 key 用 `opencode mcp list` 验连；MCP 不随 stdin EOF 退出→spawn+响应齐后 kill；removeRelationship 级联剪端点（设计）；仅显式 git add 子目录绕过锚定根 .gitignore（已修 **/.argo/temp/）；init 错误包装掩盖 message（已为 NO_DEFAULT_GRAPH 透出）；docker build 偶发 context meta.json 被占用→重试。\\n【待办】未 push；未部署到本机 ~/.argo。\\ncommits 95f63a4/2089547/0e4e241/259b5c9/c743bcc/2ca6e55/7c5cf71/b0f1d43/07893dc/87a1ee2/077521b/ac1a2ec/f853280/7f89e3f/7dee532/5f7863b/fbde114/b8e021e/b684ed0/d22afc6。T2 里程碑 overseer-milestone-schema-bundle-decoupling-001。",
+      "description": "项目总管工作记忆摘要（2026-09-30 会话 · schema 解耦 + 全面验收）：任务——schema 解耦（默认/自定义）；所有 MCP 接口在两种 schema 下正常；默认可替换；初始化报告 schema；默认图强校验；全面核对接口测试覆盖并消减全部失败测试；e2e 统一在 Docker 容器。\\n【schema 解耦交付】argob-schema.js（bundle 解析 + ontology + fail-closed bundleValidation）；argob-rules.json（默认规则数据化, archimate-class-matrix）→ 默认可整包替换；graph-semantics.js ontology 参数化；MCP/validator 按工作区解析+guidance；规则<Ontology>/唤醒门/skills 均 agent-facing；.qea 通用投影（不跳过）；默认图：仅内置默认拷贝，自定义须自建否则 fail-closed；schema 报告（init/validate/queryNeo4jGraph/argo-init skill）；custom-schema/ 示例。\\n【全接口验收】19 接口：initializeWorkspace, runArchitectureTests, getSystemArchitecture, getIntentElementContext, getArchitectureViewContext, queryNeo4jGraph, memory_search, validateSystemArchitecture, preview/applySystemArchitectureMutation, add/update/remove element/relationship/view。\\n【验收标准（新）】npm run acceptance = scripts/mcp-acceptance.js → 隔离 Docker 容器（node+opencode，真 Neo4j(host.docker.internal, 隔离库) + 真 embedding）跑 sandbox/schema-decoupling/verify-all.js：19/19 接口 × 默认/自定义 schema × 语义+非语义检索 + init/校验/写入/runArchitectureTests + custom 无图 fail-closed + 默认 bundle 可替换。9/9 passed。文档 docs/mcp-acceptance.md（元素 doc-mcp-acceptance-001）。\\n【失败测试消减】本机 npm test 从 24 fail → 0 fail（646 测试，635 pass，11 skipped）。case by case：①删除已废弃 EA import-from-kg/-external-package 测试（脚本已删，新路径由 ea-qea-sync.test.js 覆盖）；②删除 out-of-repo excalidraw-diagram-skill 测试；③env-key 归类 ARGO_COST_PROFILER/_TRACE_MAX_BYTES；④刷新图谱漂移期望（architecture-view-context 子视图 24、memory-eval MQ-17=24、overseer-ltm-layering 成员、agent-read-projection fixture 改用元素 1318/view174）；⑤移除图谱上指向已删测试的 AT（元素 1331/2100）。\\n【关键决策】复用 .argo/schema 覆盖；默认零回归；默认规则数据化；.qea 通用；默认图仅内置；规则/skill 是 Agent 行为契约；e2e 一律 Docker（宿主不受影响）；语义检索验收不得跳过。\\n【坑】Docker Desktop 需手动拉起；容器只拷代码子集并排除 ACL 受限 repo argo/.env（挂可读 ~/.argo/.env）；Neo4j 库名禁下划线；语义生命周期需 ARGO_LIVE_PROVIDER_E2E=1 且每次 init 前 drop 库；容器内 neo4j-driver 从 vendor tgz 装 + NODE_PATH；opencode 无 key 用 mcp list 验连；MCP 不随 stdin EOF 退出→spawn+响应齐后 kill；removeRelationship 级联剪端点（设计）；显式 git add 子目录绕过锚定根 .gitignore（已修 **/.argo/temp/）；init 错误包装掩盖 message（已透出 NO_DEFAULT_GRAPH）；docker build 偶发 context 占用→重试；删除被测试引用的元素 AT 会连带打断以其为 fixture 的测试（需同步换 fixture）。\\n【待办】未 push本轮（前已 push 至 origin/develop-separate-schema，本轮未 push）。\\ncommits …/b8e021e/b684ed0/d22afc6/83cca1b/23e5cdd。T2 里程碑 overseer-milestone-schema-bundle-decoupling-001。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -10169,6 +10169,16 @@
           "name": "commit",
           "value": "d22afc6",
           "description": "refine(schema): only the built-in default schema auto-provides a graph — argo/scripts/argob-schema.js; argo/scripts/argo-mcp-server.js; argo/schema/argob.config.json; custom-schema/README.md; tests/argob-schema-bundle.test.js; sandbox/schema-decoupling/verify-all.js; docs/schema-bundle-decoupling.md"
+        },
+        {
+          "name": "commit",
+          "value": "23e5cdd",
+          "description": "test: eliminate all failing tests + standardize Docker MCP acceptance — tests/*; scripts/mcp-acceptance.js; docs/mcp-acceptance.md; package.json; scripts/memory-eval-run.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "acceptanceStandard",
+          "value": "docker-e2e",
+          "description": "npm run acceptance ⇒ Docker verify-all：19/19 接口 × 默认/自定义 schema × 语义+非语义检索 + init/校验/写入/fail-closed；报告 results/schema-decoupling-all-report.json。本机全量 npm test 646 测试 0 失败（11 skipped）。"
         }
       ],
       "testcases": [
@@ -10324,6 +10334,11 @@
           "name": "commit",
           "value": "d22afc6",
           "description": "default-graph refined: only built-in default copies; custom requires user graph (fail-closed, no copy); verify-all 9/9"
+        },
+        {
+          "name": "commit",
+          "value": "23e5cdd",
+          "description": "eliminate all failing tests + Docker MCP acceptance standard (19/19, both schemas)"
         }
       ],
       "description": "里程碑（2026-09-30，项目总管，分支 develop-separate-schema）：把 ARGO 工具链从硬编码的 ArgoBument 建模语言解耦为 schema bundle——默认用内置 ArgoBument（ArchiMate 3.2 + ARGO）；工作区自带 <workspace>/.argo/schema/（SystemArchitecture.schema.json + 可选 argob.config.json/argob-rules.json/guide）则用该仓自有 schema。解析优先级 ARGO_SCHEMA_DIR > 仓内 .argo/schema > 默认。\n【关键决策】① 复用既有（此前为死代码的）仓内 .argo/schema 覆盖路径（人类伙伴裁决），未新造 .argob 目录；② 默认路径逐字节保持——规则数据仍来自 archimate32-rules.js，只有自定义 bundle 才走新逻辑；③ 不变量（端点矩阵/statement 语法/根视图名/单视图元素上限）由 bundle 配置，自定义 schema 默认宽松；④ .qea 投影对非 ArchiMate 工作区显式跳过；⑤ Neo4j 标签/runArchitectureTests 依赖序启发式列为已文档化残留。\n【交付】argo/scripts/argob-schema.js（resolveSchemaBundle/loadSchemaBundleAndOntology/resolveTypeEnums）；graph-semantics.js ontology 参数化；validateSystemArchitecture.js / systemarchitecture-mcp-server.js 按工作区解析 bundle 并校验+guidance；queryNeo4jGraph{schema:true} 增 schemaKind/schemaLanguage/schemaDir/guidePath；工具描述/规则<Ontology>/唤醒闸门(ARGO_ACTOR_ELEMENT_TYPE)/skills 去 ArchiMate 硬编码；.env 归类 ARGO_SCHEMA_DIR/ARGO_ACTOR_ELEMENT_TYPE；docs/schema-bundle-decoupling.md。\n【验证】tests/argob-schema-bundle.test.js 12 例；Docker 沙箱 sandbox/schema-decoupling（基于 opencode-sandbox 镜像，容器内 node v24.21.0 + opencode 1.18.29，~/.argo 部署态）6/6：47 测试通过、部署态 MCP 自定义语言 TeamA Ontology 校验通过、默认回退 ArchiMate 3.2/64、opencode mcp list 报 argo connected；本机全量回归无新增失败（剩余为改动前既有：EA import 工具链、cost-log env 键、图谱内容漂移）。\n【经验/坑】① 本机 Docker Desktop 引擎需手动拉起（Start-Process Docker Desktop.exe，~30-60s）；② bind-mount 整个仓（含 .qea/tarball/node_modules）到容器极慢——只拷代码子集（tar 子目录）并排除 ACL 受限的 argo/.env；③ 容器内 MCP 需 neo4j-driver——用 vendor 内置 tgz 在 ~/.argo 安装，NODE_PATH 指向 ~/.argo/node_modules；④ opencode 无 API key 也能用 `opencode mcp list` 验证 MCP 连接；⑤ PowerShell 管道 Select-Object -Last 会缓冲到结束，诊断挂起用 docker run -d + docker logs。\ncommits 95f63a4（代码+测试+沙箱+文档）/ 2089547（图谱登记）/ 0e4e241（commit 登记）。",
@@ -10331,6 +10346,19 @@
       "name": "里程碑：schema/建模语言解耦为 schema bundle（默认 ArgoBument + 仓内 .argo/schema 覆盖）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "doc-mcp-acceptance-001",
+      "name": "MCP 验收标准（Docker 端到端）",
+      "type": "Artifact",
+      "description": "docs/mcp-acceptance.md：所有 ARGO MCP 端到端验收统一在隔离 Docker 容器中进行（npm run acceptance → sandbox/schema-decoupling/verify-all.js，真 Neo4j(host.docker.internal, 隔离库) + 真 embedding）；覆盖全部 19 个接口 × 默认/自定义 schema × 语义/非语义检索 + initializeWorkspace/校验/全部写入/runArchitectureTests + custom 无图 fail-closed + 默认 bundle 可替换；报告 results/schema-decoupling-all-report.json。同时记录本机 npm test 646 测试 0 失败（删除已废弃测试、刷新图谱漂移期望）。宿主框架不受影响。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "23e5cdd",
+          "description": "docs/mcp-acceptance.md; scripts/mcp-acceptance.js; package.json (acceptance script)"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -12621,7 +12649,8 @@
       "description": "将 ARGO 工具链从固定建模语言（ArgoBument = ArchiMate 3.2 + ARGO）解耦为 schema bundle：默认使用内置 ArgoBument；工作区若提供 <workspace>/.argo/schema/ 则使用该仓自有 schema（可选 argob.config.json / argob-rules.json / guide）。解析优先级 ARGO_SCHEMA_DIR > 工作区 .argo/schema > 默认。",
       "included_elements": [
         "wp-schema-bundle-decoupling-001",
-        "doc-schema-bundle-decoupling-001"
+        "doc-schema-bundle-decoupling-001",
+        "doc-mcp-acceptance-001"
       ]
     }
   ]
