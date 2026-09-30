@@ -16,6 +16,10 @@ const {
   loadSchemaBundleAndOntology,
 } = require('./argob-schema.js');
 const {
+  externalQueryRequested,
+  queryExternalRead,
+} = require('./external-graph-query.js');
+const {
   getWorkspaceRoot,
   hasStaticWorkspace,
   resolveArgoPath,
@@ -407,6 +411,16 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
     crash.markPhase('tool:' + name);
   } catch {
     // diagnostics are best-effort; never block a tool call
+  }
+  // Cross-project read: a read tool with `projectId` is routed to the federation
+  // center (never silently served from the local graph).
+  if (externalQueryRequested(name, args)) {
+    const result = await queryExternalRead({
+      workspaceRoot: resolveWorkspaceRoot(args),
+      tool: name,
+      args,
+    });
+    return toolResult(result);
   }
   if (name === 'initializeWorkspace') {
     const workspace = await initializeWorkspace(resolveWorkspaceRoot(args));

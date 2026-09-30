@@ -172,6 +172,7 @@ const {
 } = require('./neo4j-system-architecture-store.js');
 
 const losslessWriteGate = require('./lossless-write-gate.js');
+const { EXTERNAL_READ_TOOLS } = require('./external-graph-query.js');
 
 const HANDLED_MUTATION_TYPES = new Set([
   'addElement',
@@ -419,6 +420,13 @@ const WORKSPACE_ROOT_PARAM = Object.freeze({
   description:
     'Optional absolute workspace root for this call. When provided it is used as-is; otherwise the server launch directory is used.',
 });
+// Cross-project graph query: the 5 read tools accept an optional `projectId`;
+// provided => routed to the federation center, omitted => the local workspace.
+const PROJECT_ID_PARAM = Object.freeze({
+  type: 'string',
+  description:
+    'Optional external project id. When provided, the query is routed to the federation center to read that project\'s graph (this project must be registered in .argo/federation.json); omitted = the local workspace (unchanged).',
+});
 // Lossless write gate: every update/remove helper accepts an explicit loss
 // acknowledgement (see lossless-write-gate.js). add* is purely additive and is
 // left alone. Without the acknowledgement a shrinking text edit or a destructive
@@ -439,6 +447,9 @@ for (const tool of TOOLS) {
   if (!inputSchema || inputSchema.type !== 'object' || !inputSchema.properties) continue;
   if (!Object.prototype.hasOwnProperty.call(inputSchema.properties, 'workspaceRoot')) {
     inputSchema.properties.workspaceRoot = WORKSPACE_ROOT_PARAM;
+  }
+  if (EXTERNAL_READ_TOOLS.has(tool.name) && !Object.prototype.hasOwnProperty.call(inputSchema.properties, 'projectId')) {
+    inputSchema.properties.projectId = PROJECT_ID_PARAM;
   }
   if (tool.name && /^(update|remove)Architecture/.test(tool.name)) {
     for (const [key, value] of Object.entries(LOSS_ACK_INPUT_PROPS)) {

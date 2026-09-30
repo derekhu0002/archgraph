@@ -410,6 +410,21 @@ async function main() {
     return { failClosed: 'ok', packagedGraphCopied: false };
   });
 
+  // Cross-project read: a read tool with projectId routes to the federation
+  // center (real) and returns the external project's result + namespaceKey.
+  await record('cross-project read routes to the federation center (projectId=soc-demo)', async () => {
+    fs.mkdirSync('/ws-fed/.argo', { recursive: true });
+    fs.writeFileSync('/ws-fed/.argo/federation.json', JSON.stringify({ projectId: 'archgraph', sourceRepo: 'https://github.com/derekhu0002/archgraph', centerUrl: 'https://argo.derekworkspacev5.com', branch: 'main' }));
+    const out = await mcpSession([
+      { key: 'ext', name: 'queryNeo4jGraph', arguments: { workspaceRoot: '/ws-fed', projectId: 'soc-demo', cypher: 'MATCH (e:Element) RETURN count(e) AS n' } },
+    ], { ARGO_REPO_ROOT: '/ws-fed', NODE_PATH }, { timeoutMs: 60000 });
+    const r = out.ext;
+    if (!r || r.status !== 'passed' || r.database !== 'soc-demo' || r.namespaceKey !== 'proj:soc-demo') {
+      throw new Error(`unexpected external read result: ${JSON.stringify(r).slice(0, 300)}`);
+    }
+    return { status: r.status, database: r.database, namespaceKey: r.namespaceKey, records: r.records };
+  });
+
   const failed = steps.filter((s) => s.status === 'failed');
   const skipped = failed.some((s) => /^SKIP:/.test(s.error || ''));
   const report = {

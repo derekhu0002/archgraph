@@ -203,7 +203,7 @@ and the live MCP projection.
 - `verify.js` — 7 checks: toolchain install, schema acceptance tests + MCP
   regressions, deployed MCP custom-vs-default resolution, the shipped example,
   and `opencode mcp list` loading the deployed server.
-- `verify-all.js` — 9 checks: the full surface under **both** schema modes
+- `verify-all.js` — 10 checks: the full surface under **both** schema modes
   (A custom Team Graph, B default ArgoBument) against a **real Neo4j + real
   embedding provider**, each exercising all 19 MCP tools: `initializeWorkspace`
   (Neo4j sync + semantic lifecycle, and asserts the result reports the active
@@ -213,8 +213,10 @@ and the live MCP projection.
   (before/after writes), every write tool (element/relationship/view
   add·update·remove, preview, apply), and `runArchitectureTests`. It also
   replaces the installed `~/.argo/schema` with a custom bundle and proves a
-  plain workspace adopts it (the default is replaceable), and proves a custom
-  schema with no graph fails closed (the packaged graph is never copied). Run:
+  plain workspace adopts it (the default is replaceable), proves a custom
+  schema with no graph fails closed (the packaged graph is never copied), and
+  routes a cross-project read (`projectId=soc-demo`) to the federation center
+  (docs/external-graph-query.md). Run:
 
   ```
   docker run --rm --entrypoint node \
