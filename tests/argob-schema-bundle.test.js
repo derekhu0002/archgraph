@@ -68,6 +68,9 @@ function writeCustomBundle(workspaceRoot, options = {}) {
     },
     ...(options.config || {}),
   };
+  if (options.omitActorElementType !== true) {
+    config.actorElementType = options.actorElementType === undefined ? 'Team Node' : options.actorElementType;
+  }
   fs.writeFileSync(path.join(schemaDir, 'argob.config.json'), JSON.stringify(config, null, 2));
 
   if (options.rules) {
@@ -260,6 +263,8 @@ test('AT argob-schema: MCP queryNeo4jGraph {schema:true} reports the workspace s
   assert.deepEqual(payload.schema.archimateElementTypes.sort(), CUSTOM_ELEMENT_TYPES.slice().sort());
   assert.deepEqual(payload.schema.archimateRelationshipTypes, CUSTOM_RELATIONSHIP_TYPES);
   assert.equal(payload.schema.schemaLanguage, 'TeamA Ontology');
+  assert.equal(payload.schema.actorElementType, 'Team Node');
+  assert.equal(payload.schema.bundleValidation.status, 'passed');
 });
 
 test('AT argob-schema: MCP validateSystemArchitecture passes for a custom-schema graph', () => {
@@ -298,4 +303,74 @@ test('AT argob-schema: the repository default graph still validates against the 
   });
   // THEN it passes (no regression to the default ArgoBument path)
   assert.equal(result.status, 0, String(result.stderr || '').slice(0, 500));
+});
+
+test('AT argob-schema: a valid actorElementType makes the bundle pass validation', () => {
+  // GIVEN a custom bundle that declares its actor type among its element types
+  const workspace = makeTempWorkspace();
+  writeCustomBundle(workspace, { actorElementType: 'Team Node' });
+  // WHEN the ontology is built
+  const { ontology } = loadSchemaBundleAndOntology(workspace);
+  // THEN the actor contract is satisfied (the wakeup gate can identify an Actor)
+  assert.equal(ontology.actorElementType, 'Team Node');
+  assert.equal(ontology.bundleValidation.status, 'passed');
+});
+
+test('AT argob-schema: a bundle whose actorElementType is not a declared type fails validation', () => {
+  // GIVEN a custom bundle whose actorElementType is not one of its element types
+  const workspace = makeTempWorkspace();
+  writeCustomBundle(workspace, { actorElementType: 'Business Actor' });
+  // WHEN the ontology is built
+  const { ontology } = loadSchemaBundleAndOntology(workspace);
+  // THEN bundle validation fails, naming the actor type
+  assert.equal(ontology.bundleValidation.status, 'failed');
+  assert.ok(ontology.bundleValidation.errors.some(e => e.includes("actorElementType 'Business Actor'")), JSON.stringify(ontology.bundleValidation));
+});
+
+test('AT argob-schema: a custom bundle with no actor type declared fails validation (must declare or opt out)', () => {
+  // GIVEN a custom bundle with no actorElementType and no 'Business Actor' in its enum
+  const workspace = makeTempWorkspace();
+  writeCustomBundle(workspace, { omitActorElementType: true });
+  // WHEN the ontology is built
+  const { ontology } = loadSchemaBundleAndOntology(workspace);
+  // THEN it fails closed with a fix instruction (declare a type or set null)
+  assert.equal(ontology.actorElementType, 'Business Actor');
+  assert.equal(ontology.bundleValidation.status, 'failed');
+  assert.ok(ontology.bundleValidation.errors.some(e => e.includes('actorElementType')), JSON.stringify(ontology.bundleValidation));
+});
+
+test('AT argob-schema: actorElementType null is the explicit "no actor concept" opt-out', () => {
+  // GIVEN a custom bundle that explicitly declares it has no actor concept
+  const workspace = makeTempWorkspace();
+  writeCustomBundle(workspace, { actorElementType: null });
+  // WHEN the ontology is built
+  const { ontology } = loadSchemaBundleAndOntology(workspace);
+  // THEN validation passes and actorElementType is null
+  assert.equal(ontology.actorElementType, null);
+  assert.equal(ontology.bundleValidation.status, 'passed');
+});
+
+test('AT argob-schema: MCP validateSystemArchitecture fails closed on an invalid bundle', () => {
+  // GIVEN a workspace whose bundle omits the actor type
+  const workspace = makeTempWorkspace();
+  writeCustomBundle(workspace, { omitActorElementType: true });
+  writeGraph(workspace, customGraph());
+  // WHEN validation is requested through the MCP server
+  const payload = runServerTool('validateSystemArchitecture', { workspaceRoot: workspace }, { ARGO_REPO_ROOT: workspace });
+  // THEN it fails with the bundle-validation error (writes cannot proceed on a misconfigured bundle)
+  assert.equal(payload.status, 'failed');
+  assert.ok(String(payload.stderr || '').includes('schema bundle:'), String(payload.stderr || '').slice(0, 500));
+});
+
+test('AT argob-schema: the shipped custom-schema example bundle loads and validates end-to-end', () => {
+  // GIVEN the recommended example bundle checked into custom-schema/
+  const workspace = path.join(ROOT, 'custom-schema');
+  // WHEN its ontology is resolved and its example graph is validated through the MCP
+  const { ontology } = loadSchemaBundleAndOntology(workspace);
+  assert.equal(ontology.language, 'Team Graph');
+  assert.equal(ontology.actorElementType, 'Agent Node');
+  assert.equal(ontology.bundleValidation.status, 'passed');
+  const payload = runServerTool('validateSystemArchitecture', { workspaceRoot: workspace }, { ARGO_REPO_ROOT: workspace });
+  // THEN both pass (the documented example is executable, not just descriptive)
+  assert.equal(payload.status, 'passed', JSON.stringify(payload).slice(0, 500));
 });

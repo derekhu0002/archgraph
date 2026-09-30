@@ -108,6 +108,7 @@ function patchCustomSchema() {
   fs.writeFileSync(path.join(dir, 'SystemArchitecture.schema.json'), JSON.stringify(base, null, 2));
   fs.writeFileSync(path.join(dir, 'argob.config.json'), JSON.stringify({
     language: 'TeamA Ontology',
+    actorElementType: 'Team Node',
     invariants: { statementGrammar: true, endpointMatrix: false, rootViewName: 'SystemArchitecture', maxElementsPerView: 15 },
   }, null, 2));
 
@@ -151,7 +152,7 @@ function main() {
   record('copy repo to /work (code subset only; no node_modules/.git/.venv/.qea/.env)', () => {
     // tar with an explicit subset + exclude -- never read the ACL-restricted
     // argo/.env (it must not be deployed anyway).
-    mustRun('sh', ['-c', `rm -rf ${WORK} && mkdir -p ${WORK} && cd /repo && tar --exclude=argo/.env -cf - argo tests scripts design docs dsh-argo-wakeup dsh-argo-workspace install-argo.ps1 cordis.patch.yml package.json vendor | tar -xf - -C ${WORK}`]);
+    mustRun('sh', ['-c', `rm -rf ${WORK} && mkdir -p ${WORK} && cd /repo && tar --exclude=argo/.env -cf - argo tests scripts design docs dsh-argo-wakeup dsh-argo-workspace custom-schema install-argo.ps1 cordis.patch.yml package.json vendor | tar -xf - -C ${WORK}`]);
     if (!fs.existsSync(path.join(WORK, 'argo', 'scripts', 'argob-schema.js'))) {
       throw new Error('argob-schema.js missing from the copied repo (branch not mounted?)');
     }
@@ -204,8 +205,12 @@ function main() {
     if (!(enums.includes('Team Node') && enums.includes('Service Node')) || enums.includes('Business Actor')) {
       throw new Error(`custom enums not in effect: ${JSON.stringify(enums)}`);
     }
+    if (schema.schema.actorElementType !== 'Team Node') throw new Error(`expected actorElementType=Team Node, got ${schema.schema.actorElementType}`);
+    if (!schema.schema.bundleValidation || schema.schema.bundleValidation.status !== 'passed') {
+      throw new Error(`bundle validation not passed: ${JSON.stringify(schema.schema.bundleValidation)}`);
+    }
     if (validate.status !== 'passed') throw new Error(`validate status=${validate.status}: ${JSON.stringify(validate).slice(0, 500)}`);
-    return { schemaKind: schema.schema.schemaKind, language: schema.schema.schemaLanguage, elementTypes: enums, validate: validate.status };
+    return { schemaKind: schema.schema.schemaKind, language: schema.schema.schemaLanguage, elementTypes: enums, actorElementType: schema.schema.actorElementType, bundleValidation: schema.schema.bundleValidation.status, validate: validate.status };
   });
 
   record('deployed MCP falls back to the default ArgoBument schema (no .argo/schema)', () => {
@@ -218,6 +223,23 @@ function main() {
     if (schema.schema.schemaKind !== 'default') throw new Error(`expected schemaKind=default, got ${schema.schema.schemaKind}`);
     if (enums.length !== 64 || !enums.includes('Business Actor')) throw new Error(`default enums wrong: ${enums.length}`);
     return { schemaKind: schema.schema.schemaKind, language: schema.schema.schemaLanguage, elementTypeCount: enums.length };
+  });
+
+  record('deployed MCP loads the shipped custom-schema example (Team Graph) end-to-end', () => {
+    const server = path.join(ARGO, 'scripts', 'argo-mcp-server.js');
+    const exampleWorkspace = path.join(WORK, 'custom-schema');
+    const [schema, validate] = mcpCall(server, [
+      { name: 'queryNeo4jGraph', arguments: { schema: true, workspaceRoot: exampleWorkspace } },
+      { name: 'validateSystemArchitecture', arguments: { workspaceRoot: exampleWorkspace } },
+    ], { ARGO_REPO_ROOT: exampleWorkspace, NODE_PATH: path.join(ARGO, 'node_modules') });
+    if (schema.schema.schemaKind !== 'workspace') throw new Error(`expected schemaKind=workspace, got ${schema.schema.schemaKind}`);
+    if (schema.schema.schemaLanguage !== 'Team Graph') throw new Error(`expected Team Graph, got ${schema.schema.schemaLanguage}`);
+    if (schema.schema.actorElementType !== 'Agent Node') throw new Error(`expected actorElementType=Agent Node, got ${schema.schema.actorElementType}`);
+    if (!schema.schema.bundleValidation || schema.schema.bundleValidation.status !== 'passed') {
+      throw new Error(`bundle validation not passed: ${JSON.stringify(schema.schema.bundleValidation)}`);
+    }
+    if (validate.status !== 'passed') throw new Error(`validate status=${validate.status}: ${JSON.stringify(validate).slice(0, 400)}`);
+    return { language: schema.schema.schemaLanguage, actorElementType: schema.schema.actorElementType, bundleValidation: schema.schema.bundleValidation.status, validate: validate.status };
   });
 
   record('OpenCode runtime loads the deployed ARGO MCP server', () => {

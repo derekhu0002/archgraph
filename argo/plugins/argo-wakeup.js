@@ -11,7 +11,7 @@ const ACTOR_ELEMENT_TYPE = process.env.ARGO_ACTOR_ELEMENT_TYPE || 'Business Acto
 
 const WAKEUP_GATE = [
   "WAKEUP GATE (unconditional; applies to the very first message of every session, including greetings, casual chat, and questions; never skip or defer).",
-  `1. Your very FIRST tool call must be an ARGO MCP query listing all Actor elements (getSystemArchitecture, purpose "audit", subject "${ACTOR_ELEMENT_TYPE}"; a workspace with its own .argo/schema bundle may declare a different Actor type — queryNeo4jGraph with {schema:true} reports the resolved enums) to identify which Actor you are.`,
+  `1. Your very FIRST tool call must be an ARGO MCP query listing all Actor elements (getSystemArchitecture, purpose "audit", subject "${ACTOR_ELEMENT_TYPE}"). Resolve the workspace's own schema first: queryNeo4jGraph with {schema:true} reports actorElementType (a .argo/schema bundle may rename it; null means no Actor concept, then skip), bundleValidation, and the type enums.`,
   "2. Restore that Actor's long-term memory (the SUBVIEW hierarchy mounted under it) before responding.",
   "3. If the ARGO MCP is unavailable or errors, say so explicitly first. Only after this gate may you respond or act.",
 ].join("\n");

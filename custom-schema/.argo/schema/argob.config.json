@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Team Graph schema bundle descriptor",
+  "description": "Example CUSTOM schema bundle. Declares the Team Graph ontology: element/relationship types, endpoint legality (argob-rules.json), the actor element type used by the ARGO wakeup gate, and the graph invariants.",
+  "language": "Team Graph",
+  "actorElementType": "Agent Node",
+  "guide": "ARGOB.md",
+  "invariants": {
+    "statementGrammar": true,
+    "endpointMatrix": true,
+    "rootViewName": "SystemArchitecture",
+    "maxElementsPerView": 12
+  }
+}

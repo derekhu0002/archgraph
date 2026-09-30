@@ -74,6 +74,27 @@ Implementation: `argo/scripts/argob-schema.js` → `resolveSchemaBundle`,
   `maxElementsPerView: 15`. Set `rootViewName: null` (no name requirement) and
   `maxElementsPerView: null` (unlimited) to disable.
 
+### The actor contract (bundle validation)
+
+The ARGO workflow identifies the agent through an **Actor element** (the wakeup
+gate). A custom schema could rename or omit that type, silently breaking actor
+identification — so the actor type is part of the bundle contract:
+
+- `argob.config.json` → `actorElementType` (string). Default `Business Actor`.
+- Set `"actorElementType": null` to explicitly declare the schema has **no**
+  actor/agent concept (actor identification is then skipped).
+- On load, the bundle is **validated fail-closed**; `bundleValidation.status`
+  becomes `failed` and validation/writes are blocked with a clear message when:
+  - no element/relationship types are defined;
+  - `actorElementType` is not one of the bundle's element types (fix the name
+    or set it to `null`);
+  - the endpoint matrix references unknown relationship/element types.
+
+The resolved `actorElementType` and `bundleValidation` are reported by
+`queryNeo4jGraph {schema:true}`, so an agent resolves them at runtime instead of
+assuming `Business Actor`. Host override remains `ARGO_ACTOR_ELEMENT_TYPE` for
+hosts that cannot query first (e.g. the static OpenCode wakeup hook).
+
 ### Built-in default bundle
 
 `argo/schema/argob.config.json` describes the default bundle (language
@@ -113,10 +134,15 @@ byte-for-byte behaviour-compatible with the previous release.
 
 ## 4. Authoring a workspace schema (example)
 
+A complete, runnable example lives in `custom-schema/` (Team Graph ontology:
+`Agent Node` / `Team Node` / `Service Node`; `Assigned To` / `Depends On`).
+It is exercised by `tests/argob-schema-bundle.test.js` ("the shipped
+custom-schema example bundle loads and validates end-to-end").
+
 ```
 <repo>/.argo/schema/
   SystemArchitecture.schema.json   # copy the default and edit $defs enums (or write your own)
-  argob.config.json                # { "language": "...", "invariants": {...} }
+  argob.config.json                # { "language": "...", "actorElementType": "...", "invariants": {...} }
   argob-rules.json                 # optional matrix/metadata
   ARGOB.md                         # optional guide
 ```

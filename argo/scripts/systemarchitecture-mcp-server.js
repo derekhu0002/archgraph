@@ -600,6 +600,9 @@ async function loadContext(args = {}) {
 function validateDocument(document, schema, options = {}) {
   const ontology = options.ontology;
   const errors = [];
+  if (ontology && ontology.bundleValidation && ontology.bundleValidation.status === 'failed') {
+    errors.push(...ontology.bundleValidation.errors.map(error => `schema bundle: ${error}`));
+  }
   validateAgainstSchema(document, schema, '#', errors, schema);
   validateGraphSemantics(document, errors, ontology);
   validateArchiMateEndpointMatrix(document, errors, {
@@ -3116,13 +3119,15 @@ function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
   let schemaBundleInfo = {};
   try {
     const resolvedRoot = workspaceRoot || resolveWorkspaceRoot({ architecturePath });
-    const { bundle } = loadSchemaBundleAndOntology(resolvedRoot);
+    const { bundle, ontology } = loadSchemaBundleAndOntology(resolvedRoot);
     const enums = resolveTypeEnums(bundle);
     typeEnums = {
       archimateElementTypes: enums.elementTypes,
       archimateRelationshipTypes: enums.relationshipTypes,
       schemaLanguage: (bundle.config && bundle.config.language) || null,
       schemaKind: bundle.kind,
+      actorElementType: ontology.actorElementType,
+      bundleValidation: ontology.bundleValidation,
     };
     schemaBundleInfo = {
       schemaPath: bundle.schema.relativePath,

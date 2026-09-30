@@ -36,6 +36,7 @@ const DEFAULT_GUIDE_BASENAME = 'archimate3.2.md';
 const DEFAULT_LANGUAGE = 'ArchiMate 3.2';
 const DEFAULT_ROOT_VIEW_NAME = 'SystemArchitecture';
 const DEFAULT_MAX_ELEMENTS_PER_VIEW = 15;
+const DEFAULT_ACTOR_ELEMENT_TYPE = 'Business Actor';
 const ELEMENT_ENUM_KEYS = ['archimateElementType', 'elementType', 'elementTypes'];
 const RELATIONSHIP_ENUM_KEYS = ['archimateRelationshipType', 'relationshipType', 'relationshipTypes'];
 
@@ -217,19 +218,83 @@ function resolveInvariants(config, defaults) {
   return invariants;
 }
 
+function resolveActorElementType(config) {
+  // The Actor element type is part of the bundle contract: the ARGO workflow
+  // identifies the agent through an Actor element (wakeup gate). A bundle may
+  // rename it, or set it to null to declare that the schema has no actor concept
+  // (actor identification is then skipped). Absent => the default 'Business Actor'.
+  if (config && Object.prototype.hasOwnProperty.call(config, 'actorElementType')) {
+    return config.actorElementType;
+  }
+  return DEFAULT_ACTOR_ELEMENT_TYPE;
+}
+
+function validateBundle({ language, kind, elementTypes, relationshipTypes, actorElementType, matrix }) {
+  const errors = [];
+  const elementTypeList = Array.isArray(elementTypes) ? elementTypes : [];
+  const relationshipTypeList = Array.isArray(relationshipTypes) ? relationshipTypes : [];
+
+  if (elementTypeList.length === 0) {
+    errors.push(`schema bundle '${language}' defines no element types`);
+  }
+  if (relationshipTypeList.length === 0) {
+    errors.push(`schema bundle '${language}' defines no relationship types`);
+  }
+
+  if (actorElementType === null) {
+    // Explicit opt-out: the schema has no actor/agent identity concept.
+  } else if (typeof actorElementType === 'string' && actorElementType.trim() !== '') {
+    if (!elementTypeList.includes(actorElementType)) {
+      errors.push(
+        `schema bundle '${language}' declares actorElementType '${actorElementType}' which is not one of its element types; ` +
+        `set a valid actorElementType in argob.config.json (one of: ${elementTypeList.join(', ') || '(none)'}) ` +
+        `or set "actorElementType": null if the schema has no actor concept`,
+      );
+    }
+  } else {
+    errors.push(`schema bundle '${language}' actorElementType must be a non-empty string or null; got ${JSON.stringify(actorElementType)}`);
+  }
+
+  // The endpoint matrix (custom bundles only) must only reference declared types.
+  if (kind !== 'default' && matrix && typeof matrix === 'object') {
+    for (const [relationshipType, targetsBySource] of Object.entries(matrix)) {
+      if (!relationshipTypeList.includes(relationshipType)) {
+        errors.push(`relationshipTargetMatrix references unknown relationship type '${relationshipType}'`);
+      }
+      for (const [sourceType, targetList] of Object.entries(targetsBySource || {})) {
+        if (!elementTypeList.includes(sourceType)) {
+          errors.push(`relationshipTargetMatrix['${relationshipType}'] references unknown element type '${sourceType}'`);
+        }
+        for (const targetType of Array.isArray(targetList) ? targetList : []) {
+          if (targetType !== '*' && !elementTypeList.includes(targetType)) {
+            errors.push(`relationshipTargetMatrix['${relationshipType}']['${sourceType}'] references unknown element type '${targetType}'`);
+          }
+        }
+      }
+    }
+  }
+
+  return { status: errors.length === 0 ? 'passed' : 'failed', errors };
+}
+
 function buildDefaultOntology(bundle) {
   const rules = require('./archimate32-rules.js');
   const language = typeof bundle.config.language === 'string' && bundle.config.language.trim() !== ''
     ? bundle.config.language.trim()
     : DEFAULT_LANGUAGE;
+  const elementTypes = Array.from(rules.elementTypeMetadata.keys());
+  const relationshipTypes = Array.from(rules.relationshipCategoryByType.keys());
+  const actorElementType = resolveActorElementType(bundle.config);
   return finalizeOntology({
     kind: 'default',
     language,
     elementTypeErrorLabel: 'ArchiMate',
     relationshipTypeErrorLabel: 'ArchiMate',
     matrixErrorLabel: 'ArchiMate 3.2 relationship matrix',
-    elementTypes: Array.from(rules.elementTypeMetadata.keys()),
-    relationshipTypes: Array.from(rules.relationshipCategoryByType.keys()),
+    elementTypes,
+    relationshipTypes,
+    actorElementType,
+    bundleValidation: validateBundle({ language, kind: 'default', elementTypes, relationshipTypes, actorElementType, matrix: null }),
     elementTypeMetadata: rules.elementTypeMetadata,
     relationshipCategoryByType: rules.relationshipCategoryByType,
     isSupportedElementType: rules.isSupportedElementType,
@@ -284,6 +349,9 @@ function buildCustomOntology(bundle) {
   }
 
   const matrixErrorLabel = `${language} relationship matrix`;
+  const actorElementType = resolveActorElementType(config);
+  const elementTypes = Array.from(elementTypeMetadata.keys());
+  const relationshipTypes = Array.from(relationshipCategoryByType.keys());
   const getArchiMateClass = (elementOrType) => {
     const type = typeof elementOrType === 'string' ? elementOrType : elementOrType && elementOrType.type;
     return type;
@@ -317,8 +385,10 @@ function buildCustomOntology(bundle) {
     elementTypeErrorLabel: language,
     relationshipTypeErrorLabel: language,
     matrixErrorLabel,
-    elementTypes: Array.from(elementTypeMetadata.keys()),
-    relationshipTypes: Array.from(relationshipCategoryByType.keys()),
+    elementTypes,
+    relationshipTypes,
+    actorElementType,
+    bundleValidation: validateBundle({ language, kind: 'custom', elementTypes, relationshipTypes, actorElementType, matrix }),
     elementTypeMetadata,
     relationshipCategoryByType,
     isSupportedElementType: (type) => elementTypeMetadata.has(type),

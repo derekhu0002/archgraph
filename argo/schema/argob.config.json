@@ -5,6 +5,7 @@
   "language": "ArchiMate 3.2",
   "elementTypeEnumKey": "archimateElementType",
   "relationshipTypeEnumKey": "archimateRelationshipType",
+  "actorElementType": "Business Actor",
   "guide": "archimate3.2.md",
   "invariants": {
     "statementGrammar": true,

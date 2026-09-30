@@ -36,6 +36,11 @@ function main() {
     const document = parseJson(graphPath, 'design/KG/SystemArchitecture.json');
     const errors = [];
 
+    if (ontology.bundleValidation && ontology.bundleValidation.status === 'failed') {
+        for (const error of ontology.bundleValidation.errors) {
+            errors.push(`schema bundle: ${error}`);
+        }
+    }
     validateAgainstSchema(document, schema, '#', errors, schema);
     validateGraphSemantics(document, errors, ontology);
     validateArchiMateEndpointMatrix(document, errors, { ontology });

@@ -1,0 +1,31 @@
+{
+  "elementTypeMetadata": {
+    "Agent Node": {
+      "layer": "Organization",
+      "aspect": "Active Structure"
+    },
+    "Team Node": {
+      "layer": "Organization",
+      "aspect": "Active Structure"
+    },
+    "Service Node": {
+      "layer": "Organization",
+      "aspect": "Behavior"
+    }
+  },
+  "relationshipCategoryByType": {
+    "Depends On": "Dependency",
+    "Assigned To": "Assignment"
+  },
+  "relationshipTargetMatrix": {
+    "Depends On": {
+      "Team Node": ["Service Node", "Team Node"],
+      "Service Node": ["Service Node"],
+      "Agent Node": ["Team Node", "Service Node"]
+    },
+    "Assigned To": {
+      "Agent Node": ["Team Node"],
+      "Team Node": ["Agent Node"]
+    }
+  }
+}
