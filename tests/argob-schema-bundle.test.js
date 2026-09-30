@@ -79,6 +79,12 @@ function writeCustomBundle(workspaceRoot, options = {}) {
   if (options.rules) {
     fs.writeFileSync(path.join(schemaDir, 'argob-rules.json'), JSON.stringify(options.rules, null, 2));
   }
+  if (options.defaultGraph) {
+    const defaultDir = path.join(schemaDir, 'default');
+    fs.mkdirSync(defaultDir, { recursive: true });
+    const graph = options.defaultGraph === true ? customGraph() : options.defaultGraph;
+    fs.writeFileSync(path.join(defaultDir, 'SystemArchitecture.json'), JSON.stringify(graph, null, 2));
+  }
   return schemaDir;
 }
 
@@ -350,7 +356,7 @@ test('AT argob-schema: the .qea projection maps custom types generically (never 
 test('AT argob-schema: initializeWorkspace reports the resolved schema (kind + language)', async () => {
   // GIVEN a workspace with its own schema bundle
   const custom = makeTempWorkspace();
-  writeCustomBundle(custom);
+  writeCustomBundle(custom, { defaultGraph: true });
   // WHEN the workspace is initialized
   const customResult = await argoMcp.initializeWorkspace(custom);
   // THEN the result names the active schema
@@ -367,6 +373,38 @@ test('AT argob-schema: initializeWorkspace reports the resolved schema (kind + l
   assert.equal(plainResult.schema.language, 'ArchiMate 3.2');
   assert.equal(plainResult.schema.dialect, 'archimate-class-matrix');
   assert.equal(plainResult.schema.actorElementType, 'Business Actor');
+});
+
+test('AT argob-schema: the default bundle declares a default graph', () => {
+  // GIVEN the default bundle
+  // WHEN resolved
+  const bundle = resolveSchemaBundle(ROOT);
+  // THEN it points at the bundled ArgoBument default graph
+  assert.ok(bundle.defaultGraphPath, 'default bundle must declare a default graph');
+  assert.match(bundle.defaultGraphPath.relativePath.replace(/\\/g, '/'), /defaults\/design\/KG\/SystemArchitecture\.json$/);
+});
+
+test('AT argob-schema: a custom bundle default graph bootstraps a fresh workspace', async () => {
+  // GIVEN a custom bundle that ships its own default graph, and a workspace with no graph
+  const ws = makeTempWorkspace();
+  writeCustomBundle(ws, { defaultGraph: true });
+  assert.ok(!fs.existsSync(path.join(ws, 'design', 'KG', 'SystemArchitecture.json')));
+  // WHEN initialized
+  const result = await argoMcp.initializeWorkspace(ws);
+  // THEN the SCHEMA's own default graph is copied (not the ArchiMate one), and it validates
+  assert.equal(result.schema.kind, 'workspace');
+  assert.ok(result.createdFiles.includes('design/KG/SystemArchitecture.json'), JSON.stringify(result.createdFiles));
+  const graph = JSON.parse(fs.readFileSync(path.join(ws, 'design', 'KG', 'SystemArchitecture.json'), 'utf8'));
+  assert.deepEqual(graph.elements.map(e => e.type).sort(), ['Service Node', 'Team Node']);
+});
+
+test('AT argob-schema: a custom bundle without a default graph fails closed on a fresh workspace', async () => {
+  // GIVEN a custom bundle with no default graph and a workspace with no graph
+  const ws = makeTempWorkspace();
+  writeCustomBundle(ws);
+  // WHEN initialized
+  // THEN it fails closed (never injects a mismatched ArchiMate graph)
+  await assert.rejects(argoMcp.initializeWorkspace(ws), /No default graph for schema/);
 });
 
 test('AT argob-schema: the repository default graph still validates against the default bundle', () => {

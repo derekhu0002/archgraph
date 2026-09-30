@@ -17,6 +17,7 @@ custom-schema/
   .argo/schema/argob.config.json                # bundle descriptor
   .argo/schema/argob-rules.json                 # type metadata + endpoint matrix
   .argo/schema/ARGOB.md                         # human-readable guide
+  .argo/schema/default/SystemArchitecture.json  # the bundle's own default graph
   design/KG/SystemArchitecture.json             # example graph using the types
 ```
 
@@ -52,6 +53,7 @@ queryNeo4jGraph { "schema": true }
 | `actorElementType` | yes* | The element type the ARGO wakeup gate uses to identify an agent. Default `Business Actor`. Set to `null` (explicit opt-out) only if the schema genuinely has **no** actor concept. |
 | `invariants` | no | `statementGrammar`, `endpointMatrix`, `rootViewName`, `maxElementsPerView`. |
 | `argob-rules.json` | no | `elementTypeMetadata`, `relationshipCategoryByType`, `relationshipTargetMatrix`. |
+| `default/SystemArchitecture.json` | no* | The bundle's **default graph**: copied by `argo init` when the workspace has no `design/KG/SystemArchitecture.json`. If the bundle has none and the workspace has none, init **fails closed** (it never injects the ArchiMate graph into a Team Graph workspace). |
 
 **Bundle validation (fail-closed).** On load the bundle is checked; a failure
 blocks validation / writes with a clear message. It fails when:

@@ -23,6 +23,7 @@ A schema bundle is a directory holding the graph contract:
 | `SystemArchitecture.schema.json` | yes | JSON Schema of the graph document (structure + type enums). |
 | `argob.config.json` | no | Bundle descriptor (see below). May also be embedded in the schema under the `x-argob` key. |
 | `argob-rules.json` | no | Ontology rules: element type metadata, relationship categories, endpoint legality matrix. |
+| `default/SystemArchitecture.json` | no* | The bundle's own **default graph**, copied by `argo init` when the workspace has no `design/KG/SystemArchitecture.json`. If neither exists, init **fails closed**. Declare a different path via `argob.config.json` → `defaultGraph`. |
 | `ARGOB.md` (or `guide`) | no | Human-readable guide / viewpoints; replaces `archimate3.2.md` for that repo. |
 
 ### Resolution precedence
@@ -106,6 +107,18 @@ therefore a plain data bundle, it is **replaceable file-for-file** exactly like 
 custom one — swapping `~/.argo/schema/` (or `ARGO_SCHEMA_DIR`) changes the
 default language, not just a per-repo override.
 
+### Default graph (fail-closed)
+
+`argo init` must bootstrap a graph that matches the active schema. Resolution
+when `design/KG/SystemArchitecture.json` is missing:
+
+1. the active bundle's own default graph (`<bundle>/default/SystemArchitecture.json`,
+   or `argob.config.json` → `defaultGraph`), else
+2. for the default bundle only, the bundled ArgoBument template, else
+3. **fail closed** — init errors instead of injecting a mismatched ArchiMate
+   graph into a custom-schema workspace. A copied default graph that does not
+   validate under the active schema also fails init (the harness validates it).
+
 ### Reporting the active schema
 
 The active schema is surfaced wherever a user needs to see it:
@@ -182,7 +195,7 @@ and the live MCP projection.
 - `verify.js` — 7 checks: toolchain install, schema acceptance tests + MCP
   regressions, deployed MCP custom-vs-default resolution, the shipped example,
   and `opencode mcp list` loading the deployed server.
-- `verify-all.js` — 8 checks: the full surface under **both** schema modes
+- `verify-all.js` — 9 checks: the full surface under **both** schema modes
   (A custom Team Graph, B default ArgoBument) against a **real Neo4j + real
   embedding provider**, each exercising all 19 MCP tools: `initializeWorkspace`
   (Neo4j sync + semantic lifecycle, and asserts the result reports the active
@@ -192,7 +205,8 @@ and the live MCP projection.
   (before/after writes), every write tool (element/relationship/view
   add·update·remove, preview, apply), and `runArchitectureTests`. It also
   replaces the installed `~/.argo/schema` with a custom bundle and proves a
-  plain workspace adopts it (the default is replaceable). Run:
+  plain workspace adopts it (the default is replaceable), and proves the
+  bundle-default-graph bootstrap + fail-closed-on-missing behavior. Run:
 
   ```
   docker run --rm --entrypoint node \

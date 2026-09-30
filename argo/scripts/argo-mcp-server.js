@@ -14,6 +14,7 @@ const {
 } = require('./repositoryArgoEnvironment.js');
 const {
   loadSchemaBundleAndOntology,
+  resolveSchemaBundle,
 } = require('./argob-schema.js');
 const {
   getWorkspaceRoot,
@@ -521,7 +522,24 @@ async function initializeWorkspace(workspaceRoot) {
   const graphTargetPath = path.join(workspaceRoot, ...WORKSPACE_GRAPH_PATH_SEGMENTS);
   const graphRelativePath = normalizeRelativePath(path.relative(workspaceRoot, graphTargetPath));
   if (!fs.existsSync(graphTargetPath)) {
-    const graphSourcePath = resolveGraphDefaultSourcePath();
+    // The default graph MUST come from the ACTIVE schema bundle: the built-in
+    // ArgoBument template for the default schema, or the bundle's own default
+    // graph for a custom schema. If the schema provides none, fail closed (never
+    // inject a mismatched ArchiMate graph into a custom-schema workspace).
+    let activeBundle = null;
+    try { activeBundle = resolveSchemaBundle(workspaceRoot); } catch { activeBundle = null; }
+    const graphSourcePath = activeBundle && activeBundle.defaultGraphPath
+      ? activeBundle.defaultGraphPath.absolutePath
+      : (activeBundle && activeBundle.kind === 'default' ? resolveGraphDefaultSourcePath() : null);
+    if (!graphSourcePath) {
+      const label = activeBundle ? `${activeBundle.kind} / ${(activeBundle.config && activeBundle.config.language) || 'unknown'}` : 'unknown';
+      const error = new Error(
+        `No default graph for schema (${label}): the workspace has no ${graphRelativePath} and the schema bundle provides no default graph. ` +
+        `Add ${graphRelativePath} to the workspace, or ship one in the bundle at <bundle>/default/SystemArchitecture.json (or set argob.config.json "defaultGraph").`,
+      );
+      error.code = 'NO_DEFAULT_GRAPH';
+      throw error;
+    }
     await fs.promises.mkdir(path.dirname(graphTargetPath), { recursive: true });
     await fs.promises.copyFile(graphSourcePath, graphTargetPath);
     createdFiles.push(graphRelativePath);
@@ -661,6 +679,14 @@ function toolResult(payload) {
 }
 
 function canonicalInitErrorResult(error) {
+  // Workspace-bootstrap faults (e.g. a schema with no default graph) are not
+  // semantic-lifecycle secrets and must surface their message to the caller.
+  if (error && error.code === 'NO_DEFAULT_GRAPH') {
+    return toolResult({
+      status: 'failed',
+      error: { category: 'WORKSPACE_INIT_FAILED', code: error.code, message: String(error.message) },
+    });
+  }
   const result = semanticOperatorErrorResult(error);
   if (error.safeSemanticLifecycleMessage !== true) return result;
   const payload = Object.freeze({
