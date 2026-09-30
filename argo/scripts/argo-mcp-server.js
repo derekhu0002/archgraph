@@ -132,7 +132,7 @@ const TOOLS = [
   },
   {
     name: 'previewSystemArchitectureMutation',
-    description: 'Use before apply for complex or risky changes. Performs a dry-run of one or more mutations, runs schema, graph, view, and ArchiMate 3.2 validation, and does not write the graph.',
+    description: 'Use before apply for complex or risky changes. Performs a dry-run of one or more mutations, runs schema, graph, view, and modeling-language validation, and does not write the graph.',
     inputSchema: mutationInputSchema(),
   },
   {

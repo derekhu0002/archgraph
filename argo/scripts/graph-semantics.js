@@ -3,26 +3,44 @@
 // systemarchitecture-mcp-server.js (mutation-path validation).
 //
 // This module eliminates the duplicate validateGraphSemantics implementations.
-// All callers get identical core checks; ArchiMate endpoint matrix and view
-// element limits are parameterized so the full validator can check everything
-// while the mutation path only checks what changed.
+// All callers get identical core checks; the modeling language (element types,
+// relationship types, endpoint matrix, statement grammar, root-view name and
+// view element limit) is supplied by an *ontology* so a repository that ships
+// its own schema under .argo/schema is validated against its own language.
+//
+// The ontology argument is optional: when omitted, the default ArgoBument
+// (ArchiMate 3.2 + ARGO) ontology is used, preserving historical behaviour.
 
-const {
-  elementTypeMetadata,
-  relationshipCategoryByType,
-  validateRelationshipEndpointTypes,
-} = require('./archimate32-rules');
+const { loadSchemaBundleAndOntology } = require('./argob-schema.js');
+
+let defaultOntology = null;
+
+function resolveOntology(ontology) {
+  if (ontology) {
+    return ontology;
+  }
+  if (!defaultOntology) {
+    defaultOntology = loadSchemaBundleAndOntology(process.cwd()).ontology;
+  }
+  return defaultOntology;
+}
 
 /**
  * Core graph-semantics checks that are always identical for all callers.
- * 
+ *
  * @param {object} document - parsed SystemArchitecture JSON
  * @param {string[]} errors - error accumulator
+ * @param {object} [ontology] - resolved modeling language (defaults to ArgoBument)
  */
-function validateGraphSemantics(document, errors) {
+function validateGraphSemantics(document, errors, ontology) {
   if (!document || typeof document !== 'object') {
     return;
   }
+  const language = resolveOntology(ontology);
+  const invariants = language.invariants || {};
+  const elementTypeLabel = language.elementTypeErrorLabel || language.language || 'the';
+  const relationshipTypeLabel = language.relationshipTypeErrorLabel || language.language || 'the';
+  const rootViewName = invariants.rootViewName === undefined ? 'SystemArchitecture' : invariants.rootViewName;
 
   const elements = Array.isArray(document.elements) ? document.elements : [];
   const relationships = Array.isArray(document.relationships) ? document.relationships : [];
@@ -40,8 +58,8 @@ function validateGraphSemantics(document, errors) {
       continue;
     }
     elementById.set(element.id, element);
-    if (!elementTypeMetadata.has(element.type)) {
-      errors.push(`elements '${element.id}' uses unsupported ArchiMate element type '${element.type}'`);
+    if (!language.isSupportedElementType(element.type)) {
+      errors.push(`elements '${element.id}' uses unsupported ${elementTypeLabel} element type '${element.type}'`);
     }
   }
 
@@ -64,8 +82,8 @@ function validateGraphSemantics(document, errors) {
       continue;
     }
     relationshipById.set(relationship.id, relationship);
-    if (!relationshipCategoryByType.has(relationship.type)) {
-      errors.push(`relationships '${relationship.id}' uses unsupported ArchiMate relationship type '${relationship.type}'`);
+    if (!language.isSupportedRelationshipType(relationship.type)) {
+      errors.push(`relationships '${relationship.id}' uses unsupported ${relationshipTypeLabel} relationship type '${relationship.type}'`);
     }
 
     const source = elementById.get(relationship.source_id);
@@ -82,6 +100,9 @@ function validateGraphSemantics(document, errors) {
       errors.push(`relationships '${relationship.id}' target_name '${relationship.target_name}' does not match element '${relationship.target_id}' name '${target.name}'`);
     }
 
+    if (invariants.statementGrammar === false) {
+      continue;
+    }
     const expectedStatement = source && target
       ? `${source.name} --(${relationship.type})--> ${target.name}`
       : undefined;
@@ -93,9 +114,13 @@ function validateGraphSemantics(document, errors) {
   // --- views: topology, membership, endpoint co-occurrence ---
   const topLevelViews = views.filter(view => view && typeof view === 'object' && !view.parent_element_id);
   if (topLevelViews.length !== 1) {
-    errors.push(`views must contain exactly one top-level view named 'SystemArchitecture'; found ${topLevelViews.length}`);
-  } else if (topLevelViews[0].view_name !== 'SystemArchitecture') {
-    errors.push(`top-level view '${topLevelViews[0].view_id}' view_name must be 'SystemArchitecture'`);
+    errors.push(
+      rootViewName
+        ? `views must contain exactly one top-level view named '${rootViewName}'; found ${topLevelViews.length}`
+        : `views must contain exactly one top-level view; found ${topLevelViews.length}`,
+    );
+  } else if (rootViewName && topLevelViews[0].view_name !== rootViewName) {
+    errors.push(`top-level view '${topLevelViews[0].view_id}' view_name must be '${rootViewName}'`);
   }
 
   const elementIdsIncludedInViews = new Set();
@@ -104,8 +129,8 @@ function validateGraphSemantics(document, errors) {
     if (!view || typeof view !== 'object') {
       continue;
     }
-    if (!view.parent_element_id && view.view_name !== 'SystemArchitecture') {
-      errors.push(`views '${view.view_id}' must declare parent_element_id unless it is the top-level SystemArchitecture view`);
+    if (!view.parent_element_id && rootViewName && view.view_name !== rootViewName) {
+      errors.push(`views '${view.view_id}' must declare parent_element_id unless it is the top-level ${rootViewName} view`);
     }
     if (view.parent_element_id) {
       const parent = elementById.get(view.parent_element_id);
@@ -159,15 +184,21 @@ function validateGraphSemantics(document, errors) {
 }
 
 /**
- * Validate ArchiMate 3.2 endpoint type matrix for relationships.
+ * Validate the modeling language's endpoint-type matrix for relationships.
+ * No-op when the ontology disables the endpoint matrix invariant.
  *
  * @param {object} document - parsed SystemArchitecture JSON
  * @param {string[]} errors - error accumulator
  * @param {object} [options]
  * @param {string[]} [options.touchedRelationshipIds] - if provided, only these
  *   relationships are checked; if omitted/empty, ALL relationships are checked
+ * @param {object} [options.ontology] - resolved modeling language
  */
 function validateArchiMateEndpointMatrix(document, errors, options = {}) {
+  const ontology = resolveOntology(options.ontology);
+  if (ontology.invariants && ontology.invariants.endpointMatrix === false) {
+    return;
+  }
   const elementById = new Map(
     (document.elements || []).map(element => [element.id, element]),
   );
@@ -182,26 +213,34 @@ function validateArchiMateEndpointMatrix(document, errors, options = {}) {
     }
     const source = elementById.get(relationship.source_id);
     const target = elementById.get(relationship.target_id);
-    errors.push(...validateRelationshipEndpointTypes(relationship, source, target));
+    errors.push(...ontology.validateRelationshipEndpointTypes(relationship, source, target));
   }
 }
 
 /**
- * Validate that each view contains at most 15 included_elements.
- * included_relationships do not consume this quota.
+ * Validate the ontology's per-view element limit (default 15).
+ * `maxElementsPerView: null` disables the limit. included_relationships do not
+ * consume the quota.
  *
  * @param {object} document - parsed SystemArchitecture JSON
  * @param {string[]} errors - error accumulator
  * @param {object} [options]
  * @param {string[]} [options.touchedViewIds] - if provided, only these views
  *   are checked; if omitted/empty, ALL views are checked
+ * @param {object} [options.ontology] - resolved modeling language
  */
 function validateViewElementLimits(document, errors, options = {}) {
+  const ontology = resolveOntology(options.ontology);
+  const maxIncludedElements = ontology.invariants && ontology.invariants.maxElementsPerView !== undefined
+    ? ontology.invariants.maxElementsPerView
+    : 15;
+  if (maxIncludedElements === null) {
+    return;
+  }
   const touchedViewIdSet =
     Array.isArray(options.touchedViewIds) && options.touchedViewIds.length > 0
       ? new Set(options.touchedViewIds)
       : undefined;
-  const MAX_INCLUDED_ELEMENTS = 15;
 
   for (const view of document.views || []) {
     if (!view) {
@@ -211,9 +250,9 @@ function validateViewElementLimits(document, errors, options = {}) {
       continue;
     }
     const elementCount = Array.isArray(view.included_elements) ? view.included_elements.length : 0;
-    if (elementCount > MAX_INCLUDED_ELEMENTS) {
+    if (elementCount > maxIncludedElements) {
       errors.push(
-        `views '${view.view_id}' must contain at most ${MAX_INCLUDED_ELEMENTS} elements; found ${elementCount}. ` +
+        `views '${view.view_id}' must contain at most ${maxIncludedElements} elements; found ${elementCount}. ` +
         'Split the content into layered sub-views before adding more elements.',
       );
     }

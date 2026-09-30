@@ -2,17 +2,16 @@ const fs = require('fs');
 const path = require('path');
 
 const {
-  getArgoRoot,
   getWorkspaceRoot,
 } = require('./argo-paths.js');
+
+const {
+  loadSchemaBundleAndOntology,
+} = require('./argob-schema.js');
 
 const repoRoot = getWorkspaceRoot();
 const graphRelativePath = path.join('design', 'KG', 'SystemArchitecture.json');
 const graphPath = path.join(repoRoot, graphRelativePath);
-const schemaPathCandidates = [
-    path.join(getArgoRoot(), 'schema', 'SystemArchitecture.schema.json'),
-    path.join(repoRoot, '.argo', 'schema', 'SystemArchitecture.schema.json'),
-];
 
 const {
   validateGraphSemantics,
@@ -21,23 +20,26 @@ const {
 } = require('./graph-semantics.js');
 
 function main() {
-    const schemaPath = schemaPathCandidates.find(candidate => fs.existsSync(candidate));
-    if (!schemaPath) {
-        fail(`Schema file is missing. Checked: ${schemaPathCandidates.map(candidate => path.relative(repoRoot, candidate)).join(', ')}`);
+    let bundle;
+    let ontology;
+    try {
+        ({ bundle, ontology } = loadSchemaBundleAndOntology(repoRoot));
+    } catch (error) {
+        fail(String(error && error.message ? error.message : error));
     }
+    const schema = bundle.schemaDocument;
 
     if (!fs.existsSync(graphPath)) {
         fail('System architecture file is missing at design/KG/SystemArchitecture.json');
     }
 
-    const schema = parseJson(schemaPath, path.relative(repoRoot, schemaPath));
     const document = parseJson(graphPath, 'design/KG/SystemArchitecture.json');
     const errors = [];
 
     validateAgainstSchema(document, schema, '#', errors, schema);
-    validateGraphSemantics(document, errors);
-    validateArchiMateEndpointMatrix(document, errors);
-    validateViewElementLimits(document, errors);
+    validateGraphSemantics(document, errors, ontology);
+    validateArchiMateEndpointMatrix(document, errors, { ontology });
+    validateViewElementLimits(document, errors, { ontology });
 
     if (errors.length > 0) {
         console.error('SystemArchitecture validation failed:');

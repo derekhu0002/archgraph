@@ -6,7 +6,6 @@ const readline = require('node:readline');
 const crypto = require('node:crypto');
 
 const {
-  getArgoRoot,
   resolveCallWorkspaceRoot,
 } = require('./argo-paths.js');
 
@@ -133,6 +132,11 @@ const {
   validateViewElementLimits,
 } = require('./graph-semantics.js');
 const {
+  loadSchemaBundleAndOntology,
+  resolveSchemaBundle,
+  resolveTypeEnums,
+} = require('./argob-schema.js');
+const {
   createProductionGraphRagRuntime,
 } = require('./graph-rag/productionGraphRagRuntime.js');
 const {
@@ -231,7 +235,7 @@ const TOOLS = [
   },
   {
     name: 'previewSystemArchitectureMutation',
-    description: 'Use before apply for complex or risky changes. Performs a dry-run of one or more mutations, runs schema, graph, view, and ArchiMate 3.2 validation, and does not write the graph.',
+    description: 'Use before apply for complex or risky changes. Performs a dry-run of one or more mutations, runs schema, graph, view, and modeling-language validation, and does not write the graph.',
     inputSchema: mutationInputSchema(),
   },
   {
@@ -380,7 +384,7 @@ const TOOLS = [
   },
   {
     name: 'queryNeo4jGraph',
-    description: 'Run a read-only Cypher query against the Neo4j structural projection of the intent architecture, or request the projection schema so an agent can construct its own Cypher. Pass {schema: true} to return node labels, relationship types, property keys, and the legal ArchiMate element/relationship type enums. Pass {cypher: "..."} to execute a read-only query; scope it with {graphKey: $graphKey}. Write clauses (CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS) are rejected.',
+    description: 'Run a read-only Cypher query against the Neo4j structural projection of the intent architecture, or request the projection schema so an agent can construct its own Cypher. Pass {schema: true} to return node labels, relationship types, property keys, and the legal element/relationship type enums of the workspace-resolved schema bundle. Pass {cypher: "..."} to execute a read-only query; scope it with {graphKey: $graphKey}. Write clauses (CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS) are rejected.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -559,22 +563,7 @@ function normalizeRelativePath(value) {
 }
 
 function resolveSchemaPath(workspaceRoot) {
-  const bundledSchemaPath = path.join(getArgoRoot(), 'schema', 'SystemArchitecture.schema.json');
-  if (fs.existsSync(bundledSchemaPath)) {
-    return { absolutePath: bundledSchemaPath, relativePath: SCHEMA_PATH_CANDIDATES[0] };
-  }
-
-  for (const candidate of SCHEMA_PATH_CANDIDATES) {
-    const absolutePath = path.join(workspaceRoot, candidate);
-    if (fs.existsSync(absolutePath)) {
-      return { absolutePath, relativePath: candidate };
-    }
-    const bundledPath = path.resolve(__dirname, '..', '..', candidate);
-    if (fs.existsSync(bundledPath)) {
-      return { absolutePath: bundledPath, relativePath: candidate };
-    }
-  }
-  throw new Error(`Unable to locate SystemArchitecture schema. Checked: ${SCHEMA_PATH_CANDIDATES.join(', ')}`);
+  return resolveSchemaBundle(workspaceRoot).schema;
 }
 
 function readJson(filePath, label) {
@@ -588,13 +577,17 @@ function readJson(filePath, label) {
 async function loadContext(args = {}) {
   const workspaceRoot = resolveWorkspaceRoot(args);
   const graphPath = resolveWorkspacePath(workspaceRoot, args.architecturePath || DEFAULT_GRAPH_PATH);
-  const schemaPath = resolveSchemaPath(workspaceRoot);
+  // Resolve the modeling language for THIS workspace: a repository that ships
+  // its own bundle under .argo/schema is validated against that schema.
+  const { bundle, ontology } = loadSchemaBundleAndOntology(workspaceRoot);
   const context = {
     workspaceRoot,
     graphPath,
-    schemaPath,
+    schemaPath: bundle.schema,
+    schemaBundle: bundle,
+    ontology,
     document: readJson(graphPath.absolutePath, graphPath.relativePath),
-    schema: readJson(schemaPath.absolutePath, schemaPath.relativePath),
+    schema: bundle.schemaDocument,
   };
   context.neo4jSyncRecovery = await recoverNeo4jSyncIfNeeded({
     architecturePath: graphPath.relativePath,
@@ -605,13 +598,16 @@ async function loadContext(args = {}) {
 }
 
 function validateDocument(document, schema, options = {}) {
+  const ontology = options.ontology;
   const errors = [];
   validateAgainstSchema(document, schema, '#', errors, schema);
-  validateGraphSemantics(document, errors);
+  validateGraphSemantics(document, errors, ontology);
   validateArchiMateEndpointMatrix(document, errors, {
+    ontology,
     touchedRelationshipIds: options.touchedRelationshipIds,
   });
   validateViewElementLimits(document, errors, {
+    ontology,
     touchedViewIds: options.validateAllViewElementLimits
       ? (document.views || []).map(view => view && view.view_id)
       : options.touchedViewIds,
@@ -1930,7 +1926,7 @@ async function buildMutationResult(context, mutations, write, dependencies, loss
       before: beforeSummary,
       after: beforeSummary,
       errors,
-      guidance: buildFailureGuidance(errors),
+      guidance: buildFailureGuidance(errors, context.ontology),
     };
     if (error && Array.isArray(error.duplicateConflicts) && error.duplicateConflicts.length > 0) {
       failed.duplicateConflicts = error.duplicateConflicts;
@@ -1941,6 +1937,7 @@ async function buildMutationResult(context, mutations, write, dependencies, loss
     return failed;
   }
   const errors = validateDocument(mutationResult.document, context.schema, {
+    ontology: context.ontology,
     touchedRelationshipIds: mutationResult.touchedRelationshipIds,
     touchedViewIds: mutationResult.viewLimitCheckIds,
   });
@@ -1960,7 +1957,7 @@ async function buildMutationResult(context, mutations, write, dependencies, loss
     errors,
   };
   if (errors.length > 0) {
-    result.guidance = buildFailureGuidance(errors);
+    result.guidance = buildFailureGuidance(errors, context.ontology);
   }
 
   // Semantic dedup gate: a would-be element create is blocked when a same-type
@@ -2215,10 +2212,10 @@ function buildMutationEmbeddingLifecycleFailure(error, result) {
   });
 }
 
-function buildFailureGuidance(errors) {
+function buildFailureGuidance(errors, ontology) {
   const guidance = [];
   for (const error of errors || []) {
-    addGuidanceForError(guidance, String(error));
+    addGuidanceForError(guidance, String(error), ontology);
   }
   if (guidance.length === 0 && Array.isArray(errors) && errors.length > 0) {
     guidance.push('Inspect the error text, call getSystemArchitecture with an explicit semantic query to refresh relevant ids, use getIntentElementContext for focused dependency context when needed, then retry with previewSystemArchitectureMutation before writing. Use an omitted-query full snapshot only when exact complete view membership is required.');
@@ -2226,15 +2223,17 @@ function buildFailureGuidance(errors) {
   return guidance;
 }
 
-function addGuidanceForError(guidance, error) {
+function addGuidanceForError(guidance, error, ontology) {
+  const language = ontology && ontology.language ? ontology.language : 'ArchiMate 3.2';
+  const matrixLabel = ontology && ontology.matrixErrorLabel ? ontology.matrixErrorLabel : 'ArchiMate 3.2 relationship matrix';
   if (error.includes('mutation.view_ids must contain at least one view id')) {
     pushUnique(guidance, 'Select the target view_ids explicitly. Prefer getSystemArchitecture with an explicit semantic query to find relevant views, then use getIntentElementContext for focused element dependencies when needed. Use a full snapshot only if exact complete view membership is required.');
   }
-  if (error.includes('violates ArchiMate 3.2 relationship matrix')) {
-    pushUnique(guidance, 'Check relationship.type and the source and target element types against ArchiMate 3.2. If the intended meaning is still valid, choose a compliant relationship type or change the endpoint element types by remove-and-add.');
+  if (error.includes(`violates ${matrixLabel}`)) {
+    pushUnique(guidance, `Check relationship.type and the source and target element types against ${language}. If the intended meaning is still valid, choose a compliant relationship type or change the endpoint element types by remove-and-add.`);
   }
-  if (error.includes('uses unsupported ArchiMate relationship type')) {
-    pushUnique(guidance, 'Use relationship.type for the ArchiMate relationship type and choose one of the schema-supported ArchiMate 3.2 relationship types.');
+  if (error.includes('uses unsupported') && error.includes('relationship type')) {
+    pushUnique(guidance, `Use relationship.type for the relationship type and choose one of the schema-supported ${language} relationship types.`);
   }
   if (error.includes('id cannot be updated') || error.includes('type cannot be updated')) {
     pushUnique(guidance, 'Do not patch immutable identity or type fields. To change an id or type, remove the existing element or relationship, then add the replacement with the desired id or type.');
@@ -2243,10 +2242,16 @@ function addGuidanceForError(guidance, error) {
     pushUnique(guidance, 'Every element and relationship must belong to at least one view. Add it with view_ids, or add the existing object to an appropriate view before validating again.');
   }
   if (error.includes('must declare parent_element_id') || error.includes('top-level view')) {
-    pushUnique(guidance, 'Keep exactly one top-level view named SystemArchitecture. For any sub-view, set parent_element_id to an existing element and keep parent_element_name aligned with that element name.');
+    const rootViewName = ontology && ontology.invariants && ontology.invariants.rootViewName
+      ? ontology.invariants.rootViewName
+      : 'SystemArchitecture';
+    pushUnique(guidance, `Keep exactly one top-level view${rootViewName ? ` named ${rootViewName}` : ''}. For any sub-view, set parent_element_id to an existing element and keep parent_element_name aligned with that element name.`);
   }
-  if (error.includes('must contain at most 15 elements')) {
-    pushUnique(guidance, 'Do not force more than 15 included_elements into one view. Pause and think about layered architecture: split the view into layered sub-views, attach each sub-view with parent_element_id, and move lower-level elements into the appropriate child view before retrying.');
+  if (error.includes('must contain at most') && error.includes('elements')) {
+    const maxElements = ontology && ontology.invariants && ontology.invariants.maxElementsPerView !== undefined && ontology.invariants.maxElementsPerView !== null
+      ? ontology.invariants.maxElementsPerView
+      : 15;
+    pushUnique(guidance, `Do not force more than ${maxElements} included_elements into one view. Pause and think about layered architecture: split the view into layered sub-views, attach each sub-view with parent_element_id, and move lower-level elements into the appropriate child view before retrying.`);
   }
   if (error.includes('does not exist') || error.includes('references missing')) {
     pushUnique(guidance, 'Refresh current ids with getSystemArchitecture semantic query first, then call getIntentElementContext for any returned element that needs dependency context. Do not guess ids; use existing element, relationship, and view ids or create missing objects first.');
@@ -2275,6 +2280,12 @@ function summarizeDocument(document) {
 function resolveQeaProjectionTarget(context) {
   const none = (reason, hasEaSignals) => ({ target: null, reason, hasEaSignals: !!hasEaSignals });
   try {
+    const ontology = context && context.ontology;
+    if (ontology && ontology.kind === 'custom') {
+      // The .qea projection maps ArchiMate stereotypes to EA shapes; a workspace
+      // schema with its own ontology has no such mapping, so skip it explicitly.
+      return none(`workspace schema '${ontology.language || 'custom'}' is not the default ArchiMate schema; .qea projection skipped`, false);
+    }
     const workspaceRoot = String(context && context.workspaceRoot ? context.workspaceRoot : '');
     if (!workspaceRoot || !fs.existsSync(workspaceRoot)) { return none('workspace root unavailable: ' + workspaceRoot, true); }
     const graphAbsolute = context.graphPath && context.graphPath.absolutePath ? context.graphPath.absolutePath : null;
@@ -3102,13 +3113,22 @@ async function queryNeo4jGraphTool(args = {}) {
 function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
   const schema = buildNeo4jGraphSchema(architecturePath);
   let typeEnums = {};
+  let schemaBundleInfo = {};
   try {
     const resolvedRoot = workspaceRoot || resolveWorkspaceRoot({ architecturePath });
-    const schemaPath = resolveSchemaPath(resolvedRoot);
-    const jsonSchema = readJson(schemaPath.absolutePath, schemaPath.relativePath);
+    const { bundle } = loadSchemaBundleAndOntology(resolvedRoot);
+    const enums = resolveTypeEnums(bundle);
     typeEnums = {
-      archimateElementTypes: (jsonSchema.$defs.archimateElementType || {}).enum || [],
-      archimateRelationshipTypes: (jsonSchema.$defs.archimateRelationshipType || {}).enum || [],
+      archimateElementTypes: enums.elementTypes,
+      archimateRelationshipTypes: enums.relationshipTypes,
+      schemaLanguage: (bundle.config && bundle.config.language) || null,
+      schemaKind: bundle.kind,
+    };
+    schemaBundleInfo = {
+      schemaPath: bundle.schema.relativePath,
+      schemaKind: bundle.kind,
+      schemaDir: bundle.relativeDir,
+      guidePath: bundle.guidePath ? bundle.guidePath.relativePath : null,
     };
   } catch (error) {
     typeEnums = {
@@ -3125,6 +3145,7 @@ function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
     schema: {
       ...schema,
       ...typeEnums,
+      ...schemaBundleInfo,
     },
     usage: {
       scopeGraph: 'MATCH (e:Element {graphKey: $graphKey}) ...',

@@ -15,7 +15,7 @@ Agent 的职责：结合全局分析 draft 中的每条提议、给出建议与�
 - [ ] 工作区有 `design/KG/SystemArchitecture.json`（canonical 意图图）——分析全局的依据。
 - [ ] ARGO MCP 可用。关键查询手段：
   - 语义/上下文：`getSystemArchitecture`（带 query.purpose + query.intent）、`getIntentElementContext`（看单个元素/关系/视图的依赖与受影响对象）。
-  - 结构/类型：`queryNeo4jGraph`（只读 Cypher，如 `MATCH (e:Element {graphKey: $graphKey, type:'Business Actor'}) ...`；先 `{schema:true}` 查投影 schema）。
+  - 结构/类型：`queryNeo4jGraph`（只读 Cypher，如 `MATCH (e:Element {graphKey: $graphKey, type:'<resolved element type>'}) ...`；先 `{schema:true}` 查投影 schema——它会报告当前工作区解析到的语言、元素/关系类型枚举与 guide，默认 ArgoBument，工作区若有 `.argo/schema` 则为该仓自定义 schema）。
   - 校验：`validateSystemArchitecture`；写图：`previewSystemArchitectureMutation` / `applySystemArchitectureMutation`。
 
 ## 原则
@@ -25,6 +25,7 @@ Agent 的职责：结合全局分析 draft 中的每条提议、给出建议与�
 - **删除/破坏性提议单独把关**：对 `removeElement` / `removeRelationship` / `removeView`，必须指出 canonical 里谁引用它、删除会级联影响谁，并给出「保留 / 改挂 / 确认删除」的建议，交由人类确认。
 - **新增/更新提议**：核对 type / name / description / attributes 是否与全局命名与类型一致、是否与既有元素/关系重复冲突、应挂在哪个 parent / 视图下。
 - **视图提议**：核对成员是否落在正确层级（parent_element_id 是否合理）、删视图会否使相关 subdiagram_views 悬空。
+- **类型以工作区 schema 为准**：默认建模语言是 ArgoBument（ArchiMate 3.2 + ARGO）；若工作区自带 `.argo/schema/` schema bundle，则该仓使用它自己的元素/关系类型与校验规则。分析前先经 `queryNeo4jGraph {schema:true}` 确认解析到的语言与类型枚举，**不要硬编码 ArchiMate 类型**。
 - **只读取、不泄露**：MUST NOT 读取/复述 `.env` 里的 secret 或推断敏感配置值。
 
 ## 目标
