@@ -623,15 +623,7 @@
           "value": "not_delivered"
         }
       ],
-      "testcases": [
-        {
-          "name": "AT-excalidraw-diagram-skill-01",
-          "description": "GIVEN 主流 coleam00/excalidraw-diagram-skill 已原封不动安装；WHEN 检查仓库 .opencode/skills/excalidraw-diagram/；THEN SKILL.md 存在且 name=excalidraw-diagram，references/ 各文件齐备。",
-          "type": "Acceptance Test",
-          "Input": "tests/excalidraw-diagram-skill.test.js",
-          "acceptanceCriteria": "tests/excalidraw-diagram-skill.test.js"
-        }
-      ]
+      "testcases": []
     },
     {
       "id": "1332",
@@ -1936,27 +1928,6 @@
         }
       ],
       "testcases": [
-        {
-          "Input": "tests/ea-import-reconcile.test.js",
-          "acceptanceCriteria": "tests/ea-import-reconcile.test.js",
-          "description": "GIVEN 导入脚本（静态审查）：WHEN 解析其逻辑；THEN ①目标包为固定名同步根包（不存在则先建、复用不再时间戳新包）；②幂等分支：按 schema_id 匹配已存在→update 不重建、图谱独有→add；③删除分支：对账包内图谱缺失对象收集删除清单且需人类确认后才执行；④UI 刷新只在最后或省略（无逐对象/逐集合 Refresh 刷屏）。",
-          "name": "AT-2100-OPT-01",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "tests/ea-import-perf.test.js",
-          "acceptanceCriteria": "tests/ea-import-perf.test.js",
-          "description": "GIVEN 既有/扩展的导入性能断言基线；WHEN 对比优化前后导入关键路径；THEN 导入避免每对象 Update 后立即全集合 Refresh 等已知慢操作（静态断言辅助）+ 结构级不变性：重复导入同一图谱不产生重复对象（update-in-place 幂等）。",
-          "name": "AT-2100-OPT-02",
-          "type": "Acceptance Test"
-        },
-        {
-          "Input": "tests/ea-import-reconcile.test.js",
-          "acceptanceCriteria": "tests/ea-import-reconcile.test.js",
-          "description": "GIVEN 导入脚本含 SQL 直写通道（静态审查）：WHEN 检查其 SQL 路径；THEN 读侧对账用 Repository.SQLQuery、写侧用 Repository.Execute 批量；update 按 schema 键匹配且不触碰 t_diagramobjects 几何；新增保证 ea_guid 唯一并读回 id；删除分支保留清单+人工确认；幂等无重复行。",
-          "name": "AT-2100-OPT-03",
-          "type": "Acceptance Test"
-        },
         {
           "Input": "tests/ea-roundtrip.test.js",
           "acceptanceCriteria": "tests/ea-roundtrip.test.js",

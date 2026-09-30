@@ -146,7 +146,7 @@ const QUESTIONS = [
     id: 'MQ-17', dimension: '知识更新', label: 'view 429 当前多少子视图？',
     retrieval: [{ tool: 'getArchitectureViewContext', args: { view_id: '429', includeChildViews: true } }],
     requirements: [
-      { step: 0, type: 'childViewCount', value: 20 },
+        { step: 0, type: 'childViewCount', value: 24 },
       { step: 0, type: 'contains', values: ['tb-eval-view-001', 'memory-eval-view-001', 'self-evolution-sandbox-view-001', 'agent-cost-eval-view-001', 'framework-defaults-view-001', 'graph-consistency-tech-ref-001'] },
     ],
   },

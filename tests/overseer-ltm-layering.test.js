@@ -20,26 +20,26 @@ const LAYERS = ['overseer-rules-001', 'overseer-retrieval-001', 'overseer-produc
 const CORE_REQUIRED = ['overseer-memory-tiers-001', 'overseer-vision-001', 'overseer-wiki-eval-001'];
 const MEMBERS_BY_VIEW = {
   'overseer-ltm-001': [
-    'overseer-memory-tiers-001', 'overseer-archimate-role-001', 'overseer-retrieval-recall-first-001',
-    'overseer-wiki-eval-001', 'overseer-failure-exp-concept-001', 'overseer-vision-001',
-    'overseer-default-pm-actor-001', 'overseer-federation-vision-001',
-    'overseer-federation-center-design-001',
+    'overseer-archimate-role-001', 'overseer-default-pm-actor-001', 'overseer-diagram-redraw-dark-001',
+    'overseer-doubao-adaptation-001', 'overseer-email-format-ref-001', 'overseer-failure-exp-concept-001',
+    'overseer-federation-center-design-001', 'overseer-federation-vision-001', 'overseer-memory-tiers-001',
+    'overseer-milestone-schema-bundle-decoupling-001', 'overseer-paper-writing-001', 'overseer-retrieval-recall-first-001',
+    'overseer-site-refresh-0.26.2-001', 'overseer-vision-001', 'overseer-wiki-eval-001',
   ],
   'overseer-rules-001': [
-    'overseer-graph-dedup-gate-001', 'overseer-harness-workspaceroot-fix-001', 'overseer-graph-mcp-deploy-001',
-    'overseer-mcp-tool-surface-001', 'overseer-milestone-critical-reasoning-001',
-    'overseer-milestone-lossless-write-001', 'overseer-cross-project-dispatch-001',
+    'overseer-argo-mcp-verification-001', 'overseer-cross-project-dispatch-001', 'overseer-graph-dedup-gate-001',
+    'overseer-graph-mcp-deploy-001', 'overseer-harness-workspaceroot-fix-001', 'overseer-mcp-tool-surface-001',
+    'overseer-milestone-critical-reasoning-001', 'overseer-milestone-lossless-write-001',
   ],
   'overseer-retrieval-001': [
-    'overseer-semantic-seed-prefix-fix-001', 'overseer-rerank-latency-fix-001',
-    'overseer-community-probe-001', 'overseer-mem-semantic-threshold-calibration-001',
-    'overseer-semantic-projection-oom-001',
+    'overseer-community-probe-001', 'overseer-harness-view-relations-001', 'overseer-mem-agent-cost-harness-001',
+    'overseer-mem-semantic-threshold-calibration-001', 'overseer-milestone-read-projection-001',
+    'overseer-rerank-latency-fix-001', 'overseer-semantic-projection-oom-001', 'overseer-semantic-seed-prefix-fix-001',
   ],
   'overseer-product-001': [
-    'overseer-teamai-insight-001', 'overseer-homepage-v3-kglibrary-retire-001', 'overseer-community-linkage-001',
-    'overseer-multiagent-delegation-plan-001', 'overseer-view-geometry-route-fix-001',
-    'overseer-framework-series-001', 'overseer-agent-model-unification-001',
-    'overseer-archgraph-intro-pdf-001',
+    'overseer-agent-model-unification-001', 'overseer-archgraph-intro-pdf-001', 'overseer-community-linkage-001',
+    'overseer-framework-series-001', 'overseer-homepage-v3-kglibrary-retire-001',
+    'overseer-multiagent-delegation-plan-001', 'overseer-teamai-insight-001', 'overseer-view-geometry-route-fix-001',
   ],
 };
 

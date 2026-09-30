@@ -30,29 +30,29 @@ test('AT-agent-read-projection-01: view read omits attributes/testcases by defau
   const responses = runMcp([
     { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 't', version: '1' } } },
     { jsonrpc: '2.0', method: 'notifications/initialized', params: {} },
-    base(2, 'getArchitectureViewContext', { view_id: '176' }),
-    base(3, 'getArchitectureViewContext', { view_id: '176', includeAttributes: true, includeTestcases: true }),
+    base(2, 'getArchitectureViewContext', { view_id: '174' }),
+    base(3, 'getArchitectureViewContext', { view_id: '174', includeAttributes: true, includeTestcases: true }),
   ]);
   const def = payload(responses, 2);
   const full = payload(responses, 3);
   assert.equal(def.status, 'passed');
-  // the member that DOES carry bookkeeping (1331) has it omitted by default
-  const e1331def = def.elements.find(e => e.id === '1331');
-  const e1331full = full.elements.find(e => e.id === '1331');
-  assert.ok(e1331def && e1331full);
-  assert.equal(e1331def.attributes, undefined, 'attributes omitted by default');
-  assert.equal(e1331def.testcases, undefined, 'testcases omitted by default');
-  assert.ok(Array.isArray(e1331def.attributes) === false);
+  // the member that DOES carry bookkeeping (1318) has it omitted by default
+  const e1318def = def.elements.find(e => e.id === '1318');
+  const e1318full = full.elements.find(e => e.id === '1318');
+  assert.ok(e1318def && e1318full);
+  assert.equal(e1318def.attributes, undefined, 'attributes omitted by default');
+  assert.equal(e1318def.testcases, undefined, 'testcases omitted by default');
+  assert.ok(Array.isArray(e1318def.attributes) === false);
   // default read reports the omission so the agent knows how to get them
   assert.ok(def.projection && def.projection.attributesOmitted > 0, 'projection note must report omissions');
   assert.match(def.projection.note, /includeAttributes/);
   // opt-in returns them verbatim
-  assert.ok(Array.isArray(e1331full.attributes) && e1331full.attributes.length > 0, 'opt-in restores attributes');
-  assert.ok(Array.isArray(e1331full.testcases) && e1331full.testcases.length > 0, 'opt-in restores testcases');
+  assert.ok(Array.isArray(e1318full.attributes) && e1318full.attributes.length > 0, 'opt-in restores attributes');
+  assert.ok(Array.isArray(e1318full.testcases) && e1318full.testcases.length > 0, 'opt-in restores testcases');
   assert.equal(full.projection, undefined, 'no omission note when nothing omitted');
   // non-bookkeeping content is untouched
-  assert.equal(e1331def.description, e1331full.description);
-  assert.equal(e1331def.name, e1331full.name);
+  assert.equal(e1318def.description, e1318full.description);
+  assert.equal(e1318def.name, e1318full.name);
 });
 
 test('AT-agent-read-projection-02: an element read keeps the FOCUS element bookkeeping', () => {
