@@ -102,7 +102,6 @@ Before building an element, look up the skills and resources needed and put them
 4. Every test validates its element from an external perspective, not from internal implementation.
 5. Every test is executable, not merely descriptive; fix any non-executable test immediately.
 6. Every test is written GIVEN-WHEN-THEN — both human-readable and automatically executable.
-7. Keep coverage durable: a delivered feature keeps an executable acceptance test until it is explicitly removed; never drop coverage for a live feature. End-to-end acceptance runs in the real environment (Docker: `npm run acceptance`), and every live feature is registered in the coverage guardian.
 </AcceptanceTestFirst>
 
 <ChangeTierGate>
