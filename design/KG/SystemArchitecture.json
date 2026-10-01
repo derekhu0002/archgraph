@@ -3427,7 +3427,7 @@
           "view_name": "项目总管发布记录·归档（≤0.20.x）"
         },
         {
-          "view_id": "overseer-ltm-lessons-001",
+          "view_id": "overseer-lessons-001",
           "view_name": "项目总管经验库"
         }
       ],
@@ -12720,10 +12720,10 @@
       ]
     },
     {
-      "view_id": "overseer-ltm-lessons-001",
+      "view_id": "overseer-lessons-001",
       "view_name": "项目总管经验库",
       "parent_element_id": "project-overseer-001",
-      "description": "项目总管 T2 长期记忆的经验/坑分层子视图（overseer-ltm-001 达 15 元素上限后按层拆分）。",
+      "description": "项目总管 T2 长期记忆的经验/坑分层子视图（overseer-ltm-001 达 15 元素上限后按层拆分）。id 不含 -ltm-，以免与 T2 召回视图（按 /-ltm-/ 解析）冲突。",
       "included_elements": [
         "overseer-lesson-npm-proxy-deploy-001"
       ]

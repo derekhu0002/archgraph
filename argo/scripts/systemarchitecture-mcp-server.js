@@ -2699,15 +2699,51 @@ function compactMutationResponse(payload) {
   return compact;
 }
 
-function getSystemArchitectureResult(payload) {
-  const failed = payload.status === 'failed';
-  return toolResult(payload, {
+// The typed getSystemArchitecture output contract (see
+// GET_SYSTEM_ARCHITECTURE_OUTPUT_SCHEMA). The error variant allows only the
+// listed keys, so any error (local or mirrored from a cross-project read) is
+// projected onto that shape with category + message guaranteed. Exposed so the
+// argo MCP server can build the SAME structuredContent for a cross-project read
+// (which bypasses this module's callTool) instead of returning a result without
+// structuredContent — which violates the declared outputSchema (-32600).
+const GET_SYSTEM_ARCHITECTURE_ERROR_KEYS = Object.freeze([
+  'category', 'message', 'action', 'fullSnapshotFallback', 'state',
+  'canonicalVersion', 'contentVersion', 'indexVersion',
+  'completedChannels', 'missingChannels', 'mismatchedChannels',
+]);
+
+function normalizeGetSystemArchitectureError(error) {
+  const source = error && typeof error === 'object' ? error : {};
+  const normalized = {};
+  for (const key of GET_SYSTEM_ARCHITECTURE_ERROR_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(source, key) && source[key] !== undefined) {
+      normalized[key] = source[key];
+    }
+  }
+  if (typeof normalized.category !== 'string' || normalized.category === '') {
+    normalized.category = 'GET_SYSTEM_ARCHITECTURE_ERROR';
+  }
+  if (typeof normalized.message !== 'string' || normalized.message === '') {
+    normalized.message = typeof source.reason === 'string' && source.reason !== ''
+      ? source.reason
+      : 'getSystemArchitecture failed';
+  }
+  return normalized;
+}
+
+function buildGetSystemArchitectureStructuredContent(payload) {
+  const failed = Boolean(payload) && payload.status === 'failed';
+  return {
     version: '1.0',
     mode: failed ? 'error' : 'semantic-query',
-    document: failed ? null : (payload.document === undefined ? null : payload.document),
-    query: failed ? null : (payload.query || null),
-    error: failed ? payload.error : null,
-  });
+    document: failed ? null : (payload && payload.document === undefined ? null : payload.document),
+    query: failed ? null : ((payload && payload.query) || null),
+    error: failed ? normalizeGetSystemArchitectureError(payload.error) : null,
+  };
+}
+
+function getSystemArchitectureResult(payload) {
+  return toolResult(payload, buildGetSystemArchitectureStructuredContent(payload));
 }
 
 async function callTool(name, args = {}, dependencies = undefined) {
@@ -4488,6 +4524,7 @@ if (require.main === module) {
 
 module.exports = {
   GET_SYSTEM_ARCHITECTURE_OUTPUT_SCHEMA,
+  buildGetSystemArchitectureStructuredContent,
   TOOLS,
   applyMutations,
   buildBusinessSemanticSummary,

@@ -420,6 +420,13 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
       tool: name,
       args,
     });
+    // getSystemArchitecture declares an outputSchema, so its result MUST carry
+    // matching structuredContent even on the cross-project path (which bypasses
+    // the systemarchitecture module's own toolResult). A missing
+    // structuredContent makes the MCP client reject the call with -32600.
+    if (name === 'getSystemArchitecture') {
+      return toolResult(result, systemArchitectureMcp.buildGetSystemArchitectureStructuredContent(result));
+    }
     return toolResult(result);
   }
   if (name === 'initializeWorkspace') {
@@ -678,7 +685,7 @@ function normalizeRelativePath(value) {
   return String(value).replace(/\\/g, '/');
 }
 
-function toolResult(payload) {
+function toolResult(payload, structuredContent = undefined) {
   return {
     content: [
       {
@@ -686,6 +693,7 @@ function toolResult(payload) {
         text: JSON.stringify(payload, null, 2),
       },
     ],
+    ...(structuredContent === undefined ? {} : { structuredContent }),
     isError: payload.status === 'failed',
   };
 }

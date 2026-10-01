@@ -187,3 +187,88 @@ test('AT external-query: the MCP routes a projectId call through the center end-
     assert.equal(center.requests.length, 1);
   } finally { center.server.close(); }
 });
+
+// Like callToolAsync, but resolves the FULL tools/call result object (so the
+// declared outputSchema contract — structuredContent — can be asserted).
+function callToolRawAsync(name, args, env) {
+  const input = [
+    { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'extq', version: '1' } } },
+    { jsonrpc: '2.0', method: 'notifications/initialized', params: {} },
+    { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name, arguments: args } },
+  ].map((m) => JSON.stringify(m)).join('\n') + '\n';
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [SERVER], { cwd: ROOT, env: { ...process.env, ...env }, stdio: ['pipe', 'pipe', 'pipe'] });
+    let buffer = ''; let stderr = ''; let done = false;
+    const timer = setTimeout(() => { if (!done) { done = true; try { child.kill('SIGKILL'); } catch { /* ignore */ } reject(new Error(`timeout; stderr=${stderr.slice(0, 200)}`)); } }, 90000);
+    child.stdout.on('data', (chunk) => {
+      buffer += chunk.toString();
+      let nl;
+      while ((nl = buffer.indexOf('\n')) >= 0) {
+        const line = buffer.slice(0, nl).trim();
+        buffer = buffer.slice(nl + 1);
+        if (!line) continue;
+        let m; try { m = JSON.parse(line); } catch { continue; }
+        if (m && m.id === 2 && m.result) {
+          done = true; clearTimeout(timer);
+          try { child.kill('SIGKILL'); } catch { /* ignore */ }
+          resolve(m.result);
+        }
+      }
+    });
+    child.stderr.on('data', (d) => { stderr += d.toString(); });
+    child.on('error', (e) => { if (!done) { done = true; clearTimeout(timer); reject(e); } });
+    child.stdin.on('error', () => { /* ignore EPIPE */ });
+    child.stdin.write(input);
+    child.stdin.end();
+  });
+}
+
+const GET_SA_ERROR_KEYS = ['category', 'message', 'action', 'fullSnapshotFallback', 'state', 'canonicalVersion', 'contentVersion', 'indexVersion', 'completedChannels', 'missingChannels', 'mismatchedChannels'];
+
+test('AT external-query: cross-project getSystemArchitecture returns schema-conformant structuredContent', async () => {
+  // GIVEN a center stub returning a native getSystemArchitecture result
+  const center = await startCenter(() => ({
+    status: 200,
+    payload: {
+      status: 'ok', requester: 'archgraph', projectId: 'abot', namespaceKey: 'proj:abot', tool: 'getSystemArchitecture',
+      result: { status: 'passed', query: { purpose: 'general', intent: 'x', mode: 'semantic-query', semanticRetrieval: 'invoked' }, document: { elements: [{ id: 'abot-vision-001', name: 'Vision', type: 'Business Object' }] } },
+    },
+  }));
+  const ws = makeWorkspace();
+  writeFederation(ws, center.url);
+  try {
+    // WHEN getSystemArchitecture is called WITH projectId
+    const result = await callToolRawAsync('getSystemArchitecture', { projectId: 'abot', query: { purpose: 'general', intent: 'x' }, workspaceRoot: ws }, { ARGO_REPO_ROOT: ws });
+    // THEN the result carries structuredContent matching the declared outputSchema
+    const sc = result.structuredContent;
+    assert.ok(sc, 'structuredContent must be present when the tool declares an outputSchema');
+    assert.equal(sc.version, '1.0');
+    assert.equal(sc.mode, 'semantic-query');
+    assert.equal(sc.error, null);
+    assert.equal(sc.query.mode, 'semantic-query');
+    assert.ok(sc.document && Array.isArray(sc.document.elements));
+    assert.equal(sc.namespaceKey, undefined, 'structuredContent must match the schema (additionalProperties:false); namespaceKey stays in the text payload');
+    const payload = JSON.parse(result.content[0].text);
+    assert.equal(payload.namespaceKey, 'proj:abot');
+  } finally { center.server.close(); }
+});
+
+test('AT external-query: a denied cross-project getSystemArchitecture still returns an error structuredContent', async () => {
+  const center = await startCenter(() => ({ status: 403, payload: { status: 'denied', reason: 'not_authorized', requester: 'archgraph', projectId: 'abot' } }));
+  const ws = makeWorkspace();
+  writeFederation(ws, center.url);
+  try {
+    const result = await callToolRawAsync('getSystemArchitecture', { projectId: 'abot', query: { purpose: 'general', intent: 'x' }, workspaceRoot: ws }, { ARGO_REPO_ROOT: ws });
+    const sc = result.structuredContent;
+    assert.ok(sc, 'structuredContent must be present even on failure');
+    assert.equal(sc.version, '1.0');
+    assert.equal(sc.mode, 'error');
+    assert.equal(sc.document, null);
+    assert.equal(sc.query, null);
+    assert.equal(sc.error.category, 'EXTERNAL_QUERY_DENIED');
+    assert.ok(typeof sc.error.message === 'string' && sc.error.message.length > 0);
+    for (const k of Object.keys(sc.error)) {
+      assert.ok(GET_SA_ERROR_KEYS.includes(k), `error key '${k}' is not allowed by the outputSchema`);
+    }
+  } finally { center.server.close(); }
+});
