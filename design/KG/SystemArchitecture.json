@@ -10125,6 +10125,11 @@
           "name": "federationQuery",
           "value": "projectId-routed",
           "description": "5 个读工具支持可选 projectId：缺省本仓不变；提供则经联邦中心 /graph/read 授权转发（requester 取自 .argo/federation.json，本仓 projectId=archgraph），透传结果+namespaceKey，绝不静默降级；缺身份报错。hermetic 测试 6/6；Docker 验收 10/10（含 live 跨仓读 soc-demo 386 元素）。"
+        },
+        {
+          "name": "commit",
+          "value": "44d0dad",
+          "description": "refactor(schema): rename argob-* to schema-bundle-* and ArgoBument to ArchiMate 3.2; argo/scripts/schema-bundle.js; argo/schema/schema-bundle.config.json; argo/schema/schema-bundle.rules.json; custom-schema/.argo/schema/GUIDE.md; custom-schema/.argo/schema/schema-bundle.config.json; tests/schema-bundle.test.js; docs/schema-bundle-decoupling.md; sandbox/schema-decoupling/verify-all.js; design/KG/SystemArchitecture.json; npm test 646/0/0; Docker acceptance 10/10"
         }
       ],
       "testcases": [
