@@ -27,3 +27,22 @@ in `argo/rules/archgraph.instructions.md` and must stay universally true.
 
 See `docs/mcp-acceptance.md` for the acceptance standard and the tool coverage
 matrix.
+
+## Deployment (this repo)
+
+1. **Deploy only via the official method.** Host deployment MUST install the
+   published package from the registry, then run the deployer:
+   `npm i -g archgraph-argo-beta@<version>` followed by `argo-deploy -SkipEnv`.
+   Never install from a local tarball, folder, `npm pack`, or any other path —
+   the registry artifact is the only sanctioned source. Dev releases publish to
+   `archgraph-argo-beta` with `--tag beta`.
+2. **Wait out registry propagation, don't bypass it.** After `npm publish`,
+   confirm `npm view archgraph-argo-beta@<version> version` succeeds before
+   installing. If it lags, retry — do not fall back to a local install.
+3. **The deployer copies, it does not mirror.** `argo-deploy` copy-overlays
+   `argo/schema` into `~/.argo/schema` without deleting renamed/removed files.
+   After a rename, manually delete stale files under `~/.argo` (e.g. old
+   `argob.*`), then verify `~/.argo` has no removed tokens.
+4. **Restart MCP clients after deploy.** Running `argo-mcp-server` processes hold
+   the code loaded at start; restart opencode/VS Code/Cursor/OpenClaw/Doubao so
+   they pick up the new deployment.

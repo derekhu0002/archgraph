@@ -10399,9 +10399,9 @@
     },
     {
       "id": "overseer-lesson-npm-proxy-deploy-001",
-      "name": "经验：npm 发布/安装需走系统代理 127.0.0.1:7890（TLS 直连失败）",
+      "name": "经验：npm 发布/安装需走系统代理 127.0.0.1:7890 + 部署必须用正式安装法",
       "type": "Business Object",
-      "description": "【症状】本机 npm publish / npm i -g / npm view 挂起，或报 ERR_TLS_CERT_ALTNAME_INVALID；而 PowerShell Invoke-WebRequest 正常(200)。\\n【原因】本机有系统代理(WinINET: ProxyEnable=1, ProxyServer=127.0.0.1:7890)，PowerShell 默认走它，npm 默认不走；npm 直连 registry.npmjs.org:443 被拦截/重置。\\n【修复】发布/安装前设 $env:HTTPS_PROXY 与 $env:HTTP_PROXY=http://127.0.0.1:7890（临时环境变量即可，无需改 .npmrc）。发布后 registry 有传播延迟(分钟级)，npm view/install 需重试。\\n【本次部署】archgraph-argo-beta@0.27.0-beta.1(tag beta) 已发布；因传播延迟改用本地 npm pack 的 tgz 安装；argo-deploy -SkipEnv 22/22；宿主 ~/.argo/schema 拷入 schema-bundle.config.json/.rules.json 并删除陈旧 argob.config.json/argob-rules.json 与 ~/.argo/scripts/argob-schema.js（部署器只拷贝、不镜像删除，须手工清理）；部署态解析 kind=default / language=ArchiMate 3.2 / 64 元素 / 11 关系 / bundleValidation passed。commit dde28c5。",
+      "description": "【症状】本机 npm publish / npm i -g / npm view 挂起，或报 ERR_TLS_CERT_ALTNAME_INVALID；而 PowerShell Invoke-WebRequest 正常(200)。\\n【原因】本机有系统代理(WinINET: ProxyEnable=1, ProxyServer=127.0.0.1:7890)，PowerShell 默认走它，npm 默认不走；npm 直连 registry.npmjs.org:443 被拦截/重置。\\n【修复】发布/安装前设 $env:HTTPS_PROXY 与 $env:HTTP_PROXY=http://127.0.0.1:7890（临时环境变量即可，无需改 .npmrc）。\\n【部署规矩（硬性）】部署必须用正式方法：先确认 npm view archgraph-argo-beta@<version> 可用（等 registry 传播，勿绕过），再 npm i -g archgraph-argo-beta@<version>（registry 安装），然后 argo-deploy -SkipEnv。禁止用本地 tarball/folder/npm pack 安装。\\n【本次部署】发布 archgraph-argo-beta@0.27.0-beta.1(tag beta)；传播延迟期间曾用本地 tgz 临时验证，最终以正式方法落地：npm i -g archgraph-argo-beta@0.27.0-beta.1 + argo-deploy -SkipEnv 22/22；宿主 ~/.argo/schema 拷入 schema-bundle.config.json/.rules.json，手工删除陈旧 argob.config.json/argob-rules.json 与 ~/.argo/scripts/argob-schema.js（部署器只拷贝、不镜像删除）；部署态 kind=default / language=ArchiMate 3.2 / 64 元素 / 11 关系 / bundleValidation passed。commit dde28c5。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -10414,7 +10414,12 @@
         {
           "name": "commit",
           "value": "dde28c5",
-          "description": "chore(release): archgraph-argo-beta@0.27.0-beta.1 + host redeploy"
+          "description": "chore(release): archgraph-argo-beta@0.27.0-beta.1 + 正式安装/部署"
+        },
+        {
+          "name": "rule",
+          "value": "deploy-must-use-official-install",
+          "description": "部署必须用正式 registry 安装法（npm i -g 包@版本 + argo-deploy -SkipEnv）；本地 tgz 仅临时验证、最终被正式安装取代。"
         }
       ]
     }
