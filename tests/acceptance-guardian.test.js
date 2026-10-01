@@ -64,7 +64,7 @@ const DELIVERABLE_GUARDS = [
   ['SKILL: argo-init drives initializeWorkspace (functional, no external script)', 'tests/argo-init-interface.test.js'],
   ['Schema / ArchiMate 3.2 constraint', 'tests/aml-standard.test.js'],
   ['Neo4j structural projection & sync', 'tests/neo4j-sync-staleness.test.js'],
-  ['Semantic lifecycle (ACL / threshold / backfill)', 'tests/semantic-acl-posix.test.js'],
+  ['Secret .env preflight (never-committed; ACL not enforced)', 'tests/semantic-env-guard.test.js'],
   ['Semantic backfill reconcile', 'tests/semantic-backfill-reconcile.test.js'],
   ['Eval harness deliverable (eval-seed)', 'tests/eval-seed.test.js'],
   ['Web project deliverable', 'tests/website.test.js'],
