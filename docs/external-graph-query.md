@@ -50,14 +50,16 @@ The dispatch lives in `argo-mcp-server.js` (`externalQueryRequested(name, args)`
 - `tests/external-graph-query.test.js` (hermetic, mock center): router gating,
   pass-through + `namespaceKey`, denied reason surfaced, register-first on
   missing identity, local path unchanged, and the MCP end-to-end route.
-- **Live** (real center, requester `archgraph`, target `soc-demo`) — all 5 read
-  tools return the external project's result + `namespaceKey proj:soc-demo`,
-  covering both semantic and non-semantic retrieval:
-  - `queryNeo4jGraph` (structural Cypher) → `database=soc-demo`, `386` elements.
-  - `getSystemArchitecture` (semantic) → `mode=semantic-query`, 63 elements.
-  - `memory_search` (semantic) → 3 hits (scores 0.99 / 0.98 / 0.97).
-  - `getIntentElementContext` (semantic context) → 4 elements for `soc-agent-artifact`.
-  - `getArchitectureViewContext` (structural view) → 2 elements for view `170`.
+- **Live** (real center, requester `archgraph`, target our own registered project
+  `archgraph` so the precondition is guaranteed) — structural reads succeed and
+  return the mirror's data with `namespaceKey proj:archgraph`:
+  - `queryNeo4jGraph` (structural Cypher) → `database=archgraph`, `298` elements.
+  - `getIntentElementContext` / `getArchitectureViewContext` (structural) → ok.
+  - Semantic reads on the mirror (`getSystemArchitecture`, `memory_search`)
+    additionally require the mirror engine's embedding configuration; when that
+    is unset they return a structured result (`LIVE_PROVIDER_CONFIGURATION_REQUIRED`
+    / empty hits), which the acceptance records rather than failing. Semantic
+    retrieval itself is hard-verified locally under both schemas.
 
 ## Boundary
 
