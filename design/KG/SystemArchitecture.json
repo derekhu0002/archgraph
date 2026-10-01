@@ -10342,6 +10342,24 @@
           "acceptanceCriteria": "tests/external-graph-query.test.js"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; argo/scripts/graph-rag/defaultSemanticRetrieval.js; tests/semantic-env-guard.test.js; tests/acceptance-guardian.test.js; argo/skills/argo-init/SKILL.md; argo/.env.example",
+          "name": "commit",
+          "value": "PENDING"
+        },
+        {
+          "name": "commit",
+          "value": "f7d50c6",
+          "description": "feat(secret): drop OS ACL hardening for the ARGO .env (keep never-committed) — commit f7d50c6"
+        }
+      ],
+      "description": "ARGO env 文件（~/.argo/.env）不再做 OS ACL / 文件权限加固（该检查经常误报导致失败）；只保证不被提交：仍强制 SECRET_FILE_TRACKED / SECRET_FILE_NOT_IGNORED（git 跟踪/忽略），并保留路径/重解析点检查。变更：liveEmbeddingProviderConfig.js 移除 validateAcl/parseAcl/posixModeIsSecretSafe/validatePosixSecretFileAcl 与 win32 ACL 读取；defaultSemanticRetrieval.js 移除其 ACL 校验；删除 tests/semantic-acl-posix.test.js，新增 tests/semantic-env-guard.test.js（跟踪拒绝、未忽略拒绝、ACL 不再拦截）；覆盖守护与 skill 同步。验收：npm test 646/0 fail/0 skip；Docker 验收 10/10。",
+      "id": "argo-env-no-acl-guard-001",
+      "name": "ARGO .env 免 ACL 加固（仅保证不被提交）",
+      "type": "Requirement"
     }
   ],
   "relationships": [
@@ -12634,7 +12652,8 @@
         "wp-schema-bundle-decoupling-001",
         "doc-schema-bundle-decoupling-001",
         "doc-mcp-acceptance-001",
-        "doc-external-graph-query-001"
+        "doc-external-graph-query-001",
+        "argo-env-no-acl-guard-001"
       ]
     }
   ]
