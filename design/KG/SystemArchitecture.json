@@ -10346,6 +10346,11 @@
           "name": "commit",
           "value": "d12318c",
           "description": "fix(mcp): cross-project getSystemArchitecture returns schema-conformant structuredContent (closes #2); argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; tests/external-graph-query.test.js; npm test 648/0/0"
+        },
+        {
+          "name": "commit",
+          "value": "b390f03",
+          "description": "chore(release): archgraph-argo-beta@0.27.0-beta.2 (issue #2 fix) 发布+正式安装+argo-deploy；宿主 ~/.argo 已含修复"
         }
       ],
       "description": "跨项目图谱查询适配（docs/external-graph-query.md）：5 个 ARGO 读工具（getSystemArchitecture / getIntentElementContext / getArchitectureViewContext / queryNeo4jGraph / memory_search）新增可选 projectId；缺省=本仓（行为不变），提供=经联邦中心 POST <centerUrl>/graph/read（requester 取自 <workspace>/.argo/federation.json），透传原生结果+namespaceKey，绝不静默降级本仓。路由层 argo/scripts/external-graph-query.js；派发在 argo-mcp-server.js。缺失身份→EXTERNAL_QUERY_NOT_REGISTERED（不猜测）。验证：tests/external-graph-query.test.js（mock 中心，6/6）+ Docker 验收新增 live 跨仓读（projectId=soc-demo → database soc-demo/386 元素/namespaceKey proj:soc-demo）。",
@@ -10425,6 +10430,37 @@
           "name": "rule",
           "value": "deploy-must-use-official-install",
           "description": "部署必须用正式 registry 安装法（npm i -g 包@版本 + argo-deploy -SkipEnv）；本地 tgz 仅临时验证、最终被正式安装取代。"
+        }
+      ]
+    },
+    {
+      "id": "overseer-lesson-mcp-outputschema-structuredcontent-001",
+      "name": "经验：声明 outputSchema 的 MCP 工具，所有返回分支都必须给 structuredContent",
+      "type": "Business Object",
+      "description": "【症状】跨项目 getSystemArchitecture(projectId) 报 “MCP error -32600: Tool getSystemArchitecture has an output schema but did not return structured content”；同授权下其他 4 个读工具（均未声明 outputSchema）正常，本地 getSystemArchitecture 也正常。\\n【原因】argo-mcp-server.js 给该工具声明了 outputSchema，但跨项目分支用本文件的 toolResult()（不产出 structuredContent），绕过了 systemarchitecture-mcp-server.js 本地路径的 getSystemArchitectureResult（有 structuredContent）。MCP 客户端按 outputSchema 校验→-32600。声明了 outputSchema 的工具，其 ANY 返回分支都必须带 structuredContent。\\n【修复（issue #2 / commit d12318c）】抽出并导出 buildGetSystemArchitectureStructuredContent(payload) 作单一真源（local 与 external 共用）；错误对象规整到 schema 允许的键集并保证 category+message；argo-mcp-server.toolResult 支持可选 structuredContent；跨项目分支对声明 outputSchema 的工具附上契约化 structuredContent（namespaceKey 仅留文本 payload，因 outputSchema additionalProperties:false）。\\n【验收】新增 2 条回归 AT（成功 + 被拒）显式断言 structuredContent；npm test 648/0/0；Docker acceptance 10/10（含 cross-project all 5 read tools）；发布 archgraph-argo-beta@0.27.0-beta.2（b390f03）并按正式方法部署。\\n【教训】新增带 outputSchema 的 MCP 工具时，必须为它的每个返回分支（本地/跨项目/错误）产出符合契约的 structuredContent，并补一条显式断言 structuredContent 的可执行验收。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "d12318c",
+          "description": "fix(mcp): cross-project getSystemArchitecture returns schema-conformant structuredContent (closes #2)"
+        },
+        {
+          "name": "commit",
+          "value": "b390f03",
+          "description": "chore(release): archgraph-argo-beta@0.27.0-beta.2"
+        },
+        {
+          "name": "issue",
+          "value": "#2",
+          "description": "derekhu0002/archgraph issue #2，已 comment 并 CLOSED"
         }
       ]
     }
@@ -12730,7 +12766,8 @@
       "parent_element_id": "project-overseer-001",
       "description": "项目总管 T2 长期记忆的经验/坑分层子视图（overseer-ltm-001 达 15 元素上限后按层拆分）。id 不含 -ltm-，以免与 T2 召回视图（按 /-ltm-/ 解析）冲突。",
       "included_elements": [
-        "overseer-lesson-npm-proxy-deploy-001"
+        "overseer-lesson-npm-proxy-deploy-001",
+        "overseer-lesson-mcp-outputschema-structuredcontent-001"
       ]
     }
   ]
