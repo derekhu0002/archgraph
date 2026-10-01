@@ -26,7 +26,7 @@ const SCRIPT_CANDIDATES = {
 const TOOLS = [
   {
     name: 'validateSystemArchitecture',
-    description: 'Validate design/KG/SystemArchitecture.json against the workspace-resolved schema bundle (the default ArgoBument schema, or the repository\'s own .argo/schema) and Argo graph rules.',
+    description: 'Validate design/KG/SystemArchitecture.json against the workspace-resolved schema bundle (the default ArchiMate 3.2 schema, or the repository\'s own .argo/schema) and Argo graph rules.',
     inputSchema: {
       type: 'object',
       properties: {},

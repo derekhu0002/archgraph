@@ -1,6 +1,6 @@
 {
   "dialect": "archimate-class-matrix",
-  "description": "Default ArgoBument rule data extracted from argo/scripts/archimate32-rules.js. Makes the default schema bundle data-driven so it can be replaced file-for-file like any custom bundle.",
+  "description": "Default ArchiMate 3.2 rule data extracted from argo/scripts/archimate32-rules.js. Makes the default schema bundle data-driven so it can be replaced file-for-file like any custom bundle.",
   "elementTypeMetadata": {
     "Resource": {
       "layer": "Strategy",

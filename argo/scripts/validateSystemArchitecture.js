@@ -7,7 +7,7 @@ const {
 
 const {
   loadSchemaBundleAndOntology,
-} = require('./argob-schema.js');
+} = require('./schema-bundle.js');
 
 const repoRoot = getWorkspaceRoot();
 const graphRelativePath = path.join('design', 'KG', 'SystemArchitecture.json');

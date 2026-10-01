@@ -2,7 +2,7 @@
 
 // Full-surface verification of the ARGO MCP under BOTH schema modes:
 //   A. CUSTOM schema  鈥?the shipped Team Graph bundle (.argo/schema present)
-//   B. DEFAULT schema 鈥?no .argo/schema (built-in ArgoBument / ArchiMate 3.2)
+//   B. DEFAULT schema 鈥?no .argo/schema (built-in default / ArchiMate 3.2)
 //
 // Each scenario runs against a REAL Neo4j (host.docker.internal, its own
 // isolated test database) and the REAL embedding provider, initializes the
@@ -191,7 +191,7 @@ function customScenario() {
   return {
     label: 'custom schema (Team Graph)',
     ws,
-    db: 'argob-schema-custom',
+    db: 'schema-bundle-custom',
     schema: { kind: 'workspace', language: 'Team Graph', actor: 'Agent Node' },
     mentions: /team-a|svc-a|svc-b|Team A|Service A|Service B/,
     minRows: 4,
@@ -226,9 +226,9 @@ function customScenario() {
 function defaultScenario() {
   const ws = WS_DEFAULT;
   return {
-    label: 'default schema (ArgoBument / ArchiMate 3.2)',
+    label: 'default schema (default / ArchiMate 3.2)',
     ws,
-    db: 'argob-schema-default',
+    db: 'schema-bundle-default',
     schema: { kind: 'default', language: 'ArchiMate 3.2', actor: 'Business Actor' },
     mentions: /1249|1240|project-manager-001|Implementation and Migration|Application Cooperation/,
     minRows: 3,

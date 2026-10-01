@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "ArgoBument default schema bundle descriptor",
-  "description": "Descriptor for the default ARGO schema bundle (ArchiMate 3.2 + ARGO extensions). A repository may override this bundle by placing its own SystemArchitecture.schema.json (plus an optional argob.config.json / argob-rules.json) under <workspace>/.argo/schema.",
+  "title": "ArchiMate 3.2 default schema bundle descriptor",
+  "description": "Descriptor for the default ARGO schema bundle (ArchiMate 3.2 + ARGO extensions). A repository may override this bundle by placing its own SystemArchitecture.schema.json (plus an optional schema-bundle.config.json / schema-bundle.rules.json) under <workspace>/.argo/schema.",
   "language": "ArchiMate 3.2",
   "elementTypeEnumKey": "archimateElementType",
   "relationshipTypeEnumKey": "archimateRelationshipType",

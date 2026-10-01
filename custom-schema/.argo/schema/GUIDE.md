@@ -1,6 +1,6 @@
 # Team Graph — custom modeling language (schema bundle)
 
-This bundle replaces the default ArgoBument (ArchiMate 3.2 + ARGO) schema for
+This bundle replaces the default ArchiMate 3.2 (+ ARGO) schema for
 **one repository only**: any workspace that has this directory at
 `<workspace>/.argo/schema/`.
 
@@ -22,7 +22,7 @@ This bundle replaces the default ArgoBument (ArchiMate 3.2 + ARGO) schema for
 ## Invariants
 
 - `statementGrammar: true` — every relationship statement must be `<source> --(<type>)--> <target>`.
-- `endpointMatrix: true` — endpoints are checked against the matrix in `argob-rules.json`.
+- `endpointMatrix: true` — endpoints are checked against the matrix in `schema-bundle.rules.json`.
 - `rootViewName: "SystemArchitecture"` — exactly one top-level view with that name.
 - `maxElementsPerView: 12` — per-view element limit.
 

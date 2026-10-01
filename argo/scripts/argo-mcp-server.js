@@ -14,7 +14,7 @@ const {
 } = require('./repositoryArgoEnvironment.js');
 const {
   loadSchemaBundleAndOntology,
-} = require('./argob-schema.js');
+} = require('./schema-bundle.js');
 const {
   externalQueryRequested,
   queryExternalRead,
@@ -438,7 +438,7 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
     return toolResult({
       status: report.status,
       workspaceRoot: workspace.workspaceRoot,
-      // The resolved modeling language for this workspace (default ArgoBument vs
+      // The resolved modeling language for this workspace (default ArchiMate 3.2 vs
       // the repository's own .argo/schema bundle) so init names the active schema.
       schema: workspace.schema,
       schemaBundle: report.schemaBundle,
@@ -535,7 +535,7 @@ async function initializeWorkspace(workspaceRoot) {
   const graphTargetPath = path.join(workspaceRoot, ...WORKSPACE_GRAPH_PATH_SEGMENTS);
   const graphRelativePath = normalizeRelativePath(path.relative(workspaceRoot, graphTargetPath));
   if (!fs.existsSync(graphTargetPath)) {
-    // Only the built-in ArgoBument default schema auto-provides a graph (the
+    // Only the built-in ArchiMate 3.2 default schema auto-provides a graph (the
     // packaged default). For any custom / replaced schema the graph is the user's
     // own: never copy the packaged (mismatched) graph — fail closed if missing.
     let ontology = null;
@@ -590,7 +590,7 @@ async function initializeWorkspace(workspaceRoot) {
   } catch (error) {
     qeaFullProjection = { status: 'failed', error: String(error && error.message ? error.message : error) };
   }
-  // Report which schema this workspace resolves to (default ArgoBument vs a
+  // Report which schema this workspace resolves to (default ArchiMate 3.2 vs a
   // repository's own .argo/schema bundle) so the caller/human can see the active
   // modeling language right after init.
   let schema;

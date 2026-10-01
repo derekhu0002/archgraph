@@ -4262,7 +4262,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（阶段总结 · 2026-10-01，分支 develop-separate-schema，已 push，HEAD a4e08af）：主题——schema 解耦 + 跨项目图谱查询 + beta 包发布 + 联邦中心 issue#1 验收 PASS。\\n【交付】schema 解耦（argob-schema.js bundle 解析/ontology/bundleValidation fail-closed；默认规则数据化 argo/schema/argob-rules.json→默认可整包替换；graph-semantics ontology 参数化；.qea 通用投影；deliveryDependencies 由 bundle 声明；actorElementType 契约；默认图仅内置拷贝、其他 schema 自建 else fail-closed；schema 报告；.env 免 OS ACL）；跨项目查询（5 读工具可选 projectId，经联邦中心 /graph/read，requester 取自 .argo/federation.json，附 namespaceKey，绝不静默降级）。\\n【发布/部署】dev 包 archgraph-argo-beta@0.27.0-beta.0（bin argo-deploy）；稳定 archgraph-argo latest=0.26.2 未被占用，0.27.0 已 deprecate；本机装 beta + argo-deploy -SkipEnv 22/22；重启后常驻 MCP 返回新字段（schemaDialect/actorElementType/bundleValidation）。\\n【联邦】本仓 projectId=archgraph 已注册+自读；issue graph-wiki#1 两轮修复（2218d2a 隐式自读/异步注册/git 身份/branch；1d9a9a4 陈旧 .meta 清理/DB 校验自愈/meta.ok 含语义/embedding 版本守卫）后，ArchGraph 端独立验收 PASS：mirror synced/ok=true；结构 298 元素；语义 12 元素；memory 命中 0.99；mirror_sync=up-to-date。\\n【验收】npm test 646 / 0 fail / 0 skip；npm run acceptance 10/10（19 接口×默认/自定义 schema×语义+非语义+fail-closed+默认可替换+跨项目语义 ok）。项目级规则入仓库根 AGENTS.md（框架规则只留普适）。\\n【关键决策】默认零回归；dev 用独立包名；项目实践入 AGENTS.md 不入框架规则；e2e 用本仓 Docker；跨仓查询通用（中心白名单=5 读工具）；.env 免 ACL（仅 never-committed）。\\n【经验/坑】无自定义 schema 旧项目无影响（default/ArchiMate）；opencode run --pure -m deepseek/deepseek-flash 可派发其他项目验证；ARGO MCP 写 .argo/temp 诊断（建议各仓忽略）；外部 getSystemArchitecture 不得预建本地语义 journey；MCP 不随 stdin EOF 退出；npm prerelease 需 --tag；granular token 不能 unpublish；并行 mutation+bash commit 竞争；PowerShell $args 是自动变量不能做参数名。\\n【待办】无（未开 PR；分支 develop-separate-schema）。\\n【commits（已 push）】…/6975dc3/edb7277/0fb9021/8cc33bb/a25edc8/a4e08af。T2 里程碑 overseer-milestone-schema-cross-project-001。",
+      "description": "项目总管工作记忆摘要（阶段总结 · 2026-10-01，分支 develop-separate-schema，已 push）：主题——schema 解耦 + 跨项目图谱查询 + beta 包发布 + 联邦中心 issue#1 验收 PASS。术语统一：默认 schema 一律称 ArchiMate 3.2；通用 bundle 文件统一命名 schema-bundle-*。\\n【交付】schema 解耦（schema-bundle.js bundle 解析/ontology/bundleValidation fail-closed；默认规则数据化 argo/schema/schema-bundle.rules.json→默认可整包替换；graph-semantics ontology 参数化；.qea 通用投影；deliveryDependencies 由 bundle 声明；actorElementType 契约；默认图仅内置拷贝、其他 schema 自建 else fail-closed；schema 报告；.env 免 OS ACL）；跨项目查询（5 读工具可选 projectId，经联邦中心 /graph/read，requester 取自 .argo/federation.json，附 namespaceKey，绝不静默降级）。\\n【发布/部署】dev 包 archgraph-argo-beta@0.27.0-beta.0（bin argo-deploy）；稳定 archgraph-argo latest=0.26.2 未被占用，0.27.0 已 deprecate；本机装 beta + argo-deploy -SkipEnv 22/22；重启后常驻 MCP 返回新字段（schemaDialect/actorElementType/bundleValidation）。\\n【联邦】本仓 projectId=archgraph 已注册+自读；issue graph-wiki#1 两轮修复（2218d2a 隐式自读/异步注册/git 身份/branch；1d9a9a4 陈旧 .meta 清理/DB 校验自愈/meta.ok 含语义/embedding 版本守卫）后，ArchGraph 端独立验收 PASS：mirror synced/ok=true；结构 298 元素；语义 12 元素；memory 命中 0.99；mirror_sync=up-to-date。\\n【验收】npm test 646 / 0 fail / 0 skip；npm run acceptance 10/10（19 接口×默认/自定义 schema×语义+非语义+fail-closed+默认可替换+跨项目语义 ok）。项目级规则入仓库根 AGENTS.md（框架规则只留普适）。\\n【关键决策】默认零回归；dev 用独立包名；项目实践入 AGENTS.md 不入框架规则；e2e 用本仓 Docker；跨仓查询通用（中心白名单=5 读工具）；.env 免 ACL（仅 never-committed）。\\n【经验/坑】无自定义 schema 旧项目无影响（default/ArchiMate 3.2）；opencode run --pure -m deepseek/deepseek-flash 可派发其他项目验证；ARGO MCP 写 .argo/temp 诊断（建议各仓忽略）；外部 getSystemArchitecture 不得预建本地语义 journey；MCP 不随 stdin EOF 退出；npm prerelease 需 --tag；granular token 不能 unpublish；并行 mutation+bash commit 竞争；PowerShell $args 是自动变量不能做参数名。\\n【待办】无（未开 PR；分支 develop-separate-schema）。\\nT2 里程碑 overseer-milestone-schema-cross-project-001。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -9997,9 +9997,9 @@
     },
     {
       "id": "wp-schema-bundle-decoupling-001",
-      "name": "schema/建模语言解耦为 schema bundle（默认 ArgoBument + 仓内 .argo/schema 覆盖）",
+      "name": "schema/建模语言解耦为 schema bundle（默认 ArchiMate 3.2 + 仓内 .argo/schema 覆盖）",
       "type": "Work Package",
-      "description": "将 ARGO 工具链从硬编码的 ArgoBument 建模语言解耦：默认仍是内置 ArgoBument（ArchiMate 3.2 + ARGO），工作区若自带 .argo/schema/ schema bundle 则该仓使用自有 schema（元素/关系类型、端点规则、根视图名、单视图元素上限随 bundle）。核心：新增 argo/scripts/argob-schema.js（resolveSchemaBundle / loadSchemaBundleAndOntology / resolveTypeEnums，优先级 ARGO_SCHEMA_DIR > 仓内 .argo/schema > 默认）；graph-semantics.js 由 ontology 参数化（默认行为逐字节不变）；validateSystemArchitecture.js 与 systemarchitecture-mcp-server.js 按工作区解析 bundle 并用于校验与 guidance；queryNeo4jGraph {schema:true} 返回解析后语言/枚举/guide（新增 schemaKind/schemaLanguage/schemaDir/guidePath）；MCP/validator 工具描述、规则 <Ontology>、唤醒闸门（ARGO_ACTOR_ELEMENT_TYPE）、skills 去 ArchiMate 硬编码；自定义 schema 下 .qea 投影显式跳过；ARGO_SCHEMA_DIR / ARGO_ACTOR_ELEMENT_TYPE 归类 host-only env。交付 docs/schema-bundle-decoupling.md（含耦合清单与残留项）。验收：tests/argob-schema-bundle.test.js 12 例（默认/覆盖/优先级/自定义类型/端点矩阵开关/自定义矩阵/单视图上限/MCP 面）；Docker 沙箱 sandbox/schema-decoupling（node v24 + opencode 1.18.29，6/6：47 测试通过、部署态 MCP 自定义语言 TeamA Ontology 校验通过、默认回退 ArchiMate 3.2/64、opencode mcp list 报告 argo connected）；本机全量回归无新增失败（剩余失败为改动前既有：EA import 工具链、cost-log env 键、图谱内容漂移）。",
+      "description": "将 ARGO 工具链从硬编码的 ArchiMate 3.2 建模语言解耦：默认仍是内置 ArchiMate 3.2（+ ARGO），工作区若自带 .argo/schema/ schema bundle 则该仓使用自有 schema（元素/关系类型、端点规则、根视图名、单视图元素上限随 bundle）。核心：新增 argo/scripts/schema-bundle.js（resolveSchemaBundle / loadSchemaBundleAndOntology / resolveTypeEnums，优先级 ARGO_SCHEMA_DIR > 仓内 .argo/schema > 默认）；graph-semantics.js 由 ontology 参数化（默认行为逐字节不变）；validateSystemArchitecture.js 与 systemarchitecture-mcp-server.js 按工作区解析 bundle 并用于校验与 guidance；queryNeo4jGraph {schema:true} 返回解析后语言/枚举/guide（新增 schemaKind/schemaLanguage/schemaDir/guidePath）；MCP/validator 工具描述、规则 <Ontology>、唤醒闸门（ARGO_ACTOR_ELEMENT_TYPE）、skills 去 ArchiMate 硬编码；自定义 schema 下 .qea 投影显式跳过；ARGO_SCHEMA_DIR / ARGO_ACTOR_ELEMENT_TYPE 归类 host-only env。交付 docs/schema-bundle-decoupling.md（含耦合清单与残留项）。验收：tests/schema-bundle.test.js（默认/覆盖/优先级/自定义类型/端点矩阵开关/自定义矩阵/单视图上限/MCP 面）；Docker 沙箱 sandbox/schema-decoupling（node v24 + opencode，全部测试通过、部署态 MCP 自定义语言 TeamA Ontology 校验通过、默认回退 ArchiMate 3.2/64、opencode mcp list 报告 argo connected）；本机全量回归无新增失败。",
       "attributes": [
         {
           "name": "commit",
@@ -10130,31 +10130,31 @@
       "testcases": [
         {
           "name": "AT-schema-bundle-01",
-          "description": "GIVEN 一个未提供自有 schema 的工作区；WHEN 解析 schema bundle 并运行 MCP 校验；THEN 使用默认 ArgoBument（kind=default、语言 ArchiMate 3.2、64 元素/11 关系枚举），canonical 图校验通过。",
+          "description": "GIVEN 一个未提供自有 schema 的工作区；WHEN 解析 schema bundle 并运行 MCP 校验；THEN 使用默认 ArchiMate 3.2（kind=default、语言 ArchiMate 3.2、64 元素/11 关系枚举），canonical 图校验通过。",
           "type": "Acceptance Test",
-          "Input": "tests/argob-schema-bundle.test.js",
-          "acceptanceCriteria": "tests/argob-schema-bundle.test.js"
+          "Input": "tests/schema-bundle.test.js",
+          "acceptanceCriteria": "tests/schema-bundle.test.js"
         },
         {
           "name": "AT-schema-bundle-02",
           "description": "GIVEN 工作区在 .argo/schema 自定义 schema（自有元素/关系类型）；WHEN 校验使用自定义类型的图并尝试默认 ArchiMate 类型；THEN 自定义类型通过、默认类型被拒（提示自定义语言）。",
           "type": "Acceptance Test",
-          "Input": "tests/argob-schema-bundle.test.js",
-          "acceptanceCriteria": "tests/argob-schema-bundle.test.js"
+          "Input": "tests/schema-bundle.test.js",
+          "acceptanceCriteria": "tests/schema-bundle.test.js"
         },
         {
           "name": "AT-schema-bundle-03",
-          "description": "GIVEN bundle 的 argob.config.json 配置端点矩阵开/关/自定义矩阵与单视图元素上限、以及 ARGO_SCHEMA_DIR；WHEN 校验；THEN 不变量按 bundle 生效（关=宽松、自定义矩阵=按矩阵拒绝、上限=自定义值），且 ARGO_SCHEMA_DIR 优先于工作区 bundle。",
+          "description": "GIVEN bundle 的 schema-bundle.config.json 配置端点矩阵开/关/自定义矩阵与单视图元素上限、以及 ARGO_SCHEMA_DIR；WHEN 校验；THEN 不变量按 bundle 生效（关=宽松、自定义矩阵=按矩阵拒绝、上限=自定义值），且 ARGO_SCHEMA_DIR 优先于工作区 bundle。",
           "type": "Acceptance Test",
-          "Input": "tests/argob-schema-bundle.test.js",
-          "acceptanceCriteria": "tests/argob-schema-bundle.test.js"
+          "Input": "tests/schema-bundle.test.js",
+          "acceptanceCriteria": "tests/schema-bundle.test.js"
         },
         {
           "name": "AT-schema-bundle-04",
           "description": "GIVEN 已部署到 ~/.argo 的 MCP（node + opencode 运行时）；WHEN 对自定义/默认工作区调用 queryNeo4jGraph {schema:true} 与 validateSystemArchitecture，并 opencode mcp list；THEN 返回解析后的语言/枚举并校验通过，opencode 报告 argo connected。",
           "type": "Acceptance Test",
-          "Input": "tests/argob-schema-bundle.test.js",
-          "acceptanceCriteria": "tests/argob-schema-bundle.test.js"
+          "Input": "tests/schema-bundle.test.js",
+          "acceptanceCriteria": "tests/schema-bundle.test.js"
         }
       ]
     },
@@ -10162,7 +10162,7 @@
       "id": "doc-schema-bundle-decoupling-001",
       "name": "Schema/建模语言解耦设计文档（schema bundle）",
       "type": "Artifact",
-      "description": "docs/schema-bundle-decoupling.md：schema bundle 机制（解析优先级、argob.config.json / argob-rules.json / guide、不变量开关）、耦合清单（12 项：schema 路径解析、类型枚举重复、端点矩阵、graph-semantics 不变量、MCP guidance、queryNeo4jGraph、工具描述、<Ontology>、唤醒闸门 actor 类型、skills、.qea 投影、env 归类）及残留项（Neo4j 标签、runArchitectureTests 依赖序启发式、EA round-trip 仍 ArchiMate 专用）。",
+      "description": "docs/schema-bundle-decoupling.md：schema bundle 机制（解析优先级、schema-bundle.config.json / schema-bundle.rules.json / guide、不变量开关）、耦合清单（12 项：schema 路径解析、类型枚举重复、端点矩阵、graph-semantics 不变量、MCP guidance、queryNeo4jGraph、工具描述、<Ontology>、唤醒闸门 actor 类型、skills、.qea 投影、env 归类）及残留项（Neo4j 标签、runArchitectureTests 依赖序启发式、EA round-trip 仍 ArchiMate 专用）。",
       "attributes": [
         {
           "name": "commit",
@@ -10302,9 +10302,9 @@
           "description": "cross-project graph query (projectId) routed to the federation center; verify-all 10/10 incl. live soc-demo read"
         }
       ],
-      "description": "里程碑（2026-09-30，项目总管，分支 develop-separate-schema）：把 ARGO 工具链从硬编码的 ArgoBument 建模语言解耦为 schema bundle——默认用内置 ArgoBument（ArchiMate 3.2 + ARGO）；工作区自带 <workspace>/.argo/schema/（SystemArchitecture.schema.json + 可选 argob.config.json/argob-rules.json/guide）则用该仓自有 schema。解析优先级 ARGO_SCHEMA_DIR > 仓内 .argo/schema > 默认。\n【关键决策】① 复用既有（此前为死代码的）仓内 .argo/schema 覆盖路径（人类伙伴裁决），未新造 .argob 目录；② 默认路径逐字节保持——规则数据仍来自 archimate32-rules.js，只有自定义 bundle 才走新逻辑；③ 不变量（端点矩阵/statement 语法/根视图名/单视图元素上限）由 bundle 配置，自定义 schema 默认宽松；④ .qea 投影对非 ArchiMate 工作区显式跳过；⑤ Neo4j 标签/runArchitectureTests 依赖序启发式列为已文档化残留。\n【交付】argo/scripts/argob-schema.js（resolveSchemaBundle/loadSchemaBundleAndOntology/resolveTypeEnums）；graph-semantics.js ontology 参数化；validateSystemArchitecture.js / systemarchitecture-mcp-server.js 按工作区解析 bundle 并校验+guidance；queryNeo4jGraph{schema:true} 增 schemaKind/schemaLanguage/schemaDir/guidePath；工具描述/规则<Ontology>/唤醒闸门(ARGO_ACTOR_ELEMENT_TYPE)/skills 去 ArchiMate 硬编码；.env 归类 ARGO_SCHEMA_DIR/ARGO_ACTOR_ELEMENT_TYPE；docs/schema-bundle-decoupling.md。\n【验证】tests/argob-schema-bundle.test.js 12 例；Docker 沙箱 sandbox/schema-decoupling（基于 opencode-sandbox 镜像，容器内 node v24.21.0 + opencode 1.18.29，~/.argo 部署态）6/6：47 测试通过、部署态 MCP 自定义语言 TeamA Ontology 校验通过、默认回退 ArchiMate 3.2/64、opencode mcp list 报 argo connected；本机全量回归无新增失败（剩余为改动前既有：EA import 工具链、cost-log env 键、图谱内容漂移）。\n【经验/坑】① 本机 Docker Desktop 引擎需手动拉起（Start-Process Docker Desktop.exe，~30-60s）；② bind-mount 整个仓（含 .qea/tarball/node_modules）到容器极慢——只拷代码子集（tar 子目录）并排除 ACL 受限的 argo/.env；③ 容器内 MCP 需 neo4j-driver——用 vendor 内置 tgz 在 ~/.argo 安装，NODE_PATH 指向 ~/.argo/node_modules；④ opencode 无 API key 也能用 `opencode mcp list` 验证 MCP 连接；⑤ PowerShell 管道 Select-Object -Last 会缓冲到结束，诊断挂起用 docker run -d + docker logs。\ncommits 95f63a4（代码+测试+沙箱+文档）/ 2089547（图谱登记）/ 0e4e241（commit 登记）。",
+      "description": "里程碑（2026-09-30，项目总管，分支 develop-separate-schema）：把 ARGO 工具链从硬编码的 ArchiMate 3.2 建模语言解耦为 schema bundle——默认用内置 ArchiMate 3.2（+ ARGO）；工作区自带 <workspace>/.argo/schema/（SystemArchitecture.schema.json + 可选 schema-bundle.config.json/schema-bundle.rules.json/guide）则用该仓自有 schema。解析优先级 ARGO_SCHEMA_DIR > 仓内 .argo/schema > 默认。\\n【关键决策】① 复用既有（此前为死代码的）仓内 .argo/schema 覆盖路径（人类伙伴裁决），未新造独立目录；② 默认路径逐字节保持——规则数据仍来自 archimate32-rules.js，只有自定义 bundle 才走新逻辑；③ 不变量（端点矩阵/statement 语法/根视图名/单视图元素上限）由 bundle 配置，自定义 schema 默认宽松；④ .qea 投影对非 ArchiMate 工作区显式跳过；⑤ Neo4j 标签/runArchitectureTests 依赖序启发式列为已文档化残留。\\n【交付】argo/scripts/schema-bundle.js（resolveSchemaBundle/loadSchemaBundleAndOntology/resolveTypeEnums）；graph-semantics.js ontology 参数化；validateSystemArchitecture.js / systemarchitecture-mcp-server.js 按工作区解析 bundle 并校验+guidance；queryNeo4jGraph{schema:true} 增 schemaKind/schemaLanguage/schemaDir/guidePath；工具描述/规则<Ontology>/唤醒闸门(ARGO_ACTOR_ELEMENT_TYPE)/skills 去 ArchiMate 硬编码；.env 归类 ARGO_SCHEMA_DIR/ARGO_ACTOR_ELEMENT_TYPE；docs/schema-bundle-decoupling.md。\\n【验证】tests/schema-bundle.test.js；Docker 沙箱 sandbox/schema-decoupling（opencode-sandbox 镜像，容器内 node + opencode，~/.argo 部署态）；本机全量回归无新增失败。\\n【经验/坑】Docker Desktop 引擎需手动拉起；bind-mount 整个仓极慢——只拷代码子集并排除 ACL 受限的 argo/.env；容器内 MCP 需 neo4j-driver（vendor 内置 tgz 安装 + NODE_PATH）；opencode 无 API key 可用 `opencode mcp list` 验证 MCP 连接；PowerShell 管道 Select-Object -Last 会缓冲到结束，诊断挂起用 docker run -d + docker logs。\\ncommits 95f63a4（代码+测试+沙箱+文档）/ 2089547（图谱登记）/ 0e4e241（commit 登记）。",
       "id": "overseer-milestone-schema-bundle-decoupling-001",
-      "name": "里程碑：schema/建模语言解耦为 schema bundle（默认 ArgoBument + 仓内 .argo/schema 覆盖）",
+      "name": "里程碑：schema/建模语言解耦为 schema bundle（默认 ArchiMate 3.2 + 仓内 .argo/schema 覆盖）",
       "parent": "project-overseer-001",
       "type": "Business Object"
     },
@@ -10377,7 +10377,7 @@
           "value": "ACTIVE"
         }
       ],
-      "description": "里程碑（2026-10-01，项目总管，分支 develop-separate-schema）。\\n【一、schema 解耦】argob-schema.js（bundle 解析：ARGO_SCHEMA_DIR > 仓内 .argo/schema > 默认；ontology；bundleValidation fail-closed）；默认规则数据化 argo/schema/argob-rules.json → 默认 schema 可整包替换；graph-semantics.js ontology 参数化；.qea 通用投影；deliveryDependencies 由 bundle 声明；actorElementType 契约；默认图仅内置拷贝、其他 schema 须自建 else fail-closed；schema 报告；.env 免 OS ACL（仅保证不被提交）。\\n【二、跨项目图谱查询】5 读工具可选 projectId；缺省本仓，提供则经联邦中心 POST <centerUrl>/graph/read（requester 取自 .argo/federation.json），透传结果+namespaceKey，绝不静默降级。本仓 projectId=archgraph，已在中心注册+自读。\\n【三、发布模型】dev 分支包名 archgraph-argo-beta@0.27.0-beta.0（bin argo-deploy）；稳定 archgraph-argo latest=0.26.2 未被占用；误发的 0.27.0 已 deprecate。本机 npm i -g archgraph-argo-beta + argo-deploy -SkipEnv 22/22；重启后常驻 MCP 已返回新字段。\\n【四、联邦中心协作（issue graph-wiki#1）】中心两轮修复（2218d2a：隐式自读/异步注册/git 身份/branch；1d9a9a4：陈旧 .meta 清理 + DB 存在性校验自愈 + meta.ok 含语义 + embedding 版本守卫）。ArchGraph 端独立验收 PASS：结构 298 元素；语义 getSystemArchitecture=semantic-query/12 元素；memory_search 命中 0.99；acceptance 10/10。\\n【验收】npm test 646 / 0 fail / 0 skip；Docker npm run acceptance 10/10。项目级规则入仓库根 AGENTS.md。\\n【关键决策】默认零回归；dev 用独立包名；e2e 用本仓 Docker；跨仓查询通用；.env 免 ACL。\\n【经验/坑】无自定义 schema 旧项目无影响；opencode run --pure 可派发其他项目验证；MCP 会在调用工作区写 .argo/temp 诊断；外部 getSystemArchitecture 不得预建本地语义 journey；npm prerelease 需 --tag；granular token 不能 unpublish。",
+      "description": "里程碑（2026-10-01，项目总管，分支 develop-separate-schema）。\\n【一、schema 解耦】schema-bundle.js（bundle 解析：ARGO_SCHEMA_DIR > 仓内 .argo/schema > 默认；ontology；bundleValidation fail-closed）；默认规则数据化 argo/schema/schema-bundle.rules.json → 默认 schema 可整包替换；graph-semantics.js ontology 参数化；.qea 通用投影；deliveryDependencies 由 bundle 声明；actorElementType 契约；默认图仅内置拷贝、其他 schema 须自建 else fail-closed；schema 报告；.env 免 OS ACL（仅保证不被提交）。\\n【二、跨项目图谱查询】5 读工具可选 projectId；缺省本仓，提供则经联邦中心 POST <centerUrl>/graph/read（requester 取自 .argo/federation.json），透传结果+namespaceKey，绝不静默降级。本仓 projectId=archgraph，已在中心注册+自读。\\n【三、发布模型】dev 分支包名 archgraph-argo-beta@0.27.0-beta.0（bin argo-deploy）；稳定 archgraph-argo latest=0.26.2 未被占用；误发的 0.27.0 已 deprecate。本机 npm i -g archgraph-argo-beta + argo-deploy -SkipEnv 22/22；重启后常驻 MCP 已返回新字段。\\n【四、联邦中心协作（issue graph-wiki#1）】中心两轮修复（2218d2a：隐式自读/异步注册/git 身份/branch；1d9a9a4：陈旧 .meta 清理 + DB 存在性校验自愈 + meta.ok 含语义 + embedding 版本守卫）。ArchGraph 端独立验收 PASS：结构 298 元素；语义 getSystemArchitecture=semantic-query/12 元素；memory_search 命中 0.99；acceptance 10/10。\\n【验收】npm test 646 / 0 fail / 0 skip；Docker npm run acceptance 10/10。项目级规则入仓库根 AGENTS.md。\\n【关键决策】默认零回归；dev 用独立包名；e2e 用本仓 Docker；跨仓查询通用；.env 免 ACL。\\n【经验/坑】无自定义 schema 旧项目无影响；opencode run --pure 可派发其他项目验证；MCP 会在调用工作区写 .argo/temp 诊断；外部 getSystemArchitecture 不得预建本地语义 journey；npm prerelease 需 --tag；granular token 不能 unpublish。",
       "id": "overseer-milestone-schema-cross-project-001",
       "name": "里程碑：schema 解耦 + 跨项目图谱查询端到端交付并验收 PASS（beta 包）",
       "parent": "project-overseer-001",

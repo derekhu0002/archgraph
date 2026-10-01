@@ -18,7 +18,7 @@ in `argo/rules/archgraph.instructions.md` and must stay universally true.
    Neo4j and the real embedding provider; the host framework is only read-mounted
    and never modified. Do not run e2e acceptance by deploying on the host.
 4. **Both schema modes + semantic.** MCP acceptance must cover the default
-   ArgoBument schema and a custom schema, and must exercise **semantic retrieval**
+   ArchiMate 3.2 schema and a custom schema, and must exercise **semantic retrieval**
    (`getSystemArchitecture`, `memory_search`) as well as non-semantic retrieval —
    semantic must not be skipped.
 5. **Zero regressions.** `npm test` must stay at **0 failures / 0 skips**. Fix or

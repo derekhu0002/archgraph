@@ -423,13 +423,13 @@ async function writeArchitectureGraph(graphPath, graph) {
  * Dependency direction for delivery:
  * For element X, its upstream dependencies = elements X needs to be delivered first.
  * The mapping comes from the ACTIVE schema bundle's `deliveryDependencies`
- * (argob.config.json), not hardcoded ArchiMate names, so a custom schema can
- * declare its own relationship types (e.g. "Depends On"). The default ArgoBument
+ * (schema-bundle.config.json), not hardcoded ArchiMate names, so a custom schema can
+ * declare its own relationship types (e.g. "Depends On"). The default ArchiMate 3.2
  * bundle declares the ArchiMate mapping.
  */
 const DELIVERY_DEPENDENCIES = (() => {
     try {
-        const { loadSchemaBundleAndOntology } = require('./argob-schema.js');
+        const { loadSchemaBundleAndOntology } = require('./schema-bundle.js');
         return loadSchemaBundleAndOntology(repoRoot).ontology.deliveryDependencies;
     } catch {
         return { sourceDependsOnTarget: [], targetDependsOnSource: [] };

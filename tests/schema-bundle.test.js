@@ -3,7 +3,7 @@
 // Acceptance tests for the schema-bundle decoupling (WP: separate schema/ontology).
 //
 // The toolchain is decoupled from a single hard-wired modeling language:
-//   - default   : the built-in ArgoBument (ArchiMate 3.2 + ARGO) bundle
+//   - default   : the built-in ArchiMate 3.2 (+ ARGO) bundle
 //   - workspace : a repository's own bundle under <workspace>/.argo/schema
 //   - override  : ARGO_SCHEMA_DIR
 //
@@ -22,7 +22,7 @@ const {
   resolveTypeEnums,
   loadSchemaBundleAndOntology,
   buildOntology,
-} = require('../argo/scripts/argob-schema.js');
+} = require('../argo/scripts/schema-bundle.js');
 const argoMcp = require('../argo/scripts/argo-mcp-server.js');
 const qeaLib = require('../argo/scripts/ea-qea-sync-lib.js');
 const {
@@ -49,7 +49,7 @@ const CUSTOM_ELEMENT_TYPES = ['Team Node', 'Service Node'];
 const CUSTOM_RELATIONSHIP_TYPES = ['Depends On'];
 
 function makeTempWorkspace() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'argob-schema-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'schema-bundle-'));
 }
 
 function writeCustomBundle(workspaceRoot, options = {}) {
@@ -74,10 +74,10 @@ function writeCustomBundle(workspaceRoot, options = {}) {
   if (options.omitActorElementType !== true) {
     config.actorElementType = options.actorElementType === undefined ? 'Team Node' : options.actorElementType;
   }
-  fs.writeFileSync(path.join(schemaDir, 'argob.config.json'), JSON.stringify(config, null, 2));
+  fs.writeFileSync(path.join(schemaDir, 'schema-bundle.config.json'), JSON.stringify(config, null, 2));
 
   if (options.rules) {
-    fs.writeFileSync(path.join(schemaDir, 'argob-rules.json'), JSON.stringify(options.rules, null, 2));
+    fs.writeFileSync(path.join(schemaDir, 'schema-bundle.rules.json'), JSON.stringify(options.rules, null, 2));
   }
   return schemaDir;
 }
@@ -123,7 +123,7 @@ function customGraph(overrides = {}) {
 
 function runServerTool(name, args, env) {
   const input = [
-    { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'argob-schema-test', version: '1' } } },
+    { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'schema-bundle-test', version: '1' } } },
     { jsonrpc: '2.0', method: 'notifications/initialized', params: {} },
     { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name, arguments: args } },
   ].map(r => JSON.stringify(r)).join('\n') + '\n';
@@ -141,7 +141,7 @@ function runServerTool(name, args, env) {
   return JSON.parse(call.result.content[0].text);
 }
 
-test('AT argob-schema: a workspace without .argo/schema resolves to the default ArgoBument bundle', () => {
+test('AT schema-bundle: a workspace without .argo/schema resolves to the default ArchiMate 3.2 bundle', () => {
   // GIVEN a workspace that does not define its own schema
   const workspace = makeTempWorkspace();
   // WHEN the schema bundle is resolved
@@ -155,7 +155,7 @@ test('AT argob-schema: a workspace without .argo/schema resolves to the default 
   assert.ok(enums.elementTypes.includes('Business Actor'));
 });
 
-test('AT argob-schema: a workspace with .argo/schema overrides the default bundle', () => {
+test('AT schema-bundle: a workspace with .argo/schema overrides the default bundle', () => {
   // GIVEN a workspace that ships its own schema under .argo/schema
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace);
@@ -168,7 +168,7 @@ test('AT argob-schema: a workspace with .argo/schema overrides the default bundl
   assert.deepEqual(ontology.relationshipTypes, CUSTOM_RELATIONSHIP_TYPES);
 });
 
-test('AT argob-schema: ARGO_SCHEMA_DIR overrides even a workspace bundle', () => {
+test('AT schema-bundle: ARGO_SCHEMA_DIR overrides even a workspace bundle', () => {
   // GIVEN a workspace bundle AND an explicit ARGO_SCHEMA_DIR pointing elsewhere
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace);
@@ -178,7 +178,7 @@ test('AT argob-schema: ARGO_SCHEMA_DIR overrides even a workspace bundle', () =>
   schema.$defs.archimateElementType.enum = ['Only Node'];
   schema.$defs.archimateRelationshipType.enum = ['Links'];
   fs.writeFileSync(path.join(overrideDir, 'SystemArchitecture.schema.json'), JSON.stringify(schema));
-  fs.writeFileSync(path.join(overrideDir, 'argob.config.json'), JSON.stringify({ language: 'Explicit', invariants: { endpointMatrix: false } }));
+  fs.writeFileSync(path.join(overrideDir, 'schema-bundle.config.json'), JSON.stringify({ language: 'Explicit', invariants: { endpointMatrix: false } }));
   // WHEN the bundle is resolved with the override
   const bundle = resolveSchemaBundle(workspace, { schemaDir: overrideDir });
   // THEN the explicit override is used
@@ -186,7 +186,7 @@ test('AT argob-schema: ARGO_SCHEMA_DIR overrides even a workspace bundle', () =>
   assert.deepEqual(resolveTypeEnums(bundle).elementTypes, ['Only Node']);
 });
 
-test('AT argob-schema: graph-semantics accepts a workspace schema\'s custom types', () => {
+test('AT schema-bundle: graph-semantics accepts a workspace schema\'s custom types', () => {
   // GIVEN a workspace schema with custom element/relationship types
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace);
@@ -197,7 +197,7 @@ test('AT argob-schema: graph-semantics accepts a workspace schema\'s custom type
   assert.deepEqual(errors, []);
 });
 
-test('AT argob-schema: graph-semantics rejects a default-only type under a custom schema', () => {
+test('AT schema-bundle: graph-semantics rejects a default-only type under a custom schema', () => {
   // GIVEN a workspace schema that does NOT define ArchiMate types
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace);
@@ -210,7 +210,7 @@ test('AT argob-schema: graph-semantics rejects a default-only type under a custo
   assert.ok(errors.some(e => e.includes("unsupported TeamA Ontology element type 'Business Actor'")), JSON.stringify(errors));
 });
 
-test('AT argob-schema: endpointMatrix off makes the endpoint invariant permissive', () => {
+test('AT schema-bundle: endpointMatrix off makes the endpoint invariant permissive', () => {
   // GIVEN a custom schema with the endpoint matrix disabled
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace, { endpointMatrix: false });
@@ -222,7 +222,7 @@ test('AT argob-schema: endpointMatrix off makes the endpoint invariant permissiv
   assert.deepEqual(errors, []);
 });
 
-test('AT argob-schema: a custom rules matrix enforces its own endpoint legality', () => {
+test('AT schema-bundle: a custom rules matrix enforces its own endpoint legality', () => {
   // GIVEN a custom schema whose rules forbid Team Node --Depends On--> Service Node
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace, {
@@ -239,7 +239,7 @@ test('AT argob-schema: a custom rules matrix enforces its own endpoint legality'
   assert.ok(errors.some(e => e.includes('violates TeamA Ontology relationship matrix')), JSON.stringify(errors));
 });
 
-test('AT argob-schema: per-view element limit comes from the resolved ontology', () => {
+test('AT schema-bundle: per-view element limit comes from the resolved ontology', () => {
   // GIVEN a custom schema that allows at most 2 elements per view
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace, { endpointMatrix: false });
@@ -253,7 +253,7 @@ test('AT argob-schema: per-view element limit comes from the resolved ontology',
   assert.ok(errors.some(e => e.includes('at most 2 elements; found 3')), JSON.stringify(errors));
 });
 
-test('AT argob-schema: MCP queryNeo4jGraph {schema:true} reports the workspace schema enums', () => {
+test('AT schema-bundle: MCP queryNeo4jGraph {schema:true} reports the workspace schema enums', () => {
   // GIVEN a workspace with a custom bundle
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace);
@@ -270,7 +270,7 @@ test('AT argob-schema: MCP queryNeo4jGraph {schema:true} reports the workspace s
   assert.equal(payload.schema.bundleValidation.status, 'passed');
 });
 
-test('AT argob-schema: MCP validateSystemArchitecture passes for a custom-schema graph', () => {
+test('AT schema-bundle: MCP validateSystemArchitecture passes for a custom-schema graph', () => {
   // GIVEN a valid graph written against a workspace's own schema
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace);
@@ -281,7 +281,7 @@ test('AT argob-schema: MCP validateSystemArchitecture passes for a custom-schema
   assert.equal(payload.status, 'passed');
 });
 
-test('AT argob-schema: MCP validateSystemArchitecture fails when a graph uses a foreign type', () => {
+test('AT schema-bundle: MCP validateSystemArchitecture fails when a graph uses a foreign type', () => {
   // GIVEN a graph that uses a default ArchiMate type the custom schema does not define
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace);
@@ -295,11 +295,11 @@ test('AT argob-schema: MCP validateSystemArchitecture fails when a graph uses a 
   assert.ok(String(payload.stderr || '').includes('unsupported TeamA Ontology element type'), String(payload.stderr || '').slice(0, 500));
 });
 
-test('AT argob-schema: the shipped default bundle is data-driven (argob-rules.json)', () => {
+test('AT schema-bundle: the shipped default bundle is data-driven (schema-bundle.rules.json)', () => {
   // GIVEN the default bundle
   // WHEN its ontology is resolved
   const { bundle, ontology } = loadSchemaBundleAndOntology(ROOT);
-  const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'argo', 'schema', 'argob-rules.json'), 'utf8'));
+  const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'argo', 'schema', 'schema-bundle.rules.json'), 'utf8'));
   // THEN the rule data ships as JSON (class matrix dialect), not code, so the
   // default can be replaced file-for-file like any custom bundle
   assert.equal(rules.dialect, 'archimate-class-matrix');
@@ -310,7 +310,7 @@ test('AT argob-schema: the shipped default bundle is data-driven (argob-rules.js
   assert.equal(ontology.relationshipTypes.length, 11);
 });
 
-test('AT argob-schema: a default bundle carrying its own type-matrix rules is used as-is (replaceable default)', () => {
+test('AT schema-bundle: a default bundle carrying its own type-matrix rules is used as-is (replaceable default)', () => {
   // GIVEN a default-located bundle whose rules use the type-matrix dialect
   const synthetic = {
     kind: 'default',
@@ -333,7 +333,7 @@ test('AT argob-schema: a default bundle carrying its own type-matrix rules is us
   assert.deepEqual(ontology.relationshipTypes, ['Links']);
 });
 
-test('AT argob-schema: the .qea projection maps custom types generically (never skipped)', () => {
+test('AT schema-bundle: the .qea projection maps custom types generically (never skipped)', () => {
   // GIVEN a custom ontology whose types/relationships are unknown to the ArchiMate mapper
   // WHEN the .qea projection mapping is applied
   // THEN it degrades to a generic EA shape (Class + stereotype = type name; Association)
@@ -347,7 +347,7 @@ test('AT argob-schema: the .qea projection maps custom types generically (never 
   assert.equal(qeaLib.relationshipMap('Triggering').connectorType, 'ControlFlow');
 });
 
-test('AT argob-schema: the default ontology declares the ArchiMate delivery dependencies', () => {
+test('AT schema-bundle: the default ontology declares the ArchiMate delivery dependencies', () => {
   // GIVEN the default bundle (ArchiMate class matrix)
   const { ontology } = loadSchemaBundleAndOntology(ROOT);
   // THEN it declares the ArchiMate dependency mapping (preserves prior behaviour)
@@ -355,7 +355,7 @@ test('AT argob-schema: the default ontology declares the ArchiMate delivery depe
   assert.deepEqual(ontology.deliveryDependencies.targetDependsOnSource, ['Serving', 'Realization', 'Flow', 'Triggering', 'Influence']);
 });
 
-test('AT argob-schema: a custom bundle declares its OWN delivery dependencies', () => {
+test('AT schema-bundle: a custom bundle declares its OWN delivery dependencies', () => {
   // GIVEN the shipped custom example (Team Graph)
   const { ontology } = loadSchemaBundleAndOntology(path.join(ROOT, 'custom-schema'));
   // THEN runArchitectureTests / semantic edges use the schema's own relationship types
@@ -364,7 +364,7 @@ test('AT argob-schema: a custom bundle declares its OWN delivery dependencies', 
   assert.equal(ontology.bundleValidation.status, 'passed');
 });
 
-test('AT argob-schema: deliveryDependencies referencing unknown relationship types fails validation', () => {
+test('AT schema-bundle: deliveryDependencies referencing unknown relationship types fails validation', () => {
   // GIVEN a custom bundle whose deliveryDependencies names a relationship it does not define
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace, { config: { deliveryDependencies: { sourceDependsOnTarget: ['Depends On', 'Nonexistent'] } } });
@@ -375,7 +375,7 @@ test('AT argob-schema: deliveryDependencies referencing unknown relationship typ
   assert.ok(ontology.bundleValidation.errors.some(e => e.includes("deliveryDependencies.sourceDependsOnTarget references unknown relationship type 'Nonexistent'")), JSON.stringify(ontology.bundleValidation));
 });
 
-test('AT argob-schema: initializeWorkspace reports the resolved schema (kind + language)', async () => {
+test('AT schema-bundle: initializeWorkspace reports the resolved schema (kind + language)', async () => {
   // GIVEN a workspace with its own schema bundle (and a user-authored graph)
   const custom = makeTempWorkspace();
   writeCustomBundle(custom);
@@ -391,26 +391,26 @@ test('AT argob-schema: initializeWorkspace reports the resolved schema (kind + l
   // GIVEN a workspace without its own schema
   const plain = makeTempWorkspace();
   const plainResult = await argoMcp.initializeWorkspace(plain);
-  // THEN it reports the default ArgoBument schema
+  // THEN it reports the default ArchiMate 3.2 schema
   assert.equal(plainResult.schema.kind, 'default');
   assert.equal(plainResult.schema.language, 'ArchiMate 3.2');
   assert.equal(plainResult.schema.dialect, 'archimate-class-matrix');
   assert.equal(plainResult.schema.actorElementType, 'Business Actor');
 });
 
-test('AT argob-schema: the built-in default schema auto-provides the packaged graph on a fresh workspace', async () => {
+test('AT schema-bundle: the built-in default schema auto-provides the packaged graph on a fresh workspace', async () => {
   // GIVEN a workspace with no schema override and no graph
   const ws = makeTempWorkspace();
   // WHEN initialized
   const result = await argoMcp.initializeWorkspace(ws);
-  // THEN the built-in ArgoBument default graph is copied
+  // THEN the built-in ArchiMate 3.2 default graph is copied
   assert.equal(result.schema.kind, 'default');
   assert.ok(result.createdFiles.includes('design/KG/SystemArchitecture.json'));
   const graph = JSON.parse(fs.readFileSync(path.join(ws, 'design', 'KG', 'SystemArchitecture.json'), 'utf8'));
   assert.ok(graph.elements.some(e => e.type === 'Business Actor'));
 });
 
-test('AT argob-schema: a custom schema with a user-authored graph initializes; the packaged graph is never copied', async () => {
+test('AT schema-bundle: a custom schema with a user-authored graph initializes; the packaged graph is never copied', async () => {
   // GIVEN a custom schema and a user-authored graph
   const ws = makeTempWorkspace();
   writeCustomBundle(ws);
@@ -424,7 +424,7 @@ test('AT argob-schema: a custom schema with a user-authored graph initializes; t
   assert.deepEqual(graph.elements.map(e => e.type).sort(), ['Service Node', 'Team Node']);
 });
 
-test('AT argob-schema: a custom schema without a graph fails closed (no packaged-graph copy)', async () => {
+test('AT schema-bundle: a custom schema without a graph fails closed (no packaged-graph copy)', async () => {
   // GIVEN a custom schema and a workspace with no graph
   const ws = makeTempWorkspace();
   writeCustomBundle(ws);
@@ -434,7 +434,7 @@ test('AT argob-schema: a custom schema without a graph fails closed (no packaged
   assert.ok(!fs.existsSync(path.join(ws, 'design', 'KG', 'SystemArchitecture.json')));
 });
 
-test('AT argob-schema: the repository default graph still validates against the default bundle', () => {
+test('AT schema-bundle: the repository default graph still validates against the default bundle', () => {
   // GIVEN the repository's canonical default graph
   const workspace = ROOT;
   // WHEN validation runs
@@ -443,11 +443,11 @@ test('AT argob-schema: the repository default graph still validates against the 
     encoding: 'utf8',
     env: { ...process.env, ARGO_REPO_ROOT: ROOT },
   });
-  // THEN it passes (no regression to the default ArgoBument path)
+  // THEN it passes (no regression to the default ArchiMate 3.2 path)
   assert.equal(result.status, 0, String(result.stderr || '').slice(0, 500));
 });
 
-test('AT argob-schema: a valid actorElementType makes the bundle pass validation', () => {
+test('AT schema-bundle: a valid actorElementType makes the bundle pass validation', () => {
   // GIVEN a custom bundle that declares its actor type among its element types
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace, { actorElementType: 'Team Node' });
@@ -458,7 +458,7 @@ test('AT argob-schema: a valid actorElementType makes the bundle pass validation
   assert.equal(ontology.bundleValidation.status, 'passed');
 });
 
-test('AT argob-schema: a bundle whose actorElementType is not a declared type fails validation', () => {
+test('AT schema-bundle: a bundle whose actorElementType is not a declared type fails validation', () => {
   // GIVEN a custom bundle whose actorElementType is not one of its element types
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace, { actorElementType: 'Business Actor' });
@@ -469,7 +469,7 @@ test('AT argob-schema: a bundle whose actorElementType is not a declared type fa
   assert.ok(ontology.bundleValidation.errors.some(e => e.includes("actorElementType 'Business Actor'")), JSON.stringify(ontology.bundleValidation));
 });
 
-test('AT argob-schema: a custom bundle with no actor type declared fails validation (must declare or opt out)', () => {
+test('AT schema-bundle: a custom bundle with no actor type declared fails validation (must declare or opt out)', () => {
   // GIVEN a custom bundle with no actorElementType and no 'Business Actor' in its enum
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace, { omitActorElementType: true });
@@ -481,7 +481,7 @@ test('AT argob-schema: a custom bundle with no actor type declared fails validat
   assert.ok(ontology.bundleValidation.errors.some(e => e.includes('actorElementType')), JSON.stringify(ontology.bundleValidation));
 });
 
-test('AT argob-schema: actorElementType null is the explicit "no actor concept" opt-out', () => {
+test('AT schema-bundle: actorElementType null is the explicit "no actor concept" opt-out', () => {
   // GIVEN a custom bundle that explicitly declares it has no actor concept
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace, { actorElementType: null });
@@ -492,7 +492,7 @@ test('AT argob-schema: actorElementType null is the explicit "no actor concept" 
   assert.equal(ontology.bundleValidation.status, 'passed');
 });
 
-test('AT argob-schema: MCP validateSystemArchitecture fails closed on an invalid bundle', () => {
+test('AT schema-bundle: MCP validateSystemArchitecture fails closed on an invalid bundle', () => {
   // GIVEN a workspace whose bundle omits the actor type
   const workspace = makeTempWorkspace();
   writeCustomBundle(workspace, { omitActorElementType: true });
@@ -504,7 +504,7 @@ test('AT argob-schema: MCP validateSystemArchitecture fails closed on an invalid
   assert.ok(String(payload.stderr || '').includes('schema bundle:'), String(payload.stderr || '').slice(0, 500));
 });
 
-test('AT argob-schema: the shipped custom-schema example bundle loads and validates end-to-end', () => {
+test('AT schema-bundle: the shipped custom-schema example bundle loads and validates end-to-end', () => {
   // GIVEN the recommended example bundle checked into custom-schema/
   const workspace = path.join(ROOT, 'custom-schema');
   // WHEN its ontology is resolved and its example graph is validated through the MCP

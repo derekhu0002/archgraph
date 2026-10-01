@@ -135,7 +135,7 @@ const {
   loadSchemaBundleAndOntology,
   resolveSchemaBundle,
   resolveTypeEnums,
-} = require('./argob-schema.js');
+} = require('./schema-bundle.js');
 const {
   createProductionGraphRagRuntime,
 } = require('./graph-rag/productionGraphRagRuntime.js');
@@ -1017,7 +1017,7 @@ function buildGraphIndex(document, ontology) {
 }
 
 // Dependency direction for the semantic-edge walk comes from the active schema
-// bundle's deliveryDependencies; this is the ArgoBument fallback by default.
+// bundle's deliveryDependencies; this is the ArchiMate 3.2 fallback by default.
 const DEFAULT_DELIVERY_DEPENDENCIES = Object.freeze({
   sourceDependsOnTarget: Object.freeze(['Access', 'Assignment', 'Specialization', 'Composition', 'Aggregation']),
   targetDependsOnSource: Object.freeze(['Serving', 'Realization', 'Flow', 'Triggering', 'Influence']),

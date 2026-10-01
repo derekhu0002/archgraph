@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 // ARGO schema-bundle resolution and ontology construction.
 //
@@ -6,18 +6,18 @@
 // "schema bundle" is a directory that carries the graph contract:
 //
 //   <bundle>/SystemArchitecture.schema.json   (required) JSON Schema of the graph
-//   <bundle>/argob.config.json                (optional) bundle descriptor:
+//   <bundle>/schema-bundle.config.json                (optional) bundle descriptor:
 //                                               language, enum locations, guide,
 //                                               rules file, invariant switches
-//   <bundle>/argob-rules.json                 (optional) ontology rules data
+//   <bundle>/schema-bundle.rules.json                 (optional) ontology rules data
 //                                               (type metadata, relationship
 //                                               categories, endpoint matrix)
-//   <bundle>/ARGOB.md                         (optional) human-readable guide
+//   <bundle>/GUIDE.md                         (optional) human-readable guide
 //
 // Resolution precedence (first bundle that has SystemArchitecture.schema.json):
-//   1. ARGO_SCHEMA_DIR                     — explicit override (tests / hosts)
-//   2. <workspaceRoot>/.argo/schema        — the repository's own schema
-//   3. <argoRoot>/schema                   — the default ArgoBument schema
+//   1. ARGO_SCHEMA_DIR                     鈥?explicit override (tests / hosts)
+//   2. <workspaceRoot>/.argo/schema        鈥?the repository's own schema
+//   3. <argoRoot>/schema                   鈥?the default ArchiMate 3.2 schema
 //
 // The default bundle keeps the historical ArchiMate 3.2 + ARGO behaviour. A
 // custom bundle may define its own element/relationship types and, optionally,
@@ -29,9 +29,9 @@ const path = require('node:path');
 const { getArgoRoot } = require('./argo-paths.js');
 
 const SCHEMA_BASENAME = 'SystemArchitecture.schema.json';
-const CONFIG_BASENAME = 'argob.config.json';
-const RULES_BASENAME = 'argob-rules.json';
-const GUIDE_BASENAME = 'ARGOB.md';
+const CONFIG_BASENAME = 'schema-bundle.config.json';
+const RULES_BASENAME = 'schema-bundle.rules.json';
+const GUIDE_BASENAME = 'GUIDE.md';
 const DEFAULT_GUIDE_BASENAME = 'archimate3.2.md';
 const DEFAULT_LANGUAGE = 'ArchiMate 3.2';
 const DEFAULT_ROOT_VIEW_NAME = 'SystemArchitecture';
@@ -39,8 +39,8 @@ const DEFAULT_MAX_ELEMENTS_PER_VIEW = 15;
 const DEFAULT_ACTOR_ELEMENT_TYPE = 'Business Actor';
 
 // Which relationship types express a delivery dependency and in which direction.
-// Declared per bundle via argob.config.json "deliveryDependencies"; the default
-// ArgoBument bundle keeps the ArchiMate mapping below (previous behaviour).
+// Declared per bundle via schema-bundle.config.json "deliveryDependencies"; the default
+// ArchiMate 3.2 bundle keeps the ArchiMate mapping below (previous behaviour).
 const ARCHIMATE_DELIVERY_DEPENDENCIES = Object.freeze({
   sourceDependsOnTarget: Object.freeze(['Access', 'Assignment', 'Specialization', 'Composition', 'Aggregation']),
   targetDependsOnSource: Object.freeze(['Serving', 'Realization', 'Flow', 'Triggering', 'Influence']),
@@ -103,8 +103,8 @@ function buildBundle(kind, dir, workspaceRoot) {
 
   const configFile = path.join(dir, CONFIG_BASENAME);
   const fileConfig = isFile(configFile) ? readJsonFile(configFile) : {};
-  const inlineConfig = schema && typeof schema['x-argob'] === 'object' && schema['x-argob'] !== null
-    ? schema['x-argob']
+  const inlineConfig = schema && typeof schema['x-schema-bundle'] === 'object' && schema['x-schema-bundle'] !== null
+    ? schema['x-schema-bundle']
     : {};
   const config = { ...inlineConfig, ...fileConfig };
 
@@ -276,7 +276,7 @@ function validateBundle({ language, dialect, elementTypes, relationshipTypes, ac
     if (!elementTypeList.includes(actorElementType)) {
       errors.push(
         `schema bundle '${language}' declares actorElementType '${actorElementType}' which is not one of its element types; ` +
-        `set a valid actorElementType in argob.config.json (one of: ${elementTypeList.join(', ') || '(none)'}) ` +
+        `set a valid actorElementType in schema-bundle.config.json (one of: ${elementTypeList.join(', ') || '(none)'}) ` +
         `or set "actorElementType": null if the schema has no actor concept`,
       );
     }
@@ -338,7 +338,7 @@ function buildClassMatrixOntology(bundle) {
   let validateRelationshipEndpointTypes;
 
   if (rules) {
-    // Data-driven default: the bundle ships its own rule data (argob-rules.json),
+    // Data-driven default: the bundle ships its own rule data (schema-bundle.rules.json),
     // so the DEFAULT schema is replaceable file-for-file exactly like a custom one.
     const classByType = rules.archimateClassByElementType || {};
     const classMatrix = rules.relationshipTargetMatrix || {};
@@ -371,7 +371,7 @@ function buildClassMatrixOntology(bundle) {
       return [];
     };
   } else {
-    // Legacy fallback: an installation without argob-rules.json uses the bundled module.
+    // Legacy fallback: an installation without schema-bundle.rules.json uses the bundled module.
     const mod = require('./archimate32-rules.js');
     elementTypeMetadata = mod.elementTypeMetadata;
     relationshipCategoryByType = mod.relationshipCategoryByType;

@@ -17,7 +17,7 @@ disable-model-invocation: true
 ## Rules
 
 - **MUST** 调用 ARGO MCP 工具 `initializeWorkspace`（传当前工作区根）执行确定性初始化，并以其返回报告为最终判断依据。
-- **MUST** 报告当前 schema：`initializeWorkspace` 返回的 `schema`（或 harness 的 `schemaBundle`）中的 `kind`（default=内置 ArgoBument / workspace=仓内自定义 / override）、`language`（名称）、`actorElementType`、`dir`、`guide`；输出形如 `schema: default / ArchiMate 3.2`。
+- **MUST** 报告当前 schema：`initializeWorkspace` 返回的 `schema`（或 harness 的 `schemaBundle`）中的 `kind`（default=内置 ArchiMate 3.2 / workspace=仓内自定义 / override）、`language`（名称）、`actorElementType`、`dir`、`guide`；输出形如 `schema: default / ArchiMate 3.2`。
 - **MUST** 报告 `mcp` / `systemArchitecture` / `neo4j` / `qeaFullProjection` / `semanticLifecycle` / `subdiagramViews` 与整体 `status`。
 - **MUST** 核验并报告：① `.qea` 投影是否成功（`qeaFullProjection.status`），且投影目标 `qeaFullProjection.qea` 是否为**本仓库自己的 .qea 文件**（解析自 `ARGO_EA_QEA` 或仓库根唯一 `*.qea`）；目标不是本仓库文件或投影失败 → 报告为告警/失败，不得视为 init 成功。
 - **MUST** 核验并报告：Neo4j 投影目标数据库名（`neo4j.database`）是否**与本仓库名一致**（仓库 basename == 数据库名）；不一致 → 报告为告警/失败。
@@ -69,7 +69,7 @@ disable-model-invocation: true
 
 ### 1. Environment Status
 - overall status: ok / failed
-- **解析到的 schema：kind（default/workspace/override）+ language（名称）+ actorElementType + dir/guide**（默认 ArgoBument 还是仓内自定义 schema）
+- **解析到的 schema：kind（default/workspace/override）+ language（名称）+ actorElementType + dir/guide**（默认 ArchiMate 3.2 还是仓内自定义 schema）
 - whether mcp health passed
 - whether neo4j health passed
 - whether .qea full projection passed

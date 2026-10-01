@@ -57,7 +57,7 @@ async function runHarnessReport({ checkOnly, workspaceRoot, includeBootstrap }) 
   try {
     report.harnessEnvironment = loadRepositoryArgoEnvironment(workspaceRoot);
     try {
-      const { bundle, ontology } = require('./argob-schema.js').loadSchemaBundleAndOntology(workspaceRoot);
+      const { bundle, ontology } = require('./schema-bundle.js').loadSchemaBundleAndOntology(workspaceRoot);
       report.schemaBundle = {
         kind: bundle.kind,
         language: ontology.language,

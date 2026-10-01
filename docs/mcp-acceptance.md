@@ -25,7 +25,7 @@ failure.
   `previewSystemArchitectureMutation`, `applySystemArchitectureMutation`,
   `add/update/removeArchitectureElement`, `add/update/removeArchitectureRelationship`,
   `add/update/removeArchitectureView`. The report asserts `tools.exercised === 19`.
-- **Both schema modes**: the default ArgoBument schema and a custom schema
+- **Both schema modes**: the default ArchiMate 3.2 schema and a custom schema
   (the shipped Team Graph bundle), each with its own isolated database.
 - **Retrieval, semantic AND non-semantic**: semantic `getSystemArchitecture`
   (asserts a custom/default element is actually returned) and `memory_search`

@@ -8,7 +8,7 @@
 // container, using a REAL Neo4j (host.docker.internal, isolated test databases)
 // and the REAL embedding provider (credentials mounted from ~/.argo/.env).
 //
-// It verifies EVERY ARGO MCP tool under BOTH the default ArgoBument schema and a
+// It verifies EVERY ARGO MCP tool under BOTH the default ArchiMate 3.2 schema and a
 // custom schema, including semantic retrieval (getSystemArchitecture /
 // memory_search) and non-semantic retrieval (queryNeo4jGraph / intent / view
 // context), plus init, validation, writes and the bundled-example bootstrap.

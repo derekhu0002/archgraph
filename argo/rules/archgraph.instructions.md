@@ -30,7 +30,7 @@ Non-negotiable red lines (MUST). Never skip, simplify, or silently violate them;
 
 <Ontology>
 Resolve the workspace modeling language before acting; do not assume ArchiMate. `queryNeo4jGraph` with `{schema:true}` returns `schemaKind`, `schemaLanguage`, the element/relationship type enums, `actorElementType`, `bundleValidation` and `guidePath`.
-1. `schemaKind` `default`: the built-in ArgoBument language (ArchiMate 3.2 + ARGO). Reference files under ~/.argo: structure `~/.argo/schema/SystemArchitecture.schema.json`; types `~/.argo/schema/archimate3.2.md`.
+1. `schemaKind` `default`: the built-in ArchiMate 3.2 modeling language (with ARGO extensions). Reference files under ~/.argo: structure `~/.argo/schema/SystemArchitecture.schema.json`; types `~/.argo/schema/archimate3.2.md`.
 2. `schemaKind` `workspace`/`override`: the repository's own schema bundle. Its element/relationship types, endpoint rules, root-view name, per-view element limit and guide govern every read and write — never assume ArchiMate types here.
 3. `actorElementType` is the element type whose members are Actors (default `Business Actor`; `null` = no actor concept → skip Actor identification). Host override: ARGO_ACTOR_ELEMENT_TYPE.
 4. If `bundleValidation.status` is `failed`, the workspace schema is misconfigured: report it to the human partner and do not write until it is fixed.

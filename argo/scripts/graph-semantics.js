@@ -8,10 +8,10 @@
 // view element limit) is supplied by an *ontology* so a repository that ships
 // its own schema under .argo/schema is validated against its own language.
 //
-// The ontology argument is optional: when omitted, the default ArgoBument
+// The ontology argument is optional: when omitted, the default ArchiMate 3.2
 // (ArchiMate 3.2 + ARGO) ontology is used, preserving historical behaviour.
 
-const { loadSchemaBundleAndOntology } = require('./argob-schema.js');
+const { loadSchemaBundleAndOntology } = require('./schema-bundle.js');
 
 let defaultOntology = null;
 
@@ -30,7 +30,7 @@ function resolveOntology(ontology) {
  *
  * @param {object} document - parsed SystemArchitecture JSON
  * @param {string[]} errors - error accumulator
- * @param {object} [ontology] - resolved modeling language (defaults to ArgoBument)
+ * @param {object} [ontology] - resolved modeling language (defaults to ArchiMate 3.2)
  */
 function validateGraphSemantics(document, errors, ontology) {
   if (!document || typeof document !== 'object') {

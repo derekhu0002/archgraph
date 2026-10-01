@@ -153,7 +153,7 @@ test('AT external-query: no projectId keeps the local path (no center call)', as
   const ws = makeWorkspace();
   // WHEN queryNeo4jGraph schema mode is called WITHOUT projectId (spawned server)
   const payload = callToolOnce('queryNeo4jGraph', { schema: true, workspaceRoot: ws }, { ARGO_REPO_ROOT: ws });
-  // THEN it is served locally (default ArgoBument schema) and never routed
+  // THEN it is served locally (default ArchiMate 3.2 schema) and never routed
   assert.equal(payload.status, 'passed');
   assert.equal(payload.schema.schemaKind, 'default');
 });

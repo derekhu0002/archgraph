@@ -106,7 +106,7 @@ function patchCustomSchema() {
   const dir = path.join(WS_CUSTOM, '.argo', 'schema');
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'SystemArchitecture.schema.json'), JSON.stringify(base, null, 2));
-  fs.writeFileSync(path.join(dir, 'argob.config.json'), JSON.stringify({
+  fs.writeFileSync(path.join(dir, 'schema-bundle.config.json'), JSON.stringify({
     language: 'TeamA Ontology',
     actorElementType: 'Team Node',
     invariants: { statementGrammar: true, endpointMatrix: false, rootViewName: 'SystemArchitecture', maxElementsPerView: 15 },
@@ -153,8 +153,8 @@ function main() {
     // tar with an explicit subset + exclude -- never read the ACL-restricted
     // argo/.env (it must not be deployed anyway).
     mustRun('sh', ['-c', `rm -rf ${WORK} && mkdir -p ${WORK} && cd /repo && tar --exclude=argo/.env -cf - argo tests scripts design docs dsh-argo-wakeup dsh-argo-workspace custom-schema install-argo.ps1 cordis.patch.yml package.json vendor | tar -xf - -C ${WORK}`]);
-    if (!fs.existsSync(path.join(WORK, 'argo', 'scripts', 'argob-schema.js'))) {
-      throw new Error('argob-schema.js missing from the copied repo (branch not mounted?)');
+    if (!fs.existsSync(path.join(WORK, 'argo', 'scripts', 'schema-bundle.js'))) {
+      throw new Error('schema-bundle.js missing from the copied repo (branch not mounted?)');
     }
     return { work: WORK };
   });
@@ -176,7 +176,7 @@ function main() {
 
   record('acceptance: schema-bundle tests + MCP/graph-semantics regressions', () => {
     const files = [
-      'tests/argob-schema-bundle.test.js',
+      'tests/schema-bundle.test.js',
       'tests/argo-mcp-tools.test.js',
       'tests/neo4j-cypher-query.test.js',
       'tests/mcp-interface-behavior.test.js',
@@ -213,7 +213,7 @@ function main() {
     return { schemaKind: schema.schema.schemaKind, language: schema.schema.schemaLanguage, elementTypes: enums, actorElementType: schema.schema.actorElementType, bundleValidation: schema.schema.bundleValidation.status, validate: validate.status };
   });
 
-  record('deployed MCP falls back to the default ArgoBument schema (no .argo/schema)', () => {
+  record('deployed MCP falls back to the default ArchiMate 3.2 schema (no .argo/schema)', () => {
     writeDefaultWorkspace();
     const server = path.join(ARGO, 'scripts', 'argo-mcp-server.js');
     const [schema] = mcpCall(server, [
