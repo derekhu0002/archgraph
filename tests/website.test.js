@@ -209,3 +209,13 @@ test('newer-capabilities: homepage documents federation, lean reads and cost obs
   assert.match(section, /token/, 'should mention token cost observability');
   assert.match(section, /diagnos/i, 'should mention the agent-search-diagnosis capability');
 });
+
+test('cross-project-query: homepage documents the projectId external read', () => {
+  // GIVEN a read tool can target another project's graph via the federation center
+  // WHEN a visitor opens the Capabilities section
+  // THEN it documents the optional projectId parameter, the external target, and the federation center
+  const section = HTML.slice(HTML.indexOf('id="capabilities"'), HTML.indexOf('id="install"'));
+  assert.match(section, /projectId/, 'Capabilities should mention the projectId parameter');
+  assert.match(section, /another project's graph/i, "should mention querying another project's graph");
+  assert.match(section, /federation center/i, 'should name the federation center');
+});

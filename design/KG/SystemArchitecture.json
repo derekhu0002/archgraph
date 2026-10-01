@@ -10332,7 +10332,16 @@
       "description": "跨项目图谱查询适配（docs/external-graph-query.md）：5 个 ARGO 读工具（getSystemArchitecture / getIntentElementContext / getArchitectureViewContext / queryNeo4jGraph / memory_search）新增可选 projectId；缺省=本仓（行为不变），提供=经联邦中心 POST <centerUrl>/graph/read（requester 取自 <workspace>/.argo/federation.json），透传原生结果+namespaceKey，绝不静默降级本仓。路由层 argo/scripts/external-graph-query.js；派发在 argo-mcp-server.js。缺失身份→EXTERNAL_QUERY_NOT_REGISTERED（不猜测）。验证：tests/external-graph-query.test.js（mock 中心，6/6）+ Docker 验收新增 live 跨仓读（projectId=soc-demo → database soc-demo/386 元素/namespaceKey proj:soc-demo）。",
       "id": "doc-external-graph-query-001",
       "name": "跨项目图谱查询适配（projectId 路由到联邦中心）",
-      "type": "Artifact"
+      "type": "Artifact",
+      "testcases": [
+        {
+          "name": "AT-external-graph-query-01",
+          "description": "GIVEN the ARGO read tools with an optional projectId and a registered federation identity; WHEN a read tool is called WITH projectId; THEN it routes to the federation center, returns the external result + namespaceKey, is denied by default, and never falls back to the local graph; WHEN projectId is omitted; THEN the local path is unchanged.",
+          "type": "Acceptance Test",
+          "Input": "tests/external-graph-query.test.js",
+          "acceptanceCriteria": "tests/external-graph-query.test.js"
+        }
+      ]
     }
   ],
   "relationships": [

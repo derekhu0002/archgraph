@@ -114,3 +114,14 @@ test('readme: community section documents the federated graph-sharing registry',
   assert.match(section, /by reference/i, 'should state that reads return a reference, not a copy');
   assert.match(section, /denied by default/i, 'should state that cross-member access is denied by default');
 });
+
+test('readme: What is this? documents cross-project graph query (projectId)', () => {
+  // GIVEN a read tool can target another project's graph via the federation center
+  // WHEN a reader opens the What is this? section
+  // THEN it mentions the projectId parameter and the read-only, by-reference, denied-by-default contract
+  const section = sectionAfter(README, 'What is this');
+  assert.match(section, /projectId/, 'should mention the projectId parameter');
+  assert.match(section, /another project's graph/i, "should mention querying another project's graph");
+  assert.match(section, /federation center/i, 'should name the federation center');
+  assert.match(section, /denied by default/i, 'should state external access is denied by default');
+});

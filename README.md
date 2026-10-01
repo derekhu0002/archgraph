@@ -11,7 +11,9 @@ It doubles as a **long-term memory for coding agents**: an ArchiMate 3.2 intent 
 a single read/write MCP interface. Memory is tiered — a compact working memory restored at session
 start, a long-term memory recalled on demand — and writes are deduplicated, so the graph stays clean
 and semantic recall stays precise. Reusable subgraphs can also be shared across projects through a
-federated registry. See the [home page](https://archgraph.org/) for the full capability set.
+federated registry, and any read tool can take an optional <code>projectId</code> to query
+**another project's graph** through the federation center — authorized, read-only, and by
+reference (denied by default). See the [home page](https://archgraph.org/) for the full capability set.
 
 ![ArchGraph core model — harness design and product design in one graph](docs/diagrams/core-model.svg)
 

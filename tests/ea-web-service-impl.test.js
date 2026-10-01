@@ -476,7 +476,15 @@ test('语义检索：经 ARGO MCP getSystemArchitecture 返回 hits（真实后�
     return;
   }
   const project = { id: 'archgraph', name: 'archgraph', root: ROOT, graphPath: REAL_GRAPH };
-  const result = await searchSemantic(adapter, project, 'EA 知识图谱导入导出本地Web服务');
+  const intent = 'EA 知识图谱导入导出本地Web服务';
+  // The real embedding backend can be briefly rate-limited while the full suite
+  // runs files in parallel; retry a few times (bounded) before asserting.
+  let result = { supported: false, hits: [] };
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    result = await searchSemantic(adapter, project, intent);
+    if (result.supported === true && Array.isArray(result.hits) && result.hits.length > 0) break;
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
   assert.equal(result.supported, true);
   assert.ok(Array.isArray(result.hits) && result.hits.length > 0, '语义检索应返回命中');
   assert.ok(result.hits.some((h) => h.kind === 'element'), '命中应包含元素');

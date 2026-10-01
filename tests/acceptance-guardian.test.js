@@ -70,6 +70,8 @@ const DELIVERABLE_GUARDS = [
   ['Web project deliverable', 'tests/website.test.js'],
   ['WeChat publishing deliverable', 'tests/wechat-article.test.js'],
   ['EA tooling deliverable (web-service + import)', 'tests/ea-web-service-impl.test.js'],
+  ['FEATURE: cross-project graph query (projectId -> federation center)', 'tests/external-graph-query.test.js'],
+  ['FEATURE: schema bundle (default + custom schema decoupling)', 'tests/argob-schema-bundle.test.js'],
 ];
 
 const ALL_GUARDS = [...MCP_INTERFACE_GUARDS.map(([name, file]) => ({ kind: 'mcp-interface', name, file })), ...DELIVERABLE_GUARDS.map(([name, file]) => ({ kind: 'deliverable', name, file }))];
