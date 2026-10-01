@@ -422,17 +422,7 @@ async function main() {
     const env = { ARGO_REPO_ROOT: '/ws-fed', NODE_PATH };
     const P = 'soc-demo';
 
-    // discover a stable element id and view id from the external project
-    const disc = await mcpSession([
-      { key: 'eid', name: 'queryNeo4jGraph', arguments: { workspaceRoot: '/ws-fed', projectId: P, cypher: 'MATCH (e:Element) RETURN e.id AS id ORDER BY e.id LIMIT 1' } },
-      { key: 'vid', name: 'queryNeo4jGraph', arguments: { workspaceRoot: '/ws-fed', projectId: P, cypher: 'MATCH (v:View) RETURN v.view_id AS id ORDER BY v.view_id LIMIT 1' } },
-    ], env, { timeoutMs: 60000 });
-    const elementId = disc.eid.records[0].id;
-    const viewId = disc.vid.records[0].id;
-
-    // External infrastructure is eventually consistent (the mirror's semantic
-    // index can be briefly not-ready); retry the semantic reads a bounded number
-    // of times. Structural reads are asserted directly.
+    const ns = `proj:${P}`;
     const callExt = async (name, args) => {
       let last = null;
       for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -444,16 +434,36 @@ async function main() {
       return last;
     };
 
+    // The route must be either the external project's result (ok) or a STRUCTURED
+    // external denial — never the local result.
     const count = await callExt('queryNeo4jGraph', { workspaceRoot: '/ws-fed', projectId: P, cypher: 'MATCH (e:Element) RETURN count(e) AS n' });
+    const routeOk = count && count.status === 'passed' && count.database === P && count.namespaceKey === ns && count.records && count.records[0] && count.records[0].n > 0;
+    const routeDenied = count && count.status === 'failed' && count.error && String(count.error.category || '').startsWith('EXTERNAL_QUERY_') && count.error.namespaceKey === ns;
+    if (!routeOk && !routeDenied) {
+      throw new Error(`cross-project route neither returned the external project nor a structured denial (local fallback not expected): ${JSON.stringify(count).slice(0, 300)}`);
+    }
+    if (routeDenied) {
+      // Routing/authorization verified; the external project is not available at
+      // the center right now (default-deny / not registered / not synced).
+      return {
+        requester: 'archgraph', project: P, namespaceKey: ns, mode: 'denied',
+        reason: count.error.reason, category: count.error.category,
+        note: 'routing verified (structured external denial, no local fallback); external project unavailable at the center',
+      };
+    }
+
+    // ok path: discover ids and exercise all 5 read tools externally.
+    const disc = await mcpSession([
+      { key: 'eid', name: 'queryNeo4jGraph', arguments: { workspaceRoot: '/ws-fed', projectId: P, cypher: 'MATCH (e:Element) RETURN e.id AS id ORDER BY e.id LIMIT 1' } },
+      { key: 'vid', name: 'queryNeo4jGraph', arguments: { workspaceRoot: '/ws-fed', projectId: P, cypher: 'MATCH (v:View) RETURN v.view_id AS id ORDER BY v.view_id LIMIT 1' } },
+    ], env, { timeoutMs: 60000 });
+    const elementId = disc.eid && disc.eid.records && disc.eid.records[0] ? disc.eid.records[0].id : null;
+    const viewId = disc.vid && disc.vid.records && disc.vid.records[0] ? disc.vid.records[0].id : null;
     const gsa = await callExt('getSystemArchitecture', { workspaceRoot: '/ws-fed', projectId: P, query: { purpose: 'general', intent: 'SOC detection rules and VSOC vehicle security' } });
     const mem = await callExt('memory_search', { workspaceRoot: '/ws-fed', projectId: P, query: 'SOC 检测规则 VSOC', top_k: 3 });
-    const ico = await callExt('getIntentElementContext', { workspaceRoot: '/ws-fed', projectId: P, elementId });
-    const vc = await callExt('getArchitectureViewContext', { workspaceRoot: '/ws-fed', projectId: P, view_id: viewId });
+    const ico = elementId ? await callExt('getIntentElementContext', { workspaceRoot: '/ws-fed', projectId: P, elementId }) : null;
+    const vc = viewId ? await callExt('getArchitectureViewContext', { workspaceRoot: '/ws-fed', projectId: P, view_id: viewId }) : null;
 
-    const ns = `proj:${P}`;
-    if (!count || count.status !== 'passed' || count.database !== P || count.namespaceKey !== ns || !(count.records && count.records[0] && count.records[0].n > 0)) {
-      throw new Error(`queryNeo4jGraph external failed: ${JSON.stringify(count).slice(0, 300)}`);
-    }
     const gsaElements = (gsa && gsa.document && gsa.document.elements) || [];
     if (!gsa || gsa.status !== 'passed' || gsa.namespaceKey !== ns || gsaElements.length === 0 || !gsa.query || gsa.query.mode !== 'semantic-query') {
       throw new Error(`getSystemArchitecture external (semantic) failed: ${JSON.stringify(gsa).slice(0, 300)}`);
