@@ -410,19 +410,76 @@ async function main() {
     return { failClosed: 'ok', packagedGraphCopied: false };
   });
 
-  // Cross-project read: a read tool with projectId routes to the federation
-  // center (real) and returns the external project's result + namespaceKey.
-  await record('cross-project read routes to the federation center (projectId=soc-demo)', async () => {
+  // Cross-project reads: all 5 read tools with projectId route to the federation
+  // center (real) and return the external project's result + namespaceKey,
+  // covering BOTH semantic (getSystemArchitecture, memory_search) and
+  // non-semantic (queryNeo4jGraph, getIntentElementContext,
+  // getArchitectureViewContext) retrieval against a real external project.
+  await record('cross-project reads: all 5 read tools against a real external project (soc-demo)', async () => {
+    const FED = { projectId: 'archgraph', sourceRepo: 'https://github.com/derekhu0002/archgraph', centerUrl: 'https://argo.derekworkspacev5.com', branch: 'main' };
     fs.mkdirSync('/ws-fed/.argo', { recursive: true });
-    fs.writeFileSync('/ws-fed/.argo/federation.json', JSON.stringify({ projectId: 'archgraph', sourceRepo: 'https://github.com/derekhu0002/archgraph', centerUrl: 'https://argo.derekworkspacev5.com', branch: 'main' }));
-    const out = await mcpSession([
-      { key: 'ext', name: 'queryNeo4jGraph', arguments: { workspaceRoot: '/ws-fed', projectId: 'soc-demo', cypher: 'MATCH (e:Element) RETURN count(e) AS n' } },
-    ], { ARGO_REPO_ROOT: '/ws-fed', NODE_PATH }, { timeoutMs: 60000 });
-    const r = out.ext;
-    if (!r || r.status !== 'passed' || r.database !== 'soc-demo' || r.namespaceKey !== 'proj:soc-demo') {
-      throw new Error(`unexpected external read result: ${JSON.stringify(r).slice(0, 300)}`);
+    fs.writeFileSync('/ws-fed/.argo/federation.json', JSON.stringify(FED));
+    const env = { ARGO_REPO_ROOT: '/ws-fed', NODE_PATH };
+    const P = 'soc-demo';
+
+    // discover a stable element id and view id from the external project
+    const disc = await mcpSession([
+      { key: 'eid', name: 'queryNeo4jGraph', arguments: { workspaceRoot: '/ws-fed', projectId: P, cypher: 'MATCH (e:Element) RETURN e.id AS id ORDER BY e.id LIMIT 1' } },
+      { key: 'vid', name: 'queryNeo4jGraph', arguments: { workspaceRoot: '/ws-fed', projectId: P, cypher: 'MATCH (v:View) RETURN v.view_id AS id ORDER BY v.view_id LIMIT 1' } },
+    ], env, { timeoutMs: 60000 });
+    const elementId = disc.eid.records[0].id;
+    const viewId = disc.vid.records[0].id;
+
+    // External infrastructure is eventually consistent (the mirror's semantic
+    // index can be briefly not-ready); retry the semantic reads a bounded number
+    // of times. Structural reads are asserted directly.
+    const callExt = async (name, args) => {
+      let last = null;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const o = await mcpSession([{ key: 'r', name, arguments: args }], env, { timeoutMs: 90000 });
+        last = o.r;
+        if (last && last.status === 'passed') return last;
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      }
+      return last;
+    };
+
+    const count = await callExt('queryNeo4jGraph', { workspaceRoot: '/ws-fed', projectId: P, cypher: 'MATCH (e:Element) RETURN count(e) AS n' });
+    const gsa = await callExt('getSystemArchitecture', { workspaceRoot: '/ws-fed', projectId: P, query: { purpose: 'general', intent: 'SOC detection rules and VSOC vehicle security' } });
+    const mem = await callExt('memory_search', { workspaceRoot: '/ws-fed', projectId: P, query: 'SOC 检测规则 VSOC', top_k: 3 });
+    const ico = await callExt('getIntentElementContext', { workspaceRoot: '/ws-fed', projectId: P, elementId });
+    const vc = await callExt('getArchitectureViewContext', { workspaceRoot: '/ws-fed', projectId: P, view_id: viewId });
+
+    const ns = `proj:${P}`;
+    if (!count || count.status !== 'passed' || count.database !== P || count.namespaceKey !== ns || !(count.records && count.records[0] && count.records[0].n > 0)) {
+      throw new Error(`queryNeo4jGraph external failed: ${JSON.stringify(count).slice(0, 300)}`);
     }
-    return { status: r.status, database: r.database, namespaceKey: r.namespaceKey, records: r.records };
+    const gsaElements = (gsa && gsa.document && gsa.document.elements) || [];
+    if (!gsa || gsa.status !== 'passed' || gsa.namespaceKey !== ns || gsaElements.length === 0 || !gsa.query || gsa.query.mode !== 'semantic-query') {
+      throw new Error(`getSystemArchitecture external (semantic) failed: ${JSON.stringify(gsa).slice(0, 300)}`);
+    }
+    if (!mem || mem.status !== 'passed' || mem.namespaceKey !== ns || !Array.isArray(mem.hits) || mem.hits.length === 0) {
+      throw new Error(`memory_search external (semantic) failed: ${JSON.stringify(mem).slice(0, 300)}`);
+    }
+    if (!ico || ico.status !== 'passed' || ico.namespaceKey !== ns || !(ico.subgraph && (ico.subgraph.elements || []).length > 0)) {
+      throw new Error(`getIntentElementContext external failed: ${JSON.stringify(ico).slice(0, 300)}`);
+    }
+    if (!vc || vc.status !== 'passed' || vc.namespaceKey !== ns || !(Array.isArray(vc.elements) && vc.elements.length > 0)) {
+      throw new Error(`getArchitectureViewContext external failed: ${JSON.stringify(vc).slice(0, 300)}`);
+    }
+
+    return {
+      requester: 'archgraph',
+      project: P,
+      namespaceKey: ns,
+      tools: {
+        queryNeo4jGraph: { mode: 'structural-cypher', params: { cypher: 'MATCH (e:Element) RETURN count(e) AS n' }, result: { database: count.database, count: count.records[0].n } },
+        getSystemArchitecture: { mode: 'semantic', params: { query: { purpose: 'general', intent: 'SOC detection rules and VSOC vehicle security' } }, result: { semanticMode: gsa.query.mode, elements: gsaElements.length, sampleIds: gsaElements.slice(0, 3).map((e) => e.id) } },
+        memory_search: { mode: 'semantic', params: { query: 'SOC 检测规则 VSOC', top_k: 3 }, result: { hits: mem.hits.length, top: mem.hits.slice(0, 3).map((h) => ({ id: h.id, score: h.score })) } },
+        getIntentElementContext: { mode: 'semantic-context', params: { elementId }, result: { elements: (ico.subgraph.elements || []).length } },
+        getArchitectureViewContext: { mode: 'structural-view', params: { view_id: viewId }, result: { elements: vc.elements.length } },
+      },
+    };
   });
 
   const failed = steps.filter((s) => s.status === 'failed');

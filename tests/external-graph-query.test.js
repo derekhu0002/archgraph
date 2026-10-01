@@ -158,6 +158,23 @@ test('AT external-query: no projectId keeps the local path (no center call)', as
   assert.equal(payload.schema.schemaKind, 'default');
 });
 
+test('AT external-query: an external getSystemArchitecture works even with no local graph', async () => {
+  // GIVEN a registered workspace that has NO local design/KG graph, and a center stub
+  const center = await startCenter(() => ({ status: 200, payload: { status: 'ok', requester: 'archgraph', projectId: 'soc-demo', namespaceKey: 'proj:soc-demo', tool: 'getSystemArchitecture', result: { status: 'passed', query: { mode: 'semantic-query' }, document: { elements: [{ id: 'soc-x', name: 'X', type: 'Business Object' }] } } } }));
+  const ws = makeWorkspace();
+  writeFederation(ws, center.url);
+  try {
+    // WHEN getSystemArchitecture is called WITH projectId (the external path must
+    // not try to build a LOCAL semantic journey first)
+    const payload = await callToolAsync('getSystemArchitecture', { projectId: 'soc-demo', query: { purpose: 'general', intent: 'x' }, workspaceRoot: ws }, { ARGO_REPO_ROOT: ws });
+    // THEN it routes to the center and returns the external semantic result
+    assert.equal(payload.status, 'passed');
+    assert.equal(payload.namespaceKey, 'proj:soc-demo');
+    assert.equal(payload.query.mode, 'semantic-query');
+    assert.equal(center.requests.length, 1);
+  } finally { center.server.close(); }
+});
+
 test('AT external-query: the MCP routes a projectId call through the center end-to-end', async () => {
   const center = await startCenter(() => ({ status: 200, payload: { status: 'ok', requester: 'archgraph', projectId: 'soc-demo', namespaceKey: 'proj:soc-demo', tool: 'queryNeo4jGraph', result: { status: 'passed', database: 'soc-demo', records: [{ n: 1 }] } } }));
   const ws = makeWorkspace();

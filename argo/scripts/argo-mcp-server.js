@@ -833,6 +833,7 @@ async function handleRequest(request, dependencies = undefined) {
         && params.arguments
         && Object.prototype.hasOwnProperty.call(params.arguments, 'query')
         && params.arguments.query
+        && !externalQueryRequested(params.name, params.arguments)
       ) {
         activeDependencies = {
           semanticOperatorJourney:

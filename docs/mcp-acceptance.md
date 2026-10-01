@@ -36,6 +36,12 @@ failure.
 - **Validation before and after writes** (`validateSystemArchitecture`).
 - **Fail-closed rules**: a custom schema with no graph is rejected (the packaged
   graph is never copied); the installed default bundle is replaceable.
+- **Cross-project reads (real external project, `projectId=soc-demo`)**: all 5
+  read tools route to the federation center — semantic (`getSystemArchitecture`
+  → `semantic-query`, 63 elements; `memory_search` → hits 0.99/0.98/0.97) and
+  non-semantic (`queryNeo4jGraph` → 386 elements, `database=soc-demo`;
+  `getIntentElementContext`; `getArchitectureViewContext`) — each returning the
+  external result with `namespaceKey proj:soc-demo`.
 
 ## In-suite vs Docker coverage
 
