@@ -3425,6 +3425,10 @@
         {
           "view_id": "overseer-release-archive-001",
           "view_name": "项目总管发布记录·归档（≤0.20.x）"
+        },
+        {
+          "view_id": "overseer-ltm-lessons-001",
+          "view_name": "项目总管经验库"
         }
       ],
       "attributes": [
@@ -10130,6 +10134,11 @@
           "name": "commit",
           "value": "44d0dad",
           "description": "refactor(schema): rename argob-* to schema-bundle-* and ArgoBument to ArchiMate 3.2; argo/scripts/schema-bundle.js; argo/schema/schema-bundle.config.json; argo/schema/schema-bundle.rules.json; custom-schema/.argo/schema/GUIDE.md; custom-schema/.argo/schema/schema-bundle.config.json; tests/schema-bundle.test.js; docs/schema-bundle-decoupling.md; sandbox/schema-decoupling/verify-all.js; design/KG/SystemArchitecture.json; npm test 646/0/0; Docker acceptance 10/10"
+        },
+        {
+          "name": "commit",
+          "value": "dde28c5",
+          "description": "chore(release): archgraph-argo-beta@0.27.0-beta.1 (deploy rename); package.json; deployed to host ~/.argo (schema-bundle.*; stale argob.* removed); default resolves ArchiMate 3.2, 64/11, bundleValidation passed"
         }
       ],
       "testcases": [
@@ -10387,6 +10396,27 @@
       "name": "里程碑：schema 解耦 + 跨项目图谱查询端到端交付并验收 PASS（beta 包）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "overseer-lesson-npm-proxy-deploy-001",
+      "name": "经验：npm 发布/安装需走系统代理 127.0.0.1:7890（TLS 直连失败）",
+      "type": "Business Object",
+      "description": "【症状】本机 npm publish / npm i -g / npm view 挂起，或报 ERR_TLS_CERT_ALTNAME_INVALID；而 PowerShell Invoke-WebRequest 正常(200)。\\n【原因】本机有系统代理(WinINET: ProxyEnable=1, ProxyServer=127.0.0.1:7890)，PowerShell 默认走它，npm 默认不走；npm 直连 registry.npmjs.org:443 被拦截/重置。\\n【修复】发布/安装前设 $env:HTTPS_PROXY 与 $env:HTTP_PROXY=http://127.0.0.1:7890（临时环境变量即可，无需改 .npmrc）。发布后 registry 有传播延迟(分钟级)，npm view/install 需重试。\\n【本次部署】archgraph-argo-beta@0.27.0-beta.1(tag beta) 已发布；因传播延迟改用本地 npm pack 的 tgz 安装；argo-deploy -SkipEnv 22/22；宿主 ~/.argo/schema 拷入 schema-bundle.config.json/.rules.json 并删除陈旧 argob.config.json/argob-rules.json 与 ~/.argo/scripts/argob-schema.js（部署器只拷贝、不镜像删除，须手工清理）；部署态解析 kind=default / language=ArchiMate 3.2 / 64 元素 / 11 关系 / bundleValidation passed。commit dde28c5。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "dde28c5",
+          "description": "chore(release): archgraph-argo-beta@0.27.0-beta.1 + host redeploy"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -12682,6 +12712,15 @@
         "doc-mcp-acceptance-001",
         "doc-external-graph-query-001",
         "argo-env-no-acl-guard-001"
+      ]
+    },
+    {
+      "view_id": "overseer-ltm-lessons-001",
+      "view_name": "项目总管经验库",
+      "parent_element_id": "project-overseer-001",
+      "description": "项目总管 T2 长期记忆的经验/坑分层子视图（overseer-ltm-001 达 15 元素上限后按层拆分）。",
+      "included_elements": [
+        "overseer-lesson-npm-proxy-deploy-001"
       ]
     }
   ]
