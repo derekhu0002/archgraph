@@ -58,3 +58,18 @@ test('AT extends-03: addElementTypes contributes a class mapping merged onto bas
   // base class map intact
   assert.ok(bundle.rules.archimateClassByElementType['Business Actor']);
 });
+
+test('AT extends-04: a schema-less Profile also extends the inherited JSON-Schema type enum', () => {
+  // GIVEN a Profile that only declares extends + an added type (no own schema)
+  const dir = makeExtendsBundle({
+    extends: 'default',
+    addElementTypes: { 'Coding Rule': { class: 'Rule' } },
+  });
+  const bundle = resolveSchemaBundle(dir, { schemaDir: dir });
+  // THEN the inherited schema's element-type enum contains the added type
+  // (so whole-graph validation accepts elements of the added type, not just the
+  //  ontology level), and base types remain
+  const enumValues = bundle.schemaDocument.$defs.archimateElementType.enum;
+  assert.ok(enumValues.includes('Coding Rule'), 'added type must be a valid schema type');
+  assert.ok(enumValues.includes('Business Actor'), 'base types must remain');
+});

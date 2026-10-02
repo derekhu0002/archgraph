@@ -212,6 +212,27 @@ function mergeMatrixInto(target, source) {
   return target;
 }
 
+// Append added types to a JSON-Schema enum def (the element/relationship type
+// universe), so a schema-less inheriting Profile's own added types are structurally
+// valid — not just present at the ontology level.
+function extendSchemaEnum(schemaDocument, enumKeys, additions) {
+  const defs = schemaDocument && typeof schemaDocument.$defs === 'object' ? schemaDocument.$defs : null;
+  if (!defs) {
+    return;
+  }
+  for (const key of enumKeys) {
+    const node = defs[key];
+    if (node && Array.isArray(node.enum)) {
+      for (const value of additions) {
+        if (typeof value === 'string' && value !== '' && !node.enum.includes(value)) {
+          node.enum.push(value);
+        }
+      }
+      return;
+    }
+  }
+}
+
 function mergeExtendsBundle(base, child) {
   const baseRules = base.rules || {};
   const childRules = child.rules || {};
@@ -265,13 +286,34 @@ function mergeExtendsBundle(base, child) {
     relationshipTargetMatrix,
   };
 
+  // Structural schema: when the child has none, it inherits the base schema — but
+  // its added types must be valid against the base's $defs enum too, otherwise
+  // whole-graph validation (validateAgainstSchema) rejects elements of the added
+  // types. Extend the inherited schema enum in place (clone, never mutate base).
+  let schemaDocument = child.schemaDocument || base.schemaDocument;
+  if (!child.schemaDocument && base.schemaDocument) {
+    const extraElementTypes = Object.keys(addElementTypes).filter(Boolean);
+    const extraRelationshipTypes = Object.keys(addRelationships).filter(Boolean);
+    const extraFromConfigElements = Array.isArray(config.elementTypes) ? config.elementTypes : [];
+    const extraFromConfigRelationships = Array.isArray(config.relationshipTypes) ? config.relationshipTypes : [];
+    if (extraElementTypes.length || extraRelationshipTypes.length || extraFromConfigElements.length || extraFromConfigRelationships.length) {
+      schemaDocument = deepCloneJson(base.schemaDocument);
+      extendSchemaEnum(schemaDocument, ELEMENT_ENUM_KEYS, extraElementTypes.concat(extraFromConfigElements));
+      extendSchemaEnum(schemaDocument, RELATIONSHIP_ENUM_KEYS, extraRelationshipTypes.concat(extraFromConfigRelationships));
+    }
+  }
+
   return {
     ...child,
     schema: child.schema || base.schema,
-    schemaDocument: child.schemaDocument || base.schemaDocument,
+    schemaDocument,
     rules,
     config,
     inheritedFrom: base.dir,
+    chainDirs: Array.from(new Set([
+      ...(Array.isArray(base.chainDirs) && base.chainDirs.length > 0 ? base.chainDirs : [path.resolve(base.dir).toLowerCase()]),
+      path.resolve(child.dir).toLowerCase(),
+    ])),
   };
 }
 
@@ -766,9 +808,36 @@ function buildOntology(bundle) {
   return bundle.kind === 'default' ? buildClassMatrixOntology(bundle) : buildTypeMatrixOntology(bundle);
 }
 
+// Cheap on-disk fingerprint of a bundle (and its extends chain) so a running MCP
+// picks up edits to the bundle files without a restart: the ontology cache key
+// changes when any key file's mtime/size changes.
+function bundleFingerprint(bundle) {
+  const dirs = Array.isArray(bundle.chainDirs) && bundle.chainDirs.length > 0
+    ? bundle.chainDirs
+    : [path.resolve(bundle.dir).toLowerCase()];
+  const statFile = (absolutePath) => {
+    try {
+      const stat = fs.statSync(absolutePath);
+      return `${Math.round(stat.mtimeMs)}:${stat.size}`;
+    } catch {
+      return '-';
+    }
+  };
+  const parts = [];
+  for (const dir of dirs) {
+    for (const name of [SCHEMA_BASENAME, CONFIG_BASENAME, RULES_BASENAME]) {
+      parts.push(`${name}=${statFile(path.join(dir, name))}`);
+    }
+  }
+  if (bundle.config && typeof bundle.config.rules === 'string' && bundle.config.rules.trim() !== '') {
+    parts.push(`rules=${statFile(path.resolve(bundle.dir, bundle.config.rules))}`);
+  }
+  return parts.join('|');
+}
+
 function loadSchemaBundleAndOntology(workspaceRoot, options = {}) {
   const bundle = resolveSchemaBundle(workspaceRoot, options);
-  const cacheKey = `${bundle.kind}:${path.resolve(bundle.dir).toLowerCase()}`;
+  const cacheKey = `${bundle.kind}:${path.resolve(bundle.dir).toLowerCase()}:${bundleFingerprint(bundle)}`;
   if (ontologyCache.has(cacheKey)) {
     return { bundle, ontology: ontologyCache.get(cacheKey) };
   }

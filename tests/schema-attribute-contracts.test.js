@@ -83,3 +83,22 @@ test('AT attribute-contracts-05: a bundle declaring a contract for an unknown el
   assert.equal(ontology.bundleValidation.status, 'failed');
   assert.ok(ontology.bundleValidation.errors.some((error) => /Ghost/.test(error)));
 });
+
+test('AT attribute-contracts-06: editing a bundle file invalidates the ontology cache (no MCP restart)', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ac-cache-'));
+  const configPath = path.join(dir, 'schema-bundle.config.json');
+  fs.writeFileSync(path.join(dir, 'SystemArchitecture.schema.json'), '{}');
+  fs.writeFileSync(configPath, JSON.stringify({ language: 'Cache Test', elementTypes: ['Rule'], relationshipTypes: ['Association'] }));
+  const before = loadSchemaBundleAndOntology(dir, { schemaDir: dir }).ontology;
+  assert.equal(before.attributesByElementType, undefined);
+  // WHEN the bundle is edited on disk...
+  fs.writeFileSync(configPath, JSON.stringify({
+    language: 'Cache Test',
+    elementTypes: ['Rule'],
+    relationshipTypes: ['Association'],
+    attributesByElementType: { Rule: { required: ['ruleId'] } },
+  }));
+  // THEN a later load in the SAME process reflects the change (cache invalidated)
+  const after = loadSchemaBundleAndOntology(dir, { schemaDir: dir }).ontology;
+  assert.ok(after.attributesByElementType && after.attributesByElementType.Rule, 'edited bundle must take effect without a restart');
+});
