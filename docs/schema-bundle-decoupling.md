@@ -261,7 +261,7 @@ A Profile may compose on a base bundle instead of forking it:
 
 ```json
 {
-  "extends": "archimate3.2",
+  "extends": "default",
   "addElementTypes": { "Coding Rule": { "class": "Rule", "layer": "Other", "aspect": "Active Structure" } },
   "addRelationships": {},
   "overrideMatrix": {}
@@ -270,10 +270,11 @@ A Profile may compose on a base bundle instead of forking it:
 
 Resolution is `base -> delta`: the element universe becomes base ∪ add (single
 source of truth), metadata/matrix merge by key, and `dialect` is inherited unless
-overridden. `extends` may name the built-in default (`archimate3.2` / `default` /
-`base`) or a bundle directory; chains are followed with cycle detection. A bundle
-that only declares `extends` (no own `SystemArchitecture.schema.json`) inherits the
-base schema document.
+overridden. `extends` is either the reserved, language-neutral name `default`
+(the built-in bundle) or a path to another bundle directory — the framework never
+hardcodes a modeling-language name. Chains are followed with cycle detection. A
+bundle that only declares `extends` (no own `SystemArchitecture.schema.json`)
+inherits the base schema document.
 
 ### 3. Order-independent mutation batches (#5)
 

@@ -18,10 +18,10 @@ function makeExtendsBundle(config) {
   return dir;
 }
 
-test('AT extends-01: a Profile inheriting archimate3.2 exposes base ∪ add element types', () => {
+test('AT extends-01: a Profile inheriting default exposes base ∪ add element types', () => {
   // GIVEN a bundle that only declares extends + one added element type
   const dir = makeExtendsBundle({
-    extends: 'archimate3.2',
+    extends: 'default',
     language: 'HarmonyOS Profile',
     addElementTypes: { 'Coding Rule': { class: 'Rule', layer: 'Other', aspect: 'Active Structure' } },
   });
@@ -37,7 +37,7 @@ test('AT extends-01: a Profile inheriting archimate3.2 exposes base ∪ add elem
 
 test('AT extends-02: overrideMatrix overrides one endpoint while the rest stays base', () => {
   const dir = makeExtendsBundle({
-    extends: 'archimate3.2',
+    extends: 'default',
     overrideMatrix: { Access: { BusinessActor: ['BusinessObject'] } },
   });
   const bundle = resolveSchemaBundle(dir, { schemaDir: dir });
@@ -50,7 +50,7 @@ test('AT extends-02: overrideMatrix overrides one endpoint while the rest stays 
 
 test('AT extends-03: addElementTypes contributes a class mapping merged onto base metadata', () => {
   const dir = makeExtendsBundle({
-    extends: 'archimate3.2',
+    extends: 'default',
     addElementTypes: { 'Coding Rule': { class: 'Rule', layer: 'Other', aspect: 'Active Structure' } },
   });
   const bundle = resolveSchemaBundle(dir, { schemaDir: dir });

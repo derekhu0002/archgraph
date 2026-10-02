@@ -180,7 +180,10 @@ function hasExtendsConfig(dir) {
 
 function resolveBaseBundleDir(ext, childDir) {
   const value = String(ext).trim();
-  if (value === 'default' || value === 'archimate3.2' || value === 'archimate' || value === 'base') {
+  // Reserved, language-neutral name for the built-in default bundle. Any other
+  // value is a path to another bundle directory — the framework never hardcodes a
+  // modeling-language name (ArchiMate or otherwise) into bundle resolution.
+  if (value === 'default') {
     return path.join(getArgoRoot(), 'schema');
   }
   return path.resolve(childDir, value);
@@ -230,6 +233,21 @@ function mergeExtendsBundle(base, child) {
   const addRelationships = config.addRelationships && typeof config.addRelationships === 'object' ? config.addRelationships : {};
   for (const [type, category] of Object.entries(addRelationships)) {
     relationshipCategoryByType[type] = category;
+  }
+
+  // Guarantee base ∪ add for the element/relationship universe regardless of the
+  // base dialect (class-matrix derives types from rules metadata, type-matrix from
+  // schema enums) — an inheriting Profile must never silently drop a base type.
+  const baseOntology = buildOntology(base);
+  for (const type of baseOntology.elementTypes) {
+    if (!elementTypeMetadata[type]) {
+      elementTypeMetadata[type] = { layer: null, aspect: null };
+    }
+  }
+  for (const type of baseOntology.relationshipTypes) {
+    if (!relationshipCategoryByType[type]) {
+      relationshipCategoryByType[type] = 'Custom';
+    }
   }
 
   const relationshipTargetMatrix = deepCloneJson(baseRules.relationshipTargetMatrix || {}) || {};

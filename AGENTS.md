@@ -51,3 +51,19 @@ matrix.
 5. **Restart MCP clients after deploy.** Running `argo-mcp-server` processes hold
    the code loaded at start; restart opencode/VS Code/Cursor/OpenClaw/Doubao so
    they pick up the new deployment.
+
+## Framework generality (this repo IS the framework owner)
+
+1. **`argo/**` stays modeling-language- and project-agnostic.** No hardcoded
+   language or project names, and no product-specific semantics in framework code
+   or in the bundle resolver. The built-in default happens to be ArchiMate 3.2,
+   but that is data in a bundle, never a name baked into logic (e.g. `extends`
+   accepts the neutral `default` or a path — never `archimate3.2`).
+2. **A consuming project's need is met by an opt-in, declarative, generic
+   mechanism** (bundle `schema`/`rules`/`config`), never by weakening the general
+   contract. If a feature cannot be expressed generically, stop and surface the
+   trade-off to the human partner before implementing.
+3. **Review every requested change for generality before implementing** and after
+   delivering — a feature that only works for one project/language is a defect.
+   Default-bundle behaviour must stay byte-identical unless the change is itself
+   opt-in.
