@@ -88,6 +88,23 @@ After installing, open your project and start a coding agent. It will:
 
 The intent architecture graph — modelled in **ArchiMate 3.2** — is the single source of truth.
 
+## The federation model
+
+ArchGraph is a **federated intent graph**, not one big distributed graph. Every project owns a
+complete, **sovereign** canonical graph (`design/KG/SystemArchitecture.json`) and stays the single
+source of truth for its own model — nothing is split, sharded, or merged into a central super-graph.
+
+Projects **co-build** by federation: a member **self-registers** with the federation center, others
+**discover** it, reads are **explicitly authorized and denied by default**, and a cross-project read
+returns a **reference, not a copy**. The center holds only federation metadata — membership,
+capabilities, interfaces, grants — plus a read-only mirror: it is a **registry + broker**, never the
+content.
+
+The pattern is **Registry–Broker Federation over sovereign knowledge graphs**: self-registration +
+discovery + capability-based authorization + reference-not-copy, mediated by a broker. It is
+*federated*, not "distributed" — a distributed model would mean one logical graph partitioned across
+nodes, which is exactly what this design avoids.
+
 ## Community
 
 ArchGraph runs on open co-building. Join the community hub to share, browse and reuse **architecture

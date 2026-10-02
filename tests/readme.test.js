@@ -115,6 +115,21 @@ test('readme: community section documents the federated graph-sharing registry',
   assert.match(section, /denied by default/i, 'should state that cross-member access is denied by default');
 });
 
+test('readme: frames the federation model (sovereign graphs, registry–broker, not distributed)', () => {
+  // GIVEN ArchGraph is a federation of independent projects, each owning its graph
+  // WHEN a reader opens the federation-model section
+  // THEN it states sovereign graphs, the registry–broker center, by-reference reads,
+  //      and does NOT mislabel the model as a "distributed knowledge graph"
+  const section = sectionAfter(README, 'The federation model');
+  assert.ok(section, 'README should have a The federation model section');
+  assert.match(section, /sovereign/i, 'should state each project keeps a sovereign graph');
+  assert.match(section, /register[\s\S]{0,160}discover/i, 'should describe self-register then discovery');
+  assert.match(section, /registry/i, 'should name the registry role');
+  assert.match(section, /broker/i, 'should name the broker role');
+  assert.match(section, /reference, not a copy|by reference/i, 'should state reads return a reference');
+  assert.doesNotMatch(README, /distributed knowledge graph/i, 'must not mislabel the model as distributed');
+});
+
 test('readme: What is this? documents cross-project graph query (projectId)', () => {
   // GIVEN a read tool can target another project's graph via the federation center
   // WHEN a reader opens the What is this? section

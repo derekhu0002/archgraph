@@ -210,6 +210,17 @@ test('newer-capabilities: homepage documents federation, lean reads and cost obs
   assert.match(section, /diagnos/i, 'should mention the agent-search-diagnosis capability');
 });
 
+test('federation-model: homepage frames federated sovereign graphs via a registry-broker (not distributed)', () => {
+  // GIVEN ArchGraph is a federation of independent projects, each owning its graph
+  // WHEN a visitor opens the Capabilities section
+  // THEN it states sovereign graphs + registry/broker, and does NOT call it a "distributed knowledge graph"
+  const section = HTML.slice(HTML.indexOf('id="capabilities"'), HTML.indexOf('id="install"'));
+  assert.match(section, /sovereign/i, 'should state sovereign graphs');
+  assert.match(section, /registry/i, 'should name the registry role');
+  assert.match(section, /broker/i, 'should name the broker role');
+  assert.doesNotMatch(HTML, /distributed knowledge graph/i, 'must not mislabel the model as distributed');
+});
+
 test('cross-project-query: homepage documents the projectId external read', () => {
   // GIVEN a read tool can target another project's graph via the federation center
   // WHEN a visitor opens the Capabilities section
