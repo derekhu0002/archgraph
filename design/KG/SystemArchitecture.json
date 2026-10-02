@@ -10494,6 +10494,16 @@
           "name": "commit",
           "value": "490135c",
           "description": "release archgraph-argo-beta@0.27.0-beta.3 (tag latest) + argo-deploy"
+        },
+        {
+          "name": "commit",
+          "value": "495c5e9",
+          "description": "fix(cache): loadSchemaBundleAndOntology 按 bundle 磁盘指纹(mtime+size, 含 extends 链)缓存; 改文件后免重启即生效; AT attribute-contracts-06"
+        },
+        {
+          "name": "commit",
+          "value": "7747b29",
+          "description": "release archgraph-argo-beta@0.27.0-beta.5 (tag latest) + 正式安装 + argo-deploy"
         }
       ]
     },
@@ -10532,6 +10542,16 @@
           "name": "commit",
           "value": "21f7149",
           "description": "release archgraph-argo-beta@0.27.0-beta.4 (tag latest) + 正式安装 + argo-deploy"
+        },
+        {
+          "name": "commit",
+          "value": "495c5e9",
+          "description": "fix(extends): 无自有 schema 的子包把新增类型并入继承 schema 枚举($defs.archimateElementType/RelationshipType); AT extends-04; npm test 662/0/0"
+        },
+        {
+          "name": "commit",
+          "value": "7747b29",
+          "description": "release archgraph-argo-beta@0.27.0-beta.5 (tag latest) + 正式安装 + argo-deploy"
         }
       ]
     },
