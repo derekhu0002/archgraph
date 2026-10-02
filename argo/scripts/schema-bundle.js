@@ -99,7 +99,8 @@ function relativeLabel(workspaceRoot, absolutePath) {
 
 function buildBundle(kind, dir, workspaceRoot) {
   const schemaFile = path.join(dir, SCHEMA_BASENAME);
-  const schema = readJsonFile(schemaFile);
+  const schemaExists = isFile(schemaFile);
+  const schema = schemaExists ? readJsonFile(schemaFile) : null;
 
   const configFile = path.join(dir, CONFIG_BASENAME);
   const fileConfig = isFile(configFile) ? readJsonFile(configFile) : {};
@@ -135,10 +136,9 @@ function buildBundle(kind, dir, workspaceRoot) {
     kind,
     dir,
     relativeDir: relativeLabel(workspaceRoot, dir),
-    schema: {
-      absolutePath: schemaFile,
-      relativePath: relativeLabel(workspaceRoot, schemaFile),
-    },
+    schema: schemaExists
+      ? { absolutePath: schemaFile, relativePath: relativeLabel(workspaceRoot, schemaFile) }
+      : null,
     schemaDocument: schema,
     config: {
       filePath: isFile(configFile) ? { absolutePath: configFile, relativePath: relativeLabel(workspaceRoot, configFile) } : null,
@@ -152,6 +152,127 @@ function buildBundle(kind, dir, workspaceRoot) {
       ? { absolutePath: guidePath, relativePath: relativeLabel(workspaceRoot, guidePath) }
       : null,
   };
+}
+
+// --- Bundle inheritance (issue #4) -----------------------------------------
+// A bundle may declare `extends` to inherit a base bundle (the built-in default,
+// or another bundle directory) and add/override on top of it instead of forking
+// the whole rules file. `addElementTypes` / `addRelationships` / `overrideMatrix`
+// are the delta; the effective element universe becomes base ∪ add (single
+// source of truth), matrix/metadata merge by key.
+
+function bundleConfig(dir) {
+  const configFile = path.join(dir, CONFIG_BASENAME);
+  if (!isFile(configFile)) {
+    return {};
+  }
+  try {
+    return readJsonFile(configFile);
+  } catch {
+    return {};
+  }
+}
+
+function hasExtendsConfig(dir) {
+  const config = bundleConfig(dir);
+  return typeof config.extends === 'string' && config.extends.trim() !== '';
+}
+
+function resolveBaseBundleDir(ext, childDir) {
+  const value = String(ext).trim();
+  if (value === 'default' || value === 'archimate3.2' || value === 'archimate' || value === 'base') {
+    return path.join(getArgoRoot(), 'schema');
+  }
+  return path.resolve(childDir, value);
+}
+
+function deepCloneJson(value) {
+  return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+}
+
+function mergeMatrixInto(target, source) {
+  if (!source || typeof source !== 'object') {
+    return target;
+  }
+  for (const [relationshipType, bySource] of Object.entries(source)) {
+    if (!bySource || typeof bySource !== 'object') {
+      target[relationshipType] = deepCloneJson(bySource);
+      continue;
+    }
+    if (!target[relationshipType] || typeof target[relationshipType] !== 'object') {
+      target[relationshipType] = {};
+    }
+    for (const [sourceType, targets] of Object.entries(bySource)) {
+      target[relationshipType][sourceType] = deepCloneJson(targets);
+    }
+  }
+  return target;
+}
+
+function mergeExtendsBundle(base, child) {
+  const baseRules = base.rules || {};
+  const childRules = child.rules || {};
+  const config = { ...(base.config || {}), ...(child.config || {}) };
+
+  const elementTypeMetadata = { ...(baseRules.elementTypeMetadata || {}), ...(childRules.elementTypeMetadata || {}) };
+  const archimateClassByElementType = { ...(baseRules.archimateClassByElementType || {}), ...(childRules.archimateClassByElementType || {}) };
+  const relationshipCategoryByType = { ...(baseRules.relationshipCategoryByType || {}), ...(childRules.relationshipCategoryByType || {}) };
+
+  const addElementTypes = config.addElementTypes && typeof config.addElementTypes === 'object' ? config.addElementTypes : {};
+  for (const [type, meta] of Object.entries(addElementTypes)) {
+    if (!elementTypeMetadata[type]) {
+      elementTypeMetadata[type] = { layer: (meta && meta.layer) || null, aspect: (meta && meta.aspect) || null };
+    }
+    if (meta && typeof meta.class === 'string' && meta.class !== '') {
+      archimateClassByElementType[type] = meta.class;
+    }
+  }
+  const addRelationships = config.addRelationships && typeof config.addRelationships === 'object' ? config.addRelationships : {};
+  for (const [type, category] of Object.entries(addRelationships)) {
+    relationshipCategoryByType[type] = category;
+  }
+
+  const relationshipTargetMatrix = deepCloneJson(baseRules.relationshipTargetMatrix || {}) || {};
+  mergeMatrixInto(relationshipTargetMatrix, childRules.relationshipTargetMatrix || {});
+  mergeMatrixInto(relationshipTargetMatrix, config.overrideMatrix || {});
+
+  const dialect = childRules.dialect || baseRules.dialect || 'archimate-class-matrix';
+  const rules = {
+    ...baseRules,
+    ...childRules,
+    dialect,
+    elementTypeMetadata,
+    archimateClassByElementType,
+    relationshipCategoryByType,
+    relationshipTargetMatrix,
+  };
+
+  return {
+    ...child,
+    schema: child.schema || base.schema,
+    schemaDocument: child.schemaDocument || base.schemaDocument,
+    rules,
+    config,
+    inheritedFrom: base.dir,
+  };
+}
+
+function applyExtends(bundle, workspaceRoot, seen = new Set()) {
+  const ext = bundle && bundle.config && typeof bundle.config.extends === 'string' ? bundle.config.extends.trim() : '';
+  if (!ext) {
+    return bundle;
+  }
+  seen.add(path.resolve(bundle.dir).toLowerCase());
+  const baseDir = resolveBaseBundleDir(ext, bundle.dir);
+  const baseKey = path.resolve(baseDir).toLowerCase();
+  if (seen.has(baseKey)) {
+    throw new Error(`schema bundle extends cycle detected at '${baseDir}'`);
+  }
+  if (!isFile(path.join(baseDir, SCHEMA_BASENAME)) && !hasExtendsConfig(baseDir)) {
+    throw new Error(`schema bundle extends '${ext}' could not be resolved: no schema bundle at '${baseDir}'`);
+  }
+  const baseBundle = applyExtends(buildBundle('extends', baseDir, workspaceRoot), workspaceRoot, seen);
+  return mergeExtendsBundle(baseBundle, bundle);
 }
 
 function resolveSchemaBundle(workspaceRoot, options = {}) {
@@ -172,8 +293,8 @@ function resolveSchemaBundle(workspaceRoot, options = {}) {
       continue;
     }
     seen.add(key);
-    if (isFile(path.join(candidate.dir, SCHEMA_BASENAME))) {
-      return buildBundle(candidate.kind, candidate.dir, root);
+    if (isFile(path.join(candidate.dir, SCHEMA_BASENAME)) || hasExtendsConfig(candidate.dir)) {
+      return applyExtends(buildBundle(candidate.kind, candidate.dir, root), root);
     }
   }
 
@@ -258,7 +379,77 @@ function resolveActorElementType(config) {
   return DEFAULT_ACTOR_ELEMENT_TYPE;
 }
 
-function validateBundle({ language, dialect, elementTypes, relationshipTypes, actorElementType, matrix, deliveryDependencies }) {
+// Per-element-type attribute contract (issue #3): declare that an element type
+// must carry certain attributes, that some attribute values are a controlled
+// vocabulary, and that some attribute values are unique within the type.
+//   { "Rule": { "required": ["ruleId","normativity"], "unique": ["ruleId"],
+//               "enumByAttr": { "normativity": ["MUST","SHOULD","MAY","MUST_NOT"] } } }
+// Absent => no per-type attribute contract (backward compatible).
+function resolveAttributeContracts(config) {
+  const raw = config && typeof config.attributesByElementType === 'object' && config.attributesByElementType !== null
+    ? config.attributesByElementType
+    : null;
+  if (!raw) {
+    return undefined;
+  }
+  const contracts = {};
+  for (const [type, contract] of Object.entries(raw)) {
+    if (!contract || typeof contract !== 'object') {
+      contracts[type] = {};
+      continue;
+    }
+    contracts[type] = {
+      required: Array.isArray(contract.required) ? contract.required.slice() : undefined,
+      unique: Array.isArray(contract.unique) ? contract.unique.slice() : undefined,
+      enumByAttr: contract.enumByAttr && typeof contract.enumByAttr === 'object' ? { ...contract.enumByAttr } : undefined,
+    };
+  }
+  return contracts;
+}
+
+function validateAttributeContracts(language, elementTypeList, contracts) {
+  const errors = [];
+  if (!contracts || typeof contracts !== 'object') {
+    return errors;
+  }
+  for (const [type, contract] of Object.entries(contracts)) {
+    if (!elementTypeList.includes(type)) {
+      errors.push(`schema bundle '${language}' attributesByElementType references unknown element type '${type}'`);
+    }
+    if (!contract || typeof contract !== 'object') {
+      continue;
+    }
+    for (const key of ['required', 'unique']) {
+      const list = contract[key];
+      if (list === undefined) {
+        continue;
+      }
+      if (!Array.isArray(list)) {
+        errors.push(`schema bundle '${language}' attributesByElementType['${type}'].${key} must be an array`);
+        continue;
+      }
+      for (const name of list) {
+        if (typeof name !== 'string' || name === '') {
+          errors.push(`schema bundle '${language}' attributesByElementType['${type}'].${key} entries must be non-empty strings`);
+        }
+      }
+    }
+    if (contract.enumByAttr !== undefined) {
+      if (!contract.enumByAttr || typeof contract.enumByAttr !== 'object') {
+        errors.push(`schema bundle '${language}' attributesByElementType['${type}'].enumByAttr must be an object`);
+      } else {
+        for (const [attr, allowed] of Object.entries(contract.enumByAttr)) {
+          if (!Array.isArray(allowed) || allowed.length === 0) {
+            errors.push(`schema bundle '${language}' attributesByElementType['${type}'].enumByAttr['${attr}'] must be a non-empty array`);
+          }
+        }
+      }
+    }
+  }
+  return errors;
+}
+
+function validateBundle({ language, dialect, elementTypes, relationshipTypes, actorElementType, matrix, deliveryDependencies, attributesByElementType }) {
   const errors = [];
   const elementTypeList = Array.isArray(elementTypes) ? elementTypes : [];
   const relationshipTypeList = Array.isArray(relationshipTypes) ? relationshipTypes : [];
@@ -304,6 +495,7 @@ function validateBundle({ language, dialect, elementTypes, relationshipTypes, ac
   }
 
   errors.push(...validateDeliveryDependencies(language, relationshipTypeList, deliveryDependencies));
+  errors.push(...validateAttributeContracts(language, elementTypeList, attributesByElementType));
 
   return { status: errors.length === 0 ? 'passed' : 'failed', errors };
 }
@@ -386,6 +578,7 @@ function buildClassMatrixOntology(bundle) {
   const relationshipTypes = Array.from(relationshipCategoryByType.keys());
   const actorElementType = resolveActorElementType(bundle.config);
   const deliveryDependencies = resolveDeliveryDependencies(bundle.config, 'archimate-class-matrix');
+  const attributesByElementType = resolveAttributeContracts(bundle.config);
   return finalizeOntology({
     kind: bundle.kind,
     dialect: 'archimate-class-matrix',
@@ -397,7 +590,8 @@ function buildClassMatrixOntology(bundle) {
     relationshipTypes,
     actorElementType,
     deliveryDependencies,
-    bundleValidation: validateBundle({ language, dialect: 'archimate-class-matrix', elementTypes, relationshipTypes, actorElementType, matrix: null, deliveryDependencies }),
+    attributesByElementType,
+    bundleValidation: validateBundle({ language, dialect: 'archimate-class-matrix', elementTypes, relationshipTypes, actorElementType, matrix: null, deliveryDependencies, attributesByElementType }),
     elementTypeMetadata,
     relationshipCategoryByType,
     isSupportedElementType,
@@ -456,6 +650,7 @@ function buildTypeMatrixOntology(bundle) {
   const elementTypes = Array.from(elementTypeMetadata.keys());
   const relationshipTypes = Array.from(relationshipCategoryByType.keys());
   const deliveryDependencies = resolveDeliveryDependencies(config, 'type-matrix');
+  const attributesByElementType = resolveAttributeContracts(config);
   const getArchiMateClass = (elementOrType) => {
     const type = typeof elementOrType === 'string' ? elementOrType : elementOrType && elementOrType.type;
     return type;
@@ -494,7 +689,8 @@ function buildTypeMatrixOntology(bundle) {
     relationshipTypes,
     actorElementType,
     deliveryDependencies,
-    bundleValidation: validateBundle({ language, dialect: 'type-matrix', elementTypes, relationshipTypes, actorElementType, matrix, deliveryDependencies }),
+    attributesByElementType,
+    bundleValidation: validateBundle({ language, dialect: 'type-matrix', elementTypes, relationshipTypes, actorElementType, matrix, deliveryDependencies, attributesByElementType }),
     elementTypeMetadata,
     relationshipCategoryByType,
     isSupportedElementType: (type) => elementTypeMetadata.has(type),

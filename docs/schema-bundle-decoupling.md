@@ -227,3 +227,63 @@ and the live MCP projection.
 
 The full Node suite is otherwise unchanged (remaining failures pre-date this
 branch: EA-import tooling, cost-log env keys, graph-content drift).
+
+## Incremental extensions (issues #3 / #4 / #5)
+
+Three declarative extensions were added to the bundle contract; all are optional
+and a bundle that does not use them behaves exactly as before.
+
+### 1. Per-element-type attribute contracts (`attributesByElementType`, #3)
+
+`schema-bundle.config.json` may constrain the metadata an element type carries:
+
+```json
+{
+  "attributesByElementType": {
+    "Rule": {
+      "required": ["ruleId", "normativity"],
+      "unique": ["ruleId"],
+      "enumByAttr": { "normativity": ["MUST", "SHOULD", "MAY", "MUST_NOT"] }
+    }
+  }
+}
+```
+
+Enforced natively by `graph-semantics.validateAttributeContracts` (ontology-
+parameterised) through BOTH the read-only validator (`validateSystemArchitecture`)
+and the write path (`validateDocument`, i.e. add/update/remove + preview/apply).
+The bundle itself is validated at load: a contract keyed on an unknown element
+type (or a malformed contract) fails `bundleValidation` closed.
+
+### 2. Bundle inheritance (`extends`, #4)
+
+A Profile may compose on a base bundle instead of forking it:
+
+```json
+{
+  "extends": "archimate3.2",
+  "addElementTypes": { "Coding Rule": { "class": "Rule", "layer": "Other", "aspect": "Active Structure" } },
+  "addRelationships": {},
+  "overrideMatrix": {}
+}
+```
+
+Resolution is `base -> delta`: the element universe becomes base ∪ add (single
+source of truth), metadata/matrix merge by key, and `dialect` is inherited unless
+overridden. `extends` may name the built-in default (`archimate3.2` / `default` /
+`base`) or a bundle directory; chains are followed with cycle detection. A bundle
+that only declares `extends` (no own `SystemArchitecture.schema.json`) inherits the
+base schema document.
+
+### 3. Order-independent mutation batches (#5)
+
+`applySystemArchitectureMutation` / `previewSystemArchitectureMutation` build a
+dependency graph over the batch and apply it in topological order, so a mutation
+may reference an object created later in the same batch (`addElement` joining a
+same-batch view, `addRelationship` whose endpoints are added alongside,
+`addView` parented by a same-batch element). A genuine cycle is rejected with the
+offending id chain; preview and apply share the same `applyMutations` path and the
+final document is still validated as a whole.
+
+Acceptance (executable): `tests/schema-attribute-contracts.test.js`,
+`tests/schema-bundle-extends.test.js`, `tests/mutation-batch-order.test.js`.

@@ -259,8 +259,105 @@ function validateViewElementLimits(document, errors, options = {}) {
   }
 }
 
+// Per-element-type attribute contract (issue #3): required attributes, a
+// controlled vocabulary per attribute (enumByAttr) and uniqueness per attribute.
+// Supplied by the active schema bundle's `attributesByElementType`; absent => no-op
+// (fully backward compatible).
+function attributeEntriesByName(element) {
+  const map = new Map();
+  const entries = Array.isArray(element && element.attributes) ? element.attributes : [];
+  for (const entry of entries) {
+    if (!entry || typeof entry !== 'object' || typeof entry.name !== 'string' || entry.name === '') {
+      continue;
+    }
+    if (!map.has(entry.name)) {
+      map.set(entry.name, []);
+    }
+    map.get(entry.name).push(entry);
+  }
+  return map;
+}
+
+function attributeValueOf(entry) {
+  if (entry.value !== undefined && entry.value !== null) {
+    return entry.value;
+  }
+  if (entry.content !== undefined && entry.content !== null) {
+    return entry.content;
+  }
+  return undefined;
+}
+
+function validateAttributeContracts(document, errors, ontology) {
+  const language = resolveOntology(ontology);
+  const contracts = language.attributesByElementType;
+  if (!contracts || typeof contracts !== 'object') {
+    return;
+  }
+  const uniqueTrackers = new Map();
+  for (const type of Object.keys(contracts)) {
+    uniqueTrackers.set(type, new Map());
+  }
+
+  for (const element of document.elements || []) {
+    if (!element || typeof element !== 'object') {
+      continue;
+    }
+    const contract = contracts[element.type];
+    if (!contract || typeof contract !== 'object') {
+      continue;
+    }
+    const byName = attributeEntriesByName(element);
+
+    for (const name of Array.isArray(contract.required) ? contract.required : []) {
+      const entries = byName.get(name);
+      const present = Array.isArray(entries) && entries.some((entry) => {
+        const value = attributeValueOf(entry);
+        return value !== undefined && value !== '';
+      });
+      if (!present) {
+        errors.push(`element '${element.id}' (type '${element.type}') is missing required attribute '${name}'`);
+      }
+    }
+
+    const enumByAttr = contract.enumByAttr && typeof contract.enumByAttr === 'object' ? contract.enumByAttr : {};
+    for (const [attr, allowed] of Object.entries(enumByAttr)) {
+      if (!Array.isArray(allowed)) {
+        continue;
+      }
+      for (const entry of byName.get(attr) || []) {
+        const value = attributeValueOf(entry);
+        if (value === undefined) {
+          continue;
+        }
+        const matches = allowed.some((option) => option === value || JSON.stringify(option) === JSON.stringify(value));
+        if (!matches) {
+          errors.push(`element '${element.id}' (type '${element.type}') attribute '${attr}' value ${JSON.stringify(value)} is not one of: ${allowed.map((option) => JSON.stringify(option)).join(', ')}`);
+        }
+      }
+    }
+
+    for (const attr of Array.isArray(contract.unique) ? contract.unique : []) {
+      const tracker = uniqueTrackers.get(element.type);
+      for (const entry of byName.get(attr) || []) {
+        const value = attributeValueOf(entry);
+        if (value === undefined) {
+          continue;
+        }
+        const key = JSON.stringify(value);
+        if (tracker.has(key) && tracker.get(key) !== element.id) {
+          errors.push(`element '${element.id}' (type '${element.type}') attribute '${attr}' value ${key} duplicates element '${tracker.get(key)}'`);
+        } else if (!tracker.has(key)) {
+          tracker.set(key, element.id);
+        }
+      }
+    }
+  }
+}
+
 module.exports = {
   validateGraphSemantics,
   validateArchiMateEndpointMatrix,
   validateViewElementLimits,
+  validateAttributeContracts,
 };

@@ -10468,6 +10468,54 @@
           "description": "derekhu0002/archgraph issue #2，已 comment 并 CLOSED"
         }
       ]
+    },
+    {
+      "id": "wp-schema-attribute-contracts-001",
+      "name": "schema-bundle：按元素类型的属性契约与受控词汇（issue #3）",
+      "type": "Work Package",
+      "parent": "1249",
+      "description": "自定义 bundle 可通过 schema-bundle.config.json 的 attributesByElementType 声明：某元素类型的 required 属性、unique 属性，及 enumByAttr 受控词汇。由 graph-semantics.validateAttributeContracts(ontology 参数化)在 validateSystemArchitecture 与 MCP 写入路径(validateDocument)原生执行；bundle 自身校验(未知类型/非法形状)fail-closed。未声明该键的 bundle 行为不变。issue #3 / P0-1。",
+      "testcases": [
+        {
+          "name": "AT-attribute-contracts-01",
+          "description": "GIVEN bundle 带 attributesByElementType（Rule 必带 ruleId/normativity；normativity 受控枚举；ruleId 唯一）；WHEN 校验/写入；THEN 缺必填、非法枚举值、重复唯一值均失败并给出元素与属性；全部合规通过；未声明契约的类型不受约束；契约引用未知元素类型时 bundle 校验失败。",
+          "type": "Acceptance Test",
+          "Input": "tests/schema-attribute-contracts.test.js",
+          "acceptanceCriteria": "tests/schema-attribute-contracts.test.js"
+        }
+      ]
+    },
+    {
+      "id": "wp-schema-bundle-extends-001",
+      "name": "schema-bundle：extends 继承 base+delta，Profile 可组合而非整包 fork（issue #4）",
+      "type": "Work Package",
+      "parent": "1249",
+      "description": "bundle 可通过 config.extends 继承 base（内置默认 archimate3.2 或另一 bundle 目录），并用 addElementTypes / addRelationships / overrideMatrix 做增量；解析顺序 base→delta，元素宇宙=base∪add（单一事实源），矩阵/元数据按 key 覆盖，dialect 继承可覆盖。支持链式继承与环检测。issue #4 / P0-2。",
+      "testcases": [
+        {
+          "name": "AT-extends-01",
+          "description": "GIVEN 仅声明 extends:'archimate3.2' 与 1 个新增元素类型的 bundle；WHEN 加载；THEN ontology.elementTypes=默认∪新增、dialect=archimate-class-matrix、language 取 Profile、bundleValidation 通过；overrideMatrix 只覆盖指定端点、其余保持 base；addElementTypes 的 class 映射合并到 base 元数据。",
+          "type": "Acceptance Test",
+          "Input": "tests/schema-bundle-extends.test.js",
+          "acceptanceCriteria": "tests/schema-bundle-extends.test.js"
+        }
+      ]
+    },
+    {
+      "id": "wp-mutation-batch-order-001",
+      "name": "MCP：applySystemArchitectureMutation 批次顺序无关 + 拓扑排序 + 环检测（issue #5）",
+      "type": "Work Package",
+      "parent": "1249",
+      "description": "applySystemArchitectureMutation/preview 对 mutation 批次先构建依赖图并拓扑排序再逐条应用，使批次顺序无关：addElement(view_ids 指向同批稍后的 addView)、addRelationship(引用同批端点)、addView(parent=同批元素) 均可任意顺序；真正的循环依赖给出含 id 链的明确错误；preview 与 apply 同路径(applyMutations)保持一致，最终文档仍做整体校验(validateDocument)。issue #5 / P0-3。",
+      "testcases": [
+        {
+          "name": "AT-batch-order-01",
+          "description": "GIVEN 批次内 addElement 的 view_ids 指向同批稍后 addView 的 view / addRelationship 引用同批端点；WHEN apply；THEN 成功且最终视图正确连线；同一批次正序与逆序结果一致(顺序无关)；GIVEN 互引循环依赖；THEN 抛出含 id 链的明确错误。",
+          "type": "Acceptance Test",
+          "Input": "tests/mutation-batch-order.test.js",
+          "acceptanceCriteria": "tests/mutation-batch-order.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -12741,7 +12789,8 @@
       "description": "ARGO MCP 功能验证（本仓 archgraph）工作包视图：承载『在当前项目验证 ARGO MCP 读写功能是否正常』的工作包与验收用例，覆盖工具面注册、读接口语义/结构行为、只读 Cypher 护栏、写图去重门禁、无损写入门禁与工作区绑定证据。",
       "included_elements": [
         "argo-mcp-verification-001",
-        "acceptance-guardian-001"
+        "acceptance-guardian-001",
+        "wp-mutation-batch-order-001"
       ],
       "included_relationships": [
         "argo-mcp-verification-guardian-assoc-001"
@@ -12762,7 +12811,9 @@
         "doc-schema-bundle-decoupling-001",
         "doc-mcp-acceptance-001",
         "doc-external-graph-query-001",
-        "argo-env-no-acl-guard-001"
+        "argo-env-no-acl-guard-001",
+        "wp-schema-attribute-contracts-001",
+        "wp-schema-bundle-extends-001"
       ]
     },
     {

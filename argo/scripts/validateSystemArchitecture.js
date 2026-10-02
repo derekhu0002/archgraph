@@ -17,6 +17,7 @@ const {
   validateGraphSemantics,
   validateArchiMateEndpointMatrix,
   validateViewElementLimits,
+  validateAttributeContracts,
 } = require('./graph-semantics.js');
 
 function main() {
@@ -43,6 +44,7 @@ function main() {
     }
     validateAgainstSchema(document, schema, '#', errors, schema);
     validateGraphSemantics(document, errors, ontology);
+    validateAttributeContracts(document, errors, ontology);
     validateArchiMateEndpointMatrix(document, errors, { ontology });
     validateViewElementLimits(document, errors, { ontology });
 

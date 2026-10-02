@@ -130,6 +130,7 @@ const {
   validateGraphSemantics,
   validateArchiMateEndpointMatrix,
   validateViewElementLimits,
+  validateAttributeContracts,
 } = require('./graph-semantics.js');
 const {
   loadSchemaBundleAndOntology,
@@ -616,6 +617,7 @@ function validateDocument(document, schema, options = {}) {
   }
   validateAgainstSchema(document, schema, '#', errors, schema);
   validateGraphSemantics(document, errors, ontology);
+  validateAttributeContracts(document, errors, ontology);
   validateArchiMateEndpointMatrix(document, errors, {
     ontology,
     touchedRelationshipIds: options.touchedRelationshipIds,
@@ -1389,6 +1391,207 @@ function resolveDuplicateConflict(options, candidates) {
   return { action: 'create', justification: options.justification };
 }
 
+function mutationNodeId(mutation) {
+  if (!mutation || typeof mutation !== 'object') {
+    return '(invalid)';
+  }
+  if (mutation.type === 'addElement') {
+    return (mutation.element && mutation.element.id) || '(addElement)';
+  }
+  if (mutation.type === 'addRelationship') {
+    return (mutation.relationship && mutation.relationship.id) || '(addRelationship)';
+  }
+  if (mutation.type === 'addView') {
+    return (mutation.view && mutation.view.view_id) || '(addView)';
+  }
+  if (mutation.type === 'updateView') {
+    return mutation.view_id || mutation.id || '(updateView)';
+  }
+  return mutation.id || mutation.view_id || `(${mutation.type})`;
+}
+
+// Order a batch so it is order-independent: a mutation that references an object
+// created later in the SAME batch is applied after its producer. Dependencies:
+//   addElement     -> views it joins (view_ids)
+//   addRelationship-> views it joins + its source/target elements
+//   addView        -> its parent element + included elements/relationships
+//   update*/remove*-> the object they target (when that object is produced here)
+// A genuine cycle is reported with the id chain so the caller can split the batch.
+function orderMutationsForApplication(mutations) {
+  const n = mutations.length;
+  const producers = new Map();
+  const addProducer = (key, index) => {
+    if (!key) {
+      return;
+    }
+    if (!producers.has(key)) {
+      producers.set(key, []);
+    }
+    producers.get(key).push(index);
+  };
+
+  mutations.forEach((mutation, index) => {
+    if (!mutation || typeof mutation !== 'object') {
+      return;
+    }
+    if (mutation.type === 'addElement' && mutation.element) {
+      addProducer('element:' + mutation.element.id, index);
+    }
+    if (mutation.type === 'addRelationship' && mutation.relationship) {
+      addProducer('relationship:' + mutation.relationship.id, index);
+    }
+    if (mutation.type === 'addView' && mutation.view) {
+      addProducer('view:' + mutation.view.view_id, index);
+    }
+  });
+
+  const dependencies = mutations.map(() => new Set());
+  mutations.forEach((mutation, index) => {
+    if (!mutation || typeof mutation !== 'object') {
+      return;
+    }
+    const requireKey = (key) => {
+      const matches = producers.get(key);
+      if (!matches) {
+        return;
+      }
+      for (const producerIndex of matches) {
+        if (producerIndex !== index) {
+          dependencies[index].add(producerIndex);
+        }
+      }
+    };
+
+    if (mutation.type === 'addElement') {
+      for (const viewId of Array.isArray(mutation.view_ids) ? mutation.view_ids : []) {
+        requireKey('view:' + viewId);
+      }
+    } else if (mutation.type === 'addRelationship') {
+      for (const viewId of Array.isArray(mutation.view_ids) ? mutation.view_ids : []) {
+        requireKey('view:' + viewId);
+      }
+      if (mutation.relationship) {
+        requireKey('element:' + mutation.relationship.source_id);
+        requireKey('element:' + mutation.relationship.target_id);
+      }
+    } else if (mutation.type === 'addView') {
+      if (mutation.view) {
+        requireKey('element:' + mutation.view.parent_element_id);
+        for (const elementId of Array.isArray(mutation.view.included_elements) ? mutation.view.included_elements : []) {
+          requireKey('element:' + elementId);
+        }
+        for (const relationshipId of Array.isArray(mutation.view.included_relationships) ? mutation.view.included_relationships : []) {
+          requireKey('relationship:' + relationshipId);
+        }
+      }
+    } else if (mutation.type === 'updateElement') {
+      requireKey('element:' + mutation.id);
+    } else if (mutation.type === 'updateRelationship') {
+      requireKey('relationship:' + mutation.id);
+    } else if (mutation.type === 'updateView') {
+      requireKey('view:' + (mutation.view_id || mutation.id));
+    } else if (mutation.type === 'removeView') {
+      requireKey('view:' + mutation.view_id);
+    } else if (mutation.type === 'removeElement') {
+      requireKey('element:' + mutation.id);
+    } else if (mutation.type === 'removeRelationship') {
+      requireKey('relationship:' + mutation.id);
+    }
+  });
+
+  const indegree = mutations.map((_, index) => dependencies[index].size);
+  const dependents = mutations.map(() => []);
+  dependencies.forEach((set, index) => {
+    for (const dependency of set) {
+      dependents[dependency].push(index);
+    }
+  });
+
+  const remaining = new Set();
+  for (let index = 0; index < n; index += 1) {
+    remaining.add(index);
+  }
+  const ready = [];
+  for (let index = 0; index < n; index += 1) {
+    if (indegree[index] === 0) {
+      ready.push(index);
+    }
+  }
+  ready.sort((a, b) => a - b);
+
+  const ordered = [];
+  while (ready.length > 0) {
+    const index = ready.shift();
+    if (!remaining.has(index)) {
+      continue;
+    }
+    remaining.delete(index);
+    ordered.push(mutations[index]);
+    for (const dependent of dependents[index]) {
+      indegree[dependent] -= 1;
+      if (indegree[dependent] === 0) {
+        ready.push(dependent);
+      }
+    }
+    ready.sort((a, b) => a - b);
+  }
+
+  if (ordered.length !== n) {
+    const chain = findMutationCycle(mutations, dependencies, remaining);
+    throw new Error(
+      `Cyclic mutation dependencies in batch: ${chain.join(' -> ')}. `
+      + 'Order the batch so each referenced object is created first, or split the mutually-dependent objects into separate calls.',
+    );
+  }
+
+  return ordered;
+}
+
+function findMutationCycle(mutations, dependencies, remaining) {
+  const visited = new Set();
+  const inStack = new Set();
+  const stack = [];
+  let cycle = null;
+
+  const visit = (index) => {
+    if (cycle) {
+      return;
+    }
+    visited.add(index);
+    inStack.add(index);
+    stack.push(index);
+    for (const dependency of dependencies[index]) {
+      if (!remaining.has(dependency)) {
+        continue;
+      }
+      if (inStack.has(dependency)) {
+        cycle = stack.slice(stack.indexOf(dependency)).concat(dependency);
+        return;
+      }
+      if (!visited.has(dependency)) {
+        visit(dependency);
+      }
+      if (cycle) {
+        return;
+      }
+    }
+    inStack.delete(index);
+    stack.pop();
+  };
+
+  for (const index of remaining) {
+    if (!visited.has(index)) {
+      visit(index);
+    }
+    if (cycle) {
+      break;
+    }
+  }
+
+  const chain = cycle || [...remaining];
+  return chain.map((index) => mutationNodeId(mutations[index]));
+}
+
 function applyMutations(document, mutations, options = {}) {
   const nextDocument = clone(document);
   const touchedElementIds = new Set();
@@ -1401,7 +1604,11 @@ function applyMutations(document, mutations, options = {}) {
     throw new Error('mutations must contain at least one mutation');
   }
 
-  for (const mutation of mutations) {
+  // Apply in dependency order so a batch is order-independent (see
+  // orderMutationsForApplication); a genuine cycle throws with the id chain.
+  const orderedMutations = orderMutationsForApplication(mutations);
+
+  for (const mutation of orderedMutations) {
     if (!mutation || typeof mutation !== 'object' || !HANDLED_MUTATION_TYPES.has(mutation.type)) {
       throw new Error(`Unsupported mutation type: ${mutation && mutation.type}`);
     }

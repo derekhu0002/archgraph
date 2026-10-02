@@ -72,6 +72,9 @@ const DELIVERABLE_GUARDS = [
   ['EA tooling deliverable (web-service + import)', 'tests/ea-web-service-impl.test.js'],
   ['FEATURE: cross-project graph query (projectId -> federation center)', 'tests/external-graph-query.test.js'],
   ['FEATURE: schema bundle (default + custom schema decoupling)', 'tests/schema-bundle.test.js'],
+  ['FEATURE: schema bundle per-type attribute contracts (attributesByElementType)', 'tests/schema-attribute-contracts.test.js'],
+  ['FEATURE: schema bundle extends inheritance (base + delta)', 'tests/schema-bundle-extends.test.js'],
+  ['FEATURE: order-independent mutation batches (topological apply + cycle report)', 'tests/mutation-batch-order.test.js'],
 ];
 
 const ALL_GUARDS = [...MCP_INTERFACE_GUARDS.map(([name, file]) => ({ kind: 'mcp-interface', name, file })), ...DELIVERABLE_GUARDS.map(([name, file]) => ({ kind: 'deliverable', name, file }))];
