@@ -10562,6 +10562,16 @@
           "name": "commit",
           "value": "a7de23a",
           "description": "release archgraph-argo-beta@0.27.0-beta.6 (tag latest) + 正式安装 + argo-deploy"
+        },
+        {
+          "name": "commit",
+          "value": "b47fca3",
+          "description": "fix(extends): 别名数据化——默认 bundle 声明 id/aliases(archimate3.2/archimate/base); resolveBaseBundleDir 按目标 bundle 自声明的 id/aliases 符号解析(语言名不入逻辑); AT extends-05"
+        },
+        {
+          "name": "commit",
+          "value": "6d02579",
+          "description": "release archgraph-argo-beta@0.27.0-beta.7 (tag latest) + 正式安装 + argo-deploy"
         }
       ]
     },
@@ -10643,6 +10653,11 @@
           "name": "commit",
           "value": "461f569",
           "description": "refactor: 去除 extends dialect 的语言名默认; AGENTS.md 两条解耦轴"
+        },
+        {
+          "name": "commit",
+          "value": "b47fca3",
+          "description": "别名数据化:extends 符号名来自 bundle 声明的 id/aliases,恢复兼容且不把语言名写回框架逻辑(issue #6)"
         }
       ]
     }
