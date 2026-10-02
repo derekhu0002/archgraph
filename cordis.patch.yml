@@ -2,5 +2,14 @@
 - insert:
     - id: argo-workspace
       name: archgraph-argo/dsh-argo-workspace
+      config:
+        servers:
+          - id: argo
+            injectWorkspaceRoot: true
+          - id: graph-mcp
+            serverPath: '../argo/mcp-bridges/graph-mcp-stdio.js'
+            env:
+              GRAPH_MCP_URL: https://argo.derekworkspacev5.com/mcp
+            injectWorkspaceRoot: false
     - id: argo-wakeup
       name: archgraph-argo/dsh-argo-wakeup

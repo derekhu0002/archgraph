@@ -459,7 +459,7 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     );
     assert.match(bridge, /export const name = 'dsh-argo-workspace'/, 'bridge must export its name');
     assert.match(bridge, /export const inject = \['tools'\]/, 'bridge must inject the tools registry');
-    assert.match(bridge, /spawn\('node', \[serverPath\]/, 'bridge must spawn the argo server directly');
+    assert.match(bridge, /spawn\(command, args/, 'bridge must spawn each configured server generically');
     assert.match(bridge, /render: \(_args, value\) => value\.content/, 'bridge must declare output.render for the tool registry');
     assert.match(bridge, /mcp__argo__/, 'bridge must register the public mcp__argo__ tool names');
     assert.doesNotMatch(bridge, /mcp__argo-core__/, 'bridge must not create internal tool names');
@@ -471,6 +471,14 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
       'deployed workspace bridge must be byte-identical to the single-source bundle artifact',
     );
 
+    // 4d) the federation Graph MCP is mounted for DSH too: the same stdio bridge
+    // is deployed and the managed block configures a graph-mcp server next to argo.
+    const dshGraphBridge = path.join(dshHome, 'mcp-bridges', 'graph-mcp-stdio.js');
+    assert.ok(fs.existsSync(dshGraphBridge), 'DSH graph-mcp stdio bridge must be deployed');
+    assert.match(patch, /id: graph-mcp/, 'managed block must configure the graph-mcp server');
+    assert.match(patch, /GRAPH_MCP_URL/, 'graph-mcp server must carry GRAPH_MCP_URL');
+    assert.match(patch, /graph-mcp-stdio\.js/, 'graph-mcp server must spawn the stdio bridge');
+    assert.match(bridge, /config\.servers|normalizeServerSpecs/, 'bridge must support a list of servers');
 
     // 6) idempotency: a second run must not duplicate the managed block.
     const second = runInstall({ ...paths, skipEnv: true });

@@ -776,9 +776,9 @@ Write-Host "[4/22] argo\skills\argo-init -> $skillDest"
 Copy-Tree -Source $skillSrc -Destination $skillDest
 $reconcileSkillSrc = Join-Path (Join-Path $argoDir 'skills') 'ea-human-reconcile'
 $diagSkillSrc = Join-Path (Join-Path $argoDir 'skills') 'agent-search-diagnosis'
-Write-Host '  argo\skills\ea-human-reconcile -> $SkillsRoot\ea-human-reconcile (EA human draft reconcile skill)'
+Write-Host "  argo\skills\ea-human-reconcile -> $SkillsRoot\ea-human-reconcile (EA human draft reconcile skill)"
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $SkillsRoot 'ea-human-reconcile')
-Write-Host '  argo\skills\agent-search-diagnosis -> $SkillsRoot\agent-search-diagnosis (agent search diagnosis skill)'
+Write-Host "  argo\skills\agent-search-diagnosis -> $SkillsRoot\agent-search-diagnosis (agent search diagnosis skill)"
 Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $SkillsRoot 'agent-search-diagnosis')
 
 $ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
@@ -795,9 +795,9 @@ Copy-Item -Force -Path $depsSrc -Destination $depsDest
 $cursorSkillDest = Join-Path $CursorSkillsRoot 'argo-init'
 Write-Host "[7/22] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
 Copy-Tree -Source $skillSrc -Destination $cursorSkillDest
-Write-Host '  argo\skills\ea-human-reconcile -> $CursorSkillsRoot\ea-human-reconcile (Cursor)'
+Write-Host "  argo\skills\ea-human-reconcile -> $CursorSkillsRoot\ea-human-reconcile (Cursor)"
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $CursorSkillsRoot 'ea-human-reconcile')
-Write-Host '  argo\skills\agent-search-diagnosis -> $CursorSkillsRoot\agent-search-diagnosis (Cursor)'
+Write-Host "  argo\skills\agent-search-diagnosis -> $CursorSkillsRoot\agent-search-diagnosis (Cursor)"
 Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $CursorSkillsRoot 'agent-search-diagnosis')
 
 $mcpBridgeSrc = Join-Path $argoDir 'mcp-bridges'
@@ -808,9 +808,9 @@ Copy-Tree -Source $mcpBridgeSrc -Destination $mcpBridgeDest
 $openCodeSkillDest = Join-Path $OpenCodeSkillsRoot 'argo-init'
 Write-Host "[8/22] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
 Copy-Tree -Source $skillSrc -Destination $openCodeSkillDest
-Write-Host '  argo\skills\ea-human-reconcile -> $OpenCodeSkillsRoot\ea-human-reconcile (OpenCode)'
+Write-Host "  argo\skills\ea-human-reconcile -> $OpenCodeSkillsRoot\ea-human-reconcile (OpenCode)"
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $OpenCodeSkillsRoot 'ea-human-reconcile')
-Write-Host '  argo\skills\agent-search-diagnosis -> $OpenCodeSkillsRoot\agent-search-diagnosis (OpenCode)'
+Write-Host "  argo\skills\agent-search-diagnosis -> $OpenCodeSkillsRoot\agent-search-diagnosis (OpenCode)"
 Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $OpenCodeSkillsRoot 'agent-search-diagnosis')
 
 Write-Host "[9/22] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
@@ -849,15 +849,15 @@ if ($SkipDsh) {
 
     Write-Host "[16/22] argo\skills\argo-init -> $dshSkillDest (DeepSeek Harness skill)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $dshSkillDest
-    Write-Host '  argo\skills\ea-human-reconcile -> $DshHome\skills\ea-human-reconcile (DeepSeek Harness skill)'
+    Write-Host "  argo\skills\ea-human-reconcile -> $DshHome\skills\ea-human-reconcile (DeepSeek Harness skill)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-reconcile') -Destination (Join-Path (Join-Path $DshHome 'skills') 'ea-human-reconcile')
-    Write-Host '  argo\skills\agent-search-diagnosis -> $DshHome\skills\agent-search-diagnosis (DeepSeek Harness skill)'
+    Write-Host "  argo\skills\agent-search-diagnosis -> $DshHome\skills\agent-search-diagnosis (DeepSeek Harness skill)"
     Copy-Tree -Source $diagSkillSrc -Destination (Join-Path (Join-Path $DshHome 'skills') 'agent-search-diagnosis')
 
     Write-Host "[17/22] dsh-argo-wakeup\index.js (single source; gate from argo\rules\archgraph.instructions.md <WakeupGuideline>) -> $DshHome\plugins\dsh-argo-wakeup\index.js (DeepSeek Harness wakeup plugin)"
     $wakeupDshPath = New-DshWakeupPlugin -DshHome $DshHome
 
-    Write-Host "[18/22] argo-workspace + argo-wakeup rows -> $patchPath (DeepSeek Harness MCP bridge + wakeup plugin)"
+    Write-Host "[18/22] argo-workspace (argo + graph-mcp) + argo-wakeup rows -> $patchPath (DeepSeek Harness MCP bridges + wakeup plugin)"
     # The generated dsh-argo-workspace bridge connects directly to the argo
     # server (no dsh-mcp-client row), registers every tool as mcp__argo__* and
     # injects the current session's workspace (SessionHeader.cwd) as the
@@ -865,9 +865,20 @@ if ($SkipDsh) {
     # user switched to. The server honors the injected workspaceRoot
     # unconditionally.
     $bridgeDshPath = New-DshWorkspaceBridge -DshHome $DshHome
+    # Deploy the federation Graph MCP stdio bridge next to the DSH plugins, so the
+    # remote graph-mcp (registry_*/mirror_*/graph_*) mounts as an ordinary local
+    # stdio server - the same bridge Cursor/Doubao already use.
+    $dshBridgeDir = Join-Path $DshHome 'mcp-bridges'
+    Copy-Tree -Source (Join-Path $argoDir 'mcp-bridges') -Destination $dshBridgeDir
+    $dshGraphBridgePath = (Join-Path $dshBridgeDir 'graph-mcp-stdio.js').Replace('\', '/')
     if ($bridgeDshPath) {
         $bridgeUrl = 'file:///' + (($bridgeDshPath -replace '\\', '/').TrimStart('/'))
-        $bridgeConfig = "    config:`n      serverPath: '$argoServer'`n"
+        # One bridge plugin mounts every server; the argo server follows the session
+        # workspace (workspaceRoot), graph-mcp does not inject workspaceRoot.
+        $serversYaml = "      servers:`n"
+        $serversYaml += "        - id: argo`n          serverPath: '$argoServer'`n          injectWorkspaceRoot: true`n"
+        $serversYaml += "        - id: graph-mcp`n          command: node`n          args:`n            - '$dshGraphBridgePath'`n          env:`n            GRAPH_MCP_URL: '$GraphMcpUrl'`n          injectWorkspaceRoot: false`n"
+        $bridgeConfig = "    config:`n" + $serversYaml
         if ($DshWorkspaces) {
             $wsList = @($DshWorkspaces.Replace('\', '/').Split(';') | ForEach-Object { "        - $_" }) -join "`n"
             $bridgeConfig += "      workspaces:`n" + $wsList + "`n"
@@ -891,10 +902,8 @@ if ($SkipDsh) {
     Write-Host "[19/22] argo\agents -> $DshHome\.agent-presets\<id> (DeepSeek Harness agent presets)"
     New-DshAgentPresets -DshHome $DshHome -AgentsSrc (Join-Path $argoDir 'agents')
 
-    Write-Host "  note: graph-mcp remote ($GraphMcpUrl) is NOT registered for DeepSeek Harness -"
-    Write-Host "  ~/.dsh/cordis.patch.yml only carries plugin rows (the dsh-argo-workspace bridge spawns"
-    Write-Host "  the local argo server); an HTTP remote MCP server has no equivalent cordis row here."
-    Write-Host "  Restart `dsh web` to activate the MCP bridge and the wakeup plugin;"
+    Write-Host "  graph-mcp registered for DeepSeek Harness as a stdio bridge -> $dshGraphBridgePath (GRAPH_MCP_URL=$GraphMcpUrl)"
+    Write-Host "  Restart `dsh web` to activate the MCP bridges and the wakeup plugin;"
     Write-Host '  new sessions pick up the global rule and the argo-init skill automatically.'
     Write-Host '  The argo tools (mcp__argo__*) auto-follow the workspace the user switched to'
     Write-Host '  in one dsh instance - no restart needed between workspaces (the server honors'
@@ -914,9 +923,9 @@ if ($SkipOpenClaw) {
 
     Write-Host "[21/22] argo\skills\argo-init -> $openClawSkillDest (OpenClaw managed skill, all agents)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $openClawSkillDest
-Write-Host '  argo\skills\ea-human-reconcile -> $OpenClawHome\skills\ea-human-reconcile (OpenClaw managed skill, all agents)'
+Write-Host "  argo\skills\ea-human-reconcile -> $OpenClawHome\skills\ea-human-reconcile (OpenClaw managed skill, all agents)"
 Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-reconcile') -Destination (Join-Path (Join-Path $OpenClawHome 'skills') 'ea-human-reconcile')
-Write-Host '  argo\skills\agent-search-diagnosis -> $OpenClawHome\skills\agent-search-diagnosis (OpenClaw managed skill, all agents)'
+Write-Host "  argo\skills\agent-search-diagnosis -> $OpenClawHome\skills\agent-search-diagnosis (OpenClaw managed skill, all agents)"
 Copy-Tree -Source $diagSkillSrc -Destination (Join-Path (Join-Path $OpenClawHome 'skills') 'agent-search-diagnosis')
 
     Write-Host '  OpenClaw injects AGENTS.md into Project Context on every session, so the wakeup'
