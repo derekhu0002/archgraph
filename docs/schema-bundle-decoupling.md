@@ -272,13 +272,17 @@ Resolution is `base -> delta`: the element universe becomes base ∪ add (single
 source of truth), metadata/matrix merge by key, and `dialect` is inherited unless
 overridden. `extends` resolves, in order: the reserved name `default`; a
 **symbolic name the target bundle declares about itself** (`id` / `aliases` in its
-`schema-bundle.config.json` — the built-in default declares `id:"default"` and
-aliases `archimate3.2` / `archimate` / `base` for backward compatibility); or a
-path to another bundle directory. Framework logic hardcodes no modeling-language
-name — a bundle's identity and aliases are data. Chains are followed with cycle
-detection. A bundle that only declares `extends` (no own
-`SystemArchitecture.schema.json`) inherits the base schema document, and its added
-types are added to the inherited schema's type enum.
+`schema-bundle.config.json`); or a path to another bundle directory. A symbolic
+name is matched against the self-declared `id`/`aliases` of each candidate bundle,
+searched in order: the built-in default bundle (which declares `id:"default"` and
+aliases `archimate3.2` / `archimate` / `base` for backward compatibility), any
+directory listed in the child's `basePaths`, the child's own directory, then its
+immediate sub-directories. A symbolic name that matches nothing falls back to a
+relative path. Framework logic hardcodes no modeling-language name — a bundle's
+identity and aliases are data. Chains are followed with cycle detection. A bundle
+that only declares `extends` (no own `SystemArchitecture.schema.json`) inherits the
+base schema document, and its added types are added to the inherited schema's type
+enum.
 
 ### 3. Order-independent mutation batches (#5)
 

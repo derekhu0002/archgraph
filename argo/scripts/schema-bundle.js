@@ -197,19 +197,67 @@ function bundleSymbolicNames(dir) {
   return names;
 }
 
-function resolveBaseBundleDir(ext, childDir) {
+function isPathLikeExt(value) {
+  return value.includes('/') || value.includes('\\') || value.startsWith('.') || value.startsWith('~')
+    || /^[a-zA-Z]:/.test(value);
+}
+
+// Bounded, general candidate list for symbolic bundle resolution: the built-in
+// default bundle, any directory a bundle lists in its own `basePaths`, the bundle's
+// own directory, and its immediate sub-directories. The framework matches a name
+// against each candidate's SELF-DECLARED id/aliases (data) — it hardcodes no
+// modeling-language name. A non-matching symbolic name falls back to a path, so
+// bare relative directory references keep working.
+function candidateBaseDirs(childDir, config) {
+  const dirs = [];
+  const seen = new Set();
+  const push = (dir) => {
+    if (!dir) {
+      return;
+    }
+    const resolved = path.resolve(dir);
+    const key = resolved.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      dirs.push(resolved);
+    }
+  };
+  push(path.join(getArgoRoot(), 'schema'));
+  const basePaths = config && Array.isArray(config.basePaths) ? config.basePaths : [];
+  for (const basePath of basePaths) {
+    if (typeof basePath === 'string' && basePath.trim() !== '') {
+      push(path.resolve(childDir, basePath.trim()));
+    }
+  }
+  push(childDir);
+  let entries = [];
+  try {
+    entries = fs.readdirSync(childDir, { withFileTypes: true });
+  } catch {
+    entries = [];
+  }
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      push(path.join(childDir, entry.name));
+    }
+  }
+  return dirs;
+}
+
+function resolveBaseBundleDir(ext, childDir, config) {
   const value = String(ext).trim();
   // `default` is the reserved, language-neutral name of the built-in bundle.
   if (value === 'default') {
     return path.join(getArgoRoot(), 'schema');
   }
-  // Otherwise resolve a SYMBOLIC name against the built-in bundle's self-declared
-  // id/aliases (data), then fall back to a relative path. Framework logic contains
-  // no modeling-language names.
-  const defaultDir = path.join(getArgoRoot(), 'schema');
-  if (bundleSymbolicNames(defaultDir).has(value)) {
-    return defaultDir;
+  if (!isPathLikeExt(value)) {
+    for (const dir of candidateBaseDirs(childDir, config)) {
+      if (bundleSymbolicNames(dir).has(value)) {
+        return dir;
+      }
+    }
   }
+  // Not a symbolic hit: treat as a path relative to the bundle directory.
   return path.resolve(childDir, value);
 }
 
@@ -350,7 +398,7 @@ function applyExtends(bundle, workspaceRoot, seen = new Set()) {
     return bundle;
   }
   seen.add(path.resolve(bundle.dir).toLowerCase());
-  const baseDir = resolveBaseBundleDir(ext, bundle.dir);
+  const baseDir = resolveBaseBundleDir(ext, bundle.dir, bundle.config);
   const baseKey = path.resolve(baseDir).toLowerCase();
   if (seen.has(baseKey)) {
     throw new Error(`schema bundle extends cycle detected at '${baseDir}'`);

@@ -86,3 +86,19 @@ test('AT extends-05: bundle-declared aliases resolve to the built-in default (da
     assert.equal(ontology.dialect, 'archimate-class-matrix', `${alias}: default dialect`);
   }
 });
+
+test('AT extends-06: a non-built-in base bundle is reachable by its declared symbolic name', () => {
+  // GIVEN a base bundle under the child's directory declaring id/aliases
+  const child = fs.mkdtempSync(path.join(os.tmpdir(), 'ext6-'));
+  const baseDir = path.join(child, 'base-x');
+  fs.mkdirSync(baseDir);
+  fs.writeFileSync(path.join(baseDir, 'schema-bundle.config.json'), JSON.stringify({ extends: 'default', id: 'userbase', aliases: ['ub'], language: 'User Base' }));
+  fs.writeFileSync(path.join(child, 'schema-bundle.config.json'), JSON.stringify({ extends: 'ub', language: 'Child', addElementTypes: { 'Coding Rule': { class: 'Rule' } } }));
+  // WHEN the child extends by that symbolic name
+  const { ontology } = loadSchemaBundleAndOntology(child, { schemaDir: child });
+  // THEN it resolves to the non-built-in base and composes
+  assert.equal(ontology.language, 'Child');
+  assert.ok(ontology.elementTypes.includes('Coding Rule'));
+  assert.ok(ontology.elementTypes.includes('Business Actor'));
+  assert.equal(ontology.bundleValidation.status, 'passed');
+});
