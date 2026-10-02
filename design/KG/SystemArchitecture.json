@@ -10552,6 +10552,16 @@
           "name": "commit",
           "value": "7747b29",
           "description": "release archgraph-argo-beta@0.27.0-beta.5 (tag latest) + 正式安装 + argo-deploy"
+        },
+        {
+          "name": "commit",
+          "value": "461f569",
+          "description": "refactor: mergeExtendsBundle 不再把 dialect 默认成 'archimate-class-matrix'（语言中立）; AGENTS.md 定义通用性=框架↔插件 + 框架↔本体 schema 两个解耦"
+        },
+        {
+          "name": "commit",
+          "value": "a7de23a",
+          "description": "release archgraph-argo-beta@0.27.0-beta.6 (tag latest) + 正式安装 + argo-deploy"
         }
       ]
     },
@@ -10614,7 +10624,7 @@
       "id": "overseer-lesson-framework-generality-001",
       "name": "规则/经验：框架保持建模语言中立，不因项目需求硬编码语言名",
       "type": "Business Object",
-      "description": "【原则】作为 ArchGraph 框架的负责项目，argo/** 必须保持建模语言/项目中立。不能因为某个消费项目（如 HarmonyOS-Dev-Standards）的 issue 示例，就把具体语言/项目名写进框架逻辑。\\n【具体踩坑（issue #4）】实现 bundle extends 时，因 issue 示例写 extends:'archimate3.2'，我在 resolveBaseBundleDir 里硬编码了别名 'archimate3.2'/'archimate'——这把 ArchiMate 绑进了通用解析器。修正：只保留中性的保留名 'default'（或另一 bundle 目录路径）。commit d2e1e18。\\n【同时修正】mergeExtendsBundle 改为并集 base ontology 的类型，保证任意 dialect 下继承不丢 base 类型（原 class-matrix 从 rules 元数据、type-matrix 从 schema 枚举，继承时可能丢类型）。\\n【规约】消费项目的需求只能用【可选、声明式、通用】机制满足（bundle schema/rules/config）；若无法泛化表达，停下向人类伙伴提出取舍，而不是弱化通用契约。默认包行为除非本身可选（opt-in），必须保持逐字节不变。已入仓库根 AGENTS.md «Framework generality»。",
+      "description": "【原则】作为 ArchGraph 框架的负责项目，argo/** 必须保持两类解耦：(a) 框架↔插件；(b) 框架↔本体 schema。不能因为某个消费项目（如 HarmonyOS-Dev-Standards）的 issue 示例，就把具体语言/项目名或插件写进框架核心逻辑。\\n【踩坑 1（issue #4）】实现 extends 时硬编码了别名 'archimate3.2'/'archimate'；修正为只保留中性保留名 'default'（或路径）。commit d2e1e18。\\n【踩坑 2】mergeExtendsBundle 一度把 dialect 默认成 'archimate-class-matrix'——又一处语言名进入通用逻辑；修正为只继承 base/child 的 dialect，缺省由 ontology 构建器根据 bundle 声明的 rules 决定。commit 461f569。\\n【同时修正】mergeExtendsBundle 并集 base ontology 类型(不丢 base)；无自有 schema 时把新增类型并入继承 schema 枚举。\\n【规约】消费项目需求只能用【可选、声明式、通用】机制满足（bundle schema/rules/config）；无法泛化则停下向人类伙伴提出取舍，不弱化通用契约。默认包行为除非 opt-in 否则逐字节不变。已入仓库根 AGENTS.md «Framework generality»（含两条解耦轴）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -10628,6 +10638,11 @@
           "name": "commit",
           "value": "d2e1e18",
           "description": "refactor(schema-bundle): language-neutral extends + base∪add; AGENTS.md framework-generality rule"
+        },
+        {
+          "name": "commit",
+          "value": "461f569",
+          "description": "refactor: 去除 extends dialect 的语言名默认; AGENTS.md 两条解耦轴"
         }
       ]
     }
