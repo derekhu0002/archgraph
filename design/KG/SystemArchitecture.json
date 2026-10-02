@@ -2672,6 +2672,16 @@
           "name": "commit",
           "value": "ce7c330",
           "description": "AD-f single-source convergence: scripts/gen-dsh-plugins.js; dsh-argo-wakeup/index.js (regenerated); dsh-argo-workspace/index.js; install-argo.ps1 (copy instead of inline templates, Get-WakeupGuideline removed); package.json (gen:dsh-plugins + prepack); tests/dsh-plugin-single-source.test.js; tests/argo-deploy.test.js; docs/dsh-plugin-design.md; docs/dsh-plugin-code-review.md"
+        },
+        {
+          "name": "commit",
+          "value": "8a51c31",
+          "description": "fix(dsh): 为 DSH 注册联邦 graph-mcp（stdio 桥）——install-argo.ps1 部署桥到 ~/.dsh/mcp-bridges 并输出多 server 托管块；dsh-argo-workspace 泛化 config.servers（每 server 前缀/注入开关，向后兼容）；bundle cordis.patch.yml 同步；修 8 处 Write-Host 引号；删误提交 InternalHost。npm test 666/0/0（closes #7）"
+        },
+        {
+          "name": "commit",
+          "value": "3299c57",
+          "description": "release archgraph-argo-beta@0.27.0-beta.9 (tag latest) + 正式安装 + argo-deploy"
         }
       ]
     },
