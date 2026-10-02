@@ -10572,6 +10572,16 @@
           "name": "commit",
           "value": "6d02579",
           "description": "release archgraph-argo-beta@0.27.0-beta.7 (tag latest) + 正式安装 + argo-deploy"
+        },
+        {
+          "name": "commit",
+          "value": "65ba577",
+          "description": "fix(extends): 通用符号解析(内置 + basePaths + 子包自身及直接子目录; 未命中回落路径); 别名来自 bundle 自声明 id/aliases; AT extends-06; 文档精化"
+        },
+        {
+          "name": "commit",
+          "value": "bdf0c42",
+          "description": "release archgraph-argo-beta@0.27.0-beta.8 (tag latest) + 正式安装 + argo-deploy"
         }
       ]
     },
