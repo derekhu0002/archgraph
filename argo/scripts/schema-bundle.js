@@ -275,7 +275,10 @@ function mergeExtendsBundle(base, child) {
   mergeMatrixInto(relationshipTargetMatrix, childRules.relationshipTargetMatrix || {});
   mergeMatrixInto(relationshipTargetMatrix, config.overrideMatrix || {});
 
-  const dialect = childRules.dialect || baseRules.dialect || 'archimate-class-matrix';
+  // Inherit the base dialect as-is; never default to a specific dialect NAME here
+  // (that would couple the generic merge to one modeling language). When both are
+  // absent the ontology builder decides from the bundle's declared rules.
+  const dialect = childRules.dialect || baseRules.dialect;
   const rules = {
     ...baseRules,
     ...childRules,

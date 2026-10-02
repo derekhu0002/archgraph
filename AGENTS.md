@@ -54,6 +54,14 @@ matrix.
 
 ## Framework generality (this repo IS the framework owner)
 
+0. **Generality = two decouplings, kept inviolate.** (a) **framework ↔ plugins**:
+   the core never depends on a specific plugin (wakeup, cost, harness, DSH...);
+   plugins attach through generic extension points. (b) **framework ↔ ontology
+   schema**: the core never depends on a specific modeling language or ontology;
+   a schema/ontology plugs in as an opt-in bundle (`schema`/`rules`/`config`) and
+   the core only knows the generic bundle contract. Any change that couples the
+   core to a plugin or to a particular ontology is a defect, regardless of which
+   consuming project asked for it.
 1. **`argo/**` stays modeling-language- and project-agnostic.** No hardcoded
    language or project names, and no product-specific semantics in framework code
    or in the bundle resolver. The built-in default happens to be ArchiMate 3.2,
