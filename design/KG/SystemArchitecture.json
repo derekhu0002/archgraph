@@ -358,6 +358,11 @@
           "name": "commit",
           "value": "56b874b",
           "description": "index.html（about/feature 改用 core-model.svg；Capabilities 新增 3 张能力示意图：联邦/三层记忆/精益读取；.about-img/.feature-media 改深色）；tests/website.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "302e534",
+          "description": "docs: 主页新增 'Federated, not distributed' 能力卡 + Community lead 命名模式; README The federation model 节; tests/website.test.js + readme.test.js 守卫"
         }
       ],
       "testcases": [
@@ -515,6 +520,11 @@
           "name": "commit",
           "value": "d9769af",
           "description": "README.md; tests/readme.test.js（What is this 补分层记忆 + 联邦共享；Community 补联邦注册中心 register/discover/authorize/read by reference；新增 AT-readme federated 断言）"
+        },
+        {
+          "name": "commit",
+          "value": "302e534",
+          "description": "docs: README 新增 The federation model 节（联邦式意图图谱/registry-broker/引用不拷贝/非分布式）；tests/readme.test.js 守卫"
         }
       ],
       "testcases": [
@@ -10670,6 +10680,24 @@
           "description": "别名数据化:extends 符号名来自 bundle 声明的 id/aliases,恢复兼容且不把语言名写回框架逻辑(issue #6)"
         }
       ]
+    },
+    {
+      "id": "design-federated-intent-graph-001",
+      "name": "设计模式：联邦式意图图谱（Registry–Broker Federation over sovereign graphs）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "命名与模式定义（2026-10-02，人类伙伴认可）。结论：ArchGraph 的组织机制应称【联邦式意图图谱 Federated Intent Graph】，不是【分布式知识图谱】。【结构】每个项目拥有完整、自治的 canonical 意图图（主权、唯一事实源）；不切分、不合并成中心超级图。【协同】成员向联邦中心自注册 → 被发现 → 显式授权（默认拒绝）→ 跨项目读返回【引用而非拷贝】；中心只持联邦元数据（成员/能力/接口/授权）+ 只读镜像 = 注册表 + 代理（registry + broker）。【模式】Registry–Broker Federation over sovereign knowledge graphs（自注册 + 发现 + 基于能力的授权 + 引用不拷贝，由 broker 中介）；拓扑是“自治成员 + 中心控制面”的混合，非纯 P2P/去中心化——与 Data Mesh 神似（领域自治 + 联邦式治理）。【为什么不用“分布式”】distributed 通常指一个逻辑图被分片/复制到多节点、透明全局查询；本设计刻意避免合并，故用 federated。【落地】README 《The federation model》节 + 主页《Federated, not distributed》卡 + Community lead 命名。commit 302e534。",
+      "attributes": [
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "302e534",
+          "description": "docs: frame ArchGraph as a federated intent graph (registry-broker over sovereign graphs); README + index.html + tests"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -12979,7 +13007,8 @@
         "overseer-lesson-npm-proxy-deploy-001",
         "overseer-lesson-mcp-outputschema-structuredcontent-001",
         "overseer-milestone-issues-3-4-5-001",
-        "overseer-lesson-framework-generality-001"
+        "overseer-lesson-framework-generality-001",
+        "design-federated-intent-graph-001"
       ]
     }
   ]
