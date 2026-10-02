@@ -270,11 +270,15 @@ A Profile may compose on a base bundle instead of forking it:
 
 Resolution is `base -> delta`: the element universe becomes base ∪ add (single
 source of truth), metadata/matrix merge by key, and `dialect` is inherited unless
-overridden. `extends` is either the reserved, language-neutral name `default`
-(the built-in bundle) or a path to another bundle directory — the framework never
-hardcodes a modeling-language name. Chains are followed with cycle detection. A
-bundle that only declares `extends` (no own `SystemArchitecture.schema.json`)
-inherits the base schema document.
+overridden. `extends` resolves, in order: the reserved name `default`; a
+**symbolic name the target bundle declares about itself** (`id` / `aliases` in its
+`schema-bundle.config.json` — the built-in default declares `id:"default"` and
+aliases `archimate3.2` / `archimate` / `base` for backward compatibility); or a
+path to another bundle directory. Framework logic hardcodes no modeling-language
+name — a bundle's identity and aliases are data. Chains are followed with cycle
+detection. A bundle that only declares `extends` (no own
+`SystemArchitecture.schema.json`) inherits the base schema document, and its added
+types are added to the inherited schema's type enum.
 
 ### 3. Order-independent mutation batches (#5)
 

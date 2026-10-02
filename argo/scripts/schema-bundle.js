@@ -178,13 +178,37 @@ function hasExtendsConfig(dir) {
   return typeof config.extends === 'string' && config.extends.trim() !== '';
 }
 
+// Symbolic names a bundle declares about itself (`id` + `aliases`) in its config.
+// The framework resolves an `extends` value against these DECLARED names — never a
+// name hardcoded in framework logic — so a bundle's identity/aliases are data.
+function bundleSymbolicNames(dir) {
+  const config = bundleConfig(dir);
+  const names = new Set();
+  if (typeof config.id === 'string' && config.id.trim() !== '') {
+    names.add(config.id.trim());
+  }
+  if (Array.isArray(config.aliases)) {
+    for (const alias of config.aliases) {
+      if (typeof alias === 'string' && alias.trim() !== '') {
+        names.add(alias.trim());
+      }
+    }
+  }
+  return names;
+}
+
 function resolveBaseBundleDir(ext, childDir) {
   const value = String(ext).trim();
-  // Reserved, language-neutral name for the built-in default bundle. Any other
-  // value is a path to another bundle directory — the framework never hardcodes a
-  // modeling-language name (ArchiMate or otherwise) into bundle resolution.
+  // `default` is the reserved, language-neutral name of the built-in bundle.
   if (value === 'default') {
     return path.join(getArgoRoot(), 'schema');
+  }
+  // Otherwise resolve a SYMBOLIC name against the built-in bundle's self-declared
+  // id/aliases (data), then fall back to a relative path. Framework logic contains
+  // no modeling-language names.
+  const defaultDir = path.join(getArgoRoot(), 'schema');
+  if (bundleSymbolicNames(defaultDir).has(value)) {
+    return defaultDir;
   }
   return path.resolve(childDir, value);
 }

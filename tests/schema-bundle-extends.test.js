@@ -73,3 +73,16 @@ test('AT extends-04: a schema-less Profile also extends the inherited JSON-Schem
   assert.ok(enumValues.includes('Coding Rule'), 'added type must be a valid schema type');
   assert.ok(enumValues.includes('Business Actor'), 'base types must remain');
 });
+
+test('AT extends-05: bundle-declared aliases resolve to the built-in default (data, not logic)', () => {
+  // GIVEN the built-in default bundle declares aliases archimate3.2/archimate/base
+  // WHEN a Profile extends by such a symbolic name
+  // THEN it resolves to the built-in default (same as 'default'), generically
+  for (const alias of ['archimate3.2', 'archimate', 'base']) {
+    const dir = makeExtendsBundle({ extends: alias, addElementTypes: { 'Coding Rule': { class: 'Rule' } } });
+    const { ontology } = loadSchemaBundleAndOntology(dir, { schemaDir: dir });
+    assert.ok(ontology.elementTypes.includes('Coding Rule'), `${alias}: added type present (resolved to default)`);
+    assert.ok(ontology.elementTypes.includes('Business Actor'), `${alias}: base types inherited`);
+    assert.equal(ontology.dialect, 'archimate-class-matrix', `${alias}: default dialect`);
+  }
+});
