@@ -10409,9 +10409,9 @@
     },
     {
       "id": "overseer-lesson-npm-proxy-deploy-001",
-      "name": "经验：npm 发布/安装需走系统代理 127.0.0.1:7890 + 部署必须用正式安装法",
+      "name": "经验：npm 走系统代理发布/安装 + 正式安装法 + dev 包单一 latest tag",
       "type": "Business Object",
-      "description": "【症状】本机 npm publish / npm i -g / npm view 挂起，或报 ERR_TLS_CERT_ALTNAME_INVALID；而 PowerShell Invoke-WebRequest 正常(200)。\\n【原因】本机有系统代理(WinINET: ProxyEnable=1, ProxyServer=127.0.0.1:7890)，PowerShell 默认走它，npm 默认不走；npm 直连 registry.npmjs.org:443 被拦截/重置。\\n【修复】发布/安装前设 $env:HTTPS_PROXY 与 $env:HTTP_PROXY=http://127.0.0.1:7890（临时环境变量即可，无需改 .npmrc）。\\n【部署规矩（硬性）】部署必须用正式方法：先确认 npm view archgraph-argo-beta@<version> 可用（等 registry 传播，勿绕过），再 npm i -g archgraph-argo-beta@<version>（registry 安装），然后 argo-deploy -SkipEnv。禁止用本地 tarball/folder/npm pack 安装。\\n【本次部署】发布 archgraph-argo-beta@0.27.0-beta.1(tag beta)；传播延迟期间曾用本地 tgz 临时验证，最终以正式方法落地：npm i -g archgraph-argo-beta@0.27.0-beta.1 + argo-deploy -SkipEnv 22/22；宿主 ~/.argo/schema 拷入 schema-bundle.config.json/.rules.json，手工删除陈旧 argob.config.json/argob-rules.json 与 ~/.argo/scripts/argob-schema.js（部署器只拷贝、不镜像删除）；部署态 kind=default / language=ArchiMate 3.2 / 64 元素 / 11 关系 / bundleValidation passed。commit dde28c5。",
+      "description": "【症状】本机 npm publish / npm i -g / npm view 挂起，或报 ERR_TLS_CERT_ALTNAME_INVALID；而 PowerShell Invoke-WebRequest 正常(200)。\\n【原因】本机有系统代理(WinINET: ProxyEnable=1, ProxyServer=127.0.0.1:7890)，PowerShell 默认走它，npm 默认不走；npm 直连 registry.npmjs.org:443 被拦截/重置。\\n【修复】发布/安装前设 $env:HTTPS_PROXY 与 $env:HTTP_PROXY=http://127.0.0.1:7890（临时环境变量即可，无需改 .npmrc）。\\n【部署规矩（硬性）】部署必须用正式方法：确认 npm view 可用（等 registry 传播，勿绕过），再 npm i -g 安装（registry），然后 argo-deploy -SkipEnv。禁止用本地 tarball/folder/npm pack 安装。\\n【Tag 策略（2026-10-02 人类伙伴决策）】不搞多余 tag：稳定=archgraph-argo（自有 latest）；开发=archgraph-argo-beta（自有 latest，跟最新 dev）。发布 dev 用默认 tag（不再 --tag beta），dev 包只保留单一 latest。安装：npm i -g archgraph-argo-beta（不写版本/tag），随后 argo-deploy -SkipEnv。已把 latest 指向 0.27.0-beta.2（核实 @latest=0.27.0-beta.2）。\\n【坑】npm dist-tag rm archgraph-argo-beta beta 返 403 Forbidden（DELETE dist-tags/beta）——当前 granular access token 无 dist-tag 删除权限（与无法 unpublish 同类）；beta tag 仍存在但与 latest 同版本（无害；今后默认发布只推进 latest）。彻底删除需有相应权限的 token/2FA。\\n【本次部署】archgraph-argo-beta 已发到 0.27.0-beta.2 并按正式方法部署；宿主 ~/.argo/schema 拷入 schema-bundle.config.json/.rules.json，手工删除陈旧 argob 文件与 argob-schema.js（部署器只拷贝、不镜像删除）；部署态 kind=default / language=ArchiMate 3.2 / 64 元素 / 11 关系 / bundleValidation passed。commits dde28c5 / 58e641d。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -10430,6 +10430,11 @@
           "name": "rule",
           "value": "deploy-must-use-official-install",
           "description": "部署必须用正式 registry 安装法（npm i -g 包@版本 + argo-deploy -SkipEnv）；本地 tgz 仅临时验证、最终被正式安装取代。"
+        },
+        {
+          "name": "commit",
+          "value": "58e641d",
+          "description": "docs(agents): dev/stable split by package name; single latest tag, no --tag beta"
         }
       ]
     },
