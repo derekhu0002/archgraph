@@ -10483,6 +10483,18 @@
           "Input": "tests/schema-attribute-contracts.test.js",
           "acceptanceCriteria": "tests/schema-attribute-contracts.test.js"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "aa19371",
+          "description": "feat: attributesByElementType 属性契约(required/unique/enumByAttr) + graph-semantics.validateAttributeContracts + validateSystemArchitecture/validateDocument 双路径 + tests/schema-attribute-contracts.test.js(5)"
+        },
+        {
+          "name": "commit",
+          "value": "490135c",
+          "description": "release archgraph-argo-beta@0.27.0-beta.3 (tag latest) + argo-deploy"
+        }
       ]
     },
     {
@@ -10498,6 +10510,18 @@
           "type": "Acceptance Test",
           "Input": "tests/schema-bundle-extends.test.js",
           "acceptanceCriteria": "tests/schema-bundle-extends.test.js"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "aa19371",
+          "description": "feat: config.extends base+delta(addElementTypes/addRelationships/overrideMatrix) + applyExtends/mergeExtendsBundle + 无自有 schema 时继承 base + 链式环检测 + tests/schema-bundle-extends.test.js(3)"
+        },
+        {
+          "name": "commit",
+          "value": "490135c",
+          "description": "release archgraph-argo-beta@0.27.0-beta.3 (tag latest) + argo-deploy"
         }
       ]
     },
@@ -10515,7 +10539,46 @@
           "Input": "tests/mutation-batch-order.test.js",
           "acceptanceCriteria": "tests/mutation-batch-order.test.js"
         }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "aa19371",
+          "description": "feat: applyMutations 依赖拓扑排序 orderMutationsForApplication + findMutationCycle；preview/apply 同路径；tests/mutation-batch-order.test.js(4)"
+        },
+        {
+          "name": "commit",
+          "value": "490135c",
+          "description": "release archgraph-argo-beta@0.27.0-beta.3 (tag latest) + argo-deploy"
+        }
       ]
+    },
+    {
+      "id": "overseer-milestone-issues-3-4-5-001",
+      "name": "里程碑：issue #3/#4/#5 可选扩展交付（属性契约 / extends 继承 / 批次顺序无关）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "aa19371",
+          "description": "feat(schema-bundle): per-type attribute contracts, extends inheritance, order-independent mutation batches (closes #3 #4 #5); npm test 660/0/0; Docker acceptance 10/10"
+        },
+        {
+          "name": "commit",
+          "value": "490135c",
+          "description": "release archgraph-argo-beta@0.27.0-beta.3 (tag latest) + 正式安装 + argo-deploy"
+        }
+      ],
+      "description": "里程碑（2026-10-02）：处理 HarmonyOS-Dev-Standards 建自定义本体暴露的三个 P0 issue。#3 attributesByElementType：按元素类型声明 required/unique/enumByAttr，由 graph-semantics.validateAttributeContracts(ontology 参数化)在校验器(validateSystemArchitecture)与写入路径(validateDocument)原生执行；bundle 自校验 fail-closed。#4 config.extends：base+delta(addElementTypes/addRelationships/overrideMatrix)，元素宇宙=base∪add，无自有 schema 时继承 base schema，链式继承+环检测。#5 applySystemArchitectureMutation/preview：批次依赖拓扑排序(orderMutationsForApplication)+环报 id 链，preview/apply 同 applyMutations 路径，最终文档整体校验。均向后兼容(未声明则行为不变)。验收：新增可执行 AT 共 12(5+3+4)，已注册进 tests/acceptance-guardian.test.js；npm test 660/0/0；Docker acceptance 10/10；图谱 WP：wp-schema-attribute-contracts-001 / wp-schema-bundle-extends-001 / wp-mutation-batch-order-001。发布 archgraph-argo-beta@0.27.0-beta.3(tag latest) 并按正式方法安装部署。"
     }
   ],
   "relationships": [
@@ -12823,7 +12886,8 @@
       "description": "项目总管 T2 长期记忆的经验/坑分层子视图（overseer-ltm-001 达 15 元素上限后按层拆分）。id 不含 -ltm-，以免与 T2 召回视图（按 /-ltm-/ 解析）冲突。",
       "included_elements": [
         "overseer-lesson-npm-proxy-deploy-001",
-        "overseer-lesson-mcp-outputschema-structuredcontent-001"
+        "overseer-lesson-mcp-outputschema-structuredcontent-001",
+        "overseer-milestone-issues-3-4-5-001"
       ]
     }
   ]
