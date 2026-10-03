@@ -247,18 +247,17 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureElement',
-    description: 'Use for one element. Creates a new element or adds an existing element to view_ids. view_ids is required so elements never exist outside views. element.id is REQUIRED: a non-empty, caller-assigned, stable string — there is no auto-id (reuse an existing id, or allocate the next one from the graph). Set dryRun to preview without writing.',
+    description: 'Use for one element. Creates a new element or adds an existing element to view_ids. view_ids is required so elements never exist outside views. element.id is OPTIONAL: omit it and the server auto-allocates a unique id (returned in the result); provide it to pin a specific id (must not collide with a different element). Set dryRun to preview without writing.',
     inputSchema: {
       type: 'object',
       required: ['element', 'view_ids'],
       properties: {
         element: {
           type: 'object',
-          required: ['id'],
           properties: {
-            id: { type: 'string', minLength: 1, description: 'Element id (non-empty, caller-assigned, stable). REQUIRED — the graph is written by id and there is NO auto-id: reuse an existing id (onConflict:"reuse" with the same (type,name)) or allocate the next one (e.g. MATCH (e:Element {graphKey:$graphKey}) RETURN max(toInteger(e.id))).' },
+            id: { type: 'string', description: 'Element id (OPTIONAL). Omit to let the server auto-allocate a unique id (a semantic slug from the name, e.g. "graph-wiki-federation-center", suffixed -002.. if taken). If provided it must not collide with a DIFFERENT element (a same (type,name) match is idempotent reuse).' },
           },
-          description: 'The element to create/attach. MUST include a non-empty `id`.',
+          description: 'The element to create/attach. `id` is optional — omit it and the server allocates one (returned in the result).',
         },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
         onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: find-or-create — attach an existing exact (type, name) match; a same-type semantic near-duplicate also blocks creation. allowDuplicate: create anyway (even if a duplicate exists), requires a justification.' },
@@ -301,7 +300,7 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureRelationship',
-    description: 'Use for one relationship. Creates a new relationship or adds an existing relationship to view_ids. relationship.type is the ArchiMate 3.2 relationship type and is validated against endpoint element types. Set dryRun to preview without writing.',
+    description: 'Use for one relationship. Creates a new relationship or adds an existing relationship to view_ids. relationship.type is the ArchiMate 3.2 relationship type and is validated against endpoint element types. relationship.id is OPTIONAL: omit it and the server auto-allocates a unique id (returned in the result). Set dryRun to preview without writing.',
     inputSchema: {
       type: 'object',
       required: ['relationship', 'view_ids'],
@@ -348,7 +347,7 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureView',
-    description: 'Use for one view. The graph must have exactly one top-level view named SystemArchitecture; all sub-views must attach to an element with parent_element_id. Set dryRun to preview without writing.',
+    description: 'Use for one view. The graph must have exactly one top-level view named SystemArchitecture; all sub-views must attach to an element with parent_element_id. view.view_id is OPTIONAL: omit it and the server auto-allocates a unique view_id (returned in the result). Set dryRun to preview without writing.',
     inputSchema: {
       type: 'object',
       required: ['view'],
@@ -1623,19 +1622,30 @@ function applyMutations(document, mutations, options = {}) {
     if (mutation.type === 'addElement') {
       requireObject(mutation.element, 'mutation.element');
       const scopedViews = requireViewScope(nextDocument.views, mutation.view_ids, 'mutation.view_ids');
-      if (typeof mutation.element.id !== 'string' || mutation.element.id === '') {
-        // Actionable: the caller must supply a stable id (issue #8). Not a generic
-        // requireId message — say what is missing and how to get one.
-        throw new Error(
-          "addElement requires element.id: a non-empty, caller-assigned, stable string. There is no auto-id — set `id` explicitly: " +
-          "reuse an existing element's id with onConflict:'reuse' (matched by the same (type,name)), or allocate the next id " +
-          '(e.g. MATCH (e:Element {graphKey:$graphKey}) RETURN max(toInteger(e.id))).',
-        );
-      }
-      const existingElement = findById(nextDocument.elements, mutation.element.id);
-      let targetElementId = mutation.element.id;
-      let reusedElement = false;
-      if (!existingElement) {
+      const requestedElementId = typeof mutation.element.id === 'string' && mutation.element.id !== ''
+        ? mutation.element.id
+        : null;
+      let targetElementId;
+      let elementCreated = false;
+      let elementReused = false;
+
+      const existingById = requestedElementId ? findById(nextDocument.elements, requestedElementId) : undefined;
+      if (existingById) {
+        // An explicit id that already exists: idempotent ONLY if it is the same
+        // (type,name). Otherwise the caller picked a taken id — fail loudly instead
+        // of silently attaching an unrelated element (issue #8 collision safety).
+        const sameIdentity = existingById.type === mutation.element.type
+          && normalizeDedupName(existingById.name) === normalizeDedupName(mutation.element.name);
+        if (!sameIdentity) {
+          throw new Error(
+            `addElement id '${requestedElementId}' is already used by a different element `
+            + `(type '${existingById.type}', name '${existingById.name}'). Choose another id (or omit id to auto-allocate one), `
+            + `attach the existing element by using its id, or update it with updateArchitectureElement.`,
+          );
+        }
+        targetElementId = requestedElementId;
+        elementReused = true;
+      } else {
         const candidates = findDuplicateElements(nextDocument.elements, mutation.element);
         const resolution = resolveDuplicateConflict({
           onConflict: mutation.onConflict,
@@ -1644,12 +1654,19 @@ function applyMutations(document, mutations, options = {}) {
         }, candidates);
         if (resolution.action === 'reuse') {
           targetElementId = resolution.existing.id;
-          reusedElement = true;
+          elementReused = true;
         } else {
-          nextDocument.elements.push(clone(mutation.element));
-          syncViewsToElementSubdiagramViews(nextDocument, findById(nextDocument.elements, mutation.element.id));
+          targetElementId = requestedElementId || allocateUniqueId(
+            nextDocument.elements.map(entry => entry.id),
+            mutation.element.name,
+            slugifyId(mutation.element.type) || 'element',
+          );
+          nextDocument.elements.push({ ...clone(mutation.element), id: targetElementId });
+          syncViewsToElementSubdiagramViews(nextDocument, findById(nextDocument.elements, targetElementId));
+          elementCreated = true;
         }
       }
+
       for (const view of scopedViews) {
         view.included_elements = addUnique(view.included_elements || [], [targetElementId]);
         touchedViewIds.add(view.view_id);
@@ -1660,8 +1677,10 @@ function applyMutations(document, mutations, options = {}) {
         type: mutation.type,
         id: targetElementId,
         view_ids: mutation.view_ids,
-        created: !existingElement && !reusedElement,
-        ...(reusedElement ? { reused: true, reusedId: targetElementId, requestedId: mutation.element.id } : {}),
+        created: elementCreated,
+        ...(elementReused ? { reused: true, reusedId: targetElementId } : {}),
+        ...(requestedElementId === null && elementCreated ? { allocatedId: targetElementId } : {}),
+        ...(elementReused && requestedElementId && requestedElementId !== targetElementId ? { requestedId: requestedElementId } : {}),
       });
       continue;
     }
@@ -1760,13 +1779,35 @@ function applyMutations(document, mutations, options = {}) {
     if (mutation.type === 'addRelationship') {
       requireObject(mutation.relationship, 'mutation.relationship');
       const scopedViews = requireViewScope(nextDocument.views, mutation.view_ids, 'mutation.view_ids');
-      requireId(mutation.relationship.id, 'mutation.relationship.id');
-      const existingRelationship = findById(nextDocument.relationships, mutation.relationship.id);
-      let targetRelationshipId = mutation.relationship.id;
+      const requestedRelationshipId = typeof mutation.relationship.id === 'string' && mutation.relationship.id !== ''
+        ? mutation.relationship.id
+        : null;
+      let targetRelationshipId;
       let sourceElementId = mutation.relationship.source_id;
       let targetEndpointId = mutation.relationship.target_id;
-      let reusedRelationship = false;
-      if (!existingRelationship) {
+      let relationshipCreated = false;
+      let relationshipReused = false;
+
+      const existingById = requestedRelationshipId ? findById(nextDocument.relationships, requestedRelationshipId) : undefined;
+      if (existingById) {
+        // Explicit id that already exists: idempotent only for the same natural key;
+        // otherwise fail loudly instead of silently attaching an unrelated edge.
+        const sameIdentity = existingById.source_id === mutation.relationship.source_id
+          && existingById.type === mutation.relationship.type
+          && existingById.target_id === mutation.relationship.target_id
+          && normalizeDedupName(existingById.name) === normalizeDedupName(mutation.relationship.name);
+        if (!sameIdentity) {
+          throw new Error(
+            `addRelationship id '${requestedRelationshipId}' is already used by a different relationship `
+            + `(source '${existingById.source_id}', type '${existingById.type}', target '${existingById.target_id}'). `
+            + 'Choose another id (or omit id to auto-allocate one), or update it with updateArchitectureRelationship.',
+          );
+        }
+        targetRelationshipId = requestedRelationshipId;
+        sourceElementId = existingById.source_id;
+        targetEndpointId = existingById.target_id;
+        relationshipReused = true;
+      } else {
         const candidates = findDuplicateRelationships(nextDocument.relationships, mutation.relationship);
         const resolution = resolveDuplicateConflict({
           onConflict: mutation.onConflict,
@@ -1777,9 +1818,15 @@ function applyMutations(document, mutations, options = {}) {
           targetRelationshipId = resolution.existing.id;
           sourceElementId = resolution.existing.source_id;
           targetEndpointId = resolution.existing.target_id;
-          reusedRelationship = true;
+          relationshipReused = true;
         } else {
-          nextDocument.relationships.push(clone(mutation.relationship));
+          targetRelationshipId = requestedRelationshipId || allocateUniqueId(
+            nextDocument.relationships.map(entry => entry.id),
+            mutation.relationship.name || `${mutation.relationship.source_id}-${mutation.relationship.type}-${mutation.relationship.target_id}`,
+            'relationship',
+          );
+          nextDocument.relationships.push({ ...clone(mutation.relationship), id: targetRelationshipId });
+          relationshipCreated = true;
         }
       }
       for (const view of scopedViews) {
@@ -1795,8 +1842,9 @@ function applyMutations(document, mutations, options = {}) {
         type: mutation.type,
         id: targetRelationshipId,
         view_ids: mutation.view_ids,
-        created: !existingRelationship && !reusedRelationship,
-        ...(reusedRelationship ? { reused: true, reusedId: targetRelationshipId, requestedId: mutation.relationship.id } : {}),
+        created: relationshipCreated,
+        ...(relationshipReused ? { reused: true, reusedId: targetRelationshipId } : {}),
+        ...(requestedRelationshipId === null && relationshipCreated ? { allocatedId: targetRelationshipId } : {}),
       });
       continue;
     }
@@ -1880,38 +1928,65 @@ function applyMutations(document, mutations, options = {}) {
 
     if (mutation.type === 'addView') {
       requireObject(mutation.view, 'mutation.view');
-      if (findView(nextDocument.views, mutation.view.view_id)) {
-        throw new Error(`View '${mutation.view.view_id}' already exists`);
-      }
-      const candidates = findDuplicateViews(nextDocument.views, mutation.view);
-      const resolution = resolveDuplicateConflict({
-        onConflict: mutation.onConflict,
-        justification: mutation.justification,
-        label: `view (name '${mutation.view.view_name}')`,
-      }, candidates);
-      if (resolution.action === 'reuse') {
-        mutationSummaries.push({
-          type: mutation.type,
-          id: resolution.existing.view_id,
-          created: false,
-          reused: true,
-          reusedId: resolution.existing.view_id,
-          requestedId: mutation.view.view_id,
-        });
+      const requestedViewId = typeof mutation.view.view_id === 'string' && mutation.view.view_id !== ''
+        ? mutation.view.view_id
+        : null;
+      let targetViewId;
+      let viewCreated = false;
+      let viewReused = false;
+
+      const existingById = requestedViewId ? findView(nextDocument.views, requestedViewId) : undefined;
+      if (existingById) {
+        // Explicit view_id that already exists: idempotent only for the same
+        // (parent,name); otherwise fail loudly.
+        const sameIdentity = (existingById.parent_element_id || '') === (mutation.view.parent_element_id || '')
+          && normalizeDedupName(existingById.view_name) === normalizeDedupName(mutation.view.view_name);
+        if (!sameIdentity) {
+          throw new Error(
+            `addView view_id '${requestedViewId}' is already used by a different view `
+            + `(name '${existingById.view_name}', parent '${existingById.parent_element_id || ''}'). `
+            + 'Choose another view_id (or omit it to auto-allocate one), or update it with updateArchitectureView.',
+          );
+        }
+        targetViewId = requestedViewId;
+        viewReused = true;
       } else {
-        const newView = clone(mutation.view);
-        if (Array.isArray(newView.included_elements)) {
-          newView.included_elements = addUnique([], newView.included_elements);
+        const candidates = findDuplicateViews(nextDocument.views, mutation.view);
+        const resolution = resolveDuplicateConflict({
+          onConflict: mutation.onConflict,
+          justification: mutation.justification,
+          label: `view (name '${mutation.view.view_name}')`,
+        }, candidates);
+        if (resolution.action === 'reuse') {
+          targetViewId = resolution.existing.view_id;
+          viewReused = true;
+        } else {
+          targetViewId = requestedViewId || allocateUniqueId(
+            nextDocument.views.map(entry => entry.view_id),
+            mutation.view.view_name,
+            'view',
+          );
+          const newView = { ...clone(mutation.view), view_id: targetViewId };
+          if (Array.isArray(newView.included_elements)) {
+            newView.included_elements = addUnique([], newView.included_elements);
+          }
+          if (Array.isArray(newView.included_relationships)) {
+            newView.included_relationships = addUnique([], newView.included_relationships);
+          }
+          nextDocument.views.push(newView);
+          upsertSubdiagramViewIntoElement(nextDocument, newView.parent_element_id, newView);
+          touchedViewIds.add(newView.view_id);
+          viewLimitCheckIds.add(newView.view_id);
+          viewCreated = true;
         }
-        if (Array.isArray(newView.included_relationships)) {
-          newView.included_relationships = addUnique([], newView.included_relationships);
-        }
-        nextDocument.views.push(newView);
-        upsertSubdiagramViewIntoElement(nextDocument, newView.parent_element_id, newView);
-        touchedViewIds.add(newView.view_id);
-        viewLimitCheckIds.add(newView.view_id);
-        mutationSummaries.push({ type: mutation.type, id: newView.view_id });
       }
+      mutationSummaries.push({
+        type: mutation.type,
+        id: targetViewId,
+        created: viewCreated,
+        ...(viewReused ? { reused: true, reusedId: targetViewId } : {}),
+        ...(requestedViewId === null && viewCreated ? { allocatedId: targetViewId } : {}),
+      });
       continue;
     }
 
@@ -1981,6 +2056,33 @@ function requireObject(value, label) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error(`${label} must be an object`);
   }
+}
+
+function slugifyId(seed) {
+  return String(seed == null ? '' : seed)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// One unified id strategy for the whole framework (issue #8): a semantic slug
+// derived from the entity's human name, made unique within its collection by a
+// numeric suffix. Callers MAY omit an id; the server allocates one. There is no
+// per-repository id strategy — ArchGraph has a single one.
+function allocateUniqueId(existingIds, seed, fallbackBase) {
+  const taken = new Set((Array.isArray(existingIds) ? existingIds : []).map(String));
+  const base = slugifyId(seed) || fallbackBase || 'item';
+  if (!taken.has(base)) {
+    return base;
+  }
+  for (let n = 2; n < 100000; n += 1) {
+    const candidate = `${base}-${String(n).padStart(3, '0')}`;
+    if (!taken.has(candidate)) {
+      return candidate;
+    }
+  }
+  return `${base}-${Date.now()}`;
 }
 
 function requireId(value, label) {
@@ -2877,6 +2979,18 @@ function compactMutationResponse(payload) {
     status: payload && payload.status,
     written: Boolean(payload && payload.written),
   };
+  // A successful write must tell the caller which id was used/allocated and whether
+  // it created or reused — otherwise an omitted (auto-allocated) id is invisible
+  // and an id collision would look like a create. Kept to a few fields (issue #8).
+  if (Array.isArray(payload && payload.mutations) && payload.mutations.length > 0) {
+    compact.mutations = payload.mutations.map((entry) => ({
+      type: entry.type,
+      id: entry.id,
+      created: entry.created,
+      ...(entry.reused ? { reused: true, reusedId: entry.reusedId } : {}),
+      ...(entry.allocatedId ? { allocatedId: entry.allocatedId } : {}),
+    }));
+  }
   if (payload && payload.embeddingLifecycle && payload.embeddingLifecycle.state) {
     compact.embeddingLifecycle = { state: payload.embeddingLifecycle.state };
   }

@@ -149,18 +149,17 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureElement',
-    description: 'Use for one element. Creates a new element or adds an existing element to view_ids. view_ids is required so elements never exist outside views. element.id is REQUIRED: a non-empty, caller-assigned, stable string — there is no auto-id (reuse an existing id, or allocate the next one from the graph).',
+    description: 'Use for one element. Creates a new element or adds an existing element to view_ids. view_ids is required so elements never exist outside views. element.id is OPTIONAL: omit it and the server auto-allocates a unique id (returned in the result); provide it to pin a specific id (must not collide with a different element).',
     inputSchema: {
       type: 'object',
       required: ['element', 'view_ids'],
       properties: {
         element: {
           type: 'object',
-          required: ['id'],
           properties: {
-            id: { type: 'string', minLength: 1, description: 'Element id (non-empty, caller-assigned, stable). REQUIRED — the graph is written by id and there is NO auto-id: reuse an existing id (onConflict:"reuse" with the same (type,name)) or allocate the next one (e.g. MATCH (e:Element {graphKey:$graphKey}) RETURN max(toInteger(e.id))).' },
+            id: { type: 'string', description: 'Element id (OPTIONAL). Omit to let the server auto-allocate a unique id (a semantic slug from the name, e.g. "graph-wiki-federation-center", suffixed -002.. if taken). If provided it must not collide with a DIFFERENT element (a same (type,name) match is idempotent reuse).' },
           },
-          description: 'The element to create/attach. MUST include a non-empty `id`.',
+          description: 'The element to create/attach. `id` is optional — omit it and the server allocates one (returned in the result).',
         },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
         onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: find-or-create — attach an existing exact (type, name) match; a same-type semantic near-duplicate also blocks creation. allowDuplicate: create anyway (even if a duplicate exists), requires a justification.' },
@@ -200,7 +199,7 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureRelationship',
-    description: 'Use for one relationship. Creates a new relationship or adds an existing relationship to view_ids. relationship.type is the ArchiMate 3.2 relationship type and is validated against endpoint element types.',
+    description: 'Use for one relationship. Creates a new relationship or adds an existing relationship to view_ids. relationship.type is the ArchiMate 3.2 relationship type and is validated against endpoint element types. relationship.id is OPTIONAL: omit it and the server auto-allocates a unique id (returned in the result).',
     inputSchema: {
       type: 'object',
       required: ['relationship', 'view_ids'],
@@ -244,7 +243,7 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureView',
-    description: 'Use for one view. The graph must have exactly one top-level view named SystemArchitecture; all sub-views must attach to an element with parent_element_id.',
+    description: 'Use for one view. The graph must have exactly one top-level view named SystemArchitecture; all sub-views must attach to an element with parent_element_id. view.view_id is OPTIONAL: omit it and the server auto-allocates a unique view_id (returned in the result).',
     inputSchema: {
       type: 'object',
       required: ['view'],
