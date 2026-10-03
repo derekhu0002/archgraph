@@ -4094,6 +4094,16 @@
           "name": "commit",
           "value": "b3ebd0d",
           "description": "argo/scripts/argo-mcp-server.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/productionGraphRagRuntime.js; sandbox/*; scripts/ea-web-service.js; tests/*; argo/scripts/ARCHITECTURE.md; design/KG/SystemArchitecture.json（purpose 收拢 general+audit）"
+        },
+        {
+          "name": "commit",
+          "value": "7ac6559",
+          "description": "fix(mcp): addArchitectureElement/applySystemArchitectureMutation 声明 element.id 必填（schema+描述，两处 server）+ addElement 路径给出可操作错误（无 auto-id，如何取下一个 id）；issue #8 P1"
+        },
+        {
+          "name": "commit",
+          "value": "8c18965",
+          "description": "release archgraph-argo-beta@0.27.0-beta.11 (tag latest) + 正式安装 + argo-deploy"
         }
       ]
     },
@@ -9437,6 +9447,11 @@
           "name": "commit",
           "value": "ee0987a",
           "description": "release archgraph-argo-beta@0.27.0-beta.10 (tag latest) + 正式安装 + argo-deploy"
+        },
+        {
+          "name": "commit",
+          "value": "7ac6559",
+          "description": "fix(diagnosis): overSearch.emptyOrError 改为 distinct(error OR empty) 去重叠计数（issue #8 口径）+ AT-agent-search-diagnosis-07"
         }
       ]
     },
