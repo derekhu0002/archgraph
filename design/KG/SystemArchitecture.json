@@ -9427,6 +9427,16 @@
           "name": "commit",
           "value": "a62e4ca",
           "description": "argo/scripts/agentSearchDiagnose.js（humanWait 单列、contextBlowup 标记、queryClass 细化）; tests/agent-search-diagnosis.test.js（AT-06）"
+        },
+        {
+          "name": "commit",
+          "value": "a1b5cce",
+          "description": "fix(deploy): 该 skill 只部署到 OpenCode（会话摄取依赖 opencode export/session JSON）；Copilot/Cursor/DSH/OpenClaw/Doubao 不再部署；测试改为断言 OpenCode-only；主页/概览限定 OpenCode"
+        },
+        {
+          "name": "commit",
+          "value": "ee0987a",
+          "description": "release archgraph-argo-beta@0.27.0-beta.10 (tag latest) + 正式安装 + argo-deploy"
         }
       ]
     },
