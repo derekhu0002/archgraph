@@ -110,7 +110,7 @@ test('install-argo.ps1 deploys the ArchGraph skills into both Doubao skill roots
 
     const workspaceSkills = path.join(paths.doubaoWorkspace, '.user_skills');
     const globalSkills = path.join(paths.doubaoHome, 'skills');
-    const skills = ['argo-init', 'ea-human-reconcile', 'agent-search-diagnosis'];
+    const skills = ['argo-init', 'ea-human-reconcile'];
 
     // AT-doubao-01: every skill is deployed to BOTH the workspace .user_skills
     // root and the global ~/Doubao/skills root.
@@ -259,8 +259,8 @@ test('install-argo.ps1 refreshes an existing Doubao skill in place (idempotent)'
     // No duplicate skill folders created by the refresh.
     assert.deepEqual(
       fs.readdirSync(path.join(paths.doubaoWorkspace, '.user_skills')).sort(),
-      ['agent-search-diagnosis', 'archgraph-argo', 'argo-init', 'ea-human-reconcile'],
-      'the skill root must contain exactly the four ArchGraph skills',
+      ['archgraph-argo', 'argo-init', 'ea-human-reconcile'],
+      'the skill root must contain exactly the three ArchGraph skills (agent-search-diagnosis is OpenCode-only)',
     );
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });

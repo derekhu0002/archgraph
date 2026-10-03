@@ -103,7 +103,7 @@ test('AT-agent-search-diagnosis-06: human wait is separated from agent/tool time
   assert.equal(big.overview.contextBlowup.max, 150000);
 });
 
-test('AT-agent-search-diagnosis-04: the skill + script ship with the framework', () => {
+test('AT-agent-search-diagnosis-04: the skill + script ship with the framework and deploy to OpenCode only', () => {
   assert.ok(fs.existsSync(path.join(ROOT, 'argo', 'skills', 'agent-search-diagnosis', 'SKILL.md')), 'skill must exist');
   assert.ok(fs.existsSync(path.join(ROOT, 'argo', 'scripts', 'agentSearchDiagnose.js')), 'script must exist');
   const skill = fs.readFileSync(path.join(ROOT, 'argo', 'skills', 'agent-search-diagnosis', 'SKILL.md'), 'utf8');
@@ -113,5 +113,11 @@ test('AT-agent-search-diagnosis-04: the skill + script ship with the framework',
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
   assert.ok(pkg.files.includes('argo/skills/agent-search-diagnosis'), 'npm package must ship the skill');
   const installer = fs.readFileSync(path.join(ROOT, 'install-argo.ps1'), 'utf8');
-  assert.match(installer, /agent-search-diagnosis/, 'installer must deploy the skill');
+  // The skill assumes `opencode` session export, so it deploys to OpenCode only.
+  assert.match(installer, /\$OpenCodeSkillsRoot 'agent-search-diagnosis'/, 'installer must deploy the skill to OpenCode');
+  assert.doesNotMatch(installer, /\$SkillsRoot 'agent-search-diagnosis'/, 'Copilot must not get the OpenCode-only diagnosis skill');
+  assert.doesNotMatch(installer, /\$CursorSkillsRoot 'agent-search-diagnosis'/, 'Cursor must not get the OpenCode-only diagnosis skill');
+  assert.doesNotMatch(installer, /\$OpenClawHome[^\r\n]*agent-search-diagnosis/, 'OpenClaw must not get the OpenCode-only diagnosis skill');
+  assert.doesNotMatch(installer, /\$DshHome[^\r\n]*agent-search-diagnosis/, 'DSH must not get the OpenCode-only diagnosis skill');
+  assert.doesNotMatch(installer, /@\([^)]*agent-search-diagnosis/, 'Doubao skill list must not include the OpenCode-only diagnosis skill');
 });

@@ -113,7 +113,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     // 3) argo-init skill (+ global ea-human-reconcile skill)
     assert.ok(fs.existsSync(path.join(skillsRoot, 'argo-init', 'SKILL.md')));
     assert.ok(fs.existsSync(path.join(skillsRoot, 'ea-human-reconcile', 'SKILL.md')), 'Copilot ea-human-reconcile skill must be deployed');
-    assert.ok(fs.existsSync(path.join(skillsRoot, 'agent-search-diagnosis', 'SKILL.md')), 'Copilot agent-search-diagnosis skill must be deployed');
+    assert.ok(!fs.existsSync(path.join(skillsRoot, 'agent-search-diagnosis', 'SKILL.md')), 'Copilot must NOT get the OpenCode-only agent-search-diagnosis skill');
     // 4) global rule
     assert.ok(fs.existsSync(path.join(promptsRoot, 'archgraph.instructions.md')));
 
@@ -417,6 +417,7 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     const skill = fs.readFileSync(path.join(dshHome, 'skills', 'argo-init', 'SKILL.md'), 'utf8');
     assert.match(skill, /name: argo-init/, 'skill must keep its DSH-compatible frontmatter');
     assert.ok(fs.existsSync(path.join(dshHome, 'skills', 'ea-human-reconcile', 'SKILL.md')), 'DSH ea-human-reconcile skill must be deployed');
+    assert.ok(!fs.existsSync(path.join(dshHome, 'skills', 'agent-search-diagnosis', 'SKILL.md')), 'DSH must NOT get the OpenCode-only agent-search-diagnosis skill');
 
     // 3+4) bridge + wakeup rows -> ~/.dsh/cordis.patch.yml (managed block).
     // The dsh-argo-workspace bridge connects directly to the argo server; no

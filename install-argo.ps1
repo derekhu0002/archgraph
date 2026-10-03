@@ -778,8 +778,7 @@ $reconcileSkillSrc = Join-Path (Join-Path $argoDir 'skills') 'ea-human-reconcile
 $diagSkillSrc = Join-Path (Join-Path $argoDir 'skills') 'agent-search-diagnosis'
 Write-Host "  argo\skills\ea-human-reconcile -> $SkillsRoot\ea-human-reconcile (EA human draft reconcile skill)"
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $SkillsRoot 'ea-human-reconcile')
-Write-Host "  argo\skills\agent-search-diagnosis -> $SkillsRoot\agent-search-diagnosis (agent search diagnosis skill)"
-Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $SkillsRoot 'agent-search-diagnosis')
+# agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to Copilot.
 
 $ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
 $ruleDest = Join-Path $PromptsRoot 'archgraph.instructions.md'
@@ -797,8 +796,7 @@ Write-Host "[7/22] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
 Copy-Tree -Source $skillSrc -Destination $cursorSkillDest
 Write-Host "  argo\skills\ea-human-reconcile -> $CursorSkillsRoot\ea-human-reconcile (Cursor)"
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $CursorSkillsRoot 'ea-human-reconcile')
-Write-Host "  argo\skills\agent-search-diagnosis -> $CursorSkillsRoot\agent-search-diagnosis (Cursor)"
-Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $CursorSkillsRoot 'agent-search-diagnosis')
+# agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to Cursor.
 
 $mcpBridgeSrc = Join-Path $argoDir 'mcp-bridges'
 $mcpBridgeDest = Join-Path $CursorMcpBridgesRoot ''
@@ -810,7 +808,7 @@ Write-Host "[8/22] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
 Copy-Tree -Source $skillSrc -Destination $openCodeSkillDest
 Write-Host "  argo\skills\ea-human-reconcile -> $OpenCodeSkillsRoot\ea-human-reconcile (OpenCode)"
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $OpenCodeSkillsRoot 'ea-human-reconcile')
-Write-Host "  argo\skills\agent-search-diagnosis -> $OpenCodeSkillsRoot\agent-search-diagnosis (OpenCode)"
+Write-Host "  argo\skills\agent-search-diagnosis -> $OpenCodeSkillsRoot\agent-search-diagnosis (OpenCode-only: assumes opencode session export)"
 Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $OpenCodeSkillsRoot 'agent-search-diagnosis')
 
 Write-Host "[9/22] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
@@ -851,8 +849,7 @@ if ($SkipDsh) {
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $dshSkillDest
     Write-Host "  argo\skills\ea-human-reconcile -> $DshHome\skills\ea-human-reconcile (DeepSeek Harness skill)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-reconcile') -Destination (Join-Path (Join-Path $DshHome 'skills') 'ea-human-reconcile')
-    Write-Host "  argo\skills\agent-search-diagnosis -> $DshHome\skills\agent-search-diagnosis (DeepSeek Harness skill)"
-    Copy-Tree -Source $diagSkillSrc -Destination (Join-Path (Join-Path $DshHome 'skills') 'agent-search-diagnosis')
+    # agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to DeepSeek Harness.
 
     Write-Host "[17/22] dsh-argo-wakeup\index.js (single source; gate from argo\rules\archgraph.instructions.md <WakeupGuideline>) -> $DshHome\plugins\dsh-argo-wakeup\index.js (DeepSeek Harness wakeup plugin)"
     $wakeupDshPath = New-DshWakeupPlugin -DshHome $DshHome
@@ -925,8 +922,7 @@ if ($SkipOpenClaw) {
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $openClawSkillDest
 Write-Host "  argo\skills\ea-human-reconcile -> $OpenClawHome\skills\ea-human-reconcile (OpenClaw managed skill, all agents)"
 Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-reconcile') -Destination (Join-Path (Join-Path $OpenClawHome 'skills') 'ea-human-reconcile')
-Write-Host "  argo\skills\agent-search-diagnosis -> $OpenClawHome\skills\agent-search-diagnosis (OpenClaw managed skill, all agents)"
-Copy-Tree -Source $diagSkillSrc -Destination (Join-Path (Join-Path $OpenClawHome 'skills') 'agent-search-diagnosis')
+# agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to OpenClaw.
 
     Write-Host '  OpenClaw injects AGENTS.md into Project Context on every session, so the wakeup'
     Write-Host '  gate (UNCONDITIONAL STARTUP GATE) is active on the next OpenClaw session; restart'
@@ -946,7 +942,8 @@ if ($SkipDoubao) {
     # fully ported surface). MCP servers are registered through Doubao's in-app
     # custom connector UI (STDIO), not a config file, so the installer emits a
     # copy-paste connector recipe instead of writing a config.
-    $doubaoSkills = @('argo-init', 'ea-human-reconcile', 'agent-search-diagnosis')
+    # agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to Doubao.
+    $doubaoSkills = @('argo-init', 'ea-human-reconcile')
     $doubaoSkillsSrc = Join-Path $argoDir 'skills'
     Write-Host '==> Deploying Doubao (desktop agent mode) integration'
     Copy-DoubaoSkills -Root (Join-Path $DoubaoWorkspace '.user_skills') -SourceSkillsRoot $doubaoSkillsSrc -SkillNames $doubaoSkills -Label 'workspace .user_skills'
