@@ -10718,6 +10718,27 @@
           "description": "docs: frame ArchGraph as a federated intent graph (registry-broker over sovereign graphs); README + index.html + tests"
         }
       ]
+    },
+    {
+      "id": "overseer-lesson-clash-proxy-https-001",
+      "name": "经验：本机 Clash 代理(127.0.0.1:7890)可能只通 TCP 不转发 HTTPS；npm/github 超时时先测直连",
+      "type": "Business Object",
+      "description": "【症状】本机 npm publish/npm view/curl -x/Invoke-RestMethod 对 registry.npmjs.org、github.com 等 HTTPS 全部超时（无响应），但 Test-NetConnection 的 TCP 443 却为 True（端口能连、请求无响应）。\\n【原因】本机系统代理 Clash（127.0.0.1:7890）进程存在、端口监听，但不转发 HTTPS（上游失效），把所有经代理的 HTTPS 挡住。\\n【诊断】绕过代理直连对比：.NET 直连（HttpWebRequest.Proxy=null）与 node fetch 直连均 200 → 表明是代理问题，非网络断开。\\n【修复/规避】①重启 Clash 代理客户端即恢复；②代理失效期间，npm/github 操作【不设 HTTPS_PROXY/HTTP_PROXY】走直连即可（本机直连可用，npm 默认不用系统代理）。\\n【命令】测代理：Invoke-WebRequest https://registry.npmjs.org -TimeoutSec 20；测直连：node -e \\\"fetch('https://registry.npmjs.org/').then(r=>console.log(r.status))\\\"。\\n【教训】'TCP 通' 不等于 'HTTPS 通'；排查网络先分离「代理 vs 直连」。commit ee0987a（beta.10 最终用直连发布）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "ee0987a",
+          "description": "release archgraph-argo-beta@0.27.0-beta.10（代理故障期间用直连发布）"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -13028,7 +13049,8 @@
         "overseer-lesson-mcp-outputschema-structuredcontent-001",
         "overseer-milestone-issues-3-4-5-001",
         "overseer-lesson-framework-generality-001",
-        "design-federated-intent-graph-001"
+        "design-federated-intent-graph-001",
+        "overseer-lesson-clash-proxy-https-001"
       ]
     }
   ]
