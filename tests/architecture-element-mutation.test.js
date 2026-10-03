@@ -3,7 +3,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { applyMutations } = require('../argo/scripts/systemarchitecture-mcp-server.js');
+const { applyMutations, TOOLS } = require('../argo/scripts/systemarchitecture-mcp-server.js');
 
 function baseDocument() {
   return {
@@ -235,4 +235,26 @@ test('updateElement: op:remove with a value removes only that exact ledger entry
     { name: 'commit', value: 'aaa' },
     { name: 'commit', value: 'ccc' },
   ]);
+});
+
+test('addElement: a missing element.id fails with an actionable message (issue #8)', () => {
+  // GIVEN an addElement without element.id
+  // WHEN applied
+  // THEN it throws an actionable error that names element.id and says there is no auto-id
+  assert.throws(
+    () => applyMutations(baseDocument(), [
+      { type: 'addElement', element: { name: 'No Id', type: 'Application Component' }, view_ids: ['top'] },
+    ]),
+    /element\.id[\s\S]*no auto-id/i,
+  );
+});
+
+test('addArchitectureElement: the tool schema declares element.id required (issue #8)', () => {
+  // GIVEN the registered addArchitectureElement tool
+  // WHEN its input schema is inspected
+  // THEN element.id is required and the description tells the caller id is needed
+  const tool = TOOLS.find(entry => entry.name === 'addArchitectureElement');
+  assert.ok(tool, 'addArchitectureElement must be registered');
+  assert.deepEqual(tool.inputSchema.properties.element.required, ['id']);
+  assert.match(tool.description, /element\.id/, 'description must state element.id is required');
 });

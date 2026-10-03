@@ -247,12 +247,19 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureElement',
-    description: 'Use for one element. Creates a new element or adds an existing element to view_ids. view_ids is required so elements never exist outside views. Set dryRun to preview without writing.',
+    description: 'Use for one element. Creates a new element or adds an existing element to view_ids. view_ids is required so elements never exist outside views. element.id is REQUIRED: a non-empty, caller-assigned, stable string — there is no auto-id (reuse an existing id, or allocate the next one from the graph). Set dryRun to preview without writing.',
     inputSchema: {
       type: 'object',
       required: ['element', 'view_ids'],
       properties: {
-        element: { type: 'object' },
+        element: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'string', minLength: 1, description: 'Element id (non-empty, caller-assigned, stable). REQUIRED — the graph is written by id and there is NO auto-id: reuse an existing id (onConflict:"reuse" with the same (type,name)) or allocate the next one (e.g. MATCH (e:Element {graphKey:$graphKey}) RETURN max(toInteger(e.id))).' },
+          },
+          description: 'The element to create/attach. MUST include a non-empty `id`.',
+        },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
         onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: find-or-create — attach an existing exact (type, name) match; a same-type semantic near-duplicate also blocks creation. allowDuplicate: create anyway (even if a duplicate exists), requires a justification.' },
         justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
@@ -1616,7 +1623,15 @@ function applyMutations(document, mutations, options = {}) {
     if (mutation.type === 'addElement') {
       requireObject(mutation.element, 'mutation.element');
       const scopedViews = requireViewScope(nextDocument.views, mutation.view_ids, 'mutation.view_ids');
-      requireId(mutation.element.id, 'mutation.element.id');
+      if (typeof mutation.element.id !== 'string' || mutation.element.id === '') {
+        // Actionable: the caller must supply a stable id (issue #8). Not a generic
+        // requireId message — say what is missing and how to get one.
+        throw new Error(
+          "addElement requires element.id: a non-empty, caller-assigned, stable string. There is no auto-id — set `id` explicitly: " +
+          "reuse an existing element's id with onConflict:'reuse' (matched by the same (type,name)), or allocate the next id " +
+          '(e.g. MATCH (e:Element {graphKey:$graphKey}) RETURN max(toInteger(e.id))).',
+        );
+      }
       const existingElement = findById(nextDocument.elements, mutation.element.id);
       let targetElementId = mutation.element.id;
       let reusedElement = false;

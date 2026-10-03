@@ -38,6 +38,16 @@ test('AT-agent-search-diagnosis-01: diagnose surfaces over-search signals + timi
   assert.ok(Array.isArray(m.hints) && m.hints.length >= 1);
 });
 
+test('AT-agent-search-diagnosis-07: a failed+empty call counts once in emptyOrError (no double count)', () => {
+  // GIVEN the fixture: 2 empty greps + 1 error(read, empty)
+  // WHEN diagnosed
+  // THEN emptyOrError is the DISTINCT unproductive count (3), not toolErrors+emptyResults (4)
+  const m = diag.diagnose(diag.parseSession(SESSION), { wallMs: 4000, workspace: 'ws', sessionId: 's1' });
+  assert.equal(m.overview.toolErrors, 1);
+  assert.equal(m.overview.emptyResults, 3);
+  assert.equal(m.overSearch.emptyOrError, 3, 'failed-and-empty must not be counted twice');
+});
+
 test('AT-agent-search-diagnosis-02: writeBundle emits the fixed temp2.2 bundle', () => {
   const ws = tmpWs();
   try {
