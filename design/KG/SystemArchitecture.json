@@ -4104,6 +4104,16 @@
           "name": "commit",
           "value": "8c18965",
           "description": "release archgraph-argo-beta@0.27.0-beta.11 (tag latest) + 正式安装 + argo-deploy"
+        },
+        {
+          "name": "commit",
+          "value": "093b65a",
+          "description": "feat(mcp): 统一 ID 策略 + 自动分配——element/relationship/view 的 id 可选，省略则分配唯一语义 slug（冲突 -002..）；显式 id 碰撞不同实体→报错，相同自然键→幂等复用；compactMutationResponse 回带 id/created/reused/allocatedId；引用类 id 仍须显式"
+        },
+        {
+          "name": "commit",
+          "value": "27766ee",
+          "description": "release archgraph-argo-beta@0.27.0-beta.12 (tag latest) + 正式安装 + argo-deploy"
         }
       ]
     },
