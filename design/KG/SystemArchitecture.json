@@ -9489,7 +9489,7 @@
       ]
     },
     {
-      "description": "框架读取层优化：对**结构型读取**（getArchitectureViewContext / getIntentElementContext）默认剔除 Agent 用不着的“账本”字段，而不是摘要（保留字段逐字原样）。背景：全图字段字节占比 description 40.6% / attributes 38.1% / testcases 14.1%——attributes（commit/session/release 台账）+ testcases 合计 ~52% 对结构读取无用（实测 view 174 读 16,098 vs 58,884 字节，**−72.7%**）。匹配感知（关键）：语义检索将 attributes 与 testcase 描述**编入向量文本**（semanticRecordText.js），因此语义命中必须保留它们；queryNeo4jGraph 为用户显式投影、不裁剪；getIntentElementContext 的**焦点元素始终保留自身 attributes/testcases**，仅对邻接元素裁剪。可逆：默认返回 result.projection 说明（attributesOmitted/testcasesOmitted + 如何取），并新增 includeAttributes/includeTestcases 显式取回。非摘要、不改候选集与排序 → 与 retrieval-recall-first 一致；对 S1–S8 全场景统一生效（非单会话定制）。交付：argo/scripts/systemarchitecture-mcp-server.js（projectAgentFields/buildAgentProjection + 两个 builder 接入 + schema）; argo/scripts/argo-mcp-server.js（schema）; tests/agent-read-projection.test.js（AT-01..03）。",
+      "description": "框架读取层优化：对**结构型读取**（getArchitectureViewContext / getIntentElementContext）默认剔除 Agent 用不着的“账本”字段，而不是摘要（保留字段逐字原样）。背景：全图字段字节占比 description 40.6% / attributes 38.1% / testcases 14.1%——attributes（commit/session/release 台账）+ testcases 合计 ~52% 对结构读取无用（实测 view 174 读 16,098 vs 58,884 字节，**−72.7%**）。匹配感知（关键）：语义检索将 attributes 与 testcase 描述**编入向量文本**（semanticRecordText.js），因此语义命中必须保留它们；queryNeo4jGraph 为用户显式投影、不裁剪；getIntentElementContext 的**焦点元素始终保留自身 attributes/testcases**，仅对邻接元素裁剪。可逆：默认返回 result.projection 说明（attributesOmitted/testcasesOmitted + 如何取），并新增 includeAttributes/includeTestcases 显式取回。非摘要、不改候选集与排序 → 与 retrieval-recall-first 一致；对 S1–S8 全场景统一生效（非单会话定制）。交付：argo/scripts/systemarchitecture-mcp-server.js（projectAgentFields/buildAgentProjection + 两个 builder 接入 + schema）; argo/scripts/argo-mcp-server.js（schema）; tests/agent-read-projection.test.js（AT-01..03）。\n\n[上下文输出预算，issue #9] 再为这两个结构型读取加一层**输出预算**：默认上限 maxBytes（ARGO_CONTEXT_MAX_BYTES 或 32000；0=无限）。超预算时非焦点成员降级为身份（id/type/name），焦点元素与 boundary/explorationHints 保留，全部纳入 id 完整清单写入 result.truncation，故载荷始终是合法 JSON、绝不被宿主从 JSON 中间静默截断；语义检索不受影响。工具描述同时提示：hub 元素上勿开 includeAttributes/includeTestcases，先 queryNeo4jGraph 定位 id 再窄读。交付：argo/scripts/systemarchitecture-mcp-server.js（resolveContextMaxBytes/applyContextBudget/applyViewContextBudget + 两个 builder 接入 + schema maxBytes + 指引）; argo/scripts/argo-mcp-server.js（schema）; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js（HOST_ONLY_ENV_KEYS）; scripts/read-projection-gain.js（maxBytes:0 保持纯投影度量）; tests/agent-read-projection.test.js（AT-budget-01..04）。",
       "id": "agent-read-projection-001",
       "name": "结构读取字段投影（默认剔除账本字段 + 匹配感知 + opt-in）",
       "parent": "1961",
@@ -9527,6 +9527,34 @@
           "acceptanceCriteria": "tests/agent-read-projection.test.js",
           "description": "GIVEN 带账本字段的 memory_search 命中；WHEN 构建 memoryHitCard；THEN 附 matchedSnippet（源自与该 query 相关的 attribute/testcase）；无账本时无 snippet。",
           "name": "AT-agent-read-projection-05",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-read-projection.test.js",
+          "acceptanceCriteria": "tests/agent-read-projection.test.js",
+          "description": "GIVEN 一个超预算的 hub 元素；WHEN getIntentElementContext 默认深度读取且结果超 maxBytes；THEN 非焦点成员降级为身份、焦点元素保留、truncation 列出完整 id 清单，载荷为合法 JSON 且不超过 maxBytes（绝不被宿主腰斩）。",
+          "name": "AT-budget-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-read-projection.test.js",
+          "acceptanceCriteria": "tests/agent-read-projection.test.js",
+          "description": "GIVEN 一个低于默认预算的普通元素；WHEN 默认读取与 maxBytes:0 无限读取对比；THEN 默认读取无 truncation 且与无限读取逐字节一致（零回归）。",
+          "name": "AT-budget-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-read-projection.test.js",
+          "acceptanceCriteria": "tests/agent-read-projection.test.js",
+          "description": "GIVEN 一个远超预算的合成结果；WHEN applyContextBudget 与 resolveContextMaxBytes；THEN 身份降级层在预算内且 id 清单完整、焦点保留；极小预算标 manifestTruncated；0=无限；默认 32000、env 覆盖、arg 优先。",
+          "name": "AT-budget-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/agent-read-projection.test.js",
+          "acceptanceCriteria": "tests/agent-read-projection.test.js",
+          "description": "GIVEN 一个超过预算的视图；WHEN getArchitectureViewContext 设 maxBytes；THEN 视图读报告 truncation，成员降级为身份，15 个元素 id + 9 个关系 id 完整列出，载荷不超预算。",
+          "name": "AT-budget-04",
           "type": "Acceptance Test"
         }
       ],
@@ -9566,6 +9594,11 @@
           "name": "commit",
           "value": "5254f75",
           "description": "package.json（release 0.26.2）"
+        },
+        {
+          "name": "commit",
+          "value": "02db5f7",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; scripts/read-projection-gain.js; tests/agent-read-projection.test.js; tests/acceptance-guardian.test.js（结构读取输出预算；issue #9）"
         }
       ]
     },
