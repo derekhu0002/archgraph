@@ -4306,7 +4306,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-03，分支 develop-separate-schema）。主题：issue #8 会话诊断处理 + 统一实体 id 策略（自动分配）+ graph-wiki 适配委派 + 本机代理排障。\\n【issue #8（已完成，CLOSED）】来自 agent-search-diagnosis 的真实会话诊断包（my-army，3× element.id 缺失重试 + 1× 真环 + 1× 语义去重 + 模型耗时主导）。核实准确后按“最大性价比”处置：①P1 先做显式契约（element.id required + 可操作错误，beta.11，commit 7ac6559）；②诊断口径 emptyOrError 去重叠计数；③按人类伙伴判断推翻“必填 id”——改为【统一 ID 策略】：element.id/relationship.id/view.view_id 均【可选】，省略则由服务端分配【唯一语义 slug】（冲突 -002..）；显式 id 与不同实体碰撞→报错、相同自然键→幂等复用；compactMutationResponse 回带 {id,created,reused,allocatedId}；引用类 id（view_ids/source_id/target_id/parent_element_id/included_*）仍须显式（beta.12，commit 093b65a）。已活验证：不带 id→自动得到 autoid-live-probe-2026；显式 id 撞不同元素→可操作报错（均 dryRun）。\\n【graph-wiki 适配】已提 issue graph-wiki#3，列 6 组框架变化（schema-bundle 命名统一、bundle 扩展、structuredContent、实体 id 自动分配、DSH 桥、联邦命名）请其对齐。\\n【代理坑】Clash 127.0.0.1:7890 曾只通 TCP、不转发 HTTPS（npm/github 全超时）；重启恢复；期间用直连发布。已记 T2 overseer-lesson-clash-proxy-https-001。\\n【版本】dev archgraph-argo-beta@0.27.0-beta.12（tag latest）；stable archgraph-argo@0.26.2（未推进）；本机安装=beta.12；分支 HEAD=develop-separate-schema。\\n【验收】npm test 669→674（ea-web-browser/ea-web-shell 浏览器测试偶发超时，单独复跑通过，非回归）。\\n【提交（已 push）】44d0dad…0306ef6 区间（含 d2e1e18/461f569/b47fca3/65ba577/302e534/7d6128e/2a82eb9/8a51c31/3299c57/6fe27c4/7ac6559/8c18965/093b65a/27766ee/0306ef6）。\\n【待办】①stable 是否合并/推进 dev（人类决定）；②默认包路径 ArchiMate 命名下沉为 opt-in 数据（待裁决）；③issue #8 的 #3 语义去重阈值分档（需评测数据）、#2 描述前置提示、#4 读侧合批（暂缓）。\\nT2：agent-search-diagnosis-skill-001 / overseer-mcp-tool-surface-001 / overseer-lesson-clash-proxy-https-001 / design-federated-intent-graph-001。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-04，分支 develop-separate-schema）。主题：issue #9 分析 + 结构读取输出预算落地。\n【issue #9】来自 agent-search-diagnosis 的真例会话语料（SOC-DEMO OpenCTI 对外，ses_efdb...）：单条 getIntentElementContext(soc-tobe-app-opencti) ≈13,985 tokens 被宿主截断；step-69 input 165k 尖峰。复核：问题真实（单条观测可超宿主上限被从 JSON 中间腰斩），但归因不完全——该调用显式 includeAttributes/includeTestcases（关掉了默认读取投影 ~52% 字节）而 issue 未提；框架已有 boundary/explorationHints + 默认投影。评判：建议 1「下调默认深度」不合理（牺牲常规召回），建议 2 观测压缩属宿主职责，建议 3/4 属 agent 行为指引。\n【落地 A+B】getIntentElementContext / getArchitectureViewContext 新增 maxBytes 输出预算（默认 ARGO_CONTEXT_MAX_BYTES 或 32000；0=无限）：超预算→非焦点成员降级为身份(id/type/name)、焦点+boundary/explorationHints 保留、result.truncation 列完整 id 清单，始终合法 JSON；语义检索不动。工具描述增加 hub 元素指引（少开 includeAttributes/includeTestcases，先 queryNeo4jGraph 定位再窄读）。read-projection-gain 传 maxBytes:0 保持纯投影度量。\n【验收】npm test 678/678（0 fail/0 skip）；Docker e2e npm run acceptance 10/10、19/19 tools；validate 通过。\n【提交】02db5f7（feat mcp，6 文件）；9a0eab6（docs kg 登记 + archgraph.qea）。\nT2：overseer-milestone-read-projection-001（已续写结构读取输出预算）。\n【待办】stable 是否推进 dev（人类决定）；issue #9 点3/4（并发取数/停止判据）如需要可回给 agent-search-diagnosis skill 作宿主侧建议。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4328,8 +4328,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-03",
-          "description": "本轮 schema/建模语言解耦会话"
+          "value": "2026-10-04",
+          "description": "issue #9 结构读取输出预算"
         },
         {
           "name": "commit",
@@ -4594,6 +4594,16 @@
           "name": "commit",
           "value": "0e4e241",
           "description": "T1 摘要覆盖为本轮 schema/建模语言解耦会话摘要"
+        },
+        {
+          "name": "commit",
+          "value": "02db5f7",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; tests/agent-read-projection.test.js（结构读取输出预算 issue #9）"
+        },
+        {
+          "name": "commit",
+          "value": "9a0eab6",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（T1 摘要覆盖写）"
         }
       ],
       "testcases": [
@@ -9607,7 +9617,7 @@
       "name": "里程碑：读取投影/命中回带 + 诊断 skill + 评测框架（0.25.0–0.26.2）",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "里程碑（2026-09-23，项目总管）：把「Agent 成本—召回」从度量做到优化落地。发布（均 npm publish + argo-deploy + 重启）：0.25.0 框架单一日志 <ws>/.argo/temp/agent-cost-log.ndjson（仅宿主插件 argo-cost-collector 采集全部工具调用（图+仓）+ token 用量；MCP 侧不采集；无 MCP 工具/CLI）；0.26.0 agent-search-diagnosis skill（单会话诊断包，bundle temp2.2；humanWait 单列、上下文尖峰标记、opencode export JSON 兼容）；0.26.1 结构读投影 + 语义命中 matchedSnippet；0.26.2 投影 note 门控（只在省≥160B 时附；裁剪永不使读取变大，min 降幅=0）。读取优化：getArchitectureViewContext/getIntentElementContext 默认剔除 attributes/testcases（焦点元素保留自身），opt-in；匹配感知（语义检索命中保留=匹配面、queryNeo4jGraph 不动）；语义命中带 matchedSnippet（~62 tokens 代 ~5,400 tokens 回查）。量化：视图读 −51.5%（min0/med36.4/p90 73.7/max84.5），合并 −42%（85 读省 ~149k tokens）。评测体：memory-retrieval-eval-framework-001（S1–S8 × small/large × 指标；E1 机制/E2 制度）；graph-gain-regime-boundary-001（Graph 增益不可干净隔离）；原则 framework-optimization-cross-scenario-001（不得跨场景劣化，剖面验证）；R7 harness scripts/agent-cost-eval.js + A/B scripts/memory-retrieval-ab.js + 度量 scripts/read-projection-gain.js。待办（接手优先）：人类伙伴将于下一会话做一次完整测试。另：DASHSCOPE_API_KEY 未配置（BAILIAN 不可用）；宿主级读缓存暂缓；批量写图/去重读未做。",
+      "description": "里程碑（2026-09-23，项目总管）：把「Agent 成本—召回」从度量做到优化落地。发布（均 npm publish + argo-deploy + 重启）：0.25.0 框架单一日志 <ws>/.argo/temp/agent-cost-log.ndjson（仅宿主插件 argo-cost-collector 采集全部工具调用（图+仓）+ token 用量；MCP 侧不采集；无 MCP 工具/CLI）；0.26.0 agent-search-diagnosis skill（单会话诊断包，bundle temp2.2；humanWait 单列、上下文尖峰标记、opencode export JSON 兼容）；0.26.1 结构读投影 + 语义命中 matchedSnippet；0.26.2 投影 note 门控（只在省≥160B 时附；裁剪永不使读取变大，min 降幅=0）。读取优化：getArchitectureViewContext/getIntentElementContext 默认剔除 attributes/testcases（焦点元素保留自身），opt-in；匹配感知（语义检索命中保留=匹配面、queryNeo4jGraph 不动）；语义命中带 matchedSnippet（~62 tokens 代 ~5,400 tokens 回查）。量化：视图读 −51.5%（min0/med36.4/p90 73.7/max84.5），合并 −42%（85 读省 ~149k tokens）。评测体：memory-retrieval-eval-framework-001（S1–S8 × small/large × 指标；E1 机制/E2 制度）；graph-gain-regime-boundary-001（Graph 增益不可干净隔离）；原则 framework-optimization-cross-scenario-001（不得跨场景劣化，剖面验证）；R7 harness scripts/agent-cost-eval.js + A/B scripts/memory-retrieval-ab.js + 度量 scripts/read-projection-gain.js。待办（接手优先）：人类伙伴将于下一会话做一次完整测试。另：DASHSCOPE_API_KEY 未配置（BAILIAN 不可用）；宿主级读缓存暂缓；批量写图/去重读未做。\n\n[续 · 结构读取输出预算，issue #9，2026-10-04] 承接上条读取优化：再为 getIntentElementContext / getArchitectureViewContext 加一层输出预算 maxBytes（默认 ARGO_CONTEXT_MAX_BYTES 或 32000；0=无限）。超预算时非焦点成员降级为身份(id/type/name)、焦点与 boundary/explorationHints 保留、result.truncation 列完整 id 清单 → 始终合法 JSON、绝不被宿主从 JSON 中间静默截断；语义检索不受影响。工具描述增加 hub 指引（少开 includeAttributes/includeTestcases，先 queryNeo4jGraph 定位再窄读）；read-projection-gain 传 maxBytes:0 保持纯投影度量。验收：npm test 678/678；Docker e2e 10/10、tools 19/19；validate 通过。commit 02db5f7 / 9a0eab6。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -9626,6 +9636,16 @@
           "name": "commit",
           "value": "216f8b9",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（本会话记忆落地：T2 里程碑 + T1 摘要覆盖写；含下一会话完整测试待办钩子）"
+        },
+        {
+          "name": "commit",
+          "value": "02db5f7",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; scripts/read-projection-gain.js; tests/agent-read-projection.test.js; tests/acceptance-guardian.test.js（结构读取输出预算 issue #9）"
+        },
+        {
+          "name": "commit",
+          "value": "9a0eab6",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（agent-read-projection-001 登记 + AT-budget-01..04）"
         }
       ]
     },
