@@ -4306,7 +4306,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-02，分支 develop-separate-schema）。主题：issue #6/#7 处理 + 联邦重注册 + 对外呈现刷新 + 框架通用性。\\n【issue（全部 comment + CLOSED）】#6 extends 内置别名回归（我引入的破坏性变更）：别名数据化——默认 bundle 声明 id:default + aliases[archimate3.2,archimate,base]；resolveBaseBundleDir 通用符号解析（内置 + basePaths + 子包自身及直接子目录；未命中回落路径）。#7 DSH 未注册联邦 graph-mcp：install-argo.ps1 部署 stdio 桥到 ~/.dsh/mcp-bridges 并输出多 server 的 cordis 托管块；dsh-argo-workspace 泛化为 config.servers（每 server 前缀/注入开关，向后兼容）；bundle cordis.patch.yml 同步；修 8 处 Write-Host 引号 bug；删误提交的 InternalHost。DSH 侧人类伙伴已验证 OK（插件 apply() 实测挂载 argo 19 + graph-mcp 13 工具）。\\n【联邦】以 branch=develop-separate-schema 重注册 archgraph；授权未被重置，按原范围幂等补授 graph-wiki 与 new-era-cybersecurity-strategy（各含通配 *）；.argo/federation.json branch 已更新；mirror synced/ok。\\n【对外呈现】按“联邦式意图图谱”刷新 README（The federation model 节）+ 主页（Federated, not distributed 卡 + Community lead）；新增图谱元素 design-federated-intent-graph-001（模式=Registry–Broker Federation over sovereign knowledge graphs；是 federated 非 distributed）；readme/website 测试新增守卫。\\n【通用性】AGENTS.md 确立两条解耦轴（框架↔插件、框架↔本体 schema）；修掉引入的语言耦合（extends 别名、dialect 默认）。\\n【版本】dev 包 archgraph-argo-beta@0.27.0-beta.9（tag latest；beta tag 陈旧停在 -beta.2，granular token 无 dist-tag 删除权限，无害）；稳定 archgraph-argo latest=0.26.2（未推进）；宿主已安装=beta.9。\\n【验收】npm test 666 / 0 fail / 0 skip；Docker acceptance 10/10（本轮早期）。\\n【提交（已 push）】44d0dad…6fe27c4 之间（含 d2e1e18/461f569/b47fca3/65ba577/bdf0c42/67dbeb3/302e534/7d6128e/2a82eb9/8a51c31/3299c57/6fe27c4）。\\n【待办】默认包路径 ArchiMate 命名下沉（opt-in，待人类裁决）；stable 是否合并 dev（人类伙伴决定）。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-03，分支 develop-separate-schema）。主题：issue #8 会话诊断处理 + 统一实体 id 策略（自动分配）+ graph-wiki 适配委派 + 本机代理排障。\\n【issue #8（已完成，CLOSED）】来自 agent-search-diagnosis 的真实会话诊断包（my-army，3× element.id 缺失重试 + 1× 真环 + 1× 语义去重 + 模型耗时主导）。核实准确后按“最大性价比”处置：①P1 先做显式契约（element.id required + 可操作错误，beta.11，commit 7ac6559）；②诊断口径 emptyOrError 去重叠计数；③按人类伙伴判断推翻“必填 id”——改为【统一 ID 策略】：element.id/relationship.id/view.view_id 均【可选】，省略则由服务端分配【唯一语义 slug】（冲突 -002..）；显式 id 与不同实体碰撞→报错、相同自然键→幂等复用；compactMutationResponse 回带 {id,created,reused,allocatedId}；引用类 id（view_ids/source_id/target_id/parent_element_id/included_*）仍须显式（beta.12，commit 093b65a）。已活验证：不带 id→自动得到 autoid-live-probe-2026；显式 id 撞不同元素→可操作报错（均 dryRun）。\\n【graph-wiki 适配】已提 issue graph-wiki#3，列 6 组框架变化（schema-bundle 命名统一、bundle 扩展、structuredContent、实体 id 自动分配、DSH 桥、联邦命名）请其对齐。\\n【代理坑】Clash 127.0.0.1:7890 曾只通 TCP、不转发 HTTPS（npm/github 全超时）；重启恢复；期间用直连发布。已记 T2 overseer-lesson-clash-proxy-https-001。\\n【版本】dev archgraph-argo-beta@0.27.0-beta.12（tag latest）；stable archgraph-argo@0.26.2（未推进）；本机安装=beta.12；分支 HEAD=develop-separate-schema。\\n【验收】npm test 669→674（ea-web-browser/ea-web-shell 浏览器测试偶发超时，单独复跑通过，非回归）。\\n【提交（已 push）】44d0dad…0306ef6 区间（含 d2e1e18/461f569/b47fca3/65ba577/302e534/7d6128e/2a82eb9/8a51c31/3299c57/6fe27c4/7ac6559/8c18965/093b65a/27766ee/0306ef6）。\\n【待办】①stable 是否合并/推进 dev（人类决定）；②默认包路径 ArchiMate 命名下沉为 opt-in 数据（待裁决）；③issue #8 的 #3 语义去重阈值分档（需评测数据）、#2 描述前置提示、#4 读侧合批（暂缓）。\\nT2：agent-search-diagnosis-skill-001 / overseer-mcp-tool-surface-001 / overseer-lesson-clash-proxy-https-001 / design-federated-intent-graph-001。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4328,7 +4328,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-02",
+          "value": "2026-10-03",
           "description": "本轮 schema/建模语言解耦会话"
         },
         {
