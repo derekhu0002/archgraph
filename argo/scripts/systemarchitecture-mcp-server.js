@@ -760,8 +760,24 @@ function budgetTruncationBase(result, maxBytes, fullBytes, ids) {
 // real loss of a listed id.
 function trimManifestToBudget(result, maxBytes) {
   const truncation = result.truncation;
-  const arrays = ['includedElementIds', 'includedRelationshipIds', 'includedViewIds'];
   const focusId = result.focusElementId;
+  // If the FOCUS element alone already exceeds the budget, trimming the (cheap)
+  // id manifest cannot get us under it — and dropping ids would only lose
+  // navigation for nothing. Keep the COMPLETE manifest and say why.
+  const focusOnly = {
+    ...result,
+    truncation: {
+      ...truncation,
+      includedElementIds: focusId ? [focusId] : [],
+      includedRelationshipIds: [],
+      includedViewIds: [],
+    },
+  };
+  if (focusId && payloadByteLength(focusOnly) > maxBytes) {
+    truncation.overBudgetByFocus = true;
+    return;
+  }
+  const arrays = ['includedElementIds', 'includedRelationshipIds', 'includedViewIds'];
   for (let ratio = 0.9; ratio >= 0; ratio -= 0.1) {
     for (const key of arrays) {
       const full = truncation[key] || [];

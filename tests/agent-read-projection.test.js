@@ -210,8 +210,24 @@ test('AT-budget-03: budget tiers + parameter resolution (identity fallback, comp
   assert.equal(out.subgraph.elements.find(e => e.id === 'f').description, 'focus', 'focus kept full');
   assert.equal(out.subgraph.elements.find(e => e.id === 'n1').description, undefined, 'neighbours are identity only');
   assert.deepEqual(out.truncation.includedElementIds.slice().sort(), ['f', 'n1', 'n2', 'n3'], 'id manifest is complete');
-  const forced = mcpModule.applyContextBudget(big, 40);
-  assert.equal(forced.truncation.manifestTruncated, true, 'a tiny budget flags manifest truncation');
+  const focusBound = mcpModule.applyContextBudget(big, 40);
+  assert.equal(focusBound.truncation.overBudgetByFocus, true, 'a budget below the focus element size is flagged');
+  assert.deepEqual(focusBound.truncation.includedElementIds.slice().sort(), ['f', 'n1', 'n2', 'n3'], 'complete manifest kept when trimming ids cannot help');
+  const wide = {
+    status: 'passed',
+    focusElementId: 'f',
+    subgraph: {
+      elements: [{ id: 'f', name: 'F', type: 'X', description: 'x' }]
+        .concat(Array.from({ length: 300 }, (_, i) => ({ id: 'n' + i, name: 'N' + i, type: 'Y', description: 'd'.repeat(100) }))),
+      relationships: [],
+      views: [],
+    },
+    boundary: { truncatedDependencies: [], truncatedDependents: [] },
+    explorationHints: [],
+  };
+  const trimmed = mcpModule.applyContextBudget(wide, 1200);
+  assert.equal(trimmed.truncation.manifestTruncated, true, 'when the manifest itself is the binding constraint it is trimmed and flagged');
+  assert.ok((trimmed.truncation.includedElementIds || []).length < 301, 'manifest trimmed');
   assert.equal(mcpModule.applyContextBudget(big, 0), big, '0 = unlimited');
   assert.equal(mcpModule.applyContextBudget(big, 10_000_000), big, 'a huge budget leaves the read untouched');
 
