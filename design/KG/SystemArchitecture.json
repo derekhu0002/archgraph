@@ -4306,7 +4306,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-04，分支 develop-separate-schema）。主题：issue #9 分析 + 结构读取输出预算落地。\n【issue #9】来自 agent-search-diagnosis 的真例会话语料（SOC-DEMO OpenCTI 对外，ses_efdb...）：单条 getIntentElementContext(soc-tobe-app-opencti) ≈13,985 tokens 被宿主截断；step-69 input 165k 尖峰。复核：问题真实（单条观测可超宿主上限被从 JSON 中间腰斩），但归因不完全——该调用显式 includeAttributes/includeTestcases（关掉了默认读取投影 ~52% 字节）而 issue 未提；框架已有 boundary/explorationHints + 默认投影。评判：建议 1「下调默认深度」不合理（牺牲常规召回），建议 2 观测压缩属宿主职责，建议 3/4 属 agent 行为指引。\n【落地 A+B】getIntentElementContext / getArchitectureViewContext 新增 maxBytes 输出预算（默认 ARGO_CONTEXT_MAX_BYTES 或 32000；0=无限）：超预算→非焦点成员降级为身份(id/type/name)、焦点+boundary/explorationHints 保留、result.truncation 列完整 id 清单，始终合法 JSON；语义检索不动。工具描述增加 hub 元素指引（少开 includeAttributes/includeTestcases，先 queryNeo4jGraph 定位再窄读）。read-projection-gain 传 maxBytes:0 保持纯投影度量。\n【验收】npm test 678/678（0 fail/0 skip）；Docker e2e npm run acceptance 10/10、19/19 tools；validate 通过。\n【提交】02db5f7（feat mcp，6 文件）；9a0eab6（docs kg 登记 + archgraph.qea）。\nT2：overseer-milestone-read-projection-001（已续写结构读取输出预算）。\n【待办】stable 是否推进 dev（人类决定）；issue #9 点3/4（并发取数/停止判据）如需要可回给 agent-search-diagnosis skill 作宿主侧建议。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-04，分支 develop-separate-schema）。主题：issue #9 分析 → 结构读取输出预算落地 → 发布/部署/验证。\n【issue #9】agent-search-diagnosis 真例会话语料（SOC-DEMO OpenCTI 对外，ses_efdb...）：单条 getIntentElementContext(soc-tobe-app-opencti) ≈13,985 tokens 被宿主截断；step-69 input 165k 尖峰。复核：问题真实（单条观测可超宿主上限被从 JSON 中间腰斩）；归因不完全——该调用显式 includeAttributes/includeTestcases（关掉默认投影 ~52% 字节）而 issue 未提；框架已有 boundary/explorationHints + 默认投影。评判：建议 1「下调默认深度」不合理（牺牲常规召回），建议 2 观测压缩属宿主职责，建议 3/4 属 agent 行为指引。\n【落地 A+B】getIntentElementContext / getArchitectureViewContext 新增 maxBytes 输出预算（默认 ARGO_CONTEXT_MAX_BYTES 或 32000；0=无限）。超预算：非焦点成员降级身份(id/type/name)、焦点+boundary/explorationHints 保留、result.truncation 列完整 id 清单 → 始终合法 JSON；语义检索不动。工具描述加 hub 指引（少开 includeAttributes/includeTestcases，先 queryNeo4jGraph 定位再窄读）。read-projection-gain 传 maxBytes:0。\n【边界修复】maxBytes < 焦点元素自身时，保留完整 id 清单并标 overBudgetByFocus（不再为凑预算丢 id）。\n【验收】npm test 678/678；Docker e2e npm run acceptance 10/10、tools 19/19；validate 通过；对已部署产物独立跑 12/12；重启宿主后 live 3/3（元素预算/无限/视图预算）。\n【发布/部署】archgraph-argo-beta@0.27.0-beta.14（--tag latest）→ npm i -g archgraph-argo-beta → argo-deploy -SkipEnv 22/22。提交：02db5f7 / 9a0eab6 / 4e59c2d / c0bd02c / 6adee79 / 705b89c / 4192522（本地未 push，待人类决定）。\n【坑】本机 Clash/DNS 污染 registry.npmjs.org（返回 141.193.154.x 等），ERR_TLS_CERT_ALTNAME_INVALID；重启 Clash 未解；npm 逐条加 --proxy/--https-proxy 127.0.0.1:7890 才通（未改全局）。详见 T2 overseer-lesson-clash-proxy-https-001。\n【待办】①是否 push 到 origin/develop-separate-schema（人类决定）；②stable 是否推进；③issue #9 点3/4（并发取数/停止判据）回给 agent-search-diagnosis skill 作宿主侧建议。T2：overseer-milestone-read-projection-001（已续写预算层）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4329,7 +4329,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-10-04",
-          "description": "issue #9 结构读取输出预算"
+          "description": "会话收尾：issue #9 分析与结构读取输出预算落地/发布/部署/验证"
         },
         {
           "name": "commit",
@@ -4604,6 +4604,11 @@
           "name": "commit",
           "value": "9a0eab6",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（T1 摘要覆盖写）"
+        },
+        {
+          "name": "commit",
+          "value": "4192522",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（会话收尾 T1 摘要覆盖写 + 登记 6adee79/705b89c）"
         }
       ],
       "testcases": [
