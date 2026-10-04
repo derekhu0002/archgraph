@@ -227,12 +227,12 @@ const TOOLS = [
   },
   {
     name: 'getIntentElementContext',
-    description: 'read-only query that returns an intent subgraph context for one element. Uses ArchiMate semantic dependency traversal with dependencyDepth and dependentDepth, preserving native subgraph elements, relationships, and views.',
+    description: 'read-only query that returns an intent subgraph context for one element. Uses ArchiMate semantic dependency traversal with dependencyDepth and dependentDepth, preserving native subgraph elements, relationships, and views. Output is bounded by maxBytes (default ARGO_CONTEXT_MAX_BYTES or 32000): beyond it non-focus members degrade to identity (id/type/name) and a complete id manifest is returned under truncation, so the host never silently cuts the payload. On a large/hub element leave includeAttributes/includeTestcases off (they are the ledger and can dominate the size) and prefer queryNeo4jGraph to locate ids, then read them narrowly.',
     inputSchema: intentElementContextInputSchema(),
   },
   {
     name: 'getArchitectureViewContext',
-    description: 'read-only query that resolves one view by view_id into its complete membership: the view object, every member element (from included_elements), every member relationship (from included_relationships), the parent element, and optionally child sub-views declared by member elements. Resolves ids into full canonical objects instead of returning raw id lists. Optional includeEaGeometry (default false) additionally returns the EA diagram geometry of the resolved view: element boxes plus each connector ROUTE (t_diagramlinks.Path as `path` + parsed `points`, with the non-route Geometry override kept separately under `geometry`).',
+    description: 'read-only query that resolves one view by view_id into its complete membership: the view object, every member element (from included_elements), every member relationship (from included_relationships), the parent element, and optionally child sub-views declared by member elements. Resolves ids into full canonical objects instead of returning raw id lists. Output is bounded by maxBytes (default ARGO_CONTEXT_MAX_BYTES or 32000): beyond it members degrade to identity (id/type/name) with a complete id manifest under truncation. Optional includeEaGeometry (default false) additionally returns the EA diagram geometry of the resolved view: element boxes plus each connector ROUTE (t_diagramlinks.Path as `path` + parsed `points`, with the non-route Geometry override kept separately under `geometry`).',
     inputSchema: viewContextInputSchema(),
   },
   {
@@ -483,8 +483,9 @@ function intentElementContextInputSchema() {
       dependentDepth: { type: 'number', description: 'Default: 1. Semantic dependents that rely on the focus element.' },
       associationDepth: { type: 'number', description: 'Default: 1. Association neighbors are expanded at least one layer.' },
       associationNeighborDependencyDepth: { type: 'number', description: 'Default: 0. Optional dependency expansion from association neighbors.' },
-      includeAttributes: { type: 'boolean', description: 'Default: false. Include `attributes` (commit/session/release ledgers) verbatim. Omitted by default from this structural read; the focus element always keeps its own. Semantic retrieval embeds attributes, so semantic hits keep them.' },
-      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim. Omitted by default from this structural read (bookkeeping); pass true when you need acceptance cases. Semantic retrieval embeds testcase descriptions, so semantic hits keep them.' },
+      includeAttributes: { type: 'boolean', description: 'Default: false. Include `attributes` (commit/session/release ledgers) verbatim. Omitted by default from this structural read; the focus element always keeps its own. Semantic retrieval embeds attributes, so semantic hits keep them. On a hub element this ledger can dominate the payload — prefer leaving it off and reading bookkeeping narrowly.' },
+      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim. Omitted by default from this structural read (bookkeeping); pass true when you need acceptance cases. Semantic retrieval embeds testcase descriptions, so semantic hits keep them. On a hub element this can be large — prefer leaving it off.' },
+      maxBytes: { type: 'number', description: 'Optional output budget in UTF-8 bytes (the exact serialized response). Default: ARGO_CONTEXT_MAX_BYTES env or 32000. 0 = unlimited. When the payload exceeds the budget, non-focus members degrade to identity (id/type/name) and a complete id manifest is returned under `truncation` — the payload is never silently truncated by the host.' },
     },
     additionalProperties: false,
   };
@@ -502,6 +503,7 @@ function viewContextInputSchema() {
       includeAttributes: { type: 'boolean', description: 'Default: false. Include member/relationship `attributes` (commit/session/release ledgers) verbatim. Omitted by default from this structural read (bookkeeping); pass true when you need provenance.' },
       includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim. Omitted by default from this structural read; pass true for acceptance-case lookups.' },
       includeEaGeometry: { type: 'boolean', description: 'Default: false (opt-in). When true, additionally resolve the diagram GEOMETRY (element boxes + connector line routes) for this view from the workspace EA model (.qea) and return it under a `geometry` field aligned by schema id with the resolved members. Each geometry relationship carries: `path` (the EA route from t_diagramlinks.Path, "" when EA auto-routes), `points` (the parsed [{x,y}] waypoints), `edge` (the EDGE route-style token or null) and `geometry` (the raw SX/SY/EX/EY override string, which contains NO waypoints). By default the EA model is never touched and no `geometry` field is returned; a missing EA model/diagram yields geometry.present=false, never an error.' },
+      maxBytes: { type: 'number', description: 'Optional output budget in UTF-8 bytes (the exact serialized response). Default: ARGO_CONTEXT_MAX_BYTES env or 32000. 0 = unlimited. When the payload exceeds the budget, members degrade to identity (id/type/name) and a complete id manifest is returned under `truncation` — the payload is never silently truncated by the host.' },
     },
     additionalProperties: false,
   };
@@ -686,6 +688,217 @@ function buildAgentProjection(omitted) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Context output budget (bounded, well-formed structural reads)
+// ---------------------------------------------------------------------------
+// A hub element/view can expand a semantic subgraph to tens of KB, which the
+// HOST then cuts mid-JSON — the agent receives a malformed partial observation.
+// This budget makes the ceiling the framework's, not the host's: above maxBytes
+// the non-focus members degrade to identity (id/type/name), the focus element +
+// boundary/explorationHints are kept, and EVERY included id is listed under
+// `truncation` — so the payload is always valid JSON and always navigable.
+// Default (or ARGO_CONTEXT_MAX_BYTES); 0 = unlimited. Semantic retrieval is NOT
+// affected (only these two structural builders).
+const DEFAULT_CONTEXT_MAX_BYTES = 32000;
+const CONTEXT_BUDGET_NOTE =
+  'The full payload exceeded maxBytes, so non-focus members are reduced to identity '
+  + '(id/type/name). The focus element and boundary/explorationHints are kept and every '
+  + 'included id is listed here. Raise maxBytes (0 = unlimited) or narrow the traversal '
+  + '(dependencyDepth/dependentDepth) to read details.';
+
+function resolveContextMaxBytes(args = {}) {
+  const raw = args && args.maxBytes !== undefined ? args.maxBytes : process.env.ARGO_CONTEXT_MAX_BYTES;
+  if (raw === undefined || raw === null || raw === '') {
+    return DEFAULT_CONTEXT_MAX_BYTES;
+  }
+  const numeric = Number(raw);
+  if (!Number.isFinite(numeric) || numeric < 0) {
+    return DEFAULT_CONTEXT_MAX_BYTES;
+  }
+  return Math.floor(numeric);
+}
+
+// Budget is measured on the EXACT serialization the caller receives
+// (`toolResult` pretty-prints with 2 spaces), in UTF-8 bytes.
+function payloadByteLength(value) {
+  try { return Buffer.byteLength(JSON.stringify(value, null, 2)); } catch (_) { return 0; }
+}
+
+function identityElementRecord(element) {
+  return { id: element.id, name: element.name, type: element.type };
+}
+
+function identityRelationshipRecord(relationship) {
+  return {
+    id: relationship.id,
+    name: relationship.name,
+    type: relationship.type,
+    source_id: relationship.source_id,
+    target_id: relationship.target_id,
+  };
+}
+
+function identityViewRecord(view) {
+  return { view_id: view.view_id, view_name: view.view_name };
+}
+
+function budgetTruncationBase(result, maxBytes, fullBytes, ids) {
+  return {
+    truncated: true,
+    reason: 'context_budget_exceeded',
+    maxBytes,
+    fullBytes,
+    includedElementIds: ids.elements,
+    includedRelationshipIds: ids.relationships,
+    includedViewIds: ids.views,
+    note: CONTEXT_BUDGET_NOTE,
+  };
+}
+
+// Shrink the manifest id lists (last resort) so even a pathological hub stays
+// within budget. The focus id is never dropped; `manifestTruncated` records any
+// real loss of a listed id.
+function trimManifestToBudget(result, maxBytes) {
+  const truncation = result.truncation;
+  const arrays = ['includedElementIds', 'includedRelationshipIds', 'includedViewIds'];
+  const focusId = result.focusElementId;
+  for (let ratio = 0.9; ratio >= 0; ratio -= 0.1) {
+    for (const key of arrays) {
+      const full = truncation[key] || [];
+      const kept = full.slice(0, Math.ceil(full.length * ratio));
+      if (key === 'includedElementIds' && focusId && !kept.includes(focusId)) {
+        kept.unshift(focusId);
+      }
+      truncation[key] = kept;
+    }
+    truncation.manifestTruncated = true;
+    if (payloadByteLength(result) <= maxBytes) return;
+  }
+  truncation.manifestTruncated = true;
+}
+
+function applyContextBudget(result, maxBytes) {
+  if (!result || result.status !== 'passed' || !maxBytes || maxBytes <= 0) {
+    return result;
+  }
+  const fullBytes = payloadByteLength(result);
+  if (fullBytes <= maxBytes) {
+    return result;
+  }
+
+  const subgraph = result.subgraph || {};
+  const elements = Array.isArray(subgraph.elements) ? subgraph.elements : [];
+  const relationships = Array.isArray(subgraph.relationships) ? subgraph.relationships : [];
+  const views = Array.isArray(subgraph.views) ? subgraph.views : [];
+  const focusId = result.focusElementId;
+  const ids = {
+    elements: elements.map((entry) => entry.id),
+    relationships: relationships.map((entry) => entry.id),
+    views: views.map((entry) => entry.view_id),
+  };
+  const truncated = (tier) => budgetTruncationBase(result, maxBytes, fullBytes, ids);
+  const nonFocusCount = elements.filter((entry) => entry.id !== focusId).length;
+
+  const compact = {
+    ...result,
+    subgraph: {
+      ...subgraph,
+      elements: elements.map((entry) => (entry.id === focusId ? entry : identityElementRecord(entry))),
+      relationships: relationships.map(identityRelationshipRecord),
+      views: views.map(identityViewRecord),
+    },
+    truncation: { ...truncated('identity'), omittedElementDetails: nonFocusCount },
+  };
+  if (payloadByteLength(compact) <= maxBytes) {
+    return compact;
+  }
+
+  const idsOnly = {
+    ...result,
+    subgraph: {
+      ...subgraph,
+      elements: elements.map((entry) => (entry.id === focusId ? entry : { id: entry.id })),
+      relationships: relationships.map((entry) => ({ id: entry.id })),
+      views: views.map((entry) => ({ view_id: entry.view_id })),
+    },
+    truncation: truncated('ids-only'),
+  };
+  if (payloadByteLength(idsOnly) <= maxBytes) {
+    return idsOnly;
+  }
+
+  const manifestOnly = {
+    ...result,
+    subgraph: {
+      elements: elements.filter((entry) => entry.id === focusId),
+      relationships: [],
+      views: [],
+    },
+    truncation: truncated('manifest-only'),
+  };
+  trimManifestToBudget(manifestOnly, maxBytes);
+  return manifestOnly;
+}
+
+function applyViewContextBudget(result, maxBytes) {
+  if (!result || result.status !== 'passed' || !maxBytes || maxBytes <= 0) {
+    return result;
+  }
+  const fullBytes = payloadByteLength(result);
+  if (fullBytes <= maxBytes) {
+    return result;
+  }
+
+  const elements = Array.isArray(result.elements) ? result.elements : [];
+  const relationships = Array.isArray(result.relationships) ? result.relationships : [];
+  const childViews = Array.isArray(result.childViews) ? result.childViews : [];
+  const ids = {
+    elements: elements.map((entry) => entry.id),
+    relationships: relationships.map((entry) => entry.id),
+    views: childViews.map((entry) => entry.view_id),
+  };
+  const strippedView = result.view
+    ? { ...result.view, included_elements: [], included_relationships: [] }
+    : result.view;
+  const truncated = (tier) => ({ ...budgetTruncationBase(result, maxBytes, fullBytes, ids), tier });
+
+  const compact = {
+    ...result,
+    elements: elements.map(identityElementRecord),
+    relationships: relationships.map(identityRelationshipRecord),
+    parentElement: result.parentElement ? identityElementRecord(result.parentElement) : result.parentElement,
+    childViews: childViews.map(identityViewRecord),
+    truncation: { ...truncated('identity'), omittedElementDetails: elements.length },
+  };
+  if (payloadByteLength(compact) <= maxBytes) {
+    return compact;
+  }
+
+  const idsOnly = {
+    ...result,
+    elements: elements.map((entry) => ({ id: entry.id })),
+    relationships: relationships.map((entry) => ({ id: entry.id })),
+    parentElement: result.parentElement ? { id: result.parentElement.id } : result.parentElement,
+    childViews: childViews.map((entry) => ({ view_id: entry.view_id })),
+    truncation: truncated('ids-only'),
+  };
+  if (payloadByteLength(idsOnly) <= maxBytes) {
+    return idsOnly;
+  }
+
+  const manifestOnly = {
+    ...result,
+    view: strippedView,
+    elements: [],
+    relationships: [],
+    parentElement: null,
+    childViews: [],
+    truncation: truncated('manifest-only'),
+  };
+  trimManifestToBudget(manifestOnly, maxBytes);
+  return manifestOnly;
+}
+
 function buildIntentElementContext(context, args = {}) {
   const profile = args.profile || 'generic-agent';
   const focusResult = resolveFocusElement(context.document, args);
@@ -812,7 +1025,7 @@ function buildIntentElementContext(context, args = {}) {
   };
   const projection = buildAgentProjection(omitted);
   if (projection) result.projection = projection;
-  return result;
+  return applyContextBudget(result, resolveContextMaxBytes(args));
 }
 
 // ---------------------------------------------------------------------------
@@ -956,7 +1169,7 @@ function buildViewContext(context, args = {}) {
   }
   const projection = buildAgentProjection(omitted);
   if (projection) result.projection = projection;
-  return result;
+  return applyViewContextBudget(result, resolveContextMaxBytes(args));
 }
 
 function resolveFocusElement(document, args) {
@@ -4863,6 +5076,9 @@ module.exports = {
   buildGetSystemArchitectureStructuredContent,
   TOOLS,
   applyMutations,
+  applyContextBudget,
+  applyViewContextBudget,
+  resolveContextMaxBytes,
   buildBusinessSemanticSummary,
   buildSemanticDedupAdvisory,
   selectCreatedElementAdds,

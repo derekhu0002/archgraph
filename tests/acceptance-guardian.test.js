@@ -75,6 +75,7 @@ const DELIVERABLE_GUARDS = [
   ['FEATURE: schema bundle per-type attribute contracts (attributesByElementType)', 'tests/schema-attribute-contracts.test.js'],
   ['FEATURE: schema bundle extends inheritance (base + delta)', 'tests/schema-bundle-extends.test.js'],
   ['FEATURE: order-independent mutation batches (topological apply + cycle report)', 'tests/mutation-batch-order.test.js'],
+  ['FEATURE: bounded structural reads (context output budget: identity fallback + complete id manifest)', 'tests/agent-read-projection.test.js'],
 ];
 
 const ALL_GUARDS = [...MCP_INTERFACE_GUARDS.map(([name, file]) => ({ kind: 'mcp-interface', name, file })), ...DELIVERABLE_GUARDS.map(([name, file]) => ({ kind: 'deliverable', name, file }))];

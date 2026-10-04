@@ -134,7 +134,7 @@ const TOOLS = [
   },
   {
     name: 'getIntentElementContext',
-    description: 'read-only query that returns an intent subgraph context for one element. Uses ArchiMate semantic dependency traversal with dependencyDepth and dependentDepth, preserving native subgraph elements, relationships, and views.',
+    description: 'read-only query that returns an intent subgraph context for one element. Uses ArchiMate semantic dependency traversal with dependencyDepth and dependentDepth, preserving native subgraph elements, relationships, and views. Output is bounded by maxBytes (default ARGO_CONTEXT_MAX_BYTES or 32000): beyond it non-focus members degrade to identity (id/type/name) with a complete id manifest under truncation, so the host never silently cuts the payload. On a large/hub element leave includeAttributes/includeTestcases off and prefer queryNeo4jGraph to locate ids, then read them narrowly.',
     inputSchema: intentElementContextInputSchema(),
   },
   {
@@ -343,8 +343,9 @@ function intentElementContextInputSchema() {
       dependentDepth: { type: 'number', description: 'Default: 1. Semantic dependents that rely on the focus element.' },
       associationDepth: { type: 'number', description: 'Default: 1. Association neighbors are expanded at least one layer.' },
       associationNeighborDependencyDepth: { type: 'number', description: 'Default: 0. Optional dependency expansion from association neighbors.' },
-      includeAttributes: { type: 'boolean', description: 'Default: false. Include `attributes` (commit/session/release ledgers) verbatim; omitted by default from this structural read (the focus element always keeps its own).' },
-      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim; omitted by default from this structural read.' },
+      includeAttributes: { type: 'boolean', description: 'Default: false. Include `attributes` (commit/session/release ledgers) verbatim; omitted by default from this structural read (the focus element always keeps its own). On a hub element this ledger can dominate the payload.' },
+      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim; omitted by default from this structural read. On a hub element this can be large.' },
+      maxBytes: { type: 'number', description: 'Optional output budget in UTF-8 bytes. Default: ARGO_CONTEXT_MAX_BYTES env or 32000. 0 = unlimited. Above the budget, non-focus members degrade to identity (id/type/name) with a complete id manifest under `truncation`; the payload is never silently truncated by the host.' },
     },
     additionalProperties: false,
   };

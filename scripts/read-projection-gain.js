@@ -76,9 +76,9 @@ function main() {
   const views = (GRAPH.views || []).filter(v => v.view_id);
   for (const v of views) {
     const a = nextId++; ids.viewDef.push([a, v.view_id]);
-    requests.push({ jsonrpc: '2.0', id: a, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: v.view_id } } });
+    requests.push({ jsonrpc: '2.0', id: a, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: v.view_id, maxBytes: 0 } } });
     const b = nextId++; ids.viewFull.push([b, v.view_id]);
-    requests.push({ jsonrpc: '2.0', id: b, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: v.view_id, includeAttributes: true, includeTestcases: true } } });
+    requests.push({ jsonrpc: '2.0', id: b, method: 'tools/call', params: { name: 'getArchitectureViewContext', arguments: { view_id: v.view_id, includeAttributes: true, includeTestcases: true, maxBytes: 0 } } });
   }
 
   // intent-element context: sample elements that carry bookkeeping (so neighbours matter)
@@ -88,9 +88,9 @@ function main() {
     .slice(0, 20);
   for (const e of bookkept) {
     const a = nextId++; ids.intDef.push([a, e.id]);
-    requests.push({ jsonrpc: '2.0', id: a, method: 'tools/call', params: { name: 'getIntentElementContext', arguments: { elementId: e.id, dependencyDepth: 1, dependentDepth: 0, associationDepth: 1 } } });
+    requests.push({ jsonrpc: '2.0', id: a, method: 'tools/call', params: { name: 'getIntentElementContext', arguments: { elementId: e.id, dependencyDepth: 1, dependentDepth: 0, associationDepth: 1, maxBytes: 0 } } });
     const b = nextId++; ids.intFull.push([b, e.id]);
-    requests.push({ jsonrpc: '2.0', id: b, method: 'tools/call', params: { name: 'getIntentElementContext', arguments: { elementId: e.id, dependencyDepth: 1, dependentDepth: 0, associationDepth: 1, includeAttributes: true, includeTestcases: true } } });
+    requests.push({ jsonrpc: '2.0', id: b, method: 'tools/call', params: { name: 'getIntentElementContext', arguments: { elementId: e.id, dependencyDepth: 1, dependentDepth: 0, associationDepth: 1, includeAttributes: true, includeTestcases: true, maxBytes: 0 } } });
   }
 
   // semantic memory hits: how many carry matchedSnippet, and its size
