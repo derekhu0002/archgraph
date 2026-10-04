@@ -4398,8 +4398,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.25.0",
-          "description": "2026-09-23 发布+部署完成（npm shasum 5055189f、全局安装、argo-deploy 22/22、argo-cost-collector 插件已注册）；框架单一日志 agent-cost-log.ndjson 待宿主重启后开始采集。commits dc70ca3(版本)/131bfdc(仅宿主插件)"
+          "value": "archgraph-argo-beta@0.27.0-beta.14",
+          "description": "package.json（release archgraph-argo-beta@0.27.0-beta.14；发布+全局安装+argo-deploy 22/22）"
         },
         {
           "name": "commit",
@@ -9609,6 +9609,16 @@
           "name": "commit",
           "value": "02db5f7",
           "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; scripts/read-projection-gain.js; tests/agent-read-projection.test.js; tests/acceptance-guardian.test.js（结构读取输出预算；issue #9）"
+        },
+        {
+          "name": "commit",
+          "value": "6adee79",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; tests/agent-read-projection.test.js（修复：focus 元素自身超 maxBytes 时保留完整 id 清单并标 overBudgetByFocus）"
+        },
+        {
+          "name": "commit",
+          "value": "705b89c",
+          "description": "package.json（release archgraph-argo-beta@0.27.0-beta.14；npm publish tag latest + 全局安装 + argo-deploy 22/22）"
         }
       ]
     },
@@ -9646,6 +9656,11 @@
           "name": "commit",
           "value": "9a0eab6",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（agent-read-projection-001 登记 + AT-budget-01..04）"
+        },
+        {
+          "name": "commit",
+          "value": "705b89c",
+          "description": "package.json（release beta.13/beta.14）：结构读取输出预算上线"
         }
       ]
     },
