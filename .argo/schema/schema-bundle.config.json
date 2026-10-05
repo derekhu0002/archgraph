@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Acme + UML 2 State Machine schema bundle",
+  "description": "Workspace schema bundle for this repository. It EXTENDS the built-in default bundle (the Acme base = ArchiMate 3.2 + ARGO extensions, resolved by the language-neutral name 'default') and adds a UML 2 state-machine profile (states + transition). The effective element universe is base union add, so every existing ArchiMate element/relationship remains valid while the coding business process can be modeled as a UML 2 state machine.",
+  "id": "acme-uml2-statemachine",
+  "aliases": ["acme-uml2", "uml2-sm"],
+  "extends": "default",
+  "language": "Acme + UML 2 State Machine",
+  "guide": "GUIDE.md",
+  "addElementTypes": {
+    "State": { "layer": "UML 2 State Machine", "aspect": "Behavior" },
+    "Initial State": { "layer": "UML 2 State Machine", "aspect": "Behavior" },
+    "Final State": { "layer": "UML 2 State Machine", "aspect": "Behavior" },
+    "Composite State": { "layer": "UML 2 State Machine", "aspect": "Behavior" },
+    "Choice": { "layer": "UML 2 State Machine", "aspect": "Behavior" },
+    "Entry Point": { "layer": "UML 2 State Machine", "aspect": "Structure" },
+    "Exit Point": { "layer": "UML 2 State Machine", "aspect": "Structure" }
+  },
+  "addRelationships": {
+    "Transition": "Dynamic"
+  }
+}

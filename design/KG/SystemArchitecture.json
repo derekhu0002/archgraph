@@ -107,6 +107,10 @@
         {
           "view_id": "schema-bundle-decoupling-001",
           "view_name": "Schema/Ontology 解耦（schema bundle）"
+        },
+        {
+          "view_id": "comm-2026-10-view-001",
+          "view_name": "沟通材料（2026-10）"
         }
       ]
     },
@@ -3449,6 +3453,14 @@
         {
           "view_id": "overseer-lessons-001",
           "view_name": "项目总管经验库"
+        },
+        {
+          "view_id": "overseer-modeling-001",
+          "view_name": "项目总管记忆·建模与度量"
+        },
+        {
+          "view_id": "overseer-comm-001",
+          "view_name": "项目总管记忆·沟通与汇报交付"
         }
       ],
       "attributes": [
@@ -4306,7 +4318,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-04，分支 develop-separate-schema）。主题：issue #9 分析 → 结构读取输出预算落地 → 发布/部署/验证。\n【issue #9】agent-search-diagnosis 真例会话语料（SOC-DEMO OpenCTI 对外，ses_efdb...）：单条 getIntentElementContext(soc-tobe-app-opencti) ≈13,985 tokens 被宿主截断；step-69 input 165k 尖峰。复核：问题真实（单条观测可超宿主上限被从 JSON 中间腰斩）；归因不完全——该调用显式 includeAttributes/includeTestcases（关掉默认投影 ~52% 字节）而 issue 未提；框架已有 boundary/explorationHints + 默认投影。评判：建议 1「下调默认深度」不合理（牺牲常规召回），建议 2 观测压缩属宿主职责，建议 3/4 属 agent 行为指引。\n【落地 A+B】getIntentElementContext / getArchitectureViewContext 新增 maxBytes 输出预算（默认 ARGO_CONTEXT_MAX_BYTES 或 32000；0=无限）。超预算：非焦点成员降级身份(id/type/name)、焦点+boundary/explorationHints 保留、result.truncation 列完整 id 清单 → 始终合法 JSON；语义检索不动。工具描述加 hub 指引（少开 includeAttributes/includeTestcases，先 queryNeo4jGraph 定位再窄读）。read-projection-gain 传 maxBytes:0。\n【边界修复】maxBytes < 焦点元素自身时，保留完整 id 清单并标 overBudgetByFocus（不再为凑预算丢 id）。\n【验收】npm test 678/678；Docker e2e npm run acceptance 10/10、tools 19/19；validate 通过；对已部署产物独立跑 12/12；重启宿主后 live 3/3（元素预算/无限/视图预算）。\n【发布/部署】archgraph-argo-beta@0.27.0-beta.14（--tag latest）→ npm i -g archgraph-argo-beta → argo-deploy -SkipEnv 22/22。提交：02db5f7 / 9a0eab6 / 4e59c2d / c0bd02c / 6adee79 / 705b89c / 4192522（本地未 push，待人类决定）。\n【坑】本机 Clash/DNS 污染 registry.npmjs.org（返回 141.193.154.x 等），ERR_TLS_CERT_ALTNAME_INVALID；重启 Clash 未解；npm 逐条加 --proxy/--https-proxy 127.0.0.1:7890 才通（未改全局）。详见 T2 overseer-lesson-clash-proxy-https-001。\n【待办】①是否 push 到 origin/develop-separate-schema（人类决定）；②stable 是否推进；③issue #9 点3/4（并发取数/停止判据）回给 agent-search-diagnosis skill 作宿主侧建议。T2：overseer-milestone-read-projection-001（已续写预算层）。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-05，分支 develop-separate-schema）。本会话主题：新增 UML 2 状态机 schema，把「Agent 帮助 coding」的业务价值流 + 业绩指标体系建模进意图图。\n【目标】引入 UML 2 状态机建模语言；把 coding 全流程与指标入图，并支持持续评测迭代。\n【进展】\n① 新增工作区 schema bundle <repo>/.argo/schema（extends:'default'（=Acme 基础 ArchiMate 3.2）；addElementTypes: State/Initial State/Final State/Composite State/Choice/Entry Point/Exit Point；addRelationships: Transition；+GUIDE.md）。schemaKind=workspace、bundleValidation passed、现有图校验通过。\n② 修正状态机理解偏差：State=条件而非活动。重建为 Idle / Running(复合: Reasoning/Retrieving/Acting/Verifying/AwaitingResult/Finalizing) / AwaitingUser / Stopped；后台任务=正交区域(BG.Submitted→Running→Done/Failed，完成抛事件跨区域唤醒)。旧 18 态『活动当状态』模型已墓碑删除。\n③ 指标建模：12 个局部/状态指标(Assessment)按『挂到被测动作』原则用 Association 关联；8 个业界整体任务基准(SWE-bench/Verified/Terminal-Bench/HumanEval-MBPP/LiveCodeBench/GAIA/τ-bench/AgentBench)挂状态机主体，终态为观测点。\n④ 局部→整体用 Influence 建模(38 条)；补极性 strength:+/-(关系属性仅允许 name+description，故极性编码在关系名 influences(+/-)）；补局部↔局部权衡(检索召回/工具 −→ 等待时延；记忆/计划 +→ 检索/工具)；新增『指标权衡(决策支持)』视图。\n⑤ 实测覆盖统计并挂到 20 个指标元素(measurement-status + measurement-result)：measured 4(检索/工具/记忆/时延)、partial 5(e2e/成功率/验收/去重/计划)、not_measured 11(含 8 业界基准 + 空闲/回环/登记)。\n【视图】UML 2 State Machine Viewpoint 下 7 个：Coding Agent 状态机 / Running 子状态 / 后台任务区域 / 业界整体任务指标 / 指标分解·代码 / 指标分解·Agent / 指标权衡。\n【决策/教训】Acme=内置 default，用 extends:'default'；State 是条件、行为放转移 effect；跨整体指标挂主体、终态观测；Influence 极性=+改善/-恶化(权衡)；L1 语义门对同型短名(Idle vs AwaitingUser 0.88)假阳性→allowDuplicate+justification；本仓根放 .argo/schema 会覆盖整仓 schema，故必须 extends default，且 tests/schema-bundle.test.js 两处 ROOT→默认包目录修正。\n【验收】tests/uml2-state-machine-bundle.test.js(4 AT) + tests/uml2-coding-statemachine.test.js(8 AT) 共 12/12；validateSystemArchitecture passed。\n【未提交/下一步】尚无 commit(graph/qea/.argo/schema/测试 未提交)→待提交并登记到 uml2-sm-viewpoint；补 11 项未测指标(优先 SWE-bench/Terminal-Bench E2 制度对照：挂 vs 不挂 ArchGraph)；partial 升定量(去重 P/R 套件/计划质量/coding e2e 基准)；Influence 补数值权重以支持可计算权衡；重跑 Docker e2e(npm run acceptance)。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4328,8 +4340,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-04",
-          "description": "会话收尾：issue #9 分析与结构读取输出预算落地/发布/部署/验证"
+          "value": "2026-10-05",
+          "description": "会话收尾：UML 2 schema + coding 状态机 + 指标体系建模（未提交）"
         },
         {
           "name": "commit",
@@ -10837,6 +10849,693 @@
           "description": "release archgraph-argo-beta@0.27.0-beta.10（代理故障期间用直连发布）"
         }
       ]
+    },
+    {
+      "id": "overseer-lesson-argo-mcp-crash-diagnosis-001",
+      "name": "经验：argo MCP「连接被关/反复崩溃」诊断法 + 本次结论（宿主终止 vs 服务端崩溃）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "经验（2026-10-04，项目总管）：诊断 opencode 日志反复出现的 WARN \"MCP connection closed\" server=argo 与 aBot 常驻 MCP 进程硬死。\n【现象】9-11..10-04 多次；每次关闭都发生在某次 argo 工具调用后 0.05–3.6s（多为 apply/addArchitectureElement，也有 queryNeo4jGraph/memory_search，甚至 git status 后）。\n【可复用诊断法】①读每工作区 <ws>/.argo/temp/mcp-crash.log + mcp-phase.json：kind=previous-run-phase 表示上一进程最后相位（硬死、无 exit）；kind=exit 正常退出；kind=uncaughtException JS 异常；把相位与 opencode 关闭时间对齐。②查 Windows WER/Application+System 事件与 Crashpad dumps，判断是否有 OS 级 node 崩溃。③受控复现：ARGO_REPO_ROOT=一次性工作区 + 部署版 argo-mcp-server.js 直连 stdio，加 --report-on-fatalerror/--report-directory 并捕获 stderr/exit。\n【本次结论】aBot pid 37932 最后相位 mutation:embeddingLifecycle @2026-10-04T09:17:31.833Z，markPhase('mutation:done') 从未写入 → 死于 await attachMutationEmbeddingLifecycle 未返回时；该进程无 exit、无 uncaughtException，Windows 无 node WER/AppHang/System 事件 → 硬杀（TerminateProcess 类）。受控复现（单次 + 同进程连续 40 次 live 写入）：embeddingLifecycle=Aligned、RSS ~74MB 平稳、句柄 221→218、到 Neo4j 7687 连接每次回落 0、干净退出 code=0、无 report → argo 写入+语义生命周期代码非本次死因；排除 OOM（aBot 113/archgraph 501 条语义记录）、driver/socket 泄漏、外部 embed 挂死（端点 HTTP200 ~125ms 1536 维）、JS 异常。判定：宿主 opencode 关闭/终止 MCP 子连接（opencode INFO 无原因、且不自动重连，故上会话需手工 stdio 兜底）。\n【坑】不能只凭最后相位断定服务端 bug；必须用‘一次成功复现’证伪确定性缺陷，再区分 native abort（有 node report/WER）与外部 kill（服务端无任何痕迹）。\n【代码观察（非本次死因，勿据此改动，保稳定）】attachMutationEmbeddingLifecycle→persistentReconcile 每次新建 neo4j.driver（mutationEmbeddingVectorLifecycle.js:136-144），projectionStore.close（L241）在该路径为死代码；另有 2 处 properties() 全量物化（mutationEmbeddingVectorLifecycle.js:276 topK100；productionSemanticNeo4jAdapter.js:79 readRecords 全量带 vector），系 2026-09-22 OOM 热修显式 defer 的站点，仅大图需处理。\n【未定/下一步（人类决定，未实施）】给 argo MCP 启动包薄 wrapper 记录 exit code/signal/stderr + --report-on-fatalerror，或临时调 opencode debug 日志，复现一次即可定案终止者。"
+    },
+    {
+      "description": "UML 2 状态机视角（扩展自 Acme 基础 schema：ArchiMate 3.2 + UML 2 state-machine profile）。承载「Coding 业务状态机」的 UML 2 视图：状态以 State 建模、流转以 Transition 建模，指标以 Acme/ArchiMate 的 Assessment 建模并关联到状态。",
+      "id": "uml2-sm-viewpoint",
+      "name": "UML 2 State Machine Viewpoint",
+      "type": "Grouping",
+      "subdiagram_views": [
+        {
+          "view_id": "uml2-coding-statemachine-view-002",
+          "view_name": "Coding Agent 状态机（UML 2）"
+        },
+        {
+          "view_id": "uml2-coding-running-view-002",
+          "view_name": "Running 子状态（可观测）"
+        },
+        {
+          "view_id": "uml2-coding-background-view-002",
+          "view_name": "后台任务区域（正交）"
+        },
+        {
+          "view_id": "uml2-coding-benchmark-view-002",
+          "view_name": "业界整体任务指标（跨整体）"
+        },
+        {
+          "view_id": "uml2-metric-decomp-code-view-002",
+          "view_name": "指标分解·代码任务（整体←局部）"
+        },
+        {
+          "view_id": "uml2-metric-decomp-agent-view-002",
+          "view_name": "指标分解·Agent 任务（整体←局部）"
+        },
+        {
+          "view_id": "uml2-metric-tradeoff-view-002",
+          "view_name": "指标权衡（决策支持）"
+        }
+      ]
+    },
+    {
+      "description": "Coding Agent 状态机的主体：Agent 会话。事件源：user_message / tool_result / background_task_done / timer / stop。",
+      "id": "aos-machine",
+      "name": "Coding Agent 状态机（主体：Agent 会话）",
+      "type": "Composite State"
+    },
+    {
+      "description": "初始伪状态：会话开始。",
+      "id": "aos-initial",
+      "name": "Initial",
+      "type": "Initial State"
+    },
+    {
+      "description": "空闲/待命：无在跑回合，等任意事件（用户消息/后台完成/定时）。",
+      "id": "aos-idle",
+      "name": "Idle（空闲/待命）",
+      "parent": "aos-machine",
+      "type": "State"
+    },
+    {
+      "description": "执行回合：一个回合在执行（内部含子状态）；即“等待自身工具结果”也属于它。",
+      "id": "aos-running",
+      "name": "Running（执行回合）",
+      "parent": "aos-machine",
+      "type": "Composite State"
+    },
+    {
+      "description": "等待用户：回合暂停并提问，等用户答复；也可被后台事件唤醒。",
+      "id": "aos-awaiting-user",
+      "name": "AwaitingUser（等待用户）",
+      "parent": "aos-machine",
+      "type": "State"
+    },
+    {
+      "description": "已停止：会话终止（终态）。",
+      "id": "aos-stopped",
+      "name": "Stopped（已停止）",
+      "parent": "aos-machine",
+      "type": "State"
+    },
+    {
+      "description": "状态级：空闲时长。",
+      "id": "aos-as-idle",
+      "name": "指标·空闲时长",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "尚未测评",
+          "description": "空闲时长未采集"
+        }
+      ]
+    },
+    {
+      "description": "状态级：请示频率、回环轮次。",
+      "id": "aos-as-hitl",
+      "name": "指标·请示频率与回环轮次",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "尚未测评",
+          "description": "请示频率/回环轮次未采集"
+        }
+      ]
+    },
+    {
+      "description": "跨整体：任务完成成功率（到达成功终态的比例），挂主体/终态。",
+      "id": "aos-as-success",
+      "name": "指标·任务完成成功率",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "partial"
+        },
+        {
+          "name": "measurement-result",
+          "value": "memory-eval 100%(31/31)；navigation 20/20；A/B(10题) 100%",
+          "description": "均为自建/小样本域内集，非 coding 闭环整体基准"
+        }
+      ]
+    },
+    {
+      "description": "跨整体：端到端时延/成本/可复现性。",
+      "id": "aos-as-e2e",
+      "name": "指标·端到端时延/成本/可复现",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "partial"
+        },
+        {
+          "name": "measurement-result",
+          "value": "读 ~2.0–2.5s / 写 ~1.1s；4890 token/查询；压缩 94.5%；rerank 开/关准确率一致 0.935（不降召回）",
+          "description": "真实 MCP；缺 coding 闭环端到端基准"
+        }
+      ]
+    },
+    {
+      "description": "子状态：推理/规划。",
+      "id": "aos-reasoning",
+      "name": "Reasoning（推理/规划）",
+      "parent": "aos-running",
+      "type": "State"
+    },
+    {
+      "description": "子状态：检索（KG-first）。",
+      "id": "aos-retrieving",
+      "name": "Retrieving（检索）",
+      "parent": "aos-running",
+      "type": "State"
+    },
+    {
+      "description": "子状态：工具执行/写图谱（经写入门禁）。",
+      "id": "aos-acting",
+      "name": "Acting（工具执行/写图）",
+      "parent": "aos-running",
+      "type": "State"
+    },
+    {
+      "description": "子状态：验收（跑可执行 AT + validate + 回归）。",
+      "id": "aos-verifying",
+      "name": "Verifying（验收）",
+      "parent": "aos-running",
+      "type": "State"
+    },
+    {
+      "description": "子状态：等本回合工具结果（原 Waiting，现作为 Running 子状态）。",
+      "id": "aos-awaiting-result",
+      "name": "AwaitingResult（等工具结果）",
+      "parent": "aos-running",
+      "type": "State"
+    },
+    {
+      "description": "子状态：提交/交付/记忆沉淀。",
+      "id": "aos-finalizing",
+      "name": "Finalizing（提交/交付/沉淀）",
+      "parent": "aos-running",
+      "type": "State"
+    },
+    {
+      "description": "行为指标：计划正确率（挂 Reasoning）。",
+      "id": "aos-as-plan",
+      "name": "指标·计划正确率",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "partial"
+        },
+        {
+          "name": "measurement-result",
+          "value": "代理指标：navigation-eval 20/20（非严格计划正确率）",
+          "description": "缺计划质量专用评测"
+        }
+      ]
+    },
+    {
+      "description": "行为指标：Recall@k/MRR/多跳（挂 Retrieving）。",
+      "id": "aos-as-retrieve",
+      "name": "指标·检索召回与排序",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "vector r@1 94.6 / r@5 99.4 / MRR 0.967；rerank r@1 98.7→99.3–100 / MRR 0.997；策展语义文本 视图 r@1 82.8→91.9、关系 98.1→100；阈值 0.70（分离窗口 0.686–0.833）",
+          "description": "golden 150–725 题，qwen3.7-text-embedding；scripts/eval-retrieval.js / eval-rerank.js；commit a35074c 等"
+        }
+      ]
+    },
+    {
+      "description": "行为指标：工具成功率、轮次（挂 Acting）。",
+      "id": "aos-as-tool",
+      "name": "指标·工具成功率与轮次",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "A/B(10题) ON 臂：成功率 100%、err 0、轮次 −39%、工具 −43%、token −18%",
+          "description": "同仓同模型，唯一变量=是否挂 MCP；results/memory-retrieval-ab-report.json"
+        }
+      ]
+    },
+    {
+      "description": "行为指标：去重P/R、无损率（挂 Acting→写图）。",
+      "id": "aos-as-write",
+      "name": "指标·去重P/R与无损率",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "partial"
+        },
+        {
+          "name": "measurement-result",
+          "value": "L0 精确复用（未新建）；L1 语义门阈值 0.85（实测假阳性 0.853–0.889）；无损门名称合并/acknowledgeLoss",
+          "description": "单测 AT 级，缺定量 P/R 套件"
+        }
+      ]
+    },
+    {
+      "description": "行为指标：验收通过率、回归（挂 Verifying）。",
+      "id": "aos-as-verify",
+      "name": "指标·验收通过率与回归",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "partial"
+        },
+        {
+          "name": "measurement-result",
+          "value": "本模型 AT 12/12；ARGO MCP 回归 38/38；目标 0 fail/0 skip",
+          "description": "node --test；validateSystemArchitecture passed"
+        }
+      ]
+    },
+    {
+      "description": "行为指标：等待/唤醒时延（挂 AwaitingResult）。",
+      "id": "aos-as-wait",
+      "name": "指标·等待/唤醒时延",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "检索 ~2.0–2.5s；写入 ~1.1s；memory 检索 5.7ms（优化前读19/写25s）",
+          "description": "真实 MCP；commit a35074c/132cec1/7eee172"
+        }
+      ]
+    },
+    {
+      "description": "行为指标：提交登记完整率（挂 Finalizing）。",
+      "id": "aos-as-commit",
+      "name": "指标·提交登记完整率",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "尚未测评（流程要求登记，但无完整率统计）",
+          "description": "可由 commit 台账统计"
+        }
+      ]
+    },
+    {
+      "description": "行为指标：记忆准确率与拒答（挂 Finalizing）。",
+      "id": "aos-as-memory",
+      "name": "指标·记忆准确率与拒答",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "整体准确率 100%(31/31)；拒答 100%；检索 5.7ms；4890 token/查询；压缩率 97.1%",
+          "description": "docs/memory-eval-dataset.md（自建 31 题）；scripts/memory-eval-run.js。2026-10 复跑：31/31 通过（MQ-17 期望值随 view 429 子视图数 24→31 同步维护），avgCompressionRatio=0.971、avgRetrievedTokens=8017、avgLatencyMs=289.8"
+        }
+      ]
+    },
+    {
+      "description": "后台任务：正交区域，任务自身生命周期。",
+      "id": "aos-bg-machine",
+      "name": "后台任务（Region B）",
+      "type": "Composite State"
+    },
+    {
+      "description": "后台任务已提交。",
+      "id": "aos-bg-submitted",
+      "name": "BG.Submitted（已提交）",
+      "parent": "aos-bg-machine",
+      "type": "State"
+    },
+    {
+      "description": "后台任务运行中。",
+      "id": "aos-bg-running",
+      "name": "BG.Running（运行中）",
+      "parent": "aos-bg-machine",
+      "type": "State"
+    },
+    {
+      "description": "后台任务完成（抛 background_task_done）。",
+      "id": "aos-bg-done",
+      "name": "BG.Done（完成）",
+      "parent": "aos-bg-machine",
+      "type": "State"
+    },
+    {
+      "description": "后台任务失败。",
+      "id": "aos-bg-failed",
+      "name": "BG.Failed（失败）",
+      "parent": "aos-bg-machine",
+      "type": "State"
+    },
+    {
+      "description": "业界：SWE-bench 真实 GitHub issue 修复的 Resolved%。",
+      "id": "aos-as-swebench",
+      "name": "指标·SWE-bench Resolved%",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "未跑（无实测）",
+          "description": "需 E2 制度对照（挂 vs 不挂 ArchGraph）"
+        }
+      ]
+    },
+    {
+      "description": "业界：SWE-bench Verified（人工校验子集）的 Resolved%。",
+      "id": "aos-as-sweverified",
+      "name": "指标·SWE-bench Verified Resolved%",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "未跑（无实测）",
+          "description": "同上"
+        }
+      ]
+    },
+    {
+      "description": "业界：Terminal-Bench 终端/CLI 任务的成功率。",
+      "id": "aos-as-terminalbench",
+      "name": "指标·Terminal-Bench 任务成功率",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "未跑（无实测）",
+          "description": "同上"
+        }
+      ]
+    },
+    {
+      "description": "业界：HumanEval / MBPP 函数级代码的 pass@k。",
+      "id": "aos-as-codegen",
+      "name": "指标·HumanEval/MBPP pass@k",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "未跑（不适用/未测）",
+          "description": "函数级代码生成；框架侧未接"
+        }
+      ]
+    },
+    {
+      "description": "业界：LiveCodeBench 防污染代码基准 pass@1。",
+      "id": "aos-as-livecodebench",
+      "name": "指标·LiveCodeBench pass@1",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "未跑（无实测）",
+          "description": "同上"
+        }
+      ]
+    },
+    {
+      "description": "业界：GAIA 通用 Agent 任务成功率。",
+      "id": "aos-as-gaia",
+      "name": "指标·GAIA 任务成功率",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "未跑（无实测）",
+          "description": "通用 Agent 任务"
+        }
+      ]
+    },
+    {
+      "description": "业界：τ-bench（tau-bench）工具-用户交互 pass^k。",
+      "id": "aos-as-taubench",
+      "name": "指标·τ-bench pass^k",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "未跑（无实测）",
+          "description": "工具-用户交互"
+        }
+      ]
+    },
+    {
+      "description": "业界：AgentBench 多环境 Agent 任务成功率。",
+      "id": "aos-as-agentbench",
+      "name": "指标·AgentBench 任务成功率",
+      "type": "Assessment",
+      "attributes": [
+        {
+          "name": "measurement-status",
+          "value": "not_measured"
+        },
+        {
+          "name": "measurement-result",
+          "value": "未跑（无实测）",
+          "description": "多环境 Agent"
+        }
+      ]
+    },
+    {
+      "id": "overseer-milestone-uml2-statemachine-metric-model-001",
+      "name": "里程碑：UML 2 状态机 + 指标体系建模（coding 业务价值流）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-10-05，项目总管，分支 develop-separate-schema）：用 UML 2 状态机把「Agent 帮助 coding」业务价值流 + 业绩指标体系建模进意图图。交付：① 工作区 schema bundle <repo>/.argo/schema extends 'default'(Acme=ArchiMate 3.2)，新增 UML 2 State/Initial/Final/Composite/Choice/EntryPoint/ExitPoint + Transition（schemaKind=workspace，校验通过）；② 重建状态机为 Idle / Running(复合子态 Reasoning/Retrieving/Acting/Verifying/AwaitingResult/Finalizing) / AwaitingUser / Stopped + 后台任务正交区域（旧 18 态活动当状态模型已墓碑删除）；③ 12 局部/状态指标(Assessment)按被测动作关联 + 8 业界整体基准(SWE-bench/Verified/Terminal-Bench/HumanEval-MBPP/LiveCodeBench/GAIA/τ-bench/AgentBench)挂主体；④ 局部→整体 Influence 分解(38) + 极性 strength:+/-(编码于关系名 influences(+/-)) + 局部↔局部权衡 + 『指标权衡(决策支持)』视图；⑤ 20 指标实测覆盖(measured 4 / partial 5 / not_measured 11)写入 measurement-status+measurement-result 属性供迭代。视图共 7 个（UML 2 State Machine Viewpoint 下）。验收 tests/uml2-state-machine-bundle.test.js + tests/uml2-coding-statemachine.test.js 12/12；未提交。下一步：提交并登记到 uml2-sm-viewpoint；补 11 项未测（优先 SWE-bench/Terminal-Bench E2 制度对照）；partial 升定量；Influence 补权重；重跑 Docker e2e。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ]
+    },
+    {
+      "attributes": [],
+      "description": "汇报 PPT 第 1 页内容（正文全文见 docs/ppt/content-plan.json pages[0]）。主体＝一次 Agent 会话（Coding 业务单元）。左 3/4：状态机（主体区域 Idle / Running 复合态〔Reasoning→Retrieving→Acting→AwaitingResult→Reasoning 主回路；Verifying 失败回流 Acting、通过进 Finalizing〕/ AwaitingUser / Stopped；正交区域 B 后台任务 Submitted→Running→Done/Failed，Done 抛 background_task_done 跨区域唤醒主区域），16 个标号（S1–S11 状态、T1–T12 转移）。右：按标号逐条简释（一句一条，含该状态/转移挂的指标名）。底部：价值阶段 ↔ 12 项行为指标锚点表。关键转移：T1 user_message[需外部动作]→Running；T2–T4 主回路；T5 验收失败回流 Acting；T6 验收通过→Finalizing；T7/T8 人工请示与答复回路；T10 后台完成唤醒；T11/T12 stop→Stopped。",
+      "id": "deck-p1-coding-statemachine-001",
+      "name": "PPT P1：Coding 业务全景状态机（业务价值流程 + 关键转移）",
+      "testcases": [],
+      "type": "Business Object"
+    },
+    {
+      "attributes": [],
+      "description": "汇报 PPT 第 2 页内容（正文全文见 docs/ppt/content-plan.json pages[1]）。左：先进实践 6 例（OpenAI Harness Engineering 3 人/5 月/100 万行/手写 0 行；Bun Zig→Rust 535,496 行/11 天/~6,700 commits/~$165k；Anthropic 大规模迁移六步法「不要修代码，要修产生代码的循环」；DHH 近乎全量 Agent 重写 3h11m / 2.1 万行；Codex CLI TS→Rust ≈95.7% Rust；Mitchell Hashimoto 单 Agent 深度参与对照路线）+ 痛点 6 条（GitClear 重复块 4 倍、churn +27%；DORA 2025 吞吐↑但交付不稳定↑、verification tax；Stack Overflow 46% 不信任；METR RCT 实测慢 19%；Chroma Context Rot 长上下文退化；Bun 测试全绿合入后仍 19 个回归）+ 启发 5 条与结论（缺的不是更强模型，而是人与 Agent 都能读写的共同语言 + 可查上下文 + 可执行门禁平台）。右：Arc 框架解决方案四块（本体＝共同语言 / 图谱＝承载方式 / 窗口＝双向读写 / 从单项目到组织）。本页含来源口径声明。",
+      "id": "deck-p2-industry-pain-practice-001",
+      "name": "PPT P2：业界痛点与先进实践 → 缺的是人与 Agent 的共同语言",
+      "testcases": [],
+      "type": "Business Object"
+    },
+    {
+      "attributes": [],
+      "description": "汇报 PPT 第 3 页内容（正文全文见 docs/ppt/content-plan.json pages[2]）。左：9 个状态/阶段与 12 项行为指标的映射（挂到被测动作）。右：20 个指标的完整表（指标/分组 · 状态机映射 · 状态 · 我方评测结果 · 业界口径 · Gap 与优化方向），状态分布 4 measured / 5 partial / 11 not_measured（measured = memory/retrieve/tool/wait）。结论：已定量 4 项都落在框架真正提供能力的环节（检索/执行/沉淀）；最大 Gap 在整体任务层（8 个业界基准全部未跑、整体成功率仅自建小样本 partial）。优化方向 P0 整体基准 + 制度对照（SWE-bench Verified / Terminal-Bench，同仓同模型挂 vs 不挂）、P1 局部补定量（去重 P/R、计划质量、登记完整率、唤醒时延）、P2 与公开口径对齐。",
+      "id": "deck-p3-metric-system-001",
+      "name": "PPT P3：指标体系（指标↔状态机映射 · 我方评测 · 业界 Gap）",
+      "testcases": [],
+      "type": "Business Object"
+    },
+    {
+      "attributes": [],
+      "description": "汇报 PPT 第 4 页内容（正文全文见 docs/ppt/content-plan.json pages[3]）。左 1/2：业界通用流程 8 环节（写入：L1 数据接入与治理 / L2 解析与切块 / L3 嵌入与索引 / L4 图构建与对齐；检索：L5 召回 / L6 融合与重排；生成与闭环：L7 生成与 grounding / L8 评估与迭代），含评估反馈回到索引/权重/提示的闭环。右上：单项目 Graph MCP 供给面 7 组（R1 语义 / R2 上下文 / R3 结构 / W1 对象 / W2 批次 / W3 门禁链 / X1 跨项目）。右下：(a) 环节覆盖 8/8（L2 以本体替代切块、L4 partial 因社区索引暂缓）+ (b) 每环节映射到第 3 页指标编号 + (c) 度量结果（检索召回 r@1 94.6→98.7；读 2.0–2.5s / 写 1.1s；记忆 5.7ms、压缩 97.1%；挂 MCP 工具 −43% / token −18%）+ Gap 四条。",
+      "id": "deck-p4-graph-rag-flow-001",
+      "name": "PPT P4：检索的一级通用流程（Graph RAG 全景 · 覆盖 · 指标 · 度量）",
+      "testcases": [],
+      "type": "Business Object"
+    },
+    {
+      "attributes": [],
+      "description": "汇报 PPT 第 5 页内容（正文全文见 docs/ppt/content-plan.json pages[4]）。上 1/5：整体方案——单个 ArcGraph 项目＝一个自治的知识图谱单元（含本领域本体的治理与消费），以联邦方式组合即组织级知识图谱；三点：积木（canonical 图主权）/ 联邦（自注册→发现→显式授权默认拒绝→引用不拷贝，中心只持元数据 + 只读镜像）/ 价值（领域自治 + 组合即组织级知识库）。下左 1/4：三大好处（质量按领域专业化；闭环且地基已铺好——MCP 已代做去重/无损/结构校验，业务只做语义治理；统一权限与授权）。下中：联邦组合示意（组织级知识库 ← 联邦中心 registry+broker graph://argo.derekworkspacev5.com〔注册/发现/授权/跨项目读取/镜像托管〕← 成员项目积木）。下右：图注 4 条。状态快照：已注册成员 23、已授权关系 45、archgraph 对外授权 graph-wiki 与 new-era-cybersecurity-strategy、跨项目读 projectId=soc-demo 实读（386 元素、namespaceKey 回传）。",
+      "id": "deck-p5-federated-org-graph-001",
+      "name": "PPT P5：联邦式组织级知识图谱（用 ArcGraph 项目当积木）",
+      "testcases": [],
+      "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "ppt",
+          "value": "docs/ppt/archgraph-coding-business-deck.pptx"
+        },
+        {
+          "name": "preview",
+          "value": "docs/ppt/preview.html"
+        },
+        {
+          "name": "plan",
+          "value": "docs/ppt/content-plan.json"
+        }
+      ],
+      "description": "汇报 PPTX 交付物（5 页 16:9）：docs/ppt/archgraph-coding-business-deck.pptx。每页＝整页深色图（docs/ppt/assets/pN-*.png，1600x900）作为底图 + 由生成器从源 SVG 的 text 节点重建的原生文本框覆盖（文字可选、可编辑、可搜索：P1 128、P2 84、P3 271、P4 120、P5 79 个文本框）。同源产物：content-plan.json（内容单一事实源）、p1..p5 SVG/PNG、preview.html（浏览器预览）。生成命令：node scripts/gen-coding-deck.js --check && node scripts/rasterize-coding-deck.js && python scripts/build-coding-deck-pptx.py（或 npm run gen:deck）。",
+      "id": "coding-business-deck-pptx-001",
+      "name": "交付物：Coding 业务价值汇报 PPTX（5 页 16:9）",
+      "testcases": [],
+      "type": "Deliverable"
+    },
+    {
+      "description": "按人类伙伴给定的 5 页大纲编制汇报 PPT（面向评审）。逐页要求：P1 用状态机表达 Coding 业务价值流程（复用意图图 UML 2 状态机：Idle / Running 复合子态 / AwaitingUser / Stopped + 后台正交区域），左侧约 3/4 画状态机并用标号标注关键状态与关键转移，右侧按序号逐条简释；P2 业界痛点与先进实践（左上实践、左下痛点与启发、右侧我方 Arc 框架方案：本体＝共同语言、图谱＝承载方式）；P3 指标体系（20 个指标 ↔ 状态机映射、我方评测结果、业界 Gap 与优化方向）；P4 检索的一级通用流程（左：业界 Graph RAG 通用流程 写入→检索→生成→评估闭环；右上：单项目 Graph MCP 供给面；右下：环节覆盖、指标映射、度量结果）；P5 基于 ArcGraph 的联邦式组织级知识图谱方案（上：整体方案；下左：三大好处；下中：联邦组合示意；下右：图注）。交付物：docs/ppt/content-plan.json（内容单一事实源）、docs/ppt/assets/p1..p5*.svg + png、docs/ppt/archgraph-coding-business-deck.pptx（5 页 16:9，整页图 + 可编辑文本框）、docs/ppt/preview.html（浏览器预览）。生成链：scripts/gen-coding-deck.js（SVG+预览）→ scripts/rasterize-coding-deck.js（PNG 1600x900）→ scripts/build-coding-deck-pptx.py（PPTX）。验收：tests/coding-business-deck.test.js（AT-coding-deck-01..09，可执行）。",
+      "id": "wp-coding-business-deck-001",
+      "name": "编制 Coding 业务价值汇报 PPT（5 页：状态机/痛点实践/指标/Graph RAG/联邦）",
+      "testcases": [
+        {
+          "Input": "tests/coding-business-deck.test.js",
+          "acceptanceCriteria": "tests/coding-business-deck.test.js",
+          "description": "GIVEN 汇报大纲的 5 页内容计划（docs/ppt/content-plan.json）；WHEN 检查页面顺序与每页必备内容；THEN 5 页按 P1..P5 排列，P1 有 ≥12 个状态/转移标号、P2 有实践与痛点各 ≥4 条且方案含本体+图谱、P3 列出全部 20 个指标且每个都有状态映射/结果/业界/优化、P4 通用流程 8 环节且 8 个环节都有我方覆盖与指标映射、P5 三大好处与图注齐备。",
+          "name": "AT-coding-deck-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/coding-business-deck.test.js",
+          "acceptanceCriteria": "tests/coding-business-deck.test.js",
+          "description": "GIVEN PPT 引用的所有意图图谱 id（状态机状态/转移、20 个指标元素）；WHEN 在 canonical 图谱中逐个解析；THEN 全部存在（无悬空引用），保证汇报内容与图谱同源。",
+          "name": "AT-coding-deck-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/coding-business-deck.test.js",
+          "acceptanceCriteria": "tests/coding-business-deck.test.js",
+          "description": "GIVEN P1 的标号清单；WHEN 与图谱比对；THEN ≥8 个标号解析为 State/Composite State/Initial State、≥4 个解析为 Transition 关系，标号 1..n 连续，且 Running 的六子态（Reasoning/Retrieving/Acting/Verifying/AwaitingResult/Finalizing）全部在解释清单中。",
+          "name": "AT-coding-deck-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/coding-business-deck.test.js",
+          "acceptanceCriteria": "tests/coding-business-deck.test.js",
+          "description": "GIVEN 20 个指标元素的 measurement-status / measurement-result 属性；WHEN 与 P3 表格逐行比对；THEN 20 行的 status 与图谱完全一致，measured=4（memory/retrieve/tool/wait）、partial=5、not_measured=11。",
+          "name": "AT-coding-deck-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/coding-business-deck.test.js",
+          "acceptanceCriteria": "tests/coding-business-deck.test.js",
+          "description": "GIVEN P4 的环节覆盖表与 P3 指标编号；WHEN 解析每个环节的指标单元格；THEN 每个引用的指标编号都存在于 P3 的 20 个指标中，且 Graph MCP 供给面列出的工具名是真实工具名（getSystemArchitecture/getIntentElementContext/getArchitectureViewContext/queryNeo4jGraph/memory_search/applySystemArchitectureMutation）。",
+          "name": "AT-coding-deck-05",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/coding-business-deck.test.js",
+          "acceptanceCriteria": "tests/coding-business-deck.test.js",
+          "description": "GIVEN 交付物目录 docs/ppt；WHEN 检查产物；THEN 5 个 SVG（1280x720）+ 5 个 PNG（真 PNG 头、>20KB）+ preview.html + PPTX 全部存在且非平凡。",
+          "name": "AT-coding-deck-06",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/coding-business-deck.test.js",
+          "acceptanceCriteria": "tests/coding-business-deck.test.js",
+          "description": "GIVEN 生成的 PPTX；WHEN 打开 slide XML；THEN 恰好 5 页、每页内嵌整页图、每页携带该页 kicker 与标题文本。",
+          "name": "AT-coding-deck-07",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/coding-business-deck.test.js",
+          "acceptanceCriteria": "tests/coding-business-deck.test.js",
+          "description": "GIVEN PPTX 的可编辑文字层；WHEN 抽取第 1 页与第 3 页的 <a:t> 文本；THEN 第 1 页含 Idle/Running/Reasoning/Retrieving/Acting/Verifying/Finalizing/AwaitingResult 与页面标题，第 3 页含全部 20 个指标名（文字可搜索、可编辑，而非只有像素）。",
+          "name": "AT-coding-deck-08",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/coding-business-deck.test.js",
+          "acceptanceCriteria": "tests/coding-business-deck.test.js",
+          "description": "GIVEN P1 的 SVG；WHEN 统计文本节点的 x 分布；THEN 左侧（x<900）文本节点多于右侧，且右侧标号列有 >20 个文本节点、标号 1 已绘制 —— 即左 3/4 状态机 + 右标号简释的排版成立。",
+          "name": "AT-coding-deck-09",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "里程碑（2026-10，项目总管，分支 develop-separate-schema）：按人类伙伴给定的 5 页大纲交付 Coding 业务价值汇报 PPT，并顺带修复两个因图谱长大而失效的旧验收/基准。\n【交付】docs/ppt/content-plan.json（内容单一事实源）+ assets/p1..p5 SVG(1280x720)/PNG(1600x900) + archgraph-coding-business-deck.pptx（5 页 16:9，整页图底 + 共 682 个原生可编辑文本框）+ preview.html。生成链：scripts/gen-coding-deck.js → scripts/rasterize-coding-deck.js → scripts/build-coding-deck-pptx.py（npm run gen:deck）。验收 tests/coding-business-deck.test.js（AT-coding-deck-01..09，9/9）。图谱：视图 comm-2026-10-view-001（沟通材料 2026-10）+ WP wp-coding-business-deck-001（含 9 条 AT）+ 5 个页面内容元素 + Deliverable coding-business-deck-pptx-001。\n【关键决策】(1) 内容单一事实源放 content-plan.json，SVG/PNG/PPTX/预览与验收全部由它派生 —— 避免图文不一致（AT-04 直接拿 20 个指标的 measurement-status 与图谱逐行对挖）。(2) PPTX = 整页 PNG 底图 + 从源 SVG 的 text 节点重建的原生文本框（文字可选/可编辑/可搜索，AT-08 验证），而 SVG 保留为可改源。(3) 五页排版严格按人类要求：P1 左 3/4 状态机 + 右 16 标号简释 + 底部指标锚点；P4 左 1/2 通用流程 + 右上 Graph MCP + 右下 覆盖/指标映射/度量结果；P5 上整体方案 + 下左三大好处 + 下中组合示意 + 下右图注。\n【证据治理】P2 业界数字逐条附 URL；委托验证分析师（web_search/web_fetch，未用 BAILIAN）拿回后修正了原拟叙述：① 去掉了无法核实的『UN 框架 99% 由 Agent 重写』，换成可完整验证的 Bun Zig→Rust（535,496 行/1,448 文件/11 天/~6,700 commits/~$165k）并明确备注官方未提『99%』；② GitClear 改为可核实的『重复块 4 倍 + churn 27%』（删掉未核实的 8 倍）；③ 去掉拿不到一手分数、只能二手转述的榜单一手分数（故不引用 SWE-bench 具体分），改为可核实的 DORA 2025 verification tax、Stack Overflow 46% 不信任、METR RCT 实测慢 19%、Chroma Context Rot、Bun 合入后 19 个回归。页面明写来源口径声明。\n【发现并修复的存量失效（属图谱长大的滞后，不是框架缺陷）】① tests/architecture-view-context.test.js 视图 429 子视图期望停留在 24，上会话新增 UML 2 视角 7 个子视图后应为 31 → 同步；② scripts/memory-eval-run.js MQ-17 同样因子视图数变化而失败（且 dataset 文档还写着 15）→ 同步为 31 并在题集文档里注明『该值需随图增长维护，属题集维护而非记忆退化』；③ tests/ea-web-service-impl.test.js『真实 MCP 写图回滚』变为静默 skip：它把 canonical 图拷到临时工作区但没带 .argo/schema bundle，而图中已有 State/Composite State/Transition 等 bundle 新增类型 → 解析回落到内置默认 bundle、写入被图谱校验以 TYPES 拒收；修复＝临时工作区同时拷入本仓 .argo/schema，并把『失败就 skip』改为断言必须成功（skip 会隐藏失效）。③ 是本次最重要的教训。\n【回归】npm test 699/699 pass、0 fail、0 skip（前：696/2fail/1skip）；validateSystemArchitecture 通过（写图调用均返回 passed）。\n【数字纪律】把 aos-as-memory 的压缩率由旧 94.5% 更新为本次实测 97.1%；P4 度量卡同步（避免文档滞后于实测）。\n【待办】① 人类伙伴审阅版面文字密度（每页信息量偏大）与『Arcanate』术语（本仓实际叫 Acme base = ArchiMate 3.2 + ARGO 扩展，无 Arcanate）；② P3 的 8 个业界基准仍未跑（E1/E2 制度对照）；③ Docker e2e（npm run acceptance）未跑。",
+      "id": "overseer-milestone-coding-business-deck-001",
+      "name": "里程碑：Coding 业务价值汇报 PPT（5 页）+ 旧验收/基准随图长大的同步修复",
+      "testcases": [
+        {
+          "Input": "tests/coding-business-deck.test.js",
+          "acceptanceCriteria": "tests/coding-business-deck.test.js",
+          "description": "GIVEN 交付的 5 页汇报 PPT（content-plan.json + 5 SVG/PNG + PPTX + preview.html）与图谱登记；WHEN 检查页面结构、图谱 id 同源、20 指标与 measurement 属性逐行一致、产物存在且可读、PPTX 可编辑文字层齐备；THEN AT-coding-deck-01..09 全部通过（9/9），且 npm test 699/699 pass / 0 fail / 0 skip。",
+          "name": "AT-overseer-coding-business-deck-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/architecture-view-context.test.js",
+          "acceptanceCriteria": "tests/architecture-view-context.test.js",
+          "description": "GIVEN 视图 429 的子视图集合（含 UML 2 视角挂载的 7 个子视图）；WHEN 调用 getArchitectureViewContext view_id=429 includeChildViews=true；THEN childViews 恰为 31 个（含 uml2-* 七个），且 geometry 相关断言不变。",
+          "name": "AT-overseer-coding-business-deck-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/ea-web-service-impl.test.js",
+          "acceptanceCriteria": "tests/ea-web-service-impl.test.js",
+          "description": "GIVEN 一个带本仓 .argo/schema bundle 与 canonical 图副本的临时工作区（图内含 bundle 新增类型 State/Transition）；WHEN 通过适配器真实 addArchitectureElement 再 removeArchitectureElement；THEN add 必须成功（不得 skip）、元素数量恢复、目标元素被移除。",
+          "name": "AT-overseer-coding-business-deck-03",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -12009,6 +12708,1118 @@
       "target_id": "acceptance-guardian-001",
       "target_name": "验收看护服务（Acceptance Guardianship）",
       "type": "Association"
+    },
+    {
+      "id": "aos-t-init-idle",
+      "name": "ev_start",
+      "source_id": "aos-initial",
+      "source_name": "Initial",
+      "statement": "Initial --(Transition)--> Idle（空闲/待命）",
+      "target_id": "aos-idle",
+      "target_name": "Idle（空闲/待命）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-idle-running",
+      "name": "user_message[需外部动作]",
+      "source_id": "aos-idle",
+      "source_name": "Idle（空闲/待命）",
+      "statement": "Idle（空闲/待命） --(Transition)--> Running（执行回合）",
+      "target_id": "aos-running",
+      "target_name": "Running（执行回合）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-idle-idle",
+      "name": "user_message[无需外部动作]",
+      "source_id": "aos-idle",
+      "source_name": "Idle（空闲/待命）",
+      "statement": "Idle（空闲/待命） --(Transition)--> Idle（空闲/待命）",
+      "target_id": "aos-idle",
+      "target_name": "Idle（空闲/待命）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-idle-awaiting",
+      "name": "user_message[需澄清]",
+      "source_id": "aos-idle",
+      "source_name": "Idle（空闲/待命）",
+      "statement": "Idle（空闲/待命） --(Transition)--> AwaitingUser（等待用户）",
+      "target_id": "aos-awaiting-user",
+      "target_name": "AwaitingUser（等待用户）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-idle-running-bg",
+      "name": "background_task_done",
+      "source_id": "aos-idle",
+      "source_name": "Idle（空闲/待命）",
+      "statement": "Idle（空闲/待命） --(Transition)--> Running（执行回合）",
+      "target_id": "aos-running",
+      "target_name": "Running（执行回合）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-running-idle",
+      "name": "turn_done",
+      "source_id": "aos-running",
+      "source_name": "Running（执行回合）",
+      "statement": "Running（执行回合） --(Transition)--> Idle（空闲/待命）",
+      "target_id": "aos-idle",
+      "target_name": "Idle（空闲/待命）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-running-awaiting",
+      "name": "need_clarification",
+      "source_id": "aos-running",
+      "source_name": "Running（执行回合）",
+      "statement": "Running（执行回合） --(Transition)--> AwaitingUser（等待用户）",
+      "target_id": "aos-awaiting-user",
+      "target_name": "AwaitingUser（等待用户）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-awaiting-running",
+      "name": "user_reply",
+      "source_id": "aos-awaiting-user",
+      "source_name": "AwaitingUser（等待用户）",
+      "statement": "AwaitingUser（等待用户） --(Transition)--> Running（执行回合）",
+      "target_id": "aos-running",
+      "target_name": "Running（执行回合）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-awaiting-running-bg",
+      "name": "background_task_done",
+      "source_id": "aos-awaiting-user",
+      "source_name": "AwaitingUser（等待用户）",
+      "statement": "AwaitingUser（等待用户） --(Transition)--> Running（执行回合）",
+      "target_id": "aos-running",
+      "target_name": "Running（执行回合）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-idle-stopped",
+      "name": "stop",
+      "source_id": "aos-idle",
+      "source_name": "Idle（空闲/待命）",
+      "statement": "Idle（空闲/待命） --(Transition)--> Stopped（已停止）",
+      "target_id": "aos-stopped",
+      "target_name": "Stopped（已停止）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-running-stopped",
+      "name": "stop",
+      "source_id": "aos-running",
+      "source_name": "Running（执行回合）",
+      "statement": "Running（执行回合） --(Transition)--> Stopped（已停止）",
+      "target_id": "aos-stopped",
+      "target_name": "Stopped（已停止）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-awaiting-stopped",
+      "name": "stop",
+      "source_id": "aos-awaiting-user",
+      "source_name": "AwaitingUser（等待用户）",
+      "statement": "AwaitingUser（等待用户） --(Transition)--> Stopped（已停止）",
+      "target_id": "aos-stopped",
+      "target_name": "Stopped（已停止）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-a-machine-success",
+      "name": "measures",
+      "source_id": "aos-machine",
+      "source_name": "Coding Agent 状态机（主体：Agent 会话）",
+      "statement": "Coding Agent 状态机（主体：Agent 会话） --(Association)--> 指标·任务完成成功率",
+      "target_id": "aos-as-success",
+      "target_name": "指标·任务完成成功率",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-machine-e2e",
+      "name": "measures",
+      "source_id": "aos-machine",
+      "source_name": "Coding Agent 状态机（主体：Agent 会话）",
+      "statement": "Coding Agent 状态机（主体：Agent 会话） --(Association)--> 指标·端到端时延/成本/可复现",
+      "target_id": "aos-as-e2e",
+      "target_name": "指标·端到端时延/成本/可复现",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-idle-idle",
+      "name": "measures",
+      "source_id": "aos-idle",
+      "source_name": "Idle（空闲/待命）",
+      "statement": "Idle（空闲/待命） --(Association)--> 指标·空闲时长",
+      "target_id": "aos-as-idle",
+      "target_name": "指标·空闲时长",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-awaiting-hitl",
+      "name": "measures",
+      "source_id": "aos-awaiting-user",
+      "source_name": "AwaitingUser（等待用户）",
+      "statement": "AwaitingUser（等待用户） --(Association)--> 指标·请示频率与回环轮次",
+      "target_id": "aos-as-hitl",
+      "target_name": "指标·请示频率与回环轮次",
+      "type": "Association"
+    },
+    {
+      "id": "aos-t-reasoning-retrieving",
+      "name": "需上下文",
+      "source_id": "aos-reasoning",
+      "source_name": "Reasoning（推理/规划）",
+      "statement": "Reasoning（推理/规划） --(Transition)--> Retrieving（检索）",
+      "target_id": "aos-retrieving",
+      "target_name": "Retrieving（检索）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-retrieving-reasoning",
+      "name": "检索结果",
+      "source_id": "aos-retrieving",
+      "source_name": "Retrieving（检索）",
+      "statement": "Retrieving（检索） --(Transition)--> Reasoning（推理/规划）",
+      "target_id": "aos-reasoning",
+      "target_name": "Reasoning（推理/规划）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-reasoning-acting",
+      "name": "决定动作",
+      "source_id": "aos-reasoning",
+      "source_name": "Reasoning（推理/规划）",
+      "statement": "Reasoning（推理/规划） --(Transition)--> Acting（工具执行/写图）",
+      "target_id": "aos-acting",
+      "target_name": "Acting（工具执行/写图）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-acting-awaiting",
+      "name": "已派发",
+      "source_id": "aos-acting",
+      "source_name": "Acting（工具执行/写图）",
+      "statement": "Acting（工具执行/写图） --(Transition)--> AwaitingResult（等工具结果）",
+      "target_id": "aos-awaiting-result",
+      "target_name": "AwaitingResult（等工具结果）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-awaiting-reasoning",
+      "name": "工具结果",
+      "source_id": "aos-awaiting-result",
+      "source_name": "AwaitingResult（等工具结果）",
+      "statement": "AwaitingResult（等工具结果） --(Transition)--> Reasoning（推理/规划）",
+      "target_id": "aos-reasoning",
+      "target_name": "Reasoning（推理/规划）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-reasoning-verifying",
+      "name": "实现完成",
+      "source_id": "aos-reasoning",
+      "source_name": "Reasoning（推理/规划）",
+      "statement": "Reasoning（推理/规划） --(Transition)--> Verifying（验收）",
+      "target_id": "aos-verifying",
+      "target_name": "Verifying（验收）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-verifying-acting",
+      "name": "验收失败",
+      "source_id": "aos-verifying",
+      "source_name": "Verifying（验收）",
+      "statement": "Verifying（验收） --(Transition)--> Acting（工具执行/写图）",
+      "target_id": "aos-acting",
+      "target_name": "Acting（工具执行/写图）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-verifying-finalizing",
+      "name": "验收通过",
+      "source_id": "aos-verifying",
+      "source_name": "Verifying（验收）",
+      "statement": "Verifying（验收） --(Transition)--> Finalizing（提交/交付/沉淀）",
+      "target_id": "aos-finalizing",
+      "target_name": "Finalizing（提交/交付/沉淀）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-a-reasoning-plan",
+      "name": "measures",
+      "source_id": "aos-reasoning",
+      "source_name": "Reasoning（推理/规划）",
+      "statement": "Reasoning（推理/规划） --(Association)--> 指标·计划正确率",
+      "target_id": "aos-as-plan",
+      "target_name": "指标·计划正确率",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-retrieving-retrieve",
+      "name": "measures",
+      "source_id": "aos-retrieving",
+      "source_name": "Retrieving（检索）",
+      "statement": "Retrieving（检索） --(Association)--> 指标·检索召回与排序",
+      "target_id": "aos-as-retrieve",
+      "target_name": "指标·检索召回与排序",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-acting-tool",
+      "name": "measures",
+      "source_id": "aos-acting",
+      "source_name": "Acting（工具执行/写图）",
+      "statement": "Acting（工具执行/写图） --(Association)--> 指标·工具成功率与轮次",
+      "target_id": "aos-as-tool",
+      "target_name": "指标·工具成功率与轮次",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-acting-write",
+      "name": "measures",
+      "source_id": "aos-acting",
+      "source_name": "Acting（工具执行/写图）",
+      "statement": "Acting（工具执行/写图） --(Association)--> 指标·去重P/R与无损率",
+      "target_id": "aos-as-write",
+      "target_name": "指标·去重P/R与无损率",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-verifying-verify",
+      "name": "measures",
+      "source_id": "aos-verifying",
+      "source_name": "Verifying（验收）",
+      "statement": "Verifying（验收） --(Association)--> 指标·验收通过率与回归",
+      "target_id": "aos-as-verify",
+      "target_name": "指标·验收通过率与回归",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-awaiting-wait",
+      "name": "measures",
+      "source_id": "aos-awaiting-result",
+      "source_name": "AwaitingResult（等工具结果）",
+      "statement": "AwaitingResult（等工具结果） --(Association)--> 指标·等待/唤醒时延",
+      "target_id": "aos-as-wait",
+      "target_name": "指标·等待/唤醒时延",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-finalizing-commit",
+      "name": "measures",
+      "source_id": "aos-finalizing",
+      "source_name": "Finalizing（提交/交付/沉淀）",
+      "statement": "Finalizing（提交/交付/沉淀） --(Association)--> 指标·提交登记完整率",
+      "target_id": "aos-as-commit",
+      "target_name": "指标·提交登记完整率",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-finalizing-memory",
+      "name": "measures",
+      "source_id": "aos-finalizing",
+      "source_name": "Finalizing（提交/交付/沉淀）",
+      "statement": "Finalizing（提交/交付/沉淀） --(Association)--> 指标·记忆准确率与拒答",
+      "target_id": "aos-as-memory",
+      "target_name": "指标·记忆准确率与拒答",
+      "type": "Association"
+    },
+    {
+      "id": "aos-t-bg-submitted-running",
+      "name": "派发",
+      "source_id": "aos-bg-submitted",
+      "source_name": "BG.Submitted（已提交）",
+      "statement": "BG.Submitted（已提交） --(Transition)--> BG.Running（运行中）",
+      "target_id": "aos-bg-running",
+      "target_name": "BG.Running（运行中）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-bg-running-done",
+      "name": "完成",
+      "source_id": "aos-bg-running",
+      "source_name": "BG.Running（运行中）",
+      "statement": "BG.Running（运行中） --(Transition)--> BG.Done（完成）",
+      "target_id": "aos-bg-done",
+      "target_name": "BG.Done（完成）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-bg-running-failed",
+      "name": "失败",
+      "source_id": "aos-bg-running",
+      "source_name": "BG.Running（运行中）",
+      "statement": "BG.Running（运行中） --(Transition)--> BG.Failed（失败）",
+      "target_id": "aos-bg-failed",
+      "target_name": "BG.Failed（失败）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-t-bg-done-running",
+      "name": "background_task_done[跨区域唤醒]",
+      "source_id": "aos-bg-done",
+      "source_name": "BG.Done（完成）",
+      "statement": "BG.Done（完成） --(Transition)--> Running（执行回合）",
+      "target_id": "aos-running",
+      "target_name": "Running（执行回合）",
+      "type": "Transition"
+    },
+    {
+      "id": "aos-a-machine-swebench",
+      "name": "measures",
+      "source_id": "aos-machine",
+      "source_name": "Coding Agent 状态机（主体：Agent 会话）",
+      "statement": "Coding Agent 状态机（主体：Agent 会话） --(Association)--> 指标·SWE-bench Resolved%",
+      "target_id": "aos-as-swebench",
+      "target_name": "指标·SWE-bench Resolved%",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-machine-sweverified",
+      "name": "measures",
+      "source_id": "aos-machine",
+      "source_name": "Coding Agent 状态机（主体：Agent 会话）",
+      "statement": "Coding Agent 状态机（主体：Agent 会话） --(Association)--> 指标·SWE-bench Verified Resolved%",
+      "target_id": "aos-as-sweverified",
+      "target_name": "指标·SWE-bench Verified Resolved%",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-machine-terminalbench",
+      "name": "measures",
+      "source_id": "aos-machine",
+      "source_name": "Coding Agent 状态机（主体：Agent 会话）",
+      "statement": "Coding Agent 状态机（主体：Agent 会话） --(Association)--> 指标·Terminal-Bench 任务成功率",
+      "target_id": "aos-as-terminalbench",
+      "target_name": "指标·Terminal-Bench 任务成功率",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-machine-codegen",
+      "name": "measures",
+      "source_id": "aos-machine",
+      "source_name": "Coding Agent 状态机（主体：Agent 会话）",
+      "statement": "Coding Agent 状态机（主体：Agent 会话） --(Association)--> 指标·HumanEval/MBPP pass@k",
+      "target_id": "aos-as-codegen",
+      "target_name": "指标·HumanEval/MBPP pass@k",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-machine-livecodebench",
+      "name": "measures",
+      "source_id": "aos-machine",
+      "source_name": "Coding Agent 状态机（主体：Agent 会话）",
+      "statement": "Coding Agent 状态机（主体：Agent 会话） --(Association)--> 指标·LiveCodeBench pass@1",
+      "target_id": "aos-as-livecodebench",
+      "target_name": "指标·LiveCodeBench pass@1",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-machine-gaia",
+      "name": "measures",
+      "source_id": "aos-machine",
+      "source_name": "Coding Agent 状态机（主体：Agent 会话）",
+      "statement": "Coding Agent 状态机（主体：Agent 会话） --(Association)--> 指标·GAIA 任务成功率",
+      "target_id": "aos-as-gaia",
+      "target_name": "指标·GAIA 任务成功率",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-machine-taubench",
+      "name": "measures",
+      "source_id": "aos-machine",
+      "source_name": "Coding Agent 状态机（主体：Agent 会话）",
+      "statement": "Coding Agent 状态机（主体：Agent 会话） --(Association)--> 指标·τ-bench pass^k",
+      "target_id": "aos-as-taubench",
+      "target_name": "指标·τ-bench pass^k",
+      "type": "Association"
+    },
+    {
+      "id": "aos-a-machine-agentbench",
+      "name": "measures",
+      "source_id": "aos-machine",
+      "source_name": "Coding Agent 状态机（主体：Agent 会话）",
+      "statement": "Coding Agent 状态机（主体：Agent 会话） --(Association)--> 指标·AgentBench 任务成功率",
+      "target_id": "aos-as-agentbench",
+      "target_name": "指标·AgentBench 任务成功率",
+      "type": "Association"
+    },
+    {
+      "id": "aos-i-plan-swebench",
+      "name": "influences (+)",
+      "source_id": "aos-as-plan",
+      "source_name": "指标·计划正确率",
+      "statement": "指标·计划正确率 --(Influence)--> 指标·SWE-bench Resolved%",
+      "target_id": "aos-as-swebench",
+      "target_name": "指标·SWE-bench Resolved%",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向：计划正确率改善 → SWE-bench Resolved% 提升"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-plan-sweverified",
+      "name": "influences (+)",
+      "source_id": "aos-as-plan",
+      "source_name": "指标·计划正确率",
+      "statement": "指标·计划正确率 --(Influence)--> 指标·SWE-bench Verified Resolved%",
+      "target_id": "aos-as-sweverified",
+      "target_name": "指标·SWE-bench Verified Resolved%",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-plan-terminalbench",
+      "name": "influences (+)",
+      "source_id": "aos-as-plan",
+      "source_name": "指标·计划正确率",
+      "statement": "指标·计划正确率 --(Influence)--> 指标·Terminal-Bench 任务成功率",
+      "target_id": "aos-as-terminalbench",
+      "target_name": "指标·Terminal-Bench 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-plan-codegen",
+      "name": "influences (+)",
+      "source_id": "aos-as-plan",
+      "source_name": "指标·计划正确率",
+      "statement": "指标·计划正确率 --(Influence)--> 指标·HumanEval/MBPP pass@k",
+      "target_id": "aos-as-codegen",
+      "target_name": "指标·HumanEval/MBPP pass@k",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-plan-livecodebench",
+      "name": "influences (+)",
+      "source_id": "aos-as-plan",
+      "source_name": "指标·计划正确率",
+      "statement": "指标·计划正确率 --(Influence)--> 指标·LiveCodeBench pass@1",
+      "target_id": "aos-as-livecodebench",
+      "target_name": "指标·LiveCodeBench pass@1",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-retrieve-swebench",
+      "name": "influences (+)",
+      "source_id": "aos-as-retrieve",
+      "source_name": "指标·检索召回与排序",
+      "statement": "指标·检索召回与排序 --(Influence)--> 指标·SWE-bench Resolved%",
+      "target_id": "aos-as-swebench",
+      "target_name": "指标·SWE-bench Resolved%",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-retrieve-sweverified",
+      "name": "influences (+)",
+      "source_id": "aos-as-retrieve",
+      "source_name": "指标·检索召回与排序",
+      "statement": "指标·检索召回与排序 --(Influence)--> 指标·SWE-bench Verified Resolved%",
+      "target_id": "aos-as-sweverified",
+      "target_name": "指标·SWE-bench Verified Resolved%",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-retrieve-terminalbench",
+      "name": "influences (+)",
+      "source_id": "aos-as-retrieve",
+      "source_name": "指标·检索召回与排序",
+      "statement": "指标·检索召回与排序 --(Influence)--> 指标·Terminal-Bench 任务成功率",
+      "target_id": "aos-as-terminalbench",
+      "target_name": "指标·Terminal-Bench 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-tool-swebench",
+      "name": "influences (+)",
+      "source_id": "aos-as-tool",
+      "source_name": "指标·工具成功率与轮次",
+      "statement": "指标·工具成功率与轮次 --(Influence)--> 指标·SWE-bench Resolved%",
+      "target_id": "aos-as-swebench",
+      "target_name": "指标·SWE-bench Resolved%",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-tool-sweverified",
+      "name": "influences (+)",
+      "source_id": "aos-as-tool",
+      "source_name": "指标·工具成功率与轮次",
+      "statement": "指标·工具成功率与轮次 --(Influence)--> 指标·SWE-bench Verified Resolved%",
+      "target_id": "aos-as-sweverified",
+      "target_name": "指标·SWE-bench Verified Resolved%",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-tool-terminalbench",
+      "name": "influences (+)",
+      "source_id": "aos-as-tool",
+      "source_name": "指标·工具成功率与轮次",
+      "statement": "指标·工具成功率与轮次 --(Influence)--> 指标·Terminal-Bench 任务成功率",
+      "target_id": "aos-as-terminalbench",
+      "target_name": "指标·Terminal-Bench 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-write-swebench",
+      "name": "influences (+)",
+      "source_id": "aos-as-write",
+      "source_name": "指标·去重P/R与无损率",
+      "statement": "指标·去重P/R与无损率 --(Influence)--> 指标·SWE-bench Resolved%",
+      "target_id": "aos-as-swebench",
+      "target_name": "指标·SWE-bench Resolved%",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-write-sweverified",
+      "name": "influences (+)",
+      "source_id": "aos-as-write",
+      "source_name": "指标·去重P/R与无损率",
+      "statement": "指标·去重P/R与无损率 --(Influence)--> 指标·SWE-bench Verified Resolved%",
+      "target_id": "aos-as-sweverified",
+      "target_name": "指标·SWE-bench Verified Resolved%",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-write-terminalbench",
+      "name": "influences (+)",
+      "source_id": "aos-as-write",
+      "source_name": "指标·去重P/R与无损率",
+      "statement": "指标·去重P/R与无损率 --(Influence)--> 指标·Terminal-Bench 任务成功率",
+      "target_id": "aos-as-terminalbench",
+      "target_name": "指标·Terminal-Bench 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-verify-swebench",
+      "name": "influences (+)",
+      "source_id": "aos-as-verify",
+      "source_name": "指标·验收通过率与回归",
+      "statement": "指标·验收通过率与回归 --(Influence)--> 指标·SWE-bench Resolved%",
+      "target_id": "aos-as-swebench",
+      "target_name": "指标·SWE-bench Resolved%",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-verify-sweverified",
+      "name": "influences (+)",
+      "source_id": "aos-as-verify",
+      "source_name": "指标·验收通过率与回归",
+      "statement": "指标·验收通过率与回归 --(Influence)--> 指标·SWE-bench Verified Resolved%",
+      "target_id": "aos-as-sweverified",
+      "target_name": "指标·SWE-bench Verified Resolved%",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-verify-terminalbench",
+      "name": "influences (+)",
+      "source_id": "aos-as-verify",
+      "source_name": "指标·验收通过率与回归",
+      "statement": "指标·验收通过率与回归 --(Influence)--> 指标·Terminal-Bench 任务成功率",
+      "target_id": "aos-as-terminalbench",
+      "target_name": "指标·Terminal-Bench 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-verify-codegen",
+      "name": "influences (+)",
+      "source_id": "aos-as-verify",
+      "source_name": "指标·验收通过率与回归",
+      "statement": "指标·验收通过率与回归 --(Influence)--> 指标·HumanEval/MBPP pass@k",
+      "target_id": "aos-as-codegen",
+      "target_name": "指标·HumanEval/MBPP pass@k",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-verify-livecodebench",
+      "name": "influences (+)",
+      "source_id": "aos-as-verify",
+      "source_name": "指标·验收通过率与回归",
+      "statement": "指标·验收通过率与回归 --(Influence)--> 指标·LiveCodeBench pass@1",
+      "target_id": "aos-as-livecodebench",
+      "target_name": "指标·LiveCodeBench pass@1",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-plan-success",
+      "name": "influences (+)",
+      "source_id": "aos-as-plan",
+      "source_name": "指标·计划正确率",
+      "statement": "指标·计划正确率 --(Influence)--> 指标·任务完成成功率",
+      "target_id": "aos-as-success",
+      "target_name": "指标·任务完成成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-plan-gaia",
+      "name": "influences (+)",
+      "source_id": "aos-as-plan",
+      "source_name": "指标·计划正确率",
+      "statement": "指标·计划正确率 --(Influence)--> 指标·GAIA 任务成功率",
+      "target_id": "aos-as-gaia",
+      "target_name": "指标·GAIA 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-plan-taubench",
+      "name": "influences (+)",
+      "source_id": "aos-as-plan",
+      "source_name": "指标·计划正确率",
+      "statement": "指标·计划正确率 --(Influence)--> 指标·τ-bench pass^k",
+      "target_id": "aos-as-taubench",
+      "target_name": "指标·τ-bench pass^k",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-plan-agentbench",
+      "name": "influences (+)",
+      "source_id": "aos-as-plan",
+      "source_name": "指标·计划正确率",
+      "statement": "指标·计划正确率 --(Influence)--> 指标·AgentBench 任务成功率",
+      "target_id": "aos-as-agentbench",
+      "target_name": "指标·AgentBench 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-retrieve-success",
+      "name": "influences (+)",
+      "source_id": "aos-as-retrieve",
+      "source_name": "指标·检索召回与排序",
+      "statement": "指标·检索召回与排序 --(Influence)--> 指标·任务完成成功率",
+      "target_id": "aos-as-success",
+      "target_name": "指标·任务完成成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-retrieve-e2e",
+      "name": "influences (-)",
+      "source_id": "aos-as-retrieve",
+      "source_name": "指标·检索召回与排序",
+      "statement": "指标·检索召回与排序 --(Influence)--> 指标·端到端时延/成本/可复现",
+      "target_id": "aos-as-e2e",
+      "target_name": "指标·端到端时延/成本/可复现",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:-",
+          "description": "负向（权衡）：更强的检索召回 → 端到端时延/成本上升"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-retrieve-gaia",
+      "name": "influences (+)",
+      "source_id": "aos-as-retrieve",
+      "source_name": "指标·检索召回与排序",
+      "statement": "指标·检索召回与排序 --(Influence)--> 指标·GAIA 任务成功率",
+      "target_id": "aos-as-gaia",
+      "target_name": "指标·GAIA 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-retrieve-agentbench",
+      "name": "influences (+)",
+      "source_id": "aos-as-retrieve",
+      "source_name": "指标·检索召回与排序",
+      "statement": "指标·检索召回与排序 --(Influence)--> 指标·AgentBench 任务成功率",
+      "target_id": "aos-as-agentbench",
+      "target_name": "指标·AgentBench 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-tool-success",
+      "name": "influences (+)",
+      "source_id": "aos-as-tool",
+      "source_name": "指标·工具成功率与轮次",
+      "statement": "指标·工具成功率与轮次 --(Influence)--> 指标·任务完成成功率",
+      "target_id": "aos-as-success",
+      "target_name": "指标·任务完成成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-tool-e2e",
+      "name": "influences (-)",
+      "source_id": "aos-as-tool",
+      "source_name": "指标·工具成功率与轮次",
+      "statement": "指标·工具成功率与轮次 --(Influence)--> 指标·端到端时延/成本/可复现",
+      "target_id": "aos-as-e2e",
+      "target_name": "指标·端到端时延/成本/可复现",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:-",
+          "description": "负向（权衡）：更多工具调用 → 端到端时延/成本上升"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-tool-gaia",
+      "name": "influences (+)",
+      "source_id": "aos-as-tool",
+      "source_name": "指标·工具成功率与轮次",
+      "statement": "指标·工具成功率与轮次 --(Influence)--> 指标·GAIA 任务成功率",
+      "target_id": "aos-as-gaia",
+      "target_name": "指标·GAIA 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-tool-taubench",
+      "name": "influences (+)",
+      "source_id": "aos-as-tool",
+      "source_name": "指标·工具成功率与轮次",
+      "statement": "指标·工具成功率与轮次 --(Influence)--> 指标·τ-bench pass^k",
+      "target_id": "aos-as-taubench",
+      "target_name": "指标·τ-bench pass^k",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-tool-agentbench",
+      "name": "influences (+)",
+      "source_id": "aos-as-tool",
+      "source_name": "指标·工具成功率与轮次",
+      "statement": "指标·工具成功率与轮次 --(Influence)--> 指标·AgentBench 任务成功率",
+      "target_id": "aos-as-agentbench",
+      "target_name": "指标·AgentBench 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-verify-success",
+      "name": "influences (+)",
+      "source_id": "aos-as-verify",
+      "source_name": "指标·验收通过率与回归",
+      "statement": "指标·验收通过率与回归 --(Influence)--> 指标·任务完成成功率",
+      "target_id": "aos-as-success",
+      "target_name": "指标·任务完成成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-verify-taubench",
+      "name": "influences (+)",
+      "source_id": "aos-as-verify",
+      "source_name": "指标·验收通过率与回归",
+      "statement": "指标·验收通过率与回归 --(Influence)--> 指标·τ-bench pass^k",
+      "target_id": "aos-as-taubench",
+      "target_name": "指标·τ-bench pass^k",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-verify-agentbench",
+      "name": "influences (+)",
+      "source_id": "aos-as-verify",
+      "source_name": "指标·验收通过率与回归",
+      "statement": "指标·验收通过率与回归 --(Influence)--> 指标·AgentBench 任务成功率",
+      "target_id": "aos-as-agentbench",
+      "target_name": "指标·AgentBench 任务成功率",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-wait-e2e",
+      "name": "influences (-)",
+      "source_id": "aos-as-wait",
+      "source_name": "指标·等待/唤醒时延",
+      "statement": "指标·等待/唤醒时延 --(Influence)--> 指标·端到端时延/成本/可复现",
+      "target_id": "aos-as-e2e",
+      "target_name": "指标·端到端时延/成本/可复现",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:-",
+          "description": "负向：等待时延上升 → 端到端时延/成本上升"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-commit-e2e",
+      "name": "influences (-)",
+      "source_id": "aos-as-commit",
+      "source_name": "指标·提交登记完整率",
+      "statement": "指标·提交登记完整率 --(Influence)--> 指标·端到端时延/成本/可复现",
+      "target_id": "aos-as-e2e",
+      "target_name": "指标·端到端时延/成本/可复现",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:-",
+          "description": "负向：登记/交付开销 → 端到端时延/成本上升"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-memory-e2e",
+      "name": "influences (-)",
+      "source_id": "aos-as-memory",
+      "source_name": "指标·记忆准确率与拒答",
+      "statement": "指标·记忆准确率与拒答 --(Influence)--> 指标·端到端时延/成本/可复现",
+      "target_id": "aos-as-e2e",
+      "target_name": "指标·端到端时延/成本/可复现",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:-",
+          "description": "负向：更多记忆上下文 → token 成本上升"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-retrieve-wait",
+      "name": "influences (-)",
+      "source_id": "aos-as-retrieve",
+      "source_name": "指标·检索召回与排序",
+      "statement": "指标·检索召回与排序 --(Influence)--> 指标·等待/唤醒时延",
+      "target_id": "aos-as-wait",
+      "target_name": "指标·等待/唤醒时延",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:-",
+          "description": "负向（权衡）：更大召回范围/重排 → 检索等待时延上升"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-tool-wait",
+      "name": "influences (-)",
+      "source_id": "aos-as-tool",
+      "source_name": "指标·工具成功率与轮次",
+      "statement": "指标·工具成功率与轮次 --(Influence)--> 指标·等待/唤醒时延",
+      "target_id": "aos-as-wait",
+      "target_name": "指标·等待/唤醒时延",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:-",
+          "description": "负向（权衡）：更多工具调用/轮次 → 等待时延上升"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-memory-retrieve",
+      "name": "influences (+)",
+      "source_id": "aos-as-memory",
+      "source_name": "指标·记忆准确率与拒答",
+      "statement": "指标·记忆准确率与拒答 --(Influence)--> 指标·检索召回与排序",
+      "target_id": "aos-as-retrieve",
+      "target_name": "指标·检索召回与排序",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向：更好的记忆/拒答 → 更准的检索召回"
+        }
+      ]
+    },
+    {
+      "id": "aos-i-plan-tool",
+      "name": "influences (+)",
+      "source_id": "aos-as-plan",
+      "source_name": "指标·计划正确率",
+      "statement": "指标·计划正确率 --(Influence)--> 指标·工具成功率与轮次",
+      "target_id": "aos-as-tool",
+      "target_name": "指标·工具成功率与轮次",
+      "type": "Influence",
+      "attributes": [
+        {
+          "name": "strength:+",
+          "description": "正向：更好的计划 → 更少失败工具/轮次"
+        }
+      ]
     }
   ],
   "views": [
@@ -12468,7 +14279,8 @@
         "1249",
         "1240",
         "1334",
-        "1961"
+        "1961",
+        "uml2-sm-viewpoint"
       ],
       "included_relationships": [
         "1161"
@@ -13054,7 +14866,8 @@
       ],
       "parent_element_id": "project-overseer-001",
       "view_id": "overseer-release-archive-001",
-      "view_name": "项目总管发布记录·归档（≤0.20.x）"
+      "view_name": "项目总管发布记录·归档（≤0.20.x）",
+      "included_relationships": []
     },
     {
       "view_id": "graph-consistency-tech-ref-001",
@@ -13080,7 +14893,8 @@
         "agent-search-diagnosis-skill-001",
         "framework-optimization-cross-scenario-001",
         "agent-read-projection-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "comm-2026-09-view-001",
@@ -13095,7 +14909,8 @@
         "graph-position-paper-001",
         "graph-agent-paper-001",
         "wp-graph-agent-paper-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "description": "为 ArchGraph 适配豆包（Doubao）桌面版 agent 模式宿主的工作包视图。豆包 Harness 扩展点：技能 = Anthropic Agent Skills 规范（SKILL.md，frontmatter 只允许 name+description，默认根 <workspace>/.user_skills；另有全局根 ~/Doubao/skills）；MCP 由 mcp_helper 支持（配置机制待定）；无 AGENTS.md/唤醒门挂点。",
@@ -13104,7 +14919,8 @@
       "view_name": "Doubao Harness Adaptation",
       "included_elements": [
         "doubao-harness-adaptation-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "description": "ARGO MCP 功能验证（本仓 archgraph）工作包视图：承载『在当前项目验证 ARGO MCP 读写功能是否正常』的工作包与验收用例，覆盖工具面注册、读接口语义/结构行为、只读 Cypher 护栏、写图去重门禁、无损写入门禁与工作区绑定证据。",
@@ -13135,7 +14951,8 @@
         "argo-env-no-acl-guard-001",
         "wp-schema-attribute-contracts-001",
         "wp-schema-bundle-extends-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "overseer-lessons-001",
@@ -13148,8 +14965,285 @@
         "overseer-milestone-issues-3-4-5-001",
         "overseer-lesson-framework-generality-001",
         "design-federated-intent-graph-001",
-        "overseer-lesson-clash-proxy-https-001"
-      ]
+        "overseer-lesson-clash-proxy-https-001",
+        "overseer-lesson-argo-mcp-crash-diagnosis-001"
+      ],
+      "included_relationships": []
+    },
+    {
+      "description": "Coding Agent 的顶层状态机：Idle / Running / AwaitingUser / Stopped（主体：Agent 会话）。",
+      "included_elements": [
+        "aos-machine",
+        "aos-initial",
+        "aos-idle",
+        "aos-running",
+        "aos-awaiting-user",
+        "aos-stopped",
+        "aos-as-idle",
+        "aos-as-hitl",
+        "aos-as-success",
+        "aos-as-e2e"
+      ],
+      "included_relationships": [
+        "aos-t-init-idle",
+        "aos-t-idle-running",
+        "aos-t-idle-idle",
+        "aos-t-idle-awaiting",
+        "aos-t-idle-running-bg",
+        "aos-t-running-idle",
+        "aos-t-running-awaiting",
+        "aos-t-awaiting-running",
+        "aos-t-awaiting-running-bg",
+        "aos-t-idle-stopped",
+        "aos-t-running-stopped",
+        "aos-t-awaiting-stopped",
+        "aos-a-machine-success",
+        "aos-a-machine-e2e",
+        "aos-a-idle-idle",
+        "aos-a-awaiting-hitl"
+      ],
+      "parent_element_id": "uml2-sm-viewpoint",
+      "parent_element_name": "UML 2 State Machine Viewpoint",
+      "view_id": "uml2-coding-statemachine-view-002",
+      "view_name": "Coding Agent 状态机（UML 2）"
+    },
+    {
+      "description": "Running 复合态的子状态，用于增强可观测性，并把行为指标挂到对应子状态。",
+      "included_elements": [
+        "aos-running",
+        "aos-reasoning",
+        "aos-retrieving",
+        "aos-acting",
+        "aos-verifying",
+        "aos-awaiting-result",
+        "aos-finalizing",
+        "aos-as-plan",
+        "aos-as-retrieve",
+        "aos-as-tool",
+        "aos-as-write",
+        "aos-as-verify",
+        "aos-as-wait",
+        "aos-as-commit",
+        "aos-as-memory"
+      ],
+      "included_relationships": [
+        "aos-t-reasoning-retrieving",
+        "aos-t-retrieving-reasoning",
+        "aos-t-reasoning-acting",
+        "aos-t-acting-awaiting",
+        "aos-t-awaiting-reasoning",
+        "aos-t-reasoning-verifying",
+        "aos-t-verifying-acting",
+        "aos-t-verifying-finalizing",
+        "aos-a-reasoning-plan",
+        "aos-a-retrieving-retrieve",
+        "aos-a-acting-tool",
+        "aos-a-acting-write",
+        "aos-a-verifying-verify",
+        "aos-a-awaiting-wait",
+        "aos-a-finalizing-commit",
+        "aos-a-finalizing-memory"
+      ],
+      "parent_element_id": "uml2-sm-viewpoint",
+      "parent_element_name": "UML 2 State Machine Viewpoint",
+      "view_id": "uml2-coding-running-view-002",
+      "view_name": "Running 子状态（可观测）"
+    },
+    {
+      "description": "后台任务的正交区域：任务自身生命周期，完成时抛 background_task_done 唤醒主区域。",
+      "included_elements": [
+        "aos-bg-machine",
+        "aos-bg-submitted",
+        "aos-bg-running",
+        "aos-bg-done",
+        "aos-bg-failed",
+        "aos-running"
+      ],
+      "included_relationships": [
+        "aos-t-bg-submitted-running",
+        "aos-t-bg-running-done",
+        "aos-t-bg-running-failed",
+        "aos-t-bg-done-running"
+      ],
+      "parent_element_id": "uml2-sm-viewpoint",
+      "parent_element_name": "UML 2 State Machine Viewpoint",
+      "view_id": "uml2-coding-background-view-002",
+      "view_name": "后台任务区域（正交）"
+    },
+    {
+      "description": "业界标准的整体任务执行度基准（SWE-bench、Terminal-Bench 等），度量整台状态机跑完整任务的结果，挂在状态机主体/终态。",
+      "included_elements": [
+        "aos-machine",
+        "aos-as-swebench",
+        "aos-as-sweverified",
+        "aos-as-terminalbench",
+        "aos-as-codegen",
+        "aos-as-livecodebench",
+        "aos-as-gaia",
+        "aos-as-taubench",
+        "aos-as-agentbench"
+      ],
+      "included_relationships": [
+        "aos-a-machine-swebench",
+        "aos-a-machine-sweverified",
+        "aos-a-machine-terminalbench",
+        "aos-a-machine-codegen",
+        "aos-a-machine-livecodebench",
+        "aos-a-machine-gaia",
+        "aos-a-machine-taubench",
+        "aos-a-machine-agentbench"
+      ],
+      "parent_element_id": "uml2-sm-viewpoint",
+      "parent_element_name": "UML 2 State Machine Viewpoint",
+      "view_id": "uml2-coding-benchmark-view-002",
+      "view_name": "业界整体任务指标（跨整体）"
+    },
+    {
+      "description": "指标分解（代码任务）：局部先导指标以 Influence 影响整体结果指标（SWE-bench / Terminal-Bench / 代码生成）。",
+      "included_elements": [
+        "aos-as-swebench",
+        "aos-as-sweverified",
+        "aos-as-terminalbench",
+        "aos-as-codegen",
+        "aos-as-livecodebench",
+        "aos-as-plan",
+        "aos-as-retrieve",
+        "aos-as-tool",
+        "aos-as-write",
+        "aos-as-verify"
+      ],
+      "included_relationships": [
+        "aos-i-plan-swebench",
+        "aos-i-plan-sweverified",
+        "aos-i-plan-terminalbench",
+        "aos-i-plan-codegen",
+        "aos-i-plan-livecodebench",
+        "aos-i-retrieve-swebench",
+        "aos-i-retrieve-sweverified",
+        "aos-i-retrieve-terminalbench",
+        "aos-i-tool-swebench",
+        "aos-i-tool-sweverified",
+        "aos-i-tool-terminalbench",
+        "aos-i-write-swebench",
+        "aos-i-write-sweverified",
+        "aos-i-write-terminalbench",
+        "aos-i-verify-swebench",
+        "aos-i-verify-sweverified",
+        "aos-i-verify-terminalbench",
+        "aos-i-verify-codegen",
+        "aos-i-verify-livecodebench"
+      ],
+      "parent_element_id": "uml2-sm-viewpoint",
+      "parent_element_name": "UML 2 State Machine Viewpoint",
+      "view_id": "uml2-metric-decomp-code-view-002",
+      "view_name": "指标分解·代码任务（整体←局部）"
+    },
+    {
+      "description": "指标分解（Agent 通用）：局部先导指标以 Influence 影响整体结果指标（任务完成成功率 / 端到端 / GAIA / τ-bench / AgentBench）。",
+      "included_elements": [
+        "aos-as-success",
+        "aos-as-e2e",
+        "aos-as-gaia",
+        "aos-as-taubench",
+        "aos-as-agentbench",
+        "aos-as-plan",
+        "aos-as-retrieve",
+        "aos-as-tool",
+        "aos-as-verify",
+        "aos-as-wait",
+        "aos-as-commit",
+        "aos-as-memory"
+      ],
+      "included_relationships": [
+        "aos-i-plan-success",
+        "aos-i-plan-gaia",
+        "aos-i-plan-taubench",
+        "aos-i-plan-agentbench",
+        "aos-i-retrieve-success",
+        "aos-i-retrieve-e2e",
+        "aos-i-retrieve-gaia",
+        "aos-i-retrieve-agentbench",
+        "aos-i-tool-success",
+        "aos-i-tool-e2e",
+        "aos-i-tool-gaia",
+        "aos-i-tool-taubench",
+        "aos-i-tool-agentbench",
+        "aos-i-verify-success",
+        "aos-i-verify-taubench",
+        "aos-i-verify-agentbench",
+        "aos-i-wait-e2e",
+        "aos-i-commit-e2e",
+        "aos-i-memory-e2e"
+      ],
+      "parent_element_id": "uml2-sm-viewpoint",
+      "parent_element_name": "UML 2 State Machine Viewpoint",
+      "view_id": "uml2-metric-decomp-agent-view-002",
+      "view_name": "指标分解·Agent 任务（整体←局部）"
+    },
+    {
+      "description": "指标权衡（决策支持）：展示局部指标之间的正/负相互影响，以及它们对整体结果指标的差异化影响，用于权衡决策。",
+      "included_elements": [
+        "aos-as-retrieve",
+        "aos-as-tool",
+        "aos-as-wait",
+        "aos-as-e2e",
+        "aos-as-success",
+        "aos-as-plan",
+        "aos-as-memory"
+      ],
+      "included_relationships": [
+        "aos-i-retrieve-wait",
+        "aos-i-tool-wait",
+        "aos-i-memory-retrieve",
+        "aos-i-plan-tool",
+        "aos-i-retrieve-success",
+        "aos-i-tool-success",
+        "aos-i-retrieve-e2e",
+        "aos-i-tool-e2e",
+        "aos-i-wait-e2e",
+        "aos-i-memory-e2e"
+      ],
+      "parent_element_id": "uml2-sm-viewpoint",
+      "parent_element_name": "UML 2 State Machine Viewpoint",
+      "view_id": "uml2-metric-tradeoff-view-002",
+      "view_name": "指标权衡（决策支持）"
+    },
+    {
+      "view_id": "overseer-modeling-001",
+      "view_name": "项目总管记忆·建模与度量",
+      "parent_element_id": "project-overseer-001",
+      "parent_element_name": "项目总管",
+      "description": "项目总管 T2 长期记忆子视图：建模语言/状态机/指标体系（assessment）相关里程碑。",
+      "included_elements": [
+        "overseer-milestone-uml2-statemachine-metric-model-001"
+      ],
+      "included_relationships": []
+    },
+    {
+      "description": "2026-10 产出的对内/对外沟通材料：Coding 业务价值与组织级知识图谱的 5 页汇报 PPT（状态机 → 痛点与先进实践 → 指标体系 → Graph RAG 通用流程 → 联邦式组织级图谱）。",
+      "included_elements": [
+        "deck-p1-coding-statemachine-001",
+        "deck-p2-industry-pain-practice-001",
+        "deck-p3-metric-system-001",
+        "deck-p4-graph-rag-flow-001",
+        "deck-p5-federated-org-graph-001",
+        "coding-business-deck-pptx-001",
+        "wp-coding-business-deck-001"
+      ],
+      "included_relationships": [],
+      "parent_element_id": "1249",
+      "view_id": "comm-2026-10-view-001",
+      "view_name": "沟通材料（2026-10）"
+    },
+    {
+      "description": "项目总管 T2 长期记忆分层子视图：对外/对内沟通材料与汇报交付（PPT/PDF/邮件）。id 不含 -ltm- 以免与 T2 召回视图（按 /-ltm-/ 解析）冲突。",
+      "included_elements": [
+        "overseer-milestone-coding-business-deck-001"
+      ],
+      "included_relationships": [],
+      "parent_element_id": "project-overseer-001",
+      "view_id": "overseer-comm-001",
+      "view_name": "项目总管记忆·沟通与汇报交付"
     }
   ]
 }

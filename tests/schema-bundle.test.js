@@ -296,9 +296,10 @@ test('AT schema-bundle: MCP validateSystemArchitecture fails when a graph uses a
 });
 
 test('AT schema-bundle: the shipped default bundle is data-driven (schema-bundle.rules.json)', () => {
-  // GIVEN the default bundle
+  // GIVEN the default bundle (the repo's own .argo/schema workspace bundle may
+  // override ROOT, so target the built-in default bundle directory explicitly)
   // WHEN its ontology is resolved
-  const { bundle, ontology } = loadSchemaBundleAndOntology(ROOT);
+  const { bundle, ontology } = loadSchemaBundleAndOntology(path.join(ROOT, 'argo'));
   const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'argo', 'schema', 'schema-bundle.rules.json'), 'utf8'));
   // THEN the rule data ships as JSON (class matrix dialect), not code, so the
   // default can be replaced file-for-file like any custom bundle
@@ -348,8 +349,9 @@ test('AT schema-bundle: the .qea projection maps custom types generically (never
 });
 
 test('AT schema-bundle: the default ontology declares the ArchiMate delivery dependencies', () => {
-  // GIVEN the default bundle (ArchiMate class matrix)
-  const { ontology } = loadSchemaBundleAndOntology(ROOT);
+  // GIVEN the default bundle (ArchiMate class matrix; target the built-in
+  // default bundle directory explicitly — ROOT may carry a workspace override)
+  const { ontology } = loadSchemaBundleAndOntology(path.join(ROOT, 'argo'));
   // THEN it declares the ArchiMate dependency mapping (preserves prior behaviour)
   assert.deepEqual(ontology.deliveryDependencies.sourceDependsOnTarget, ['Access', 'Assignment', 'Specialization', 'Composition', 'Aggregation']);
   assert.deepEqual(ontology.deliveryDependencies.targetDependsOnSource, ['Serving', 'Realization', 'Flow', 'Triggering', 'Influence']);
