@@ -4318,7 +4318,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-05，分支 develop-separate-schema）。本会话主题：新增 UML 2 状态机 schema，把「Agent 帮助 coding」的业务价值流 + 业绩指标体系建模进意图图。\n【目标】引入 UML 2 状态机建模语言；把 coding 全流程与指标入图，并支持持续评测迭代。\n【进展】\n① 新增工作区 schema bundle <repo>/.argo/schema（extends:'default'（=Acme 基础 ArchiMate 3.2）；addElementTypes: State/Initial State/Final State/Composite State/Choice/Entry Point/Exit Point；addRelationships: Transition；+GUIDE.md）。schemaKind=workspace、bundleValidation passed、现有图校验通过。\n② 修正状态机理解偏差：State=条件而非活动。重建为 Idle / Running(复合: Reasoning/Retrieving/Acting/Verifying/AwaitingResult/Finalizing) / AwaitingUser / Stopped；后台任务=正交区域(BG.Submitted→Running→Done/Failed，完成抛事件跨区域唤醒)。旧 18 态『活动当状态』模型已墓碑删除。\n③ 指标建模：12 个局部/状态指标(Assessment)按『挂到被测动作』原则用 Association 关联；8 个业界整体任务基准(SWE-bench/Verified/Terminal-Bench/HumanEval-MBPP/LiveCodeBench/GAIA/τ-bench/AgentBench)挂状态机主体，终态为观测点。\n④ 局部→整体用 Influence 建模(38 条)；补极性 strength:+/-(关系属性仅允许 name+description，故极性编码在关系名 influences(+/-)）；补局部↔局部权衡(检索召回/工具 −→ 等待时延；记忆/计划 +→ 检索/工具)；新增『指标权衡(决策支持)』视图。\n⑤ 实测覆盖统计并挂到 20 个指标元素(measurement-status + measurement-result)：measured 4(检索/工具/记忆/时延)、partial 5(e2e/成功率/验收/去重/计划)、not_measured 11(含 8 业界基准 + 空闲/回环/登记)。\n【视图】UML 2 State Machine Viewpoint 下 7 个：Coding Agent 状态机 / Running 子状态 / 后台任务区域 / 业界整体任务指标 / 指标分解·代码 / 指标分解·Agent / 指标权衡。\n【决策/教训】Acme=内置 default，用 extends:'default'；State 是条件、行为放转移 effect；跨整体指标挂主体、终态观测；Influence 极性=+改善/-恶化(权衡)；L1 语义门对同型短名(Idle vs AwaitingUser 0.88)假阳性→allowDuplicate+justification；本仓根放 .argo/schema 会覆盖整仓 schema，故必须 extends default，且 tests/schema-bundle.test.js 两处 ROOT→默认包目录修正。\n【验收】tests/uml2-state-machine-bundle.test.js(4 AT) + tests/uml2-coding-statemachine.test.js(8 AT) 共 12/12；validateSystemArchitecture passed。\n【未提交/下一步】尚无 commit(graph/qea/.argo/schema/测试 未提交)→待提交并登记到 uml2-sm-viewpoint；补 11 项未测指标(优先 SWE-bench/Terminal-Bench E2 制度对照：挂 vs 不挂 ArchGraph)；partial 升定量(去重 P/R 套件/计划质量/coding e2e 基准)；Influence 补数值权重以支持可计算权衡；重跑 Docker e2e(npm run acceptance)。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10，分支 develop-separate-schema）。本会话主题：按人类伙伴给定的 5 页大纲交付 Coding 业务价值汇报 PPT，并修复因图谱长大而失效的旧验收。\n【身份】Business Actor 项目总管（project-overseer-001；人类未指定角色时默认由本角色对话与决策）。\n【目标】交付 5 页汇报 PPT：P1 状态机表达 Coding 业务价值流程（左 3/4 状态机 + 右标号简释）；P2 业界痛点与先进实践 → 我方 Arc 方案（本体＝共同语言 / 图谱＝承载）；P3 指标体系（20 指标↔状态机映射 + 我方评测 + 业界 Gap 与优化方向）；P4 检索的一级通用流程（Graph RAG 全景 + 覆盖 + 指标映射 + 度量）；P5 联邦式组织级知识图谱（单项目当积木 + 三大好处 + 组合示意）。\n【进展】① 交付 docs/ppt/archgraph-coding-business-deck.pptx（5 页 16:9，整页图底 + 682 个原生可编辑文本框）+ content-plan.json（内容单一事实源）+ 5 SVG/PNG + preview.html；生成链 scripts/gen-coding-deck.js → rasterize-coding-deck.js → build-coding-deck-pptx.py（npm run gen:deck）。② 验收 tests/coding-business-deck.test.js（AT-coding-deck-01..09，9/9）。③ 图谱登记：视图 comm-2026-10-view-001 + WP wp-coding-business-deck-001（含 9 AT）+ 5 个页面内容元素 + Deliverable coding-business-deck-pptx-001 + T2 里程碑卡 + 子视图 overseer-comm-001。④ 证据治理：P2 业界数字逐条附 URL；先委托验证分析师拿回后修正叙述（删掉无法核实的『UN 框架 99% 由 Agent 写』改为 Bun Zig→Rust；GitClear 用 4 倍而非 8 倍；不引用拿不到一手分数的榜单分）。⑤ 修复两个存量失效：视图 429 子视图期望 24→31（tests/architecture-view-context.test.js）与 MQ-17（scripts/memory-eval-run.js + 题集文档）；并把静默 skip 的『真实 MCP 写图回滚』改为必须成功（临工作区需拷 .argo/schema bundle，否则图中 bundle 新增类型被拒收）。\n【回归】npm test 699/699 pass / 0 fail / 0 skip（前：696/2 fail/1 skip）；validateSystemArchitecture 与写图调用均 passed。\n【决策/教训】① 内容单一事实源：预设图表与验收都从 content-plan.json 派生，AT-04 直接与图谱 measurement-status 逐行对挖，避免图文不一致。② PPTX 保留可编辑文字层（整页 PNG 底 + 从 SVG text 节点重建文本框）——汇报场景需要改字。③ skip 会隐藏失效：验收因环境/数据变化而 skip 就是缺陷，必须找出根因或改为硬断言。④ 评测题集里的『当前数』（如子视图数）必须写明『随图增长维护』，否则图一长大型就是假退化。⑤ SVG 排版要点：文字必须在盒子内（用估宽换行），引线不能穿盒子，标题写不下就缩字/改词，所有内容必须让开页脚区域。⑥ 术语偏差：人类伙伴说『Arcanate 语言作为 base』，本仓实际叫 Acme base（ArchiMate 3.2 + ARGO 扩展）+ 可 extends 领域本体；已在 T2 卡列为待人类确认。\n【未提交/下一步】① 人类伙伴审阅版面密度与 Arcanate 术语；② P3 的 8 个业界基准仍未跑（E1/E2 制度对照：挂 vs 不挂 ArchGraph）；③ Docker e2e（npm run acceptance）未跑；④ 待审议：汇报稿是否再出 PDF/微信版。\n【commits】11263c7（UML 2 状态机 schema + 建模，补上个会话）/ b1c0dd0（5 页汇报 PPT）/ d73480c（旧验收同步修复）/ 03ff6cd（图谱登记）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4340,7 +4340,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-05",
+          "value": "2026-10",
           "description": "会话收尾：UML 2 schema + coding 状态机 + 指标体系建模（未提交）"
         },
         {
@@ -4621,6 +4621,11 @@
           "name": "commit",
           "value": "4192522",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（会话收尾 T1 摘要覆盖写 + 登记 6adee79/705b89c）"
+        },
+        {
+          "name": "commit",
+          "value": "03ff6cd",
+          "description": "T1 摘要幂等覆盖写（本会话），并登记图谱 commits"
         }
       ],
       "testcases": [
@@ -11546,6 +11551,11 @@
           "name": "commit",
           "value": "11263c7",
           "description": ".argo/schema/**; tests/uml2-state-machine-bundle.test.js; tests/uml2-coding-statemachine.test.js; tests/schema-bundle.test.js; design/KG/SystemArchitecture.json（上个会话的 UML 2 状态机建模，本会话补提交）"
+        },
+        {
+          "name": "commit",
+          "value": "03ff6cd",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（图谱登记：comm-2026-10-view-001 + WP + 5 页面元素 + Deliverable + T2 记忆卡与子视图）"
         }
       ],
       "description": "里程碑（2026-10，项目总管，分支 develop-separate-schema）：按人类伙伴给定的 5 页大纲交付 Coding 业务价值汇报 PPT，并顺带修复两个因图谱长大而失效的旧验收/基准。\n【交付】docs/ppt/content-plan.json（内容单一事实源）+ assets/p1..p5 SVG(1280x720)/PNG(1600x900) + archgraph-coding-business-deck.pptx（5 页 16:9，整页图底 + 共 682 个原生可编辑文本框）+ preview.html。生成链：scripts/gen-coding-deck.js → scripts/rasterize-coding-deck.js → scripts/build-coding-deck-pptx.py（npm run gen:deck）。验收 tests/coding-business-deck.test.js（AT-coding-deck-01..09，9/9）。图谱：视图 comm-2026-10-view-001（沟通材料 2026-10）+ WP wp-coding-business-deck-001（含 9 条 AT）+ 5 个页面内容元素 + Deliverable coding-business-deck-pptx-001。\n【关键决策】(1) 内容单一事实源放 content-plan.json，SVG/PNG/PPTX/预览与验收全部由它派生 —— 避免图文不一致（AT-04 直接拿 20 个指标的 measurement-status 与图谱逐行对挖）。(2) PPTX = 整页 PNG 底图 + 从源 SVG 的 text 节点重建的原生文本框（文字可选/可编辑/可搜索，AT-08 验证），而 SVG 保留为可改源。(3) 五页排版严格按人类要求：P1 左 3/4 状态机 + 右 16 标号简释 + 底部指标锚点；P4 左 1/2 通用流程 + 右上 Graph MCP + 右下 覆盖/指标映射/度量结果；P5 上整体方案 + 下左三大好处 + 下中组合示意 + 下右图注。\n【证据治理】P2 业界数字逐条附 URL；委托验证分析师（web_search/web_fetch，未用 BAILIAN）拿回后修正了原拟叙述：① 去掉了无法核实的『UN 框架 99% 由 Agent 重写』，换成可完整验证的 Bun Zig→Rust（535,496 行/1,448 文件/11 天/~6,700 commits/~$165k）并明确备注官方未提『99%』；② GitClear 改为可核实的『重复块 4 倍 + churn 27%』（删掉未核实的 8 倍）；③ 去掉拿不到一手分数、只能二手转述的榜单一手分数（故不引用 SWE-bench 具体分），改为可核实的 DORA 2025 verification tax、Stack Overflow 46% 不信任、METR RCT 实测慢 19%、Chroma Context Rot、Bun 合入后 19 个回归。页面明写来源口径声明。\n【发现并修复的存量失效（属图谱长大的滞后，不是框架缺陷）】① tests/architecture-view-context.test.js 视图 429 子视图期望停留在 24，上会话新增 UML 2 视角 7 个子视图后应为 31 → 同步；② scripts/memory-eval-run.js MQ-17 同样因子视图数变化而失败（且 dataset 文档还写着 15）→ 同步为 31 并在题集文档里注明『该值需随图增长维护，属题集维护而非记忆退化』；③ tests/ea-web-service-impl.test.js『真实 MCP 写图回滚』变为静默 skip：它把 canonical 图拷到临时工作区但没带 .argo/schema bundle，而图中已有 State/Composite State/Transition 等 bundle 新增类型 → 解析回落到内置默认 bundle、写入被图谱校验以 TYPES 拒收；修复＝临时工作区同时拷入本仓 .argo/schema，并把『失败就 skip』改为断言必须成功（skip 会隐藏失效）。③ 是本次最重要的教训。\n【回归】npm test 699/699 pass、0 fail、0 skip（前：696/2fail/1skip）；validateSystemArchitecture 通过（写图调用均返回 passed）。\n【数字纪律】把 aos-as-memory 的压缩率由旧 94.5% 更新为本次实测 97.1%；P4 度量卡同步（避免文档滞后于实测）。\n【待办】① 人类伙伴审阅版面文字密度（每页信息量偏大）与『Arcanate』术语（本仓实际叫 Acme base = ArchiMate 3.2 + ARGO 扩展，无 Arcanate）；② P3 的 8 个业界基准仍未跑（E1/E2 制度对照）；③ Docker e2e（npm run acceptance）未跑。",
