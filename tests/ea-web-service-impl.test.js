@@ -504,9 +504,18 @@ test('真实 MCP 写图回滚：in-process addElement + removeElement', async (t
   // 使用非 canonical 图谱路径（design/KG/IntegrationFixture.json）：
   // 避免触发 Neo4j 同步与向量嵌入生命周期（本机无 Neo4j/LLM 服务时会长时间挂起）。
   // 写图仍走同一套 ARGO MCP buildMutationResult → writeGraph 代码路径。
+  //
+  // 工作区自带 schema bundle（本仓为 .argo/schema：Acme + UML 2 状态机），
+  // 图谱里含该 bundle 新增的类型（State / Composite State / Transition），
+  // 因此临时工作区必须带上同一份 bundle，否则 schema 解析回落到内置默认
+  // bundle、写入会被图谱校验以 TYPES 失败拒收（这不是写路径的缺陷）。
   const fixtureRel = ['design', 'KG', 'IntegrationFixture.json'];
   const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ea-impl-mcp-'));
   fs.mkdirSync(path.join(projectRoot, ...fixtureRel.slice(0, -1)), { recursive: true });
+  const schemaSrc = path.join(ROOT, '.argo', 'schema');
+  if (fs.existsSync(schemaSrc)) {
+    fs.cpSync(schemaSrc, path.join(projectRoot, '.argo', 'schema'), { recursive: true });
+  }
   const graphPath = path.join(projectRoot, ...fixtureRel);
   fs.writeFileSync(graphPath, JSON.stringify(real, null, 2));
   const beforeCount = readGraph(graphPath).elements.length;
@@ -520,10 +529,10 @@ test('真实 MCP 写图回滚：in-process addElement + removeElement', async (t
     },
     projectRoot,
   );
-  if (!add.ok) {
-    t.skip(`MCP addElement failed: ${JSON.stringify(add.error || add.payload).slice(0, 200)}`);
-    return;
-  }
+  assert.ok(
+    add.ok,
+    `真实 MCP addElement 必须成功（否则该验收已失效）：${JSON.stringify(add.error || add.payload).slice(0, 400)}`,
+  );
   assert.ok(readGraph(graphPath).elements.some((e) => e.id === '900001'), 'add 后应存在元素');
 
   const remove = await adapter.callTool(
