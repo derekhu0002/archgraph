@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ArchGraph · Coding 业务价值与组织级知识图谱 — 预览</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #070a12; color: #eef1f6;
+    font-family: 'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', sans-serif; }
+  header { padding: 28px 32px 12px; }
+  h1 { margin: 0 0 6px; font-size: 22px; }
+  p.sub { margin: 0; color: #9aa6bd; font-size: 13.5px; line-height: 1.7; }
+  p.note { margin: 10px 0 0; font-size: 12.5px; color: #6b7793; }
+  main { padding: 18px 32px 48px; display: flex; flex-direction: column; gap: 26px; }
+  figure.slide { margin: 0; border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; overflow: hidden;
+    background: #0a0e1a; box-shadow: 0 18px 40px rgba(0,0,0,0.45); }
+  figure.slide img { display: block; width: 100%; height: auto; }
+  figcaption { padding: 10px 14px; font-size: 12.5px; color: #9aa6bd; border-top: 1px solid rgba(255,255,255,0.08); }
+  figcaption b { color: #6b8cff; margin-right: 8px; }
+  @media print { body { background: #fff; } figure.slide { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>ArchGraph · Coding 业务价值与组织级知识图谱</h1>
+  <p class="sub">五页汇报：状态机全景 → 业界痛点与先进实践 → 指标体系 → Graph RAG 通用流程 → 联邦式组织级图谱</p>
+  <p class="note">本页所有『我方』数字取自意图图谱 aos-as-*（measurement-status / measurement-result）与 tests/；所有『业界』数字为外部公开来源快照，标注 URL，非我方实测。</p>
+</header>
+<main>
+    <figure class="slide">
+      <img src="assets/p1-state-machine.svg" alt="Coding 业务全景：以状态机表达的业务价值流程" />
+      <figcaption><b>PAGE 1 / 5</b>Coding 业务全景：以状态机表达的业务价值流程</figcaption>
+    </figure>
+    <figure class="slide">
+      <img src="assets/p2-pain-and-practice.svg" alt="Coding 的痛点与先进实践：缺的是人与 Agent 的『共同语言』" />
+      <figcaption><b>PAGE 2 / 5</b>Coding 的痛点与先进实践：缺的是人与 Agent 的『共同语言』</figcaption>
+    </figure>
+    <figure class="slide">
+      <img src="assets/p3-metric-system.svg" alt="指标体系：指标 ↔ 状态机映射、我方评测与业界 Gap" />
+      <figcaption><b>PAGE 3 / 5</b>指标体系：指标 ↔ 状态机映射、我方评测与业界 Gap</figcaption>
+    </figure>
+    <figure class="slide">
+      <img src="assets/p4-graph-rag-pipeline.svg" alt="检索的一级通用流程：Graph RAG 全景与我方覆盖" />
+      <figcaption><b>PAGE 4 / 5</b>检索的一级通用流程：Graph RAG 全景与我方覆盖</figcaption>
+    </figure>
+    <figure class="slide">
+      <img src="assets/p5-federation.svg" alt="联邦式组织级知识图谱：用 ArcGraph 项目当积木" />
+      <figcaption><b>PAGE 5 / 5</b>联邦式组织级知识图谱：用 ArcGraph 项目当积木</figcaption>
+    </figure>
+</main>
+</body>
+</html>
