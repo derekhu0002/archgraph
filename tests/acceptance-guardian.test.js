@@ -79,6 +79,7 @@ const DELIVERABLE_GUARDS = [
   ['FEATURE: bounded structural reads (context output budget: identity fallback + complete id manifest)', 'tests/agent-read-projection.test.js'],
   ['FEATURE: Coding business deck v2 (editable nine-slide deliverable)', 'tests/coding-business-deck-v2.test.js'],
   ['FEATURE: Coding business deck v3 (framework-first nine-slide narrative)', 'tests/coding-business-deck-v3.test.js'],
+  ['FEATURE: Coding business deck v4 (business/application layers with optional RAG modes)', 'tests/coding-business-deck-v4.test.js'],
 ];
 
 const ALL_GUARDS = [...MCP_INTERFACE_GUARDS.map(([name, file]) => ({ kind: 'mcp-interface', name, file })), ...DELIVERABLE_GUARDS.map(([name, file]) => ({ kind: 'deliverable', name, file }))];
