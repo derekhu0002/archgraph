@@ -12202,7 +12202,22 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Work Package"
+      "type": "Work Package",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "7006297",
+          "description": "Register DSH write-guard self-verification task in intent graph; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "status",
+          "value": "OPEN"
+        },
+        {
+          "name": "owner",
+          "value": "project-overseer-001"
+        }
+      ]
     }
   ],
   "relationships": [
