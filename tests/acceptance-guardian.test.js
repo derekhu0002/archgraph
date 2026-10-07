@@ -72,6 +72,7 @@ const DELIVERABLE_GUARDS = [
   ['EA tooling deliverable (web-service + import)', 'tests/ea-web-service-impl.test.js'],
   ['FEATURE: cross-project graph query (projectId -> federation center)', 'tests/external-graph-query.test.js'],
   ['FEATURE: cross-project workspaceRoot is read-only (write pinned to home workspace)', 'tests/workspace-write-guard.test.js'],
+  ['FEATURE: local cross-project access boundary per harness (dsh bridge pins the session workspace)', 'tests/dsh-cross-project-access.test.js'],
   ['FEATURE: schema bundle (default + custom schema decoupling)', 'tests/schema-bundle.test.js'],
   ['FEATURE: schema bundle per-type attribute contracts (attributesByElementType)', 'tests/schema-attribute-contracts.test.js'],
   ['FEATURE: schema bundle extends inheritance (base + delta)', 'tests/schema-bundle-extends.test.js'],

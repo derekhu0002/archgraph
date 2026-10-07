@@ -140,3 +140,38 @@ test('readme: What is this? documents cross-project graph query (projectId)', ()
   assert.match(section, /federation center/i, 'should name the federation center');
   assert.match(section, /denied by default/i, 'should state external access is denied by default');
 });
+
+test('readme: documents local cross-project read/write availability per harness', () => {
+  // GIVEN the per-call workspaceRoot channel is bridged by the host, so whether a harness can touch
+  //       another LOCAL project's graph differs per harness (DSH pins it, direct-MCP hosts honor it)
+  // WHEN a reader opens the cross-project section
+  // THEN each harness is listed with its local cross-project read/write status, the DSH limitation is
+  //      stated explicitly, the two separate channels (local path vs federated projectId) are named,
+  //      and the same-machine federation test evidence is recorded
+  const section = sectionAfter(README, 'Cross-project read/write');
+  assert.ok(section, 'README should have a Cross-project read/write section');
+
+  // the two independent channels must not be conflated
+  assert.match(section, /workspaceRoot/, 'should name the per-call local workspaceRoot channel');
+  assert.match(section, /projectId/, 'should name the federated projectId channel');
+  assert.match(section, /separate|not the same|independent/i, 'should state the two channels are separate');
+
+  // the DSH limitation, from the observed evidence
+  assert.match(section, /DeepSeek Harness/, 'should list DeepSeek Harness');
+  assert.match(section, /cannot|not possible|no way/i, 'should state that local cross-project access cannot be done');
+  assert.match(section, /pins|overwrit|replac/i, 'should explain the bridge pins/overwrites workspaceRoot');
+  assert.match(section, /WORKSPACE_WRITE_DENIED/, 'should name the guard branch that never fires on DSH');
+  assert.match(section, /read-only/i, 'should state cross-project write is read-only-blocked by design');
+
+  // every harness must appear with a status
+  for (const harness of ['OpenCode', 'Codex', 'DeepSeek Harness', 'GitHub Copilot', 'Cursor', 'OpenClaw']) {
+    assert.match(section, new RegExp(harness), `should list ${harness} in the harness table`);
+  }
+  assert.match(section, /待测|not yet tested|untested/i, 'should mark the untested harnesses');
+  assert.match(section, /not applicable|不涉及/i, 'should mark harnesses the scenario does not apply to');
+
+  // federation reads do work, and the evidence is recorded
+  assert.match(section, /federation center/i, 'should state that federated reads do work');
+  assert.match(section, /database=abot/, 'should record the observed cross-project read evidence');
+  assert.match(section, /self-declared|self-asserted|自述/i, 'should record that the requester identity is self-declared');
+});

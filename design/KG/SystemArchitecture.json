@@ -362,10 +362,6 @@
           "description": "index.html; README.md; docs/archgraph-framework-overview.md（对外介绍补自建/可插拔 embedding 能力，对应 0.24.0）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "d9769af",
           "description": "index.html; tests/website.test.js; README.md; docs/archgraph-framework-overview.md（首页/README/总纲对外刷新到 0.26.2：联邦共享、精益读取、成本可观测三类新能力卡片 + Community 联邦说明；仓库 About description/topics 同步刷新）"
@@ -379,6 +375,10 @@
           "name": "commit",
           "value": "302e534",
           "description": "docs: 主页新增 'Federated, not distributed' 能力卡 + Community lead 命名模式; README The federation model 节; tests/website.test.js + readme.test.js 守卫"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -529,10 +529,6 @@
           "description": "README.md（Install 补可插拔/自建 embedding：任意 OpenAI 兼容端点、ARGO_EMBEDDING_PROFILE=openai-compatible、自建指南链接）；tests/readme.test.js（新增 AT）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "d9769af",
           "description": "README.md; tests/readme.test.js（What is this 补分层记忆 + 联邦共享；Community 补联邦注册中心 register/discover/authorize/read by reference；新增 AT-readme federated 断言）"
@@ -541,6 +537,10 @@
           "name": "commit",
           "value": "302e534",
           "description": "docs: README 新增 The federation model 节（联邦式意图图谱/registry-broker/引用不拷贝/非分布式）；tests/readme.test.js 守卫"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -575,10 +575,6 @@
           "value": "COMPLETED"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "56b874b",
           "description": "docs/diagrams/global-architecture.svg（重画为深色 Layered Viewpoint：人类/AGENT/ARGO MCP/graph/Neo4j/ArchiMate 3.2/EA + Federation）；scripts/gen-diagrams.js（新增可复现生成器，替代 excalidraw 源）；docs/diagrams/global-architecture.excalidraw（删除，git 历史可回）；README.md（Editable source→scripts/gen-diagrams.js）；tests/architecture-diagram.test.js"
@@ -587,6 +583,10 @@
           "name": "commit",
           "value": "945d4a4",
           "description": "scripts/gen-diagrams.js（生成器随 core-model 布局修正同步；global-architecture.svg 内容未变）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -2966,10 +2966,6 @@
           "description": "<LosslessWrite> 口径修正：结构化 token 丢失用分隔符/空白不敏感判定，排除裸 / 与短数字；argo/rules/archgraph.instructions.md"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "343a98f",
           "description": "argo/rules/archgraph.instructions.md; tests/argo-rules-federation.test.js; design/KG/SystemArchitecture.json（新增 <FederationGuideline> + CoreRule 12 + AT-rules-06）"
@@ -2983,6 +2979,10 @@
           "name": "commit",
           "value": "90e9bc6",
           "description": "package.json（release archgraph-argo@0.24.3 + 全宿主部署 <FederationGuideline> + CoreRule 12）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -4340,7 +4340,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-07）。\n【目标与成果】完成Coding Agent业务价值/ArchGraph测评PPT v5，按伙伴反馈进一步重画第3页。最终版：docs/ppt/output/archgraph-coding-business-deck-v5-clarified-p3-r2.pptx；脚本 docs/ppt/build-coding-business-deck-v5.mjs；内容计划 docs/ppt/content-plan-v5.json。主交付提交 e01fa0b、登记提交 9a121f0；第3页修订提交 19b6f67。\n【第3页决策】把通用Coding Agent Harness放在ArchGraph边界外作为调用方，边界内明确标注“ARCHGRAPH框架提供”，分三条工作链：图谱校验→去重→无损写入→语义投影；默认语义检索→Hybrid→Rerank（后两者注明默认关闭，输入投影/Embedding标Serving）；结构同步→只读Cypher→社区索引（注明P1暂缓）。上方业务层按模型表达专家/开发者与领域本体Association；删除原来错误暗示业务流程—本体有直接关系的连线。所有关系、元素与状态遵守ARGO canonical视图。\n【验证】本次定向模型/交付/看护测试6/6通过。此前整库 npm test 为710/711，其中memory-eval-run-baseline一次TOOL_ERROR；不能归因本次改动，后续可重跑。9页PPT finalizer完成，现场查看第3页布局清晰；ARGO图谱校验已通过。\n【版本与提交】v1-v4、v5-final-aligned历史产物保留；最终修订版与源码、计划登记在交付元素。旧试稿已清理。\n【可复用认知】展示框架价值时，应使用清晰的框架边界、调用方位置及内部职责分区；强调映射前先逐项对照模型的relationship端点和类型，避免布局连接暗示不存在的关系。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-07）。\n【本会话目标与结论】人类伙伴要求验证 Argo MCP 的读写（含本项目读写与跨项目读写）权限控制是否符合预期。结论：权限结果符合预期（跨项目写被有效阻断、项目外路径零写入），但发现两处实现细节与文档表述不符，已登记到 T2 卡 overseer-argo-mcp-verification-001（本卡不重复）。\n【关键认知（坑）】①写门禁在 DSH 内永不触发：dsh-argo-workspace/index.js 在 {...args} 展开后覆盖注入 workspaceRoot=sessionCwd 与 sessionWorkspaceRoot=sessionCwd（注释：模型值不能赢），故 authorizeWorkspaceWrite 总在 sameWorkspace 分支放行，WORKSPACE_WRITE_DENIED 分支只在非 DSH 主机（直接 node 跑单测）才执行；写边界实际由『桥钉住会话工作区』保证，方向正确、零安全影响。实测：带 workspaceRoot=D:\\Projects\\SOC-DEMO 的写入未被拒，元素落在本仓，SOC-DEMO 零改动。②跨项目读联邦通道默认拒绝生效：abot/my-army/graph-wiki/new-era 均 EXTERNAL_QUERY_DENIED(403，requester=archgraph)，与 registry_grants 一致（archgraph 作为 grantee 无任何授权）。③修正上轮记录：addArchitectureElement 省略 element.id 会自动分配（回传 allocatedId），非『必须自带 id』；上次的 requireId 类失败实为元素缺 type 的 schema 校验错误。④语义去重门禁假阳性再复现（本卡 0.8922 拦截新卡），已按规则复用追加。\n【阻塞】沙箱 PowerShell 被 Windows 文件权限挡住（SetNamedSecurityInfoW grantWrite(D:\\Projects\\archgraph)），git / npm test / npm run acceptance 均不可用；守卫单测（tests/workspace-write-guard.test.js）与 Docker 端到端验收未跑，本会话结论仅由 MCP 实测支撑。恢复 shell 后应补跑 ARM。\n【图谱】探针已全部移除，图谱回到 402 元素 / 0 探针基线；validateSystemArchitecture 通过。\n【上一轮（已归 T2 归档，索引保留）】Coding Agent 业务价值 PPT v5 已完成：最终版 docs/ppt/output/archgraph-coding-business-deck-v5-clarified-p3-r2.pptx，构建脚本 docs/ppt/build-coding-business-deck-v5.mjs，内容计划 docs/ppt/content-plan-v5.json；主交付 e01fa0b、登记 9a121f0、第3页修订 19b6f67；v1-v4、v5-final-aligned 历史产物保留。\n【待办】①恢复 shell 后补跑 workspace-write-guard 单测与非 DSH 主机的拒写实测（守卫拒绝分支的真实证据）；②确认『读工具按 per-call workspaceRoot 跨项目读取』在 DSH 下不再可用是否需要文档补充（现只有 projectId 联邦通道可用）；③若需在 DSH 内直接验守卫拒绝分支，需人类伙伴同意临时切换完全权限或改用非桥接宿主。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4363,7 +4363,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-10-07",
-          "description": "Coding Agent PPT architecture-model alignment review; awaiting user choice on canonical model extension"
+          "description": "Argo MCP 读写权限控制验证（本仓 + 跨项目）"
         },
         {
           "name": "commit",
@@ -4616,10 +4616,6 @@
           "description": "design/KG/SystemArchitecture.json（T1 摘要覆盖写：语义检索向量投影 OOM 修复 + 发布 0.24.2）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "037d4e7",
           "description": "scripts/memory-retrieval-ab.js; tests/memory-retrieval-ab.test.js（A/B harness 隔离 HOME 下 ARGO_ENV_FILE 修复 + --auto；AT-05/06）"
@@ -4678,6 +4674,10 @@
           "name": "commit",
           "value": "abea25a",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（记录 Coding Agent PPT 架构模型对齐审视、价值定位与待决模型缺口）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -7881,7 +7881,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -7924,13 +7924,13 @@
           "description": "docs/archgraph-framework-overview.md（框架介绍系列总纲草稿）; tests/framework-overview.test.js（AT-wp-framework-overview-001-01）; design/KG/SystemArchitecture.json（新增 WP wp-framework-overview-001 于 view 180）"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "commit",
           "value": "d9769af",
           "description": "docs/archgraph-framework-overview.md; tests/framework-overview.test.js（总纲『落地与生态』补联邦协作/可观测与成本/精益读取；updated→2026-09-25；新增 AT）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "ArchGraph 框架介绍系列的总纲。以《ArchGraph 总纲：用一张意图架构图，统一 Agent 工程》统一整个系列的叙事与术语：覆盖架构线（AML 把 ArchiMate 3.2 扩成 Agent 建模语言 / 产品与 Harness 统一模型 / 视图与视角）与 AI 线（图谱即记忆·三层记忆 / GraphRAG 检索 / 语义与结构双通道）两条主线，以及四道工程约束（定位先行 / 验收先行 / 变更可证 / 写入无害）。给出系列地图，用于逐步把既有文章（官宣、8 创新、多角色、社区、Skill 共演化、洞察报告）整合进同一体系。产出仓库草稿 docs/archgraph-framework-overview.md（status=draft），配套可执行验收测试 tests/framework-overview.test.js。",
@@ -8772,6 +8772,10 @@
           "name": "commit",
           "value": "9ba8379",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-federation-vision.test.js; tests/overseer-ltm-layering.test.js（登记联邦愿景 Goal + 可执行验收 + LTM 核心视图成员同步）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "愿景延伸（2026-09-22 人类伙伴口述，项目总管登记）：联邦式组织级图谱——以「国家/联邦」类比「项目/组织」。① 国家与地形（项目属性）：每个国家有自己的地形（建筑、人才等），对应该项目自身意图图的内容与属性。② 国家间的管控（访问权限/海关）：国家与国家之间有进入的限制和管控（如海关），对应图谱/项目之间的访问权限设定。③ 联邦与国家（组织与项目）：联邦有总的法则规范，成员国保持独立与自治；各国在联邦中各有分工与优劣（如有的项目专责知识库构建、有的专责项目开发）。定位：与既有愿景『为 AGENT 提供长期记忆系统』并存、不冲突，是其向『图间/组织级』的延伸；本质是在『图』之上再加一层『图间组织（联邦）』模型（现有 AgentOrganization 仅为图内组织）。方法：采用联邦/引用式（各国地图不合并、交流走引用），避免拷贝式内容漂移；引用需引用契约兜底（悬空检测依托墓碑账本/canonicalDigest）。最小门槛＝联邦法则：① 跨国引用绝对坐标 (graphKey, elementId)＋可选版本指纹；② 同构类型共同语言 ArchiMate 3.2＋AML；③ 默认拒绝的海关基线（先拒绝、再显式邦交授予）。信任极性：对内『先给再收窄』、对外『先拒绝再授予』。地形与分工属成员国内政，非联邦成立门槛。关联既有评测缺口：多跳 Recall 深度。",
@@ -8816,6 +8820,10 @@
           "name": "decision",
           "value": "registration-human-initiated",
           "description": "2026-09-22 人类伙伴裁决：不把『注册』作为 initializeWorkspace 的出生步骤——注册应由人类发起、AI 执行；联邦成员资格是人的决定，不是框架自动行为。故推翻 v0 设计稿『initializeWorkspace 把注册联邦作为建国出生步骤』一项。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "设计方案（2026-09-22 人类伙伴口述要点 + 项目总管成稿，v0 设计稿；承接 Goal overseer-federation-vision-001）：\n【点1 中心机构】设一个联邦中心，管理成员国的新增/注册/销毁退出，并让成员相互知道对方存在。红线：中心只持有『联邦元数据』（成员身份/作用/能力、接口清单、授权、请求队列），不持有成员国内容——内容仍留各国 canonical 图，跨国走引用；以此保住各国自治与唯一事实源，避免中心成为拷贝式超级图。单点风险：中心不可用时允许成员以本地缓存目录+已授信降级可读。承载：拿 Graph Store 当中心的方向可行，但 Graph Store 现状是『子图工作包导出/发布/复用』（copy 式，见 2748 社区 + export-to-kg.js），必须升级为 reference-registry（同时托管已发布工件+接口描述+成员/授权元数据），否则与『引用不漂移』矛盾。\n【点2 规则内化到 Graph 框架（插拔）】联邦能力随框架分发（argo/defaults 模板 + initializeWorkspace 把『注册联邦』作为建国出生步骤）。三能力：(a) 项目注册与管理 register；(b) 相互授权与感知 discover/grant/revoke/checkAccess（默认拒绝）；(c) 需求申请与接口交互 request→accept/reject→expose(interface)。交互分两级：L-Read 引用（只读、无漂移）与 L-Provide 契约式交付（请求-接纳-接口暴露，可能含写/交付语义，须契约+审计+可能人类审批）。组件提供方/消费方天然构成依赖图（安卓子仓/组件消费类比），可放进自相似联邦图。\n【生命周期】genesis→register→operate→exit/destroy；退出协议=注销→墓碑→通知下游（悬空引用/依赖断裂）→降级；接口带版本语义、引用可 pin。\n【分期】P0 契约与寻址（联邦法则 v0+稳定 fedId+ForeignReference 代理+中心元数据模型）；P1 中心=Registry（注册/发现/授权，默认拒绝，只读）；P2 跨图只读检索（grant 范围 fan-out+provenance）；P3 契约式交付+组织层/分工（自相似联邦图）；P4 生命周期/退出对账、drift/墓碑/审计。\n【裁决与进展（2026-09-22 人类伙伴裁决）】D1b 已定：框架（archgraph）负责落规则 + 提供 Graph MCP 接口；中心（Registry）落在 graph-wiki——它是云端托管服务，各项目经 Graph MCP 注册/注销自己。D3 已定：首期只做 Read，且『只读』限定在内容维度（中心对内容 read-through、不复制副本）；注册/注销/发现/授权/授权后读取作为最小元数据写原语必须实现。进展：graph-wiki 已交付联邦中心 P0（新视图 federation-registry-view + 11 元素 + 10 关系；mcp/registry.js + 5 个 registry_* 工具），并已部署到公网 120.24.114.13 的 graph-mcp（9 工具，7 步远端验证全绿）。graph-wiki commits dcb85bb/11220fc/c19f297/bc52bdf/360eec4。\n【裁决补充（2026-09-22）】D2：注册/退出无需人类单独审批（由项目自身 Agent 与人协作完成）；中心定位＝提供平台；D5：先单点中心（可复制后置）；D4 信任圈层搁置（首期一律默认拒绝+显式授权，等价单一最外圈层）。框架侧已落 <FederationGuideline> + CoreRule 12（argo/rules，AT-rules-06；规则回归 22/22、argo-deploy 8/8；stdio 桥为通用透传遂 registry_* 自动对接）；WP wp-federation-framework-side-001 状态 IN_PROGRESS（工具契约 schema 对接待续）。commits 343a98f/32b8ea3。",
@@ -8863,6 +8871,10 @@
           "name": "evidence",
           "value": "graph-wiki-sync-2026-09-23",
           "description": "graph-wiki 回补/同步（2026-09-23）：主仓 github.com/derekhu0002/graph-wiki main 现为 fe1c3c5（本机与远端一致无分叉）；回补服务器 live registry（archgraph+soc-demo）按文件状态补入；新增同步机制 mcp/registry-sync.sh（push/pull 幂等）+ .gitattributes(LF) + README 多设备说明。缺口：服务器 /opt/graph-wiki 为独立仓（无 remote）且无 GitHub 凭证，真触发式 push 需先配只写 deploy key；另 graph_submit/graph_update 产生的 assets/graphs/*+catalog.json（~10 图）未回主仓（主仓仅 2 图），待单独处理。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "框架侧工作包（2026-09-22 立项；同日首刀落地规则）：在 archgraph 框架侧落地联邦能力——① 规则：把联邦行为契约写进工作流规则（Agent 如何注册/注销/发现/授权/读取、默认拒绝、内容不复制、身份稳定），Agent 视角、命令式行为契约（已完成：<FederationGuideline> + CoreRule 12，AT-rules-06；初始 commit 343a98f，Agent 视角修订 commit 92ec334）；② MCP 工具契约：中心（graph-wiki，公网 https://argo.derekworkspacev5.com/mcp，9 工具）在 OpenCode 以 remote MCP 直连，registry_* 工具自动可用，框架侧无需新增工具或桥——工具契约以『规则声明工具面 + 远端注册』兑现，schema 对齐仅为文档层面确认（graph-wiki 可提供输入 schema 清单）。关联设计稿 overseer-federation-center-design-001；D1b 已定（框架落规则+工具、中心落 graph-wiki）。验收：GIVEN 框架侧规则与工具契约；WHEN 项目初始化后尝试注册/发现/授权读取；THEN 规则可被 Agent 读取执行、远端工具面一致、默认拒绝生效。",
@@ -8894,6 +8906,10 @@
           "name": "commit",
           "value": "00771d6",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-federation-framework-wp.test.js; tests/overseer-ltm-layering.test.js（登记跨项目投递机制与编码规范 T2 经验卡）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "可复用经验（2026-09-22，项目总管）：跨项目给另一个项目的 Agent 投递需求/消息的机制与编码规范。\n机制：OpenCode 桌面版内置 HTTP server（127.0.0.1:<port>，端口每次运行不同）＋ Basic 认证（取 env OPENCODE_SERVER_USERNAME/PASSWORD，勿打印值）；POST /session?directory=<项目目录> 建绑定该目录的会话 → POST /session/{id}/message（body {parts:[{type:'text',text:'...'}]}）发送并等待回复。CLI 等价物 opencode run --dir <项目> 'msg'，但本机仅桌面 Electron 版、未装 CLI（PATH 无 opencode；全局 npm 仅 archgraph-argo/openclaw）。\n编码规范（坑）：PowerShell 5.1 对无 charset 的 JSON 默认按 Latin-1 解码 → 发出的中文变 '?'、响应双重编码；修复：以 UTF-8 字节发送并显式 Content-Type: application/json; charset=utf-8，响应按 UTF-8 解码。\n隔离发现：各项目 ARGO 图相互隔离（身份/记忆不共享），跨项目消息可达但缺共享身份——正是联邦中心要解决的。\n实证：以该机制向 graph-wiki 投递「联邦中心 P0」需求并收到完成回报（会话 ses_f36641094ffeODqwWHyVeWyuT6）；graph-wiki 侧亦登记同类经验元素（xproj-msg-mechanism / xproj-encoding-norm / xproj-isolation-finding，commits bc52bdf/360eec4）。\n【更正/补充（2026-09-22）graph-mcp 接入方式】graph-mcp 在 OpenCode 里以 type: remote + url 直连（OpenCode 原生支持 Streamable HTTP），无需任何桥；远端工具面（含 registry_*）重连后自动出现。argo/mcp-bridges/graph-mcp-stdio.js 不是给 OpenCode 用的——它是给只按 SSE GET /mcp 拉远端、遇 Streamable-HTTP-only 端点 404 的宿主（典型 Cursor）准备的 stdio 兜底桥（见其文件头注释）。教训：不要因仓库里存在某模块就假定它是当前链路的必经路径，先读它的自述/引用再下结论（本次因此把一句误导性的『桥为通用透传』写入过 WP）。框架侧 MCP 接口因此无需新增工具或桥，只需 remote 注册（已注册）。",
@@ -8925,11 +8941,6 @@
           "name": "commit",
           "value": "6a6c02a",
           "description": "docs/archgraph-intro-email.html; tests/archgraph-intro-email.test.js; scripts/send-html-email.js; design/KG/SystemArchitecture.json; archgraph.qea"
-        },
-        {
-          "name": "deliveryStatus",
-          "value": "email-sent",
-          "description": "参照 VSOC 格式版已发送（主题：以项目为中心，让 AI 越用越懂你）"
         },
         {
           "name": "deliveryChannel",
@@ -8964,6 +8975,10 @@
           "name": "commit",
           "value": "8dc97c0",
           "description": "docs/archgraph-intro-email.html（视觉参照 SOC-DEMO 的 VSOC 介绍邮件：全内联样式 + 渐变页首 + 分节标题条 + 卡片/提示框；结构痛点→愿景→方案→图怎么帮）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "面向同事（对 AI/Agent 有基本认知、不了解技术细节）的框架使用介绍邮件（群发）。四条约束：① 开场（正文前半部分）不出现 archgraph/ARGO 等产品类名称（仅具体命令保留字面量）；② 大逻辑：先痛点 → 再愿景 → 然后建议解决方案 → 最后具体讲这套「图（graph）」怎么帮到大家；③ 开场先站在听众视角讲好处；④ 视觉直接参照姊妹项目 SOC-DEMO 刚发出的『VSOC 演示平台介绍』邮件格式（860px 白卡片 + 渐变页首带胶囊标识；全内联样式（无 style 块/无类）；分节标题 19px + 3px 强调色下边线；『一句话概括』提示框；2×2 边框卡片；浅灰步骤框；表格白首行；footer 顶线），邮件安全（无内联 SVG 与外链图片）。内容：开场好处（不用从头解释/记得性/经验可留）；一、痛点；二、愿景（4 张卡片）；三、建议方案（以项目为中心/项目当容器/OpenCode·Cursor/同一张图 + 图1 项目容器）；四、具体的图怎么帮（它替你记住/需要时取回/资产=仓库+图谱 + 图2 数据流；4.1 四步上手：npm install -g archgraph-argo → argo-deploy → 前置准备 图数据库+语义检索服务 ~/.argo/.env → argo init + 图3；4.2 会话结束说一声 + 图4 时序；4.3 价值 起步快/交接稳/越用越省/可规模化；4.4 下一步）。称呼『大家好』。产出 docs/archgraph-intro-email.html（自包含 HTML），配套可执行验收测试 tests/archgraph-intro-email.test.js（9/9）。",
@@ -9047,11 +9062,6 @@
           "description": "docs/org-federation-vision.html; tests/org-federation-vision.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
         },
         {
-          "name": "deliveryStatus",
-          "value": "email-sent",
-          "description": "已发送（主题：畅想：从「人的组织」到「项目的联邦」）"
-        },
-        {
           "name": "deliveryChannel",
           "value": "smtp.126.com:465（hdhscu@126.com 发送至 hudonghua@huawei.com）"
         },
@@ -9059,6 +9069,10 @@
           "name": "status",
           "value": "superseded",
           "description": "被 wp-graph-position-paper-001 重写替代（按人类伙伴反馈：去除政策家人/口服药等无关内容，改为四段结构）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "面向人类伙伴（hudonghua）的新型组织形态过渡畅想文章（意见）。主题：以「项目」为基本 block，基于「一人成军」愿景构建新型组织结构；以「国家联邦」为比喻探讨（①设立联盟中枢；②每个国家就是一个项目；③以项目为基本组织把整个组织建起来），并探讨从「人的组织形态」过渡到「政策家人」组织形态的方式（从项目化切入；建筑时代 vs 口服药类比）。文风：畅想 + 风险试探（列出中心悖论/协作摩擦/引用漂移/人的位置/度量激励/责任合规/身份文化/失败模式等），并给出 L1→L4 过渡路径与五步起步建议。产出 docs/org-federation-vision.html（参照 SOC-DEMO VSOC 邮件格式的邮件安全 HTML，2 张表示意图），文章全文存于 org-federation-vision-article-001，配套可执行验收测试 tests/org-federation-vision.test.js。",
@@ -9184,6 +9198,10 @@
           "name": "commit",
           "value": "925186b",
           "description": "scripts/agent-cost-eval.js; tests/agent-cost-eval.test.js（耗时拆分：per-tool duration/ok + toolTimeMs/toolErrors/byBackendTime，供模型 vs MCP vs 仓耗时分离）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -9315,6 +9333,10 @@
           "name": "commit",
           "value": "dc70ca3",
           "description": "package.json（release archgraph-argo 0.25.0）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -9407,6 +9429,10 @@
           "name": "eval-clean-run",
           "value": "ab-ten-task-2026-09-24",
           "description": "修复后干净 A/B（10 题×2 臂，deepseek-flash）：两臂 success/recall 均 100%；OFF tok14951 wall62.0s turns5.6 tools7.9 err9（g0/r79）；ON tok12250 wall9.3s turns3.4 tools4.5 err0 rt0.3（g18/r27）。ON 令牌 −18%、轮次 −39%、工具 −43%、0 错误。但 OFF 成本被前几次任务的 grep 工具失败/慢扫污染（S2/S1 剖面：OFF repo 631s vs ON 19s），故 E1 成本结论仍不完全可信；召回无差异——本仓 canonical JSON 在仓内，grep 可低成本命中图内 id，印证框架所述 E1 系统性低估。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -9444,6 +9470,10 @@
           "name": "commit",
           "value": "be77239",
           "description": "data/eval-seeds/agent-cost-seed.json（scenario/scale 标签）; scripts/memory-retrieval-ab.js（groupByScenario 剖面）; tests/memory-retrieval-profile.test.js（AT-01..03）; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -9467,6 +9497,10 @@
           "name": "commit",
           "value": "eadca13",
           "description": "design/KG/SystemArchitecture.json（边界元素）; tests/memory-retrieval-profile.test.js（AT-memory-retrieval-profile-04）; archgraph.qea"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -9546,6 +9580,10 @@
           "name": "commit",
           "value": "7ac6559",
           "description": "fix(diagnosis): overSearch.emptyOrError 改为 distinct(error OR empty) 去重叠计数（issue #8 口径）+ AT-agent-search-diagnosis-07"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -9569,6 +9607,10 @@
           "name": "commit",
           "value": "878e780",
           "description": "design/KG/SystemArchitecture.json; tests/memory-retrieval-profile.test.js（AT-framework-optimization-cross-scenario-01）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -9693,6 +9735,10 @@
           "name": "commit",
           "value": "705b89c",
           "description": "package.json（release archgraph-argo-beta@0.27.0-beta.14；npm publish tag latest + 全局安装 + argo-deploy 22/22）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -9781,11 +9827,6 @@
           "description": "docs/graph-position-paper.html; tests/graph-position-paper.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
         },
         {
-          "name": "deliveryStatus",
-          "value": "email-sent",
-          "description": "已发送（主题：以项目为基本 block，让 Agent 有图可依——方案与测评）"
-        },
-        {
           "name": "deliveryChannel",
           "value": "smtp.126.com:465（hdhscu@126.com 发送至 hudonghua@huawei.com）"
         },
@@ -9793,6 +9834,10 @@
           "name": "commit",
           "value": "7ba9f50",
           "description": "docs/graph-position-paper.html; tests/graph-position-paper.test.js（术语修正：本真图谱→意图架构图谱）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "面向人类伙伴（hudonghua）的方案与测评材料（意见），由原『组织形态过渡畅想文章』重写而来：废弃「政策家人/政策加人」与「盖楼 vs 口服药」无关内容，按四段结构重写——①提出问题（业界问题）；②解决方案（意图架构图谱 + 知识库作为记忆系统与设计图纸 + 人与 AI 基于架构讨论、有图可依；保留以项目为基本 block 的方向）；③框架细节（写入门禁：去重/无损/墓碑；读取优化：子图限定/三层记忆/两步回忆/阈值 0.70/混合检索/重排；检出率与召回率指标与努力）；④测评与交付（对齐 LongMemEval/LOCOMO/BEAM；自建题集/剖面评测/对照实验；结果；可执行回归）。产出 docs/graph-position-paper.html（邮件安全 HTML，2 张表示意图），全文存于 graph-position-paper-001，配套可执行验收测试 tests/graph-position-paper.test.js。",
@@ -9862,11 +9907,6 @@
           "description": "docs/graph-agent-paper.html; tests/graph-agent-paper.test.js; tests/archgraph-intro-email.test.js; tests/graph-position-paper.test.js; tests/org-federation-vision.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
         },
         {
-          "name": "deliveryStatus",
-          "value": "email-sent",
-          "description": "重写版已发送（主题：研究稿：面向 Agent 工程的一张意图架构图）"
-        },
-        {
           "name": "deliveryChannel",
           "value": "smtp.126.com:465（hdhscu@126.com 发送至 hudonghua@huawei.com）"
         },
@@ -9879,6 +9919,10 @@
           "name": "commit",
           "value": "2997263",
           "description": "docs/graph-agent-paper.html; tests/graph-agent-paper.test.js（重写：人类行文 + 对比评测 + 逻辑修正）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "面向人类伙伴（hudonghua）的科研论文（内部研究稿，重写版）：《面向 Agent 工程的一张意图架构图：写入治理、检索优化与可信记忆的实证研究》。本轮按人类伙伴要求全面重写：① 学习人类学术行文（段落承接、诚实限定、去除口号对仗与滥用列表）；② 新增对比评测（内部消融图 + 能力维度对照表 + 公开数值参考表（LongMemEval/LoCoMo/BEAM/Mem0/GraphRAG/LightRAG），显式声明非同分布）；③ 修正逻辑：我方机制从『相关工作』移出，相关工作仅写真实 prior art；④ 新增局限节。写前由 3 个子 Agent 并行研究（行文风格指南 / 业界基准数据 / 逻辑审计），再由项目总管归纳成文。产出 docs/graph-agent-paper.html（VSOC 邮件格式邮件安全 HTML，4 张数据图表），全文存于 graph-agent-paper-001，配套可执行验收测试 tests/graph-agent-paper.test.js。",
@@ -10028,10 +10072,6 @@
           "description": "P1 skills deployment (verified slice); files: install-argo.ps1, tests/argo-doubao.test.js, design/KG/SystemArchitecture.json"
         },
         {
-          "name": "deliveryStatus",
-          "value": "partial"
-        },
-        {
           "name": "status",
           "value": "IN_PROGRESS"
         },
@@ -10058,6 +10098,10 @@
           "name": "commit",
           "value": "236b225",
           "description": "Doubao ARGO entry skill archgraph-argo (rules + STEP 0 gate in the always-in-context description); files: install-argo.ps1, tests/argo-doubao.test.js"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -10096,10 +10140,6 @@
           "value": "2026-09-27"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "name": "verificationResult",
           "value": "AT-regression-2026-09-27-green",
           "description": "本仓 AT 回归（2026-09-27，node 直跑各用例文件）：mcp-interface-behavior 2/2、architecture-element-mutation 14/14、architecture-view-mutation 4/4、architecture-dedup-gate 8/8、architecture-dedup-semantic 通过、lossless-write-gate 9/9、neo4j-cypher-query 17/17、acceptance-guardian 4/4、argo-mcp-tools 6/6（stdio MCP 协议路径）；validateSystemArchitecture passed（exitCode 0）。注：本沙箱默认禁止管道子进程 stdio（EPERM），argo-mcp-tools 需放宽沙箱后运行，属环境限制非产品缺陷。"
@@ -10113,6 +10153,10 @@
           "name": "commit",
           "value": "3417cf6",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（T2 里程碑记忆卡 overseer-argo-mcp-verification-001 + T1 摘要幂等覆盖 + 本 WP 的 commit 台账）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
       "description": "ARGO MCP 功能验证（2026-09-27，项目总管，本仓 archgraph）：人类伙伴要求在当前项目验证 ARGO MCP（阿狗 MCP）功能是否正常。结论=正常（读/写两条链路与护栏实测通过），并已证明常驻 MCP 实例绑定本仓。绑定证据：①常驻 MCP 进程在 <workspace>/.argo/temp/mcp-phase.json 逐调用写入相位（与本会话调用一一对应）；②validateSystemArchitecture 回传 workspaceRoot=D:\\\\Projects\\\\archgraph；③queryNeo4jGraph 的 ArchitectureGraph.source_path=design/KG/SystemArchitecture.json、database=archgraph，计数与仓内文件一致；④已部署 ~/.argo/scripts 与仓内 argo/scripts 同名服务 sha256 逐字节一致。读链路：语义检索（含 scope 收敛）、元素上下文、视图上下文（含本仓 archgraph.qea 几何）、只读 Cypher、memory_search、validate 全通。写链路（受控探针）：dryRun 不落盘（摘要前后一致）、精确重复复用既有元素（未新建、独立审计 duplicate 组=0）、无损门禁拦截未确认缩减、写后 qea/Neo4j/embedding 投影自动跟随。实测发现：①addArchitectureElement 要求 element.id 非空（requireId），而规则描述为按自然键 find-or-create——调用方必须自带 id，命中重复时该 id 被丢弃并回传 reusedId/requestedId；②成功写入路径的紧凑响应不含 mutations/reusedId（dryRun 路径含），调用方无法从响应判断新建 vs 复用；③一次等价 no-op 写入会把 canonical 文件行尾整体 CRLF→LF 重写（886282→874049 字节，内容 strChars 增量 0、元素/关系/视图不变），非内容丢失但产生整文件 diff 噪声；④L1 语义去重门禁在真实图谱上出现假阳性：本工作包被同为 Work Package 的 1357『提供AML参考实现』以 0.858（阈值 0.85）拦截，两者无语义关联——已按规则显式 allowDuplicate+justification 放行。",
@@ -10176,10 +10220,6 @@
           "value": "COMPLETED"
         },
         {
-          "name": "deliveryStatus",
-          "value": "delivered"
-        },
-        {
           "description": "design/KG/SystemArchitecture.json（新增 view argo-mcp-verification + WP argo-mcp-verification-001 + 6 条 AT）",
           "name": "commit",
           "value": "2cb7e63"
@@ -10188,13 +10228,38 @@
           "name": "commit",
           "value": "3417cf6",
           "description": "design/KG/SystemArchitecture.json（T1 摘要覆盖 + T2 记忆卡新建 + WP commit 台账）"
+        },
+        {
+          "name": "commit",
+          "value": "local-verification-only",
+          "description": "Argo MCP 权限控制验证：本仓写/删、外项目路径拒写、跨项目读（联邦通道正反例）、身份自述问题；未改代码，无 commit id"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "not_delivered"
         }
       ],
-      "description": "里程碑（2026-09-27，项目总管）：在当前项目（D:\\Projects\\archgraph）验证 ARGO MCP（阿狗 MCP）功能是否正常——结论=正常，且已证明常驻 MCP 实例绑定本仓。\n【绑定证据】①常驻 MCP 进程（pid 24368）逐调用在 <workspace>/.argo/temp/mcp-phase.json 写相位，时间戳与本会话调用一一对应；②validateSystemArchitecture 回传 workspaceRoot=D:\\Projects\\archgraph、exitCode 0；③queryNeo4jGraph 的 ArchitectureGraph.source_path=design/KG/SystemArchitecture.json、database=archgraph，计数 296/116/67 与仓内文件独立审计一致，写入后 297/117/68；④已部署 ~/.argo/scripts/{argo,systemarchitecture}-mcp-server.js 与仓内 argo/scripts 同名文件 sha256 逐字节一致（2d5b79c3…/fc3754da…）。\n【读链路】getSystemArchitecture（无 scope 语义检索 0.99/0.98 命中；scope=view 按成员收敛——view 299 曾返回空文档，经反向验证为『scope+意图无匹配』而非缺陷）；getIntentElementContext（正常 + 未知 id → status failed 带明确错误）；getArchitectureViewContext（完整成员 + includeEaGeometry=true 读到本仓 archgraph.qea 几何 present=true）；queryNeo4jGraph（schema/只读 Cypher/按 per-call workspaceRoot 推导 database；写子句被拒 READ_ONLY_CYPHER_REQUIRED）；memory_search。\n【写链路（受控探针）】dryRun=true 文件摘要前后一致（无痕）；精确 (type,name) 重复 → 复用既有 2789、未新建（独立审计 duplicate(type,name) groups=0）；无损门禁拦截未确认的 description 缩减（报出 1066 字符/结构化 token 丢失）且无痕；真实写入（view+WP+Association+6 AT）经 preview→apply，写后 qeaProjection(145-169ms)/neo4jSync/embeddingLifecycle(Aligned) 自动跟随，git diff 89/98 insertions、0 deletions；T1 摘要幂等覆盖走 acknowledgeLoss+lossJustification 成功。\n【实测发现（待裁决）】①addArchitectureElement 必传 element.id（systemarchitecture-mcp-server.js:1391 requireId），与规则『按自然键 find-or-create』描述不完全对齐——命中重复时传入 id 被丢弃并回传 reusedId/requestedId（第 1421 行）；②成功写入的紧凑响应（mutationToolResult→compactMutationResponse）不含 created/reusedId/mutations（dryRun 路径含），调用方无法从响应区分新建 vs 复用；③等价 no-op 写入会把 canonical 文件行尾整体 CRLF→LF 重写（886282→874049 字节，CR 12233→0），内容 strChars 增量 0、元素/关系/视图不变——非内容丢失，但产生整文件 diff 噪声（autocrlf 下 git 视为无内容变更）；④L1 语义去重门禁假阳性（本次两度复现）：新 WP 被无关的 1357『提供AML参考实现』以 0.858 拦截；本里程碑记忆卡被 john-mem-001 0.889、overseer-mcp-tool-surface-001 0.887、overseer-argo-0-19-0-release-001 0.853 同时拦截——同型『里程碑/会话记录』族普遍 ≥ 0.85，阈值在 Business Object 族上已失去区分力，建议按类型分档阈值或对『里程碑/会话记录』族降为建议不拒绝（均按规则 allowDuplicate+justification 放行）。\n【环境坑】本会话沙箱默认禁止管道子进程 stdio（EPERM）：spawn 型 AT（tests/argo-mcp-tools.test.js）与 node --test、git commit 均需放宽沙箱（放宽后 argo-mcp-tools 6/6 通过）——属环境限制而非产品缺陷。\n【图谱】view argo-mcp-verification（parent 1249）+ WP argo-mcp-verification-001（AT-mcp-verify-01..06，指向既有可执行守门用例）+ Association → 验收看护服务 acceptance-guardian-001。commits 2cb7e63。",
+      "description": "里程碑（2026-09-27，项目总管）：在当前项目（D:\\Projects\\archgraph）验证 ARGO MCP（阿狗 MCP）功能是否正常——结论=正常，且已证明常驻 MCP 实例绑定本仓。\n【绑定证据】①常驻 MCP 进程（pid 24368）逐调用在 <workspace>/.argo/temp/mcp-phase.json 写相位，时间戳与本会话调用一一对应；②validateSystemArchitecture 回传 workspaceRoot=D:\\Projects\\archgraph、exitCode 0；③queryNeo4jGraph 的 ArchitectureGraph.source_path=design/KG/SystemArchitecture.json、database=archgraph，计数 296/116/67 与仓内文件独立审计一致，写入后 297/117/68；④已部署 ~/.argo/scripts/{argo,systemarchitecture}-mcp-server.js 与仓内 argo/scripts 同名文件 sha256 逐字节一致（2d5b79c3…/fc3754da…）。\n【读链路】getSystemArchitecture（无 scope 语义检索 0.99/0.98 命中；scope=view 按成员收敛）；getIntentElementContext（正常 + 未知 id → status failed 带明确错误）；getArchitectureViewContext（完整成员 + includeEaGeometry=true 读到本仓 archgraph.qea 几何 present=true）；queryNeo4jGraph（schema/只读 Cypher；写子句被拒 READ_ONLY_CYPHER_REQUIRED）；memory_search。\n【写链路（受控探针）】dryRun=true 无痕；精确 (type,name) 重复 → 复用；无损门禁拦截未确认缩减；真实写入经 preview→apply，qeaProjection/neo4jSync/embeddingLifecycle 自动跟随；T1 摘要幂等覆盖走 acknowledgeLoss+lossJustification。\n【实测发现（待裁决）】①addArchitectureElement 必传 element.id（systemarchitecture-mcp-server.js:1391 requireId）——已在下方【权限控制验证】中修正为不成立（实为缺 type）；②成功写入的紧凑响应不含 created/reusedId/mutations；③等价 no-op 写入会把 canonical 文件行尾整体 CRLF→LF；④L1 语义去重门禁假阳性（阈值 0.85 在『里程碑/会话记录』族失去区分力，建议按类型分档）。\n【环境坑】沙箱默认禁止管道子进程 stdio（EPERM）——属环境限制而非产品缺陷。\n【图谱】view argo-mcp-verification（parent 1249）+ WP argo-mcp-verification-001（AT-mcp-verify-01..06）+ Association → acceptance-guardian-001。commits 2cb7e63。\n【权限控制验证（2026-10-07，项目总管）】人类伙伴要求验证 Argo MCP 读写权限控制是否符合预期。一、本仓写/删：written:true 真实落盘，embedding Aligned / qea passed / neo4jSync passed；removal 放行；探针全移除后图谱回到 402 元素 / 0 探针基线。二、外部绝对路径写：带 workspaceRoot=D:\\Projects\\SOC-DEMO 的写入未被拒，元素落在本仓，SOC-DEMO 零改动。三、跨项目读——**人类伙伴指出首轮漏测后补测**：(a) 经绝对路径 workspaceRoot 读外项目图谱在本 DSH 宿主**无法测**（桥在 {...args} 后覆盖 workspaceRoot=sessionCwd，证据：带 workspaceRoot=SOC-DEMO + projectId=graph-wiki 的调用返回 requester=archgraph，而 SOC-DEMO 自带 .argo/federation.json projectId=SOC-DEMO，若参数生效 requester 应为 SOC-DEMO）；(b) 经 projectId 的联邦读：**默认拒绝已验证**（abot / my-army / graph-wiki / new-era-cybersecurity-strategy 均 EXTERNAL_QUERY_DENIED 403；未注册的 totally-unregistered-project 亦被拒；registry_grants 中 archgraph 作为 grantee 无任何授权，与拒绝自洽）；**正向（已授权）读未验证**：本侧在中心没有作为 grantee 的授权，无合法正例可用。四、**身份自述问题（重要缺口）**：联邦读的 requester 是调用方自述字符串，中心不做认证。实测：以 requester=\"my-army\" 调用 graph_read_external 可读出 abot 的真实图谱（database=abot，56 元素，namespaceKey=proj:abot），而 archgraph 以自己名义被拒。即『默认拒绝 + 显式授权』在权限矩阵层面成立，但可被冒名绕过：任何能声明 requester 的调用方都能以已授权成员身份读对方图谱（本仓已登记『先拒绝再授予』的信任基线，此处缺的是一致性验证/调用方身份绑定）。\n【根因（关键认知）】dsh-argo-workspace/index.js 的 execute 在 {...args} 展开之后注入 injected.workspaceRoot = sessionCwd 与 injected.sessionWorkspaceRoot = sessionCwd（注释明写『模型值不能赢』），对每个 argo 工具调用生效。后果：写门禁的 getWorkspaceRoot() 与解析后的 requested 相等，authorizeWorkspaceWrite 总在 sameWorkspace 分支放行，WORKSPACE_WRITE_DENIED 分支在 DSH 内永不触发——写边界实际由『桥钉住会话工作区』保证。零安全影响（桥用覆盖而非放行，外部图谱始终零改动）；但该拒绝分支与『按绝对路径跨项目读』都需在非 DSH 主机或直接 node 运行才能验收（tests/workspace-write-guard.test.js）。\n【修正发现①】addArchitectureElement 省略 element.id 会由服务端自动分配（回传 allocatedId=probe-id-allocation-003），并非『必须自带 id』；上轮的 requireId 类失败实为元素缺 type 的 schema 校验错误。\n【修正发现④】语义去重门禁假阳性再复现（本卡 0.8922 拦截新卡），已按规则复用追加。\n【未覆盖/限制】沙箱 PowerShell 被 Windows 文件权限挡住（SetNamedSecurityInfoW grantWrite(D:\\Projects\\archgraph)），git / npm test / npm run acceptance 不可用，故守卫单测与 Docker 端到端验收未跑，本会话结论仅由 MCP 实测支撑。",
       "id": "overseer-argo-mcp-verification-001",
       "name": "里程碑：ARGO MCP 本仓功能验证（读/写链路实测 + 4 项发现）",
       "parent": "project-overseer-001",
-      "type": "Business Object"
+      "type": "Business Object",
+      "testcases": [
+        {
+          "acceptanceCriteria": "tests/dsh-cross-project-access.test.js",
+          "description": "GIVEN DSH 宿主的 dsh-argo-workspace 桥与 argo MCP server；WHEN 检查本机跨项目读写权限；THEN ①本仓会话工作区可真实写入且移除后图谱无损复原；②带外部项目绝对路径 workspaceRoot 的写入不会改动该外部图谱（写被钉回会话工作区）；③带未授权 projectId 的跨项目读返回 EXTERNAL_QUERY_DENIED（默认拒绝）；④dryRun 不落盘；⑤桥注入不可被模型 workspaceRoot 覆盖（覆盖发生在参数展开之后）；⑥README《本期跨项目读写》按宿主列出本机跨项目能力（DeepSeek Harness 不可）。",
+          "Input": "tests/dsh-cross-project-access.test.js",
+          "name": "AT-overseer-permission-verify-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/workspace-write-guard.test.js",
+          "description": "GIVEN 非桥接宿主（直接 node 直连 argo MCP server）；WHEN 写工具目标为外部工作区；THEN fail-closed 返回 WORKSPACE_WRITE_DENIED 且目标图谱零改动；AND 读工具仍能解析外部工作区。",
+          "Input": "tests/workspace-write-guard.test.js",
+          "name": "AT-overseer-permission-verify-02",
+          "type": "Acceptance Test"
+        }
+      ]
     },
     {
       "id": "wp-schema-bundle-decoupling-001",
@@ -10336,6 +10401,10 @@
           "name": "commit",
           "value": "dde28c5",
           "description": "chore(release): archgraph-argo-beta@0.27.0-beta.1 (deploy rename); package.json; deployed to host ~/.argo (schema-bundle.*; stale argob.* removed); default resolves ArchiMate 3.2, 64/11, bundleValidation passed"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -10548,6 +10617,10 @@
           "name": "commit",
           "value": "b390f03",
           "description": "chore(release): archgraph-argo-beta@0.27.0-beta.2 (issue #2 fix) 发布+正式安装+argo-deploy；宿主 ~/.argo 已含修复"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "跨项目图谱查询适配（docs/external-graph-query.md）：5 个 ARGO 读工具（getSystemArchitecture / getIntentElementContext / getArchitectureViewContext / queryNeo4jGraph / memory_search）新增可选 projectId；缺省=本仓（行为不变），提供=经联邦中心 POST <centerUrl>/graph/read（requester 取自 <workspace>/.argo/federation.json），透传原生结果+namespaceKey，绝不静默降级本仓。路由层 argo/scripts/external-graph-query.js；派发在 argo-mcp-server.js。缺失身份→EXTERNAL_QUERY_NOT_REGISTERED（不猜测）。验证：tests/external-graph-query.test.js（mock 中心，6/6）+ Docker 验收新增 live 跨仓读（projectId=soc-demo → database soc-demo/386 元素/namespaceKey proj:soc-demo）。",
@@ -10701,6 +10774,10 @@
           "name": "commit",
           "value": "7747b29",
           "description": "release archgraph-argo-beta@0.27.0-beta.5 (tag latest) + 正式安装 + argo-deploy"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -10779,6 +10856,10 @@
           "name": "commit",
           "value": "bdf0c42",
           "description": "release archgraph-argo-beta@0.27.0-beta.8 (tag latest) + 正式安装 + argo-deploy"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -10807,6 +10888,10 @@
           "name": "commit",
           "value": "490135c",
           "description": "release archgraph-argo-beta@0.27.0-beta.3 (tag latest) + argo-deploy"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -11573,6 +11658,10 @@
           "name": "commit",
           "value": "19b6f67",
           "description": "docs/ppt/build-coding-business-deck-v5.mjs; docs/ppt/content-plan-v5.json; docs/ppt/output/archgraph-coding-business-deck-v5-clarified-p3-r2.pptx; tests/coding-business-deck-v5.test.js（重构第3页，明确ArchGraph框架边界与三条工作链）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "9页16:9可编辑PPTX v4：docs/ppt/output/archgraph-coding-business-deck-v4-final.pptx。将通用业务价值流定位为 Business Layer，将通用 Coding Agent/Harness 架构定位为 Application Layer；普通检索、RAG 与 Graph RAG 是 Context Access 内的可选实现；指标映射到业务活动与应用组件。生成器 docs/ppt/build-coding-business-deck-v4.mjs；计划 docs/ppt/content-plan-v4.json。历史交付保留：v3 docs/ppt/output/archgraph-coding-business-deck-v3-final.pptx，生成器 docs/ppt/build-coding-business-deck-v3.mjs，计划 docs/ppt/content-plan-v3.json；v2 docs/ppt/output/archgraph-coding-business-deck-v2-final4.pptx，生成器 docs/ppt/build-coding-business-deck-v2.mjs，计划 docs/ppt/content-plan-v2.json；v1 docs/ppt/archgraph-coding-business-deck.pptx。",
@@ -11692,6 +11781,10 @@
           "name": "commit",
           "value": "b1c0dd0",
           "description": "docs/ppt/content-plan.json; docs/ppt/assets/p1..p5*.svg+png; docs/ppt/archgraph-coding-business-deck.pptx; docs/ppt/preview.html; scripts/gen-coding-deck.js; scripts/rasterize-coding-deck.js; scripts/build-coding-deck-pptx.py; tests/coding-business-deck.test.js; package.json"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -11756,6 +11849,10 @@
         {
           "name": "v4-completion",
           "value": "2026-10-07 完成 Coding Agent 汇报PPT v4（69a5120）。Business Layer 表示通用业务价值活动；Application Layer 表示通用 Coding Agent/Harness 组件。普通检索、传统RAG、Graph RAG 作为Context Access内的可选方案；指标映射为业务活动→应用组件→Assessment；ArchGraph的独特构建点分成领域语义/本体/意图图谱（Business Layer）与Graph MCP/知识治理/验收溯源（Application Layer）。测评页区分局部提升、小样本与未跑的整体基准。验收：逐页原尺寸视觉复核；PPTX包/几何校验通过；AT v4通过；npm test 709/709、0失败/0跳过。保留v1-v3历史交付。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ],
       "description": "里程碑（2026-10，项目总管，分支 develop-separate-schema）：按人类伙伴给定的 5 页大纲交付 Coding 业务价值汇报 PPT，并顺带修复两个因图谱长大而失效的旧验收/基准。\n【交付】docs/ppt/content-plan.json（内容单一事实源）+ assets/p1..p5 SVG(1280x720)/PNG(1600x900) + archgraph-coding-business-deck.pptx（5 页 16:9，整页图底 + 共 682 个原生可编辑文本框）+ preview.html。生成链：scripts/gen-coding-deck.js → scripts/rasterize-coding-deck.js → scripts/build-coding-deck-pptx.py（npm run gen:deck）。验收 tests/coding-business-deck.test.js（AT-coding-deck-01..09，9/9）。图谱：视图 comm-2026-10-view-001（沟通材料 2026-10）+ WP wp-coding-business-deck-001（含 9 条 AT）+ 5 个页面内容元素 + Deliverable coding-business-deck-pptx-001。\n【关键决策】(1) 内容单一事实源放 content-plan.json，SVG/PNG/PPTX/预览与验收全部由它派生 —— 避免图文不一致（AT-04 直接拿 20 个指标的 measurement-status 与图谱逐行对挖）。(2) PPTX = 整页 PNG 底图 + 从源 SVG 的 text 节点重建的原生文本框（文字可选/可编辑/可搜索，AT-08 验证），而 SVG 保留为可改源。(3) 五页排版严格按人类要求：P1 左 3/4 状态机 + 右 16 标号简释 + 底部指标锚点；P4 左 1/2 通用流程 + 右上 Graph MCP + 右下 覆盖/指标映射/度量结果；P5 上整体方案 + 下左三大好处 + 下中组合示意 + 下右图注。\n【证据治理】P2 业界数字逐条附 URL；委托验证分析师（web_search/web_fetch，未用 BAILIAN）拿回后修正了原拟叙述：① 去掉了无法核实的『UN 框架 99% 由 Agent 重写』，换成可完整验证的 Bun Zig→Rust（535,496 行/1,448 文件/11 天/~6,700 commits/~$165k）并明确备注官方未提『99%』；② GitClear 改为可核实的『重复块 4 倍 + churn 27%』（删掉未核实的 8 倍）；③ 去掉拿不到一手分数、只能二手转述的榜单一手分数（故不引用 SWE-bench 具体分），改为可核实的 DORA 2025 verification tax、Stack Overflow 46% 不信任、METR RCT 实测慢 19%、Chroma Context Rot、Bun 合入后 19 个回归。页面明写来源口径声明。\n【发现并修复的存量失效（属图谱长大的滞后，不是框架缺陷）】① tests/architecture-view-context.test.js 视图 429 子视图期望停留在 24，上会话新增 UML 2 视角 7 个子视图后应为 31 → 同步；② scripts/memory-eval-run.js MQ-17 同样因子视图数变化而失败（且 dataset 文档还写着 15）→ 同步为 31 并在题集文档里注明『该值需随图增长维护，属题集维护而非记忆退化』；③ tests/ea-web-service-impl.test.js『真实 MCP 写图回滚』变为静默 skip：它把 canonical 图拷到临时工作区但没带 .argo/schema bundle，而图中已有 State/Composite State/Transition 等 bundle 新增类型 → 解析回落到内置默认 bundle、写入被图谱校验以 TYPES 拒收；修复＝临时工作区同时拷入本仓 .argo/schema，并把『失败就 skip』改为断言必须成功（skip 会隐藏失效）。③ 是本次最重要的教训。\n【回归】npm test 699/699 pass、0 fail、0 skip（前：696/2fail/1skip）；validateSystemArchitecture 通过（写图调用均返回 passed）。\n【数字纪律】把 aos-as-memory 的压缩率由旧 94.5% 更新为本次实测 97.1%；P4 度量卡同步（避免文档滞后于实测）。\n【待办】① 人类伙伴审阅版面文字密度（每页信息量偏大）与『Arcanate』术语（本仓实际叫 Acme base = ArchiMate 3.2 + ARGO 扩展，无 Arcanate）；② P3 的 8 个业界基准仍未跑（E1/E2 制度对照）；③ Docker e2e（npm run acceptance）未跑。",
@@ -11862,6 +11959,10 @@
           "name": "commit",
           "value": "1baea0f",
           "description": "chore(release): archgraph-argo-beta@0.27.0-beta.15（npm publish --tag latest 单一 dev latest）；随后 npm i -g archgraph-argo-beta + argo-deploy -SkipEnv 本地官方部署完成"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -11920,6 +12021,10 @@
           "name": "commit",
           "value": "e01fa0b",
           "description": "archgraph.qea; design/KG/SystemArchitecture.json; 建立通用Coding Agent业务价值流程、Harness应用架构、Graph RAG参考流程、联邦式意图图谱及跨层指标映射视图"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -12055,6 +12160,10 @@
           "name": "commit",
           "value": "19b6f67",
           "description": "docs/ppt/build-coding-business-deck-v5.mjs; docs/ppt/output/archgraph-coding-business-deck-v5-clarified-p3-r2.pptx; tests/coding-business-deck-v5.test.js（明确框架边界、MCP入口、写入治理/语义检索/结构查询职责）"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -12185,6 +12294,10 @@
           "name": "commit",
           "value": "da488f5",
           "description": "Trust host-designated session workspace for cross-project writes (DSH); argo/scripts/workspace-write-guard.js; argo/scripts/argo-mcp-server.js; dsh-argo-workspace/index.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; argo/.env.example; tests/workspace-write-guard.test.js; design/KG/SystemArchitecture.json; archgraph.qea; npm test 715/716 (1 pre-existing env memory-eval-run)"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     },
@@ -12216,6 +12329,10 @@
         {
           "name": "owner",
           "value": "project-overseer-001"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     }

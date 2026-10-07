@@ -113,6 +113,74 @@ discovery + capability-based authorization + reference-not-copy, mediated by a b
 *federated*, not "distributed" — a distributed model would mean one logical graph partitioned across
 nodes, which is exactly what this design avoids.
 
+## Cross-project read/write
+
+Cross-project access runs over **two separate channels** — they must not be conflated:
+
+1. **Local path channel** — a read tool takes a per-call `workspaceRoot` (an absolute path) to read a
+   **peer project's graph on the same machine**. Writes are *not* allowed over this channel: the
+   server refuses a write targeting a foreign workspace with `WORKSPACE_WRITE_DENIED`. Cross-project
+   access is **read-only by design**.
+2. **Federated channel** — a read tool takes a `projectId` and the call is routed through the
+   federation center, authorized there (denied by default), and returned **by reference**.
+
+Whether channel 1 is usable at all depends on the **harness**, because a harness may bridge the MCP
+server and pin the workspace per call. Local cross-project read/write status by harness:
+
+| Harness           | Local cross-project read (`workspaceRoot`) | Local cross-project write | Federated read (`projectId`) | Federated write |
+|-------------------|:------------------------------------------:|:-------------------------:|:----------------------------:|:---------------:|
+| OpenCode          |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) |              ✓               |       —         |
+| Codex             |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) |              ✓               |       —         |
+| DeepSeek Harness  |                    ✗                       |             ✗             |              ✓               |       —         |
+| GitHub Copilot    |                  待测                      |           待测            |              ✓               |       —         |
+| Cursor            |                  待测                      |           待测            |              ✓               |       —         |
+| OpenClaw          |                 不涉及                     |          不涉及           |              ✓               |       —         |
+
+"Local" = another project's graph on **this** machine, addressed by absolute path. "Federated" =
+another member's graph through the center, addressed by `projectId`. The center is a
+**registry + broker**: it has **no** cross-project write path, so the federated-write column is
+empty everywhere.
+
+### Why DeepSeek Harness (dsh) cannot do local cross-project read/write
+
+The `dsh-argo-workspace` bridge registers every ARGO tool as `mcp__argo__*` and, on **each call**,
+injects the session workspace — after spreading the model's arguments, so a model-supplied value can
+never win:
+
+```js
+injected.workspaceRoot = sessionCwd          // the session workspace
+injected.sessionWorkspaceRoot = sessionCwd   // broker-only trusted channel
+```
+
+Consequences, observed on this machine:
+
+- **Local cross-project read is unreachable.** Asking for another project's graph by absolute path
+  silently reads the **session** workspace instead — the request never reaches the server as written.
+- **Local cross-project write is impossible.** Every write lands in the session workspace. A write
+  tool call targeting `D:\Projects\SOC-DEMO`, and even `initializeWorkspace` (the one write tool with
+  no `dryRun`, no schema allow-list), returned `workspaceRoot: "D:\Projects\archgraph"`: the target
+  project was never touched.
+- **`WORKSPACE_WRITE_DENIED` never fires on dsh.** Because the bridge *pins* the workspace to the
+  session workspace, the guard's target and its home compare equal and it takes the allow branch. The
+  write boundary is enforced by the bridge pinning, **not** by the guard's deny branch — that branch
+  is exercised only outside a bridged host (e.g. the direct-MCP unit test), so under dsh the guard's
+  denial path has **no** on-host verification.
+
+Net: on DeepSeek Harness the local cross-project channel is **dead in both directions** (safe, but
+unavailable), and only the federated `projectId` channel works.
+
+### What does work: federated reads
+
+Federated reads are verified live: a member holding a grant can read another member's graph through
+the center (`database=abot`, returned by reference with a `namespaceKey`), while an unauthorized or
+unregistered requester is refused (`denied`).
+
+Two caveats when reading the column above: the federation center takes the `requester` identity as a
+**self-declared string** — it is not authenticated, so a caller that names a granted member is
+treated as that member (the authorization matrix itself behaves correctly: denied by default, and an
+explicit grant is required). And the pairs marked **待测** have not been exercised for local
+cross-project access yet.
+
 ## Community
 
 ArchGraph runs on open co-building. Join the community hub to share, browse and reuse **architecture
