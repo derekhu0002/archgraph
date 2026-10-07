@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="缺的不是更强的模型，而是人与 Agent 的『共同语言』">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#475569"/></marker>
+  <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2457e6"/></marker>
+  <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0f9d63"/></marker>
+  <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#b26a04"/></marker>
+  <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#dc2f52"/></marker>
+  <marker id="arrow-cyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0e86a5"/></marker>
+  <marker id="arrow-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6d38d6"/></marker>
+</defs>
+<rect width="1280" height="720" fill="#ffffff"/>
+<rect x="0" y="0" width="1280" height="5" fill="#eaf1ff"/><rect x="0" y="0" width="220" height="5" fill="#2457e6"/>
+<text x="48" y="40" font-family="Consolas, 'Cascadia Code', ui-monospace, monospace" font-size="10.5" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">04 · 解法</text>
+<text x="48" y="78" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="26" font-weight="800" fill="#0f172a" text-anchor="start" opacity="1">缺的不是更强的模型，而是人与 Agent 的『共同语言』</text>
+<text x="48" y="106" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">本体给出语言，图谱给出载体 —— 这张图就是人机交流的窗口</text>
+<line x1="48" y1="122" x2="1232" y2="122" stroke="#eef2f7" stroke-width="1"/>
+<text x="48" y="152" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#b26a04" text-anchor="start" opacity="1">启发</text>
+<line x1="82" y1="148" x2="348" y2="148" stroke="#eef2f7" stroke-width="1"/>
+<rect x="48" y="168" width="300" height="66" rx="10" fill="#ffffff" stroke="#b26a04" stroke-width="1.2"/>
+<rect x="48" y="168" width="4" height="66" rx="2" fill="#b26a04"/>
+<circle cx="72" cy="201" r="12" fill="#b26a04" stroke="#ffffff" stroke-width="2"/><text x="72" y="205.5" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">1</text>
+<text x="94" y="198" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1"></text>
+<text x="94" y="216" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">人必须是懂全景的专家，做唯一编排者</text>
+<rect x="48" y="246" width="300" height="66" rx="10" fill="#ffffff" stroke="#b26a04" stroke-width="1.2"/>
+<rect x="48" y="246" width="4" height="66" rx="2" fill="#b26a04"/>
+<circle cx="72" cy="279" r="12" fill="#b26a04" stroke="#ffffff" stroke-width="2"/><text x="72" y="283.5" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">2</text>
+<text x="94" y="276" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1"></text>
+<text x="94" y="294" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">结构化上下文先于代码（先规则 / 依赖图）</text>
+<rect x="48" y="324" width="300" height="66" rx="10" fill="#ffffff" stroke="#b26a04" stroke-width="1.2"/>
+<rect x="48" y="324" width="4" height="66" rx="2" fill="#b26a04"/>
+<circle cx="72" cy="357" r="12" fill="#b26a04" stroke="#ffffff" stroke-width="2"/><text x="72" y="361.5" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">3</text>
+<text x="94" y="354" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1"></text>
+<text x="94" y="372" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">验证器先建、由机器执行</text>
+<text x="372" y="152" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">解法：本体 + 图谱 = 人机交流窗口</text>
+<line x1="563.3" y1="148" x2="1232" y2="148" stroke="#eef2f7" stroke-width="1"/>
+<rect x="388" y="168" width="828" height="52" rx="8" fill="#e6f9fd" stroke="#0e86a5" stroke-width="1.3"/>
+<text x="402" y="188" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#0e86a5" text-anchor="start" opacity="1">① 本体 = 共同语言</text>
+<text x="402" y="206" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">元素 / 关系类型即词汇与语法；项目可 extends 自己的领域本体</text>
+<rect x="388" y="266" width="120" height="72" rx="9" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.4"/>
+<text x="448" y="296" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#0f9d63" text-anchor="middle" opacity="1">人 · 领域专家</text>
+<text x="448" y="314" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#475569" text-anchor="middle" opacity="1">写意图 · 读结论</text>
+<rect x="1096" y="266" width="120" height="72" rx="9" fill="#f2eeff" stroke="#6d38d6" stroke-width="1.4"/>
+<text x="1156" y="296" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#6d38d6" text-anchor="middle" opacity="1">Agent · 编排者</text>
+<text x="1156" y="314" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#475569" text-anchor="middle" opacity="1">读上下文 · 写实现</text>
+<rect x="707" y="240" width="190" height="132" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.6"/>
+<text x="802" y="266" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#2457e6" text-anchor="middle" opacity="1">意图图谱</text>
+<text x="802" y="284" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#475569" text-anchor="middle" opacity="1">canonical · 单一事实源</text>
+<text x="802" y="308" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#0f172a" text-anchor="middle" opacity="1">业务 · 架构 · 指标 · 状态机</text>
+<text x="802" y="328" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#0e86a5" text-anchor="middle" opacity="1">Graph RAG：语义 + 结构</text>
+<text x="802" y="346" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#64748b" text-anchor="middle" opacity="1">证据链 · 出处 · 拒答</text>
+<line x1="508" y1="280" x2="705" y2="270" stroke="#0f9d63" stroke-width="1.4" marker-end="url(#arrow-green)"/>
+<text x="607.5" y="264" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#0f9d63" text-anchor="middle" opacity="1">写意图</text>
+<line x1="705" y1="336" x2="508" y2="326" stroke="#0f9d63" stroke-width="1.4" marker-end="url(#arrow-green)"/>
+<text x="607.5" y="352" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#0f9d63" text-anchor="middle" opacity="1">证据 / 结论</text>
+<line x1="899" y1="270" x2="1094" y2="280" stroke="#6d38d6" stroke-width="1.4" marker-end="url(#arrow-violet)"/>
+<text x="996.5" y="264" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#6d38d6" text-anchor="middle" opacity="1">读 · Graph RAG</text>
+<line x1="1094" y1="326" x2="899" y2="336" stroke="#6d38d6" stroke-width="1.4" marker-end="url(#arrow-violet)"/>
+<text x="996.5" y="352" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#6d38d6" text-anchor="middle" opacity="1">写实现 + 验收</text>
+<rect x="388" y="388" width="828" height="48" rx="8" fill="#fff6e6" stroke="#b26a04" stroke-width="1.3"/>
+<text x="402" y="406" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" fill="#b26a04" text-anchor="start" opacity="1">写入门禁 · 语言的护栏</text>
+<text x="402" y="423" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">校验 → 去重（L0 / L1）→ 无损（merge / 墓碑）；读写都经 MCP</text>
+<rect x="388" y="446" width="828" height="46" rx="8" fill="#f2eeff" stroke="#6d38d6" stroke-width="1.3"/>
+<text x="402" y="464" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" fill="#6d38d6" text-anchor="start" opacity="1">④ 从单项目到组织</text>
+<text x="402" y="481" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">跨项目引用 → 联邦式组织级知识图谱（引用不拷贝）</text>
+<rect x="388" y="502" width="828" height="44" rx="8" fill="#f7f9fc" stroke="#5b6b82" stroke-width="1.2"/>
+<text x="402" y="520" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#0f172a" text-anchor="start" opacity="1">Base · Acme（ArchiMate 3.2 + UML 2 状态机）→ extends 领域本体</text>
+<rect x="48" y="608" width="1184" height="52" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.2"/>
+<rect x="48" y="608" width="5" height="52" rx="2" fill="#2457e6"/>
+<rect x="64" y="624" width="38.0" height="20" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1"/><text x="83" y="637.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#2457e6" text-anchor="middle" opacity="1">结论</text>
+<text x="112" y="629" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start" opacity="1">本体保障共同语言，图谱保障可查上下文 —— 人写的意图与 Agent 写的实现 / 验收在同一张图上对齐。</text>
+<line x1="48" y1="682" x2="1232" y2="682" stroke="#eef2f7" stroke-width="1"/>
+<text x="48" y="698" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#64748b" text-anchor="start" opacity="1">依据：docs/diagrams/core-model.svg  ·  argo/rules/archgraph.instructions.md</text>
+<text x="1232" y="698" font-family="Consolas, 'Cascadia Code', ui-monospace, monospace" font-size="8.5" font-weight="400" fill="#94a3b8" text-anchor="end" opacity="1">ArchGraph · 04 · 解法</text>
+</svg>

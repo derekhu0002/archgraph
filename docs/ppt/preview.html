@@ -1,53 +1,30 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<html lang="zh-CN" data-theme="light">
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ArchGraph · Coding 业务价值与组织级知识图谱 — 预览</title>
 <style>
-  :root { color-scheme: dark; }
-  body { margin: 0; background: #070a12; color: #eef1f6;
-    font-family: 'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', sans-serif; }
-  header { padding: 28px 32px 12px; }
-  h1 { margin: 0 0 6px; font-size: 22px; }
-  p.sub { margin: 0; color: #9aa6bd; font-size: 13.5px; line-height: 1.7; }
-  p.note { margin: 10px 0 0; font-size: 12.5px; color: #6b7793; }
+  :root { color-scheme: light; }
+  body { margin: 0; background: #f4f7fb; color: #0f172a; font-family: 'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', sans-serif; }
+  header { padding: 28px 32px 12px; } h1 { margin: 0 0 6px; font-size: 22px; }
+  p.sub { margin: 0; color: #475569; font-size: 13.5px; line-height: 1.7; }
+  p.note { margin: 10px 0 0; font-size: 12.5px; color: #64748b; }
   main { padding: 18px 32px 48px; display: flex; flex-direction: column; gap: 26px; }
-  figure.slide { margin: 0; border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; overflow: hidden;
-    background: #0a0e1a; box-shadow: 0 18px 40px rgba(0,0,0,0.45); }
+  figure.slide { margin: 0; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 12px 30px rgba(15,23,42,0.08); }
   figure.slide img { display: block; width: 100%; height: auto; }
-  figcaption { padding: 10px 14px; font-size: 12.5px; color: #9aa6bd; border-top: 1px solid rgba(255,255,255,0.08); }
-  figcaption b { color: #6b8cff; margin-right: 8px; }
+  figcaption { padding: 10px 14px; font-size: 12.5px; color: #475569; border-top: 1px solid #eef2f7; }
+  figcaption b { color: #2457e6; margin-right: 8px; }
   @media print { body { background: #fff; } figure.slide { break-inside: avoid; } }
-</style>
-</head>
-<body>
-<header>
-  <h1>ArchGraph · Coding 业务价值与组织级知识图谱</h1>
-  <p class="sub">五页汇报：状态机全景 → 业界痛点与先进实践 → 指标体系 → Graph RAG 通用流程 → 联邦式组织级图谱</p>
-  <p class="note">本页所有『我方』数字取自意图图谱 aos-as-*（measurement-status / measurement-result）与 tests/；所有『业界』数字为外部公开来源快照，标注 URL，非我方实测。</p>
-</header>
+</style></head>
+<body><header><h1>ArchGraph · Coding 业务价值与组织级知识图谱</h1><p class="sub">8 页正文 + 1 页附录：业务全景 → 痛点 / 实践 → 解法 → 指标 → 检索 → 能力 → 组织级</p>
+<p class="note">『我方』数字取自意图图谱 aos-as-*（measurement-status / measurement-result）；『业界』数字为公开来源快照并标注出处，非我方实测。排版原则：一页一个结论，图为主、字为辅。 editable diagrams: docs/ppt/excalidraw/*.excalidraw</p></header>
 <main>
-    <figure class="slide">
-      <img src="assets/p1-state-machine.svg" alt="Coding 业务全景：以状态机表达的业务价值流程" />
-      <figcaption><b>PAGE 1 / 5</b>Coding 业务全景：以状态机表达的业务价值流程</figcaption>
-    </figure>
-    <figure class="slide">
-      <img src="assets/p2-pain-and-practice.svg" alt="Coding 的痛点与先进实践：缺的是人与 Agent 的『共同语言』" />
-      <figcaption><b>PAGE 2 / 5</b>Coding 的痛点与先进实践：缺的是人与 Agent 的『共同语言』</figcaption>
-    </figure>
-    <figure class="slide">
-      <img src="assets/p3-metric-system.svg" alt="指标体系：指标 ↔ 状态机映射、我方评测与业界 Gap" />
-      <figcaption><b>PAGE 3 / 5</b>指标体系：指标 ↔ 状态机映射、我方评测与业界 Gap</figcaption>
-    </figure>
-    <figure class="slide">
-      <img src="assets/p4-graph-rag-pipeline.svg" alt="检索的一级通用流程：Graph RAG 全景与我方覆盖" />
-      <figcaption><b>PAGE 4 / 5</b>检索的一级通用流程：Graph RAG 全景与我方覆盖</figcaption>
-    </figure>
-    <figure class="slide">
-      <img src="assets/p5-federation.svg" alt="联邦式组织级知识图谱：用 ArcGraph 项目当积木" />
-      <figcaption><b>PAGE 5 / 5</b>联邦式组织级知识图谱：用 ArcGraph 项目当积木</figcaption>
-    </figure>
-</main>
-</body>
-</html>
+    <figure class="slide"><img src="assets/p1-state-machine.svg" alt="Coding 的价值，在一个「回合」里被创造" /><figcaption><b>01 · 业务全景</b>Coding 的价值，在一个「回合」里被创造</figcaption></figure>
+    <figure class="slide"><img src="assets/p2-pains.svg" alt="Agent 产出越快，熵增与验证税越重" /><figcaption><b>02 · 业界痛点</b>Agent 产出越快，熵增与验证税越重</figcaption></figure>
+    <figure class="slide"><img src="assets/p3-practices.svg" alt="成功案例的共同点：专家带 Agent" /><figcaption><b>03 · 先进实践</b>成功案例的共同点：专家带 Agent</figcaption></figure>
+    <figure class="slide"><img src="assets/p4-solution.svg" alt="缺的不是更强的模型，而是人与 Agent 的『共同语言』" /><figcaption><b>04 · 解法</b>缺的不是更强的模型，而是人与 Agent 的『共同语言』</figcaption></figure>
+    <figure class="slide"><img src="assets/p5-metrics.svg" alt="20 个指标已建模，4 项已定量" /><figcaption><b>05 · 指标体系</b>20 个指标已建模，4 项已定量</figcaption></figure>
+    <figure class="slide"><img src="assets/p6-pipeline.svg" alt="检索不是一次查询，而是一个带治理的闭环" /><figcaption><b>06 · 检索流程</b>检索不是一次查询，而是一个带治理的闭环</figcaption></figure>
+    <figure class="slide"><img src="assets/p7-capability.svg" alt="单项目内即可用的 Graph MCP，已覆盖全流程" /><figcaption><b>07 · 我方能力</b>单项目内即可用的 Graph MCP，已覆盖全流程</figcaption></figure>
+    <figure class="slide"><img src="assets/p8-federation.svg" alt="以项目为积木，联邦式组合出组织级知识图谱" /><figcaption><b>08 · 组织级知识图谱</b>以项目为积木，联邦式组合出组织级知识图谱</figcaption></figure>
+    <figure class="slide"><img src="assets/p9-metric-detail.svg" alt="附录：20 个指标 —— 映射 · 我方评测 · 业界 Gap" /><figcaption><b>附录 A · 指标明细</b>附录：20 个指标 —— 映射 · 我方评测 · 业界 Gap</figcaption></figure>
+</main></body></html>
