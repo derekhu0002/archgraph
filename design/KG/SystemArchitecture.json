@@ -12159,6 +12159,22 @@
       "name": "Member Project Graph B",
       "type": "Data Object",
       "description": "联邦式意图图谱架构中的独立模型对象。"
+    },
+    {
+      "description": "跨项目工作区写入边界（Workspace Write Guard）：保留『按绝对路径 workspaceRoot 跨项目读取对方图谱』的能力，同时把写入钉死在本服务自身的 home 工作区。实现 argo/scripts/workspace-write-guard.js（WRITE_TOOLS 分类 + authorizeWorkspaceWrite），在 argo/scripts/argo-mcp-server.js 的 callTool 单一入口对所有工具做门禁：写工具（initializeWorkspace / runArchitectureTests / applySystemArchitectureMutation / add|update|removeArchitectureElement|Relationship|View）若 workspaceRoot 解析到非 home 工作区则 fail-closed 返回 WORKSPACE_WRITE_DENIED 且不产生任何副作用；读工具（getSystemArchitecture / getIntentElementContext / getArchitectureViewContext / queryNeo4jGraph / memory_search）以及 dryRun/preview 不受限，跨项目读取保持可用。home 工作区 = getWorkspaceRoot()（ARGO_REPO_ROOT / WORKSPACE_FOLDER / MCP roots / 内嵌 / cwd）。默认开启；ARGO_WORKSPACE_WRITE_GUARD=0 可整体关闭（信任的多工作区宿主，全有或全无，不引入按路径白名单）。背景：commit a948515 曾为修复 DSH 多工作区切换而移除 resolveCallWorkspaceRoot 的 ARGO_WORKSPACE_ROOTS 白名单，使 per-call workspaceRoot 对读写均无条件生效，A 项目可改写 B 项目图谱；本次按人类伙伴裁决采用『严格：写仅限 home 工作区』。验收：tests/workspace-write-guard.test.js（4 用例：写工具分类、仅授权 home、经 MCP 服务跨工作区写入被拒且目标零改动、跨工作区读取仍解析）。",
+      "id": "doc-workspace-write-guard-001",
+      "name": "跨项目 workspaceRoot 写入边界（写钉住 home 工作区）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/workspace-write-guard.test.js",
+          "acceptanceCriteria": "tests/workspace-write-guard.test.js",
+          "description": "GIVEN the ARGO MCP server bound to a home workspace and the per-call workspaceRoot override; WHEN a WRITE tool (e.g. addArchitectureElement) targets a foreign workspace; THEN the call fails closed with WORKSPACE_WRITE_DENIED and the foreign graph is byte-for-byte untouched; AND a READ tool targeting the same foreign workspace still resolves it; AND a focused dryRun:true mutation is not treated as a write.",
+          "name": "AT-workspace-write-guard-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Artifact"
     }
   ],
   "relationships": [
@@ -15373,6 +15389,16 @@
       "type": "Serving",
       "name": "支撑结果交付",
       "statement": "项目图谱上下文服务 --(Serving)--> 交付可验收结果"
+    },
+    {
+      "id": "doc-workspace-write-guard-guardian-assoc-001",
+      "name": "verifies via",
+      "source_id": "doc-workspace-write-guard-001",
+      "source_name": "跨项目 workspaceRoot 写入边界（写钉住 home 工作区）",
+      "statement": "跨项目 workspaceRoot 写入边界（写钉住 home 工作区） --(Association)--> 验收看护服务（Acceptance Guardianship）",
+      "target_id": "acceptance-guardian-001",
+      "target_name": "验收看护服务（Acceptance Guardianship）",
+      "type": "Association"
     }
   ],
   "views": [
@@ -16481,10 +16507,12 @@
       "included_elements": [
         "argo-mcp-verification-001",
         "acceptance-guardian-001",
-        "wp-mutation-batch-order-001"
+        "wp-mutation-batch-order-001",
+        "doc-workspace-write-guard-001"
       ],
       "included_relationships": [
-        "argo-mcp-verification-guardian-assoc-001"
+        "argo-mcp-verification-guardian-assoc-001",
+        "doc-workspace-write-guard-guardian-assoc-001"
       ],
       "parent_element_id": "1249",
       "parent_element_name": "Implementation and Migration Viewpoint",

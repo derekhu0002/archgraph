@@ -20,6 +20,10 @@ const {
   queryExternalRead,
 } = require('./external-graph-query.js');
 const {
+  authorizeWorkspaceWrite,
+  isWriteTool,
+} = require('./workspace-write-guard.js');
+const {
   getWorkspaceRoot,
   hasStaticWorkspace,
   resolveArgoPath,
@@ -411,6 +415,25 @@ function resolveWorkspaceRoot(args) {
 }
 
 async function callTool(name, args = {}, progressToken = null, dependencies = undefined) {
+  // Cross-project WRITE guard (single choke point for every tool): a write tool
+  // may only target this server's HOME workspace. A foreign `workspaceRoot` is
+  // rejected fail-closed before any side effect; READ tools stay ungated so
+  // cross-project reading still works. See workspace-write-guard.js.
+  if (isWriteTool(name, args)) {
+    const decision = authorizeWorkspaceWrite({ tool: name, args, homeRoot: getWorkspaceRoot() });
+    if (!decision.allowed) {
+      return toolResult({
+        status: 'failed',
+        error: {
+          category: decision.category,
+          message: decision.message,
+          tool: decision.tool,
+          homeWorkspaceRoot: decision.homeWorkspaceRoot,
+          requestedWorkspaceRoot: decision.requestedWorkspaceRoot,
+        },
+      });
+    }
+  }
   loadRepositoryArgoEnvironment(resolveWorkspaceRoot(args));
   try {
     const crash = require('./graph-rag/mcpCrashDiagnostics.js');
