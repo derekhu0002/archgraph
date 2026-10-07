@@ -77,6 +77,7 @@ const DELIVERABLE_GUARDS = [
   ['FEATURE: Codex harness adaptation (rules/AGENTS.md + skills + MCP config.toml)', 'tests/argo-codex.test.js'],
   ['FEATURE: order-independent mutation batches (topological apply + cycle report)', 'tests/mutation-batch-order.test.js'],
   ['FEATURE: bounded structural reads (context output budget: identity fallback + complete id manifest)', 'tests/agent-read-projection.test.js'],
+  ['FEATURE: Coding business deck v2 (editable nine-slide deliverable)', 'tests/coding-business-deck-v2.test.js'],
 ];
 
 const ALL_GUARDS = [...MCP_INTERFACE_GUARDS.map(([name, file]) => ({ kind: 'mcp-interface', name, file })), ...DELIVERABLE_GUARDS.map(([name, file]) => ({ kind: 'deliverable', name, file }))];
