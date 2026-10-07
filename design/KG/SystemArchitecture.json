@@ -4655,6 +4655,11 @@
           "name": "commit",
           "value": "69a5120",
           "description": "docs/ppt/content-plan-v4.json; docs/ppt/build-coding-business-deck-v4.mjs; docs/ppt/output/archgraph-coding-business-deck-v4-final.pptx; tests/coding-business-deck-v4.test.js; tests/acceptance-guardian.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "abea25a",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（记录 Coding Agent PPT 架构模型对齐审视、价值定位与待决模型缺口）"
         }
       ],
       "testcases": [
