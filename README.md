@@ -132,14 +132,33 @@ server and pin the workspace per call. Local cross-project read/write status by 
 | OpenCode          |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) |              ✓               |       —         |
 | Codex             |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) |              ✓               |       —         |
 | DeepSeek Harness  |                    ✗                       |             ✗             |              ✓               |       —         |
-| GitHub Copilot    |                  待测                      |           待测            |              ✓               |       —         |
+| GitHub Copilot    |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) | denied for `SOC-DEMO` (`not_authorized`) | blocked (`tool_not_allowed`) |
 | Cursor            |                  待测                      |           待测            |              ✓               |       —         |
 | OpenClaw          |                 不涉及                     |          不涉及           |              ✓               |       —         |
 
 "Local" = another project's graph on **this** machine, addressed by absolute path. "Federated" =
 another member's graph through the center, addressed by `projectId`. The center is a
-**registry + broker**: it has **no** cross-project write path, so the federated-write column is
-empty everywhere.
+**registry + broker**: it has **no** cross-project write path.
+
+**GitHub Copilot host verification (2026-10-08, direct ARGO MCP calls):**
+
+- **This project (`archgraph`) local read:** passed. The canonical graph validated, and the local
+  Neo4j projection reported **402 elements / 298 relationships / 90 views**.
+- **This project local write:** an add-element dry-run passed (`written: false`); no persistent
+  write was made because the graph and `.qea` already had unrelated uncommitted changes.
+- **Local cross-project read:** passed against `D:\Projects\SOC-DEMO` using `workspaceRoot`.
+  SOC-DEMO's graph validated and its local projection reported **393 elements / 501 relationships /
+  100 views**.
+- **Local cross-project write:** a dry-run passed but did not write. A real add-element call against
+  SOC-DEMO was rejected with `WORKSPACE_WRITE_DENIED`; a follow-up query confirmed the probe was
+  absent and the graph counts were unchanged.
+- **Federated read:** `archgraph` could read its own mirror (`namespaceKey=proj:archgraph`), but
+  that mirror returned **314 / 117 / 70**, differing from the local canonical graph. Reading
+  `SOC-DEMO` as `archgraph` was denied (`not_authorized`); no grant for this pair was present.
+- **Federated write:** rejected with `tool_not_allowed:applySystemArchitectureMutation`.
+
+These are direct calls from the GitHub Copilot host, not results inferred from the DeepSeek Harness.
+No persistent graph writes were made during this verification.
 
 ### Why DeepSeek Harness (dsh) cannot do local cross-project read/write
 
@@ -178,8 +197,8 @@ unregistered requester is refused (`denied`).
 Two caveats when reading the column above: the federation center takes the `requester` identity as a
 **self-declared string** — it is not authenticated, so a caller that names a granted member is
 treated as that member (the authorization matrix itself behaves correctly: denied by default, and an
-explicit grant is required). And the pairs marked **待测** have not been exercised for local
-cross-project access yet.
+explicit grant is required). The GitHub Copilot results above reflect the current `archgraph`
+identity and grants at test time; in particular, its federated read of `SOC-DEMO` is denied.
 
 ## Community
 

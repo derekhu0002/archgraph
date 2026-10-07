@@ -4203,7 +4203,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "testcases": [
@@ -10156,7 +10156,7 @@
         },
         {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "description": "ARGO MCP 功能验证（2026-09-27，项目总管，本仓 archgraph）：人类伙伴要求在当前项目验证 ARGO MCP（阿狗 MCP）功能是否正常。结论=正常（读/写两条链路与护栏实测通过），并已证明常驻 MCP 实例绑定本仓。绑定证据：①常驻 MCP 进程在 <workspace>/.argo/temp/mcp-phase.json 逐调用写入相位（与本会话调用一一对应）；②validateSystemArchitecture 回传 workspaceRoot=D:\\\\Projects\\\\archgraph；③queryNeo4jGraph 的 ArchitectureGraph.source_path=design/KG/SystemArchitecture.json、database=archgraph，计数与仓内文件一致；④已部署 ~/.argo/scripts 与仓内 argo/scripts 同名服务 sha256 逐字节一致。读链路：语义检索（含 scope 收敛）、元素上下文、视图上下文（含本仓 archgraph.qea 几何）、只读 Cypher、memory_search、validate 全通。写链路（受控探针）：dryRun 不落盘（摘要前后一致）、精确重复复用既有元素（未新建、独立审计 duplicate 组=0）、无损门禁拦截未确认缩减、写后 qea/Neo4j/embedding 投影自动跟随。实测发现：①addArchitectureElement 要求 element.id 非空（requireId），而规则描述为按自然键 find-or-create——调用方必须自带 id，命中重复时该 id 被丢弃并回传 reusedId/requestedId；②成功写入路径的紧凑响应不含 mutations/reusedId（dryRun 路径含），调用方无法从响应判断新建 vs 复用；③一次等价 no-op 写入会把 canonical 文件行尾整体 CRLF→LF 重写（886282→874049 字节，内容 strChars 增量 0、元素/关系/视图不变），非内容丢失但产生整文件 diff 噪声；④L1 语义去重门禁在真实图谱上出现假阳性：本工作包被同为 Work Package 的 1357『提供AML参考实现』以 0.858（阈值 0.85）拦截，两者无语义关联——已按规则显式 allowDuplicate+justification 放行。",
@@ -10235,8 +10235,13 @@
           "description": "Argo MCP 权限控制验证：本仓写/删、外项目路径拒写、跨项目读（联邦通道正反例）、身份自述问题；未改代码，无 commit id"
         },
         {
+          "name": "commit",
+          "value": "6e0de43",
+          "description": "README.md; tests/dsh-cross-project-access.test.js; tests/readme.test.js; tests/acceptance-guardian.test.js; design/KG/SystemArchitecture.json; design/KG/SystemArchitecture.tombstones.ndjson; archgraph.qea（README 新增《Cross-project read/write》节：两条通道 + 按宿主的本机跨项目读写表 + dsh 不可的根因；新增 dsh 守卫测试并注册；修正 AT-overseer-permission-verify-01 的 invalid-criteria）"
+        },
+        {
           "name": "deliveryStatus",
-          "value": "not_delivered"
+          "value": "delivered"
         }
       ],
       "description": "里程碑（2026-09-27，项目总管）：在当前项目（D:\\Projects\\archgraph）验证 ARGO MCP（阿狗 MCP）功能是否正常——结论=正常，且已证明常驻 MCP 实例绑定本仓。\n【绑定证据】①常驻 MCP 进程（pid 24368）逐调用在 <workspace>/.argo/temp/mcp-phase.json 写相位，时间戳与本会话调用一一对应；②validateSystemArchitecture 回传 workspaceRoot=D:\\Projects\\archgraph、exitCode 0；③queryNeo4jGraph 的 ArchitectureGraph.source_path=design/KG/SystemArchitecture.json、database=archgraph，计数 296/116/67 与仓内文件独立审计一致，写入后 297/117/68；④已部署 ~/.argo/scripts/{argo,systemarchitecture}-mcp-server.js 与仓内 argo/scripts 同名文件 sha256 逐字节一致（2d5b79c3…/fc3754da…）。\n【读链路】getSystemArchitecture（无 scope 语义检索 0.99/0.98 命中；scope=view 按成员收敛）；getIntentElementContext（正常 + 未知 id → status failed 带明确错误）；getArchitectureViewContext（完整成员 + includeEaGeometry=true 读到本仓 archgraph.qea 几何 present=true）；queryNeo4jGraph（schema/只读 Cypher；写子句被拒 READ_ONLY_CYPHER_REQUIRED）；memory_search。\n【写链路（受控探针）】dryRun=true 无痕；精确 (type,name) 重复 → 复用；无损门禁拦截未确认缩减；真实写入经 preview→apply，qeaProjection/neo4jSync/embeddingLifecycle 自动跟随；T1 摘要幂等覆盖走 acknowledgeLoss+lossJustification。\n【实测发现（待裁决）】①addArchitectureElement 必传 element.id（systemarchitecture-mcp-server.js:1391 requireId）——已在下方【权限控制验证】中修正为不成立（实为缺 type）；②成功写入的紧凑响应不含 created/reusedId/mutations；③等价 no-op 写入会把 canonical 文件行尾整体 CRLF→LF；④L1 语义去重门禁假阳性（阈值 0.85 在『里程碑/会话记录』族失去区分力，建议按类型分档）。\n【环境坑】沙箱默认禁止管道子进程 stdio（EPERM）——属环境限制而非产品缺陷。\n【图谱】view argo-mcp-verification（parent 1249）+ WP argo-mcp-verification-001（AT-mcp-verify-01..06）+ Association → acceptance-guardian-001。commits 2cb7e63。\n【权限控制验证（2026-10-07，项目总管）】人类伙伴要求验证 Argo MCP 读写权限控制是否符合预期。一、本仓写/删：written:true 真实落盘，embedding Aligned / qea passed / neo4jSync passed；removal 放行；探针全移除后图谱回到 402 元素 / 0 探针基线。二、外部绝对路径写：带 workspaceRoot=D:\\Projects\\SOC-DEMO 的写入未被拒，元素落在本仓，SOC-DEMO 零改动。三、跨项目读——**人类伙伴指出首轮漏测后补测**：(a) 经绝对路径 workspaceRoot 读外项目图谱在本 DSH 宿主**无法测**（桥在 {...args} 后覆盖 workspaceRoot=sessionCwd，证据：带 workspaceRoot=SOC-DEMO + projectId=graph-wiki 的调用返回 requester=archgraph，而 SOC-DEMO 自带 .argo/federation.json projectId=SOC-DEMO，若参数生效 requester 应为 SOC-DEMO）；(b) 经 projectId 的联邦读：**默认拒绝已验证**（abot / my-army / graph-wiki / new-era-cybersecurity-strategy 均 EXTERNAL_QUERY_DENIED 403；未注册的 totally-unregistered-project 亦被拒；registry_grants 中 archgraph 作为 grantee 无任何授权，与拒绝自洽）；**正向（已授权）读未验证**：本侧在中心没有作为 grantee 的授权，无合法正例可用。四、**身份自述问题（重要缺口）**：联邦读的 requester 是调用方自述字符串，中心不做认证。实测：以 requester=\"my-army\" 调用 graph_read_external 可读出 abot 的真实图谱（database=abot，56 元素，namespaceKey=proj:abot），而 archgraph 以自己名义被拒。即『默认拒绝 + 显式授权』在权限矩阵层面成立，但可被冒名绕过：任何能声明 requester 的调用方都能以已授权成员身份读对方图谱（本仓已登记『先拒绝再授予』的信任基线，此处缺的是一致性验证/调用方身份绑定）。\n【根因（关键认知）】dsh-argo-workspace/index.js 的 execute 在 {...args} 展开之后注入 injected.workspaceRoot = sessionCwd 与 injected.sessionWorkspaceRoot = sessionCwd（注释明写『模型值不能赢』），对每个 argo 工具调用生效。后果：写门禁的 getWorkspaceRoot() 与解析后的 requested 相等，authorizeWorkspaceWrite 总在 sameWorkspace 分支放行，WORKSPACE_WRITE_DENIED 分支在 DSH 内永不触发——写边界实际由『桥钉住会话工作区』保证。零安全影响（桥用覆盖而非放行，外部图谱始终零改动）；但该拒绝分支与『按绝对路径跨项目读』都需在非 DSH 主机或直接 node 运行才能验收（tests/workspace-write-guard.test.js）。\n【修正发现①】addArchitectureElement 省略 element.id 会由服务端自动分配（回传 allocatedId=probe-id-allocation-003），并非『必须自带 id』；上轮的 requireId 类失败实为元素缺 type 的 schema 校验错误。\n【修正发现④】语义去重门禁假阳性再复现（本卡 0.8922 拦截新卡），已按规则复用追加。\n【未覆盖/限制】沙箱 PowerShell 被 Windows 文件权限挡住（SetNamedSecurityInfoW grantWrite(D:\\Projects\\archgraph)），git / npm test / npm run acceptance 不可用，故守卫单测与 Docker 端到端验收未跑，本会话结论仅由 MCP 实测支撑。",

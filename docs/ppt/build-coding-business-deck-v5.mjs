@@ -53,14 +53,14 @@ function edge(s,x1,y1,x2,y2,label,type,color=C.blue){line(s,x1,y1,x2,y2,color,1.
 
 // 1 · Generic business value process
 {
- const s=page(0,true);const names=plan.pages[0].modelView;
- txt(s,'Business Process  /  Coding Agent 业务价值流程',66,171,660,24,{size:13,bold:true,color:'#AFC0FF'});
+ const s=page(0);const names=plan.pages[0].modelView;
+ txt(s,'Business Process  /  Coding Agent 业务价值流程',66,171,660,24,{size:13,bold:true,color:C.blue});
  const stages=[['明确任务与验收目标','目标 · 边界 · 完成定义'],['获取相关项目上下文','按任务需要获取相关信息'],['规划并执行代码变更','拆解 · 工具调用 · 迭代'],['验证并评审结果','测试 · 评审 · 修正'],['交付可验收结果','交付满足验收条件的变更'],['沉淀可复用项目知识','更新可复用的项目上下文']];
  const x0=66,w=169,gap=37,y=260,h=132,colors=[C.blue,'#5579D6','#4E86CC',C.teal,'#D47A4E','#20856D'];
- stages.forEach((a,i)=>{const x=x0+i*(w+gap);box(s,x,y,w,h,'#20344A','#4B6077',1,11);dot(s,x+22,y+22,14,colors[i]);txt(s,String(i+1).padStart(2,'0'),x+10,y+9,24,24,{size:11,bold:true,color:C.white,align:'center'});txt(s,a[0],x+12,y+42,w-24,43,{size:15,bold:true,color:C.white,align:'center'});txt(s,a[1],x+10,y+90,w-20,29,{size:10,color:'#C5D2E0',align:'center'});if(i<5){line(s,x+w,y+65,x+w+gap-2,y+65,'#91A9FF',1.7);txt(s,'Triggering',x+w-9,238,65,16,{size:7,bold:true,color:'#AFC0FF',align:'center'});}});
- txt(s,'图中相邻 Business Process 以 Triggering 连接',843,171,350,20,{size:9,bold:true,color:'#AFC0FF',align:'right'});
- box(s,93,463,1094,83,'#192B40','#3E536B',1,9);txt(s,'端到端目标',111,473,135,22,{size:11,bold:true,color:'#9DB1FF'});txt(s,'业务需求转成经过验证、可交付、可追溯的工程结果',252,467,882,30,{size:18,bold:true,color:C.white,align:'center'});txt(s,'流程只描述业务活动，不预设代码搜索、RAG 或 Graph RAG 等应用实现。',264,508,858,21,{size:11,color:'#C5D2E0',align:'center'});
- txt(s,'指标骨架',70,594,115,22,{size:12,bold:true,color:'#FFC59E'});txt(s,'每个业务活动都能关联对应 Assessment；整体 Coding 基准衡量端到端结果。',193,589,990,30,{size:14,bold:true,color:C.white});
+ stages.forEach((a,i)=>{const x=x0+i*(w+gap);box(s,x,y,w,h,C.white,'#D9E2EF',1,11);box(s,x,y,5,h,colors[i],'none',0,2);dot(s,x+22,y+22,14,colors[i]);txt(s,String(i+1).padStart(2,'0'),x+10,y+9,24,24,{size:11,bold:true,color:C.white,align:'center'});txt(s,a[0],x+12,y+42,w-24,43,{size:15,bold:true,color:C.ink,align:'center'});txt(s,a[1],x+10,y+90,w-20,29,{size:10,color:C.muted,align:'center'});if(i<5){line(s,x+w,y+65,x+w+gap-2,y+65,'#8BA4F9',1.7);txt(s,'Triggering',x+w-9,238,65,16,{size:7,bold:true,color:C.blue,align:'center'});}});
+ txt(s,'图中相邻 Business Process 以 Triggering 连接',843,171,350,20,{size:9,bold:true,color:C.blue,align:'right'});
+ box(s,93,463,1094,83,C.paleBlue,'#D5DDF5',1,9);txt(s,'端到端目标',111,473,135,22,{size:11,bold:true,color:C.blue});txt(s,'业务需求转成经过验证、可交付、可追溯的工程结果',252,467,882,30,{size:18,bold:true,color:C.ink,align:'center'});txt(s,'流程只描述业务活动，不预设代码搜索、RAG 或 Graph RAG 等应用实现。',264,508,858,21,{size:11,color:C.muted,align:'center'});
+ txt(s,'指标骨架',70,594,115,22,{size:12,bold:true,color:C.orange});txt(s,'每个业务活动都能关联对应 Assessment；整体 Coding 基准衡量端到端结果。',193,589,990,30,{size:14,bold:true,color:C.ink});
 }
 
 // 2 · Generic Application Layer Harness and optional retrieval implementations.
@@ -188,12 +188,12 @@ function edge(s,x1,y1,x2,y2,label,type,color=C.blue){line(s,x1,y1,x2,y2,color,1.
 
 // 9 · Industry practice supporting expert-led Agent work; separate evidence from interpretation.
 {
- const s=page(8,true);txt(s,'OPENAI · HARNESS ENGINEERING',67,169,484,21,{size:11,bold:true,color:'#AFC0FF'});
- const stats=[['3','工程师'],['5 个月','持续迭代'],['≈ 100 万','代码行'],['0','手写代码']];stats.forEach((a,i)=>{const x=67+i*287;txt(s,a[0],x,215,250,55,{size:34,bold:true,color:[C.blue,C.teal,C.orange,'#9DB1FF'][i]});txt(s,a[1],x,270,250,25,{size:12,bold:true,color:C.white});if(i<3)line(s,x+260,210,x+260,307,'#3B5067',1);});
- box(s,68,333,1144,117,'#1A2E44','#3B5067',1,10);txt(s,'文章报告的工程做法',87,346,290,22,{size:12,bold:true,color:'#9DB1FF'});const acts=['设计开发环境','定义意图与架构','设置自动验收','用反馈循环修正'];acts.forEach((a,i)=>{const x=89+i*273;box(s,x,385,246,42,'#243A53','#50657B',1,7);txt(s,a,x+8,391,230,28,{size:12,bold:true,color:C.white,align:'center'});if(i<3)txt(s,'›',x+246,390,27,24,{size:19,bold:true,color:'#9DB1FF',align:'center'});});
- box(s,68,481,550,144,'#20354C','#465B72',1,10);txt(s,'我们的解释',86,495,180,21,{size:11,bold:true,color:'#FFC59E'});txt(s,'专家掌握项目地图，才能检查 Agent 是否走在正确路径上。',86,523,512,47,{size:18,bold:true,color:C.white});txt(s,'把地图外化为本体和图谱，专家可以更深入地指导和校准。',86,580,512,28,{size:11,color:'#CBD5E1'});
- box(s,650,481,562,144,'#20354C','#465B72',1,10);txt(s,'待验证的扩展收益',668,495,220,21,{size:11,bold:true,color:'#79CBB6'});txt(s,'图谱给工程师一个可学习的领域模型；低年资成员可能借此逐步成长。',668,523,520,49,{size:15,bold:true,color:C.white});txt(s,'当前没有学习成效数据，作为待验证假设。',668,581,520,25,{size:10,color:'#CBD5E1'});
- txt(s,'案例数字为 OpenAI 团队自述；“专家脑中的图”是我们的解释，不是来源原句。',117,646,1040,20,{size:9,color:'#AEBBC8',align:'center'});
+ const s=page(8);txt(s,'OPENAI · HARNESS ENGINEERING',67,169,484,21,{size:11,bold:true,color:C.blue});
+ const stats=[['3','工程师'],['5 个月','持续迭代'],['≈ 100 万','代码行'],['0','手写代码']];stats.forEach((a,i)=>{const x=67+i*287;txt(s,a[0],x,215,250,55,{size:34,bold:true,color:[C.blue,C.teal,C.orange,C.blue][i]});txt(s,a[1],x,270,250,25,{size:12,bold:true,color:C.ink});if(i<3)line(s,x+260,210,x+260,307,C.rule,1);});
+ box(s,68,333,1144,117,C.paleBlue,'#D5DDF5',1,10);txt(s,'文章报告的工程做法',87,346,290,22,{size:12,bold:true,color:C.blue});const acts=['设计开发环境','定义意图与架构','设置自动验收','用反馈循环修正'];acts.forEach((a,i)=>{const x=89+i*273;box(s,x,385,246,42,C.white,'#C9D5EC',1,7);txt(s,a,x+8,391,230,28,{size:12,bold:true,color:C.ink,align:'center'});if(i<3)txt(s,'›',x+246,390,27,24,{size:19,bold:true,color:C.blue,align:'center'});});
+ box(s,68,481,550,144,C.white,'#D8E0EA',1,10);txt(s,'我们的解释',86,495,180,21,{size:11,bold:true,color:C.orange});txt(s,'专家掌握项目地图，才能检查 Agent 是否走在正确路径上。',86,523,512,47,{size:18,bold:true,color:C.ink});txt(s,'把地图外化为本体和图谱，专家可以更深入地指导和校准。',86,580,512,28,{size:11,color:C.muted});
+ box(s,650,481,562,144,C.white,'#D8E0EA',1,10);txt(s,'待验证的扩展收益',668,495,220,21,{size:11,bold:true,color:C.teal});txt(s,'图谱给工程师一个可学习的领域模型；低年资成员可能借此逐步成长。',668,523,520,49,{size:15,bold:true,color:C.ink});txt(s,'当前没有学习成效数据，作为待验证假设。',668,581,520,25,{size:10,color:C.muted});
+ txt(s,'案例数字为 OpenAI 团队自述；“专家脑中的图”是我们的解释，不是来源原句。',117,646,1040,20,{size:9,color:C.muted,align:'center'});
 }
 
 await fs.mkdir(TMP,{recursive:true});await fs.mkdir(path.dirname(OUT),{recursive:true});
