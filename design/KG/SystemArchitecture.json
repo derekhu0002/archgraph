@@ -12180,6 +12180,11 @@
           "name": "commit",
           "value": "8059d2d",
           "description": "Add cross-project workspace write guard (writes pinned to home workspace); argo/scripts/workspace-write-guard.js; argo/scripts/argo-mcp-server.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; argo/.env.example; tests/workspace-write-guard.test.js; tests/acceptance-guardian.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "commit",
+          "value": "da488f5",
+          "description": "Trust host-designated session workspace for cross-project writes (DSH); argo/scripts/workspace-write-guard.js; argo/scripts/argo-mcp-server.js; dsh-argo-workspace/index.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; argo/.env.example; tests/workspace-write-guard.test.js; design/KG/SystemArchitecture.json; archgraph.qea; npm test 715/716 (1 pre-existing env memory-eval-run)"
         }
       ]
     }
