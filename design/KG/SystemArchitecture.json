@@ -12187,6 +12187,22 @@
           "description": "Trust host-designated session workspace for cross-project writes (DSH); argo/scripts/workspace-write-guard.js; argo/scripts/argo-mcp-server.js; dsh-argo-workspace/index.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; argo/.env.example; tests/workspace-write-guard.test.js; design/KG/SystemArchitecture.json; archgraph.qea; npm test 715/716 (1 pre-existing env memory-eval-run)"
         }
       ]
+    },
+    {
+      "description": "任务（handoff）：在 DSH 宿主下自验证 argo MCP 的跳项目写入边界（doc-workspace-write-guard-001）已生效。目的：证明 DSH 会话可在其自身工作区写入，且宿主可信会话通道（sessionWorkspaceRoot + ARGO_WORKSPACE_ROOT_TRUSTED=1）工作正常。背景：DSH 的 dsh-argo-workspace 桥每个 DSH 实例只启动一个 argo MCP server（cwd=DSH 运行时目录，非任何项目），每次调用将 workspaceRoot 与 sessionWorkspaceRoot 均设为 SessionHeader.cwd，并设 ARGO_WORKSPACE_ROOT_TRUSTED=1；server 写门禁允许写入 home 或该可信会话工作区（读工具不受限）。可在 DSH 中安全执行的步骤（GIVEN-WHEN-THEN）：(1) GIVEN 在 DSH 打开本项目 D:\\\\Projects\\\\archgraph，WHEN 调用 validateSystemArchitecture，THEN 返回 workspaceRoot=D:\\\\Projects\\\\archgraph（宿主绑定正确）。(2) GIVEN 当前会话工作区即 archgraph，WHEN 执行一次真实写入（addArchitectureElement 向某现有视图添加一个探针元素），THEN 返回 status passed 且写后可读回该元素——此写证明可信会话通道生效（DSH server 的 home 为运行时目录而非 archgraph，旧的严格 home-only 规则会拒绝此写）。(3) WHEN 读回（getIntentElementContext / getArchitectureViewContext），THEN 可见探针，读写一致。(4) WHEN 逆操作移除探针（removeArchitectureElement，带 acknowledgeLoss），THEN 图谱无损复原。(5) 记录结论（项目总管 LTM 里程碑/经验，附 commit 与文件路径）；若任一步失败，按根因上报（常见：DSH 运行时未重启导致桥仍旧版；或桥未注入 flag）。注：在 DSH 中模型无法把写入重定向到其它工作区（桥强制以 SessionHeader.cwd 覆盖 workspaceRoot），『外部工作区写入被拒』应在非受信直连宿主（OpenCode）验证，已由 tests/workspace-write-guard.test.js 与一次 OpenCode 实测覆盖（结果：允读、拒写、伪造 sessionWorkspaceRoot 亦被忽略）。",
+      "id": "wp-dsh-write-guard-verify-001",
+      "name": "任务：DSH 跨工作区写入边界自验证（可信会话通道）",
+      "parent": "1249",
+      "testcases": [
+        {
+          "Input": "tests/workspace-write-guard.test.js",
+          "acceptanceCriteria": "tests/workspace-write-guard.test.js",
+          "description": "GIVEN the DSH host and the argo MCP write guard; WHEN a DSH session performs a real write in its own (session) workspace while the argo server's home is the DSH runtime dir; THEN the write succeeds and reads back, proving the trusted sessionWorkspaceRoot channel (ARGO_WORKSPACE_ROOT_TRUSTED=1) is active; AND on an untrusted direct-MCP host a foreign-workspace write is denied while reads remain open (covered by tests/workspace-write-guard.test.js).",
+          "name": "AT-dsh-write-guard-verify-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Work Package"
     }
   ],
   "relationships": [
@@ -15411,6 +15427,16 @@
       "target_id": "acceptance-guardian-001",
       "target_name": "验收看护服务（Acceptance Guardianship）",
       "type": "Association"
+    },
+    {
+      "id": "wp-dsh-write-guard-verify-guardian-assoc-001",
+      "name": "verifies via",
+      "source_id": "wp-dsh-write-guard-verify-001",
+      "source_name": "任务：DSH 跨工作区写入边界自验证（可信会话通道）",
+      "statement": "任务：DSH 跨工作区写入边界自验证（可信会话通道） --(Association)--> 验收看护服务（Acceptance Guardianship）",
+      "target_id": "acceptance-guardian-001",
+      "target_name": "验收看护服务（Acceptance Guardianship）",
+      "type": "Association"
     }
   ],
   "views": [
@@ -16520,11 +16546,13 @@
         "argo-mcp-verification-001",
         "acceptance-guardian-001",
         "wp-mutation-batch-order-001",
-        "doc-workspace-write-guard-001"
+        "doc-workspace-write-guard-001",
+        "wp-dsh-write-guard-verify-001"
       ],
       "included_relationships": [
         "argo-mcp-verification-guardian-assoc-001",
-        "doc-workspace-write-guard-guardian-assoc-001"
+        "doc-workspace-write-guard-guardian-assoc-001",
+        "wp-dsh-write-guard-verify-guardian-assoc-001"
       ],
       "parent_element_id": "1249",
       "parent_element_name": "Implementation and Migration Viewpoint",
