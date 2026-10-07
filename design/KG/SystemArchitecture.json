@@ -11519,6 +11519,11 @@
           "name": "commit",
           "value": "69a5120",
           "description": "docs/ppt/content-plan-v4.json; docs/ppt/build-coding-business-deck-v4.mjs; docs/ppt/output/archgraph-coding-business-deck-v4-final.pptx; tests/coding-business-deck-v4.test.js; tests/acceptance-guardian.test.js（Business/Application Layer重新分层，RAG能力归Application Layer可选Context Access）"
+        },
+        {
+          "name": "commit",
+          "value": "58ef93c",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记 v4 交付物、验收用例与工作记忆）"
         }
       ],
       "description": "9页16:9可编辑PPTX v4：docs/ppt/output/archgraph-coding-business-deck-v4-final.pptx。将通用业务价值流定位为 Business Layer，将通用 Coding Agent/Harness 架构定位为 Application Layer；普通检索、RAG 与 Graph RAG 是 Context Access 内的可选实现；指标映射到业务活动与应用组件。生成器 docs/ppt/build-coding-business-deck-v4.mjs；计划 docs/ppt/content-plan-v4.json。历史交付保留：v3 docs/ppt/output/archgraph-coding-business-deck-v3-final.pptx，生成器 docs/ppt/build-coding-business-deck-v3.mjs，计划 docs/ppt/content-plan-v3.json；v2 docs/ppt/output/archgraph-coding-business-deck-v2-final4.pptx，生成器 docs/ppt/build-coding-business-deck-v2.mjs，计划 docs/ppt/content-plan-v2.json；v1 docs/ppt/archgraph-coding-business-deck.pptx。",
