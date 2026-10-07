@@ -4322,7 +4322,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10，分支 develop-separate-schema）。本会话主题：按人类伙伴给定的 5 页大纲交付 Coding 业务价值汇报 PPT，并修复因图谱长大而失效的旧验收。\n【身份】Business Actor 项目总管（project-overseer-001；人类未指定角色时默认由本角色对话与决策）。\n【目标】交付 5 页汇报 PPT：P1 状态机表达 Coding 业务价值流程（左 3/4 状态机 + 右标号简释）；P2 业界痛点与先进实践 → 我方 Arc 方案（本体＝共同语言 / 图谱＝承载）；P3 指标体系（20 指标↔状态机映射 + 我方评测 + 业界 Gap 与优化方向）；P4 检索的一级通用流程（Graph RAG 全景 + 覆盖 + 指标映射 + 度量）；P5 联邦式组织级知识图谱（单项目当积木 + 三大好处 + 组合示意）。\n【进展】① 交付 docs/ppt/archgraph-coding-business-deck.pptx（5 页 16:9，整页图底 + 682 个原生可编辑文本框）+ content-plan.json（内容单一事实源）+ 5 SVG/PNG + preview.html；生成链 scripts/gen-coding-deck.js → rasterize-coding-deck.js → build-coding-deck-pptx.py（npm run gen:deck）。② 验收 tests/coding-business-deck.test.js（AT-coding-deck-01..09，9/9）。③ 图谱登记：视图 comm-2026-10-view-001 + WP wp-coding-business-deck-001（含 9 AT）+ 5 个页面内容元素 + Deliverable coding-business-deck-pptx-001 + T2 里程碑卡 + 子视图 overseer-comm-001。④ 证据治理：P2 业界数字逐条附 URL；先委托验证分析师拿回后修正叙述（删掉无法核实的『UN 框架 99% 由 Agent 写』改为 Bun Zig→Rust；GitClear 用 4 倍而非 8 倍；不引用拿不到一手分数的榜单分）。⑤ 修复两个存量失效：视图 429 子视图期望 24→31（tests/architecture-view-context.test.js）与 MQ-17（scripts/memory-eval-run.js + 题集文档）；并把静默 skip 的『真实 MCP 写图回滚』改为必须成功（临工作区需拷 .argo/schema bundle，否则图中 bundle 新增类型被拒收）。\n【回归】npm test 699/699 pass / 0 fail / 0 skip（前：696/2 fail/1 skip）；validateSystemArchitecture 与写图调用均 passed。\n【决策/教训】① 内容单一事实源：预设图表与验收都从 content-plan.json 派生，AT-04 直接与图谱 measurement-status 逐行对挖，避免图文不一致。② PPTX 保留可编辑文字层（整页 PNG 底 + 从 SVG text 节点重建文本框）——汇报场景需要改字。③ skip 会隐藏失效：验收因环境/数据变化而 skip 就是缺陷，必须找出根因或改为硬断言。④ 评测题集里的『当前数』（如子视图数）必须写明『随图增长维护』，否则图一长大型就是假退化。⑤ SVG 排版要点：文字必须在盒子内（用估宽换行），引线不能穿盒子，标题写不下就缩字/改词，所有内容必须让开页脚区域。⑥ 术语偏差：人类伙伴说『Arcanate 语言作为 base』，本仓实际叫 Acme base（ArchiMate 3.2 + ARGO 扩展）+ 可 extends 领域本体；已在 T2 卡列为待人类确认。\n【未提交/下一步】① 人类伙伴审阅版面密度与 Arcanate 术语；② P3 的 8 个业界基准仍未跑（E1/E2 制度对照：挂 vs 不挂 ArchGraph）；③ Docker e2e（npm run acceptance）未跑；④ 待审议：汇报稿是否再出 PDF/微信版。\n【commits】11263c7（UML 2 状态机 schema + 建模，补上个会话）/ b1c0dd0（5 页汇报 PPT）/ d73480c（旧验收同步修复）/ 03ff6cd（图谱登记）。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10，分支 develop-separate-schema）。本会话主题：把 ArchGraph 适配到 OpenAI Codex 宿主（CLI 0.162 / 桌面版，CODEX_HOME=~/.codex）。\n【身份】Business Actor 项目总管（project-overseer-001；人类未指定角色时默认由本角色对话与决策）。\n【目标】按人类确认的方案推进 Codex 适配 P1（安装器段）：规则→~/.codex/AGENTS.md、技能→~/.codex/skills、MCP→~/.codex/config.toml；跟随会话工作区（不钉 ARGO_REPO_ROOT）。\n【侦察（本机实测，关键）】① 规则：Codex 逐字注入仓库 AGENTS.md 与全局 ~/.codex/AGENTS.md（`codex debug prompt-input` 证明）→ WakeupGuideline 启动门生效。② 技能：~/.codex/skills/<name>/SKILL.md（Anthropic 规范，仅 name+description；必须无 BOM，带 BOM 静默丢弃）；另有共享根 ~/.agents/skills。③ MCP：config.toml [mcp_servers.<name>] TOML 表，`codex mcp add/list/remove`。④ 工作区：stdio MCP 以会话工作区为 cwd、无 ARGO_*（探针实测）→ 默认不钉 ARGO_REPO_ROOT。⑤ 原生多智能体（spawn_agent/send_message/wait_agent）但无人格文件 → Agents 列 —，Wakeup ✓。\n【进展】① install-argo.ps1 新增 Codex 段 + Write-CodexMcpConfig/ConvertTo-TomlString（TOML 表 upsert：先删旧表再写、保留无关键）+ -CodexHome/-CodexRepoRoot/-SkipCodex。② tests/argo-codex.test.js（AT-codex-01..07）5/5。③ 覆盖守护条目 + README/index Harness 表加 Codex 行。④ 图谱：view codex-adaptation（parent=1249）+ WP codex-harness-adaptation-001 + AT codex-01..07；T2 里程碑卡 overseer-codex-adaptation-001（入 overseer-product-001，因 overseer-ltm-001 已满 15）。⑤ 修复随图长大失效：view 429 子视图期望 + MQ-17（31→33）。\n【回归】npm test 706/706 pass / 0 fail / 0 skip；validateSystemArchitecture passed。\n【决策/教训】① 全局 AGENTS.md 注入即满足启动门；Codex 有 hooks（stable）可作 P2 加强。② 工作区策略用探针实测决定（Codex 传 cwd）→ 跟随优于钉死。③ 坑：其它安装器测试会写真实 ~/.codex，必须加 -SkipCodex 隔离；已清理污染（AGENTS.md/skills/config.toml）。④ 视图 15 元素硬上限：里程碑卡入主题子视图。\n【未提交/下一步】① P2：Codex 原生插件包（.codex-plugin + marketplace，对标 dsh-plugin）未做。② 未做真实宿主交付；如需可 `npm i -g archgraph-argo-beta` + `argo-deploy`。③ Agents 列仍为 —（Codex 无每-Actor 人格文件）。\n【commits】7eab948。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4344,7 +4344,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10",
+          "value": "2026-10-07",
           "description": "会话收尾：UML 2 schema + coding 状态机 + 指标体系建模（未提交）"
         },
         {
@@ -11646,7 +11646,36 @@
           "Input": "tests/argo-codex.test.js",
           "description": "GIVEN 传入 -CodexRepoRoot <ws>（固定工作区可选路径）；WHEN 部署 Codex MCP；THEN config.toml 写入 [mcp_servers.argo.env] 且 ARGO_REPO_ROOT 钉定到该工作区。"
         }
+      ],
+      "attributes": [
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        },
+        {
+          "name": "commit",
+          "value": "7eab948",
+          "description": "install-argo.ps1（Codex 部署段 + Write-CodexMcpConfig/ConvertTo-TomlString + -CodexHome/-CodexRepoRoot/-SkipCodex）; tests/argo-codex.test.js（AT-codex-01..07）; tests/acceptance-guardian.test.js（覆盖守护条目）; tests/argo-deploy.test.js; tests/argo-doubao.test.js; tests/argo-openclaw.test.js（隔离真实 Codex 主目录）; tests/architecture-view-context.test.js; scripts/memory-eval-run.js（MQ-17）; docs/memory-eval-dataset.md; README.md; index.html; design/KG/SystemArchitecture.json; archgraph.qea"
+        }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "install-argo.ps1; tests/argo-codex.test.js; tests/acceptance-guardian.test.js; tests/argo-deploy.test.js; tests/argo-doubao.test.js; tests/argo-openclaw.test.js; tests/architecture-view-context.test.js; scripts/memory-eval-run.js; docs/memory-eval-dataset.md; README.md; index.html; design/KG/SystemArchitecture.json; archgraph.qea",
+          "name": "commit",
+          "value": "7eab948"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        }
+      ],
+      "description": "里程碑（2026-10，项目总管）：将 ArchGraph 适配到 OpenAI Codex（Codex CLI 0.162 / 桌面版，CODEX_HOME=~/.codex）。\n【侦察（本机实测）】① 规则：Codex 把仓库 AGENTS.md 与全局 ~/.codex/AGENTS.md 逐字注入（`codex debug prompt-input` 证明）→ WakeupGuideline 无条件启动门随之生效。② 技能：~/.codex/skills/<name>/SKILL.md（Anthropic 规范，frontmatter 仅 name+description；UTF-8 无 BOM，带 BOM 会被静默丢弃）；另有共享根 ~/.agents/skills。③ MCP：~/.codex/config.toml 的 [mcp_servers.<name>] TOML 表（command/args/env；远程用 url），`codex mcp add/list/remove` 官方 CLI。④ 工作区：stdio MCP 子进程以会话工作区为 cwd 且不注入 ARGO_*（探针实测）→ 同 OpenCode/DSH/豆包，默认不钉 ARGO_REPO_ROOT。⑤ 原生多智能体（spawn_agent/send_message/wait_agent，4 槽）但无每-Actor 人格文件 → Harness 表 Agents 列标 —；Wakeup Gate 列 ✓（AGENTS.md 注入）。\n【交付】install-argo.ps1 新增 Codex 段：规则→~/.codex/AGENTS.md（复用 Write-ArchGraphRuleBlock）；技能→~/.codex/skills（复用 Copy-DoubaoSkills/Convert-SkillFile，无 BOM）；MCP→~/.codex/config.toml（新增 Write-CodexMcpConfig + ConvertTo-TomlString，文本级 TOML 表 upsert：先删旧托管表 [mcp_servers.argo]/[.argo.env]/[graph-mcp] 再写，避免重复表解析错，保留无关键）；新增参数 -CodexHome/-CodexRepoRoot/-SkipCodex。tests/argo-codex.test.js（AT-codex-01..07）5/5。\n【坑】测试运行 install-argo.ps1 若未隔离会写真实 ~/.codex（AGENTS.md/skills/config.toml），并因 Codex App 占用 AGENTS.md 而报错——须给其它安装器测试加 -SkipCodex（已修 argo-deploy/argo-doubao/argo-openclaw）并清理真实目录污染。\n【图谱】view codex-adaptation（parent=1249）+ WP codex-harness-adaptation-001 + AT-codex-01..07；语义 dedup 命中 WP 2780/豆包，按『每宿主一 WP』惯例 allowDuplicate 建独立 WP。\n【回归】npm test 706/706 pass / 0 fail / 0 skip；同步修复图上长大失效：view 429 子视图期望与 MQ-17（31→33）。commit 7eab948。",
+      "id": "overseer-codex-adaptation-001",
+      "name": "里程碑：ArchGraph 适配 OpenAI Codex 宿主（规则/技能/MCP 已交付）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -14947,7 +14976,8 @@
         "overseer-view-geometry-route-fix-001",
         "overseer-framework-series-001",
         "overseer-agent-model-unification-001",
-        "overseer-archgraph-intro-pdf-001"
+        "overseer-archgraph-intro-pdf-001",
+        "overseer-codex-adaptation-001"
       ],
       "included_relationships": []
     },
