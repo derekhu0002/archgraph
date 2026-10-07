@@ -7,7 +7,7 @@ const NODE_MODULES='C:/Users/remoteadmin/.cache/codex-runtimes/codex-primary-run
 const RUNTIME_PYTHON='C:/Users/remoteadmin/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe';
 const SKILL_DIR='C:/Users/remoteadmin/.codex/plugins/cache/openai-primary-runtime/presentations/26.909.12148/skills/presentations';
 const TMP=path.join(ROOT,'docs/ppt/.build-coding-v5');
-const OUT=path.join(ROOT,'docs/ppt/output/archgraph-coding-business-deck-v5-final-aligned.pptx');
+const OUT=path.join(ROOT,'docs/ppt/output/archgraph-coding-business-deck-v5-clarified-p3-r2.pptx');
 const source=JSON.parse(await fs.readFile(path.join(ROOT,'docs/ppt/content-plan-v4.json'),'utf8'));
 const {Presentation,PresentationFile}=await import(pathToFileURL(path.join(NODE_MODULES,'@oai/artifact-tool/dist/artifact_tool.mjs')).href);
 const {resolvePresentationFont,finalizePresentation}=await import(pathToFileURL(path.join(SKILL_DIR,'container_tools/artifact_tool_utils.mjs')).href);
@@ -17,7 +17,7 @@ const plan={...source,deckId:'archgraph-coding-business-deck-v5-001',title:'Arch
 const titles=[
  ['Coding Agent 业务价值流程','Business Layer：跨业务场景的价值活动；先说明“做什么”，再进入实现架构。'],
  ['通用 Coding Agent 应用架构','Application Layer：Harness 编排应用功能；普通检索、RAG 与 Graph RAG 是可选实现。'],
- ['ArchGraph 在业务层与应用层中的位置','Graph MCP 是 Harness 可调用的应用能力；项目本体与图谱承载共享领域语义。'],
+ ['ArchGraph 在业务层与应用层中的位置','清楚标出框架边界：Harness 在外按需调用；图谱写入治理、语义检索与结构查询由 ArchGraph 提供。'],
  ['业务阶段、应用能力与指标映射','每个 Assessment 关联到业务活动和应用能力，为结果页提供统一口径。'],
  ['Graph RAG 通用检索流程：写入、索引与查询','业界参考流程；各实现会省略、替换或扩展其中部分阶段。'],
  ['测评结果：局部改善已见，整体优势待同口径验证','检索与记忆有内部证据；整体 Coding 基准和知识质量仍需补测。'],
@@ -75,29 +75,48 @@ function edge(s,x1,y1,x2,y2,label,type,color=C.blue){line(s,x1,y1,x2,y2,color,1.
  txt(s,'按任务与知识结构选用；通用 Harness 本身不要求部署 RAG。',328,623,638,25,{size:12,bold:true,color:C.ink,align:'center'});
 }
 
-// 3 · ArchGraph's exact place in the two-layer model, plus current implementation chains.
+// 3 · Make the ArchGraph framework boundary and its actual work unmistakable.
 {
- const s=page(2);box(s,63,166,1154,108,C.ink,'none',0,9);txt(s,'BUSINESS LAYER',79,174,145,19,{size:10,bold:true,color:'#AFC0FF'});
- node(s,'Coding Agent 业务价值流程','Business Process',85,197,255,57,C.blue,C.white,12);node(s,'项目领域本体','Business Object',816,197,213,57,C.blue,C.white,12);
- node(s,'Coding领域专家','Business Actor',1051,179,143,37,C.teal,C.white,9);node(s,'Coding开发者','Business Actor',1051,222,143,37,C.teal,C.white,9);
- line(s,1051,197,1030,211,C.muted,1.2);line(s,1051,239,1030,231,C.muted,1.2);txt(s,'Association',1021,202,81,13,{size:7,bold:true,color:C.muted,align:'center'});
- box(s,63,286,1154,207,C.paleTeal,'none',0,9);txt(s,'APPLICATION LAYER',79,292,180,19,{size:10,bold:true,color:C.teal});
- node(s,'ArchGraph MCP Provider','Application Component',82,329,190,60,C.blue,C.white,11);node(s,'Graph MCP Tool Interface','Application Interface',316,329,215,60,C.blue,C.white,10);node(s,'项目图谱上下文服务','Application Service',590,329,245,60,C.teal,C.white,12);node(s,'上下文访问','Application Function',941,329,228,60,C.teal,C.white,12);
- line(s,272,359,316,359,C.blue,1.6);txt(s,'Composition',266,337,85,14,{size:7,bold:true,color:C.blue,align:'center'});line(s,531,359,590,359,C.teal,1.6);txt(s,'Assignment',520,337,89,14,{size:7,bold:true,color:C.teal,align:'center'});line(s,835,359,941,359,C.teal,1.6);txt(s,'Serving',859,337,63,14,{size:7,bold:true,color:C.teal,align:'center'});
- node(s,'项目意图图谱','Data Object',645,419,212,49,C.orange,C.white,10);line(s,710,389,710,419,C.orange,1.5);txt(s,'Access',713,393,52,14,{size:7,bold:true,color:C.orange});node(s,'通用 Coding Agent Harness','Application Component',960,421,226,48,C.ink,C.white,10);
- // Data Object realizes the Business Object; route through the open gutter between app nodes.
- line(s,857,443,886,443,C.blue,1.4);line(s,886,443,886,255,C.blue,1.4);line(s,886,255,886,255,C.blue,1.4);txt(s,'Realization',887,270,75,14,{size:7,bold:true,color:C.blue});
- // The same Application Service serves the Harness and the Business Process.
- line(s,835,379,855,402,C.teal,1.3);line(s,855,402,952,402,C.teal,1.3);line(s,952,402,972,421,C.teal,1.3);txt(s,'Serving',871,405,62,14,{size:7,bold:true,color:C.teal});
- line(s,590,345,557,345,C.teal,1.3);line(s,557,345,557,225,C.teal,1.3);line(s,557,225,340,225,C.teal,1.3);txt(s,'Serving · Business Process',383,229,172,14,{size:7,bold:true,color:C.teal,align:'center'});
- txt(s,'ArchGraph 内部实现关系',68,507,310,21,{size:12,bold:true,color:C.blue});
- const detailRows=[
-  ['写入治理',C.orange,'Graph Semantics','图谱写入去重门禁','无损写入门禁','Neo4j Semantic Projection','Triggering'],
-  ['语义检索',C.teal,'Default Semantic Retrieval','Hybrid Semantic Retrieval','Semantic Rerank',null,'Triggering'],
-  ['结构查询',C.blue,'Neo4j Structural Sync','Read-only Cypher Query','Community Index',null,'Serving']
- ];
- detailRows.forEach((r,ri)=>{const y=532+ri*42;txt(s,r[0],69,y+8,105,18,{size:8,bold:true,color:r[1]});const labels=r.slice(2,6).filter(Boolean);labels.forEach((a,i)=>{const x=181+i*250;box(s,x,y,217,34,C.white,r[1],1,6);txt(s,a,x+8,y+4,201,26,{size:9,bold:true,color:r[1],align:'center'});if(i<labels.length-1)line(s,x+217,y+17,x+246,y+17,r[1],1.5);});txt(s,r[6],1128,y+9,80,15,{size:7,bold:true,color:r[1],align:'right'});});
- txt(s,'箭头关系：写入与语义检索为 Triggering；结构投影到只读查询、查询到社区索引为 Serving。',221,660,913,15,{size:7,bold:true,color:C.muted,align:'center'});
+ const s=page(2);
+ // Business model context stays as a narrow strip; it is not an ArchGraph implementation box.
+ box(s,63,160,1154,76,C.ink,'none',0,9);txt(s,'BUSINESS LAYER · 业务背景',78,164,235,18,{size:9,bold:true,color:'#AFC0FF'});
+ node(s,'Coding Agent 业务价值流程','Business Process',82,187,255,39,C.blue,C.white,10);node(s,'项目领域本体','Business Object',554,187,202,39,C.blue,C.white,10);
+ node(s,'Coding领域专家','Business Actor',925,176,257,24,C.teal,C.white,8);node(s,'Coding开发者','Business Actor',925,207,257,24,C.teal,C.white,8);
+ line(s,756,199,925,188,C.muted,1.1);line(s,756,209,925,219,C.muted,1.1);txt(s,'Association',795,178,82,13,{size:7,bold:true,color:'#D8E0E9',align:'center'});txt(s,'Association',795,218,82,13,{size:7,bold:true,color:'#D8E0E9',align:'center'});
+ // External generic host, contrasted with the explicitly bounded ArchGraph deliverable.
+ node(s,'通用 Coding Agent Harness','Application Component',72,315,194,66,C.ink,C.white,10);
+ txt(s,'按需调用',130,389,88,16,{size:9,bold:true,color:C.teal,align:'center'});
+ box(s,294,251,922,420,'#EEF2FF',C.blue,2,12);
+ box(s,316,264,8,25,C.blue,'none',0,3);txt(s,'ARCHGRAPH 框架提供',334,261,340,30,{size:19,bold:true,color:C.blue});txt(s,'MCP 接入的项目图谱上下文能力',823,266,359,21,{size:11,bold:true,color:C.muted,align:'right'});
+ // Canonical provider → interface → service → graph data path.
+ node(s,'ArchGraph MCP Provider','Application Component',321,302,164,53,C.blue,C.white,10);
+ node(s,'Graph MCP Tool Interface','Application Interface',507,302,185,53,C.blue,C.white,9);
+ node(s,'项目图谱上下文服务','Application Service',714,302,207,53,C.teal,C.white,10);
+ node(s,'项目意图图谱','Data Object',944,302,178,53,C.orange,C.white,10);
+ line(s,485,329,507,329,C.blue,1.7);txt(s,'Composition',474,306,91,14,{size:7,bold:true,color:C.blue,align:'center'});
+ line(s,692,329,714,329,C.teal,1.7);txt(s,'Assignment',681,306,90,14,{size:7,bold:true,color:C.teal,align:'center'});
+ line(s,921,329,944,329,C.orange,1.7);txt(s,'Access',916,306,60,14,{size:7,bold:true,color:C.orange,align:'center'});
+ // Service serves the generic host; this path exits the ArchGraph boundary.
+ line(s,817,355,817,377,C.teal,1.4);line(s,817,377,268,377,C.teal,1.4);line(s,268,377,268,349,C.teal,1.4);txt(s,'Serving · Harness 按需调用',419,365,248,17,{size:8,bold:true,color:C.teal,align:'center'});
+ // The graph object realizes the business ontology; relationship routed in the gap above the framework.
+ line(s,1033,302,1033,243,C.blue,1.2);line(s,1033,243,655,243,C.blue,1.2);line(s,655,243,655,226,C.blue,1.2);txt(s,'Realization',820,235,85,14,{size:7,bold:true,color:C.blue,align:'center'});
+ txt(s,'框架内的三类工作',321,393,248,21,{size:12,bold:true,color:C.ink});
+ const lane=(y,label,color,items,rel)=>{
+   box(s,317,y,875,72,C.white,'#D6DEEB',0.8,8);box(s,317,y,102,72,color,'none',0,8);txt(s,label,326,y+7,84,57,{size:10,bold:true,color:C.white,align:'center'});txt(s,rel,1070,y+3,111,13,{size:6,bold:true,color,align:'right'});
+   items.forEach((item,i)=>{const x=432+i*184;box(s,x,y+13,163,46,item.fill||C.white,item.color||color,1.2,7);txt(s,item.name,x+6,y+15,151,42,{size:item.size||9,bold:true,color:item.color||color,align:'center'});if(i<items.length-1)line(s,x+163,y+36,x+180,y+36,color,1.7);});
+ };
+ lane(419,'写入治理',C.orange,[{name:'Graph Semantics 校验'},{name:'写入去重门禁'},{name:'无损写入门禁'},{name:'Semantic Projection'}],'Triggering');
+ // The validation→dedup→lossless→projection chain is Triggering in the canonical view.
+ box(s,317,501,875,72,C.white,'#D6DEEB',0.8,8);box(s,317,501,102,72,C.teal,'none',0,8);txt(s,'语义检索',326,508,84,57,{size:10,bold:true,color:C.white,align:'center'});txt(s,'Triggering',1070,504,111,13,{size:6,bold:true,color:C.teal,align:'right'});
+ box(s,431,507,156,24,'#F1F8F6',C.teal,1,5);txt(s,'Semantic Projection',436,509,146,20,{size:7,bold:true,color:C.teal,align:'center'});
+ box(s,431,541,156,24,'#F1F8F6',C.teal,1,5);txt(s,'Embedding Provider',436,543,146,20,{size:7,bold:true,color:C.teal,align:'center'});
+ box(s,619,514,160,46,C.white,C.teal,1.2,7);txt(s,'Default Semantic Retrieval',625,516,148,42,{size:8,bold:true,color:C.teal,align:'center'});
+ box(s,803,514,163,46,C.white,C.teal,1.2,7);txt(s,'Hybrid Semantic Retrieval\n默认关闭',809,516,151,42,{size:8,bold:true,color:C.teal,align:'center'});
+ box(s,990,514,163,46,C.white,C.teal,1.2,7);txt(s,'Semantic Rerank\n默认关闭',996,516,151,42,{size:8,bold:true,color:C.teal,align:'center'});
+ line(s,587,519,619,525,C.teal,1.4);line(s,587,553,619,549,C.teal,1.4);txt(s,'Serving',582,531,44,12,{size:6,bold:true,color:C.muted,align:'center'});
+ line(s,779,537,803,537,C.teal,1.7);line(s,966,537,990,537,C.teal,1.7);
+ lane(580,'结构查询',C.blue,[{name:'Neo4j Structural Sync'},{name:'Read-only Cypher Query'},{name:'Community Index · P1 暂缓',size:8}],'Serving');
+ txt(s,'社区索引完成 P0 探针评估；因增量价值不足，P1 暂缓。',738,653,440,13,{size:7,color:C.muted,align:'right'});
 }
 
 // 4 · Three-way Business Process / Application capability / Assessment crosswalk.
@@ -180,6 +199,6 @@ function edge(s,x1,y1,x2,y2,label,type,color=C.blue){line(s,x1,y1,x2,y2,color,1.
 await fs.mkdir(TMP,{recursive:true});await fs.mkdir(path.dirname(OUT),{recursive:true});
 const candidate=path.join(TMP,'candidate.pptx');await (await PresentationFile.exportPptx(ppt)).save(candidate);
 for(let i=0;i<ppt.slides.items.length;i++){const slide=ppt.slides.items[i],n=String(i+1).padStart(2,'0');const png=await ppt.export({slide,format:'png',scale:1});await fs.writeFile(path.join(TMP,`slide-${n}.png`),new Uint8Array(await png.arrayBuffer()));const layout=await slide.export({format:'layout'});await fs.writeFile(path.join(TMP,`slide-${n}.layout.json`),await layout.text());}
-const receipt=path.join(TMP,'validation-v5-final-aligned.json');
+const receipt=path.join(TMP,'validation-v5-clarified-p3-r2.json');
 const result=await finalizePresentation({workspaceDir:ROOT,candidatePath:candidate,finalPath:OUT,pythonExecutable:RUNTIME_PYTHON,integrityValidatorPath:path.join(SKILL_DIR,'container_tools/inspect_presentation_package_integrity.py'),layoutValidatorPath:path.join(SKILL_DIR,'container_tools/inspect_presentation_layout_geometry.py'),layoutArgs:['--validate-bullet-geometry','--validate-heading-fit'],explicitTotalSlideCount:9,fontPolicy:{basis:'design',families:[FONT,'Microsoft YaHei']},verifyArtifactToolImport:true,receiptPath:receipt});
 console.log(JSON.stringify({output:OUT,slides:ppt.slides.items.length,finalized:true,validation:result?.status||result?.ok||'completed'},null,2));

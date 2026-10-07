@@ -125,7 +125,7 @@
       "kicker": "03 · ARCHGRAPH / 两层构建点",
       "type": "archgraphOverlay",
       "title": "ArchGraph 在业务层与应用层中的位置",
-      "subtitle": "Graph MCP 是 Harness 可调用的应用能力；项目本体与图谱承载共享领域语义。",
+      "subtitle": "清楚标出框架边界：Harness 在外按需调用；图谱写入治理、语义检索与结构查询由 ArchGraph 提供。",
       "diagram": "p3-archgraph-overlay",
       "speakerNotes": "业务层构建点：Schema/本体把领域词汇和关系显式化；意图图谱沉淀需求、决策、架构、状态、指标、验收与证据；业务阶段、应用能力和Assessment指标可建立关系。应用层构建点：Graph MCP 提供语义/结构/上下文访问与受护栏写入；去重、无损、墓碑、验收测试与commit/path溯源形成知识治理；联邦中心支持发现、授权、按引用跨图读取。普通 Coding Agent 可以不使用 Graph RAG，Graph 是按需能力与治理方案，不是业务流程的替代品。质量维度 coverage/structure/provenance/freshness/redundancy 是拟议评测剖面，并非均已测。",
       "layers": [

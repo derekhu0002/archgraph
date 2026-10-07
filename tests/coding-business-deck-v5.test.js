@@ -6,7 +6,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
 const ROOT = path.resolve(__dirname, '..');
-const PPTX = path.join(ROOT, 'docs', 'ppt', 'output', 'archgraph-coding-business-deck-v5-final-aligned.pptx');
+const PPTX = path.join(ROOT, 'docs', 'ppt', 'output', 'archgraph-coding-business-deck-v5-clarified-p3-r2.pptx');
 const V4 = path.join(ROOT, 'docs', 'ppt', 'output', 'archgraph-coding-business-deck-v4-final.pptx');
 const PYTHON = 'C:/Users/remoteadmin/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe';
 
@@ -41,7 +41,8 @@ with zipfile.ZipFile(sys.argv[1]) as z:
   const [business, app, graph, metrics, rag, results] = pkg.slides;
   assert.ok(business.includes('Business Layer') && !business.includes('Graph RAG 检索'), 'retrieval implementations belong to the application layer, not the business flow');
   for (const term of ['Application Layer', '普通检索', 'RAG 检索', 'Graph RAG 检索', '通用 Harness 本身不要求部署 RAG']) assert.ok(app.includes(term), `missing app layer option ${term}`);
-  for (const term of ['项目意图图谱', 'Graph MCP Tool Interface', '项目图谱上下文服务', '上下文访问']) assert.ok(graph.includes(term), `Graph architecture is missing ${term}`);
+  for (const term of ['项目意图图谱', 'Graph MCP Tool Interface', '项目图谱上下文服务']) assert.ok(graph.includes(term), `Graph architecture is missing ${term}`);
+  for (const term of ['ARCHGRAPH 框架提供', '通用 Coding Agent Harness', '写入治理', '语义检索', '结构查询', '默认关闭', 'P1 暂缓']) assert.ok(graph.includes(term), `page 3 must make ArchGraph's work and status explicit: ${term}`);
   assert.ok(metrics.includes('Assessment') && metrics.includes('会话编排') && metrics.includes('上下文访问'));
   assert.ok(rag.includes('写入') && rag.includes('检索') && rag.includes('查询')); 
   for (const term of ['94.6', '98.7', '10 / 10', '整体 Coding', '方向观察']) assert.ok(results.includes(term), `measurement evidence/caveat missing ${term}`);
