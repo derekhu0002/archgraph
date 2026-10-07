@@ -12174,7 +12174,14 @@
           "type": "Acceptance Test"
         }
       ],
-      "type": "Artifact"
+      "type": "Artifact",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "8059d2d",
+          "description": "Add cross-project workspace write guard (writes pinned to home workspace); argo/scripts/workspace-write-guard.js; argo/scripts/argo-mcp-server.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; argo/.env.example; tests/workspace-write-guard.test.js; tests/acceptance-guardian.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
+        }
+      ]
     }
   ],
   "relationships": [
