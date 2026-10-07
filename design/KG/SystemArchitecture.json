@@ -12161,17 +12161,17 @@
       "description": "联邦式意图图谱架构中的独立模型对象。"
     },
     {
-      "description": "跨项目工作区写入边界（Workspace Write Guard）：保留『按绝对路径 workspaceRoot 跨项目读取对方图谱』的能力，同时把写入钉死在本服务自身的 home 工作区。实现 argo/scripts/workspace-write-guard.js（WRITE_TOOLS 分类 + authorizeWorkspaceWrite），在 argo/scripts/argo-mcp-server.js 的 callTool 单一入口对所有工具做门禁：写工具（initializeWorkspace / runArchitectureTests / applySystemArchitectureMutation / add|update|removeArchitectureElement|Relationship|View）若 workspaceRoot 解析到非 home 工作区则 fail-closed 返回 WORKSPACE_WRITE_DENIED 且不产生任何副作用；读工具（getSystemArchitecture / getIntentElementContext / getArchitectureViewContext / queryNeo4jGraph / memory_search）以及 dryRun/preview 不受限，跨项目读取保持可用。home 工作区 = getWorkspaceRoot()（ARGO_REPO_ROOT / WORKSPACE_FOLDER / MCP roots / 内嵌 / cwd）。默认开启；ARGO_WORKSPACE_WRITE_GUARD=0 可整体关闭（信任的多工作区宿主，全有或全无，不引入按路径白名单）。背景：commit a948515 曾为修复 DSH 多工作区切换而移除 resolveCallWorkspaceRoot 的 ARGO_WORKSPACE_ROOTS 白名单，使 per-call workspaceRoot 对读写均无条件生效，A 项目可改写 B 项目图谱；本次按人类伙伴裁决采用『严格：写仅限 home 工作区』。验收：tests/workspace-write-guard.test.js（4 用例：写工具分类、仅授权 home、经 MCP 服务跨工作区写入被拒且目标零改动、跨工作区读取仍解析）。",
+      "description": "跨项目工作区写入边界（Workspace Write Guard）：保留『按绝对路径 workspaceRoot 跨项目读取对方图谱』的能力，同时把写入限定在【home 工作区 + 宿主指定的可信会话工作区】。实现 argo/scripts/workspace-write-guard.js：WRITE_TOOLS 分类 + authorizeWorkspaceWrite；两条通道严格分离——① workspaceRoot（模型可设，仅用于读；写外部路径一律拒绝）② sessionWorkspaceRoot（宿主 broker 即 DSH workspace bridge 注入的会话工作区，仅当进程以 ARGO_WORKSPACE_ROOT_TRUSTED=1 启动时才被信任；模型无法设置进程环境变量，故不可伪造）。门禁在 argo/scripts/argo-mcp-server.js 的 callTool 单一入口：写工具（initializeWorkspace / runArchitectureTests / applySystemArchitectureMutation / add|update|removeArchitectureElement|Relationship|View）当目标既非 home 也非可信会话工作区时 fail-closed 返回 WORKSPACE_WRITE_DENIED 且无副作用，并在派发前剥离 sessionWorkspaceRoot 使其不进 schema 校验。读工具与 dryRun/preview 不受限。home = getWorkspaceRoot()；ARGO_WORKSPACE_WRITE_GUARD=0 可整体关闭。桥 dsh-argo-workspace 为注入工作区的 argo server 设 ARGO_WORKSPACE_ROOT_TRUSTED=1，并注入 sessionWorkspaceRoot=SessionHeader.cwd（在 {...args} 展开之后覆盖，模型值不能赢），会话 cwd 缺失时删除该字段。背景：commit a948515 为修复 DSH 多工作区切换移除了 resolveCallWorkspaceRoot 的 ARGO_WORKSPACE_ROOTS 白名单，使 per-call workspaceRoot 对读写无条件生效 → A 项目可改写 B 项目图谱；首次修复曾误用『严格 home-only』，经人类伙伴指正（DSH 单实例多工作区：一个 argo server 服务全部工作区、home 为运行时目录，严格规则会拒绝所有 DSH 写入）后改为本可信通道方案。验收 tests/workspace-write-guard.test.js（5 用例：写工具分类、home+可信会话授权矩阵、经 MCP 服务未授权外部写被拒且目标零改动、可信 broker 写会话工作区真实落盘、跨工作区读取仍解析）。",
       "id": "doc-workspace-write-guard-001",
       "name": "跨项目 workspaceRoot 写入边界（写钉住 home 工作区）",
       "parent": "1249",
       "testcases": [
         {
-          "Input": "tests/workspace-write-guard.test.js",
-          "acceptanceCriteria": "tests/workspace-write-guard.test.js",
-          "description": "GIVEN the ARGO MCP server bound to a home workspace and the per-call workspaceRoot override; WHEN a WRITE tool (e.g. addArchitectureElement) targets a foreign workspace; THEN the call fails closed with WORKSPACE_WRITE_DENIED and the foreign graph is byte-for-byte untouched; AND a READ tool targeting the same foreign workspace still resolves it; AND a focused dryRun:true mutation is not treated as a write.",
           "name": "AT-workspace-write-guard-01",
-          "type": "Acceptance Test"
+          "type": "Acceptance Test",
+          "description": "GIVEN the ARGO MCP server and the per-call workspaceRoot/sessionWorkspaceRoot channels; WHEN an untrusted write tool targets a foreign workspace; THEN it fails closed with WORKSPACE_WRITE_DENIED and the foreign graph is byte-for-byte untouched; AND when the process is launched by a trusted broker (ARGO_WORKSPACE_ROOT_TRUSTED=1) a write to the broker-designated sessionWorkspaceRoot really lands; AND a READ tool targeting the foreign workspace still resolves it; AND a focused dryRun:true mutation is not treated as a write.",
+          "Input": "tests/workspace-write-guard.test.js",
+          "acceptanceCriteria": "tests/workspace-write-guard.test.js"
         }
       ],
       "type": "Artifact",

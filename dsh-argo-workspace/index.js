@@ -50,6 +50,14 @@ function normalizeServerSpecs(config) {
     if (spec.injectWorkspaceRoot && topWorkspaces.length > 0) {
       env.ARGO_WORKSPACE_ROOTS = topWorkspaces.join(';')
     }
+    // Assert the broker-controlled workspace channel: the argo server will only
+    // trust the per-call sessionWorkspaceRoot (which this bridge sets from the
+    // durable SessionHeader.cwd, overwriting any model value) when this flag is
+    // present. The model cannot set a server process env var, so the trust is
+    // unforgeable.
+    if (spec.injectWorkspaceRoot) {
+      env.ARGO_WORKSPACE_ROOT_TRUSTED = '1'
+    }
     return { ...spec, env, cwd: spec.cwd ?? (spec.injectWorkspaceRoot ? config.cwd : undefined) }
   }
 
@@ -173,6 +181,13 @@ async function mountServer(ctx, spec, registered) {
             : undefined
           if (typeof sessionCwd === 'string' && sessionCwd !== '') {
             injected.workspaceRoot = sessionCwd
+            // Broker-only trusted channel: the server allows WRITES to this
+            // workspace (see workspace-write-guard.js). Set AFTER the spread so
+            // a model-supplied value can never win.
+            injected.sessionWorkspaceRoot = sessionCwd
+          } else {
+            // No session workspace: never forward a model-supplied trusted field.
+            delete injected.sessionWorkspaceRoot
           }
         }
         if (exec && exec.signal && exec.signal.aborted) {

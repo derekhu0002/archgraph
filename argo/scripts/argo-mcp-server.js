@@ -22,6 +22,7 @@ const {
 const {
   authorizeWorkspaceWrite,
   isWriteTool,
+  stripTrustedSessionField,
 } = require('./workspace-write-guard.js');
 const {
   getWorkspaceRoot,
@@ -416,9 +417,11 @@ function resolveWorkspaceRoot(args) {
 
 async function callTool(name, args = {}, progressToken = null, dependencies = undefined) {
   // Cross-project WRITE guard (single choke point for every tool): a write tool
-  // may only target this server's HOME workspace. A foreign `workspaceRoot` is
-  // rejected fail-closed before any side effect; READ tools stay ungated so
-  // cross-project reading still works. See workspace-write-guard.js.
+  // may only target this server's HOME workspace, or a host-designated trusted
+  // session workspace when the process was launched by a trusted broker
+  // (ARGO_WORKSPACE_ROOT_TRUSTED=1). A foreign `workspaceRoot` is rejected
+  // fail-closed before any side effect; READ tools stay ungated so cross-project
+  // reading still works. See workspace-write-guard.js.
   if (isWriteTool(name, args)) {
     const decision = authorizeWorkspaceWrite({ tool: name, args, homeRoot: getWorkspaceRoot() });
     if (!decision.allowed) {
@@ -430,10 +433,16 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
           tool: decision.tool,
           homeWorkspaceRoot: decision.homeWorkspaceRoot,
           requestedWorkspaceRoot: decision.requestedWorkspaceRoot,
+          ...(decision.trustedSessionWorkspaceRoot
+            ? { trustedSessionWorkspaceRoot: decision.trustedSessionWorkspaceRoot }
+            : {}),
         },
       });
     }
   }
+  // The broker-only field is not part of any tool's schema: honor it above, then
+  // drop it before dispatch so schema validation never sees it.
+  args = stripTrustedSessionField(args);
   loadRepositoryArgoEnvironment(resolveWorkspaceRoot(args));
   try {
     const crash = require('./graph-rag/mcpCrashDiagnostics.js');

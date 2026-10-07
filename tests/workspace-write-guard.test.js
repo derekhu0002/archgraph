@@ -3,10 +3,10 @@
 // Acceptance tests for the cross-project workspace WRITE guard.
 //
 // The per-call `workspaceRoot` override may READ another local project's graph,
-// but a WRITE tool must only ever target the server's HOME workspace. These are
-// GIVEN-WHEN-THEN functional tests through the real MCP server (external view):
-//   - a foreign-workspace WRITE is denied and the foreign graph is untouched;
-//   - a foreign-workspace READ still resolves (the guard never blocks reads).
+// but a WRITE tool must only target the server's HOME workspace, or a host
+// broker's designated session workspace (sessionWorkspaceRoot, honored only
+// behind the unforgeable ARGO_WORKSPACE_ROOT_TRUSTED spawn flag). These are
+// GIVEN-WHEN-THEN functional tests through the real MCP server (external view).
 
 const fs = require('node:fs');
 const os = require('node:os');
@@ -24,15 +24,24 @@ const {
 const ROOT = path.resolve(__dirname, '..');
 const SERVER = path.join(ROOT, 'argo', 'scripts', 'argo-mcp-server.js');
 const REPO_GRAPH = path.join(ROOT, 'design', 'KG', 'SystemArchitecture.json');
+const DEFAULT_GRAPH = path.join(ROOT, 'argo', 'defaults', 'design', 'KG', 'SystemArchitecture.json');
 const STABLE_ELEMENT = 'overseer-vision-001';
 
 function makeDir(prefix) {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
 }
 
-function seedWorkspace(dir) {
+// Keep the spawned server hermetic: point it at an empty env file so it does not
+// load the deployed ~/.argo/.env (real Neo4j/embedding) and hang on connect.
+function isolatedEnvFile(dir) {
+  const file = path.join(dir, 'isolated.env');
+  if (!fs.existsSync(file)) fs.writeFileSync(file, '');
+  return file;
+}
+
+function seedGraph(dir, sourceGraph) {
   fs.mkdirSync(path.join(dir, 'design', 'KG'), { recursive: true });
-  fs.copyFileSync(REPO_GRAPH, path.join(dir, 'design', 'KG', 'SystemArchitecture.json'));
+  fs.copyFileSync(sourceGraph, path.join(dir, 'design', 'KG', 'SystemArchitecture.json'));
 }
 
 // Run one tool call through the real stdio MCP server and return its decoded payload.
@@ -82,40 +91,55 @@ test('AT workspace-write-guard: classifies write tools (dry-run is not a write)'
   assert.equal(isWriteTool('previewSystemArchitectureMutation', {}), false);
 });
 
-test('AT workspace-write-guard: authorizes only the home workspace', () => {
-  // GIVEN a server bound to /home
+test('AT workspace-write-guard: home is always writable; a foreign workspace only via the trusted host channel', () => {
   const home = path.resolve('/tmp/ws-home');
-  // WHEN a write targets home (explicitly or implicitly)
+  const foreign = '/tmp/ws-foreign';
+  // GIVEN a plain (untrusted) server: home allowed, foreign denied, sessionWorkspaceRoot ignored
   assert.equal(authorizeWorkspaceWrite({ tool: 'addArchitectureElement', args: {}, homeRoot: home }).allowed, true);
   assert.equal(authorizeWorkspaceWrite({ tool: 'addArchitectureElement', args: { workspaceRoot: home }, homeRoot: home }).allowed, true);
-  // THEN a foreign target is denied fail-closed
-  const foreign = authorizeWorkspaceWrite({ tool: 'addArchitectureElement', args: { workspaceRoot: '/tmp/ws-foreign' }, homeRoot: home });
-  assert.equal(foreign.allowed, false);
-  assert.equal(foreign.category, 'WORKSPACE_WRITE_DENIED');
-  // AND an explicit opt-out disables the guard (trusted multi-workspace host)
+  const plain = authorizeWorkspaceWrite({ tool: 'addArchitectureElement', args: { workspaceRoot: foreign }, homeRoot: home });
+  assert.equal(plain.allowed, false);
+  assert.equal(plain.category, 'WORKSPACE_WRITE_DENIED');
+  // a model-supplied sessionWorkspaceRoot on an unflagged server is NOT trusted
   assert.equal(
-    authorizeWorkspaceWrite({ tool: 'addArchitectureElement', args: { workspaceRoot: '/tmp/ws-foreign' }, homeRoot: home, env: { ARGO_WORKSPACE_WRITE_GUARD: '0' } }).allowed,
+    authorizeWorkspaceWrite({ tool: 'addArchitectureElement', args: { workspaceRoot: foreign, sessionWorkspaceRoot: foreign }, homeRoot: home, env: {} }).allowed,
+    false,
+  );
+  // AND behind the spawn trust flag, the broker-designated session workspace is writable
+  const trustedEnv = { ARGO_WORKSPACE_ROOT_TRUSTED: '1' };
+  assert.equal(
+    authorizeWorkspaceWrite({ tool: 'addArchitectureElement', args: { workspaceRoot: foreign, sessionWorkspaceRoot: foreign }, homeRoot: home, env: trustedEnv }).allowed,
+    true,
+  );
+  // but a foreign path that is NOT the designated session workspace is still denied
+  assert.equal(
+    authorizeWorkspaceWrite({ tool: 'addArchitectureElement', args: { workspaceRoot: '/tmp/ws-other', sessionWorkspaceRoot: foreign }, homeRoot: home, env: trustedEnv }).allowed,
+    false,
+  );
+  // AND the explicit global opt-out disables the guard entirely
+  assert.equal(
+    authorizeWorkspaceWrite({ tool: 'addArchitectureElement', args: { workspaceRoot: foreign }, homeRoot: home, env: { ARGO_WORKSPACE_WRITE_GUARD: '0' } }).allowed,
     true,
   );
 });
 
-test('AT workspace-write-guard: a write through the MCP server to a foreign workspace is denied and the target is untouched', () => {
+test('AT workspace-write-guard: an untrusted write to a foreign workspace is denied and the target is untouched', () => {
   const tempRoot = makeDir('argo-write-guard-');
   try {
     const home = path.join(tempRoot, 'home');
     const foreign = path.join(tempRoot, 'foreign');
     fs.mkdirSync(home, { recursive: true });
-    seedWorkspace(foreign);
+    seedGraph(foreign, REPO_GRAPH);
     const foreignGraph = path.join(foreign, 'design', 'KG', 'SystemArchitecture.json');
     const before = fs.readFileSync(foreignGraph);
     const rootViewId = JSON.parse(before.toString('utf8')).views[0].view_id;
 
-    // GIVEN an MCP server whose HOME workspace is `home`, and a real foreign graph
+    // GIVEN an MCP server whose HOME workspace is `home` (NOT a trusted broker)
     // WHEN addArchitectureElement is asked to write into the foreign workspace
     const payload = callToolOnce(
       'addArchitectureElement',
       { element: { type: 'Requirement', name: 'Rogue Cross-Project Write' }, view_ids: [rootViewId], workspaceRoot: foreign },
-      { ARGO_REPO_ROOT: home },
+      { ARGO_REPO_ROOT: home, ARGO_ENV_FILE: isolatedEnvFile(tempRoot) },
     );
 
     // THEN the write is refused with a clear category ...
@@ -129,20 +153,53 @@ test('AT workspace-write-guard: a write through the MCP server to a foreign work
   }
 });
 
+test('AT workspace-write-guard: a trusted broker may write the session workspace it designates', () => {
+  const tempRoot = makeDir('argo-write-guard-trusted-');
+  try {
+    const home = path.join(tempRoot, 'home');
+    const session = path.join(tempRoot, 'session-ws');
+    fs.mkdirSync(home, { recursive: true });
+    seedGraph(session, DEFAULT_GRAPH);
+    const sessionGraph = path.join(session, 'design', 'KG', 'SystemArchitecture.json');
+    const rootViewId = JSON.parse(fs.readFileSync(sessionGraph, 'utf8')).views[0].view_id;
+
+    // GIVEN an argo server launched by a trusted broker (ARGO_WORKSPACE_ROOT_TRUSTED=1)
+    // WHEN a write targets the broker-designated session workspace
+    const payload = callToolOnce(
+      'addArchitectureElement',
+      {
+        element: { type: 'Business Actor', name: 'Trusted Host Write Sentinel' },
+        view_ids: [rootViewId],
+        workspaceRoot: session,
+        sessionWorkspaceRoot: session,
+      },
+      { ARGO_REPO_ROOT: home, ARGO_ENV_FILE: isolatedEnvFile(tempRoot), ARGO_WORKSPACE_ROOT_TRUSTED: '1' },
+    );
+
+    // THEN the guard does not deny it ...
+    assert.notEqual(payload.error && payload.error.category, 'WORKSPACE_WRITE_DENIED');
+    // AND the session workspace's graph really receives the new element
+    const after = fs.readFileSync(sessionGraph, 'utf8');
+    assert.ok(after.includes('Trusted Host Write Sentinel'), 'session workspace graph must contain the written element');
+  } finally {
+    try { fs.rmSync(tempRoot, { recursive: true, force: true }); } catch { /* best-effort */ }
+  }
+});
+
 test('AT workspace-write-guard: a READ through the MCP server still resolves a foreign workspace', () => {
   const tempRoot = makeDir('argo-write-guard-read-');
   try {
     const home = path.join(tempRoot, 'home');
     const foreign = path.join(tempRoot, 'foreign');
     fs.mkdirSync(home, { recursive: true });
-    seedWorkspace(foreign);
+    seedGraph(foreign, REPO_GRAPH);
 
     // GIVEN an MCP server whose HOME workspace is `home`
     // WHEN a READ tool targets the foreign workspace
     const payload = callToolOnce(
       'getIntentElementContext',
       { elementId: STABLE_ELEMENT, workspaceRoot: foreign },
-      { ARGO_REPO_ROOT: home },
+      { ARGO_REPO_ROOT: home, ARGO_ENV_FILE: isolatedEnvFile(tempRoot) },
     );
 
     // THEN the guard does not block it: the read resolves the foreign graph
