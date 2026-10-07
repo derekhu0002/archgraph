@@ -4630,6 +4630,11 @@
           "name": "commit",
           "value": "03ff6cd",
           "description": "T1 摘要幂等覆盖写（本会话），并登记图谱 commits"
+        },
+        {
+          "name": "commit",
+          "value": "bff052e",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（T1 摘要：2026-10-07 Codex rule/skills/MCP 部署核验与三 skill 范围结论）"
         }
       ],
       "testcases": [
