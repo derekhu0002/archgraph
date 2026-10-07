@@ -4322,7 +4322,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话核验 · 2026-10-07）。\n【身份】Business Actor 项目总管（project-overseer-001；人类未指定角色时默认由本角色对话与决策）。\n【本轮目标】检查 ArchGraph 在当前 Codex 桌面/CLI 的规则、skills 与 MCP 部署。\n【核验结果】Codex CLI 0.162.0-alpha.2；全局 ~/.codex/AGENTS.md 与仓库 argo/rules/archgraph.instructions.md 正文一致（UTF-8 无 BOM，含 Wakeup/Core/Federation 规则）。Codex 当前部署并可识别 argo-init、ea-human-reconcile；两份正文与仓库一致，frontmatter 仅 name+description、无 BOM。仓库第三个 skill agent-search-diagnosis 未部署 Codex；不是拷贝故障：安装器明确限定 OpenCode-only，因为数据源依赖 opencode export/session JSON。若 Codex 也需第三个 skill，须先解决 Codex 会话导出兼容并扩展部署/验收；当前 AT-codex-02 与 tests/argo-codex.test.js 只覆盖两个 skills（5/5 pass），绿色不能证明第三个已交付。\n【MCP】Codex config 注册本地 argo stdio 与远程 graph-mcp，均 enabled；argo 未固定 ARGO_REPO_ROOT。当前调用证实 ARGO MCP 指向本仓库 design/KG/SystemArchitecture.json；workspace schema bundle 校验 passed；结构查询、语义检索、memory_search 均成功。远程 graph-mcp registry_discover 成功，返回 23 个成员含 ArchGraph；graph_list 返回 0 个共享图资产（不同于成员发现）。~/.argo/scripts 与仓库 argo/scripts 的 56 个文件逐一 SHA-256 一致。未改安装配置。\n【未完成/下一步】与人类确认是否要将 agent-search-diagnosis 改造为 Codex 可用（需 Codex 兼容会话导出与验收）；Codex 原生插件包仍未做；此前 Codex 部署为未发布 pre-release，正式 registry 发布仍待后续安排。\n【教训】检查技能部署要按宿主能力区分；仅核对现有宿主测试通过会漏掉没有纳入测试矩阵的第三个 skill。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10，分支 develop-separate-schema）。本会话主题：把 ArchGraph 适配到 OpenAI Codex 宿主，并完成 beta 发布与本地官方部署。\n【身份】Business Actor 项目总管（project-overseer-001；人类未指定角色时默认由本角色对话与决策）。\n【目标】Codex 适配：规则→~/.codex/AGENTS.md、技能→~/.codex/skills、MCP→~/.codex/config.toml；跟随会话工作区（不钉 ARGO_REPO_ROOT）。\n【侦察（实测）】① 规则：Codex 逐字注入仓库与全局 ~/.codex/AGENTS.md → 启动门生效。② 技能：~/.codex/skills/<name>/SKILL.md（仅 name+description，必须无 BOM）。③ MCP：config.toml [mcp_servers.<name>] TOML 表；codex mcp add/list/remove。④ 工作区：stdio MCP 以会话工作区为 cwd、无 ARGO_* → 不钉 pin。⑤ 原生多智能体但无人格文件 → Agents 列 —，Wakeup ✓。\n【进展】① install-argo.ps1 新增 Codex 段 + Write-CodexMcpConfig/ConvertTo-TomlString + 参数 -CodexHome/-CodexRepoRoot/-SkipCodex。② tests/argo-codex.test.js（AT-codex-01..07）；覆盖守护条目；README/index Harness 表加 Codex 行。③ 图谱 view codex-adaptation（parent=1249）+ WP codex-harness-adaptation-001 + AT；T2 里程碑卡 overseer-codex-adaptation-001（overseer-product-001）；修复 view 429 期望 + MQ-17（31→33）。\n【发布与安装（2026-10-07）】chore(release) 1baea0f：package.json → 0.27.0-beta.15；npm publish --tag latest（dev 包单一 latest，未用 --tag beta）；传播约 80s；npm i -g archgraph-argo-beta → 0.27.0-beta.15；argo-deploy -SkipEnv 官方全量部署完成（源为 registry 制品）。Codex 落位：~/.codex/AGENTS.md + skills + config.toml（[mcp_servers.argo] node ~/.argo/scripts/argo-mcp-server.js；[mcp_servers.graph-mcp] url；无 ARGO_REPO_ROOT pin）；codex mcp list 两项 enabled。OpenClaw 因从包目录部署未钉 ARGO_REPO_ROOT（既有行为，非回归）。人类已在 Codex 实测通过。\n【回归】npm test 706/706 pass / 0 fail / 0 skip；validateSystemArchitecture passed。\n【决策/教训】① 部署规则要求 registry-only，人类先要求本地 pre-release 验证再正式发布——两阶段均按人类指示执行；正式发布已走 registry 制品。② 坑：安装器测试会写真实 ~/.codex → 须加 -SkipCodex 隔离。③ 视图 15 元素硬上限。④ 技能文件必须无 BOM。\n【未提交/下一步】人类重启 Codex 后，进行总体验收（待办）。P2：Codex 原生插件包（.codex-plugin+marketplace）未做。Agents 列仍 —。\n【commits】7eab948（实现）+ 5e6a181/1303d34（图谱/记忆）+ 1baea0f（release beta.15）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -11666,6 +11666,11 @@
           "name": "deploy",
           "value": "local-pre-release-2026-10-07",
           "description": "本地 pre-release 部署（未发布 npm）：按人类要求先不发布，采用仓库直发（非官方 registry 流程，已向人类说明规则冲突）。仅对真实 ~/.codex 与 ~/.argo 生效，其余宿主重定向到 temp 避免扰动。已写入 ~/.codex/AGENTS.md、~/.codex/skills/{argo-init,ea-human-reconcile}、~/.codex/config.toml [mcp_servers.argo](node ~/.argo/scripts/argo-mcp-server.js) + [mcp_servers.graph-mcp](url)；未钉 ARGO_REPO_ROOT（跟随工作区）。`codex mcp list` 确认两项 enabled。"
+        },
+        {
+          "name": "commit",
+          "value": "1baea0f",
+          "description": "chore(release): archgraph-argo-beta@0.27.0-beta.15（npm publish --tag latest 单一 dev latest）；随后 npm i -g archgraph-argo-beta + argo-deploy -SkipEnv 本地官方部署完成"
         }
       ]
     },
