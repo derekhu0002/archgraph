@@ -4322,7 +4322,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（Codex beta.15 重启后验收 · 2026-10-07）。\n【身份】Business Actor 项目总管（project-overseer-001；人类未指定角色时默认由本角色对话与决策）。\n【目标】验证正式发布安装 archgraph-argo-beta@0.27.0-beta.15 后，Codex 重启运行状态及规则、两个 skills、MCP。\n【结果】①全局 npm 与 registry 均为 archgraph-argo-beta@0.27.0-beta.15；Codex CLI 0.162.0-alpha.2。②~/.codex/AGENTS.md 与 beta.15 包规则正文一致，UTF-8 无 BOM，包含 Wakeup/Core/Federation。③Codex 按要求只部署两个 skills：argo-init、ea-human-reconcile；两者正文匹配 beta.15，frontmatter 仅 name+description，无 BOM，当前用户 skill 根仅这两个。④Codex MCP 注册 argo（stdio）与 graph-mcp（远程 URL），均 enabled，未配置 ARGO_REPO_ROOT。部署版 ~/.argo/scripts 与 npm beta.15 包 56/56 文件一致；安装器 hash 与 beta.15 包一致。⑤重启后 ARGO MCP 的 schema、Actor 列表、结构查询（364 elements）、语义 getSystemArchitecture、memory_search 均成功，graphKey/path 指向本仓库 design/KG/SystemArchitecture.json，schema bundle validation passed。⑥graph-mcp registry_discover 成功（23 members，含 ArchGraph）；graph_list 可达但返回 0 个共享资产，代表资产列表为空而非 MCP 无响应。⑦tests/argo-codex.test.js 5/5 pass / 0 fail / 0 skip。\n【结论】beta.15 的 Codex rule + 两 skills + MCP 主链路运行正常；不改安装配置。Graph 共享资产列表仍为空，若预期展示社区资产则另查资产发布状态。\n【剩余事项】Codex 原生插件包（.codex-plugin + marketplace）未做；Harness Agents 列仍 —。\n【教训】发布验证要对比 registry 包、全局 npm、宿主落盘副本和重启后实际工具调用；配置 enabled 单独不足以证明 MCP 可运行。",
+      "description": "项目总管工作记忆摘要（Coding 业务价值汇报 PPT 复审 · 2026-10-07）。\n【身份】Business Actor 项目总管 project-overseer-001。\n【目标】审视已制作的 Coding 业务价值汇报 PPT，给出基于实际页面的反馈。\n【结果】检查 docs/ppt/archgraph-coding-business-deck.pptx、content-plan.json 与 9 页 SVG/PNG：整体视觉清楚、留白充分，叙事覆盖 Coding Agent 状态机、业界证据、指标、Graph MCP 能力和联邦图谱。发现 P1 AwaitingResult 与 AwaitingUser 都标号 8；Stopped 被标作“成功观测点”易混淆停止与成功；P6 是 Graph RAG 检索生命周期，和 Coding Agent 主流程需明确区分；P7 内部 A/B 指标缺样本量、对照条件和口径；P7-P8 的框架能力展示不等同于 coding 闭环成效。图谱存量交付物记录为 5 页，与当前 PPTX/content-plan 实际 9 页不一致，需在交付正式确认后同步登记。\n【决策】本轮只提供审阅意见，不改 PPT 内容。\n【待办】若继续修改，优先修 P1 编号/状态语义；给指标补 N、基线和边界；在主线标清 Agent 回合与检索基础设施的关系；正式确认 9 页版后更新图谱登记。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4345,7 +4345,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-10-07",
-          "description": "正式 beta.15 安装后 Codex 重启验收完成；规则、两个 skills、ARGO 与 graph-mcp 已核验"
+          "description": "Coding 业务价值汇报 PPT 复审完成"
         },
         {
           "name": "commit",
