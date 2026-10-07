@@ -4322,7 +4322,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-07，分支 develop-separate-schema）。\n【身份】Business Actor 项目总管 project-overseer-001。\n【目标与结果】按人类伙伴确认的方向重做 Coding Agent 汇报PPT：维持9页主线，重设各页版式与可编辑架构图。交付 docs/ppt/output/archgraph-coding-business-deck-v2-final4.pptx；可复现源 docs/ppt/build-coding-business-deck-v2.mjs + docs/ppt/content-plan-v2.json；旧5页版保留。\n【决策】采用技术编辑风与多种页面构图；图示用原生PowerPoint形状。修正等待工具/等待用户状态区分及Stopped终态语义；说明Graph RAG不是整个Coding Agent工作回合；不同研究来源分口径展示；10题A/B声明OFF基线受grep失败污染，仅作试跑观察。来源在演讲者备注。\n【验证】PPTX结构、字体和几何校验通过；新GWT测试检查实际OOXML、9页和可编辑形状；npm test 707/707通过、0失败/跳过；validateSystemArchitecture通过。代码/产物提交 11c7cbf，图谱已登记 deliverable 与AT。\n【复用教训】绘制反向线段时避免负宽/翻转带来的PPT渲染伪影；图表/列表内容应在逐页预览中检查，不能只看缩略图。\n【待办】该PPT交付无阻塞事项。此前OpenClaw的MCP工作区跟随差异按人类决议暂不处理；需时从T2卡恢复。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-07，分支 develop-separate-schema）。\n【目标与交付】按伙伴修订的主线重做 Coding Agent 汇报PPT v3：docs/ppt/output/archgraph-coding-business-deck-v3-final.pptx；生成源 docs/ppt/build-coding-business-deck-v3.mjs + docs/ppt/content-plan-v3.json；提交 7106e10。\n【叙事决策】通用业务价值流程 → 通用 Coding Agent 应用架构 → ArchGraph 特有机制 → 流程/能力/指标映射 → Graph RAG 通用流程 → 测评与差距 → 联邦图谱；20 指标与业界证据放附录。已澄清“知识对”是阶段/能力/指标的图谱映射；“通用科研型应用框架”指通用 Coding Agent 框架。使用 Acme + UML 2 State Machine schema 真实名称；无证据的“99%代码由Agent重写”不作为事实。\n【设计与证据】各页采用原生可编辑架构图/流程卡片/指标表，文字压缩为辅助。Graph RAG 与 Agent 全流程明确区分。行业研究分口径；内部小样本与外部基准不混比。首次渲染发现第5页越界并已修正，逐页复核。\n【验证】PPTX包/几何最终化通过；AT-coding-business-deck-v3-01通过；npm test 708/708、0失败、0跳过；validateSystemArchitecture通过。图谱交付物挂载v3及AT，保留v1/v2路径。\n【复用教训】使用缩略图与逐页原尺寸预览双重检查；流程卡横向总宽要按可视内容区计算，避免超出画布。当前交付无未决阻塞。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4345,7 +4345,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-10-07",
-          "description": "Coding业务汇报PPT v2完成与验证"
+          "description": "Coding Agent 汇报PPT v3完成与全量验收"
         },
         {
           "name": "commit",
@@ -4645,6 +4645,11 @@
           "name": "commit",
           "value": "fe7f2bc",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-10-07 Coding 业务价值汇报 PPT 复审工作记忆摘要）"
+        },
+        {
+          "name": "commit",
+          "value": "7106e10",
+          "description": "docs/ppt/output/archgraph-coding-business-deck-v3-final.pptx; docs/ppt/build-coding-business-deck-v3.mjs; docs/ppt/content-plan-v3.json; tests/coding-business-deck-v3.test.js; tests/acceptance-guardian.test.js"
         }
       ],
       "testcases": [
@@ -11470,11 +11475,28 @@
           "name": "commit",
           "value": "11c7cbf",
           "description": "重设计9页Coding业务价值汇报PPTX v2，增加可编辑原生图示、来源备注与外部验收测试。"
+        },
+        {
+          "name": "ppt-v3",
+          "value": "docs/ppt/output/archgraph-coding-business-deck-v3-final.pptx"
+        },
+        {
+          "name": "plan-v3",
+          "value": "docs/ppt/content-plan-v3.json"
+        },
+        {
+          "name": "generator-v3",
+          "value": "docs/ppt/build-coding-business-deck-v3.mjs"
+        },
+        {
+          "name": "commit",
+          "value": "7106e10",
+          "description": "docs/ppt/content-plan-v3.json; docs/ppt/build-coding-business-deck-v3.mjs; docs/ppt/output/archgraph-coding-business-deck-v3-final.pptx; tests/coding-business-deck-v3.test.js; tests/acceptance-guardian.test.js（v3叙事重构、PPTX可编辑原生架构图与外部验收）"
         }
       ],
-      "description": "9页16:9可编辑PPTX v2：docs/ppt/output/archgraph-coding-business-deck-v2-final4.pptx。基于可复现生成器 docs/ppt/build-coding-business-deck-v2.mjs 与内容计划 docs/ppt/content-plan-v2.json；页面图示使用原生PowerPoint形状，关键口径和来源写入演讲者备注。保留原5页版本 docs/ppt/archgraph-coding-business-deck.pptx 供历史追溯。",
+      "description": "9页16:9可编辑PPTX v3：先呈现跨业务通用价值流程与通用Coding Agent应用架构，再叠加ArchGraph能力、指标映射、测评差距、Graph RAG与联邦图谱。生成源 docs/ppt/build-coding-business-deck-v3.mjs + docs/ppt/content-plan-v3.json；原生PowerPoint架构图与演讲者备注。历史版本继续保留：v2 docs/ppt/output/archgraph-coding-business-deck-v2-final4.pptx；生成器 docs/ppt/build-coding-business-deck-v2.mjs；计划 docs/ppt/content-plan-v2.json；v1 docs/ppt/archgraph-coding-business-deck.pptx。",
       "id": "coding-business-deck-pptx-001",
-      "name": "交付物：Coding 业务价值汇报 PPTX（9 页 16:9，v2）",
+      "name": "交付物：Coding Agent 通用流程、ArchGraph 框架与测评 PPTX（9页）",
       "testcases": [
         {
           "name": "AT-coding-business-deck-v2-01",
@@ -11482,6 +11504,13 @@
           "Input": "tests/coding-business-deck-v2.test.js",
           "description": "GIVEN 最新9页PPTX交付文件；WHEN 打开其OOXML包并读取实际幻灯片；THEN 包含9页、大量原生可编辑形状、Coding Agent关键状态、Graph RAG范围说明、10题试跑基线限制和20项指标附录。",
           "acceptanceCriteria": "tests/coding-business-deck-v2.test.js"
+        },
+        {
+          "name": "AT-coding-business-deck-v3-01",
+          "type": "Acceptance Test",
+          "Input": "tests/coding-business-deck-v3.test.js",
+          "description": "GIVEN 最终9页PPTX；WHEN 打开实际OOXML并检查页序、可编辑图示、限定口径的证据与评测边界；THEN 通用业务价值流程→通用应用框架→ArchGraph→指标→Graph RAG→结果→联邦→附录顺序正确，关键内容完整且无不受支持的术语/数字。",
+          "acceptanceCriteria": "tests/coding-business-deck-v3.test.js"
         }
       ],
       "type": "Deliverable"
@@ -11609,6 +11638,15 @@
         {
           "name": "v2-completion",
           "value": "2026-10-07 完成9页Coding业务汇报PPT v2，保留原5页v1。技术编辑风格、多种版式、全部原生可编辑图示；修正AwaitingResult/AwaitingUser与Stopped语义，区分Graph RAG支撑流程，行业研究分口径展示，10题A/B标注OFF组grep失败污染基线。新增独立内容计划、Artifact Tool生成器、打开OOXML的GWT验收并挂入acceptance guardian和交付物节点。关键选择：新增v2文件而不覆盖v1；透明披露证据限制；图示优先用可编辑PowerPoint对象。验收：PPTX最终校验通过；npm test 707/707、0失败、0跳过；validateSystemArchitecture通过。待办：无此交付阻塞；OpenClaw工作区跟随问题仍按旧决议搁置。"
+        },
+        {
+          "name": "v3-completion",
+          "value": "2026-10-07 完成并提交 Coding Agent 汇报PPT v3（7106e10）。9页主线：通用业务价值流程 → 通用Coding Agent应用架构 → ArchGraph能力 → 指标映射 → Graph RAG 通用流程 → 测评差距 → 联邦图谱 → 20指标明细附录 → 业界证据附录。澄清：知识对=阶段/能力/指标映射；通用科研型应用框架=通用Coding Agent应用框架。使用Acme基座真名，未将无证据的99%重写说法当作事实。Graph RAG页首次预览发现右侧越界，缩小卡片后逐页复核。验收：PPTX最终包/几何校验通过；AT v3 通过；npm test 708/708、0失败/0跳过；validateSystemArchitecture通过。保留v1/v2历史交付。"
+        },
+        {
+          "name": "commit",
+          "value": "7106e10",
+          "description": "docs/ppt/content-plan-v3.json; docs/ppt/build-coding-business-deck-v3.mjs; docs/ppt/output/archgraph-coding-business-deck-v3-final.pptx; tests/coding-business-deck-v3.test.js; tests/acceptance-guardian.test.js（Coding业务汇报PPT v3交付）"
         }
       ],
       "description": "里程碑（2026-10，项目总管，分支 develop-separate-schema）：按人类伙伴给定的 5 页大纲交付 Coding 业务价值汇报 PPT，并顺带修复两个因图谱长大而失效的旧验收/基准。\n【交付】docs/ppt/content-plan.json（内容单一事实源）+ assets/p1..p5 SVG(1280x720)/PNG(1600x900) + archgraph-coding-business-deck.pptx（5 页 16:9，整页图底 + 共 682 个原生可编辑文本框）+ preview.html。生成链：scripts/gen-coding-deck.js → scripts/rasterize-coding-deck.js → scripts/build-coding-deck-pptx.py（npm run gen:deck）。验收 tests/coding-business-deck.test.js（AT-coding-deck-01..09，9/9）。图谱：视图 comm-2026-10-view-001（沟通材料 2026-10）+ WP wp-coding-business-deck-001（含 9 条 AT）+ 5 个页面内容元素 + Deliverable coding-business-deck-pptx-001。\n【关键决策】(1) 内容单一事实源放 content-plan.json，SVG/PNG/PPTX/预览与验收全部由它派生 —— 避免图文不一致（AT-04 直接拿 20 个指标的 measurement-status 与图谱逐行对挖）。(2) PPTX = 整页 PNG 底图 + 从源 SVG 的 text 节点重建的原生文本框（文字可选/可编辑/可搜索，AT-08 验证），而 SVG 保留为可改源。(3) 五页排版严格按人类要求：P1 左 3/4 状态机 + 右 16 标号简释 + 底部指标锚点；P4 左 1/2 通用流程 + 右上 Graph MCP + 右下 覆盖/指标映射/度量结果；P5 上整体方案 + 下左三大好处 + 下中组合示意 + 下右图注。\n【证据治理】P2 业界数字逐条附 URL；委托验证分析师（web_search/web_fetch，未用 BAILIAN）拿回后修正了原拟叙述：① 去掉了无法核实的『UN 框架 99% 由 Agent 重写』，换成可完整验证的 Bun Zig→Rust（535,496 行/1,448 文件/11 天/~6,700 commits/~$165k）并明确备注官方未提『99%』；② GitClear 改为可核实的『重复块 4 倍 + churn 27%』（删掉未核实的 8 倍）；③ 去掉拿不到一手分数、只能二手转述的榜单一手分数（故不引用 SWE-bench 具体分），改为可核实的 DORA 2025 verification tax、Stack Overflow 46% 不信任、METR RCT 实测慢 19%、Chroma Context Rot、Bun 合入后 19 个回归。页面明写来源口径声明。\n【发现并修复的存量失效（属图谱长大的滞后，不是框架缺陷）】① tests/architecture-view-context.test.js 视图 429 子视图期望停留在 24，上会话新增 UML 2 视角 7 个子视图后应为 31 → 同步；② scripts/memory-eval-run.js MQ-17 同样因子视图数变化而失败（且 dataset 文档还写着 15）→ 同步为 31 并在题集文档里注明『该值需随图增长维护，属题集维护而非记忆退化』；③ tests/ea-web-service-impl.test.js『真实 MCP 写图回滚』变为静默 skip：它把 canonical 图拷到临时工作区但没带 .argo/schema bundle，而图中已有 State/Composite State/Transition 等 bundle 新增类型 → 解析回落到内置默认 bundle、写入被图谱校验以 TYPES 拒收；修复＝临时工作区同时拷入本仓 .argo/schema，并把『失败就 skip』改为断言必须成功（skip 会隐藏失效）。③ 是本次最重要的教训。\n【回归】npm test 699/699 pass、0 fail、0 skip（前：696/2fail/1skip）；validateSystemArchitecture 通过（写图调用均返回 passed）。\n【数字纪律】把 aos-as-memory 的压缩率由旧 94.5% 更新为本次实测 97.1%；P4 度量卡同步（避免文档滞后于实测）。\n【待办】① 人类伙伴审阅版面文字密度（每页信息量偏大）与『Arcanate』术语（本仓实际叫 Acme base = ArchiMate 3.2 + ARGO 扩展，无 Arcanate）；② P3 的 8 个业界基准仍未跑（E1/E2 制度对照）；③ Docker e2e（npm run acceptance）未跑。",
