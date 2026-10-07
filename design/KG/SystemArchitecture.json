@@ -11492,6 +11492,11 @@
           "name": "commit",
           "value": "7106e10",
           "description": "docs/ppt/content-plan-v3.json; docs/ppt/build-coding-business-deck-v3.mjs; docs/ppt/output/archgraph-coding-business-deck-v3-final.pptx; tests/coding-business-deck-v3.test.js; tests/acceptance-guardian.test.js（v3叙事重构、PPTX可编辑原生架构图与外部验收）"
+        },
+        {
+          "name": "commit",
+          "value": "200ef0a",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（注册Coding业务汇报PPT v3交付物、验收用例与里程碑）"
         }
       ],
       "description": "9页16:9可编辑PPTX v3：先呈现跨业务通用价值流程与通用Coding Agent应用架构，再叠加ArchGraph能力、指标映射、测评差距、Graph RAG与联邦图谱。生成源 docs/ppt/build-coding-business-deck-v3.mjs + docs/ppt/content-plan-v3.json；原生PowerPoint架构图与演讲者备注。历史版本继续保留：v2 docs/ppt/output/archgraph-coding-business-deck-v2-final4.pptx；生成器 docs/ppt/build-coding-business-deck-v2.mjs；计划 docs/ppt/content-plan-v2.json；v1 docs/ppt/archgraph-coding-business-deck.pptx。",
@@ -11647,6 +11652,11 @@
           "name": "commit",
           "value": "7106e10",
           "description": "docs/ppt/content-plan-v3.json; docs/ppt/build-coding-business-deck-v3.mjs; docs/ppt/output/archgraph-coding-business-deck-v3-final.pptx; tests/coding-business-deck-v3.test.js; tests/acceptance-guardian.test.js（Coding业务汇报PPT v3交付）"
+        },
+        {
+          "name": "commit",
+          "value": "200ef0a",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（注册Coding业务汇报PPT v3交付物、验收用例与里程碑）"
         }
       ],
       "description": "里程碑（2026-10，项目总管，分支 develop-separate-schema）：按人类伙伴给定的 5 页大纲交付 Coding 业务价值汇报 PPT，并顺带修复两个因图谱长大而失效的旧验收/基准。\n【交付】docs/ppt/content-plan.json（内容单一事实源）+ assets/p1..p5 SVG(1280x720)/PNG(1600x900) + archgraph-coding-business-deck.pptx（5 页 16:9，整页图底 + 共 682 个原生可编辑文本框）+ preview.html。生成链：scripts/gen-coding-deck.js → scripts/rasterize-coding-deck.js → scripts/build-coding-deck-pptx.py（npm run gen:deck）。验收 tests/coding-business-deck.test.js（AT-coding-deck-01..09，9/9）。图谱：视图 comm-2026-10-view-001（沟通材料 2026-10）+ WP wp-coding-business-deck-001（含 9 条 AT）+ 5 个页面内容元素 + Deliverable coding-business-deck-pptx-001。\n【关键决策】(1) 内容单一事实源放 content-plan.json，SVG/PNG/PPTX/预览与验收全部由它派生 —— 避免图文不一致（AT-04 直接拿 20 个指标的 measurement-status 与图谱逐行对挖）。(2) PPTX = 整页 PNG 底图 + 从源 SVG 的 text 节点重建的原生文本框（文字可选/可编辑/可搜索，AT-08 验证），而 SVG 保留为可改源。(3) 五页排版严格按人类要求：P1 左 3/4 状态机 + 右 16 标号简释 + 底部指标锚点；P4 左 1/2 通用流程 + 右上 Graph MCP + 右下 覆盖/指标映射/度量结果；P5 上整体方案 + 下左三大好处 + 下中组合示意 + 下右图注。\n【证据治理】P2 业界数字逐条附 URL；委托验证分析师（web_search/web_fetch，未用 BAILIAN）拿回后修正了原拟叙述：① 去掉了无法核实的『UN 框架 99% 由 Agent 重写』，换成可完整验证的 Bun Zig→Rust（535,496 行/1,448 文件/11 天/~6,700 commits/~$165k）并明确备注官方未提『99%』；② GitClear 改为可核实的『重复块 4 倍 + churn 27%』（删掉未核实的 8 倍）；③ 去掉拿不到一手分数、只能二手转述的榜单一手分数（故不引用 SWE-bench 具体分），改为可核实的 DORA 2025 verification tax、Stack Overflow 46% 不信任、METR RCT 实测慢 19%、Chroma Context Rot、Bun 合入后 19 个回归。页面明写来源口径声明。\n【发现并修复的存量失效（属图谱长大的滞后，不是框架缺陷）】① tests/architecture-view-context.test.js 视图 429 子视图期望停留在 24，上会话新增 UML 2 视角 7 个子视图后应为 31 → 同步；② scripts/memory-eval-run.js MQ-17 同样因子视图数变化而失败（且 dataset 文档还写着 15）→ 同步为 31 并在题集文档里注明『该值需随图增长维护，属题集维护而非记忆退化』；③ tests/ea-web-service-impl.test.js『真实 MCP 写图回滚』变为静默 skip：它把 canonical 图拷到临时工作区但没带 .argo/schema bundle，而图中已有 State/Composite State/Transition 等 bundle 新增类型 → 解析回落到内置默认 bundle、写入被图谱校验以 TYPES 拒收；修复＝临时工作区同时拷入本仓 .argo/schema，并把『失败就 skip』改为断言必须成功（skip 会隐藏失效）。③ 是本次最重要的教训。\n【回归】npm test 699/699 pass、0 fail、0 skip（前：696/2fail/1skip）；validateSystemArchitecture 通过（写图调用均返回 passed）。\n【数字纪律】把 aos-as-memory 的压缩率由旧 94.5% 更新为本次实测 97.1%；P4 度量卡同步（避免文档滞后于实测）。\n【待办】① 人类伙伴审阅版面文字密度（每页信息量偏大）与『Arcanate』术语（本仓实际叫 Acme base = ArchiMate 3.2 + ARGO 扩展，无 Arcanate）；② P3 的 8 个业界基准仍未跑（E1/E2 制度对照）；③ Docker e2e（npm run acceptance）未跑。",
