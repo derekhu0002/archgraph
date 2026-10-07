@@ -4635,6 +4635,11 @@
           "name": "commit",
           "value": "bff052e",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（T1 摘要：2026-10-07 Codex rule/skills/MCP 部署核验与三 skill 范围结论）"
+        },
+        {
+          "name": "commit",
+          "value": "3658f20",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（T1 摘要：archgraph-argo-beta@0.27.0-beta.15 Codex 重启后验收）"
         }
       ],
       "testcases": [
