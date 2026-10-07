@@ -55,6 +55,7 @@ function buildInstallArgs(opts) {
     '-DoubaoWorkspace', opts.doubaoWorkspace,
     '-SkipDsh',
     '-SkipOpenClaw',
+    '-SkipCodex',
     '-SkipDeps',
     '-SkipMcp',
     ...(opts.skipEnv ? ['-SkipEnv'] : []),

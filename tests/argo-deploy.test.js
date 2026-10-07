@@ -48,6 +48,7 @@ function buildInstallArgs(opts) {
     '-OpenClawHome', opts.openClawHome,
     '-OpenClawWorkspace', opts.openClawWorkspace,
     '-SkipOpenClaw',
+    '-SkipCodex',
     '-SkipDeps',
     ...(opts.skipEnv ? ['-SkipEnv'] : []),
   ];

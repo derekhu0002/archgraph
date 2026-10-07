@@ -111,6 +111,10 @@
         {
           "view_id": "comm-2026-10-view-001",
           "view_name": "沟通材料（2026-10）"
+        },
+        {
+          "view_id": "codex-adaptation",
+          "view_name": "Codex Adaptation"
         }
       ]
     },
@@ -11585,6 +11589,64 @@
         }
       ],
       "type": "Business Object"
+    },
+    {
+      "id": "codex-harness-adaptation-001",
+      "type": "Work Package",
+      "name": "增加archgraph对codex的适配",
+      "parent": "1249",
+      "description": "为 ArchGraph 增加对 OpenAI Codex（Codex CLI 0.162 / 桌面版，CODEX_HOME=~/.codex）的适配：install-argo.ps1 新增 Codex 部署段——(1) 将 argo/rules/archgraph.instructions.md 规则以 frontmatter 剥离 + 合并方式写入 ~/.codex/AGENTS.md（Codex 每会话把全局 AGENTS.md 逐字注入，等价于 DSH/OpenCode/OpenClaw 的规则机制，WakeupGuideline 无条件启动门随之生效）；(2) 将 argo-init / ea-human-reconcile 技能以 name+description 归一化（Anthropic Agent Skills 规范、UTF-8 无 BOM）部署到 ~/.codex/skills；(3) 在 ~/.codex/config.toml 以 TOML 表 [mcp_servers.argo]（stdio: node + argo-mcp-server.js）与 [mcp_servers.graph-mcp]（url=streamable http）注册 MCP。实测 Codex 以会话工作区作为 stdio MCP 子进程的 cwd 且不注入 ARGO_* 环境变量，故默认不钉 ARGO_REPO_ROOT（跟随工作区，同 OpenCode/DSH/豆包），-CodexRepoRoot 可选钉定固定工作区。支持 -SkipCodex 开关与 -CodexHome/-CodexRepoRoot 参数。",
+      "testcases": [
+        {
+          "name": "AT-codex-01",
+          "type": "Acceptance Test",
+          "acceptanceCriteria": "tests/argo-codex.test.js",
+          "Input": "tests/argo-codex.test.js",
+          "description": "GIVEN install-argo.ps1 部署 Codex 集成；WHEN 读取 ~/.codex/AGENTS.md；THEN 规则体逐字注入（无 YAML frontmatter、含 <WakeupGuideline>/<CoreRules>/UNCONDITIONAL STARTUP GATE）、非 ASCII（em dash）不损坏（Codex 每会话注入全局 AGENTS.md，故无条件启动门生效）。"
+        },
+        {
+          "name": "AT-codex-02",
+          "type": "Acceptance Test",
+          "acceptanceCriteria": "tests/argo-codex.test.js",
+          "Input": "tests/argo-codex.test.js",
+          "description": "GIVEN Codex 采用 Anthropic Agent Skills 规范（SKILL.md frontmatter 仅 name+description，文件须无 BOM）；WHEN 部署 argo-init / ea-human-reconcile；THEN 落到 ~/.codex/skills/<name>/SKILL.md 且前端保留 name/description、无 UTF-8 BOM。"
+        },
+        {
+          "name": "AT-codex-03",
+          "type": "Acceptance Test",
+          "acceptanceCriteria": "tests/argo-codex.test.js",
+          "Input": "tests/argo-codex.test.js",
+          "description": "GIVEN Codex 以 ~/.codex/config.toml 的 [mcp_servers.<name>] TOML 表注册 MCP；WHEN 部署 Codex MCP；THEN 写入 [mcp_servers.argo]（command=node，args 指向 argo-mcp-server.js）与 [mcp_servers.graph-mcp]（url=https://argo.derekworkspacev5.com/mcp）。"
+        },
+        {
+          "name": "AT-codex-04",
+          "type": "Acceptance Test",
+          "acceptanceCriteria": "tests/argo-codex.test.js",
+          "Input": "tests/argo-codex.test.js",
+          "description": "GIVEN Codex 以会话工作区作为 stdio MCP 子进程的 cwd 且不注入 ARGO_* 环境变量（实测）；WHEN 默认部署（无 -CodexRepoRoot）；THEN config.toml 不含 [mcp_servers.argo.env]/ARGO_REPO_ROOT，单一全局 argo server 跟随用户所开工作区。"
+        },
+        {
+          "name": "AT-codex-05",
+          "type": "Acceptance Test",
+          "acceptanceCriteria": "tests/argo-codex.test.js",
+          "Input": "tests/argo-codex.test.js",
+          "description": "GIVEN config.toml 已含陈旧 ArchGraph 托管表及无关配置；WHEN 重新部署；THEN 陈旧 [mcp_servers.argo]/[mcp_servers.argo.env] 被替换且不重复（TOML 重复表会解析失败）、陈旧 pin 被清除，[desktop]/[mcp_servers.node_repl] 等无关内容逐字保留。"
+        },
+        {
+          "name": "AT-codex-06",
+          "type": "Acceptance Test",
+          "acceptanceCriteria": "tests/argo-codex.test.js",
+          "Input": "tests/argo-codex.test.js",
+          "description": "GIVEN 传入 -SkipCodex；WHEN 运行安装器；THEN 完全跳过 Codex 部署——不写 ~/.codex/AGENTS.md、不部署技能、不写 config.toml。"
+        },
+        {
+          "name": "AT-codex-07",
+          "type": "Acceptance Test",
+          "acceptanceCriteria": "tests/argo-codex.test.js",
+          "Input": "tests/argo-codex.test.js",
+          "description": "GIVEN 传入 -CodexRepoRoot <ws>（固定工作区可选路径）；WHEN 部署 Codex MCP；THEN config.toml 写入 [mcp_servers.argo.env] 且 ARGO_REPO_ROOT 钉定到该工作区。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -15293,6 +15355,16 @@
       "parent_element_id": "project-overseer-001",
       "view_id": "overseer-comm-001",
       "view_name": "项目总管记忆·沟通与汇报交付"
+    },
+    {
+      "view_id": "codex-adaptation",
+      "view_name": "Codex Adaptation",
+      "parent_element_id": "1249",
+      "description": "为 ArchGraph 适配 OpenAI Codex 宿主（Codex CLI / 桌面版，CODEX_HOME=~/.codex）的工作包视图：规则→~/.codex/AGENTS.md、技能→~/.codex/skills、MCP→~/.codex/config.toml（[mcp_servers.argo] stdio + [mcp_servers.graph-mcp] streamable http）。",
+      "included_elements": [
+        "codex-harness-adaptation-001"
+      ],
+      "included_relationships": []
     }
   ]
 }

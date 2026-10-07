@@ -28,6 +28,9 @@ param(
     [string]$DoubaoHome = "$env:USERPROFILE\Doubao",
     [string]$DoubaoWorkspace = "$env:LOCALAPPDATA\Doubao\User Data\Default\.doubao\agent_mode\workspace",
     [switch]$SkipDoubao,
+    [string]$CodexHome = "$env:USERPROFILE\.codex",
+    [string]$CodexRepoRoot = '',
+    [switch]$SkipCodex,
     [string]$McpPath,
     [string]$GraphMcpUrl = 'https://argo.derekworkspacev5.com/mcp'
 )
@@ -596,6 +599,71 @@ function Write-OpenClawMcpConfig {
     [System.IO.File]::WriteAllText($configPath, $json, (New-Object System.Text.UTF8Encoding $false))
 }
 
+function ConvertTo-TomlString {
+    # Encode a value as a TOML basic string (escape backslash + double quote).
+    param([string]$Value)
+    return '"' + ($Value -replace '\\', '\\\\' -replace '"', '\"') + '"'
+}
+
+function Write-CodexMcpConfig {
+    # Register the argo and graph-mcp MCP servers in the Codex config file
+    # (~/.codex/config.toml). Codex stores MCP servers as standard TOML tables
+    # [mcp_servers.<name>] (NOT the JSON/YAML shapes the other hosts use), so
+    # this is a text-level table upsert:
+    #   - the previous managed tables ([mcp_servers.argo], [mcp_servers.argo.env],
+    #     [mcp_servers.graph-mcp]) are removed first, so a re-deploy replaces
+    #     rather than duplicates them (duplicate TOML tables are a parse error);
+    #   - every unrelated config.toml key (the desktop app's own settings, other
+    #     MCP servers, plugins, marketplaces) is preserved verbatim;
+    #   - the file is written without a BOM.
+    #
+    # Workspace: Codex spawns every stdio MCP server with the SESSION workspace
+    # as its process cwd and without ARGO_* env (verified), and argo-paths.js
+    # falls back to process.cwd() when ARGO_REPO_ROOT is unset. So, like
+    # OpenCode / DeepSeek Harness, the single global argo server FOLLOWS whichever
+    # workspace the user opened in Codex and ARGO_REPO_ROOT is NOT pinned by
+    # default. Pass -RepoRoot to pin a fixed workspace instead (opt-in).
+    param(
+        [string]$ConfigPath,
+        [string]$ArgoServer,
+        [string]$GraphMcpUrl,
+        [string]$RepoRoot
+    )
+    $targetHeaders = @('[mcp_servers.argo]', '[mcp_servers.argo.env]', '[mcp_servers.graph-mcp]')
+    $existing = if (Test-Path $ConfigPath) { [System.IO.File]::ReadAllText($ConfigPath) } else { '' }
+    $lines = if ($existing -eq '') { @() } else { $existing -split "\r?\n" }
+
+    $kept = New-Object System.Collections.Generic.List[string]
+    $i = 0
+    while ($i -lt $lines.Count) {
+        $trim = $lines[$i].Trim()
+        if ($targetHeaders -contains $trim) {
+            # Skip the header and its body up to the next top-level table header.
+            $i++
+            while ($i -lt $lines.Count -and -not $lines[$i].TrimStart().StartsWith('[')) { $i++ }
+            continue
+        }
+        $kept.Add($lines[$i])
+        $i++
+    }
+    while ($kept.Count -gt 0 -and $kept[$kept.Count - 1].Trim() -eq '') { $kept.RemoveAt($kept.Count - 1) }
+
+    $blocks = New-Object System.Collections.Generic.List[string]
+    $blocks.Add((@('[mcp_servers.argo]', 'command = "node"', "args = [$(ConvertTo-TomlString $ArgoServer)]") -join "`n"))
+    if (-not [string]::IsNullOrWhiteSpace($RepoRoot)) {
+        $blocks.Add(("[mcp_servers.argo.env]`nARGO_REPO_ROOT = $(ConvertTo-TomlString $RepoRoot)"))
+    }
+    $blocks.Add(("[mcp_servers.graph-mcp]`nurl = $(ConvertTo-TomlString $GraphMcpUrl)"))
+
+    $result = ($kept -join "`n")
+    if ($result.Trim() -ne '') { $result = $result.TrimEnd() + "`n`n" }
+    $result += ($blocks -join "`n`n") + "`n"
+
+    New-Item -ItemType Directory -Force -Path (Split-Path $ConfigPath) | Out-Null
+    [System.IO.File]::WriteAllText($ConfigPath, $result, (New-Object System.Text.UTF8Encoding $false))
+    Write-Host "  Codex MCP: argo (stdio) + graph-mcp (streamable http) -> $ConfigPath"
+}
+
 function Write-DshManagedBlock {
     # Text-level upsert of a marker-delimited block into a file (used for the
     # managed rows in ~/.dsh/cordis.patch.yml): replaces the previous managed
@@ -1146,6 +1214,33 @@ if ($SkipMcp) {
         Write-Host "[22/22] argo MCP server -> $(Join-Path $OpenClawHome 'openclaw.json') (OpenClaw mcp.servers.argo, env.ARGO_REPO_ROOT pinned)"
         Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $openClawRepoRoot -ArgoServer $argoServer -GraphMcpServer $openClawGraphMcpServer
     }
+}
+
+if ($SkipCodex) {
+    Write-Host 'Skipped Codex integration (-SkipCodex).'
+} else {
+    $ruleSrcContent = Get-Content $ruleSrc -Raw -Encoding UTF8
+    $codexAgentsPath = Join-Path $CodexHome 'AGENTS.md'
+    $codexSkillsRoot = Join-Path $CodexHome 'skills'
+
+    Write-Host '==> Deploying Codex integration'
+    Write-Host "[Codex 1/3] argo\rules\archgraph.instructions.md -> $codexAgentsPath (Codex global AGENTS.md, frontmatter stripped)"
+    Write-ArchGraphRuleBlock -DestPath $codexAgentsPath -RuleText $ruleSrcContent -Label 'Codex rule'
+
+    Write-Host "[Codex 2/3] argo\skills -> $codexSkillsRoot (Codex user skills: argo-init, ea-human-reconcile)"
+    Copy-DoubaoSkills -Root $codexSkillsRoot -SourceSkillsRoot (Join-Path $argoDir 'skills') -SkillNames @('argo-init', 'ea-human-reconcile') -Label 'Codex user skills'
+    # agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to Codex.
+
+    if ($SkipMcp) {
+        Write-Host '  Skipped Codex MCP registration (-SkipMcp).'
+    } else {
+        $codexConfigPath = Join-Path $CodexHome 'config.toml'
+        Write-Host "[Codex 3/3] argo MCP (stdio) + graph-mcp -> $codexConfigPath (Codex config.toml)"
+        Write-CodexMcpConfig -ConfigPath $codexConfigPath -ArgoServer $argoServer -GraphMcpUrl $GraphMcpUrl -RepoRoot $CodexRepoRoot
+    }
+    Write-Host '  Codex injects the global AGENTS.md into every session, so the wakeup gate is'
+    Write-Host '  active on the next Codex session; skills load on trigger. Restart Codex so it'
+    Write-Host '  picks up config.toml and the new skills.'
 }
 
 $wakeupPluginPath = Join-Path $PluginsRoot 'argo-wakeup.js'
