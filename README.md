@@ -132,7 +132,7 @@ server and pin the workspace per call. Local cross-project read/write status by 
 | OpenCode          |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) |              ✓               |       —         |
 | Codex             |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) |              ✓               |       —         |
 | DeepSeek Harness  |                    ✗                       |             ✗             |              ✓               |       —         |
-| GitHub Copilot    |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) | denied for `SOC-DEMO` (`not_authorized`) | blocked (`tool_not_allowed`) |
+| GitHub Copilot    |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) |              ✓               |       —         |
 | Cursor            |                  待测                      |           待测            |              ✓               |       —         |
 | OpenClaw          |                 不涉及                     |          不涉及           |              ✓               |       —         |
 
@@ -152,10 +152,13 @@ another member's graph through the center, addressed by `projectId`. The center 
 - **Local cross-project write:** a dry-run passed but did not write. A real add-element call against
   SOC-DEMO was rejected with `WORKSPACE_WRITE_DENIED`; a follow-up query confirmed the probe was
   absent and the graph counts were unchanged.
-- **Federated read:** `archgraph` could read its own mirror (`namespaceKey=proj:archgraph`), but
-  that mirror returned **314 / 117 / 70**, differing from the local canonical graph. Reading
-  `SOC-DEMO` as `archgraph` was denied (`not_authorized`); no grant for this pair was present.
-- **Federated write:** rejected with `tool_not_allowed:applySystemArchitectureMutation`.
+- **Federated read:** the `projectId` read route succeeded for the `archgraph` mirror
+  (`namespaceKey=proj:archgraph`), which returned **314 / 117 / 70**, differing from the local
+  canonical graph. A separate read of `SOC-DEMO` as `archgraph` was denied (`not_authorized`)
+  because no grant for that pair was present; federation reads remain subject to per-project grants.
+- **Federated write:** not applicable; the federation channel has no write path. A direct attempt
+  to invoke `applySystemArchitectureMutation` through the read broker was rejected with
+  `tool_not_allowed:applySystemArchitectureMutation`.
 
 These are direct calls from the GitHub Copilot host, not results inferred from the DeepSeek Harness.
 No persistent graph writes were made during this verification.
