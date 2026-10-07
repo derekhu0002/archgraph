@@ -80,6 +80,8 @@ const DELIVERABLE_GUARDS = [
   ['FEATURE: Coding business deck v2 (editable nine-slide deliverable)', 'tests/coding-business-deck-v2.test.js'],
   ['FEATURE: Coding business deck v3 (framework-first nine-slide narrative)', 'tests/coding-business-deck-v3.test.js'],
   ['FEATURE: Coding business deck v4 (business/application layers with optional RAG modes)', 'tests/coding-business-deck-v4.test.js'],
+  ['FEATURE: Coding business deck v5 (canonical business and application model alignment)', 'tests/coding-business-deck-v5.test.js'],
+  ['MODEL: generic Coding Agent business and application architecture', 'tests/coding-agent-architecture-model.test.js'],
 ];
 
 const ALL_GUARDS = [...MCP_INTERFACE_GUARDS.map(([name, file]) => ({ kind: 'mcp-interface', name, file })), ...DELIVERABLE_GUARDS.map(([name, file]) => ({ kind: 'deliverable', name, file }))];

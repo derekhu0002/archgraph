@@ -11,6 +11,14 @@
         {
           "view_id": "169",
           "view_name": "Application Cooperation"
+        },
+        {
+          "view_id": "coding-agent-application-architecture-001",
+          "view_name": "通用 Coding Agent 应用架构与 ArchGraph 集成"
+        },
+        {
+          "view_id": "federated-intent-graph-architecture-001",
+          "view_name": "联邦式意图图谱：Registry–Broker"
         }
       ]
     },
@@ -758,6 +766,12 @@
           "value": "a231760",
           "description": "design/KG/SystemArchitecture.json"
         }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "coding-agent-business-value-flow-001",
+          "view_name": "Coding Agent 通用业务价值流程"
+        }
       ]
     },
     {
@@ -1351,6 +1365,10 @@
         {
           "view_id": "298",
           "view_name": "Harness"
+        },
+        {
+          "view_id": "archgraph-internal-read-write-001",
+          "view_name": "ArchGraph 实现：读写治理与检索"
         }
       ],
       "description": "Harness 分组：承载 ARGO/ArchGraph 框架自身的机制设计视图（view 298 Harness）。视图内以关系显式化两条核心链路：读（默认语义检索 → 语义混合检索/RRF → 语义二阶段重排；由语义投影与可配置嵌入提供者 Serving/供数据；结构投影 Serving 只读 Cypher 查询 → 社区索引）；写（图谱校验 → 写入去重门禁 → 无损写入门禁 → 语义/向量投影生命周期）。2026-09-27 首次为 view 298 补齐 11 条关系（commit 3fb9c4a），此前仅有平铺成员、无连线。",
@@ -11555,6 +11573,13 @@
           "Input": "tests/coding-business-deck-v4.test.js",
           "description": "GIVEN v3历史交付与v4 PPTX；WHEN 检查实际OOXML页序、原生可编辑图形、Business/Application Layer边界、普通检索/RAG/Graph RAG作为应用层可选方式、跨层指标映射、Graph特有能力和带口径的测评结果；THEN 9页故事线正确，业务流程不包含具体检索实现，应用架构明确呈现三种可选知识访问方式，并将流程、能力和指标关联起来。",
           "acceptanceCriteria": "tests/coding-business-deck-v4.test.js"
+        },
+        {
+          "name": "AT-coding-business-deck-v5-01",
+          "type": "Acceptance Test",
+          "Input": "tests/coding-business-deck-v5.test.js",
+          "description": "GIVEN v5 PPTX和历史版本；WHEN 检查页序、可编辑图示、分层、Graph MCP位置、检索流程及测评口径；THEN 叙事完整且与模型对齐，结论保留证据边界。",
+          "acceptanceCriteria": "tests/coding-business-deck-v5.test.js"
         }
       ],
       "type": "Deliverable"
@@ -11831,6 +11856,264 @@
       "name": "里程碑：ArchGraph 适配 OpenAI Codex 宿主（规则/技能/MCP 已交付）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "coding-agent-business-value-flow-root-001",
+      "name": "Coding Agent 业务价值流程",
+      "type": "Business Process",
+      "description": "跨业务场景的 Business Layer 通用流程；目标为可验证交付和知识沉淀。",
+      "subdiagram_views": [
+        {
+          "view_id": "coding-agent-business-metrics-operations-001",
+          "view_name": "指标映射：执行阶段"
+        },
+        {
+          "view_id": "coding-agent-business-metrics-delivery-001",
+          "view_name": "指标映射：交付阶段"
+        },
+        {
+          "view_id": "coding-agent-business-benchmarks-1-001",
+          "view_name": "指标映射：整体任务基准"
+        },
+        {
+          "view_id": "coding-agent-business-benchmarks-2-001",
+          "view_name": "指标映射：其他整体基准"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-coding-agent-architecture-model-01",
+          "type": "Acceptance Test",
+          "Input": "tests/coding-agent-architecture-model.test.js",
+          "description": "GIVEN 通用 Coding Agent 架构模型；WHEN 读取规范视图；THEN 业务活动、完整Assessment映射、RAG应用层定位和ArchGraph MCP集成成立。",
+          "acceptanceCriteria": "tests/coding-agent-architecture-model.test.js"
+        }
+      ]
+    },
+    {
+      "id": "coding-value-define-001",
+      "name": "明确任务与验收目标",
+      "type": "Business Process",
+      "description": ""
+    },
+    {
+      "id": "coding-value-context-001",
+      "name": "获取相关项目上下文",
+      "type": "Business Process",
+      "description": ""
+    },
+    {
+      "id": "coding-value-plan-execute-001",
+      "name": "规划并执行代码变更",
+      "type": "Business Process",
+      "description": ""
+    },
+    {
+      "id": "coding-value-verify-001",
+      "name": "验证并评审结果",
+      "type": "Business Process",
+      "description": ""
+    },
+    {
+      "id": "coding-value-deliver-001",
+      "name": "交付可验收结果",
+      "type": "Business Process",
+      "description": ""
+    },
+    {
+      "id": "coding-value-capture-001",
+      "name": "沉淀可复用项目知识",
+      "type": "Business Process",
+      "description": ""
+    },
+    {
+      "id": "coding-domain-expert-001",
+      "name": "Coding领域专家",
+      "type": "Business Actor",
+      "description": ""
+    },
+    {
+      "id": "coding-agent-engineer-001",
+      "name": "Coding开发者",
+      "type": "Business Actor",
+      "description": ""
+    },
+    {
+      "id": "project-domain-ontology-001",
+      "name": "项目领域本体",
+      "type": "Business Object",
+      "description": ""
+    },
+    {
+      "id": "coding-agent-harness-001",
+      "name": "通用 Coding Agent Harness",
+      "type": "Application Component",
+      "description": ""
+    },
+    {
+      "id": "coding-agent-orchestration-001",
+      "name": "会话编排",
+      "type": "Application Function",
+      "description": ""
+    },
+    {
+      "id": "coding-context-access-001",
+      "name": "上下文访问",
+      "type": "Application Function",
+      "description": ""
+    },
+    {
+      "id": "coding-tool-execution-001",
+      "name": "工具与代码执行",
+      "type": "Application Function",
+      "description": ""
+    },
+    {
+      "id": "coding-verification-feedback-001",
+      "name": "验证与反馈",
+      "type": "Application Function",
+      "description": ""
+    },
+    {
+      "id": "coding-retrieval-ordinary-001",
+      "name": "普通检索",
+      "type": "Application Function",
+      "description": ""
+    },
+    {
+      "id": "coding-retrieval-rag-001",
+      "name": "RAG 检索",
+      "type": "Application Function",
+      "description": ""
+    },
+    {
+      "id": "coding-retrieval-graph-rag-001",
+      "name": "Graph RAG 检索",
+      "type": "Application Function",
+      "description": "",
+      "subdiagram_views": [
+        {
+          "view_id": "generic-graph-rag-end-to-end-001",
+          "view_name": "通用 Graph RAG 端到端流程"
+        }
+      ]
+    },
+    {
+      "id": "archgraph-provider-001",
+      "name": "ArchGraph MCP Provider",
+      "type": "Application Component",
+      "description": "",
+      "testcases": [
+        {
+          "name": "AT-coding-agent-architecture-model-internal-01",
+          "type": "Acceptance Test",
+          "Input": "tests/coding-agent-architecture-model.test.js",
+          "description": "GIVEN ArchGraph Harness 读写实现视图；WHEN 检查 canonical 已建模路径；THEN 写入按Graph Semantics→去重→无损→投影顺序推进，检索由默认语义检索经混合检索到重排，结构查询路径也保持独立。",
+          "acceptanceCriteria": "tests/coding-agent-architecture-model.test.js"
+        }
+      ]
+    },
+    {
+      "id": "graph-mcp-interface-001",
+      "name": "Graph MCP Tool Interface",
+      "type": "Application Interface",
+      "description": ""
+    },
+    {
+      "id": "project-graph-context-service-001",
+      "name": "项目图谱上下文服务",
+      "type": "Application Service",
+      "description": ""
+    },
+    {
+      "id": "project-intent-graph-data-001",
+      "name": "项目意图图谱",
+      "type": "Data Object",
+      "description": ""
+    },
+    {
+      "id": "graphrag-flow-ingest-001",
+      "name": "知识写入与解析",
+      "type": "Application Process",
+      "description": "业界 Graph RAG 端到端流程中的通用环节；实现方式随框架而异。"
+    },
+    {
+      "id": "graphrag-flow-extract-001",
+      "name": "实体关系抽取",
+      "type": "Application Process",
+      "description": "业界 Graph RAG 端到端流程中的通用环节；实现方式随框架而异。"
+    },
+    {
+      "id": "graphrag-flow-index-001",
+      "name": "图谱与索引构建",
+      "type": "Application Process",
+      "description": "业界 Graph RAG 端到端流程中的通用环节；实现方式随框架而异。"
+    },
+    {
+      "id": "graphrag-flow-query-001",
+      "name": "查询解析与改写",
+      "type": "Application Process",
+      "description": "业界 Graph RAG 端到端流程中的通用环节；实现方式随框架而异。"
+    },
+    {
+      "id": "graphrag-flow-retrieve-001",
+      "name": "向量词法图遍历召回",
+      "type": "Application Process",
+      "description": "业界 Graph RAG 端到端流程中的通用环节；实现方式随框架而异。"
+    },
+    {
+      "id": "graphrag-flow-rerank-001",
+      "name": "结果融合与重排",
+      "type": "Application Process",
+      "description": "业界 Graph RAG 端到端流程中的通用环节；实现方式随框架而异。"
+    },
+    {
+      "id": "graphrag-flow-context-001",
+      "name": "上下文组装与溯源",
+      "type": "Application Process",
+      "description": "业界 Graph RAG 端到端流程中的通用环节；实现方式随框架而异。"
+    },
+    {
+      "id": "graphrag-flow-generate-001",
+      "name": "生成回答与反馈",
+      "type": "Application Process",
+      "description": "业界 Graph RAG 端到端流程中的通用环节；实现方式随框架而异。"
+    },
+    {
+      "id": "federation-center-app-v5-001",
+      "name": "Federation Registry–Broker Center",
+      "type": "Application Component",
+      "description": "联邦式意图图谱架构中的独立模型对象。"
+    },
+    {
+      "id": "federation-broker-service-v5-001",
+      "name": "Federation Registry–Broker Service",
+      "type": "Application Service",
+      "description": "联邦式意图图谱架构中的独立模型对象。"
+    },
+    {
+      "id": "federation-member-metadata-v5-001",
+      "name": "Federation Membership and Grants",
+      "type": "Data Object",
+      "description": "联邦式意图图谱架构中的独立模型对象。"
+    },
+    {
+      "id": "federated-graph-reference-v5-001",
+      "name": "Federated Graph Reference",
+      "type": "Data Object",
+      "description": "联邦式意图图谱架构中的独立模型对象。"
+    },
+    {
+      "id": "federation-member-graph-a-v5-001",
+      "name": "Member Project Graph A",
+      "type": "Data Object",
+      "description": "联邦式意图图谱架构中的独立模型对象。"
+    },
+    {
+      "id": "federation-member-graph-b-v5-001",
+      "name": "Member Project Graph B",
+      "type": "Data Object",
+      "description": "联邦式意图图谱架构中的独立模型对象。"
     }
   ],
   "relationships": [
@@ -14115,6 +14398,936 @@
           "description": "正向：更好的计划 → 更少失败工具/轮次"
         }
       ]
+    },
+    {
+      "id": "coding-value-sequence-1-001",
+      "source_id": "coding-value-define-001",
+      "target_id": "coding-value-context-001",
+      "source_name": "明确任务与验收目标",
+      "target_name": "获取相关项目上下文",
+      "type": "Triggering",
+      "name": "业务活动顺序",
+      "statement": "明确任务与验收目标 --(Triggering)--> 获取相关项目上下文"
+    },
+    {
+      "id": "coding-value-sequence-2-001",
+      "source_id": "coding-value-context-001",
+      "target_id": "coding-value-plan-execute-001",
+      "source_name": "获取相关项目上下文",
+      "target_name": "规划并执行代码变更",
+      "type": "Triggering",
+      "name": "业务活动顺序",
+      "statement": "获取相关项目上下文 --(Triggering)--> 规划并执行代码变更"
+    },
+    {
+      "id": "coding-value-sequence-3-001",
+      "source_id": "coding-value-plan-execute-001",
+      "target_id": "coding-value-verify-001",
+      "source_name": "规划并执行代码变更",
+      "target_name": "验证并评审结果",
+      "type": "Triggering",
+      "name": "业务活动顺序",
+      "statement": "规划并执行代码变更 --(Triggering)--> 验证并评审结果"
+    },
+    {
+      "id": "coding-value-sequence-4-001",
+      "source_id": "coding-value-verify-001",
+      "target_id": "coding-value-deliver-001",
+      "source_name": "验证并评审结果",
+      "target_name": "交付可验收结果",
+      "type": "Triggering",
+      "name": "业务活动顺序",
+      "statement": "验证并评审结果 --(Triggering)--> 交付可验收结果"
+    },
+    {
+      "id": "coding-value-sequence-5-001",
+      "source_id": "coding-value-deliver-001",
+      "target_id": "coding-value-capture-001",
+      "source_name": "交付可验收结果",
+      "target_name": "沉淀可复用项目知识",
+      "type": "Triggering",
+      "name": "业务活动顺序",
+      "statement": "交付可验收结果 --(Triggering)--> 沉淀可复用项目知识"
+    },
+    {
+      "id": "coding-value-root-compose-coding-value-define-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "coding-value-define-001",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "明确任务与验收目标",
+      "type": "Composition",
+      "name": "流程组成",
+      "statement": "Coding Agent 业务价值流程 --(Composition)--> 明确任务与验收目标"
+    },
+    {
+      "id": "coding-value-root-compose-coding-value-context-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "coding-value-context-001",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "获取相关项目上下文",
+      "type": "Composition",
+      "name": "流程组成",
+      "statement": "Coding Agent 业务价值流程 --(Composition)--> 获取相关项目上下文"
+    },
+    {
+      "id": "coding-value-root-compose-coding-value-plan-execute-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "coding-value-plan-execute-001",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "规划并执行代码变更",
+      "type": "Composition",
+      "name": "流程组成",
+      "statement": "Coding Agent 业务价值流程 --(Composition)--> 规划并执行代码变更"
+    },
+    {
+      "id": "coding-value-root-compose-coding-value-verify-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "coding-value-verify-001",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "验证并评审结果",
+      "type": "Composition",
+      "name": "流程组成",
+      "statement": "Coding Agent 业务价值流程 --(Composition)--> 验证并评审结果"
+    },
+    {
+      "id": "coding-value-root-compose-coding-value-deliver-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "coding-value-deliver-001",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "交付可验收结果",
+      "type": "Composition",
+      "name": "流程组成",
+      "statement": "Coding Agent 业务价值流程 --(Composition)--> 交付可验收结果"
+    },
+    {
+      "id": "coding-value-root-compose-coding-value-capture-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "coding-value-capture-001",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "沉淀可复用项目知识",
+      "type": "Composition",
+      "name": "流程组成",
+      "statement": "Coding Agent 业务价值流程 --(Composition)--> 沉淀可复用项目知识"
+    },
+    {
+      "id": "expert-shares-ontology-v5-001",
+      "source_id": "coding-domain-expert-001",
+      "target_id": "project-domain-ontology-001",
+      "source_name": "Coding领域专家",
+      "target_name": "项目领域本体",
+      "type": "Association",
+      "name": "维护领域模型",
+      "statement": "Coding领域专家 --(Association)--> 项目领域本体"
+    },
+    {
+      "id": "developer-shares-ontology-v5-001",
+      "source_id": "coding-agent-engineer-001",
+      "target_id": "project-domain-ontology-001",
+      "source_name": "Coding开发者",
+      "target_name": "项目领域本体",
+      "type": "Association",
+      "name": "共享领域模型",
+      "statement": "Coding开发者 --(Association)--> 项目领域本体"
+    },
+    {
+      "id": "metric-map-aos-as-idle-v5-001",
+      "source_id": "coding-value-define-001",
+      "target_id": "aos-as-idle",
+      "source_name": "明确任务与验收目标",
+      "target_name": "指标·空闲时长",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "明确任务与验收目标 --(Association)--> 指标·空闲时长"
+    },
+    {
+      "id": "metric-map-aos-as-hitl-v5-001",
+      "source_id": "coding-value-define-001",
+      "target_id": "aos-as-hitl",
+      "source_name": "明确任务与验收目标",
+      "target_name": "指标·请示频率与回环轮次",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "明确任务与验收目标 --(Association)--> 指标·请示频率与回环轮次"
+    },
+    {
+      "id": "metric-map-aos-as-retrieve-v5-001",
+      "source_id": "coding-value-context-001",
+      "target_id": "aos-as-retrieve",
+      "source_name": "获取相关项目上下文",
+      "target_name": "指标·检索召回与排序",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "获取相关项目上下文 --(Association)--> 指标·检索召回与排序"
+    },
+    {
+      "id": "metric-map-aos-as-plan-v5-001",
+      "source_id": "coding-value-plan-execute-001",
+      "target_id": "aos-as-plan",
+      "source_name": "规划并执行代码变更",
+      "target_name": "指标·计划正确率",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "规划并执行代码变更 --(Association)--> 指标·计划正确率"
+    },
+    {
+      "id": "metric-map-aos-as-tool-v5-001",
+      "source_id": "coding-value-plan-execute-001",
+      "target_id": "aos-as-tool",
+      "source_name": "规划并执行代码变更",
+      "target_name": "指标·工具成功率与轮次",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "规划并执行代码变更 --(Association)--> 指标·工具成功率与轮次"
+    },
+    {
+      "id": "metric-map-aos-as-write-v5-001",
+      "source_id": "coding-value-plan-execute-001",
+      "target_id": "aos-as-write",
+      "source_name": "规划并执行代码变更",
+      "target_name": "指标·去重P/R与无损率",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "规划并执行代码变更 --(Association)--> 指标·去重P/R与无损率"
+    },
+    {
+      "id": "metric-map-aos-as-wait-v5-001",
+      "source_id": "coding-value-plan-execute-001",
+      "target_id": "aos-as-wait",
+      "source_name": "规划并执行代码变更",
+      "target_name": "指标·等待/唤醒时延",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "规划并执行代码变更 --(Association)--> 指标·等待/唤醒时延"
+    },
+    {
+      "id": "metric-map-aos-as-verify-v5-001",
+      "source_id": "coding-value-verify-001",
+      "target_id": "aos-as-verify",
+      "source_name": "验证并评审结果",
+      "target_name": "指标·验收通过率与回归",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "验证并评审结果 --(Association)--> 指标·验收通过率与回归"
+    },
+    {
+      "id": "metric-map-aos-as-commit-v5-001",
+      "source_id": "coding-value-deliver-001",
+      "target_id": "aos-as-commit",
+      "source_name": "交付可验收结果",
+      "target_name": "指标·提交登记完整率",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "交付可验收结果 --(Association)--> 指标·提交登记完整率"
+    },
+    {
+      "id": "metric-map-aos-as-success-v5-001",
+      "source_id": "coding-value-deliver-001",
+      "target_id": "aos-as-success",
+      "source_name": "交付可验收结果",
+      "target_name": "指标·任务完成成功率",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "交付可验收结果 --(Association)--> 指标·任务完成成功率"
+    },
+    {
+      "id": "metric-map-aos-as-e2e-v5-001",
+      "source_id": "coding-value-deliver-001",
+      "target_id": "aos-as-e2e",
+      "source_name": "交付可验收结果",
+      "target_name": "指标·端到端时延/成本/可复现",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "交付可验收结果 --(Association)--> 指标·端到端时延/成本/可复现"
+    },
+    {
+      "id": "metric-map-aos-as-memory-v5-001",
+      "source_id": "coding-value-capture-001",
+      "target_id": "aos-as-memory",
+      "source_name": "沉淀可复用项目知识",
+      "target_name": "指标·记忆准确率与拒答",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "沉淀可复用项目知识 --(Association)--> 指标·记忆准确率与拒答"
+    },
+    {
+      "id": "metric-map-aos-as-swebench-v5-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "aos-as-swebench",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "指标·SWE-bench Resolved%",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "Coding Agent 业务价值流程 --(Association)--> 指标·SWE-bench Resolved%"
+    },
+    {
+      "id": "metric-map-aos-as-sweverified-v5-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "aos-as-sweverified",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "指标·SWE-bench Verified Resolved%",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "Coding Agent 业务价值流程 --(Association)--> 指标·SWE-bench Verified Resolved%"
+    },
+    {
+      "id": "metric-map-aos-as-terminalbench-v5-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "aos-as-terminalbench",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "指标·Terminal-Bench 任务成功率",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "Coding Agent 业务价值流程 --(Association)--> 指标·Terminal-Bench 任务成功率"
+    },
+    {
+      "id": "metric-map-aos-as-codegen-v5-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "aos-as-codegen",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "指标·HumanEval/MBPP pass@k",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "Coding Agent 业务价值流程 --(Association)--> 指标·HumanEval/MBPP pass@k"
+    },
+    {
+      "id": "metric-map-aos-as-livecodebench-v5-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "aos-as-livecodebench",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "指标·LiveCodeBench pass@1",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "Coding Agent 业务价值流程 --(Association)--> 指标·LiveCodeBench pass@1"
+    },
+    {
+      "id": "metric-map-aos-as-gaia-v5-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "aos-as-gaia",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "指标·GAIA 任务成功率",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "Coding Agent 业务价值流程 --(Association)--> 指标·GAIA 任务成功率"
+    },
+    {
+      "id": "metric-map-aos-as-taubench-v5-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "aos-as-taubench",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "指标·τ-bench pass^k",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "Coding Agent 业务价值流程 --(Association)--> 指标·τ-bench pass^k"
+    },
+    {
+      "id": "metric-map-aos-as-agentbench-v5-001",
+      "source_id": "coding-agent-business-value-flow-root-001",
+      "target_id": "aos-as-agentbench",
+      "source_name": "Coding Agent 业务价值流程",
+      "target_name": "指标·AgentBench 任务成功率",
+      "type": "Association",
+      "name": "业务流程指标映射",
+      "statement": "Coding Agent 业务价值流程 --(Association)--> 指标·AgentBench 任务成功率"
+    },
+    {
+      "id": "harness-assign-coding-agent-orchestration-001-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "coding-agent-orchestration-001",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "会话编排",
+      "type": "Assignment",
+      "name": "Harness 应用功能",
+      "statement": "通用 Coding Agent Harness --(Assignment)--> 会话编排"
+    },
+    {
+      "id": "harness-assign-coding-context-access-001-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "coding-context-access-001",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "上下文访问",
+      "type": "Assignment",
+      "name": "Harness 应用功能",
+      "statement": "通用 Coding Agent Harness --(Assignment)--> 上下文访问"
+    },
+    {
+      "id": "harness-assign-coding-tool-execution-001-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "coding-tool-execution-001",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "工具与代码执行",
+      "type": "Assignment",
+      "name": "Harness 应用功能",
+      "statement": "通用 Coding Agent Harness --(Assignment)--> 工具与代码执行"
+    },
+    {
+      "id": "harness-assign-coding-verification-feedback-001-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "coding-verification-feedback-001",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "验证与反馈",
+      "type": "Assignment",
+      "name": "Harness 应用功能",
+      "statement": "通用 Coding Agent Harness --(Assignment)--> 验证与反馈"
+    },
+    {
+      "id": "context-specialize-coding-retrieval-ordinary-001-v5-001",
+      "source_id": "coding-retrieval-ordinary-001",
+      "target_id": "coding-context-access-001",
+      "source_name": "普通检索",
+      "target_name": "上下文访问",
+      "type": "Specialization",
+      "name": "上下文访问实现选项",
+      "statement": "普通检索 --(Specialization)--> 上下文访问"
+    },
+    {
+      "id": "context-specialize-coding-retrieval-rag-001-v5-001",
+      "source_id": "coding-retrieval-rag-001",
+      "target_id": "coding-context-access-001",
+      "source_name": "RAG 检索",
+      "target_name": "上下文访问",
+      "type": "Specialization",
+      "name": "上下文访问实现选项",
+      "statement": "RAG 检索 --(Specialization)--> 上下文访问"
+    },
+    {
+      "id": "context-specialize-coding-retrieval-graph-rag-001-v5-001",
+      "source_id": "coding-retrieval-graph-rag-001",
+      "target_id": "coding-context-access-001",
+      "source_name": "Graph RAG 检索",
+      "target_name": "上下文访问",
+      "type": "Specialization",
+      "name": "上下文访问实现选项",
+      "statement": "Graph RAG 检索 --(Specialization)--> 上下文访问"
+    },
+    {
+      "id": "agent-sequence-context-v5-001",
+      "source_id": "coding-agent-orchestration-001",
+      "target_id": "coding-context-access-001",
+      "source_name": "会话编排",
+      "target_name": "上下文访问",
+      "type": "Triggering",
+      "name": "按需获取上下文",
+      "statement": "会话编排 --(Triggering)--> 上下文访问"
+    },
+    {
+      "id": "agent-sequence-tool-v5-001",
+      "source_id": "coding-agent-orchestration-001",
+      "target_id": "coding-tool-execution-001",
+      "source_name": "会话编排",
+      "target_name": "工具与代码执行",
+      "type": "Triggering",
+      "name": "调度工具执行",
+      "statement": "会话编排 --(Triggering)--> 工具与代码执行"
+    },
+    {
+      "id": "agent-sequence-verify-v5-001",
+      "source_id": "coding-tool-execution-001",
+      "target_id": "coding-verification-feedback-001",
+      "source_name": "工具与代码执行",
+      "target_name": "验证与反馈",
+      "type": "Triggering",
+      "name": "执行后验证",
+      "statement": "工具与代码执行 --(Triggering)--> 验证与反馈"
+    },
+    {
+      "id": "agent-feedback-orchestration-v5-001",
+      "source_id": "coding-verification-feedback-001",
+      "target_id": "coding-agent-orchestration-001",
+      "source_name": "验证与反馈",
+      "target_name": "会话编排",
+      "type": "Triggering",
+      "name": "反馈驱动后续迭代",
+      "statement": "验证与反馈 --(Triggering)--> 会话编排"
+    },
+    {
+      "id": "provider-compose-interface-v5-001",
+      "source_id": "archgraph-provider-001",
+      "target_id": "graph-mcp-interface-001",
+      "source_name": "ArchGraph MCP Provider",
+      "target_name": "Graph MCP Tool Interface",
+      "type": "Composition",
+      "name": "提供 Graph MCP 接口",
+      "statement": "ArchGraph MCP Provider --(Composition)--> Graph MCP Tool Interface"
+    },
+    {
+      "id": "interface-assign-service-v5-001",
+      "source_id": "graph-mcp-interface-001",
+      "target_id": "project-graph-context-service-001",
+      "source_name": "Graph MCP Tool Interface",
+      "target_name": "项目图谱上下文服务",
+      "type": "Assignment",
+      "name": "暴露图谱上下文服务",
+      "statement": "Graph MCP Tool Interface --(Assignment)--> 项目图谱上下文服务"
+    },
+    {
+      "id": "graph-service-serves-context-v5-001",
+      "source_id": "project-graph-context-service-001",
+      "target_id": "coding-context-access-001",
+      "source_name": "项目图谱上下文服务",
+      "target_name": "上下文访问",
+      "type": "Serving",
+      "name": "支撑 Agent 上下文访问",
+      "statement": "项目图谱上下文服务 --(Serving)--> 上下文访问"
+    },
+    {
+      "id": "harness-consumes-graph-service-v5-001",
+      "source_id": "project-graph-context-service-001",
+      "target_id": "coding-agent-harness-001",
+      "source_name": "项目图谱上下文服务",
+      "target_name": "通用 Coding Agent Harness",
+      "type": "Serving",
+      "name": "Harness 按需调用",
+      "statement": "项目图谱上下文服务 --(Serving)--> 通用 Coding Agent Harness"
+    },
+    {
+      "id": "service-accesses-intent-graph-v5-001",
+      "source_id": "project-graph-context-service-001",
+      "target_id": "project-intent-graph-data-001",
+      "source_name": "项目图谱上下文服务",
+      "target_name": "项目意图图谱",
+      "type": "Access",
+      "name": "访问项目意图图谱",
+      "statement": "项目图谱上下文服务 --(Access)--> 项目意图图谱"
+    },
+    {
+      "id": "intent-graph-realizes-ontology-v5-001",
+      "source_id": "project-intent-graph-data-001",
+      "target_id": "project-domain-ontology-001",
+      "source_name": "项目意图图谱",
+      "target_name": "项目领域本体",
+      "type": "Realization",
+      "name": "图谱承载领域本体",
+      "statement": "项目意图图谱 --(Realization)--> 项目领域本体"
+    },
+    {
+      "id": "business-flow-uses-graph-service-v5-001",
+      "source_id": "project-graph-context-service-001",
+      "target_id": "coding-agent-business-value-flow-root-001",
+      "source_name": "项目图谱上下文服务",
+      "target_name": "Coding Agent 业务价值流程",
+      "type": "Serving",
+      "name": "支撑业务流程中的上下文访问",
+      "statement": "项目图谱上下文服务 --(Serving)--> Coding Agent 业务价值流程"
+    },
+    {
+      "id": "graphrag-flow-sequence-1-001",
+      "source_id": "graphrag-flow-ingest-001",
+      "target_id": "graphrag-flow-extract-001",
+      "source_name": "知识写入与解析",
+      "target_name": "实体关系抽取",
+      "type": "Triggering",
+      "name": "流程衔接",
+      "statement": "知识写入与解析 --(Triggering)--> 实体关系抽取"
+    },
+    {
+      "id": "graphrag-flow-sequence-2-001",
+      "source_id": "graphrag-flow-extract-001",
+      "target_id": "graphrag-flow-index-001",
+      "source_name": "实体关系抽取",
+      "target_name": "图谱与索引构建",
+      "type": "Triggering",
+      "name": "流程衔接",
+      "statement": "实体关系抽取 --(Triggering)--> 图谱与索引构建"
+    },
+    {
+      "id": "graphrag-flow-sequence-3-001",
+      "source_id": "graphrag-flow-index-001",
+      "target_id": "graphrag-flow-query-001",
+      "source_name": "图谱与索引构建",
+      "target_name": "查询解析与改写",
+      "type": "Triggering",
+      "name": "流程衔接",
+      "statement": "图谱与索引构建 --(Triggering)--> 查询解析与改写"
+    },
+    {
+      "id": "graphrag-flow-sequence-4-001",
+      "source_id": "graphrag-flow-query-001",
+      "target_id": "graphrag-flow-retrieve-001",
+      "source_name": "查询解析与改写",
+      "target_name": "向量词法图遍历召回",
+      "type": "Triggering",
+      "name": "流程衔接",
+      "statement": "查询解析与改写 --(Triggering)--> 向量词法图遍历召回"
+    },
+    {
+      "id": "graphrag-flow-sequence-5-001",
+      "source_id": "graphrag-flow-retrieve-001",
+      "target_id": "graphrag-flow-rerank-001",
+      "source_name": "向量词法图遍历召回",
+      "target_name": "结果融合与重排",
+      "type": "Triggering",
+      "name": "流程衔接",
+      "statement": "向量词法图遍历召回 --(Triggering)--> 结果融合与重排"
+    },
+    {
+      "id": "graphrag-flow-sequence-6-001",
+      "source_id": "graphrag-flow-rerank-001",
+      "target_id": "graphrag-flow-context-001",
+      "source_name": "结果融合与重排",
+      "target_name": "上下文组装与溯源",
+      "type": "Triggering",
+      "name": "流程衔接",
+      "statement": "结果融合与重排 --(Triggering)--> 上下文组装与溯源"
+    },
+    {
+      "id": "graphrag-flow-sequence-7-001",
+      "source_id": "graphrag-flow-context-001",
+      "target_id": "graphrag-flow-generate-001",
+      "source_name": "上下文组装与溯源",
+      "target_name": "生成回答与反馈",
+      "type": "Triggering",
+      "name": "流程衔接",
+      "statement": "上下文组装与溯源 --(Triggering)--> 生成回答与反馈"
+    },
+    {
+      "id": "fed-center-composes-interface-v5-001",
+      "source_id": "federation-center-app-v5-001",
+      "target_id": "graph-mcp-interface-001",
+      "source_name": "Federation Registry–Broker Center",
+      "target_name": "Graph MCP Tool Interface",
+      "type": "Composition",
+      "name": "暴露 Graph MCP 接口",
+      "statement": "Federation Registry–Broker Center --(Composition)--> Graph MCP Tool Interface"
+    },
+    {
+      "id": "fed-interface-assigns-service-v5-001",
+      "source_id": "graph-mcp-interface-001",
+      "target_id": "federation-broker-service-v5-001",
+      "source_name": "Graph MCP Tool Interface",
+      "target_name": "Federation Registry–Broker Service",
+      "type": "Assignment",
+      "name": "提供 Registry–Broker 服务",
+      "statement": "Graph MCP Tool Interface --(Assignment)--> Federation Registry–Broker Service"
+    },
+    {
+      "id": "fed-service-accesses-membership-v5-001",
+      "source_id": "federation-broker-service-v5-001",
+      "target_id": "federation-member-metadata-v5-001",
+      "source_name": "Federation Registry–Broker Service",
+      "target_name": "Federation Membership and Grants",
+      "type": "Access",
+      "name": "读取成员与授权元数据",
+      "statement": "Federation Registry–Broker Service --(Access)--> Federation Membership and Grants"
+    },
+    {
+      "id": "fed-service-reads-member-a-v5-001",
+      "source_id": "federation-broker-service-v5-001",
+      "target_id": "federation-member-graph-a-v5-001",
+      "source_name": "Federation Registry–Broker Service",
+      "target_name": "Member Project Graph A",
+      "type": "Access",
+      "name": "授权后读成员图 A",
+      "statement": "Federation Registry–Broker Service --(Access)--> Member Project Graph A"
+    },
+    {
+      "id": "fed-service-reads-member-b-v5-001",
+      "source_id": "federation-broker-service-v5-001",
+      "target_id": "federation-member-graph-b-v5-001",
+      "source_name": "Federation Registry–Broker Service",
+      "target_name": "Member Project Graph B",
+      "type": "Access",
+      "name": "授权后读成员图 B",
+      "statement": "Federation Registry–Broker Service --(Access)--> Member Project Graph B"
+    },
+    {
+      "id": "fed-service-returns-reference-v5-001",
+      "source_id": "federation-broker-service-v5-001",
+      "target_id": "federated-graph-reference-v5-001",
+      "source_name": "Federation Registry–Broker Service",
+      "target_name": "Federated Graph Reference",
+      "type": "Access",
+      "name": "返回图谱引用",
+      "statement": "Federation Registry–Broker Service --(Access)--> Federated Graph Reference"
+    },
+    {
+      "id": "fed-reference-identifies-project-a-v5-001",
+      "source_id": "federated-graph-reference-v5-001",
+      "target_id": "federation-member-graph-a-v5-001",
+      "source_name": "Federated Graph Reference",
+      "target_name": "Member Project Graph A",
+      "type": "Association",
+      "name": "引用成员图 A",
+      "statement": "Federated Graph Reference --(Association)--> Member Project Graph A"
+    },
+    {
+      "id": "fed-reference-identifies-project-b-v5-001",
+      "source_id": "federated-graph-reference-v5-001",
+      "target_id": "federation-member-graph-b-v5-001",
+      "source_name": "Federated Graph Reference",
+      "target_name": "Member Project Graph B",
+      "type": "Association",
+      "name": "引用成员图 B",
+      "statement": "Federated Graph Reference --(Association)--> Member Project Graph B"
+    },
+    {
+      "id": "app-metric-map-aos-as-idle-v5-001",
+      "source_id": "coding-agent-orchestration-001",
+      "target_id": "aos-as-idle",
+      "source_name": "会话编排",
+      "target_name": "指标·空闲时长",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "会话编排 --(Association)--> 指标·空闲时长"
+    },
+    {
+      "id": "app-metric-map-aos-as-hitl-v5-001",
+      "source_id": "coding-agent-orchestration-001",
+      "target_id": "aos-as-hitl",
+      "source_name": "会话编排",
+      "target_name": "指标·请示频率与回环轮次",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "会话编排 --(Association)--> 指标·请示频率与回环轮次"
+    },
+    {
+      "id": "app-metric-map-aos-as-plan-v5-001",
+      "source_id": "coding-agent-orchestration-001",
+      "target_id": "aos-as-plan",
+      "source_name": "会话编排",
+      "target_name": "指标·计划正确率",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "会话编排 --(Association)--> 指标·计划正确率"
+    },
+    {
+      "id": "app-metric-map-aos-as-wait-v5-001",
+      "source_id": "coding-agent-orchestration-001",
+      "target_id": "aos-as-wait",
+      "source_name": "会话编排",
+      "target_name": "指标·等待/唤醒时延",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "会话编排 --(Association)--> 指标·等待/唤醒时延"
+    },
+    {
+      "id": "app-metric-map-aos-as-retrieve-v5-001",
+      "source_id": "coding-context-access-001",
+      "target_id": "aos-as-retrieve",
+      "source_name": "上下文访问",
+      "target_name": "指标·检索召回与排序",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "上下文访问 --(Association)--> 指标·检索召回与排序"
+    },
+    {
+      "id": "app-metric-map-aos-as-tool-v5-001",
+      "source_id": "coding-tool-execution-001",
+      "target_id": "aos-as-tool",
+      "source_name": "工具与代码执行",
+      "target_name": "指标·工具成功率与轮次",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "工具与代码执行 --(Association)--> 指标·工具成功率与轮次"
+    },
+    {
+      "id": "app-metric-map-aos-as-write-v5-001",
+      "source_id": "coding-tool-execution-001",
+      "target_id": "aos-as-write",
+      "source_name": "工具与代码执行",
+      "target_name": "指标·去重P/R与无损率",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "工具与代码执行 --(Association)--> 指标·去重P/R与无损率"
+    },
+    {
+      "id": "app-metric-map-aos-as-verify-v5-001",
+      "source_id": "coding-verification-feedback-001",
+      "target_id": "aos-as-verify",
+      "source_name": "验证与反馈",
+      "target_name": "指标·验收通过率与回归",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "验证与反馈 --(Association)--> 指标·验收通过率与回归"
+    },
+    {
+      "id": "app-metric-map-aos-as-commit-v5-001",
+      "source_id": "project-graph-context-service-001",
+      "target_id": "aos-as-commit",
+      "source_name": "项目图谱上下文服务",
+      "target_name": "指标·提交登记完整率",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "项目图谱上下文服务 --(Association)--> 指标·提交登记完整率"
+    },
+    {
+      "id": "app-metric-map-aos-as-success-v5-001",
+      "source_id": "project-graph-context-service-001",
+      "target_id": "aos-as-success",
+      "source_name": "项目图谱上下文服务",
+      "target_name": "指标·任务完成成功率",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "项目图谱上下文服务 --(Association)--> 指标·任务完成成功率"
+    },
+    {
+      "id": "app-metric-map-aos-as-e2e-v5-001",
+      "source_id": "project-graph-context-service-001",
+      "target_id": "aos-as-e2e",
+      "source_name": "项目图谱上下文服务",
+      "target_name": "指标·端到端时延/成本/可复现",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "项目图谱上下文服务 --(Association)--> 指标·端到端时延/成本/可复现"
+    },
+    {
+      "id": "app-metric-map-aos-as-memory-v5-001",
+      "source_id": "project-graph-context-service-001",
+      "target_id": "aos-as-memory",
+      "source_name": "项目图谱上下文服务",
+      "target_name": "指标·记忆准确率与拒答",
+      "type": "Association",
+      "name": "应用能力指标映射",
+      "statement": "项目图谱上下文服务 --(Association)--> 指标·记忆准确率与拒答"
+    },
+    {
+      "id": "harness-metric-map-aos-as-swebench-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "aos-as-swebench",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "指标·SWE-bench Resolved%",
+      "type": "Association",
+      "name": "Harness整体基准映射",
+      "statement": "通用 Coding Agent Harness --(Association)--> 指标·SWE-bench Resolved%"
+    },
+    {
+      "id": "harness-metric-map-aos-as-sweverified-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "aos-as-sweverified",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "指标·SWE-bench Verified Resolved%",
+      "type": "Association",
+      "name": "Harness整体基准映射",
+      "statement": "通用 Coding Agent Harness --(Association)--> 指标·SWE-bench Verified Resolved%"
+    },
+    {
+      "id": "harness-metric-map-aos-as-terminalbench-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "aos-as-terminalbench",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "指标·Terminal-Bench 任务成功率",
+      "type": "Association",
+      "name": "Harness整体基准映射",
+      "statement": "通用 Coding Agent Harness --(Association)--> 指标·Terminal-Bench 任务成功率"
+    },
+    {
+      "id": "harness-metric-map-aos-as-codegen-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "aos-as-codegen",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "指标·HumanEval/MBPP pass@k",
+      "type": "Association",
+      "name": "Harness整体基准映射",
+      "statement": "通用 Coding Agent Harness --(Association)--> 指标·HumanEval/MBPP pass@k"
+    },
+    {
+      "id": "harness-metric-map-aos-as-livecodebench-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "aos-as-livecodebench",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "指标·LiveCodeBench pass@1",
+      "type": "Association",
+      "name": "Harness整体基准映射",
+      "statement": "通用 Coding Agent Harness --(Association)--> 指标·LiveCodeBench pass@1"
+    },
+    {
+      "id": "harness-metric-map-aos-as-gaia-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "aos-as-gaia",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "指标·GAIA 任务成功率",
+      "type": "Association",
+      "name": "Harness整体基准映射",
+      "statement": "通用 Coding Agent Harness --(Association)--> 指标·GAIA 任务成功率"
+    },
+    {
+      "id": "harness-metric-map-aos-as-taubench-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "aos-as-taubench",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "指标·τ-bench pass^k",
+      "type": "Association",
+      "name": "Harness整体基准映射",
+      "statement": "通用 Coding Agent Harness --(Association)--> 指标·τ-bench pass^k"
+    },
+    {
+      "id": "harness-metric-map-aos-as-agentbench-v5-001",
+      "source_id": "coding-agent-harness-001",
+      "target_id": "aos-as-agentbench",
+      "source_name": "通用 Coding Agent Harness",
+      "target_name": "指标·AgentBench 任务成功率",
+      "type": "Association",
+      "name": "Harness整体基准映射",
+      "statement": "通用 Coding Agent Harness --(Association)--> 指标·AgentBench 任务成功率"
+    },
+    {
+      "id": "app-serves-business-define-v5-001",
+      "source_id": "coding-agent-orchestration-001",
+      "target_id": "coding-value-define-001",
+      "source_name": "会话编排",
+      "target_name": "明确任务与验收目标",
+      "type": "Serving",
+      "name": "支撑业务活动",
+      "statement": "会话编排 --(Serving)--> 明确任务与验收目标"
+    },
+    {
+      "id": "app-serves-business-context-v5-001",
+      "source_id": "coding-context-access-001",
+      "target_id": "coding-value-context-001",
+      "source_name": "上下文访问",
+      "target_name": "获取相关项目上下文",
+      "type": "Serving",
+      "name": "支撑业务活动",
+      "statement": "上下文访问 --(Serving)--> 获取相关项目上下文"
+    },
+    {
+      "id": "app-serves-business-plan-v5-001",
+      "source_id": "coding-agent-orchestration-001",
+      "target_id": "coding-value-plan-execute-001",
+      "source_name": "会话编排",
+      "target_name": "规划并执行代码变更",
+      "type": "Serving",
+      "name": "支撑业务活动",
+      "statement": "会话编排 --(Serving)--> 规划并执行代码变更"
+    },
+    {
+      "id": "app-serves-business-tool-v5-001",
+      "source_id": "coding-tool-execution-001",
+      "target_id": "coding-value-plan-execute-001",
+      "source_name": "工具与代码执行",
+      "target_name": "规划并执行代码变更",
+      "type": "Serving",
+      "name": "支撑业务活动",
+      "statement": "工具与代码执行 --(Serving)--> 规划并执行代码变更"
+    },
+    {
+      "id": "app-serves-business-verify-v5-001",
+      "source_id": "coding-verification-feedback-001",
+      "target_id": "coding-value-verify-001",
+      "source_name": "验证与反馈",
+      "target_name": "验证并评审结果",
+      "type": "Serving",
+      "name": "支撑业务活动",
+      "statement": "验证与反馈 --(Serving)--> 验证并评审结果"
+    },
+    {
+      "id": "app-serves-business-capture-v5-001",
+      "source_id": "project-graph-context-service-001",
+      "target_id": "coding-value-capture-001",
+      "source_name": "项目图谱上下文服务",
+      "target_name": "沉淀可复用项目知识",
+      "type": "Serving",
+      "name": "支撑知识沉淀",
+      "statement": "项目图谱上下文服务 --(Serving)--> 沉淀可复用项目知识"
+    },
+    {
+      "id": "app-serves-business-deliver-v5-001",
+      "source_id": "project-graph-context-service-001",
+      "target_id": "coding-value-deliver-001",
+      "source_name": "项目图谱上下文服务",
+      "target_name": "交付可验收结果",
+      "type": "Serving",
+      "name": "支撑结果交付",
+      "statement": "项目图谱上下文服务 --(Serving)--> 交付可验收结果"
     }
   ],
   "views": [
@@ -15550,6 +16763,297 @@
         "codex-harness-adaptation-001"
       ],
       "included_relationships": []
+    },
+    {
+      "view_id": "coding-agent-business-value-flow-001",
+      "view_name": "Coding Agent 通用业务价值流程",
+      "parent_element_id": "1334",
+      "parent_element_name": "Process Cooperation Viewpoint",
+      "description": "与通用 Coding Agent 业务价值流程及 Assessment 指标的映射视图。",
+      "included_elements": [
+        "coding-agent-business-value-flow-root-001",
+        "coding-value-define-001",
+        "coding-value-context-001",
+        "coding-value-plan-execute-001",
+        "coding-value-verify-001",
+        "coding-value-deliver-001",
+        "coding-value-capture-001",
+        "coding-domain-expert-001",
+        "coding-agent-engineer-001",
+        "project-domain-ontology-001"
+      ],
+      "included_relationships": [
+        "coding-value-sequence-1-001",
+        "coding-value-sequence-2-001",
+        "coding-value-sequence-3-001",
+        "coding-value-sequence-4-001",
+        "coding-value-sequence-5-001",
+        "coding-value-root-compose-coding-value-define-001",
+        "coding-value-root-compose-coding-value-context-001",
+        "coding-value-root-compose-coding-value-plan-execute-001",
+        "coding-value-root-compose-coding-value-verify-001",
+        "coding-value-root-compose-coding-value-deliver-001",
+        "coding-value-root-compose-coding-value-capture-001",
+        "expert-shares-ontology-v5-001",
+        "developer-shares-ontology-v5-001"
+      ]
+    },
+    {
+      "view_id": "coding-agent-application-architecture-001",
+      "view_name": "通用 Coding Agent 应用架构与 ArchGraph 集成",
+      "parent_element_id": "1240",
+      "parent_element_name": "Application Cooperation Viewpoint",
+      "description": "与通用 Coding Agent 业务价值流程及 Assessment 指标的映射视图。",
+      "included_elements": [
+        "coding-agent-harness-001",
+        "coding-agent-orchestration-001",
+        "coding-context-access-001",
+        "coding-tool-execution-001",
+        "coding-verification-feedback-001",
+        "coding-retrieval-ordinary-001",
+        "coding-retrieval-rag-001",
+        "coding-retrieval-graph-rag-001",
+        "archgraph-provider-001",
+        "graph-mcp-interface-001",
+        "project-graph-context-service-001",
+        "project-intent-graph-data-001",
+        "project-domain-ontology-001",
+        "coding-agent-business-value-flow-root-001"
+      ],
+      "included_relationships": [
+        "harness-assign-coding-agent-orchestration-001-v5-001",
+        "harness-assign-coding-context-access-001-v5-001",
+        "harness-assign-coding-tool-execution-001-v5-001",
+        "harness-assign-coding-verification-feedback-001-v5-001",
+        "context-specialize-coding-retrieval-ordinary-001-v5-001",
+        "context-specialize-coding-retrieval-rag-001-v5-001",
+        "context-specialize-coding-retrieval-graph-rag-001-v5-001",
+        "agent-sequence-context-v5-001",
+        "agent-sequence-tool-v5-001",
+        "agent-sequence-verify-v5-001",
+        "agent-feedback-orchestration-v5-001",
+        "provider-compose-interface-v5-001",
+        "interface-assign-service-v5-001",
+        "graph-service-serves-context-v5-001",
+        "harness-consumes-graph-service-v5-001",
+        "service-accesses-intent-graph-v5-001",
+        "intent-graph-realizes-ontology-v5-001",
+        "business-flow-uses-graph-service-v5-001"
+      ]
+    },
+    {
+      "view_id": "coding-agent-business-metrics-operations-001",
+      "view_name": "指标映射：执行阶段",
+      "parent_element_id": "coding-agent-business-value-flow-root-001",
+      "parent_element_name": "Coding Agent 业务价值流程",
+      "description": "与通用 Coding Agent 业务价值流程及 Assessment 指标的映射视图。",
+      "included_elements": [
+        "aos-as-idle",
+        "aos-as-hitl",
+        "aos-as-retrieve",
+        "aos-as-plan",
+        "aos-as-tool",
+        "aos-as-write",
+        "aos-as-wait",
+        "coding-value-define-001",
+        "coding-value-context-001",
+        "coding-value-plan-execute-001",
+        "coding-agent-orchestration-001",
+        "coding-context-access-001",
+        "coding-tool-execution-001"
+      ],
+      "included_relationships": [
+        "metric-map-aos-as-idle-v5-001",
+        "metric-map-aos-as-hitl-v5-001",
+        "metric-map-aos-as-retrieve-v5-001",
+        "metric-map-aos-as-plan-v5-001",
+        "metric-map-aos-as-tool-v5-001",
+        "metric-map-aos-as-write-v5-001",
+        "metric-map-aos-as-wait-v5-001",
+        "app-metric-map-aos-as-idle-v5-001",
+        "app-metric-map-aos-as-hitl-v5-001",
+        "app-metric-map-aos-as-plan-v5-001",
+        "app-metric-map-aos-as-wait-v5-001",
+        "app-metric-map-aos-as-retrieve-v5-001",
+        "app-metric-map-aos-as-tool-v5-001",
+        "app-metric-map-aos-as-write-v5-001",
+        "app-serves-business-define-v5-001",
+        "app-serves-business-context-v5-001",
+        "app-serves-business-plan-v5-001",
+        "app-serves-business-tool-v5-001"
+      ]
+    },
+    {
+      "view_id": "coding-agent-business-metrics-delivery-001",
+      "view_name": "指标映射：交付阶段",
+      "parent_element_id": "coding-agent-business-value-flow-root-001",
+      "parent_element_name": "Coding Agent 业务价值流程",
+      "description": "与通用 Coding Agent 业务价值流程及 Assessment 指标的映射视图。",
+      "included_elements": [
+        "aos-as-verify",
+        "aos-as-commit",
+        "aos-as-success",
+        "aos-as-e2e",
+        "aos-as-memory",
+        "coding-value-verify-001",
+        "coding-value-deliver-001",
+        "coding-value-capture-001",
+        "coding-verification-feedback-001",
+        "project-graph-context-service-001"
+      ],
+      "included_relationships": [
+        "metric-map-aos-as-verify-v5-001",
+        "metric-map-aos-as-commit-v5-001",
+        "metric-map-aos-as-success-v5-001",
+        "metric-map-aos-as-e2e-v5-001",
+        "metric-map-aos-as-memory-v5-001",
+        "app-metric-map-aos-as-verify-v5-001",
+        "app-metric-map-aos-as-commit-v5-001",
+        "app-metric-map-aos-as-success-v5-001",
+        "app-metric-map-aos-as-e2e-v5-001",
+        "app-metric-map-aos-as-memory-v5-001",
+        "app-serves-business-verify-v5-001",
+        "app-serves-business-capture-v5-001",
+        "app-serves-business-deliver-v5-001"
+      ]
+    },
+    {
+      "view_id": "coding-agent-business-benchmarks-1-001",
+      "view_name": "指标映射：整体任务基准",
+      "parent_element_id": "coding-agent-business-value-flow-root-001",
+      "parent_element_name": "Coding Agent 业务价值流程",
+      "description": "与通用 Coding Agent 业务价值流程及 Assessment 指标的映射视图。",
+      "included_elements": [
+        "aos-as-swebench",
+        "aos-as-sweverified",
+        "aos-as-terminalbench",
+        "aos-as-codegen",
+        "aos-as-livecodebench",
+        "aos-as-gaia",
+        "aos-as-taubench",
+        "coding-agent-business-value-flow-root-001",
+        "coding-agent-harness-001"
+      ],
+      "included_relationships": [
+        "metric-map-aos-as-swebench-v5-001",
+        "metric-map-aos-as-sweverified-v5-001",
+        "metric-map-aos-as-terminalbench-v5-001",
+        "metric-map-aos-as-codegen-v5-001",
+        "metric-map-aos-as-livecodebench-v5-001",
+        "metric-map-aos-as-gaia-v5-001",
+        "metric-map-aos-as-taubench-v5-001",
+        "harness-metric-map-aos-as-swebench-v5-001",
+        "harness-metric-map-aos-as-sweverified-v5-001",
+        "harness-metric-map-aos-as-terminalbench-v5-001",
+        "harness-metric-map-aos-as-codegen-v5-001",
+        "harness-metric-map-aos-as-livecodebench-v5-001",
+        "harness-metric-map-aos-as-gaia-v5-001",
+        "harness-metric-map-aos-as-taubench-v5-001"
+      ]
+    },
+    {
+      "view_id": "coding-agent-business-benchmarks-2-001",
+      "view_name": "指标映射：其他整体基准",
+      "parent_element_id": "coding-agent-business-value-flow-root-001",
+      "parent_element_name": "Coding Agent 业务价值流程",
+      "description": "与通用 Coding Agent 业务价值流程及 Assessment 指标的映射视图。",
+      "included_elements": [
+        "aos-as-agentbench",
+        "coding-agent-business-value-flow-root-001",
+        "coding-agent-harness-001"
+      ],
+      "included_relationships": [
+        "metric-map-aos-as-agentbench-v5-001",
+        "harness-metric-map-aos-as-agentbench-v5-001"
+      ]
+    },
+    {
+      "view_id": "archgraph-internal-read-write-001",
+      "view_name": "ArchGraph 实现：读写治理与检索",
+      "parent_element_id": "1961",
+      "parent_element_name": "Harness",
+      "description": "复用现有 Harness 模型的真实读写关系，展示 ArchGraph 的写入治理链与 Graph RAG 相关检索链。",
+      "included_elements": [
+        "neo4j-sync-store",
+        "neo4j-cypher-query-interface",
+        "neo4j-semantic-projection-store",
+        "graph-write-dedup-gate",
+        "graph-semantics-validation-001",
+        "hybrid-semantic-retrieval-001",
+        "semantic-rerank-001",
+        "lossless-write-gate",
+        "community-index-001",
+        "configurable-embedding-provider-001",
+        "default-semantic-retrieval-001",
+        "env-file-key-governance-001",
+        "offline-embedding-deployment-001"
+      ],
+      "included_relationships": [
+        "harness-read-semantic-to-hybrid-001",
+        "harness-read-hybrid-to-rerank-001",
+        "harness-read-projection-serves-default-001",
+        "harness-read-embedding-serves-default-001",
+        "harness-query-sync-serves-cypher-001",
+        "harness-query-cypher-serves-community-001",
+        "harness-write-validate-to-dedup-001",
+        "harness-write-dedup-to-lossless-001",
+        "harness-write-lossless-to-projection-001",
+        "harness-config-envkey-to-embedding-001",
+        "harness-config-offline-deploy-realizes-embedding-001"
+      ]
+    },
+    {
+      "view_id": "generic-graph-rag-end-to-end-001",
+      "view_name": "通用 Graph RAG 端到端流程",
+      "parent_element_id": "coding-retrieval-graph-rag-001",
+      "parent_element_name": "Graph RAG 检索",
+      "description": "通用 Graph RAG 的写入/索引与查询/生成两段式参考流程；不是 ArchGraph 特有实现。",
+      "included_elements": [
+        "graphrag-flow-ingest-001",
+        "graphrag-flow-extract-001",
+        "graphrag-flow-index-001",
+        "graphrag-flow-query-001",
+        "graphrag-flow-retrieve-001",
+        "graphrag-flow-rerank-001",
+        "graphrag-flow-context-001",
+        "graphrag-flow-generate-001"
+      ],
+      "included_relationships": [
+        "graphrag-flow-sequence-1-001",
+        "graphrag-flow-sequence-2-001",
+        "graphrag-flow-sequence-3-001",
+        "graphrag-flow-sequence-4-001",
+        "graphrag-flow-sequence-5-001",
+        "graphrag-flow-sequence-6-001",
+        "graphrag-flow-sequence-7-001"
+      ]
+    },
+    {
+      "view_id": "federated-intent-graph-architecture-001",
+      "view_name": "联邦式意图图谱：Registry–Broker",
+      "parent_element_id": "1240",
+      "parent_element_name": "Application Cooperation Viewpoint",
+      "description": "中心管理成员与授权元数据，通过 broker 授权后读取成员图谱并返回引用；成员图保持主权与独立。",
+      "included_elements": [
+        "federation-center-app-v5-001",
+        "federation-broker-service-v5-001",
+        "federation-member-metadata-v5-001",
+        "federated-graph-reference-v5-001",
+        "federation-member-graph-a-v5-001",
+        "federation-member-graph-b-v5-001",
+        "design-federated-intent-graph-001",
+        "graph-mcp-interface-001"
+      ],
+      "included_relationships": [
+        "fed-center-composes-interface-v5-001",
+        "fed-interface-assigns-service-v5-001",
+        "fed-service-accesses-membership-v5-001",
+        "fed-service-reads-member-a-v5-001",
+        "fed-service-reads-member-b-v5-001",
+        "fed-service-returns-reference-v5-001",
+        "fed-reference-identifies-project-a-v5-001",
+        "fed-reference-identifies-project-b-v5-001"
+      ]
     }
   ]
 }
