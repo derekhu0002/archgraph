@@ -361,6 +361,7 @@
       <p class="kicker">01 · Install &amp; deploy</p>
       <h2>Two commands, and you're ready.</h2>
       <p class="lead">One <code class="inline">argo-deploy</code> registers the <strong>MCP server</strong> and installs the skills, rules, and agents into GitHub Copilot, Cursor, OpenCode, DeepSeek Harness, <strong>OpenClaw</strong>, and <strong>Codex</strong> — then walks you through a <code class="inline">~/.argo/.env</code> prompt (existing non-empty values are kept).</p>
+      <p class="lead" style="margin-top: 6px;">Native where it can be — for <strong>Codex</strong>, rules go to <code class="inline">~/.codex/AGENTS.md</code> (injected every session, so the wakeup gate is always active), skills to <code class="inline">~/.codex/skills/</code>, and <code class="inline">argo</code> + <code class="inline">graph-mcp</code> to <code class="inline">~/.codex/config.toml</code> — following the workspace you open.</p>
       <pre class="code">npm install -g archgraph-argo
 argo-deploy</pre>
       <p class="lead" style="margin-top: 18px;">Everything works out of the box except <strong>semantic (Graph RAG) queries</strong>, which need:</p>

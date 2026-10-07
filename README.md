@@ -43,6 +43,13 @@ ArchGraph deploys the ARGO toolchain to all major coding-agent environments:
 A single `argo-deploy` registers the `argo` MCP server and installs all artifacts into each harness
 automatically.
 
+For **Codex** (OpenAI Codex CLI / desktop), `argo-deploy` places the artifacts where Codex looks:
+the rules go to `~/.codex/AGENTS.md` (Codex injects the global `AGENTS.md` into every session, so the
+wakeup gate is always active), the `argo-init` and `ea-human-reconcile` skills go to
+`~/.codex/skills/`, and the `argo` and `graph-mcp` MCP servers are registered in
+`~/.codex/config.toml` (`[mcp_servers.*]`) — the `argo` server follows the workspace you open in
+Codex.
+
 ## Install
 
 ```powershell
