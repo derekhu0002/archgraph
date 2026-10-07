@@ -4322,7 +4322,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-07，分支 develop-separate-schema）。\n【目标与交付】按伙伴最新分层意见重做 Coding Agent 汇报PPT v4：docs/ppt/output/archgraph-coding-business-deck-v4-final.pptx；生成源 docs/ppt/build-coding-business-deck-v4.mjs + docs/ppt/content-plan-v4.json；代码与交付提交 69a5120。\n【架构决策】Business Layer 表达跨场景价值活动；Application Layer 表达通用 Coding Agent/Harness 组件。普通检索、传统 RAG、Graph RAG 都是 Context Access 内按需选择的应用能力，不是并列业务流程，也非 Harness 必选。指标映射业务环节→应用能力→Assessment。ArchGraph的业务层建设点是领域本体/意图图谱/指标关系；应用层建设点是 Graph MCP、知识写入治理、验收与溯源。\n【设计】P1跨业务价值流程；P2以六列泳道和编号连线表达业务层—应用层 Harness；P3展示 Graph 在两层的独特构建点；P4逐行交叉映射流程、能力、指标；P5把 Graph RAG 置于 Context Access 可选路径；P6局部测评/样本边界；联邦与指标/业界附录延续。全部图示使用可编辑原生形状。保留v1-v3。\n【验证】PPTX包与几何校验通过；v4 GWT验收通过；逐页渲染复核；npm test 709/709、0失败、0跳过；图谱验证通过。首轮全量测试曾有外部查询用例间歇性失败，独立与全量复跑均通过，按瞬态记录。\n【复用教训】架构图要显式标出层级与连线语义；检索实现要嵌入应用层 Context Access，避免误读成业务阶段。当前无未决交付阻塞。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-07）。\n【上一里程碑】Coding Agent 汇报PPT v4已交付：docs/ppt/output/archgraph-coding-business-deck-v4-final.pptx；源码 docs/ppt/build-coding-business-deck-v4.mjs + docs/ppt/content-plan-v4.json；代码提交69a5120，图谱提交58ef93c/4063369。v4测试与全量测试709/709通过，工作区干净。\n【本轮审视】伙伴要求所有架构图元素/关系与canonical模型一致。检视发现：当前PPT p1业务阶段序列不是模型里的Coding Agent会话状态机；p2自创Planner/Context Access/Tool Adapter等组件和阶段映射；p3跨层连接及p4业务→应用→指标交叉映射在图中都没有对应关系。模型已有UML2顶层状态机（Idle/Running/AwaitingUser/Stopped；Running子态另有视图）及状态/指标关联；Harness视图298真实建模了Graph读路径（default semantic retrieval→hybrid→rerank；projection/embedding serving retrieval；sync store→Cypher→community index）与写路径（validation→dedup→lossless→semantic projection）。\n【定位与价值】ArchGraph应讲为Application Layer中由MCP暴露、供宿主Coding Agent按需调用的项目知识/上下文能力，不是Harness核心执行循环，也不要求所有Agent使用RAG。但canonical模型尚无通用Coding Agent宿主/Harness—MCP—ArchGraph连接关系，需先补模型或严格限定PPT为已有模型子集。专家共享本体可改善意图对齐和检查证据，但图谱不等于实时全行为遥测；初级工程师沿图学习是合理价值假设，尚无测评证据。Graph traversal对显式关系/多跳任务有潜在优势，不可外推为普遍提升；94.6→98.7是内部检索排序R@1，不是Graph RAG端到端Coding提升。\n【外部背书】OpenAI Harness Engineering叙述强调人类设计环境、意图和反馈回路，以及用架构约束/linter/测试保持一致；“专家脑中有作战图”是对其案例的解释，不是原文事实。\n【待办】等伙伴选择是否先将通用业务价值流与应用集成关系建入canonical架构，再按模型生成PPT v5；否则只重画现有状态机与Harness视图覆盖部分。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4345,7 +4345,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-10-07",
-          "description": "Coding Agent 汇报PPT v4完成与全量验收"
+          "description": "Coding Agent PPT architecture-model alignment review; awaiting user choice on canonical model extension"
         },
         {
           "name": "commit",
