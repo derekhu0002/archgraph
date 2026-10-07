@@ -4340,7 +4340,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-07）。\n【目标与成果】按伙伴确认的叙事重做Coding Agent业务价值/ArchGraph测评PPT v5，所有架构图先建canonical模型并与模型关系一致。交付：docs/ppt/output/archgraph-coding-business-deck-v5-final-aligned.pptx；源码 docs/ppt/build-coding-business-deck-v5.mjs；内容计划 docs/ppt/content-plan-v5.json；提交 e01fa0b（图谱及PPT/测试），9a121f0（交付登记）。\n【叙事决策】先通用Business Layer价值流，再通用Application Layer Harness；普通检索/RAG/Graph RAG为按需上下文访问选项。随后呈现ArchGraph在MCP/图谱上下文服务中的位置、内部读写机制、阶段—应用能力—指标映射、Graph RAG业界参考流程、评测证据/边界、联邦知识图谱。专家本体协作是设计洞察；初级工程师成长是待验证价值；不宣称Graph RAG普遍优于其他检索。\n【模型】通过ARGO新增/扩展通用业务流程、Harness应用架构、ArchGraph读写、指标映射、Graph RAG参考、联邦架构视图；测试挂到模型元素和交付物，注册提交及产物路径。v4及更早交付保留。\n【验证】相关定向测试17/17通过；npm test 711项中710通过、1失败（memory-eval-run-baseline有一次TOOL_ERROR；与本次变更无关，单测重跑未能取得完整输出，待后续确认）。PPT finalizer 9页通过、未报告布局问题；本机最终字体渲染未验证。临时未跟踪目录 docs/ppt/.build-coding-v5/ 是渲染/验证产物，不属于交付。\n【后续】可在恢复端到端评测稳定后重跑全量npm test；如需调整PPT，保留v1-v4与现有v5，以新文件名生成修订版。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-07）。\n【目标与成果】完成Coding Agent业务价值/ArchGraph测评PPT v5，按伙伴反馈进一步重画第3页。最终版：docs/ppt/output/archgraph-coding-business-deck-v5-clarified-p3-r2.pptx；脚本 docs/ppt/build-coding-business-deck-v5.mjs；内容计划 docs/ppt/content-plan-v5.json。主交付提交 e01fa0b、登记提交 9a121f0；第3页修订提交 19b6f67。\n【第3页决策】把通用Coding Agent Harness放在ArchGraph边界外作为调用方，边界内明确标注“ARCHGRAPH框架提供”，分三条工作链：图谱校验→去重→无损写入→语义投影；默认语义检索→Hybrid→Rerank（后两者注明默认关闭，输入投影/Embedding标Serving）；结构同步→只读Cypher→社区索引（注明P1暂缓）。上方业务层按模型表达专家/开发者与领域本体Association；删除原来错误暗示业务流程—本体有直接关系的连线。所有关系、元素与状态遵守ARGO canonical视图。\n【验证】本次定向模型/交付/看护测试6/6通过。此前整库 npm test 为710/711，其中memory-eval-run-baseline一次TOOL_ERROR；不能归因本次改动，后续可重跑。9页PPT finalizer完成，现场查看第3页布局清晰；ARGO图谱校验已通过。\n【版本与提交】v1-v4、v5-final-aligned历史产物保留；最终修订版与源码、计划登记在交付元素。旧试稿已清理。\n【可复用认知】展示框架价值时，应使用清晰的框架边界、调用方位置及内部职责分区；强调映射前先逐项对照模型的relationship端点和类型，避免布局连接暗示不存在的关系。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -11550,7 +11550,7 @@
         },
         {
           "name": "ppt-v5",
-          "value": "docs/ppt/output/archgraph-coding-business-deck-v5-final-aligned.pptx"
+          "value": "docs/ppt/output/archgraph-coding-business-deck-v5-clarified-p3-r2.pptx"
         },
         {
           "name": "plan-v5",
@@ -11564,6 +11564,15 @@
           "name": "commit",
           "value": "e01fa0b",
           "description": "交付9页v5：通用业务流程→Harness应用层→ArchGraph位置→业务/应用/指标映射→Graph RAG参考流程→评测证据与边界→联邦图谱；原生可编辑架构图与Acceptance Tests"
+        },
+        {
+          "name": "ppt-v5-aligned-prior",
+          "value": "docs/ppt/output/archgraph-coding-business-deck-v5-final-aligned.pptx"
+        },
+        {
+          "name": "commit",
+          "value": "19b6f67",
+          "description": "docs/ppt/build-coding-business-deck-v5.mjs; docs/ppt/content-plan-v5.json; docs/ppt/output/archgraph-coding-business-deck-v5-clarified-p3-r2.pptx; tests/coding-business-deck-v5.test.js（重构第3页，明确ArchGraph框架边界与三条工作链）"
         }
       ],
       "description": "9页16:9可编辑PPTX v4：docs/ppt/output/archgraph-coding-business-deck-v4-final.pptx。将通用业务价值流定位为 Business Layer，将通用 Coding Agent/Harness 架构定位为 Application Layer；普通检索、RAG 与 Graph RAG 是 Context Access 内的可选实现；指标映射到业务活动与应用组件。生成器 docs/ppt/build-coding-business-deck-v4.mjs；计划 docs/ppt/content-plan-v4.json。历史交付保留：v3 docs/ppt/output/archgraph-coding-business-deck-v3-final.pptx，生成器 docs/ppt/build-coding-business-deck-v3.mjs，计划 docs/ppt/content-plan-v3.json；v2 docs/ppt/output/archgraph-coding-business-deck-v2-final4.pptx，生成器 docs/ppt/build-coding-business-deck-v2.mjs，计划 docs/ppt/content-plan-v2.json；v1 docs/ppt/archgraph-coding-business-deck.pptx。",
@@ -12041,6 +12050,11 @@
           "name": "commit",
           "value": "e01fa0b",
           "description": "archgraph.qea; design/KG/SystemArchitecture.json; docs/ppt/build-coding-business-deck-v5.mjs; docs/ppt/content-plan-v5.json; docs/ppt/output/archgraph-coding-business-deck-v5-final-aligned.pptx"
+        },
+        {
+          "name": "commit",
+          "value": "19b6f67",
+          "description": "docs/ppt/build-coding-business-deck-v5.mjs; docs/ppt/output/archgraph-coding-business-deck-v5-clarified-p3-r2.pptx; tests/coding-business-deck-v5.test.js（明确框架边界、MCP入口、写入治理/语义检索/结构查询职责）"
         }
       ]
     },
