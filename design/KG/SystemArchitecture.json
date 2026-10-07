@@ -4640,6 +4640,11 @@
           "name": "commit",
           "value": "3658f20",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（T1 摘要：archgraph-argo-beta@0.27.0-beta.15 Codex 重启后验收）"
+        },
+        {
+          "name": "commit",
+          "value": "fe7f2bc",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-10-07 Coding 业务价值汇报 PPT 复审工作记忆摘要）"
         }
       ],
       "testcases": [
