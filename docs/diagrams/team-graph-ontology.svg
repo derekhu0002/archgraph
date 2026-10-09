@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1000 520" role="img" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4d6bfe"/></marker><marker id="arm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#5b6472"/></marker><marker id="ars" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0f9d58"/></marker><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08"/></filter></defs>
+<rect x="0" y="0" width="1000" height="520" fill="#f5f7fa"/>
+<text x="50" y="62" font-size="26" fill="#0f172a" text-anchor="start" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Team Graph 本体</text>
+<text x="50" y="92" font-size="14" fill="#5b6472" text-anchor="start" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">元素类型与合法关系端点（默认 schema / 自定义 schema 通用）</text>
+<text x="180" y="114" font-size="11" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">element type</text>
+<rect x="50" y="122" width="260" height="104" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="64" y="138" width="9" height="72" rx="5" fill="#4d6bfe" stroke="none" stroke-width="1.5"/>
+<text x="186" y="168" font-size="19" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Agent Node</text>
+<text x="186" y="194" font-size="13" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Agent 节点</text>
+<rect x="210" y="190" width="86" height="24" rx="12" fill="#e7f6ee" stroke="#0f9d58" stroke-width="1"/>
+<text x="253" y="207" font-size="12" fill="#0f9d58" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">· actor ·</text>
+<text x="500" y="114" font-size="11" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">element type</text>
+<rect x="370" y="122" width="260" height="104" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="384" y="138" width="9" height="72" rx="5" fill="#4d6bfe" stroke="none" stroke-width="1.5"/>
+<text x="506" y="168" font-size="19" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Team Node</text>
+<text x="506" y="194" font-size="13" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Team 节点</text>
+<text x="820" y="114" font-size="11" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">element type</text>
+<rect x="690" y="122" width="260" height="104" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="704" y="138" width="9" height="72" rx="5" fill="#4d6bfe" stroke="none" stroke-width="1.5"/>
+<text x="826" y="168" font-size="19" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Service Node</text>
+<text x="826" y="194" font-size="13" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Service 节点</text>
+<text x="50" y="296" font-size="18" fill="#0f172a" text-anchor="start" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">关系类型与合法端点</text>
+<rect x="50" y="312" width="430" height="150" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="50" y="312" width="430" height="42" rx="12" fill="#eef1ff" stroke="none" stroke-width="1.5"/>
+<rect x="50" y="342" width="430" height="12" rx="0" fill="#eef1ff" stroke="none" stroke-width="1.5"/>
+<text x="68" y="339" font-size="16" fill="#4d6bfe" text-anchor="start" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Assigned To</text>
+<text x="68" y="388" font-size="14" fill="#0f172a" text-anchor="start" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Agent  ↔  Team</text>
+<text x="68" y="414" font-size="14" fill="#0f172a" text-anchor="start" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">合法端点：Agent → Team</text>
+<text x="68" y="440" font-size="14" fill="#0f172a" text-anchor="start" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">　　　　　　Team → Agent</text>
+<rect x="520" y="312" width="430" height="150" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="520" y="312" width="430" height="42" rx="12" fill="#eef1ff" stroke="none" stroke-width="1.5"/>
+<rect x="520" y="342" width="430" height="12" rx="0" fill="#eef1ff" stroke="none" stroke-width="1.5"/>
+<text x="538" y="339" font-size="16" fill="#4d6bfe" text-anchor="start" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Depends On</text>
+<text x="538" y="388" font-size="14" fill="#0f172a" text-anchor="start" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Team → { Service, Team }</text>
+<text x="538" y="414" font-size="14" fill="#0f172a" text-anchor="start" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Service → Service</text>
+<text x="538" y="440" font-size="14" fill="#0f172a" text-anchor="start" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Agent → { Team, Service }</text>
+<rect x="760" y="472" width="190" height="36" rx="10" fill="#ffffff" stroke="#0f9d58" stroke-width="1.5"/>
+<text x="855" y="495" font-size="14" fill="#0f9d58" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">maxElementsPerView = 12</text>
+</svg>

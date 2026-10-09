@@ -1,221 +1,121 @@
 # ArchGraph
 
-An architecture-graph driven framework for Agentic Engineering.
+**A knowledge-graph framework with an ontology you define — wired into your coding agent through one MCP interface.**
+
+ArchGraph gives coding agents durable, tiered long-term memory on an intent architecture graph that both you and the agent read and write through a single **MCP** server. The built-in default ontology is **ArchiMate 3.2**, but a repository can plug in its own — and this one does.
+
+[Install](#install) · [Quick start](#quick-start) · [Capabilities](#capabilities) · [Docs](#docs) · [Community](#community)
+
+![ArchGraph core model — one graph for the agent's memory and the product's design](docs/diagrams/core-model.svg)
 
 ## What is this?
 
-ArchGraph builds a **unified language** that puts harness design and target product design into
-**one model** — so you get a single view to work and observe, and real control over your agents.
+If you run coding agents on a real codebase, every session starts cold and the "why" behind the system lives nowhere. ArchGraph makes **one architecture graph** the single source of truth — the agent's memory and the product's design in one model. It is *one MCP interface* to install and learn: the agent restores context at session start, recalls detail on demand, and never duplicates what it already knows.
 
-It doubles as a **long-term memory for coding agents**: an ArchiMate 3.2 intent graph exposed through
-a single read/write MCP interface. Memory is tiered — a compact working memory restored at session
-start, a long-term memory recalled on demand — and writes are deduplicated, so the graph stays clean
-and semantic recall stays precise. Reusable subgraphs can also be shared across projects through a
-federated registry, and any read tool can take an optional <code>projectId</code> to query
-**another project's graph** through the federation center — authorized, read-only, and by
-reference (denied by default). See the [home page](https://archgraph.org/) for the full capability set.
+- **Architects / tech leads** — one model of the product, the harness, and the agents.
+- **Agent users** — memory restored at session start, recalled on demand, never duplicated.
+- **Platform teams** — one interface, deployed into the editor you already use.
 
-![ArchGraph core model — harness design and product design in one graph](docs/diagrams/core-model.svg)
+→ Full onboarding: **[docs/getting-started.html](docs/getting-started.html)**
 
-## Architecture
+## Bring your own ontology
 
-The global architecture (Layered Viewpoint) shows how the human, the coding agent, ARGO MCP, the
-intent architecture graph, ArchiMate 3.2, and Enterprise Architect relate in graph-driven agentic
-engineering:
+A knowledge-graph framework that speaks only one language is not a framework. ArchGraph separates the **core** from the **ontology**: a repository drops a *schema bundle* under `.argo/schema/` (element/relationship types, endpoint rules, an actor contract, an optional guide), and validation, MCP guidance, and the `.qea` projection follow it. A bundle can `extends` the built-in default and add its own types — no framework change required.
 
-![Global architecture — Layered Viewpoint](docs/diagrams/global-architecture.svg)
+This repository is the proof: its own schema **extends ArchiMate 3.2 with a UML 2 state-machine profile**, resolved at runtime from `.argo/schema/` rather than hardcoded in the framework.
 
-Editable source: [`scripts/gen-diagrams.js`](scripts/gen-diagrams.js)
-
-## Supported Harnesses
-
-ArchGraph deploys the ARGO toolchain to all major coding-agent environments:
-
-| Harness            | MCP Server | Skills | Rules / Instructions | Agents | Wakeup Gate |
-|--------------------|:----------:|:------:|:--------------------:|:------:|:-----------:|
-| GitHub Copilot     |     ✓      |   ✓    |          ✓           |   ✓    |      —      |
-| Cursor             |     ✓      |   ✓    |          ✓           |   ✓    |      —      |
-| OpenCode           |     ✓      |   ✓    |          ✓           |   ✓    |     ✓       |
-| DeepSeek Harness   |     ✓      |   ✓    |          ✓           |   ✓    |     ✓       |
-| OpenClaw           |     ✓      |   ✓    |          ✓           |   —    |     ✓       |
-| Codex              |     ✓      |   ✓    |          ✓           |   —    |     ✓       |
-
-A single `argo-deploy` registers the `argo` MCP server and installs all artifacts into each harness
-automatically.
-
-For **Codex** (OpenAI Codex CLI / desktop), `argo-deploy` places the artifacts where Codex looks:
-the rules go to `~/.codex/AGENTS.md` (Codex injects the global `AGENTS.md` into every session, so the
-wakeup gate is always active), the `argo-init` and `ea-human-reconcile` skills go to
-`~/.codex/skills/`, and the `argo` and `graph-mcp` MCP servers are registered in
-`~/.codex/config.toml` (`[mcp_servers.*]`) — the `argo` server follows the workspace you open in
-Codex.
+→ Worked example — define an ontology, then build the graph step by step: **[docs/case-team-graph.html](docs/case-team-graph.html)** · runnable bundle: [`custom-schema/`](custom-schema/README.md)
 
 ## Install
 
-```powershell
+```bash
 npm install -g archgraph-argo
 argo-deploy
 ```
 
-Done &mdash; the ARGO toolchain, skills, and rules are deployed, and the `argo` MCP server is registered automatically in **GitHub Copilot**, **Cursor**, **OpenCode**, **DeepSeek Harness** (dsh), **OpenClaw**, and **Codex**.
+`argo-deploy` registers the `argo` MCP server and installs the skills and rules into **GitHub Copilot, Cursor, OpenCode, DeepSeek Harness, OpenClaw, and Codex** (agents are installed where the host supports them). It then prompts for the few settings in `~/.argo/.env`. Semantic queries additionally need **Neo4j** and an **embedding** endpoint — see [Quick start](#quick-start).
 
-### Prerequisites and configuration
+## Quick start
 
-Everything works out of the box except **semantic (Graph RAG) queries**, which need:
+```bash
+# in a fresh project, ask your coding agent to run:
+argo init        # the initializeWorkspace MCP call
+```
 
-- **Neo4j graph database** — stores the structural projection of your architecture graph. During
-  `argo-deploy` you configure `ARGO_NEO4J_DATABASE_URL`, `ARGO_NEO4J_DATABASE_USERNAME`, and
-  `ARGO_NEO4J_DATABASE_PASSWORD` in `~/.argo/.env`.
-- **Embedding / vector engine** — powers semantic Graph RAG retrieval. Configure
-  `ARGO_EMBEDDING_BASE_URL`, `ARGO_EMBEDDING_MODEL`, `ARGO_EMBEDDING_PROVIDER`,
-  `ARGO_EMBEDDING_MODEL_VERSION`, `ARGO_EMBEDDING_DIMENSIONS`, plus the API key `QWEN_KEY`.
-  It points at **any OpenAI-compatible embedding endpoint** — a cloud provider, or a self-hosted
-  server for offline / intranet / private deployments via `ARGO_EMBEDDING_PROFILE=openai-compatible`
-  (see the [self-hosted embedding guide](docs/self-hosted-embedding-deployment.md)).
+`argo init` creates the starter `design/KG/SystemArchitecture.json` when missing, runs the first JSON → Neo4j sync, and initializes the semantic lifecycle. From then on the intent graph is the single source of truth: the agent locates the element behind a task, works test-first (GIVEN-WHEN-THEN), and registers each commit back onto the element it changed.
 
-Where do the values come from? The Neo4j credentials come from the Neo4j instance you own or
-provision (URI, username, password). The embedding configuration and `QWEN_KEY` come from your
-embedding provider's dashboard — for example Alibaba DashScope — or from a self-hosted
-OpenAI-compatible server. `argo-deploy` walks you through the prompt (existing non-empty values in
-`~/.argo/.env` are kept); you can also edit the file afterwards and re-run.
+**The one prerequisite that is not out of the box:** semantic (Graph RAG) retrieval needs a **Neo4j** instance and an OpenAI-compatible **embedding** endpoint. Context reads, writes, and Enterprise Architect interop work without them; the Cypher structural projection and all semantic retrieval need Neo4j.
+
+## Capabilities
+
+Each line links to a short page — this is the map, not the manual.
+
+- **[Tiered long-term memory](docs/capabilities.html#memory)** — a compact working memory at session start, a long-term memory recalled on demand, and an archive.
+- **[Pluggable ontology](docs/capabilities.html#ontology)** — ship your own schema bundle; the default ArchiMate 3.2 is data, not code.
+- **[Semantic + structural retrieval](docs/capabilities.html#retrieval)** — Graph RAG recall plus read-only Cypher for exact structure.
+- **[Deduplicated writes](docs/capabilities.html#quality)** — reuse an existing element, relationship, or view instead of copying it; near-duplicates are blocked as candidates.
+- **[Acceptance-test-first + traceability](docs/capabilities.html#quality)** — every change is testable, and the commit id is registered back onto the element.
+- **[Enterprise Architect interop](docs/capabilities.html#interop)** — the graph projects to `.qea`; human EA edits return as a semantic diff.
+- **[Federated graph sharing](docs/capabilities.html#federation)** — sovereign graphs joined by a registry–broker; reads authorized and returned by reference.
+- **[One MCP interface, six hosts](docs/capabilities.html#harness)** — install once, run in Copilot, Cursor, OpenCode, DeepSeek Harness, OpenClaw, and Codex.
 
 ## How to use
 
-**Step 0 — initialize the workspace.** In a fresh project, ask your coding agent to run `argo init`
-(the `initializeWorkspace` MCP call). It creates a starter `design/KG/SystemArchitecture.json` when
-missing, performs the first JSON → Neo4j sync, initializes the semantic (Graph RAG) lifecycle, and
-verifies the architecture. From then on, the intent graph is the source of truth for the project.
-
-After installing, open your project and start a coding agent. It will:
+**Initialize once** (`argo init`), then open your project and let your coding agent work. It will:
 
 1. locate the architecture element behind the task before changing anything,
 2. arm itself with that element's Skills and Rules,
-3. work test-first (GIVEN-WHEN-THEN), and trace every commit back to the graph,
-4. reuse an existing element, relationship, or view instead of creating a duplicate — the write path
-   deduplicates by identity and flags a semantically near element of the same type.
+3. work test-first (GIVEN-WHEN-THEN) and trace every commit back to the graph,
+4. reuse an existing element instead of creating a duplicate.
 
-The intent architecture graph — modelled in **ArchiMate 3.2** — is the single source of truth.
+The intent architecture graph is the single source of truth.
 
-## The federation model
+## Supported Harnesses
 
-ArchGraph is a **federated intent graph**, not one big distributed graph. Every project owns a
-complete, **sovereign** canonical graph (`design/KG/SystemArchitecture.json`) and stays the single
-source of truth for its own model — nothing is split, sharded, or merged into a central super-graph.
+| Harness | MCP | Skills | Rules | Agents |
+|---------|:---:|:------:|:-----:|:------:|
+| GitHub Copilot    | ✓ | ✓ | ✓ | ✓ |
+| Cursor            | ✓ | ✓ | ✓ | ✓ |
+| OpenCode          | ✓ | ✓ | ✓ | ✓ |
+| DeepSeek Harness  | ✓ | ✓ | ✓ | ✓ |
+| OpenClaw          | ✓ | ✓ | ✓ | — |
+| Codex             | ✓ | ✓ | ✓ | — |
 
-Projects **co-build** by federation: a member **self-registers** with the federation center, others
-**discover** it, reads are **explicitly authorized and denied by default**, and a cross-project read
-returns a **reference, not a copy**. The center holds only federation metadata — membership,
-capabilities, interfaces, grants — plus a read-only mirror: it is a **registry + broker**, never the
-content.
-
-The pattern is **Registry–Broker Federation over sovereign knowledge graphs**: self-registration +
-discovery + capability-based authorization + reference-not-copy, mediated by a broker. It is
-*federated*, not "distributed" — a distributed model would mean one logical graph partitioned across
-nodes, which is exactly what this design avoids.
+A single `argo-deploy` registers the `argo` MCP server and installs all artifacts into each harness automatically.
 
 ## Cross-project read/write
 
 Cross-project access runs over **two separate channels** — they must not be conflated:
 
-1. **Local path channel** — a read tool takes a per-call `workspaceRoot` (an absolute path) to read a
-   **peer project's graph on the same machine**. Writes are *not* allowed over this channel: the
-   server refuses a write targeting a foreign workspace with `WORKSPACE_WRITE_DENIED`. Cross-project
-   access is **read-only by design**.
-2. **Federated channel** — a read tool takes a `projectId` and the call is routed through the
-   federation center, authorized there (denied by default), and returned **by reference**.
+1. **Local path** — a per-call `workspaceRoot` reads a peer project's graph on the same machine. Writes are **read-only by design**: a foreign write is refused with `WORKSPACE_WRITE_DENIED`.
+2. **Federated** — a per-call `projectId` is routed through the **federation center**, authorized there (denied by default), and returned by reference.
 
-Whether channel 1 is usable at all depends on the **harness**, because a harness may bridge the MCP
-server and pin the workspace per call. Local cross-project read/write status by harness:
+Whether the local channel works depends on the harness, because a harness may bridge the MCP server and pin the workspace per call:
 
-| Harness           | Local cross-project read (`workspaceRoot`) | Local cross-project write | Federated read (`projectId`) | Federated write |
-|-------------------|:------------------------------------------:|:-------------------------:|:----------------------------:|:---------------:|
-| OpenCode          |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) |              ✓               |       —         |
-| Codex             |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) |              ✓               |       —         |
-| DeepSeek Harness  |                    ✗                       |             ✗             |              ✓               |       —         |
-| GitHub Copilot    |                    ✓                       |    blocked (`WORKSPACE_WRITE_DENIED`) |              ✓               |       —         |
-| Cursor            |                  待测                      |           待测            |              ✓               |       —         |
-| OpenClaw          |                 不涉及                     |          不涉及           |              ✓               |       —         |
+| Harness | Local read (`workspaceRoot`) | Local write | Federated read (`projectId`) |
+|---------|:----------------------------:|:-----------:|:----------------------------:|
+| OpenCode         | ✓ | blocked (`WORKSPACE_WRITE_DENIED`) | ✓ |
+| Codex            | ✓ | blocked (`WORKSPACE_WRITE_DENIED`) | ✓ |
+| DeepSeek Harness | ✗ | ✗ | ✓ |
+| GitHub Copilot   | ✓ | blocked (`WORKSPACE_WRITE_DENIED`) | ✓ |
+| Cursor           | 待测 | 待测 | ✓ |
+| OpenClaw         | 不涉及 | 不涉及 | ✓ |
 
-"Local" = another project's graph on **this** machine, addressed by absolute path. "Federated" =
-another member's graph through the center, addressed by `projectId`. The center is a
-**registry + broker**: it has **no** cross-project write path.
-
-**GitHub Copilot host verification (2026-10-08, direct ARGO MCP calls):**
-
-- **This project (`archgraph`) local read:** passed. The canonical graph validated, and the local
-  Neo4j projection reported **402 elements / 298 relationships / 90 views**.
-- **This project local write:** an add-element dry-run passed (`written: false`); no persistent
-  write was made because the graph and `.qea` already had unrelated uncommitted changes.
-- **Local cross-project read:** passed against `D:\Projects\SOC-DEMO` using `workspaceRoot`.
-  SOC-DEMO's graph validated and its local projection reported **393 elements / 501 relationships /
-  100 views**.
-- **Local cross-project write:** a dry-run passed but did not write. A real add-element call against
-  SOC-DEMO was rejected with `WORKSPACE_WRITE_DENIED`; a follow-up query confirmed the probe was
-  absent and the graph counts were unchanged.
-- **Federated read:** the `projectId` read route succeeded for the `archgraph` mirror
-  (`namespaceKey=proj:archgraph`), which returned **314 / 117 / 70**, differing from the local
-  canonical graph. A separate read of `SOC-DEMO` as `archgraph` was denied (`not_authorized`)
-  because no grant for that pair was present; federation reads remain subject to per-project grants.
-- **Federated write:** not applicable; the federation channel has no write path. A direct attempt
-  to invoke `applySystemArchitectureMutation` through the read broker was rejected with
-  `tool_not_allowed:applySystemArchitectureMutation`.
-
-These are direct calls from the GitHub Copilot host, not results inferred from the DeepSeek Harness.
-No persistent graph writes were made during this verification.
-
-### Why DeepSeek Harness (dsh) cannot do local cross-project read/write
-
-The `dsh-argo-workspace` bridge registers every ARGO tool as `mcp__argo__*` and, on **each call**,
-injects the session workspace — after spreading the model's arguments, so a model-supplied value can
-never win:
-
-```js
-injected.workspaceRoot = sessionCwd          // the session workspace
-injected.sessionWorkspaceRoot = sessionCwd   // broker-only trusted channel
-```
-
-Consequences, observed on this machine:
-
-- **Local cross-project read is unreachable.** Asking for another project's graph by absolute path
-  silently reads the **session** workspace instead — the request never reaches the server as written.
-- **Local cross-project write is impossible.** Every write lands in the session workspace. A write
-  tool call targeting `D:\Projects\SOC-DEMO`, and even `initializeWorkspace` (the one write tool with
-  no `dryRun`, no schema allow-list), returned `workspaceRoot: "D:\Projects\archgraph"`: the target
-  project was never touched.
-- **`WORKSPACE_WRITE_DENIED` never fires on dsh.** Because the bridge *pins* the workspace to the
-  session workspace, the guard's target and its home compare equal and it takes the allow branch. The
-  write boundary is enforced by the bridge pinning, **not** by the guard's deny branch — that branch
-  is exercised only outside a bridged host (e.g. the direct-MCP unit test), so under dsh the guard's
-  denial path has **no** on-host verification.
-
-Net: on DeepSeek Harness the local cross-project channel is **dead in both directions** (safe, but
-unavailable), and only the federated `projectId` channel works.
-
-### What does work: federated reads
-
-Federated reads are verified live: a member holding a grant can read another member's graph through
-the center (`database=abot`, returned by reference with a `namespaceKey`), while an unauthorized or
-unregistered requester is refused (`denied`).
-
-Two caveats when reading the column above: the federation center takes the `requester` identity as a
-**self-declared string** — it is not authenticated, so a caller that names a granted member is
-treated as that member (the authorization matrix itself behaves correctly: denied by default, and an
-explicit grant is required). The GitHub Copilot results above reflect the current `archgraph`
-identity and grants at test time; in particular, its federated read of `SOC-DEMO` is denied.
+DeepSeek Harness **cannot** do local cross-project access: its bridge pins the session workspace, so the request never reaches the server as written and only the federated channel works.
 
 ## Community
 
-ArchGraph runs on open co-building. Join the community hub to share, browse and reuse **architecture
-subgraphs** across projects, and follow the governance & contribution guides:
+ArchGraph runs on open co-building: share and reuse **architecture subgraphs** across projects. Sharing is **federated** — each project keeps its graph sovereign, and members register, discover, authorize, and read opened content **by reference** (denied by default; nothing copied or merged). The center is a **registry–broker** that holds federation metadata, never content.
 
-- **Community site** — https://argo.derekworkspacev5.com/archgraph/ (subgraph library, docs, blog)
-- **graph-wiki repository** — https://github.com/derekhu0002/graph-wiki (graph-asset home: contribute
-  a subgraph from your project, or pull one back to reuse)
+- **Community site** — https://argo.derekworkspacev5.com/archgraph/
+- **graph-wiki** (graph-asset home) — https://github.com/derekhu0002/graph-wiki
+- **GitHub** — https://github.com/derekhu0002/archgraph
 
-Sharing is **federated**: each project keeps its own graph sovereign and publishes subgraphs to a
-registry, where other members register, discover, and read opened content **by reference** —
-register, discover, authorize, read. Access is **denied by default**, and nothing is copied or merged.
-Browse the [federation members](https://argo.derekworkspacev5.com/archgraph/federation).
+## Docs
+
+- [Getting started](docs/getting-started.html) · [Capabilities](docs/capabilities.html) · [Worked case: Team Graph](docs/case-team-graph.html)
+- [Schema bundles / ontology decoupling](docs/schema-bundle-decoupling.md) · [Self-hosted embeddings](docs/self-hosted-embedding-deployment.md) · [MCP acceptance](docs/mcp-acceptance.md)
+- [Insights](docs/insights.html) — GraphRAG, agent memory, and portable skills.
 
 ## License
 

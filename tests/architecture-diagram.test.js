@@ -7,16 +7,17 @@ const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const README = readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+const CAPABILITIES_PAGE = readFileSync(path.join(ROOT, 'docs', 'capabilities.html'), 'utf8');
 const SVG_PATH = path.join(ROOT, 'docs', 'diagrams', 'global-architecture.svg');
 const CORE_MODEL_SVG_PATH = path.join(ROOT, 'docs', 'diagrams', 'core-model.svg');
 const GENERATOR_PATH = path.join(ROOT, 'scripts', 'gen-diagrams.js');
 const CAPABILITY_SVGS = ['cap-federation.svg', 'cap-memory-tiers.svg', 'cap-lean-reads.svg'];
 
-test('architecture-diagram: Layered Viewpoint diagram embedded in README', () => {
-  // GIVEN the project documents its global architecture
-  // WHEN a reader opens the README Architecture section
+test('architecture-diagram: Layered Viewpoint diagram embedded in the capabilities page', () => {
+  // GIVEN the project documents its global architecture (detail now lives on the capabilities page)
+  // WHEN a reader opens the capabilities page
   // THEN it embeds a dark Layered Viewpoint diagram expressing the relationships among 人类, AGENT, ARGO MCP, graph, ArchiMate 3.2, EA and Neo4j
-  assert.match(README, /docs\/diagrams\/global-architecture\.svg/, 'README should embed the architecture diagram');
+  assert.match(CAPABILITIES_PAGE, /diagrams\/global-architecture\.svg/, 'capabilities page should embed the architecture diagram');
   assert.ok(existsSync(SVG_PATH), 'the SVG diagram should exist');
   assert.ok(existsSync(GENERATOR_PATH), 'the reproducible diagram generator (editable source) should exist');
 

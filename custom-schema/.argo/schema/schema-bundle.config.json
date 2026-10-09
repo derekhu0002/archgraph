@@ -5,6 +5,7 @@
   "language": "Team Graph",
   "actorElementType": "Agent Node",
   "guide": "GUIDE.md",
+  "rules": "schema-bundle.rules.json",
   "deliveryDependencies": {
     "sourceDependsOnTarget": ["Depends On", "Assigned To"],
     "targetDependsOnSource": []

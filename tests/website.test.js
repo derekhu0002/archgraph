@@ -2,49 +2,41 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
+const { readFileSync, existsSync } = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const HTML = readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 
+function slice(fromId, toId) {
+  const a = HTML.indexOf('id="' + fromId + '"');
+  const b = HTML.indexOf('id="' + toId + '"');
+  return a >= 0 && b > a ? HTML.slice(a, b) : '';
+}
+
 test('layout-style: tech-simple dark layout with nav, hero and sections', () => {
   // GIVEN the project website is published
   // WHEN a visitor opens the homepage in a browser
-  // THEN the page renders a tech-simple layout: nav bar, hero, title and sectioned content in a light theme
+  // THEN the page renders a dark tech-simple layout: nav bar, hero, title and sectioned content
   assert.match(HTML, /<nav\b/, 'page should have a top navigation bar');
   assert.match(HTML, /class="hero"/, 'page should have a hero section');
-  assert.match(
-    HTML,
-    /<h1[\s\S]*?ArchGraph/,
-    'hero should show the project name'
-  );
+  assert.match(HTML, /<h1[\s\S]*?ArchGraph/, 'hero should show the project name');
   const sections = HTML.match(/<section\b/g) || [];
   assert.ok(sections.length >= 4, 'page should have at least 4 content sections');
   assert.match(HTML, /data-theme="dark"/, 'page should declare a dark tech theme');
 });
 
-test('install-section: homepage shows npm install/deploy near the top', () => {
-  // GIVEN the ARGO toolchain is published as an npm package
-  // WHEN a visitor opens the homepage
-  // THEN an Install section appears right after About, showing the install/deploy commands and a one-line Neo4j + vector engine note
-  assert.match(HTML, /id="install"/, 'page should have an Install section');
-  assert.ok(
-    HTML.indexOf('id="install"') > HTML.indexOf('id="about"') &&
-    HTML.indexOf('id="install"') < HTML.indexOf('id="howto"'),
-    'Install section should appear right after About'
-  );
-  assert.match(HTML, /npm install -g archgraph-argo/, 'should show the npm install command');
-  assert.match(HTML, /argo-deploy/, 'should show the deploy command');
-  assert.match(HTML, /Neo4j/, 'should mention Neo4j');
-  assert.match(HTML, /vector engine/, 'should mention the vector engine');
-  assert.match(HTML, /ARGO_NEO4J_DATABASE_URL/, 'should list the Neo4j .env key');
-  assert.match(HTML, /ARGO_EMBEDDING_MODEL/, 'should list an embedding .env key');
-  assert.match(HTML, /QWEN_KEY/, 'should mention the embedding API key');
+test('hero-positioning: homepage headlines the knowledge-graph framework and own-ontology value', () => {
+  // GIVEN the homepage is the primary landing page
+  // WHEN a visitor reads the hero
+  // THEN it names the knowledge-graph framework, the ontology-you-define differentiator, and MCP
+  assert.match(HTML, /knowledge-graph framework/i, 'hero should name the knowledge-graph framework');
+  assert.match(HTML, /ontology you define/i, 'hero should headline the customizable ontology');
+  assert.match(HTML, /MCP/, 'hero should name the MCP interface');
 });
 
 test('about-image: homepage embeds the core-model diagram under What is this?', () => {
-  // GIVEN the project positions itself as a unified language for harness and product design
+  // GIVEN the project positions itself as one model for the agent memory and the product design
   // WHEN a visitor opens the homepage
   // THEN the What is this? section embeds the core-model diagram
   assert.match(HTML, /docs\/diagrams\/core-model\.svg/, 'homepage should embed the core-model diagram');
@@ -53,6 +45,58 @@ test('about-image: homepage embeds the core-model diagram under What is this?', 
     HTML.indexOf('docs/diagrams/core-model.svg') < HTML.indexOf('id="install"'),
     'diagram should appear inside the What is this? section'
   );
+});
+
+test('install-section: homepage shows npm install/deploy and the semantic prerequisite', () => {
+  // GIVEN the ARGO toolchain is published as an npm package
+  // WHEN a visitor opens the homepage
+  // THEN the Install section appears after About and before How to use, showing the commands and the Neo4j + embedding note
+  assert.match(HTML, /id="install"/, 'page should have an Install section');
+  assert.ok(
+    HTML.indexOf('id="install"') > HTML.indexOf('id="about"') &&
+    HTML.indexOf('id="install"') < HTML.indexOf('id="howto"'),
+    'Install section should appear after About and before How to use'
+  );
+  const section = slice('install', 'howto');
+  assert.match(section, /npm install -g archgraph-argo/, 'should show the npm install command');
+  assert.match(section, /argo-deploy/, 'should show the deploy command');
+  assert.match(section, /Neo4j/, 'should mention Neo4j');
+  assert.match(section, /embedding/i, 'should mention the embedding endpoint');
+  assert.match(section, /OpenClaw/, 'should mention OpenClaw');
+});
+
+test('capabilities-teaser: homepage outlines capabilities and links the detail page', () => {
+  // GIVEN capabilities detail has moved to a dedicated page
+  // WHEN a visitor opens the homepage
+  // THEN a Capabilities section (after About, before Install) names the key capabilities and links the detail page
+  assert.match(HTML, /id="capabilities"/, 'page should have a Capabilities section');
+  assert.ok(
+    HTML.indexOf('id="capabilities"') > HTML.indexOf('id="about"') &&
+    HTML.indexOf('id="capabilities"') < HTML.indexOf('id="install"'),
+    'Capabilities should appear after About and before Install'
+  );
+  const section = slice('capabilities', 'install');
+  assert.match(section, /long-term memory/i, 'should frame the graph as an agent long-term memory');
+  assert.match(section, /deduplicat/i, 'should state write deduplication');
+  assert.match(section, /semantic/i, 'should mention semantic retrieval');
+  assert.match(section, /Enterprise Architect|\.qea/, 'should mention Enterprise Architect interop');
+  assert.match(section, /docs\/capabilities\.html/, 'should link the capabilities detail page');
+  for (const host of ['Copilot', 'Cursor', 'OpenCode', 'DeepSeek', 'OpenClaw', 'Codex']) {
+    assert.match(section, new RegExp(host), `should mention ${host}`);
+  }
+});
+
+test('ontology-section: homepage headlines pluggable ontology without the placeholder name', () => {
+  // GIVEN the ontology is the headline differentiator
+  // WHEN a visitor opens the homepage
+  // THEN an Ontology section names schema bundles + extends and links the worked case
+  assert.match(HTML, /id="ontology"/, 'page should have an Ontology section');
+  const section = slice('ontology', 'capabilities');
+  assert.match(section, /schema bundle/i, 'should name the schema bundle');
+  assert.match(section, /\.argo\/schema/, 'should point at .argo/schema/');
+  assert.match(section, /extends/, 'should mention the extends mechanism');
+  assert.match(section, /docs\/case-team-graph\.html/, 'should link the worked case page');
+  assert.doesNotMatch(HTML, /Acme/, 'homepage should not surface the internal placeholder bundle name');
 });
 
 test('capability-diagrams: homepage spotlights the capability illustrations', () => {
@@ -64,35 +108,6 @@ test('capability-diagrams: homepage spotlights the capability illustrations', ()
   }
 });
 
-test('openclaw-support: homepage mentions OpenClaw in install', () => {
-  // GIVEN ArchGraph has been adapted for OpenClaw (WP 2780 completed)
-  // WHEN a visitor opens the homepage
-  // THEN the Install section mentions OpenClaw support
-  assert.match(HTML, /OpenClaw/, 'homepage should mention OpenClaw');
-});
-
-test('community-linkage: homepage links the community site and graph-wiki asset repo', () => {
-  // GIVEN a dedicated ArchGraph community hub and graph-wiki asset repository exist
-  // WHEN a visitor opens the homepage
-  // THEN the nav, hero and a Community section link to the community site and the graph-wiki repo
-  assert.match(HTML, /#community/, 'nav should link to the Community section');
-  assert.match(
-    HTML,
-    /argo\.derekworkspacev5\.com\/archgraph\//,
-    'homepage should link the ArchGraph community site'
-  );
-  assert.match(
-    HTML,
-    /github\.com\/derekhu0002\/graph-wiki/,
-    'homepage should link the graph-wiki asset repository'
-  );
-  assert.ok(
-    HTML.indexOf('id="community"') > HTML.indexOf('id="howto"') &&
-    HTML.indexOf('id="community"') < HTML.indexOf('id="links"'),
-    'Community section should appear after How to use and before Links'
-  );
-});
-
 test('readme-sync: home page mirrors README how-to-use', () => {
   // GIVEN the README documents how to use the framework
   // WHEN a visitor opens the homepage in a browser
@@ -100,133 +115,59 @@ test('readme-sync: home page mirrors README how-to-use', () => {
   assert.match(HTML, /id="howto"/, 'page should have a How to use section');
   assert.match(HTML, /argo init/, 'How to use should mention the argo init workspace bootstrap');
   assert.match(HTML, /ArchiMate 3\.2/, 'How to use should mention ArchiMate 3.2');
-  assert.match(HTML, /coding agent/, 'How to use should describe the coding-agent workflow');
-  assert.match(HTML, /single source of truth/, 'How to use should state the graph is the single source of truth');
+  assert.match(HTML, /coding agent/i, 'How to use should describe the coding-agent workflow');
+  assert.match(HTML, /single source of truth/i, 'How to use should state the graph is the single source of truth');
 });
 
-test('graph-integrity: homepage documents graph integrity between How to use and Community', () => {
-  // GIVEN the framework keeps the graph clean by construction
+test('community-linkage: homepage links the community site and graph-wiki asset repo', () => {
+  // GIVEN a dedicated ArchGraph community hub and graph-wiki asset repository exist
   // WHEN a visitor opens the homepage
-  // THEN a Graph integrity section sits between How to use and Community and states dedup + single membership
-  assert.match(HTML, /id="integrity"/, 'page should have a Graph integrity section');
+  // THEN the nav and a Community section link to the community site and the graph-wiki repo
+  assert.match(HTML, /#community/, 'nav should link to the Community section');
+  assert.match(HTML, /argo\.derekworkspacev5\.com\/archgraph\//, 'homepage should link the ArchGraph community site');
+  assert.match(HTML, /github\.com\/derekhu0002\/graph-wiki/, 'homepage should link the graph-wiki asset repository');
   assert.ok(
-    HTML.indexOf('id="integrity"') > HTML.indexOf('id="howto"') &&
-    HTML.indexOf('id="integrity"') < HTML.indexOf('id="community"'),
-    'Graph integrity should appear after How to use and before Community'
+    HTML.indexOf('id="community"') > HTML.indexOf('id="howto"') &&
+    HTML.indexOf('id="community"') < HTML.indexOf('id="links"'),
+    'Community section should appear after How to use and before Links'
   );
-  const section = HTML.slice(HTML.indexOf('id="integrity"'), HTML.indexOf('id="community"'));
-  assert.match(section, /reuse/i, 'should state reuse/dedup on write');
-  assert.match(section, /semantically near/i, 'should state the semantic near-duplicate guard');
-  assert.match(section, /once per view/i, 'should state single membership per view');
 });
 
-test('capabilities: homepage summarises the framework capabilities before Install', () => {
-  // GIVEN the framework has grown a broad capability set (memory, retrieval, integrity, harnesses, EA interop)
-  // WHEN a visitor opens the homepage
-  // THEN a Capabilities section appears after About and before Install and names the key features
-  assert.match(HTML, /id="capabilities"/, 'page should have a Capabilities section');
-  assert.ok(
-    HTML.indexOf('id="capabilities"') > HTML.indexOf('id="about"') &&
-    HTML.indexOf('id="capabilities"') < HTML.indexOf('id="install"'),
-    'Capabilities should appear after About and before Install'
-  );
-  const section = HTML.slice(HTML.indexOf('id="capabilities"'), HTML.indexOf('id="install"'));
-  assert.match(section, /long-term memory/i, 'should frame the graph as an agent long-term memory');
-  assert.match(section, /deduplicat/i, 'should state write deduplication keeps recall precise');
-  assert.match(section, /semantic|Graph RAG/i, 'should mention semantic retrieval');
-  assert.match(section, /Copilot|Cursor|OpenCode|OpenClaw|DeepSeek/i, 'should mention multi-harness deployment');
-  assert.match(section, /Enterprise Architect|\.qea/, 'should mention Enterprise Architect interop');
-  assert.match(section, /GIVEN-WHEN-THEN/, 'should mention executable acceptance tests');
-});
-
-test('self-hosted-embedding: homepage presents a pluggable / self-hosted embedding option', () => {
-  // GIVEN semantic retrieval can point at any OpenAI-compatible embedding endpoint (ARGO_EMBEDDING_PROFILE)
-  // WHEN a visitor opens the homepage
-  // THEN Capabilities names a self-hosted / bring-your-own embedding option and Install documents the profile switch
-  const capabilities = HTML.slice(HTML.indexOf('id="capabilities"'), HTML.indexOf('id="install"'));
-  assert.match(capabilities, /embedding|Graph RAG/i, 'Capabilities should mention embedding / Graph RAG');
-  assert.match(
-    capabilities,
-    /self-hosted|bring your own|openai-compatible/i,
-    'Capabilities should present the self-hosted / bring-your-own embedding option'
-  );
-  const install = HTML.slice(HTML.indexOf('id="install"'), HTML.indexOf('id="howto"'));
-  assert.match(install, /ARGO_EMBEDDING_PROFILE/, 'Install should document the embedding profile switch');
+test('outline-links: homepage links every detail page', () => {
+  // GIVEN the homepage is an outline that points at detail pages
+  // WHEN a visitor looks for more detail
+  // THEN it links the getting-started, capabilities and worked-case pages, which exist
+  for (const rel of ['docs/getting-started.html', 'docs/capabilities.html', 'docs/case-team-graph.html']) {
+    assert.match(HTML, new RegExp(rel.replace(/\./g, '\\.')), `homepage should link ${rel}`);
+    assert.ok(existsSync(path.join(ROOT, rel)), `${rel} must exist`);
+  }
 });
 
 test('reference-library-removed: homepage no longer exposes a KGlibrary reference library', () => {
   // GIVEN the reference library role moved to the community hub / graph-wiki
   // WHEN a visitor opens the homepage
-  // THEN no Reference Library / KGlibrary entry remains and the legacy pages are gone
+  // THEN no Reference Library / KGlibrary entry remains
   assert.doesNotMatch(HTML, /kglibrary/i, 'homepage should not reference KGlibrary');
   assert.doesNotMatch(HTML, /Reference Library/i, 'homepage should not have a Reference Library link');
 });
 
-test('insight-report-archived: industry insight report archived under docs/', () => {
-  // GIVEN the industry insight report on knowledge-graph-driven agents has been produced
-  // WHEN a reader opens the docs/ directory
-  // THEN the report is archived as Markdown with key sections and cited sources
-  const report = readFileSync(
-    path.join(ROOT, 'docs', 'industry-insight-graph-driven-agent.md'),
-    'utf8'
-  );
-  assert.match(report, /GraphRAG/, 'report should discuss GraphRAG');
-  assert.match(report, /知识图谱/, 'report should discuss knowledge graphs');
-  assert.match(report, /80% more truthful/, 'report should cite the NICD study');
-  assert.match(report, /参考文献/, 'report should have a references section');
-});
-
-test('insight-subpage: home page links to the insight report subpage', () => {
+test('insight-subpage: home page links to the insights list page', () => {
   // GIVEN the industry insight report has been archived
   // WHEN a visitor opens the homepage and clicks the Insights link
   // THEN a standalone insights list page opens and links to each insight article
   assert.match(HTML, /docs\/insights\.html/, 'home page should link to the insights list page');
   const insightsPage = readFileSync(path.join(ROOT, 'docs', 'insights.html'), 'utf8');
   assert.match(insightsPage, /id="insights"/, 'insights page should have an Insights area');
-  assert.match(
-    insightsPage,
-    /industry-insight-graph-driven-agent\.html/,
-    'insights page should link to the insight article'
-  );
-  const subpage = readFileSync(
-    path.join(ROOT, 'docs', 'industry-insight-graph-driven-agent.html'),
-    'utf8'
-  );
-  assert.match(subpage, /知识图谱驱动的 Agent 构建/, 'subpage should show the report title');
-  assert.match(subpage, /GraphRAG/, 'subpage should discuss GraphRAG');
-  assert.match(subpage, /80% more truthful/, 'subpage should cite the NICD study');
+  assert.match(insightsPage, /industry-insight-graph-driven-agent\.html/, 'insights page should link to the insight article');
 });
 
-test('newer-capabilities: homepage documents federation, lean reads and cost observability', () => {
-  // GIVEN the framework has grown federation, token-efficient reads and cost observability since the last refresh
-  // WHEN a visitor opens the homepage
-  // THEN Capabilities names federated sharing, the matched snippet, and the cost/diagnosis tooling
-  const section = HTML.slice(HTML.indexOf('id="capabilities"'), HTML.indexOf('id="install"'));
-  assert.match(section, /federat/i, 'should mention federated graph sharing');
-  assert.match(section, /by reference/i, 'should state federation reads are by reference');
-  assert.match(section, /denied by default/i, 'should state cross-member access is denied by default');
-  assert.match(section, /matchedSnippet/, 'should mention the semantic hit matched snippet');
-  assert.match(section, /token/, 'should mention token cost observability');
-  assert.match(section, /diagnos/i, 'should mention the agent-search-diagnosis capability');
-});
-
-test('federation-model: homepage frames federated sovereign graphs via a registry-broker (not distributed)', () => {
-  // GIVEN ArchGraph is a federation of independent projects, each owning its graph
-  // WHEN a visitor opens the Capabilities section
-  // THEN it states sovereign graphs + registry/broker, and does NOT call it a "distributed knowledge graph"
-  const section = HTML.slice(HTML.indexOf('id="capabilities"'), HTML.indexOf('id="install"'));
-  assert.match(section, /sovereign/i, 'should state sovereign graphs');
-  assert.match(section, /registry/i, 'should name the registry role');
-  assert.match(section, /broker/i, 'should name the broker role');
-  assert.doesNotMatch(HTML, /distributed knowledge graph/i, 'must not mislabel the model as distributed');
-});
-
-test('cross-project-query: homepage documents the projectId external read', () => {
-  // GIVEN a read tool can target another project's graph via the federation center
-  // WHEN a visitor opens the Capabilities section
-  // THEN it documents the optional projectId parameter, the external target, and the federation center
-  const section = HTML.slice(HTML.indexOf('id="capabilities"'), HTML.indexOf('id="install"'));
-  assert.match(section, /projectId/, 'Capabilities should mention the projectId parameter');
-  assert.match(section, /another project's graph/i, "should mention querying another project's graph");
-  assert.match(section, /federation center/i, 'should name the federation center');
+test('insight-report-archived: industry insight report archived under docs/', () => {
+  // GIVEN the industry insight report on knowledge-graph-driven agents has been produced
+  // WHEN a reader opens the docs/ directory
+  // THEN the report is archived as Markdown with key sections and cited sources
+  const report = readFileSync(path.join(ROOT, 'docs', 'industry-insight-graph-driven-agent.md'), 'utf8');
+  assert.match(report, /GraphRAG/, 'report should discuss GraphRAG');
+  assert.match(report, /知识图谱/, 'report should discuss knowledge graphs');
+  assert.match(report, /80% more truthful/, 'report should cite the NICD study');
+  assert.match(report, /参考文献/, 'report should have a references section');
 });

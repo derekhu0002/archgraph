@@ -68,6 +68,7 @@ const DELIVERABLE_GUARDS = [
   ['Semantic backfill reconcile', 'tests/semantic-backfill-reconcile.test.js'],
   ['Eval harness deliverable (eval-seed)', 'tests/eval-seed.test.js'],
   ['Web project deliverable', 'tests/website.test.js'],
+  ['FEATURE: docs detail pages (getting-started / capabilities / worked case)', 'tests/docs-pages.test.js'],
   ['WeChat publishing deliverable', 'tests/wechat-article.test.js'],
   ['EA tooling deliverable (web-service + import)', 'tests/ea-web-service-impl.test.js'],
   ['FEATURE: cross-project graph query (projectId -> federation center)', 'tests/external-graph-query.test.js'],

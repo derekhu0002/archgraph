@@ -2,22 +2,11 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
+const { readFileSync, existsSync } = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..');
 const README = readFileSync(path.join(ROOT, 'README.md'), 'utf8');
-
-test('readme: what-is-this states the unified-language goal', () => {
-  // GIVEN the project positions itself as a unified language for harness and product design
-  // WHEN a reader opens README.md
-  // THEN What is this? states the unified-language, one-model, single-view positioning (matching the homepage)
-  const section = sectionAfter(README, 'What is this');
-  assert.ok(section, 'README should have a What is this? section');
-  assert.match(section, /unified language/, 'should state the unified-language goal');
-  assert.match(section, /one model/, 'should state the one-model design');
-  assert.match(section, /single view/, 'should state the single view');
-});
 
 function sectionAfter(md, heading) {
   const re = new RegExp('## ' + heading + '[\\s\\S]*?(?=\\n## |$)');
@@ -25,153 +14,124 @@ function sectionAfter(md, heading) {
   return match ? match[0] : '';
 }
 
-test('readme: how-to-use section explains the user workflow', () => {
-  // GIVEN the README documents how to use the framework
-  // WHEN a reader opens the How to use section
-  // THEN it describes the workspace bootstrap via argo init and the coding-agent workflow
-  const section = sectionAfter(README, 'How to use');
-  assert.ok(section, 'README should have a How to use section');
-  assert.match(section, /argo init/, 'should mention the argo init workspace bootstrap');
-  assert.match(section, /initializeWorkspace/, 'should mention the initializeWorkspace MCP call');
-  assert.match(section, /ArchiMate 3\.2/, 'should state ArchiMate 3.2 compliance');
-  assert.match(section, /coding agent/, 'should describe the coding-agent workflow');
-  assert.match(section, /Skills and Rules/, 'should mention arming with Skills and Rules');
-  assert.match(section, /single source of truth/, 'should state the graph is the single source of truth');
+test('readme: leads with the framework + knowledge-graph + own-ontology + MCP positioning', () => {
+  // GIVEN the README is the project's front door
+  // WHEN a reader opens it
+  // THEN the title/intro frame ArchGraph as a knowledge-graph framework with a
+  //      customizable ontology, wired into the agent through one MCP interface, and
+  //      the low-cost promise is explicit
+  assert.match(README, /knowledge-graph framework/i, 'should name the framework as a knowledge-graph framework');
+  assert.match(README, /ontology you define/i, 'should headline the customizable ontology');
+  assert.match(README, /MCP/i, 'should name the MCP interface');
+  assert.match(README, /coding agent/i, 'should address the coding-agent user');
+  assert.match(README, /one MCP interface to install and learn|one MCP/i, 'should state the low onboarding cost');
 });
 
-test('readme: install section documents npm deployment and semantic requirements', () => {
+test('readme: what-is-this frames one graph as the source of truth with deduped writes', () => {
+  // GIVEN README stays concise (goal + benefits; feature detail lives on the home page)
+  // WHEN a reader opens the What is this? section
+  // THEN it frames the graph as the single source of truth via MCP, with deduplicated writes
+  const section = sectionAfter(README, 'What is this');
+  assert.ok(section, 'README should have a What is this? section');
+  assert.match(section, /one architecture graph/i, 'should state the one-graph design');
+  assert.match(section, /single source of truth/i, 'should state the single source of truth');
+  assert.match(section, /MCP/i, 'should mention the read/write MCP interface');
+  assert.match(section, /duplicat/i, 'should mention write deduplication');
+});
+
+test('readme: bring-your-own-ontology section states the schema bundle and links the case', () => {
+  // GIVEN the framework decouples the core from the ontology (schema bundle)
+  // WHEN a reader opens the Bring your own ontology section
+  // THEN it names .argo/schema/, the extends mechanism, and links the worked case + example
+  const section = sectionAfter(README, 'Bring your own ontology');
+  assert.ok(section, 'README should have a Bring your own ontology section');
+  assert.match(section, /schema bundle/i, 'should name the schema bundle');
+  assert.match(section, /\.argo\/schema/, 'should point at .argo/schema/');
+  assert.match(section, /extends/, 'should mention the extends mechanism');
+  assert.match(section, /docs\/case-team-graph\.html/, 'should link the worked case page');
+  assert.match(section, /custom-schema\//, 'should link the runnable example');
+  assert.doesNotMatch(section, /Acme/, 'should not surface the internal placeholder bundle name');
+});
+
+test('readme: install section documents npm deployment and the semantic prerequisites', () => {
   // GIVEN the ARGO toolchain is published as an npm package
-  // WHEN a reader opens README.md
-  // THEN it shows a minimal install: npm install + argo-deploy, plus the Neo4j + vector engine prerequisites and their .env keys
+  // WHEN a reader opens the Install section
+  // THEN it shows npm install + argo-deploy, names the registered MCP server, and the
+  //      Neo4j + embedding requirements for semantic queries
   const section = sectionAfter(README, 'Install');
   assert.ok(section, 'README should have an Install section');
   assert.match(section, /npm install -g archgraph-argo/, 'should show the npm install command');
   assert.match(section, /argo-deploy/, 'should show the argo-deploy command');
   assert.match(section, /MCP server/, 'should mention the registered MCP server');
-  assert.match(section, /Neo4j/, 'should state the Neo4j requirement for semantic queries');
-  assert.match(section, /vector engine/, 'should state the vector engine requirement');
-  assert.match(section, /ARGO_NEO4J_DATABASE_URL/, 'should list the Neo4j .env key');
-  assert.match(section, /ARGO_EMBEDDING_MODEL/, 'should list an embedding .env key');
-  assert.match(section, /QWEN_KEY/, 'should mention the embedding API key');
+  assert.match(section, /Neo4j/, 'should state the Neo4j requirement');
+  assert.match(section, /embedding/i, 'should state the embedding requirement');
+  for (const host of ['GitHub Copilot', 'Cursor', 'OpenCode', 'DeepSeek Harness', 'OpenClaw', 'Codex']) {
+    assert.match(section, new RegExp(host), `should list ${host}`);
+  }
 });
 
-test('readme: install documents pluggable / self-hosted embedding', () => {
-  // GIVEN semantic retrieval can point at any OpenAI-compatible endpoint (ARGO_EMBEDDING_PROFILE)
-  // WHEN a reader opens README.md
-  // THEN the Install section documents the profile switch and the self-hosted / OpenAI-compatible option
-  const section = sectionAfter(README, 'Install');
-  assert.match(section, /ARGO_EMBEDDING_PROFILE/, 'should document the embedding profile switch');
-  assert.match(section, /self-hosted|OpenAI-compatible/i, 'should present the self-hosted / OpenAI-compatible option');
+test('readme: quick start documents argo init and the semantic caveat', () => {
+  // GIVEN the workspace bootstrap is the first user step
+  // WHEN a reader opens the Quick start section
+  // THEN it describes argo init / initializeWorkspace, the source of truth, and the
+  //      Neo4j prerequisite boundary without overclaiming
+  const section = sectionAfter(README, 'Quick start');
+  assert.ok(section, 'README should have a Quick start section');
+  assert.match(section, /argo init/, 'should mention argo init');
+  assert.match(section, /initializeWorkspace/, 'should name the initializeWorkspace MCP call');
+  assert.match(section, /single source of truth/i, 'should state the graph is the single source of truth');
+  assert.match(section, /Neo4j/, 'should name the Neo4j prerequisite for semantic retrieval');
+  assert.match(section, /without them|without Neo4j/i, 'should state what still works without Neo4j');
 });
 
-test('readme: supported harnesses include OpenClaw', () => {
-  // GIVEN ArchGraph has been adapted for OpenClaw (WP 2780 completed)
-  // WHEN a reader opens README.md
-  // THEN the Supported Harnesses table lists OpenClaw and the Install note mentions it
+test('readme: supported-harnesses table lists every adapted harness including OpenClaw', () => {
+  // GIVEN ArchGraph deploys into all major coding-agent environments
+  // WHEN a reader opens the Supported Harnesses section
+  // THEN the table lists each harness (OpenClaw included)
   const section = sectionAfter(README, 'Supported Harnesses');
   assert.ok(section, 'README should have a Supported Harnesses section');
-  assert.match(section, /OpenClaw/, 'should list OpenClaw in the harness table');
-  assert.match(README, /OpenClaw/, 'README should mention OpenClaw in the install/deploy note');
+  for (const host of ['GitHub Copilot', 'Cursor', 'OpenCode', 'DeepSeek Harness', 'OpenClaw', 'Codex']) {
+    assert.match(section, new RegExp(host), `should list ${host} in the harness table`);
+  }
 });
 
-test('readme: community section links the community site and graph-wiki asset repo', () => {
-  // GIVEN a dedicated ArchGraph community hub and graph-wiki asset repository exist
-  // WHEN a reader opens README.md
-  // THEN a Community section links to the community site and the graph-wiki asset repo
-  const section = sectionAfter(README, 'Community');
-  assert.ok(section, 'README should have a Community section');
-  assert.match(
-    section,
-    /argo\.derekworkspacev5\.com\/archgraph\//,
-    'should link the ArchGraph community site'
-  );
-  assert.match(
-    section,
-    /github\.com\/derekhu0002\/graph-wiki/,
-    'should link the graph-wiki asset repository'
-  );
+test('readme: how-to-use section explains the user workflow', () => {
+  // GIVEN the README documents how to use the framework
+  // WHEN a reader opens the How to use section
+  // THEN it describes the workspace bootstrap and the coding-agent workflow
+  const section = sectionAfter(README, 'How to use');
+  assert.ok(section, 'README should have a How to use section');
+  assert.match(section, /argo init/, 'should mention the argo init workspace bootstrap');
+  assert.match(section, /coding agent/i, 'should describe the coding-agent workflow');
+  assert.match(section, /Skills and Rules/, 'should mention arming with Skills and Rules');
+  assert.match(section, /single source of truth/i, 'should state the graph is the single source of truth');
 });
 
-test('readme: concisely frames the graph as an agent long-term memory with deduped writes', () => {
-  // GIVEN README stays concise (goal + benefits; the feature detail lives on the home page)
-  // WHEN a reader opens the What is this? section
-  // THEN it frames the graph as a long-term memory via MCP, with deduped writes and precise recall
-  const section = sectionAfter(README, 'What is this');
-  assert.match(section, /long-term memory/, 'should frame the graph as a long-term memory for agents');
-  assert.match(section, /MCP interface/, 'should mention the read/write MCP interface');
-  assert.match(section, /deduplicat/i, 'should mention write deduplication');
-  assert.match(section, /recall stays precise/i, 'should tie dedup to precise recall');
-});
-
-test('readme: community section documents the federated graph-sharing registry', () => {
+test('readme: community section documents the federated registry', () => {
   // GIVEN the community shares reusable subgraphs through a federated registry (CoreRule 12)
   // WHEN a reader opens the Community section
-  // THEN it explains federation: register/discover/authorize/read by reference, denied by default
+  // THEN it explains federation: register/discover/authorize/read by reference, denied by default,
+  //      sovereign graphs, and the registry-broker center
   const section = sectionAfter(README, 'Community');
   assert.ok(section, 'README should have a Community section');
   assert.match(section, /federat/i, 'should name the federated sharing model');
-  assert.match(section, /register/, 'should mention registering a subgraph');
-  assert.match(section, /by reference/i, 'should state that reads return a reference, not a copy');
-  assert.match(section, /denied by default/i, 'should state that cross-member access is denied by default');
-});
-
-test('readme: frames the federation model (sovereign graphs, registry–broker, not distributed)', () => {
-  // GIVEN ArchGraph is a federation of independent projects, each owning its graph
-  // WHEN a reader opens the federation-model section
-  // THEN it states sovereign graphs, the registry–broker center, by-reference reads,
-  //      and does NOT mislabel the model as a "distributed knowledge graph"
-  const section = sectionAfter(README, 'The federation model');
-  assert.ok(section, 'README should have a The federation model section');
   assert.match(section, /sovereign/i, 'should state each project keeps a sovereign graph');
-  assert.match(section, /register[\s\S]{0,160}discover/i, 'should describe self-register then discovery');
+  assert.match(section, /register/, 'should mention registering a subgraph');
+  assert.match(section, /by reference/i, 'should state that reads return a reference');
+  assert.match(section, /denied by default/i, 'should state that cross-member access is denied by default');
   assert.match(section, /registry/i, 'should name the registry role');
   assert.match(section, /broker/i, 'should name the broker role');
-  assert.match(section, /reference, not a copy|by reference/i, 'should state reads return a reference');
+  assert.match(section, /argo\.derekworkspacev5\.com\/archgraph\//, 'should link the community site');
+  assert.match(section, /github\.com\/derekhu0002\/graph-wiki/, 'should link the graph-wiki asset repository');
   assert.doesNotMatch(README, /distributed knowledge graph/i, 'must not mislabel the model as distributed');
 });
 
-test('readme: What is this? documents cross-project graph query (projectId)', () => {
-  // GIVEN a read tool can target another project's graph via the federation center
-  // WHEN a reader opens the What is this? section
-  // THEN it mentions the projectId parameter and the read-only, by-reference, denied-by-default contract
-  const section = sectionAfter(README, 'What is this');
-  assert.match(section, /projectId/, 'should mention the projectId parameter');
-  assert.match(section, /another project's graph/i, "should mention querying another project's graph");
-  assert.match(section, /federation center/i, 'should name the federation center');
-  assert.match(section, /denied by default/i, 'should state external access is denied by default');
-});
-
-test('readme: documents local cross-project read/write availability per harness', () => {
-  // GIVEN the per-call workspaceRoot channel is bridged by the host, so whether a harness can touch
-  //       another LOCAL project's graph differs per harness (DSH pins it, direct-MCP hosts honor it)
-  // WHEN a reader opens the cross-project section
-  // THEN each harness is listed with its local cross-project read/write status, the DSH limitation is
-  //      stated explicitly, the two separate channels (local path vs federated projectId) are named,
-  //      and the same-machine federation test evidence is recorded
-  const section = sectionAfter(README, 'Cross-project read/write');
-  assert.ok(section, 'README should have a Cross-project read/write section');
-
-  // the two independent channels must not be conflated
-  assert.match(section, /workspaceRoot/, 'should name the per-call local workspaceRoot channel');
-  assert.match(section, /projectId/, 'should name the federated projectId channel');
-  assert.match(section, /separate|not the same|independent/i, 'should state the two channels are separate');
-
-  // the DSH limitation, from the observed evidence
-  assert.match(section, /DeepSeek Harness/, 'should list DeepSeek Harness');
-  assert.match(section, /cannot|not possible|no way/i, 'should state that local cross-project access cannot be done');
-  assert.match(section, /pins|overwrit|replac/i, 'should explain the bridge pins/overwrites workspaceRoot');
-  assert.match(section, /WORKSPACE_WRITE_DENIED/, 'should name the guard branch that never fires on DSH');
-  assert.match(section, /read-only/i, 'should state cross-project write is read-only-blocked by design');
-
-  // every harness must appear with a status
-  for (const harness of ['OpenCode', 'Codex', 'DeepSeek Harness', 'GitHub Copilot', 'Cursor', 'OpenClaw']) {
-    assert.match(section, new RegExp(harness), `should list ${harness} in the harness table`);
+test('readme: links every detail page and archived doc', () => {
+  // GIVEN detail has moved to linked pages
+  // WHEN a reader scans the Capabilities and Docs sections
+  // THEN the README links the detail pages and they exist
+  for (const rel of ['docs/getting-started.html', 'docs/capabilities.html', 'docs/case-team-graph.html', 'docs/insights.html']) {
+    assert.match(README, new RegExp(rel.replace(/\./g, '\\.')), `README should link ${rel}`);
+    assert.ok(existsSync(path.join(ROOT, rel)), `${rel} must exist`);
   }
-  assert.match(section, /待测|not yet tested|untested/i, 'should mark the untested harnesses');
-  assert.match(section, /not applicable|不涉及/i, 'should mark harnesses the scenario does not apply to');
-
-  // federation reads do work, and the evidence is recorded
-  assert.match(section, /federation center/i, 'should state that federated reads do work');
-  assert.match(section, /database=abot/, 'should record the observed cross-project read evidence');
-  assert.match(section, /self-declared|self-asserted|自述/i, 'should record that the requester identity is self-declared');
 });

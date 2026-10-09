@@ -123,6 +123,10 @@
         {
           "view_id": "codex-adaptation",
           "view_name": "Codex Adaptation"
+        },
+        {
+          "view_id": "site-v2-delivery-001",
+          "view_name": "Site v2 — Outline & Detail Pages"
         }
       ]
     },
@@ -12340,6 +12344,42 @@
           "value": "delivered"
         }
       ]
+    },
+    {
+      "description": "目标：把 README 与主页收敛为『大纲 + 详情页链接』的对外呈现，重点提炼竞争优势（头号卖点=可自定义本体/schema bundle；一个 MCP 接口接入六大宿主；上手成本极低；Agent 分层长期记忆+去重+语义/结构检索；联邦式主权图谱；EA(.qea) 互操作+可验收可追溯）。README（222→~130 行）保持英文骨架精简为 What is this / Bring your own ontology / Install / Quick start / Capabilities / How to use / Supported Harnesses / Cross-project read/write / Community / Docs；主页 index.html 大纲化（Hero + about/ontology/capabilities/install/howto/community，14 张能力卡与细节移至详情页）；新增中文详情页 docs/getting-started.html（使用介绍）、docs/capabilities.html（能力总览）、docs/case-team-graph.html（使用案例，图文并茂），共享 docs/site.css，新增 4 张 light 主题 case 图（scripts/gen-case-diagrams.js 生成）。方法：红蓝对抗——蓝队完善（B1 README+主页大纲 / B2 中文详情页），红队挑刺（R1/R2）并提出必改项（测试完整性、死链、H1 缺 framework/knowledge-graph/MCP、Neo4j/agents 过度声明、case 步骤不可复现、缺图），项目总管收敛定稿。案例：基于仓库 custom-schema/ Team Graph（Agent Node/Team Node/Service Node；Assigned To/Depends On；actorElementType=Agent Node；端点矩阵；maxElementsPerView=12），先建根视图/批量 applySystemArchitectureMutation，并显式创建自定义 schema 下必需的 design/KG/SystemArchitecture.json，再逐步建元素/关系/视图并校验+语义召回。【附带修复】custom-schema 示例的规则文件从遗留 argob-rules.json 重命名为 schema-bundle.rules.json（并在 schema-bundle.config.json 声明 rules），使端点矩阵真正生效；按 dataset 维护说明同步 MQ-17 子视图计数。验收：先改 tests/readme.test.js、tests/website.test.js、tests/architecture-diagram.test.js，新增 tests/docs-pages.test.js 并在 acceptance-guardian 注册；npm test 720/720 通过（0 失败 0 跳过）；validateSystemArchitecture passed。Tier 2。",
+      "id": "wp-site-v2-outline-detail-pages-001",
+      "name": "对外呈现 v2：README 精简 + 主页大纲化 + 详情页（使用介绍/使用 Case/能力）",
+      "parent": "1249",
+      "type": "Work Package",
+      "attributes": [
+        {
+          "name": "status",
+          "value": "delivered"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-site-v2-01",
+          "description": "GIVEN 主页/README 链接详情页；WHEN 打开中文详情页 getting-started/capabilities/case-team-graph；THEN 页面存在、lang=zh-CN、共享 site.css、内部链接与图片均解析、内容覆盖安装配置/能力/case 且不含内部占位名 Acme。",
+          "type": "Acceptance Test",
+          "Input": "tests/docs-pages.test.js",
+          "acceptanceCriteria": "tests/docs-pages.test.js"
+        },
+        {
+          "name": "AT-site-v2-02",
+          "description": "GIVEN 主页改为大纲；WHEN 访客打开首页；THEN 呈现 dark hero/nav、What is this/ontology/capabilities/install/howto/community 大纲并链接三个详情页、嵌入 core-model 与 cap-* 图，且不暴露 KGlibrary。",
+          "type": "Acceptance Test",
+          "Input": "tests/website.test.js",
+          "acceptanceCriteria": "tests/website.test.js"
+        },
+        {
+          "name": "AT-site-v2-03",
+          "description": "GIVEN README 精简为对外大纲；WHEN 读者打开 README；THEN 体现 knowledge-graph framework + 自定义本体 + MCP + 低上手成本定位，含 Install/Quick start/How to use/Supported Harnesses/Cross-project/Community 并链接全部详情页。",
+          "type": "Acceptance Test",
+          "Input": "tests/readme.test.js",
+          "acceptanceCriteria": "tests/readme.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -17303,6 +17343,15 @@
         "fed-service-returns-reference-v5-001",
         "fed-reference-identifies-project-a-v5-001",
         "fed-reference-identifies-project-b-v5-001"
+      ]
+    },
+    {
+      "view_id": "site-v2-delivery-001",
+      "view_name": "Site v2 — Outline & Detail Pages",
+      "parent_element_id": "1249",
+      "description": "对外呈现 v2 交付视图：README 精简 + 主页大纲化 + 中文详情页（getting-started / case / capabilities）的工作包与交付物。",
+      "included_elements": [
+        "wp-site-v2-outline-detail-pages-001"
       ]
     }
   ]
