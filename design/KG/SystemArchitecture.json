@@ -12461,6 +12461,11 @@
           "name": "restartVerified",
           "value": "2026-10-09",
           "description": "2026-10-09 宿主重启后验收：argo-init(initializeWorkspace) status=ok（schema=workspace / Acme + UML 2 State Machine，actorElementType=Business Actor，bundleValidation passed；neo4j db=archgraph 与本仓同名；qeaFullProjection=archgraph.qea 成功 269ms；semanticLifecycle=Aligned/verified；subdiagramViews drift 0）；~/.argo/scripts 与 archgraph-argo@0.28.0 包逐字节一致；memory_search 命中本里程碑 score 0.99。"
+        },
+        {
+          "name": "commit",
+          "value": "25a8d7b",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记 0.28.0 重启后验收结果 restartVerified）"
         }
       ],
       "description": "发布里程碑（2026-10-09）：将 develop-separate-schema 合并入 main 后，从合并带来的 dev 包名 archgraph-argo-beta@0.27.0-beta.16 恢复主干稳定包 archgraph-argo@0.28.0 并发布。\n【背景】main 的 package.json 因合并 cfbe65b 被同步为 beta 名称/版本（dev 分支自 0fb9021 起以 archgraph-argo-beta 发布）；主干稳定线此前已发布 archgraph-argo@0.27.0（commit 6975dc3，2026-10-01，但 latest dist-tag 未推进，仍指 0.26.2）。故 main（= 0.27.0 稳定 + beta.0→beta.16 的 schema 解耦 / 语言中立 extends / DSH·Codex 宿主适配 / 网站 v2 / onboarding）以 0.28.0 延续主干稳定线发布。\n【发布】npm publish（dereckhu，archgraph-argo@0.28.0，shasum 6ddbb5928bf7862b015f20afa983b3b125cac937，86 files，packed 1.3MB / unpacked 4.6MB）→ registry 传播第 6 次轮询（~90s）可见 latest=0.28.0 → npm uninstall -g archgraph-argo-beta → npm i -g archgraph-argo → argo-deploy -SkipEnv 22/22（Copilot/Cursor/OpenCode/DSH/OpenClaw/Doubao/Codex）。\n【验收】npm test 732/732（0 fail 0 skip）；变更仅 package.json（name archgraph-argo-beta→archgraph-argo；version 0.27.0-beta.16→0.28.0）。\n【待办】宿主重启以加载新常驻 MCP 与部署产物；重启后验证。",
