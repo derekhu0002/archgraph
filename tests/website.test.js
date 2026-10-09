@@ -65,6 +65,31 @@ test('install-section: homepage shows npm install/deploy and the semantic prereq
   assert.match(section, /OpenClaw/, 'should mention OpenClaw');
 });
 
+test('why-teaser: homepage teases the ONE canonical comparison instead of duplicating it', () => {
+  // GIVEN docs/capabilities.html#compare is the single canonical comparison
+  // WHEN a visitor opens the homepage
+  // THEN #why is a short teaser linking that page and does NOT re-inline the full table
+  assert.match(HTML, /id="why"/, 'homepage should keep a Why section as an anchor');
+  const section = slice('why', 'ontology');
+  assert.ok(section, 'homepage should keep a Why section');
+  assert.match(section, /docs\/capabilities\.html#compare/, 'Why must link the canonical comparison');
+  assert.doesNotMatch(section, /<table/, 'Why must not duplicate the full comparison table');
+  assert.doesNotMatch(section, /Where it falls short/, 'Why must not re-inline the comparison rows');
+  assert.doesNotMatch(section, /locked single-ontology/i, 'Why must not use the locked-ontology straw man');
+});
+
+test('install-init-honesty: homepage scopes Node.js-only use, discloses the failed init steps, and adds the restart', () => {
+  // GIVEN argo init reports failed structural sync + semantic lifecycle without Neo4j + embedding
+  // WHEN a visitor reads Install and How to use
+  // THEN Node.js-only scope is stated, the failed steps are disclosed, and the host restart is present
+  const install = slice('install', 'howto');
+  assert.match(install, /Node\.js is all you need/i, 'Install must scope what Node.js alone covers');
+  assert.match(install, /report failed/i, 'Install must disclose the failed init steps without Neo4j');
+  assert.match(install, /restart your editor \/ host/i, 'Install must include the host-restart step');
+  const howto = slice('howto', 'community');
+  assert.match(howto, /report failed until Neo4j/i, 'How to use must qualify the argo init sync/lifecycle steps');
+});
+
 test('capabilities-teaser: homepage outlines capabilities and links the detail page', () => {
   // GIVEN capabilities detail has moved to a dedicated page
   // WHEN a visitor opens the homepage

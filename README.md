@@ -2,27 +2,35 @@
 
 **A knowledge-graph framework with an ontology you define — wired into your coding agent through one MCP interface.**
 
-ArchGraph gives coding agents durable, tiered long-term memory on an intent architecture graph that both you and the agent read and write through a single **MCP** server. The built-in default ontology is **ArchiMate 3.2**, but a repository can plug in its own — and this one does.
+For teams running coding agents on a real codebase, ArchGraph gives the agent durable, tiered long-term memory on an intent architecture graph that both you and the agent read and write through a single **MCP** server. The built-in default ontology is **ArchiMate 3.2 + ARGO extensions**, but a repository can plug in its own — and this one does. **One install, one interface to learn.**
 
-[Install](#install) · [Quick start](#quick-start) · [Capabilities](#capabilities) · [Docs](#docs) · [Community](#community)
+[Install](#install) · [Quick start](#quick-start) · [Why ArchGraph](#why-archgraph) · [Capabilities](#capabilities) · [Docs](#docs) · [Community](#community)
 
 ![ArchGraph core model — one graph for the agent's memory and the product's design](docs/diagrams/core-model.svg)
 
 ## What is this?
 
-If you run coding agents on a real codebase, every session starts cold and the "why" behind the system lives nowhere. ArchGraph makes **one architecture graph** the single source of truth — the agent's memory and the product's design in one model. It is *one MCP interface* to install and learn: the agent restores context at session start, recalls detail on demand, and never duplicates what it already knows.
+If you run coding agents on a real codebase, every session starts cold and the "why" behind the system lives nowhere. ArchGraph makes **one architecture graph** the single source of truth — the agent's memory and the product's design in one model. It is *one MCP interface* to install and learn: the agent restores context at session start, recalls detail on demand, and reuses what it already knows instead of duplicating it (a duplicate needs an explicit override).
 
 - **Architects / tech leads** — one model of the product, the harness, and the agents.
-- **Agent users** — memory restored at session start, recalled on demand, never duplicated.
+- **Agent users** — memory restored at session start, recalled on demand, reused instead of duplicated.
 - **Platform teams** — one interface, deployed into the editor you already use.
 
 → Full onboarding: **[docs/getting-started.html](docs/getting-started.html)**
 
+## Why ArchGraph
+
+Every team running coding agents hits the same wall: the code is in the repo, but the *reasoning* behind it lives nowhere. Four common fixes exist, and each works until it doesn't.
+
+The real differentiator is **not** "custom vs. locked". Protégé/OWL, Neo4j, TerminusDB, and Archi/EA all let you extend a model or bring your own vocabulary. It is that ArchGraph makes the ontology a **first-class, validated, runtime-resolved schema bundle** — and puts it behind **one MCP interface** the agent reads *and* writes, with typed dedup and commit traceability built in.
+
+The honest, cost-included comparison lives in one canonical place — **[docs/capabilities.html#compare](docs/capabilities.html#compare)**.
+
 ## Bring your own ontology
 
-A knowledge-graph framework that speaks only one language is not a framework. ArchGraph separates the **core** from the **ontology**: a repository drops a *schema bundle* under `.argo/schema/` (element/relationship types, endpoint rules, an actor contract, an optional guide), and validation, MCP guidance, and the `.qea` projection follow it. A bundle can `extends` the built-in default and add its own types — no framework change required.
+A knowledge-graph framework that speaks only one language is not a framework. ArchGraph separates the **core** from the **ontology**: a repository drops a *schema bundle* under `.argo/schema/` (element/relationship types, endpoint rules, an actor contract, an optional guide), and validation, MCP guidance, and the `.qea` projection follow it. A bundle can `extends: "default"` — inheriting the built-in **ArchiMate 3.2 + ARGO extensions** — and add its own types; no framework change required.
 
-This repository is the proof: its own schema **extends ArchiMate 3.2 with a UML 2 state-machine profile**, resolved at runtime from `.argo/schema/` rather than hardcoded in the framework.
+This repository is the proof: its own bundle uses `extends: "default"` and layers a **UML 2 state-machine profile** on top, resolved at runtime from `.argo/schema/` rather than hardcoded in the framework.
 
 → Worked example — define an ontology, then build the graph step by step: **[docs/case-team-graph.html](docs/case-team-graph.html)** · runnable bundle: [`custom-schema/`](custom-schema/README.md)
 
@@ -33,7 +41,7 @@ npm install -g archgraph-argo
 argo-deploy
 ```
 
-`argo-deploy` registers the `argo` MCP server and installs the skills and rules into **GitHub Copilot, Cursor, OpenCode, DeepSeek Harness, OpenClaw, and Codex** (agents are installed where the host supports them). It then prompts for the few settings in `~/.argo/.env`. Semantic queries additionally need **Neo4j** and an **embedding** endpoint — see [Quick start](#quick-start).
+`argo-deploy` registers the `argo` MCP server and installs the skills and rules into **GitHub Copilot, Cursor, OpenCode, DeepSeek Harness, OpenClaw, and Codex** (agents are installed where the host supports them). It then prompts for the few settings in `~/.argo/.env`. **After deploying, restart your editor / host** so it reloads the MCP server. Semantic queries additionally need **Neo4j** and an **embedding** endpoint — see [Quick start](#quick-start).
 
 ## Quick start
 
@@ -42,7 +50,7 @@ argo-deploy
 argo init        # the initializeWorkspace MCP call
 ```
 
-`argo init` creates the starter `design/KG/SystemArchitecture.json` when missing, runs the first JSON → Neo4j sync, and initializes the semantic lifecycle. From then on the intent graph is the single source of truth: the agent locates the element behind a task, works test-first (GIVEN-WHEN-THEN), and registers each commit back onto the element it changed.
+`argo init` creates the starter `design/KG/SystemArchitecture.json` when missing and verifies the graph; its first JSON → Neo4j sync and semantic-lifecycle steps run only once a **Neo4j** instance and an **embedding** endpoint are configured — otherwise they **report failed** (the graph itself, its context reads/writes, dedup, and EA interop still work). From then on the intent graph is the single source of truth: the agent locates the element behind a task, works test-first (GIVEN-WHEN-THEN), and registers each commit back onto the element it changed.
 
 **The one prerequisite that is not out of the box:** semantic (Graph RAG) retrieval needs a **Neo4j** instance and an OpenAI-compatible **embedding** endpoint. Context reads, writes, and Enterprise Architect interop work without them; the Cypher structural projection and all semantic retrieval need Neo4j.
 
@@ -51,7 +59,7 @@ argo init        # the initializeWorkspace MCP call
 Each line links to a short page — this is the map, not the manual.
 
 - **[Tiered long-term memory](docs/capabilities.html#memory)** — a compact working memory at session start, a long-term memory recalled on demand, and an archive.
-- **[Pluggable ontology](docs/capabilities.html#ontology)** — ship your own schema bundle; the default ArchiMate 3.2 is data, not code.
+- **[Pluggable ontology](docs/capabilities.html#ontology)** — ship your own schema bundle; the default (ArchiMate 3.2 + ARGO extensions) is data, not code.
 - **[Semantic + structural retrieval](docs/capabilities.html#retrieval)** — Graph RAG recall plus read-only Cypher for exact structure.
 - **[Deduplicated writes](docs/capabilities.html#quality)** — reuse an existing element, relationship, or view instead of copying it; near-duplicates are blocked as candidates.
 - **[Acceptance-test-first + traceability](docs/capabilities.html#quality)** — every change is testable, and the commit id is registered back onto the element.
@@ -66,7 +74,7 @@ Each line links to a short page — this is the map, not the manual.
 1. locate the architecture element behind the task before changing anything,
 2. arm itself with that element's Skills and Rules,
 3. work test-first (GIVEN-WHEN-THEN) and trace every commit back to the graph,
-4. reuse an existing element instead of creating a duplicate.
+4. reuse an existing element by default — a near-duplicate needs an explicit override.
 
 The intent architecture graph is the single source of truth.
 

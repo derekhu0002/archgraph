@@ -109,6 +109,35 @@ test('AT docs-pages: capabilities page carries the moved capability set and its 
   }
 });
 
+test('AT docs-pages: capabilities#compare is the canonical, honest comparison (no straw man, cost disclosed)', () => {
+  // GIVEN the homepage and README tease the comparison instead of triplicating it
+  // WHEN a reader opens the canonical comparison
+  // THEN it names real alternatives that DO allow extension, states the REAL differentiator
+  //      (a first-class validated runtime-resolved schema bundle behind one MCP interface),
+  //      and discloses what ArchGraph itself costs; it must NOT use the locked-ontology straw man
+  const html = read('capabilities.html');
+  const section = html.slice(html.indexOf('id="compare"'), html.indexOf('id="ontology"'));
+  assert.ok(section, 'capabilities page should expose the #compare section');
+  // real differentiator, not "custom vs locked"
+  assert.match(section, /schema bundle/i, 'must name the schema bundle');
+  assert.match(section, /运行时解析/, 'must state the bundle is runtime-resolved');
+  assert.match(section, /一等公民/, 'must state the ontology is first-class');
+  assert.match(section, /MCP/, 'must tie it to the single MCP interface');
+  // honest alternatives: real tools that DO allow extending the model
+  for (const tool of ['Protégé', 'Neo4j', 'TerminusDB', 'Archi']) {
+    assert.match(section, new RegExp(tool), `must name ${tool} as an alternative that allows extension`);
+  }
+  // row-2 precision: the vector-store shortfall is SEMANTIC/TYPED dedup, not dedup at large
+  assert.match(section, /语义 ?\/ ?类型化去重/, 'vector shortfall must be semantic/typed dedup');
+  // honest cost, inside the comparison itself: Neo4j + embedding + argo-deploy + .env + restart
+  for (const token of ['Neo4j', 'embedding', 'argo-deploy', '\\.env', '重启']) {
+    assert.match(section, new RegExp(token), `cost disclosure must mention ${token}`);
+  }
+  // no straw man
+  assert.doesNotMatch(section, /锁死单一本体/, 'must not use the locked-ontology straw man');
+  assert.doesNotMatch(section, /无法为你的业务域建模/, 'must not claim other tools cannot model your domain');
+});
+
 test('AT docs-pages: case page is a runnable custom-ontology walkthrough', () => {
   // GIVEN the human asked for a step-by-step "define an ontology, build the graph" case
   // WHEN a reader follows the case page

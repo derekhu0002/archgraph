@@ -126,6 +126,30 @@ test('readme: community section documents the federated registry', () => {
   assert.doesNotMatch(README, /distributed knowledge graph/i, 'must not mislabel the model as distributed');
 });
 
+test('readme: Why ArchGraph points at the one canonical comparison and states the real differentiator', () => {
+  // GIVEN the comparison is NOT triplicated: docs/capabilities.html#compare is canonical
+  // WHEN a reader opens the README Why section
+  // THEN it links that page, states the real differentiator (not "custom vs locked"), keeps no table
+  const section = sectionAfter(README, 'Why ArchGraph');
+  assert.ok(section, 'README should keep a Why ArchGraph section');
+  assert.match(section, /docs\/capabilities\.html#compare/, 'Why must link the canonical comparison');
+  assert.match(section, /first-class, validated, runtime-resolved schema bundle/i, 'must state the real differentiator');
+  assert.match(section, /one MCP interface/i, 'must tie the differentiator to one MCP interface');
+  assert.doesNotMatch(section, /\n\|/, 'Why must not re-inline the comparison table');
+  assert.doesNotMatch(section, /locked single-ontology/i, 'must not use the locked-ontology straw man');
+});
+
+test('readme: schema copy names the extends:default base precisely (ArchiMate 3.2 + ARGO extensions)', () => {
+  // GIVEN the neutral default bundle is ArchiMate 3.2 + ARGO extensions (not bare ArchiMate 3.2)
+  // WHEN a reader opens the ontology section
+  // THEN the extends base is named precisely and the placeholder name still does not leak
+  const section = sectionAfter(README, 'Bring your own ontology');
+  assert.match(section, /extends: "default"/, 'must state extends: "default"');
+  assert.match(section, /ArchiMate 3\.2 \+ ARGO extensions/, 'must name the base as ArchiMate 3.2 + ARGO extensions');
+  assert.doesNotMatch(section, /extends ArchiMate 3\.2 with/, 'must not reduce the base to plain ArchiMate 3.2');
+  assert.doesNotMatch(section, /Acme/, 'must not surface the internal placeholder bundle name');
+});
+
 test('readme: links every detail page and archived doc', () => {
   // GIVEN detail has moved to linked pages
   // WHEN a reader scans the Capabilities and Docs sections

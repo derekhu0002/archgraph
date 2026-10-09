@@ -43,12 +43,17 @@
         ArchGraph 是给 <strong>AI coding agent 用的「长期记忆」</strong>。它把你的项目架构建模成一张
         <strong>意图图谱（intent graph）</strong>，并通过一个统一的 <strong>MCP 接口</strong>让 agent 读写：
         agent 不用每次把整个项目重新读一遍，就能恢复上下文、找到「这个任务对应架构里的哪个元素」，
-        然后在改动前先定位、改动后把 commit 登记回图谱。默认用 <strong>ArchiMate 3.2</strong> 建模，
+        然后在改动前先定位、改动后把 commit 登记回图谱。默认用 <strong>ArchiMate 3.2 + ARGO 扩展</strong> 建模，
         但它也支持换成你自己的业务本体（见<a href="#model">建模自己的东西</a>）。
       </p>
       <p class="lead">
         一句话：<strong>它让 agent 的记忆变成一张干净、可查、可追溯的架构图，而不是一堆散落的文件。</strong>
         写入会自动去重，所以图谱不会越用越乱，语义检索也能一直保持准确。
+      </p>
+      <p class="lead">
+        它既不是「把上下文散在文件里」，也不是「只做语义召回的向量库」，也不是「把模型与 agent 读写路径分开」的通用图/本体工具 ——
+        关键差别在于：本体是一个一等公民、受校验、运行时解析的 schema bundle，而读和写都走同一个 MCP 接口。
+        <a href="capabilities.html#compare">看与其他做法的对比（含 ArchGraph 自身成本）→</a>
       </p>
     </section>
 
@@ -165,7 +170,11 @@ argo-deploy</code></pre>
       </ul>
       <p class="lead">从这一刻起，这张意图图谱就是你项目的<strong>单一事实来源（source of truth）</strong>。</p>
       <div class="note">
-        <strong>默认 vs. 工作区。</strong> 全新安装默认内置 ArchiMate 3.2；而某个工作区可能解析到它自己的本体包（schema bundle）。
+        <strong>没配 Neo4j / embedding 会怎样？</strong> 图谱创建与校验照常完成，但上面第 2、3 步（JSON → Neo4j 结构同步、语义生命周期）
+        会<strong>报告 failed</strong>。补齐前置条件后重跑 <code>argo init</code> 即可。
+      </div>
+      <div class="note">
+        <strong>默认 vs. 工作区。</strong> 全新安装默认内置 <strong>ArchiMate 3.2 + ARGO 扩展</strong>；而某个工作区可能解析到它自己的本体包（schema bundle），用 <code>extends: "default"</code> 继承默认再追加类型。
         用 <code>queryNeo4jGraph { "schema": true }</code> 就能看到当前生效的是哪一套。
       </div>
     </section>
@@ -211,7 +220,7 @@ argo-deploy</code></pre>
       <p class="lead">
         默认情况下，ArchGraph 用 <strong>ArchiMate 3.2</strong> 这套通用企业架构建模语言。但如果你有自己的业务领域，
         可以在项目里放一份<strong>本体包（schema bundle）</strong>，ARGO 就会只用你的本体来校验和检索这个项目 ——
-        而且只影响这一个项目，不会动到全局默认。
+        而且只影响这一个项目，不会动到全局默认。本体包可以 <code>extends: "default"</code> 继承内置默认（<strong>ArchiMate 3.2 + ARGO 扩展</strong>）再追加自己的类型。
       </p>
       <p class="lead">
         <a href="case-team-graph.html">→ 看使用案例：自定义业务域本体并一步步建图（Team Graph）</a>

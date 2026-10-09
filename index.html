@@ -151,6 +151,7 @@
       </a>
       <nav class="nav">
         <a class="link" href="#about">About</a>
+        <a class="link" href="#why">Why</a>
         <a class="link" href="#ontology">Ontology</a>
         <a class="link" href="#capabilities">Capabilities</a>
         <a class="link" href="#install">Install</a>
@@ -166,6 +167,7 @@
     </div>
     <nav class="mobile-nav container">
       <a href="#about">About</a>
+      <a href="#why">Why</a>
       <a href="#ontology">Ontology</a>
       <a href="#capabilities">Capabilities</a>
       <a href="#install">Install</a>
@@ -183,8 +185,8 @@
       <div>
         <p class="eyebrow">ArchGraph · architecture-graph driven Agentic Engineering</p>
         <h1>A knowledge-graph framework with an <span class="accent">ontology you define</span> — for your coding agent.</h1>
-        <p class="lead">ArchGraph turns one <strong>intent architecture graph</strong> into your agent's durable memory and your product's design — read and written through a single <strong>MCP interface</strong>. The built-in ontology is <strong>ArchiMate 3.2</strong>; a repository can plug in its own.</p>
-        <p class="lead">One install, one interface to learn, and a graph that stays clean because writes are deduplicated.</p>
+        <p class="lead">Your coding agent forgets everything between sessions, and the "why" behind your system lives nowhere. ArchGraph fixes that: it keeps one <strong>architecture graph</strong> — a picture of your project's parts and how they relate — as the agent's durable memory and your product's design, read and written over a single <strong>MCP</strong> (<strong>Model Context Protocol</strong>) server.</p>
+        <p class="lead">The graph's vocabulary — its <strong>ontology</strong>, the set of types and relationships it may hold — is yours to define. The built-in default is <strong>ArchiMate 3.2 + ARGO extensions</strong>; a repository can plug in its own. One install, one interface to learn, and a graph that stays clean because writes are deduplicated.</p>
         <div class="hero-actions">
           <a class="btn primary" href="#install">Install ArchGraph</a>
           <a class="btn" href="docs/getting-started.html">Read the guide</a>
@@ -221,10 +223,10 @@
     <div class="container">
       <p class="kicker">What is this?</p>
       <h2>One graph for the agent's memory and the product's design.</h2>
-      <p class="lead">Running coding agents on a real codebase hurts in two ways: every session starts cold, and the "why" behind the system lives nowhere. ArchGraph makes <strong>one architecture graph</strong> the single source of truth — a durable, tiered memory the agent reads semantically and writes without ever duplicating, plus a model you can reason over. It is one MCP interface to install and learn.</p>
+      <p class="lead">Running coding agents on a real codebase hurts in two ways: every session starts cold, and the "why" behind the system lives nowhere. ArchGraph makes <strong>one architecture graph</strong> the single source of truth — a durable, tiered memory the agent reads semantically and writes with reuse-by-default (a duplicate needs an explicit override), plus a model you can reason over. It is one MCP interface to install and learn.</p>
       <ul class="clean">
         <li><strong>Architects / tech leads</strong> — one model of the product, the harness, and the agents.</li>
-        <li><strong>Agent users</strong> — memory restored at session start, recalled on demand, never duplicated.</li>
+        <li><strong>Agent users</strong> — memory restored at session start, recalled on demand, reused instead of duplicated.</li>
         <li><strong>Platform teams</strong> — one interface, deployed into the editor you already use.</li>
       </ul>
       <img class="about-img" src="docs/diagrams/core-model.svg" alt="ArchGraph core model — one model for the agent's memory and the product's design" />
@@ -232,14 +234,23 @@
     </div>
   </section>
 
+  <section id="why" class="section">
+    <div class="container">
+      <p class="kicker">Why ArchGraph</p>
+      <h2>The comparison lives on one page.</h2>
+      <p class="lead">The usual fixes for agent context — loose files, a plain vector store, a wiki/ADR folder, a general graph or ontology tool — each work until they don't. The real differentiator isn't "custom vs. locked": Protégé/OWL, Neo4j, TerminusDB, and Archi/EA all let you extend a model. It is a <strong>first-class, validated, runtime-resolved schema bundle behind one MCP interface</strong>, with typed dedup and commit traceability built in.</p>
+      <p><a class="read-more" href="docs/capabilities.html#compare">See the full comparison — including what ArchGraph itself costs you →</a></p>
+    </div>
+  </section>
+
   <section id="ontology" class="section">
     <div class="container">
       <p class="kicker">Bring your own ontology</p>
       <h2>Not locked to one modeling language.</h2>
-      <p class="lead">ArchGraph separates the <strong>core</strong> from the <strong>ontology</strong>. A repository drops a <em>schema bundle</em> under <code class="inline">.argo/schema/</code> — element and relationship types, endpoint rules, an actor contract — and validation, MCP guidance, and the <code class="inline">.qea</code> projection follow it. A bundle can <code class="inline">extends</code> the built-in default and add its own types, with no framework change.</p>
+      <p class="lead">ArchGraph separates the <strong>core</strong> from the <strong>ontology</strong>. A repository drops a <em>schema bundle</em> under <code class="inline">.argo/schema/</code> — element and relationship types, endpoint rules, an actor contract — and validation, MCP guidance, and the <code class="inline">.qea</code> projection follow it. A bundle can <code class="inline">extends: "default"</code> — inheriting the built-in <strong>ArchiMate 3.2 + ARGO extensions</strong> — and add its own types, with no framework change.</p>
       <div class="callout reveal">
         <h3>This repository is its own proof</h3>
-        <p>Its active schema extends <strong>ArchiMate 3.2</strong> with a <strong>UML 2 state-machine profile</strong>, resolved at runtime from <code class="inline">.argo/schema/</code> rather than hardcoded in the framework.</p>
+        <p>Its active schema uses <code class="inline">extends: "default"</code> — inheriting the built-in <strong>ArchiMate 3.2 + ARGO extensions</strong> — and layers a <strong>UML 2 state-machine profile</strong> on top, resolved at runtime from <code class="inline">.argo/schema/</code> rather than hardcoded in the framework.</p>
         <p><a class="read-more" href="docs/case-team-graph.html">Worked case: define an ontology, then build the graph →</a></p>
       </div>
     </div>
@@ -278,7 +289,8 @@
       <p class="lead">One <code class="inline">argo-deploy</code> registers the <strong>MCP server</strong> and installs the skills and rules into GitHub Copilot, Cursor, OpenCode, DeepSeek Harness, <strong>OpenClaw</strong>, and <strong>Codex</strong> (agents where the host supports them), then walks you through <code class="inline">~/.argo/.env</code>.</p>
       <pre class="code">npm install -g archgraph-argo
 argo-deploy</pre>
-      <p class="lead" style="margin-top:18px;">Everything works out of the box except <strong>semantic (Graph RAG) queries</strong>, which need a <strong>Neo4j</strong> instance and an OpenAI-compatible <strong>embedding</strong> endpoint. Context reads, writes, and Enterprise Architect interop work without them.</p>
+      <p class="lead" style="margin-top:18px;">For context reads and writes, deduplication, and Enterprise Architect interop, <strong>Node.js is all you need</strong> — no database. The <strong>structural</strong> Cypher projection and all <strong>semantic</strong> Graph RAG additionally need a <strong>Neo4j</strong> instance and an OpenAI-compatible <strong>embedding</strong> endpoint; until those are configured, <code class="inline">argo init</code>'s structural sync and semantic lifecycle <strong>report failed</strong> (the graph itself is still created).</p>
+      <p class="lead"><strong>After deploying, restart your editor / host</strong> so it reloads the new MCP server.</p>
       <p><a class="read-more" href="docs/getting-started.html">Prerequisites and configuration →</a></p>
     </div>
   </section>
@@ -287,15 +299,15 @@ argo-deploy</pre>
     <div class="container">
       <p class="kicker">How to use</p>
       <h2>Initialize once, then let the agent work.</h2>
-      <p class="lead"><strong>Step 0 — initialize the workspace.</strong> In a fresh project, ask your coding agent to run <code class="inline">argo init</code> (the <code class="inline">initializeWorkspace</code> MCP call). It creates a starter <code class="inline">design/KG/SystemArchitecture.json</code> when missing, performs the first JSON → Neo4j sync, initializes the semantic lifecycle, and verifies the architecture.</p>
+      <p class="lead"><strong>Step 0 — initialize the workspace.</strong> In a fresh project, ask your coding agent to run <code class="inline">argo init</code> (the <code class="inline">initializeWorkspace</code> MCP call). It creates a starter <code class="inline">design/KG/SystemArchitecture.json</code> when missing and verifies the architecture; its first JSON → Neo4j sync and semantic-lifecycle steps <strong>report failed until Neo4j + an embedding endpoint are configured</strong> — the graph and its context reads/writes still work without them.</p>
       <p class="lead">Then open your project and start a coding agent. It will:</p>
       <ul class="clean">
         <li>locate the architecture element behind the task before changing anything,</li>
         <li>arm itself with that element's Skills and Rules,</li>
         <li>work test-first (GIVEN-WHEN-THEN) and trace every commit back to the graph,</li>
-        <li>reuse an existing element instead of creating a duplicate.</li>
+        <li>reuse an existing element by default, and only create a near-duplicate with an explicit override.</li>
       </ul>
-      <p class="lead">The intent architecture graph — modelled by default in <strong>ArchiMate 3.2</strong> — is the single source of truth.</p>
+      <p class="lead">The intent architecture graph — modelled by default in <strong>ArchiMate 3.2 + ARGO extensions</strong> — is the single source of truth.</p>
     </div>
   </section>
 
