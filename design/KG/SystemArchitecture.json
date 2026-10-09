@@ -4344,7 +4344,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-07）。\n【本会话目标与结论】人类伙伴要求验证 Argo MCP 的读写（含本项目读写与跨项目读写）权限控制是否符合预期。结论：权限结果符合预期（跨项目写被有效阻断、项目外路径零写入），但发现两处实现细节与文档表述不符，已登记到 T2 卡 overseer-argo-mcp-verification-001（本卡不重复）。\n【关键认知（坑）】①写门禁在 DSH 内永不触发：dsh-argo-workspace/index.js 在 {...args} 展开后覆盖注入 workspaceRoot=sessionCwd 与 sessionWorkspaceRoot=sessionCwd（注释：模型值不能赢），故 authorizeWorkspaceWrite 总在 sameWorkspace 分支放行，WORKSPACE_WRITE_DENIED 分支只在非 DSH 主机（直接 node 跑单测）才执行；写边界实际由『桥钉住会话工作区』保证，方向正确、零安全影响。实测：带 workspaceRoot=D:\\Projects\\SOC-DEMO 的写入未被拒，元素落在本仓，SOC-DEMO 零改动。②跨项目读联邦通道默认拒绝生效：abot/my-army/graph-wiki/new-era 均 EXTERNAL_QUERY_DENIED(403，requester=archgraph)，与 registry_grants 一致（archgraph 作为 grantee 无任何授权）。③修正上轮记录：addArchitectureElement 省略 element.id 会自动分配（回传 allocatedId），非『必须自带 id』；上次的 requireId 类失败实为元素缺 type 的 schema 校验错误。④语义去重门禁假阳性再复现（本卡 0.8922 拦截新卡），已按规则复用追加。\n【阻塞】沙箱 PowerShell 被 Windows 文件权限挡住（SetNamedSecurityInfoW grantWrite(D:\\Projects\\archgraph)），git / npm test / npm run acceptance 均不可用；守卫单测（tests/workspace-write-guard.test.js）与 Docker 端到端验收未跑，本会话结论仅由 MCP 实测支撑。恢复 shell 后应补跑 ARM。\n【图谱】探针已全部移除，图谱回到 402 元素 / 0 探针基线；validateSystemArchitecture 通过。\n【上一轮（已归 T2 归档，索引保留）】Coding Agent 业务价值 PPT v5 已完成：最终版 docs/ppt/output/archgraph-coding-business-deck-v5-clarified-p3-r2.pptx，构建脚本 docs/ppt/build-coding-business-deck-v5.mjs，内容计划 docs/ppt/content-plan-v5.json；主交付 e01fa0b、登记 9a121f0、第3页修订 19b6f67；v1-v4、v5-final-aligned 历史产物保留。\n【待办】①恢复 shell 后补跑 workspace-write-guard 单测与非 DSH 主机的拒写实测（守卫拒绝分支的真实证据）；②确认『读工具按 per-call workspaceRoot 跨项目读取』在 DSH 下不再可用是否需要文档补充（现只有 projectId 联邦通道可用）；③若需在 DSH 内直接验守卫拒绝分支，需人类伙伴同意临时切换完全权限或改用非桥接宿主。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-09）。\n【本会话目标】人类伙伴要求以红蓝对抗方式优化本仓 README 与主页（主题：可自定义本体的知识图谱框架、MCP 无缝接入宿主、低上手成本；并新增使用介绍页与图文并茂的使用 case 详情页；主页只放大纲、细节外链）。\n【结论/交付】对外呈现 v2 完成：README 精简（222→~130 行）、主页大纲化（Hero + about/ontology/capabilities/install/howto/community，14 张能力卡与 global-architecture 图迁出）、新增中文详情页 docs/getting-started.html、docs/capabilities.html、docs/case-team-graph.html + 共享 docs/site.css + 4 张 light 主题 case SVG（scripts/gen-case-diagrams.js）。npm test 720/720（0 失败 0 跳过）；validateSystemArchitecture passed。commit 8f10fc5（T2 里程碑 overseer-site-v2-outline-detail-pages-milestone-001；WP wp-site-v2-outline-detail-pages-001 + 视图 site-v2-delivery-001）。\n【方法】蓝队 B1（README+主页大纲）/B2（中文详情页）起草 → 红队 R1/R2 挑刺（必改项：测试完整性、死链、H1 缺 framework/KG/MCP、Neo4j·agents 过度声明、case 步骤不可复现、缺图）→ 项目总管收敛落地；红队证据充分、直接决定了实现。\n【关键认知（坑）】① custom-schema 示例规则文件仍是遗留名 argob-rules.json，而加载器固定读 schema-bundle.rules.json、config 未声明 rules → 端点矩阵此前静默失效（permissive）；已重命名+声明，矩阵恢复生效。② 视图元素上限（本仓 maxElementsPerView=15）导致新增 WP 需另建子视图；LTM 视图已满需按主题子视图拆分。③ 语义去重门禁会拦新里程碑（与本仓 0.26.2 刷新里程碑 0.87），按规则以 allowDuplicate+justification 新建独立里程碑。④ memory-eval MQ-17 子视图计数随图增长需同步维护（dataset 自带维护说明）；当前 38（此前 33 已陈旧）。\n【待办】① 未 push（待人类伙伴确认）；② 详情页为浅色 docs 壳而主页深色（有意为之，若需统一可后续处理）；③ 未跑 Docker npm run acceptance（本次不涉及 MCP 接口面）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4366,8 +4366,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-07",
-          "description": "Argo MCP 读写权限控制验证（本仓 + 跨项目）"
+          "value": "2026-10-09",
+          "description": "对外呈现 v2：README 精简 + 主页大纲化 + 中文详情页（红蓝对抗）"
         },
         {
           "name": "commit",
@@ -4682,6 +4682,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "8f10fc5",
+          "description": "README.md; index.html; docs/(getting-started|capabilities|case-team-graph).html; docs/site.css; docs/diagrams/team-graph-*.svg; scripts/gen-case-diagrams.js; tests/*; design/KG/SystemArchitecture.json"
         }
       ],
       "testcases": [
@@ -12355,6 +12360,11 @@
         {
           "name": "status",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "8f10fc5",
+          "description": "README.md; index.html; docs/site.css; docs/getting-started.html; docs/capabilities.html; docs/case-team-graph.html; docs/diagrams/team-graph-ontology.svg; docs/diagrams/team-graph-elements-relations.svg; docs/diagrams/team-graph-view-composition.svg; docs/diagrams/team-graph-mcp-recall-sequence.svg; scripts/gen-case-diagrams.js; custom-schema/.argo/schema/schema-bundle.config.json (+ argob-rules.json→schema-bundle.rules.json); tests/readme.test.js; tests/website.test.js; tests/architecture-diagram.test.js; tests/architecture-view-context.test.js; tests/docs-pages.test.js; tests/acceptance-guardian.test.js; scripts/memory-eval-run.js; docs/memory-eval-dataset.md; design/KG/SystemArchitecture.json; archgraph.qea"
         }
       ],
       "testcases": [
@@ -12380,6 +12390,28 @@
           "acceptanceCriteria": "tests/readme.test.js"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（对外呈现 v2 全量交付：README/主页/中文详情页/case 图/site.css + 测试重写 + custom-schema 规则文件名修复）",
+          "name": "commit",
+          "value": "8f10fc5"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "delivered"
+        }
+      ],
+      "description": "里程碑（2026-10-09，项目总管）：对外呈现 v2——README 精简 + 主页大纲化 + 中文详情页。\n【交付】README（222→~130 行）与 index.html 收敛为『大纲+详情页链接』，头条卖点=可自定义本体（schema bundle）+ 一个 MCP 接口接入六大宿主 + 低成本上手；新增中文详情页 docs/getting-started.html（使用介绍）、docs/capabilities.html（能力总览）、docs/case-team-graph.html（使用案例，图文并茂），共享 docs/site.css + 4 张 case SVG（scripts/gen-case-diagrams.js）；14 张能力卡与 global-architecture 图从主页迁至详情页。\n【方法】红蓝对抗：蓝队 B1（README+主页大纲）/B2（中文详情页）起草，红队 R1/R2 挑刺并给出必改项（测试完整性、死链、H1 缺 framework/KG/MCP、Neo4j/agents 过度声明、case 步骤不可复现、缺图），项目总管收敛定稿。\n【附带修复】custom-schema 示例规则文件从遗留 argob-rules.json 重命名为 schema-bundle.rules.json 并在 config 声明 rules，使端点矩阵真正生效（此前静默丢失）；按 dataset 维护说明同步 MQ-17 子视图计数 33→38。\n【验收】先改测试后改文档；npm test 720/720（0 失败 0 跳过）；validateSystemArchitecture passed。\n【commit】8f10fc5。",
+      "id": "overseer-site-v2-outline-detail-pages-milestone-001",
+      "name": "里程碑：对外呈现 v2（README 精简 + 主页大纲化 + 中文详情页）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -16631,7 +16663,8 @@
         "overseer-framework-series-001",
         "overseer-agent-model-unification-001",
         "overseer-archgraph-intro-pdf-001",
-        "overseer-codex-adaptation-001"
+        "overseer-codex-adaptation-001",
+        "overseer-site-v2-outline-detail-pages-milestone-001"
       ],
       "included_relationships": []
     },
