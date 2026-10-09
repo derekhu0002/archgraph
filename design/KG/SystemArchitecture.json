@@ -12375,6 +12375,11 @@
           "name": "commit",
           "value": "425189d",
           "description": "README.md; index.html; docs/capabilities.html; docs/getting-started.html; docs/site.css; tests/readme.test.js; tests/website.test.js; tests/docs-pages.test.js; tests/overseer-ltm-layering.test.js（红蓝第 2 轮：诚实对比表 + 去重主页大纲 + 精确声明 + 回归修复）"
+        },
+        {
+          "name": "commit",
+          "value": "0290626",
+          "description": "README.md; index.html; docs/case-team-graph.html; custom-schema/README.md; custom-schema/.argo/schema/GUIDE.md; custom-schema/.argo/schema/SystemArchitecture.schema.json; tests/readme.test.js; tests/website.test.js; tests/docs-pages.test.js（新手视角迭代：英文上手两条路线 + 精确 fail-closed + 测试完整性修复）"
         }
       ],
       "testcases": [
@@ -12415,9 +12420,14 @@
         {
           "name": "status",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "0290626",
+          "description": "README.md; index.html; docs/case-team-graph.html; custom-schema/README.md; custom-schema/.argo/schema/GUIDE.md; custom-schema/.argo/schema/SystemArchitecture.schema.json; tests/readme.test.js; tests/website.test.js; tests/docs-pages.test.js（新手视角迭代）"
         }
       ],
-      "description": "里程碑（2026-10-09，项目总管）：对外呈现 v2——README 精简 + 主页大纲化 + 中文详情页。\n【交付】README（222→~130 行）与 index.html 收敛为『大纲+详情页链接』，头条卖点=可自定义本体（schema bundle）+ 一个 MCP 接口接入六大宿主 + 低成本上手；新增中文详情页 docs/getting-started.html（使用介绍）、docs/capabilities.html（能力总览）、docs/case-team-graph.html（使用案例，图文并茂），共享 docs/site.css + 4 张 case SVG（scripts/gen-case-diagrams.js）；14 张能力卡与 global-architecture 图从主页迁至详情页。\n【方法】红蓝对抗：蓝队 B1（README+主页大纲）/B2（中文详情页）起草，红队 R1/R2 挑刺并给出必改项（测试完整性、死链、H1 缺 framework/KG/MCP、Neo4j/agents 过度声明、case 步骤不可复现、缺图），项目总管收敛定稿。\n【附带修复】custom-schema 示例规则文件从遗留 argob-rules.json 重命名为 schema-bundle.rules.json 并在 config 声明 rules，使端点矩阵真正生效（此前静默丢失）；按 dataset 维护说明同步 MQ-17 子视图计数 33→38。\n【验收】先改测试后改文档；npm test 720/720（0 失败 0 跳过）；validateSystemArchitecture passed。\n【commit】8f10fc5。",
+      "description": "里程碑（2026-10-09，项目总管）：对外呈现 v2——README 精简 + 主页大纲化 + 中文详情页。\n【交付】README（222→~135 行）与 index.html 收敛为『大纲+详情页链接』，头条卖点=可自定义本体（schema bundle）+ 一个 MCP 接口接入六大宿主 + 低成本上手；新增中文详情页 docs/getting-started.html（使用介绍）、docs/capabilities.html（能力总览）、docs/case-team-graph.html（使用案例，图文并茂），共享 docs/site.css + 4 张 case SVG（scripts/gen-case-diagrams.js）；14 张能力卡与 global-architecture 图从主页迁至详情页；新增唯一权威的诚实竞争优势对比（docs/capabilities.html#compare）。\n【方法】真正的多轮红蓝对抗：红队复攻修订后的实际文件与测试完整性，直到判定 CONVERGED（而非红队挑一次、总管代改）。第1轮红队找出：对比表稻草人/缺成本行、『只需 Node.js』与 argo init 自相矛盾、对比表三处重复破坏大纲 → 蓝修。第2轮红队以『第一次接触框架的使用者』视角复走全程，复现并推动：英文落地页→中文详情页的语言墙（人类伙伴裁决：保留中文详情页 + 英文主页/README 增精简英文上手的两条路线 Route A 默认本体 / Route B 自定义本体）、README/主页定义首个术语（intent graph/MCP/ontology/ArchiMate/ARGO）、Node≥18、快速上手不再预建与默认根视图冲突的视图（Route A 解析既有根视图 id；Route B 先自建 schema 与 design/KG/SystemArchitecture.json 再 init，明确 NO_DEFAULT_GRAPH）、schema-bundle.config.json 对 standalone schema 非可选（actorElementType 否则 fail-closed）、argo init 不再显示为 shell $、修正 custom-schema 拷贝指引（仅 .argo/schema）；并修复一条同义反复的测试断言（tag-strip 后校验）。\n【附带修复】custom-schema 示例规则文件从遗留 argob-rules.json 重命名为 schema-bundle.rules.json 并在 config 声明 rules，使端点矩阵真正生效；按 dataset 维护说明同步 MQ-17 子视图计数 33→38。\n【验收】先改测试后改文档；npm test 732/732（0 失败 0 跳过）；validateSystemArchitecture passed；红队以可复现实验判定 CONVERGED。\n【commit】8f10fc5（首版）/ 425189d（红蓝第2轮）/ 0290626（新手视角迭代）。",
       "id": "overseer-site-v2-outline-detail-pages-milestone-001",
       "name": "里程碑：对外呈现 v2（README 精简 + 主页大纲化 + 中文详情页）",
       "parent": "project-overseer-001",
