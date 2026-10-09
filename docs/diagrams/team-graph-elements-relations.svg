@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1000 520" role="img" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4d6bfe"/></marker><marker id="arm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#5b6472"/></marker><marker id="ars" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0f9d58"/></marker><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08"/></filter></defs>
+<rect x="0" y="0" width="1000" height="520" fill="#f5f7fa"/>
+<text x="50" y="62" font-size="26" fill="#0f172a" text-anchor="start" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">元素与关系</text>
+<text x="50" y="92" font-size="14" fill="#5b6472" text-anchor="start" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">一次写操作创建的元素与有向关系</text>
+<line x1="273" y1="255" x2="372" y2="255" stroke="#4d6bfe" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="568" y1="222" x2="674" y2="184" stroke="#4d6bfe" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="770" y1="183" x2="770" y2="330" stroke="#4d6bfe" stroke-width="2" marker-end="url(#ar)"/>
+<rect x="79" y="222" width="192" height="66" rx="12" fill="#ffffff" stroke="#0f9d58" stroke-width="1.5" filter="url(#sh)"/>
+<text x="175" y="251" font-size="17" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Agent 001</text>
+<text x="175" y="273" font-size="12" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Agent Node</text>
+<rect x="374" y="222" width="192" height="66" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<text x="470" y="251" font-size="17" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Team A</text>
+<text x="470" y="273" font-size="12" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Team Node</text>
+<rect x="674" y="117" width="192" height="66" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<text x="770" y="146" font-size="17" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Service A</text>
+<text x="770" y="168" font-size="12" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Service Node</text>
+<rect x="674" y="332" width="192" height="66" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<text x="770" y="361" font-size="17" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Service B</text>
+<text x="770" y="383" font-size="12" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Service Node</text>
+<rect x="267.9" y="227" width="108.19999999999999" height="22" rx="8" fill="#ffffff" stroke="#e6e8ee" stroke-width="1"/>
+<text x="322" y="243" font-size="12.5" fill="#4d6bfe" text-anchor="middle" font-weight="600" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Assigned To</text>
+<rect x="576" y="185" width="100" height="22" rx="8" fill="#ffffff" stroke="#e6e8ee" stroke-width="1"/>
+<text x="626" y="201" font-size="12.5" fill="#4d6bfe" text-anchor="middle" font-weight="600" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Depends On</text>
+<rect x="720" y="247" width="100" height="22" rx="8" fill="#ffffff" stroke="#e6e8ee" stroke-width="1"/>
+<text x="770" y="263" font-size="12.5" fill="#4d6bfe" text-anchor="middle" font-weight="600" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Depends On</text>
+</svg>

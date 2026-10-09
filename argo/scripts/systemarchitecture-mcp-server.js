@@ -6,7 +6,6 @@ const readline = require('node:readline');
 const crypto = require('node:crypto');
 
 const {
-  getArgoRoot,
   resolveCallWorkspaceRoot,
 } = require('./argo-paths.js');
 
@@ -131,7 +130,13 @@ const {
   validateGraphSemantics,
   validateArchiMateEndpointMatrix,
   validateViewElementLimits,
+  validateAttributeContracts,
 } = require('./graph-semantics.js');
+const {
+  loadSchemaBundleAndOntology,
+  resolveSchemaBundle,
+  resolveTypeEnums,
+} = require('./schema-bundle.js');
 const {
   createProductionGraphRagRuntime,
 } = require('./graph-rag/productionGraphRagRuntime.js');
@@ -168,6 +173,7 @@ const {
 } = require('./neo4j-system-architecture-store.js');
 
 const losslessWriteGate = require('./lossless-write-gate.js');
+const { EXTERNAL_READ_TOOLS } = require('./external-graph-query.js');
 
 const HANDLED_MUTATION_TYPES = new Set([
   'addElement',
@@ -221,17 +227,17 @@ const TOOLS = [
   },
   {
     name: 'getIntentElementContext',
-    description: 'read-only query that returns an intent subgraph context for one element. Uses ArchiMate semantic dependency traversal with dependencyDepth and dependentDepth, preserving native subgraph elements, relationships, and views.',
+    description: 'read-only query that returns an intent subgraph context for one element. Uses ArchiMate semantic dependency traversal with dependencyDepth and dependentDepth, preserving native subgraph elements, relationships, and views. Output is bounded by maxBytes (default ARGO_CONTEXT_MAX_BYTES or 32000): beyond it non-focus members degrade to identity (id/type/name) and a complete id manifest is returned under truncation, so the host never silently cuts the payload. On a large/hub element leave includeAttributes/includeTestcases off (they are the ledger and can dominate the size) and prefer queryNeo4jGraph to locate ids, then read them narrowly.',
     inputSchema: intentElementContextInputSchema(),
   },
   {
     name: 'getArchitectureViewContext',
-    description: 'read-only query that resolves one view by view_id into its complete membership: the view object, every member element (from included_elements), every member relationship (from included_relationships), the parent element, and optionally child sub-views declared by member elements. Resolves ids into full canonical objects instead of returning raw id lists. Optional includeEaGeometry (default false) additionally returns the EA diagram geometry of the resolved view: element boxes plus each connector ROUTE (t_diagramlinks.Path as `path` + parsed `points`, with the non-route Geometry override kept separately under `geometry`).',
+    description: 'read-only query that resolves one view by view_id into its complete membership: the view object, every member element (from included_elements), every member relationship (from included_relationships), the parent element, and optionally child sub-views declared by member elements. Resolves ids into full canonical objects instead of returning raw id lists. Output is bounded by maxBytes (default ARGO_CONTEXT_MAX_BYTES or 32000): beyond it members degrade to identity (id/type/name) with a complete id manifest under truncation. Optional includeEaGeometry (default false) additionally returns the EA diagram geometry of the resolved view: element boxes plus each connector ROUTE (t_diagramlinks.Path as `path` + parsed `points`, with the non-route Geometry override kept separately under `geometry`).',
     inputSchema: viewContextInputSchema(),
   },
   {
     name: 'previewSystemArchitectureMutation',
-    description: 'Use before apply for complex or risky changes. Performs a dry-run of one or more mutations, runs schema, graph, view, and ArchiMate 3.2 validation, and does not write the graph.',
+    description: 'Use before apply for complex or risky changes. Performs a dry-run of one or more mutations, runs schema, graph, view, and modeling-language validation, and does not write the graph.',
     inputSchema: mutationInputSchema(),
   },
   {
@@ -241,12 +247,18 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureElement',
-    description: 'Use for one element. Creates a new element or adds an existing element to view_ids. view_ids is required so elements never exist outside views. Set dryRun to preview without writing.',
+    description: 'Use for one element. Creates a new element or adds an existing element to view_ids. view_ids is required so elements never exist outside views. element.id is OPTIONAL: omit it and the server auto-allocates a unique id (returned in the result); provide it to pin a specific id (must not collide with a different element). Set dryRun to preview without writing.',
     inputSchema: {
       type: 'object',
       required: ['element', 'view_ids'],
       properties: {
-        element: { type: 'object' },
+        element: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'Element id (OPTIONAL). Omit to let the server auto-allocate a unique id (a semantic slug from the name, e.g. "graph-wiki-federation-center", suffixed -002.. if taken). If provided it must not collide with a DIFFERENT element (a same (type,name) match is idempotent reuse).' },
+          },
+          description: 'The element to create/attach. `id` is optional — omit it and the server allocates one (returned in the result).',
+        },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
         onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: find-or-create — attach an existing exact (type, name) match; a same-type semantic near-duplicate also blocks creation. allowDuplicate: create anyway (even if a duplicate exists), requires a justification.' },
         justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
@@ -288,7 +300,7 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureRelationship',
-    description: 'Use for one relationship. Creates a new relationship or adds an existing relationship to view_ids. relationship.type is the ArchiMate 3.2 relationship type and is validated against endpoint element types. Set dryRun to preview without writing.',
+    description: 'Use for one relationship. Creates a new relationship or adds an existing relationship to view_ids. relationship.type is the ArchiMate 3.2 relationship type and is validated against endpoint element types. relationship.id is OPTIONAL: omit it and the server auto-allocates a unique id (returned in the result). Set dryRun to preview without writing.',
     inputSchema: {
       type: 'object',
       required: ['relationship', 'view_ids'],
@@ -335,7 +347,7 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureView',
-    description: 'Use for one view. The graph must have exactly one top-level view named SystemArchitecture; all sub-views must attach to an element with parent_element_id. Set dryRun to preview without writing.',
+    description: 'Use for one view. The graph must have exactly one top-level view named SystemArchitecture; all sub-views must attach to an element with parent_element_id. view.view_id is OPTIONAL: omit it and the server auto-allocates a unique view_id (returned in the result). Set dryRun to preview without writing.',
     inputSchema: {
       type: 'object',
       required: ['view'],
@@ -380,7 +392,7 @@ const TOOLS = [
   },
   {
     name: 'queryNeo4jGraph',
-    description: 'Run a read-only Cypher query against the Neo4j structural projection of the intent architecture, or request the projection schema so an agent can construct its own Cypher. Pass {schema: true} to return node labels, relationship types, property keys, and the legal ArchiMate element/relationship type enums. Pass {cypher: "..."} to execute a read-only query; scope it with {graphKey: $graphKey}. Write clauses (CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS) are rejected.',
+    description: 'Run a read-only Cypher query against the Neo4j structural projection of the intent architecture, or request the projection schema so an agent can construct its own Cypher. Pass {schema: true} to return node labels, relationship types, property keys, and the legal element/relationship type enums of the workspace-resolved schema bundle. Pass {cypher: "..."} to execute a read-only query; scope it with {graphKey: $graphKey}. Write clauses (CREATE/MERGE/DELETE/SET/REMOVE/DROP/LOAD CSV/FOREACH/IN TRANSACTIONS) are rejected.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -415,6 +427,13 @@ const WORKSPACE_ROOT_PARAM = Object.freeze({
   description:
     'Optional absolute workspace root for this call. When provided it is used as-is; otherwise the server launch directory is used.',
 });
+// Cross-project graph query: the 5 read tools accept an optional `projectId`;
+// provided => routed to the federation center, omitted => the local workspace.
+const PROJECT_ID_PARAM = Object.freeze({
+  type: 'string',
+  description:
+    'Optional external project id. When provided, the query is routed to the federation center to read that project\'s graph (this project must be registered in .argo/federation.json); omitted = the local workspace (unchanged).',
+});
 // Lossless write gate: every update/remove helper accepts an explicit loss
 // acknowledgement (see lossless-write-gate.js). add* is purely additive and is
 // left alone. Without the acknowledgement a shrinking text edit or a destructive
@@ -435,6 +454,9 @@ for (const tool of TOOLS) {
   if (!inputSchema || inputSchema.type !== 'object' || !inputSchema.properties) continue;
   if (!Object.prototype.hasOwnProperty.call(inputSchema.properties, 'workspaceRoot')) {
     inputSchema.properties.workspaceRoot = WORKSPACE_ROOT_PARAM;
+  }
+  if (EXTERNAL_READ_TOOLS.has(tool.name) && !Object.prototype.hasOwnProperty.call(inputSchema.properties, 'projectId')) {
+    inputSchema.properties.projectId = PROJECT_ID_PARAM;
   }
   if (tool.name && /^(update|remove)Architecture/.test(tool.name)) {
     for (const [key, value] of Object.entries(LOSS_ACK_INPUT_PROPS)) {
@@ -461,8 +483,9 @@ function intentElementContextInputSchema() {
       dependentDepth: { type: 'number', description: 'Default: 1. Semantic dependents that rely on the focus element.' },
       associationDepth: { type: 'number', description: 'Default: 1. Association neighbors are expanded at least one layer.' },
       associationNeighborDependencyDepth: { type: 'number', description: 'Default: 0. Optional dependency expansion from association neighbors.' },
-      includeAttributes: { type: 'boolean', description: 'Default: false. Include `attributes` (commit/session/release ledgers) verbatim. Omitted by default from this structural read; the focus element always keeps its own. Semantic retrieval embeds attributes, so semantic hits keep them.' },
-      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim. Omitted by default from this structural read (bookkeeping); pass true when you need acceptance cases. Semantic retrieval embeds testcase descriptions, so semantic hits keep them.' },
+      includeAttributes: { type: 'boolean', description: 'Default: false. Include `attributes` (commit/session/release ledgers) verbatim. Omitted by default from this structural read; the focus element always keeps its own. Semantic retrieval embeds attributes, so semantic hits keep them. On a hub element this ledger can dominate the payload — prefer leaving it off and reading bookkeeping narrowly.' },
+      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim. Omitted by default from this structural read (bookkeeping); pass true when you need acceptance cases. Semantic retrieval embeds testcase descriptions, so semantic hits keep them. On a hub element this can be large — prefer leaving it off.' },
+      maxBytes: { type: 'number', description: 'Optional output budget in UTF-8 bytes (the exact serialized response). Default: ARGO_CONTEXT_MAX_BYTES env or 32000. 0 = unlimited. When the payload exceeds the budget, non-focus members degrade to identity (id/type/name) and a complete id manifest is returned under `truncation` — the payload is never silently truncated by the host.' },
     },
     additionalProperties: false,
   };
@@ -480,6 +503,7 @@ function viewContextInputSchema() {
       includeAttributes: { type: 'boolean', description: 'Default: false. Include member/relationship `attributes` (commit/session/release ledgers) verbatim. Omitted by default from this structural read (bookkeeping); pass true when you need provenance.' },
       includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim. Omitted by default from this structural read; pass true for acceptance-case lookups.' },
       includeEaGeometry: { type: 'boolean', description: 'Default: false (opt-in). When true, additionally resolve the diagram GEOMETRY (element boxes + connector line routes) for this view from the workspace EA model (.qea) and return it under a `geometry` field aligned by schema id with the resolved members. Each geometry relationship carries: `path` (the EA route from t_diagramlinks.Path, "" when EA auto-routes), `points` (the parsed [{x,y}] waypoints), `edge` (the EDGE route-style token or null) and `geometry` (the raw SX/SY/EX/EY override string, which contains NO waypoints). By default the EA model is never touched and no `geometry` field is returned; a missing EA model/diagram yields geometry.present=false, never an error.' },
+      maxBytes: { type: 'number', description: 'Optional output budget in UTF-8 bytes (the exact serialized response). Default: ARGO_CONTEXT_MAX_BYTES env or 32000. 0 = unlimited. When the payload exceeds the budget, members degrade to identity (id/type/name) and a complete id manifest is returned under `truncation` — the payload is never silently truncated by the host.' },
     },
     additionalProperties: false,
   };
@@ -559,22 +583,7 @@ function normalizeRelativePath(value) {
 }
 
 function resolveSchemaPath(workspaceRoot) {
-  const bundledSchemaPath = path.join(getArgoRoot(), 'schema', 'SystemArchitecture.schema.json');
-  if (fs.existsSync(bundledSchemaPath)) {
-    return { absolutePath: bundledSchemaPath, relativePath: SCHEMA_PATH_CANDIDATES[0] };
-  }
-
-  for (const candidate of SCHEMA_PATH_CANDIDATES) {
-    const absolutePath = path.join(workspaceRoot, candidate);
-    if (fs.existsSync(absolutePath)) {
-      return { absolutePath, relativePath: candidate };
-    }
-    const bundledPath = path.resolve(__dirname, '..', '..', candidate);
-    if (fs.existsSync(bundledPath)) {
-      return { absolutePath: bundledPath, relativePath: candidate };
-    }
-  }
-  throw new Error(`Unable to locate SystemArchitecture schema. Checked: ${SCHEMA_PATH_CANDIDATES.join(', ')}`);
+  return resolveSchemaBundle(workspaceRoot).schema;
 }
 
 function readJson(filePath, label) {
@@ -588,13 +597,17 @@ function readJson(filePath, label) {
 async function loadContext(args = {}) {
   const workspaceRoot = resolveWorkspaceRoot(args);
   const graphPath = resolveWorkspacePath(workspaceRoot, args.architecturePath || DEFAULT_GRAPH_PATH);
-  const schemaPath = resolveSchemaPath(workspaceRoot);
+  // Resolve the modeling language for THIS workspace: a repository that ships
+  // its own bundle under .argo/schema is validated against that schema.
+  const { bundle, ontology } = loadSchemaBundleAndOntology(workspaceRoot);
   const context = {
     workspaceRoot,
     graphPath,
-    schemaPath,
+    schemaPath: bundle.schema,
+    schemaBundle: bundle,
+    ontology,
     document: readJson(graphPath.absolutePath, graphPath.relativePath),
-    schema: readJson(schemaPath.absolutePath, schemaPath.relativePath),
+    schema: bundle.schemaDocument,
   };
   context.neo4jSyncRecovery = await recoverNeo4jSyncIfNeeded({
     architecturePath: graphPath.relativePath,
@@ -605,13 +618,20 @@ async function loadContext(args = {}) {
 }
 
 function validateDocument(document, schema, options = {}) {
+  const ontology = options.ontology;
   const errors = [];
+  if (ontology && ontology.bundleValidation && ontology.bundleValidation.status === 'failed') {
+    errors.push(...ontology.bundleValidation.errors.map(error => `schema bundle: ${error}`));
+  }
   validateAgainstSchema(document, schema, '#', errors, schema);
-  validateGraphSemantics(document, errors);
+  validateGraphSemantics(document, errors, ontology);
+  validateAttributeContracts(document, errors, ontology);
   validateArchiMateEndpointMatrix(document, errors, {
+    ontology,
     touchedRelationshipIds: options.touchedRelationshipIds,
   });
   validateViewElementLimits(document, errors, {
+    ontology,
     touchedViewIds: options.validateAllViewElementLimits
       ? (document.views || []).map(view => view && view.view_id)
       : options.touchedViewIds,
@@ -668,6 +688,233 @@ function buildAgentProjection(omitted) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Context output budget (bounded, well-formed structural reads)
+// ---------------------------------------------------------------------------
+// A hub element/view can expand a semantic subgraph to tens of KB, which the
+// HOST then cuts mid-JSON — the agent receives a malformed partial observation.
+// This budget makes the ceiling the framework's, not the host's: above maxBytes
+// the non-focus members degrade to identity (id/type/name), the focus element +
+// boundary/explorationHints are kept, and EVERY included id is listed under
+// `truncation` — so the payload is always valid JSON and always navigable.
+// Default (or ARGO_CONTEXT_MAX_BYTES); 0 = unlimited. Semantic retrieval is NOT
+// affected (only these two structural builders).
+const DEFAULT_CONTEXT_MAX_BYTES = 32000;
+const CONTEXT_BUDGET_NOTE =
+  'The full payload exceeded maxBytes, so non-focus members are reduced to identity '
+  + '(id/type/name). The focus element and boundary/explorationHints are kept and every '
+  + 'included id is listed here. Raise maxBytes (0 = unlimited) or narrow the traversal '
+  + '(dependencyDepth/dependentDepth) to read details.';
+
+function resolveContextMaxBytes(args = {}) {
+  const raw = args && args.maxBytes !== undefined ? args.maxBytes : process.env.ARGO_CONTEXT_MAX_BYTES;
+  if (raw === undefined || raw === null || raw === '') {
+    return DEFAULT_CONTEXT_MAX_BYTES;
+  }
+  const numeric = Number(raw);
+  if (!Number.isFinite(numeric) || numeric < 0) {
+    return DEFAULT_CONTEXT_MAX_BYTES;
+  }
+  return Math.floor(numeric);
+}
+
+// Budget is measured on the EXACT serialization the caller receives
+// (`toolResult` pretty-prints with 2 spaces), in UTF-8 bytes.
+function payloadByteLength(value) {
+  try { return Buffer.byteLength(JSON.stringify(value, null, 2)); } catch (_) { return 0; }
+}
+
+function identityElementRecord(element) {
+  return { id: element.id, name: element.name, type: element.type };
+}
+
+function identityRelationshipRecord(relationship) {
+  return {
+    id: relationship.id,
+    name: relationship.name,
+    type: relationship.type,
+    source_id: relationship.source_id,
+    target_id: relationship.target_id,
+  };
+}
+
+function identityViewRecord(view) {
+  return { view_id: view.view_id, view_name: view.view_name };
+}
+
+function budgetTruncationBase(result, maxBytes, fullBytes, ids) {
+  return {
+    truncated: true,
+    reason: 'context_budget_exceeded',
+    maxBytes,
+    fullBytes,
+    includedElementIds: ids.elements,
+    includedRelationshipIds: ids.relationships,
+    includedViewIds: ids.views,
+    note: CONTEXT_BUDGET_NOTE,
+  };
+}
+
+// Shrink the manifest id lists (last resort) so even a pathological hub stays
+// within budget. The focus id is never dropped; `manifestTruncated` records any
+// real loss of a listed id.
+function trimManifestToBudget(result, maxBytes) {
+  const truncation = result.truncation;
+  const focusId = result.focusElementId;
+  // If the FOCUS element alone already exceeds the budget, trimming the (cheap)
+  // id manifest cannot get us under it — and dropping ids would only lose
+  // navigation for nothing. Keep the COMPLETE manifest and say why.
+  const focusOnly = {
+    ...result,
+    truncation: {
+      ...truncation,
+      includedElementIds: focusId ? [focusId] : [],
+      includedRelationshipIds: [],
+      includedViewIds: [],
+    },
+  };
+  if (focusId && payloadByteLength(focusOnly) > maxBytes) {
+    truncation.overBudgetByFocus = true;
+    return;
+  }
+  const arrays = ['includedElementIds', 'includedRelationshipIds', 'includedViewIds'];
+  for (let ratio = 0.9; ratio >= 0; ratio -= 0.1) {
+    for (const key of arrays) {
+      const full = truncation[key] || [];
+      const kept = full.slice(0, Math.ceil(full.length * ratio));
+      if (key === 'includedElementIds' && focusId && !kept.includes(focusId)) {
+        kept.unshift(focusId);
+      }
+      truncation[key] = kept;
+    }
+    truncation.manifestTruncated = true;
+    if (payloadByteLength(result) <= maxBytes) return;
+  }
+  truncation.manifestTruncated = true;
+}
+
+function applyContextBudget(result, maxBytes) {
+  if (!result || result.status !== 'passed' || !maxBytes || maxBytes <= 0) {
+    return result;
+  }
+  const fullBytes = payloadByteLength(result);
+  if (fullBytes <= maxBytes) {
+    return result;
+  }
+
+  const subgraph = result.subgraph || {};
+  const elements = Array.isArray(subgraph.elements) ? subgraph.elements : [];
+  const relationships = Array.isArray(subgraph.relationships) ? subgraph.relationships : [];
+  const views = Array.isArray(subgraph.views) ? subgraph.views : [];
+  const focusId = result.focusElementId;
+  const ids = {
+    elements: elements.map((entry) => entry.id),
+    relationships: relationships.map((entry) => entry.id),
+    views: views.map((entry) => entry.view_id),
+  };
+  const truncated = (tier) => budgetTruncationBase(result, maxBytes, fullBytes, ids);
+  const nonFocusCount = elements.filter((entry) => entry.id !== focusId).length;
+
+  const compact = {
+    ...result,
+    subgraph: {
+      ...subgraph,
+      elements: elements.map((entry) => (entry.id === focusId ? entry : identityElementRecord(entry))),
+      relationships: relationships.map(identityRelationshipRecord),
+      views: views.map(identityViewRecord),
+    },
+    truncation: { ...truncated('identity'), omittedElementDetails: nonFocusCount },
+  };
+  if (payloadByteLength(compact) <= maxBytes) {
+    return compact;
+  }
+
+  const idsOnly = {
+    ...result,
+    subgraph: {
+      ...subgraph,
+      elements: elements.map((entry) => (entry.id === focusId ? entry : { id: entry.id })),
+      relationships: relationships.map((entry) => ({ id: entry.id })),
+      views: views.map((entry) => ({ view_id: entry.view_id })),
+    },
+    truncation: truncated('ids-only'),
+  };
+  if (payloadByteLength(idsOnly) <= maxBytes) {
+    return idsOnly;
+  }
+
+  const manifestOnly = {
+    ...result,
+    subgraph: {
+      elements: elements.filter((entry) => entry.id === focusId),
+      relationships: [],
+      views: [],
+    },
+    truncation: truncated('manifest-only'),
+  };
+  trimManifestToBudget(manifestOnly, maxBytes);
+  return manifestOnly;
+}
+
+function applyViewContextBudget(result, maxBytes) {
+  if (!result || result.status !== 'passed' || !maxBytes || maxBytes <= 0) {
+    return result;
+  }
+  const fullBytes = payloadByteLength(result);
+  if (fullBytes <= maxBytes) {
+    return result;
+  }
+
+  const elements = Array.isArray(result.elements) ? result.elements : [];
+  const relationships = Array.isArray(result.relationships) ? result.relationships : [];
+  const childViews = Array.isArray(result.childViews) ? result.childViews : [];
+  const ids = {
+    elements: elements.map((entry) => entry.id),
+    relationships: relationships.map((entry) => entry.id),
+    views: childViews.map((entry) => entry.view_id),
+  };
+  const strippedView = result.view
+    ? { ...result.view, included_elements: [], included_relationships: [] }
+    : result.view;
+  const truncated = (tier) => ({ ...budgetTruncationBase(result, maxBytes, fullBytes, ids), tier });
+
+  const compact = {
+    ...result,
+    elements: elements.map(identityElementRecord),
+    relationships: relationships.map(identityRelationshipRecord),
+    parentElement: result.parentElement ? identityElementRecord(result.parentElement) : result.parentElement,
+    childViews: childViews.map(identityViewRecord),
+    truncation: { ...truncated('identity'), omittedElementDetails: elements.length },
+  };
+  if (payloadByteLength(compact) <= maxBytes) {
+    return compact;
+  }
+
+  const idsOnly = {
+    ...result,
+    elements: elements.map((entry) => ({ id: entry.id })),
+    relationships: relationships.map((entry) => ({ id: entry.id })),
+    parentElement: result.parentElement ? { id: result.parentElement.id } : result.parentElement,
+    childViews: childViews.map((entry) => ({ view_id: entry.view_id })),
+    truncation: truncated('ids-only'),
+  };
+  if (payloadByteLength(idsOnly) <= maxBytes) {
+    return idsOnly;
+  }
+
+  const manifestOnly = {
+    ...result,
+    view: strippedView,
+    elements: [],
+    relationships: [],
+    parentElement: null,
+    childViews: [],
+    truncation: truncated('manifest-only'),
+  };
+  trimManifestToBudget(manifestOnly, maxBytes);
+  return manifestOnly;
+}
+
 function buildIntentElementContext(context, args = {}) {
   const profile = args.profile || 'generic-agent';
   const focusResult = resolveFocusElement(context.document, args);
@@ -679,7 +926,7 @@ function buildIntentElementContext(context, args = {}) {
   const dependentDepth = normalizeDepth(args.dependentDepth, 1);
   const associationDepth = Math.max(1, normalizeDepth(args.associationDepth, 1));
   const associationNeighborDependencyDepth = normalizeDepth(args.associationNeighborDependencyDepth, 0);
-  const graphIndex = buildGraphIndex(context.document);
+  const graphIndex = buildGraphIndex(context.document, context.ontology);
   const focusElement = focusResult.element;
   const includedElementIds = new Set([focusElement.id]);
   const includedRelationshipIds = new Set();
@@ -794,7 +1041,7 @@ function buildIntentElementContext(context, args = {}) {
   };
   const projection = buildAgentProjection(omitted);
   if (projection) result.projection = projection;
-  return result;
+  return applyContextBudget(result, resolveContextMaxBytes(args));
 }
 
 // ---------------------------------------------------------------------------
@@ -938,7 +1185,7 @@ function buildViewContext(context, args = {}) {
   }
   const projection = buildAgentProjection(omitted);
   if (projection) result.projection = projection;
-  return result;
+  return applyViewContextBudget(result, resolveContextMaxBytes(args));
 }
 
 function resolveFocusElement(document, args) {
@@ -991,7 +1238,7 @@ function normalizeDepth(value, defaultValue) {
   return Math.floor(numericValue);
 }
 
-function buildGraphIndex(document) {
+function buildGraphIndex(document, ontology) {
   const relationshipById = new Map();
   const elementById = new Map((document.elements || []).map(element => [element.id, element]));
   const relationshipsByElementId = new Map();
@@ -1000,8 +1247,18 @@ function buildGraphIndex(document) {
     addIndexedRelationship(relationshipsByElementId, relationship.source_id, relationship);
     addIndexedRelationship(relationshipsByElementId, relationship.target_id, relationship);
   }
-  return { elementById, relationshipById, relationshipsByElementId };
+  const deliveryDependencies = ontology && ontology.deliveryDependencies
+    ? ontology.deliveryDependencies
+    : DEFAULT_DELIVERY_DEPENDENCIES;
+  return { elementById, relationshipById, relationshipsByElementId, deliveryDependencies };
 }
+
+// Dependency direction for the semantic-edge walk comes from the active schema
+// bundle's deliveryDependencies; this is the ArchiMate 3.2 fallback by default.
+const DEFAULT_DELIVERY_DEPENDENCIES = Object.freeze({
+  sourceDependsOnTarget: Object.freeze(['Access', 'Assignment', 'Specialization', 'Composition', 'Aggregation']),
+  targetDependsOnSource: Object.freeze(['Serving', 'Realization', 'Flow', 'Triggering', 'Influence']),
+});
 
 function addIndexedRelationship(index, elementId, relationship) {
   if (!index.has(elementId)) {
@@ -1057,8 +1314,9 @@ function resolveSemanticEdges(elementId, graphIndex) {
       continue;
     }
 
-    const sourceDependsOnTarget = ['Access', 'Assignment', 'Specialization', 'Composition', 'Aggregation'].includes(relationshipType);
-    const targetDependsOnSource = ['Serving', 'Realization', 'Flow', 'Triggering', 'Influence'].includes(relationshipType);
+    const deliveryDependencies = graphIndex.deliveryDependencies || DEFAULT_DELIVERY_DEPENDENCIES;
+    const sourceDependsOnTarget = deliveryDependencies.sourceDependsOnTarget.includes(relationshipType);
+    const targetDependsOnSource = deliveryDependencies.targetDependsOnSource.includes(relationshipType);
     if (sourceDependsOnTarget) {
       edges.push({ kind: isSource ? 'dependency' : 'dependent', neighborId, relationship });
       continue;
@@ -1368,6 +1626,207 @@ function resolveDuplicateConflict(options, candidates) {
   return { action: 'create', justification: options.justification };
 }
 
+function mutationNodeId(mutation) {
+  if (!mutation || typeof mutation !== 'object') {
+    return '(invalid)';
+  }
+  if (mutation.type === 'addElement') {
+    return (mutation.element && mutation.element.id) || '(addElement)';
+  }
+  if (mutation.type === 'addRelationship') {
+    return (mutation.relationship && mutation.relationship.id) || '(addRelationship)';
+  }
+  if (mutation.type === 'addView') {
+    return (mutation.view && mutation.view.view_id) || '(addView)';
+  }
+  if (mutation.type === 'updateView') {
+    return mutation.view_id || mutation.id || '(updateView)';
+  }
+  return mutation.id || mutation.view_id || `(${mutation.type})`;
+}
+
+// Order a batch so it is order-independent: a mutation that references an object
+// created later in the SAME batch is applied after its producer. Dependencies:
+//   addElement     -> views it joins (view_ids)
+//   addRelationship-> views it joins + its source/target elements
+//   addView        -> its parent element + included elements/relationships
+//   update*/remove*-> the object they target (when that object is produced here)
+// A genuine cycle is reported with the id chain so the caller can split the batch.
+function orderMutationsForApplication(mutations) {
+  const n = mutations.length;
+  const producers = new Map();
+  const addProducer = (key, index) => {
+    if (!key) {
+      return;
+    }
+    if (!producers.has(key)) {
+      producers.set(key, []);
+    }
+    producers.get(key).push(index);
+  };
+
+  mutations.forEach((mutation, index) => {
+    if (!mutation || typeof mutation !== 'object') {
+      return;
+    }
+    if (mutation.type === 'addElement' && mutation.element) {
+      addProducer('element:' + mutation.element.id, index);
+    }
+    if (mutation.type === 'addRelationship' && mutation.relationship) {
+      addProducer('relationship:' + mutation.relationship.id, index);
+    }
+    if (mutation.type === 'addView' && mutation.view) {
+      addProducer('view:' + mutation.view.view_id, index);
+    }
+  });
+
+  const dependencies = mutations.map(() => new Set());
+  mutations.forEach((mutation, index) => {
+    if (!mutation || typeof mutation !== 'object') {
+      return;
+    }
+    const requireKey = (key) => {
+      const matches = producers.get(key);
+      if (!matches) {
+        return;
+      }
+      for (const producerIndex of matches) {
+        if (producerIndex !== index) {
+          dependencies[index].add(producerIndex);
+        }
+      }
+    };
+
+    if (mutation.type === 'addElement') {
+      for (const viewId of Array.isArray(mutation.view_ids) ? mutation.view_ids : []) {
+        requireKey('view:' + viewId);
+      }
+    } else if (mutation.type === 'addRelationship') {
+      for (const viewId of Array.isArray(mutation.view_ids) ? mutation.view_ids : []) {
+        requireKey('view:' + viewId);
+      }
+      if (mutation.relationship) {
+        requireKey('element:' + mutation.relationship.source_id);
+        requireKey('element:' + mutation.relationship.target_id);
+      }
+    } else if (mutation.type === 'addView') {
+      if (mutation.view) {
+        requireKey('element:' + mutation.view.parent_element_id);
+        for (const elementId of Array.isArray(mutation.view.included_elements) ? mutation.view.included_elements : []) {
+          requireKey('element:' + elementId);
+        }
+        for (const relationshipId of Array.isArray(mutation.view.included_relationships) ? mutation.view.included_relationships : []) {
+          requireKey('relationship:' + relationshipId);
+        }
+      }
+    } else if (mutation.type === 'updateElement') {
+      requireKey('element:' + mutation.id);
+    } else if (mutation.type === 'updateRelationship') {
+      requireKey('relationship:' + mutation.id);
+    } else if (mutation.type === 'updateView') {
+      requireKey('view:' + (mutation.view_id || mutation.id));
+    } else if (mutation.type === 'removeView') {
+      requireKey('view:' + mutation.view_id);
+    } else if (mutation.type === 'removeElement') {
+      requireKey('element:' + mutation.id);
+    } else if (mutation.type === 'removeRelationship') {
+      requireKey('relationship:' + mutation.id);
+    }
+  });
+
+  const indegree = mutations.map((_, index) => dependencies[index].size);
+  const dependents = mutations.map(() => []);
+  dependencies.forEach((set, index) => {
+    for (const dependency of set) {
+      dependents[dependency].push(index);
+    }
+  });
+
+  const remaining = new Set();
+  for (let index = 0; index < n; index += 1) {
+    remaining.add(index);
+  }
+  const ready = [];
+  for (let index = 0; index < n; index += 1) {
+    if (indegree[index] === 0) {
+      ready.push(index);
+    }
+  }
+  ready.sort((a, b) => a - b);
+
+  const ordered = [];
+  while (ready.length > 0) {
+    const index = ready.shift();
+    if (!remaining.has(index)) {
+      continue;
+    }
+    remaining.delete(index);
+    ordered.push(mutations[index]);
+    for (const dependent of dependents[index]) {
+      indegree[dependent] -= 1;
+      if (indegree[dependent] === 0) {
+        ready.push(dependent);
+      }
+    }
+    ready.sort((a, b) => a - b);
+  }
+
+  if (ordered.length !== n) {
+    const chain = findMutationCycle(mutations, dependencies, remaining);
+    throw new Error(
+      `Cyclic mutation dependencies in batch: ${chain.join(' -> ')}. `
+      + 'Order the batch so each referenced object is created first, or split the mutually-dependent objects into separate calls.',
+    );
+  }
+
+  return ordered;
+}
+
+function findMutationCycle(mutations, dependencies, remaining) {
+  const visited = new Set();
+  const inStack = new Set();
+  const stack = [];
+  let cycle = null;
+
+  const visit = (index) => {
+    if (cycle) {
+      return;
+    }
+    visited.add(index);
+    inStack.add(index);
+    stack.push(index);
+    for (const dependency of dependencies[index]) {
+      if (!remaining.has(dependency)) {
+        continue;
+      }
+      if (inStack.has(dependency)) {
+        cycle = stack.slice(stack.indexOf(dependency)).concat(dependency);
+        return;
+      }
+      if (!visited.has(dependency)) {
+        visit(dependency);
+      }
+      if (cycle) {
+        return;
+      }
+    }
+    inStack.delete(index);
+    stack.pop();
+  };
+
+  for (const index of remaining) {
+    if (!visited.has(index)) {
+      visit(index);
+    }
+    if (cycle) {
+      break;
+    }
+  }
+
+  const chain = cycle || [...remaining];
+  return chain.map((index) => mutationNodeId(mutations[index]));
+}
+
 function applyMutations(document, mutations, options = {}) {
   const nextDocument = clone(document);
   const touchedElementIds = new Set();
@@ -1380,7 +1839,11 @@ function applyMutations(document, mutations, options = {}) {
     throw new Error('mutations must contain at least one mutation');
   }
 
-  for (const mutation of mutations) {
+  // Apply in dependency order so a batch is order-independent (see
+  // orderMutationsForApplication); a genuine cycle throws with the id chain.
+  const orderedMutations = orderMutationsForApplication(mutations);
+
+  for (const mutation of orderedMutations) {
     if (!mutation || typeof mutation !== 'object' || !HANDLED_MUTATION_TYPES.has(mutation.type)) {
       throw new Error(`Unsupported mutation type: ${mutation && mutation.type}`);
     }
@@ -1388,11 +1851,30 @@ function applyMutations(document, mutations, options = {}) {
     if (mutation.type === 'addElement') {
       requireObject(mutation.element, 'mutation.element');
       const scopedViews = requireViewScope(nextDocument.views, mutation.view_ids, 'mutation.view_ids');
-      requireId(mutation.element.id, 'mutation.element.id');
-      const existingElement = findById(nextDocument.elements, mutation.element.id);
-      let targetElementId = mutation.element.id;
-      let reusedElement = false;
-      if (!existingElement) {
+      const requestedElementId = typeof mutation.element.id === 'string' && mutation.element.id !== ''
+        ? mutation.element.id
+        : null;
+      let targetElementId;
+      let elementCreated = false;
+      let elementReused = false;
+
+      const existingById = requestedElementId ? findById(nextDocument.elements, requestedElementId) : undefined;
+      if (existingById) {
+        // An explicit id that already exists: idempotent ONLY if it is the same
+        // (type,name). Otherwise the caller picked a taken id — fail loudly instead
+        // of silently attaching an unrelated element (issue #8 collision safety).
+        const sameIdentity = existingById.type === mutation.element.type
+          && normalizeDedupName(existingById.name) === normalizeDedupName(mutation.element.name);
+        if (!sameIdentity) {
+          throw new Error(
+            `addElement id '${requestedElementId}' is already used by a different element `
+            + `(type '${existingById.type}', name '${existingById.name}'). Choose another id (or omit id to auto-allocate one), `
+            + `attach the existing element by using its id, or update it with updateArchitectureElement.`,
+          );
+        }
+        targetElementId = requestedElementId;
+        elementReused = true;
+      } else {
         const candidates = findDuplicateElements(nextDocument.elements, mutation.element);
         const resolution = resolveDuplicateConflict({
           onConflict: mutation.onConflict,
@@ -1401,12 +1883,19 @@ function applyMutations(document, mutations, options = {}) {
         }, candidates);
         if (resolution.action === 'reuse') {
           targetElementId = resolution.existing.id;
-          reusedElement = true;
+          elementReused = true;
         } else {
-          nextDocument.elements.push(clone(mutation.element));
-          syncViewsToElementSubdiagramViews(nextDocument, findById(nextDocument.elements, mutation.element.id));
+          targetElementId = requestedElementId || allocateUniqueId(
+            nextDocument.elements.map(entry => entry.id),
+            mutation.element.name,
+            slugifyId(mutation.element.type) || 'element',
+          );
+          nextDocument.elements.push({ ...clone(mutation.element), id: targetElementId });
+          syncViewsToElementSubdiagramViews(nextDocument, findById(nextDocument.elements, targetElementId));
+          elementCreated = true;
         }
       }
+
       for (const view of scopedViews) {
         view.included_elements = addUnique(view.included_elements || [], [targetElementId]);
         touchedViewIds.add(view.view_id);
@@ -1417,8 +1906,10 @@ function applyMutations(document, mutations, options = {}) {
         type: mutation.type,
         id: targetElementId,
         view_ids: mutation.view_ids,
-        created: !existingElement && !reusedElement,
-        ...(reusedElement ? { reused: true, reusedId: targetElementId, requestedId: mutation.element.id } : {}),
+        created: elementCreated,
+        ...(elementReused ? { reused: true, reusedId: targetElementId } : {}),
+        ...(requestedElementId === null && elementCreated ? { allocatedId: targetElementId } : {}),
+        ...(elementReused && requestedElementId && requestedElementId !== targetElementId ? { requestedId: requestedElementId } : {}),
       });
       continue;
     }
@@ -1517,13 +2008,35 @@ function applyMutations(document, mutations, options = {}) {
     if (mutation.type === 'addRelationship') {
       requireObject(mutation.relationship, 'mutation.relationship');
       const scopedViews = requireViewScope(nextDocument.views, mutation.view_ids, 'mutation.view_ids');
-      requireId(mutation.relationship.id, 'mutation.relationship.id');
-      const existingRelationship = findById(nextDocument.relationships, mutation.relationship.id);
-      let targetRelationshipId = mutation.relationship.id;
+      const requestedRelationshipId = typeof mutation.relationship.id === 'string' && mutation.relationship.id !== ''
+        ? mutation.relationship.id
+        : null;
+      let targetRelationshipId;
       let sourceElementId = mutation.relationship.source_id;
       let targetEndpointId = mutation.relationship.target_id;
-      let reusedRelationship = false;
-      if (!existingRelationship) {
+      let relationshipCreated = false;
+      let relationshipReused = false;
+
+      const existingById = requestedRelationshipId ? findById(nextDocument.relationships, requestedRelationshipId) : undefined;
+      if (existingById) {
+        // Explicit id that already exists: idempotent only for the same natural key;
+        // otherwise fail loudly instead of silently attaching an unrelated edge.
+        const sameIdentity = existingById.source_id === mutation.relationship.source_id
+          && existingById.type === mutation.relationship.type
+          && existingById.target_id === mutation.relationship.target_id
+          && normalizeDedupName(existingById.name) === normalizeDedupName(mutation.relationship.name);
+        if (!sameIdentity) {
+          throw new Error(
+            `addRelationship id '${requestedRelationshipId}' is already used by a different relationship `
+            + `(source '${existingById.source_id}', type '${existingById.type}', target '${existingById.target_id}'). `
+            + 'Choose another id (or omit id to auto-allocate one), or update it with updateArchitectureRelationship.',
+          );
+        }
+        targetRelationshipId = requestedRelationshipId;
+        sourceElementId = existingById.source_id;
+        targetEndpointId = existingById.target_id;
+        relationshipReused = true;
+      } else {
         const candidates = findDuplicateRelationships(nextDocument.relationships, mutation.relationship);
         const resolution = resolveDuplicateConflict({
           onConflict: mutation.onConflict,
@@ -1534,9 +2047,15 @@ function applyMutations(document, mutations, options = {}) {
           targetRelationshipId = resolution.existing.id;
           sourceElementId = resolution.existing.source_id;
           targetEndpointId = resolution.existing.target_id;
-          reusedRelationship = true;
+          relationshipReused = true;
         } else {
-          nextDocument.relationships.push(clone(mutation.relationship));
+          targetRelationshipId = requestedRelationshipId || allocateUniqueId(
+            nextDocument.relationships.map(entry => entry.id),
+            mutation.relationship.name || `${mutation.relationship.source_id}-${mutation.relationship.type}-${mutation.relationship.target_id}`,
+            'relationship',
+          );
+          nextDocument.relationships.push({ ...clone(mutation.relationship), id: targetRelationshipId });
+          relationshipCreated = true;
         }
       }
       for (const view of scopedViews) {
@@ -1552,8 +2071,9 @@ function applyMutations(document, mutations, options = {}) {
         type: mutation.type,
         id: targetRelationshipId,
         view_ids: mutation.view_ids,
-        created: !existingRelationship && !reusedRelationship,
-        ...(reusedRelationship ? { reused: true, reusedId: targetRelationshipId, requestedId: mutation.relationship.id } : {}),
+        created: relationshipCreated,
+        ...(relationshipReused ? { reused: true, reusedId: targetRelationshipId } : {}),
+        ...(requestedRelationshipId === null && relationshipCreated ? { allocatedId: targetRelationshipId } : {}),
       });
       continue;
     }
@@ -1637,38 +2157,65 @@ function applyMutations(document, mutations, options = {}) {
 
     if (mutation.type === 'addView') {
       requireObject(mutation.view, 'mutation.view');
-      if (findView(nextDocument.views, mutation.view.view_id)) {
-        throw new Error(`View '${mutation.view.view_id}' already exists`);
-      }
-      const candidates = findDuplicateViews(nextDocument.views, mutation.view);
-      const resolution = resolveDuplicateConflict({
-        onConflict: mutation.onConflict,
-        justification: mutation.justification,
-        label: `view (name '${mutation.view.view_name}')`,
-      }, candidates);
-      if (resolution.action === 'reuse') {
-        mutationSummaries.push({
-          type: mutation.type,
-          id: resolution.existing.view_id,
-          created: false,
-          reused: true,
-          reusedId: resolution.existing.view_id,
-          requestedId: mutation.view.view_id,
-        });
+      const requestedViewId = typeof mutation.view.view_id === 'string' && mutation.view.view_id !== ''
+        ? mutation.view.view_id
+        : null;
+      let targetViewId;
+      let viewCreated = false;
+      let viewReused = false;
+
+      const existingById = requestedViewId ? findView(nextDocument.views, requestedViewId) : undefined;
+      if (existingById) {
+        // Explicit view_id that already exists: idempotent only for the same
+        // (parent,name); otherwise fail loudly.
+        const sameIdentity = (existingById.parent_element_id || '') === (mutation.view.parent_element_id || '')
+          && normalizeDedupName(existingById.view_name) === normalizeDedupName(mutation.view.view_name);
+        if (!sameIdentity) {
+          throw new Error(
+            `addView view_id '${requestedViewId}' is already used by a different view `
+            + `(name '${existingById.view_name}', parent '${existingById.parent_element_id || ''}'). `
+            + 'Choose another view_id (or omit it to auto-allocate one), or update it with updateArchitectureView.',
+          );
+        }
+        targetViewId = requestedViewId;
+        viewReused = true;
       } else {
-        const newView = clone(mutation.view);
-        if (Array.isArray(newView.included_elements)) {
-          newView.included_elements = addUnique([], newView.included_elements);
+        const candidates = findDuplicateViews(nextDocument.views, mutation.view);
+        const resolution = resolveDuplicateConflict({
+          onConflict: mutation.onConflict,
+          justification: mutation.justification,
+          label: `view (name '${mutation.view.view_name}')`,
+        }, candidates);
+        if (resolution.action === 'reuse') {
+          targetViewId = resolution.existing.view_id;
+          viewReused = true;
+        } else {
+          targetViewId = requestedViewId || allocateUniqueId(
+            nextDocument.views.map(entry => entry.view_id),
+            mutation.view.view_name,
+            'view',
+          );
+          const newView = { ...clone(mutation.view), view_id: targetViewId };
+          if (Array.isArray(newView.included_elements)) {
+            newView.included_elements = addUnique([], newView.included_elements);
+          }
+          if (Array.isArray(newView.included_relationships)) {
+            newView.included_relationships = addUnique([], newView.included_relationships);
+          }
+          nextDocument.views.push(newView);
+          upsertSubdiagramViewIntoElement(nextDocument, newView.parent_element_id, newView);
+          touchedViewIds.add(newView.view_id);
+          viewLimitCheckIds.add(newView.view_id);
+          viewCreated = true;
         }
-        if (Array.isArray(newView.included_relationships)) {
-          newView.included_relationships = addUnique([], newView.included_relationships);
-        }
-        nextDocument.views.push(newView);
-        upsertSubdiagramViewIntoElement(nextDocument, newView.parent_element_id, newView);
-        touchedViewIds.add(newView.view_id);
-        viewLimitCheckIds.add(newView.view_id);
-        mutationSummaries.push({ type: mutation.type, id: newView.view_id });
       }
+      mutationSummaries.push({
+        type: mutation.type,
+        id: targetViewId,
+        created: viewCreated,
+        ...(viewReused ? { reused: true, reusedId: targetViewId } : {}),
+        ...(requestedViewId === null && viewCreated ? { allocatedId: targetViewId } : {}),
+      });
       continue;
     }
 
@@ -1738,6 +2285,33 @@ function requireObject(value, label) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error(`${label} must be an object`);
   }
+}
+
+function slugifyId(seed) {
+  return String(seed == null ? '' : seed)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// One unified id strategy for the whole framework (issue #8): a semantic slug
+// derived from the entity's human name, made unique within its collection by a
+// numeric suffix. Callers MAY omit an id; the server allocates one. There is no
+// per-repository id strategy — ArchGraph has a single one.
+function allocateUniqueId(existingIds, seed, fallbackBase) {
+  const taken = new Set((Array.isArray(existingIds) ? existingIds : []).map(String));
+  const base = slugifyId(seed) || fallbackBase || 'item';
+  if (!taken.has(base)) {
+    return base;
+  }
+  for (let n = 2; n < 100000; n += 1) {
+    const candidate = `${base}-${String(n).padStart(3, '0')}`;
+    if (!taken.has(candidate)) {
+      return candidate;
+    }
+  }
+  return `${base}-${Date.now()}`;
 }
 
 function requireId(value, label) {
@@ -1930,7 +2504,7 @@ async function buildMutationResult(context, mutations, write, dependencies, loss
       before: beforeSummary,
       after: beforeSummary,
       errors,
-      guidance: buildFailureGuidance(errors),
+      guidance: buildFailureGuidance(errors, context.ontology),
     };
     if (error && Array.isArray(error.duplicateConflicts) && error.duplicateConflicts.length > 0) {
       failed.duplicateConflicts = error.duplicateConflicts;
@@ -1941,6 +2515,7 @@ async function buildMutationResult(context, mutations, write, dependencies, loss
     return failed;
   }
   const errors = validateDocument(mutationResult.document, context.schema, {
+    ontology: context.ontology,
     touchedRelationshipIds: mutationResult.touchedRelationshipIds,
     touchedViewIds: mutationResult.viewLimitCheckIds,
   });
@@ -1960,7 +2535,7 @@ async function buildMutationResult(context, mutations, write, dependencies, loss
     errors,
   };
   if (errors.length > 0) {
-    result.guidance = buildFailureGuidance(errors);
+    result.guidance = buildFailureGuidance(errors, context.ontology);
   }
 
   // Semantic dedup gate: a would-be element create is blocked when a same-type
@@ -2215,10 +2790,10 @@ function buildMutationEmbeddingLifecycleFailure(error, result) {
   });
 }
 
-function buildFailureGuidance(errors) {
+function buildFailureGuidance(errors, ontology) {
   const guidance = [];
   for (const error of errors || []) {
-    addGuidanceForError(guidance, String(error));
+    addGuidanceForError(guidance, String(error), ontology);
   }
   if (guidance.length === 0 && Array.isArray(errors) && errors.length > 0) {
     guidance.push('Inspect the error text, call getSystemArchitecture with an explicit semantic query to refresh relevant ids, use getIntentElementContext for focused dependency context when needed, then retry with previewSystemArchitectureMutation before writing. Use an omitted-query full snapshot only when exact complete view membership is required.');
@@ -2226,15 +2801,17 @@ function buildFailureGuidance(errors) {
   return guidance;
 }
 
-function addGuidanceForError(guidance, error) {
+function addGuidanceForError(guidance, error, ontology) {
+  const language = ontology && ontology.language ? ontology.language : 'ArchiMate 3.2';
+  const matrixLabel = ontology && ontology.matrixErrorLabel ? ontology.matrixErrorLabel : 'ArchiMate 3.2 relationship matrix';
   if (error.includes('mutation.view_ids must contain at least one view id')) {
     pushUnique(guidance, 'Select the target view_ids explicitly. Prefer getSystemArchitecture with an explicit semantic query to find relevant views, then use getIntentElementContext for focused element dependencies when needed. Use a full snapshot only if exact complete view membership is required.');
   }
-  if (error.includes('violates ArchiMate 3.2 relationship matrix')) {
-    pushUnique(guidance, 'Check relationship.type and the source and target element types against ArchiMate 3.2. If the intended meaning is still valid, choose a compliant relationship type or change the endpoint element types by remove-and-add.');
+  if (error.includes(`violates ${matrixLabel}`)) {
+    pushUnique(guidance, `Check relationship.type and the source and target element types against ${language}. If the intended meaning is still valid, choose a compliant relationship type or change the endpoint element types by remove-and-add.`);
   }
-  if (error.includes('uses unsupported ArchiMate relationship type')) {
-    pushUnique(guidance, 'Use relationship.type for the ArchiMate relationship type and choose one of the schema-supported ArchiMate 3.2 relationship types.');
+  if (error.includes('uses unsupported') && error.includes('relationship type')) {
+    pushUnique(guidance, `Use relationship.type for the relationship type and choose one of the schema-supported ${language} relationship types.`);
   }
   if (error.includes('id cannot be updated') || error.includes('type cannot be updated')) {
     pushUnique(guidance, 'Do not patch immutable identity or type fields. To change an id or type, remove the existing element or relationship, then add the replacement with the desired id or type.');
@@ -2243,10 +2820,16 @@ function addGuidanceForError(guidance, error) {
     pushUnique(guidance, 'Every element and relationship must belong to at least one view. Add it with view_ids, or add the existing object to an appropriate view before validating again.');
   }
   if (error.includes('must declare parent_element_id') || error.includes('top-level view')) {
-    pushUnique(guidance, 'Keep exactly one top-level view named SystemArchitecture. For any sub-view, set parent_element_id to an existing element and keep parent_element_name aligned with that element name.');
+    const rootViewName = ontology && ontology.invariants && ontology.invariants.rootViewName
+      ? ontology.invariants.rootViewName
+      : 'SystemArchitecture';
+    pushUnique(guidance, `Keep exactly one top-level view${rootViewName ? ` named ${rootViewName}` : ''}. For any sub-view, set parent_element_id to an existing element and keep parent_element_name aligned with that element name.`);
   }
-  if (error.includes('must contain at most 15 elements')) {
-    pushUnique(guidance, 'Do not force more than 15 included_elements into one view. Pause and think about layered architecture: split the view into layered sub-views, attach each sub-view with parent_element_id, and move lower-level elements into the appropriate child view before retrying.');
+  if (error.includes('must contain at most') && error.includes('elements')) {
+    const maxElements = ontology && ontology.invariants && ontology.invariants.maxElementsPerView !== undefined && ontology.invariants.maxElementsPerView !== null
+      ? ontology.invariants.maxElementsPerView
+      : 15;
+    pushUnique(guidance, `Do not force more than ${maxElements} included_elements into one view. Pause and think about layered architecture: split the view into layered sub-views, attach each sub-view with parent_element_id, and move lower-level elements into the appropriate child view before retrying.`);
   }
   if (error.includes('does not exist') || error.includes('references missing')) {
     pushUnique(guidance, 'Refresh current ids with getSystemArchitecture semantic query first, then call getIntentElementContext for any returned element that needs dependency context. Do not guess ids; use existing element, relationship, and view ids or create missing objects first.');
@@ -2625,6 +3208,18 @@ function compactMutationResponse(payload) {
     status: payload && payload.status,
     written: Boolean(payload && payload.written),
   };
+  // A successful write must tell the caller which id was used/allocated and whether
+  // it created or reused — otherwise an omitted (auto-allocated) id is invisible
+  // and an id collision would look like a create. Kept to a few fields (issue #8).
+  if (Array.isArray(payload && payload.mutations) && payload.mutations.length > 0) {
+    compact.mutations = payload.mutations.map((entry) => ({
+      type: entry.type,
+      id: entry.id,
+      created: entry.created,
+      ...(entry.reused ? { reused: true, reusedId: entry.reusedId } : {}),
+      ...(entry.allocatedId ? { allocatedId: entry.allocatedId } : {}),
+    }));
+  }
   if (payload && payload.embeddingLifecycle && payload.embeddingLifecycle.state) {
     compact.embeddingLifecycle = { state: payload.embeddingLifecycle.state };
   }
@@ -2669,15 +3264,51 @@ function compactMutationResponse(payload) {
   return compact;
 }
 
-function getSystemArchitectureResult(payload) {
-  const failed = payload.status === 'failed';
-  return toolResult(payload, {
+// The typed getSystemArchitecture output contract (see
+// GET_SYSTEM_ARCHITECTURE_OUTPUT_SCHEMA). The error variant allows only the
+// listed keys, so any error (local or mirrored from a cross-project read) is
+// projected onto that shape with category + message guaranteed. Exposed so the
+// argo MCP server can build the SAME structuredContent for a cross-project read
+// (which bypasses this module's callTool) instead of returning a result without
+// structuredContent — which violates the declared outputSchema (-32600).
+const GET_SYSTEM_ARCHITECTURE_ERROR_KEYS = Object.freeze([
+  'category', 'message', 'action', 'fullSnapshotFallback', 'state',
+  'canonicalVersion', 'contentVersion', 'indexVersion',
+  'completedChannels', 'missingChannels', 'mismatchedChannels',
+]);
+
+function normalizeGetSystemArchitectureError(error) {
+  const source = error && typeof error === 'object' ? error : {};
+  const normalized = {};
+  for (const key of GET_SYSTEM_ARCHITECTURE_ERROR_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(source, key) && source[key] !== undefined) {
+      normalized[key] = source[key];
+    }
+  }
+  if (typeof normalized.category !== 'string' || normalized.category === '') {
+    normalized.category = 'GET_SYSTEM_ARCHITECTURE_ERROR';
+  }
+  if (typeof normalized.message !== 'string' || normalized.message === '') {
+    normalized.message = typeof source.reason === 'string' && source.reason !== ''
+      ? source.reason
+      : 'getSystemArchitecture failed';
+  }
+  return normalized;
+}
+
+function buildGetSystemArchitectureStructuredContent(payload) {
+  const failed = Boolean(payload) && payload.status === 'failed';
+  return {
     version: '1.0',
     mode: failed ? 'error' : 'semantic-query',
-    document: failed ? null : (payload.document === undefined ? null : payload.document),
-    query: failed ? null : (payload.query || null),
-    error: failed ? payload.error : null,
-  });
+    document: failed ? null : (payload && payload.document === undefined ? null : payload.document),
+    query: failed ? null : ((payload && payload.query) || null),
+    error: failed ? normalizeGetSystemArchitectureError(payload.error) : null,
+  };
+}
+
+function getSystemArchitectureResult(payload) {
+  return toolResult(payload, buildGetSystemArchitectureStructuredContent(payload));
 }
 
 async function callTool(name, args = {}, dependencies = undefined) {
@@ -3102,13 +3733,25 @@ async function queryNeo4jGraphTool(args = {}) {
 function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
   const schema = buildNeo4jGraphSchema(architecturePath);
   let typeEnums = {};
+  let schemaBundleInfo = {};
   try {
     const resolvedRoot = workspaceRoot || resolveWorkspaceRoot({ architecturePath });
-    const schemaPath = resolveSchemaPath(resolvedRoot);
-    const jsonSchema = readJson(schemaPath.absolutePath, schemaPath.relativePath);
+    const { bundle, ontology } = loadSchemaBundleAndOntology(resolvedRoot);
+    const enums = resolveTypeEnums(bundle);
     typeEnums = {
-      archimateElementTypes: (jsonSchema.$defs.archimateElementType || {}).enum || [],
-      archimateRelationshipTypes: (jsonSchema.$defs.archimateRelationshipType || {}).enum || [],
+      archimateElementTypes: enums.elementTypes,
+      archimateRelationshipTypes: enums.relationshipTypes,
+      schemaLanguage: (bundle.config && bundle.config.language) || null,
+      schemaKind: bundle.kind,
+      schemaDialect: ontology.dialect,
+      actorElementType: ontology.actorElementType,
+      bundleValidation: ontology.bundleValidation,
+    };
+    schemaBundleInfo = {
+      schemaPath: bundle.schema.relativePath,
+      schemaKind: bundle.kind,
+      schemaDir: bundle.relativeDir,
+      guidePath: bundle.guidePath ? bundle.guidePath.relativePath : null,
     };
   } catch (error) {
     typeEnums = {
@@ -3125,6 +3768,7 @@ function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
     schema: {
       ...schema,
       ...typeEnums,
+      ...schemaBundleInfo,
     },
     usage: {
       scopeGraph: 'MATCH (e:Element {graphKey: $graphKey}) ...',
@@ -4445,8 +5089,12 @@ if (require.main === module) {
 
 module.exports = {
   GET_SYSTEM_ARCHITECTURE_OUTPUT_SCHEMA,
+  buildGetSystemArchitectureStructuredContent,
   TOOLS,
   applyMutations,
+  applyContextBudget,
+  applyViewContextBudget,
+  resolveContextMaxBytes,
   buildBusinessSemanticSummary,
   buildSemanticDedupAdvisory,
   selectCreatedElementAdds,

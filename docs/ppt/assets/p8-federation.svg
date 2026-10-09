@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="以项目为积木，联邦式组合出组织级知识图谱">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#475569"/></marker>
+  <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2457e6"/></marker>
+  <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0f9d63"/></marker>
+  <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#b26a04"/></marker>
+  <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#dc2f52"/></marker>
+  <marker id="arrow-cyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0e86a5"/></marker>
+  <marker id="arrow-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6d38d6"/></marker>
+</defs>
+<rect width="1280" height="720" fill="#ffffff"/>
+<rect x="0" y="0" width="1280" height="5" fill="#eaf1ff"/><rect x="0" y="0" width="220" height="5" fill="#2457e6"/>
+<text x="48" y="40" font-family="Consolas, 'Cascadia Code', ui-monospace, monospace" font-size="10.5" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">08 · 组织级知识图谱</text>
+<text x="48" y="78" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="26" font-weight="800" fill="#0f172a" text-anchor="start" opacity="1">以项目为积木，联邦式组合出组织级知识图谱</text>
+<text x="48" y="106" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">项目自治（主权图为唯一事实源），成员之间『引用而非拷贝』</text>
+<line x1="48" y1="122" x2="1232" y2="122" stroke="#eef2f7" stroke-width="1"/>
+<rect x="48" y="136" width="1184" height="52" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.2"/>
+<text x="64" y="158" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">整体方案</text>
+<text x="64" y="176" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#0f172a" text-anchor="start" opacity="1">单项目 = 一个自治的知识图谱单元；以联邦方式组合 → 组织级知识图谱（组织知识库）</text>
+<text x="48" y="218" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">三大好处</text>
+<line x1="104" y1="214" x2="378" y2="214" stroke="#eef2f7" stroke-width="1"/>
+<rect x="48" y="232" width="330" height="84" rx="10" fill="#ffffff" stroke="#0f9d63" stroke-width="1.2"/>
+<rect x="48" y="232" width="4" height="84" rx="2" fill="#0f9d63"/>
+<circle cx="72" cy="274" r="12" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="72" y="278.5" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">1</text>
+<text x="94" y="271" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">质量按领域专业化</text>
+<text x="94" y="289" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">谁的业务谁建模、谁验收</text>
+<rect x="48" y="328" width="330" height="84" rx="10" fill="#ffffff" stroke="#0f9d63" stroke-width="1.2"/>
+<rect x="48" y="328" width="4" height="84" rx="2" fill="#0f9d63"/>
+<circle cx="72" cy="370" r="12" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="72" y="374.5" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">2</text>
+<text x="94" y="367" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">闭环且地基已铺好</text>
+<text x="94" y="385" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">MCP 已代做去重 / 无损 / 结构校验</text>
+<rect x="48" y="424" width="330" height="84" rx="10" fill="#ffffff" stroke="#0f9d63" stroke-width="1.2"/>
+<rect x="48" y="424" width="4" height="84" rx="2" fill="#0f9d63"/>
+<circle cx="72" cy="466" r="12" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="72" y="470.5" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">3</text>
+<text x="94" y="463" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">统一权限与授权</text>
+<text x="94" y="481" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">中心一处管控，默认拒绝</text>
+<text x="410" y="218" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#6d38d6" text-anchor="start" opacity="1">联邦组合示意</text>
+<line x1="488" y1="214" x2="1232" y2="214" stroke="#eef2f7" stroke-width="1"/>
+<rect x="430" y="232" width="782" height="52" rx="9" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.3"/>
+<text x="444" y="254" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">组织级知识图谱（组织知识库）</text>
+<text x="444" y="272" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">领域知识彼此可见可用 · 权限统一管控 · 内容是各项目自己的图</text>
+<rect x="430" y="306" width="782" height="66" rx="9" fill="#f2eeff" stroke="#6d38d6" stroke-width="1.3"/>
+<text x="444" y="328" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#6d38d6" text-anchor="start" opacity="1">联邦中心（registry + broker）</text>
+<rect x="444" y="338" width="75.9" height="18" rx="9" fill="#f2eeff" stroke="#6d38d6" stroke-width="1"/><text x="481.925" y="350.24" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="600" fill="#6d38d6" text-anchor="middle" opacity="1">已注册成员 23</text>
+<rect x="527.85" y="338" width="75.9" height="18" rx="9" fill="#f2eeff" stroke="#6d38d6" stroke-width="1"/><text x="565.775" y="350.24" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="600" fill="#6d38d6" text-anchor="middle" opacity="1">已授权关系 45</text>
+<rect x="611.7" y="338" width="162.3" height="18" rx="9" fill="#f2eeff" stroke="#6d38d6" stroke-width="1"/><text x="692.825" y="350.24" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="600" fill="#6d38d6" text-anchor="middle" opacity="1">跨项目读 soc-demo 实读 386 元素</text>
+<text x="444" y="366" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#475569" text-anchor="start" opacity="1">中心只持联邦元数据（成员 / 能力 / 接口 / 授权），不持有成员内容</text>
+<rect x="430" y="404" width="123.66666666666667" height="66" rx="8" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.2"/>
+<text x="438" y="426" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">archgraph</text>
+<text x="438" y="442" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">canonical 图</text>
+<text x="438" y="454" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">本体可 extends</text>
+<line x1="491.8333333333333" y1="404" x2="491.8333333333333" y2="378" stroke="#2457e6" stroke-width="1.1" marker-end="url(#arrow-blue)" stroke-dasharray="3 3"/>
+<rect x="561.6666666666667" y="404" width="123.66666666666667" height="66" rx="8" fill="#f7f9fc" stroke="#5b6b82" stroke-width="1.2"/>
+<text x="569.6666666666667" y="426" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">graph-wiki</text>
+<text x="569.6666666666667" y="442" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">canonical 图</text>
+<text x="569.6666666666667" y="454" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">本体可 extends</text>
+<line x1="623.5000000000001" y1="404" x2="623.5000000000001" y2="378" stroke="#5b6b82" stroke-width="1.1" marker-end="url(#arrow)" stroke-dasharray="3 3"/>
+<rect x="693.3333333333334" y="404" width="123.66666666666667" height="66" rx="8" fill="#f7f9fc" stroke="#5b6b82" stroke-width="1.2"/>
+<text x="701.3333333333334" y="426" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">abot</text>
+<text x="701.3333333333334" y="442" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">canonical 图</text>
+<text x="701.3333333333334" y="454" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">本体可 extends</text>
+<line x1="755.1666666666667" y1="404" x2="755.1666666666667" y2="378" stroke="#5b6b82" stroke-width="1.1" marker-end="url(#arrow)" stroke-dasharray="3 3"/>
+<rect x="825" y="404" width="123.66666666666667" height="66" rx="8" fill="#f7f9fc" stroke="#5b6b82" stroke-width="1.2"/>
+<text x="833" y="426" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">my-army</text>
+<text x="833" y="442" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">canonical 图</text>
+<text x="833" y="454" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">本体可 extends</text>
+<line x1="886.8333333333334" y1="404" x2="886.8333333333334" y2="378" stroke="#5b6b82" stroke-width="1.1" marker-end="url(#arrow)" stroke-dasharray="3 3"/>
+<rect x="956.6666666666667" y="404" width="123.66666666666667" height="66" rx="8" fill="#f7f9fc" stroke="#5b6b82" stroke-width="1.2"/>
+<text x="964.6666666666667" y="426" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">HarmonyOS-Dev-Standa…</text>
+<text x="964.6666666666667" y="442" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">canonical 图</text>
+<text x="964.6666666666667" y="454" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">本体可 extends</text>
+<line x1="1018.5000000000001" y1="404" x2="1018.5000000000001" y2="378" stroke="#5b6b82" stroke-width="1.1" marker-end="url(#arrow)" stroke-dasharray="3 3"/>
+<rect x="1088.3333333333335" y="404" width="123.66666666666667" height="66" rx="8" fill="#f7f9fc" stroke="#5b6b82" stroke-width="1.2"/>
+<text x="1096.3333333333335" y="426" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">SOC-DEMO</text>
+<text x="1096.3333333333335" y="442" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">canonical 图</text>
+<text x="1096.3333333333335" y="454" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">本体可 extends</text>
+<line x1="1150.1666666666667" y1="404" x2="1150.1666666666667" y2="378" stroke="#5b6b82" stroke-width="1.1" marker-end="url(#arrow)" stroke-dasharray="3 3"/>
+<line x1="470" y1="306" x2="470" y2="288" stroke="#6d38d6" stroke-width="1.4" marker-end="url(#arrow-violet)"/>
+<text x="480" y="300" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#6d38d6" text-anchor="start" opacity="1">组合 = 组织级知识图谱</text>
+<rect x="48" y="608" width="1184" height="52" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.2"/>
+<rect x="48" y="608" width="5" height="52" rx="2" fill="#2457e6"/>
+<rect x="64" y="624" width="38.0" height="20" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1"/><text x="83" y="637.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#2457e6" text-anchor="middle" opacity="1">结论</text>
+<text x="112" y="629" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start" opacity="1">领域自治保证质量专业；中心统一授权、默认拒绝；组合即组织级知识库，无需合并图谱。</text>
+<line x1="48" y1="682" x2="1232" y2="682" stroke="#eef2f7" stroke-width="1"/>
+<text x="48" y="698" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#64748b" text-anchor="start" opacity="1">依据：design-federated-intent-graph-001  ·  overseer-federation-vision-001  ·  docs/external-graph-query.md</text>
+<text x="1232" y="698" font-family="Consolas, 'Cascadia Code', ui-monospace, monospace" font-size="8.5" font-weight="400" fill="#94a3b8" text-anchor="end" opacity="1">ArchGraph · 08 · 组织级知识图谱</text>
+</svg>

@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="检索不是一次查询，而是一个带治理的闭环">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#475569"/></marker>
+  <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2457e6"/></marker>
+  <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0f9d63"/></marker>
+  <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#b26a04"/></marker>
+  <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#dc2f52"/></marker>
+  <marker id="arrow-cyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0e86a5"/></marker>
+  <marker id="arrow-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6d38d6"/></marker>
+</defs>
+<rect width="1280" height="720" fill="#ffffff"/>
+<rect x="0" y="0" width="1280" height="5" fill="#eaf1ff"/><rect x="0" y="0" width="220" height="5" fill="#2457e6"/>
+<text x="48" y="40" font-family="Consolas, 'Cascadia Code', ui-monospace, monospace" font-size="10.5" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">06 · 检索流程</text>
+<text x="48" y="78" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="26" font-weight="800" fill="#0f172a" text-anchor="start" opacity="1">检索不是一次查询，而是一个带治理的闭环</text>
+<text x="48" y="106" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">写入治理决定检索上限；多路召回 + 重排是主流；评估反馈让它持续变好</text>
+<line x1="48" y1="122" x2="1232" y2="122" stroke="#eef2f7" stroke-width="1"/>
+<text x="48" y="152" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#0e86a5" text-anchor="start" opacity="1">业界通用流程（Graph RAG 全景）</text>
+<line x1="230.5" y1="148" x2="840" y2="148" stroke="#eef2f7" stroke-width="1"/>
+<rect x="48" y="164" width="792" height="184" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.1" stroke-dasharray="4 4"/>
+<text x="60" y="182" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">写入</text>
+<rect x="60" y="196" width="183" height="52" rx="8" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.4"/>
+<text x="70" y="214" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">L1 · 数据接入与治理</text>
+<text x="70" y="230" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">来源 / 权限 / 版本</text>
+<text x="70" y="243" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">✓ 覆盖</text>
+<rect x="255" y="196" width="183" height="52" rx="8" fill="#e6f9fd" stroke="#0e86a5" stroke-width="1.4"/>
+<text x="265" y="214" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">L2 · 解析与切块</text>
+<text x="265" y="230" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">chunk / summary 粒度</text>
+<text x="265" y="243" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="700" fill="#0e86a5" text-anchor="start" opacity="1">◎ 本体替代</text>
+<rect x="450" y="196" width="183" height="52" rx="8" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.4"/>
+<text x="460" y="214" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">L3 · 嵌入与索引</text>
+<text x="460" y="230" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">向量 + 关键词 + 双投影</text>
+<text x="460" y="243" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">✓ 覆盖</text>
+<rect x="645" y="196" width="183" height="52" rx="8" fill="#fff6e6" stroke="#b26a04" stroke-width="1.4"/>
+<text x="655" y="214" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">L4 · 图构建与对齐</text>
+<text x="655" y="230" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">实体关系 + 本体对齐</text>
+<text x="655" y="243" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="700" fill="#b26a04" text-anchor="start" opacity="1">◐ 部分</text>
+<rect x="48" y="370" width="792" height="92" rx="10" fill="#e6f9fd" stroke="#0e86a5" stroke-width="1.1" stroke-dasharray="4 4"/>
+<text x="60" y="388" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#0e86a5" text-anchor="start" opacity="1">检索</text>
+<rect x="60" y="402" width="378" height="52" rx="8" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.4"/>
+<text x="70" y="420" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">L5 · 召回</text>
+<text x="70" y="436" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">向量 / BM25 / 图遍历</text>
+<text x="70" y="449" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">✓ 覆盖</text>
+<rect x="450" y="402" width="378" height="52" rx="8" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.4"/>
+<text x="460" y="420" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">L6 · 融合与重排</text>
+<text x="460" y="436" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">RRF + 交叉 / LLM 重排</text>
+<text x="460" y="449" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">✓ 覆盖</text>
+<rect x="48" y="484" width="792" height="92" rx="10" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.1" stroke-dasharray="4 4"/>
+<text x="60" y="502" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">生成与闭环</text>
+<rect x="60" y="516" width="378" height="52" rx="8" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.4"/>
+<text x="70" y="534" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">L7 · 生成与 grounding</text>
+<text x="70" y="550" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">引用可追溯 + 拒答</text>
+<text x="70" y="563" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">✓ 覆盖</text>
+<rect x="450" y="516" width="378" height="52" rx="8" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.4"/>
+<text x="460" y="534" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">L8 · 评估与迭代</text>
+<text x="460" y="550" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.8" font-weight="400" fill="#475569" text-anchor="start" opacity="1">反馈 → 索引 / 权重 / 提示</text>
+<text x="460" y="563" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">✓ 覆盖</text>
+<path d="M444 576 L444 590 L78 590 L78 200" fill="none" stroke="#dc2f52" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#arrow-rose)"/>
+<text x="88" y="586" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#dc2f52" text-anchor="start" opacity="1">评估反馈 → 索引 / 权重 / 提示</text>
+<text x="864" y="152" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">环节覆盖（我方）</text>
+<line x1="964" y1="148" x2="1232" y2="148" stroke="#eef2f7" stroke-width="1"/>
+<rect x="864" y="166" width="368" height="48" rx="8" fill="#ffffff" stroke="#0f9d63" stroke-width="1.1"/>
+<circle cx="886" cy="190" r="13" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="886" y="193.6" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">L1</text>
+<text x="908" y="186" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#0f172a" text-anchor="start" opacity="1">写入门禁 + 版本登记</text>
+<text x="908" y="202" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#0f9d63" text-anchor="start" opacity="1">指标 #11·12</text>
+<rect x="864" y="220" width="368" height="48" rx="8" fill="#ffffff" stroke="#0e86a5" stroke-width="1.1"/>
+<circle cx="886" cy="244" r="13" fill="#0e86a5" stroke="#ffffff" stroke-width="2"/><text x="886" y="247.6" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">L2</text>
+<text x="908" y="240" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#0f172a" text-anchor="start" opacity="1">不切块：元素 / 关系即语义单元</text>
+<text x="908" y="256" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#0e86a5" text-anchor="start" opacity="1">指标 #4</text>
+<rect x="864" y="274" width="368" height="48" rx="8" fill="#ffffff" stroke="#0f9d63" stroke-width="1.1"/>
+<circle cx="886" cy="298" r="13" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="886" y="301.6" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">L3</text>
+<text x="908" y="294" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#0f172a" text-anchor="start" opacity="1">向量 + 全文 + 结构三通道</text>
+<text x="908" y="310" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#0f9d63" text-anchor="start" opacity="1">指标 #4</text>
+<rect x="864" y="328" width="368" height="48" rx="8" fill="#ffffff" stroke="#b26a04" stroke-width="1.1"/>
+<circle cx="886" cy="352" r="13" fill="#b26a04" stroke="#ffffff" stroke-width="2"/><text x="886" y="355.6" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">L4</text>
+<text x="908" y="348" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#0f172a" text-anchor="start" opacity="1">本体即图；社区索引暂缓</text>
+<text x="908" y="364" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#b26a04" text-anchor="start" opacity="1">指标 #7·6</text>
+<rect x="864" y="382" width="368" height="48" rx="8" fill="#ffffff" stroke="#0f9d63" stroke-width="1.1"/>
+<circle cx="886" cy="406" r="13" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="886" y="409.6" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">L5</text>
+<text x="908" y="402" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#0f172a" text-anchor="start" opacity="1">语义 / 词法 / 结构三路召回</text>
+<text x="908" y="418" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#0f9d63" text-anchor="start" opacity="1">指标 #4</text>
+<rect x="864" y="436" width="368" height="48" rx="8" fill="#ffffff" stroke="#0f9d63" stroke-width="1.1"/>
+<circle cx="886" cy="460" r="13" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="886" y="463.6" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">L6</text>
+<text x="908" y="456" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#0f172a" text-anchor="start" opacity="1">RRF + LLM 重排</text>
+<text x="908" y="472" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#0f9d63" text-anchor="start" opacity="1">指标 #4·8</text>
+<rect x="864" y="490" width="368" height="48" rx="8" fill="#ffffff" stroke="#0f9d63" stroke-width="1.1"/>
+<circle cx="886" cy="514" r="13" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="886" y="517.6" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">L7</text>
+<text x="908" y="510" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#0f172a" text-anchor="start" opacity="1">证据链 + 拒答</text>
+<text x="908" y="526" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#0f9d63" text-anchor="start" opacity="1">指标 #10</text>
+<rect x="864" y="544" width="368" height="48" rx="8" fill="#ffffff" stroke="#0f9d63" stroke-width="1.1"/>
+<circle cx="886" cy="568" r="13" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="886" y="571.6" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">L8</text>
+<text x="908" y="564" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#0f172a" text-anchor="start" opacity="1">golden 题集 + A/B</text>
+<text x="908" y="580" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#0f9d63" text-anchor="start" opacity="1">指标 #5·10·11</text>
+<rect x="48" y="608" width="1184" height="52" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.2"/>
+<rect x="48" y="608" width="5" height="52" rx="2" fill="#2457e6"/>
+<rect x="64" y="624" width="38.0" height="20" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1"/><text x="83" y="637.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#2457e6" text-anchor="middle" opacity="1">结论</text>
+<text x="112" y="629" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start" opacity="1">写入侧的治理（去重 / 无损）在业界普遍缺失 —— 这恰是我们覆盖最深的一环。</text>
+<line x1="48" y1="682" x2="1232" y2="682" stroke="#eef2f7" stroke-width="1"/>
+<text x="48" y="698" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#64748b" text-anchor="start" opacity="1">依据：视图 298 Harness  ·  graph-rag 组件  ·  docs/mcp-acceptance.md</text>
+<text x="1232" y="698" font-family="Consolas, 'Cascadia Code', ui-monospace, monospace" font-size="8.5" font-weight="400" fill="#94a3b8" text-anchor="end" opacity="1">ArchGraph · 06 · 检索流程</text>
+</svg>

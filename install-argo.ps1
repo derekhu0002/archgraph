@@ -28,6 +28,9 @@ param(
     [string]$DoubaoHome = "$env:USERPROFILE\Doubao",
     [string]$DoubaoWorkspace = "$env:LOCALAPPDATA\Doubao\User Data\Default\.doubao\agent_mode\workspace",
     [switch]$SkipDoubao,
+    [string]$CodexHome = "$env:USERPROFILE\.codex",
+    [string]$CodexRepoRoot = '',
+    [switch]$SkipCodex,
     [string]$McpPath,
     [string]$GraphMcpUrl = 'https://argo.derekworkspacev5.com/mcp'
 )
@@ -596,6 +599,71 @@ function Write-OpenClawMcpConfig {
     [System.IO.File]::WriteAllText($configPath, $json, (New-Object System.Text.UTF8Encoding $false))
 }
 
+function ConvertTo-TomlString {
+    # Encode a value as a TOML basic string (escape backslash + double quote).
+    param([string]$Value)
+    return '"' + ($Value -replace '\\', '\\\\' -replace '"', '\"') + '"'
+}
+
+function Write-CodexMcpConfig {
+    # Register the argo and graph-mcp MCP servers in the Codex config file
+    # (~/.codex/config.toml). Codex stores MCP servers as standard TOML tables
+    # [mcp_servers.<name>] (NOT the JSON/YAML shapes the other hosts use), so
+    # this is a text-level table upsert:
+    #   - the previous managed tables ([mcp_servers.argo], [mcp_servers.argo.env],
+    #     [mcp_servers.graph-mcp]) are removed first, so a re-deploy replaces
+    #     rather than duplicates them (duplicate TOML tables are a parse error);
+    #   - every unrelated config.toml key (the desktop app's own settings, other
+    #     MCP servers, plugins, marketplaces) is preserved verbatim;
+    #   - the file is written without a BOM.
+    #
+    # Workspace: Codex spawns every stdio MCP server with the SESSION workspace
+    # as its process cwd and without ARGO_* env (verified), and argo-paths.js
+    # falls back to process.cwd() when ARGO_REPO_ROOT is unset. So, like
+    # OpenCode / DeepSeek Harness, the single global argo server FOLLOWS whichever
+    # workspace the user opened in Codex and ARGO_REPO_ROOT is NOT pinned by
+    # default. Pass -RepoRoot to pin a fixed workspace instead (opt-in).
+    param(
+        [string]$ConfigPath,
+        [string]$ArgoServer,
+        [string]$GraphMcpUrl,
+        [string]$RepoRoot
+    )
+    $targetHeaders = @('[mcp_servers.argo]', '[mcp_servers.argo.env]', '[mcp_servers.graph-mcp]')
+    $existing = if (Test-Path $ConfigPath) { [System.IO.File]::ReadAllText($ConfigPath) } else { '' }
+    $lines = if ($existing -eq '') { @() } else { $existing -split "\r?\n" }
+
+    $kept = New-Object System.Collections.Generic.List[string]
+    $i = 0
+    while ($i -lt $lines.Count) {
+        $trim = $lines[$i].Trim()
+        if ($targetHeaders -contains $trim) {
+            # Skip the header and its body up to the next top-level table header.
+            $i++
+            while ($i -lt $lines.Count -and -not $lines[$i].TrimStart().StartsWith('[')) { $i++ }
+            continue
+        }
+        $kept.Add($lines[$i])
+        $i++
+    }
+    while ($kept.Count -gt 0 -and $kept[$kept.Count - 1].Trim() -eq '') { $kept.RemoveAt($kept.Count - 1) }
+
+    $blocks = New-Object System.Collections.Generic.List[string]
+    $blocks.Add((@('[mcp_servers.argo]', 'command = "node"', "args = [$(ConvertTo-TomlString $ArgoServer)]") -join "`n"))
+    if (-not [string]::IsNullOrWhiteSpace($RepoRoot)) {
+        $blocks.Add(("[mcp_servers.argo.env]`nARGO_REPO_ROOT = $(ConvertTo-TomlString $RepoRoot)"))
+    }
+    $blocks.Add(("[mcp_servers.graph-mcp]`nurl = $(ConvertTo-TomlString $GraphMcpUrl)"))
+
+    $result = ($kept -join "`n")
+    if ($result.Trim() -ne '') { $result = $result.TrimEnd() + "`n`n" }
+    $result += ($blocks -join "`n`n") + "`n"
+
+    New-Item -ItemType Directory -Force -Path (Split-Path $ConfigPath) | Out-Null
+    [System.IO.File]::WriteAllText($ConfigPath, $result, (New-Object System.Text.UTF8Encoding $false))
+    Write-Host "  Codex MCP: argo (stdio) + graph-mcp (streamable http) -> $ConfigPath"
+}
+
 function Write-DshManagedBlock {
     # Text-level upsert of a marker-delimited block into a file (used for the
     # managed rows in ~/.dsh/cordis.patch.yml): replaces the previous managed
@@ -776,10 +844,9 @@ Write-Host "[4/22] argo\skills\argo-init -> $skillDest"
 Copy-Tree -Source $skillSrc -Destination $skillDest
 $reconcileSkillSrc = Join-Path (Join-Path $argoDir 'skills') 'ea-human-reconcile'
 $diagSkillSrc = Join-Path (Join-Path $argoDir 'skills') 'agent-search-diagnosis'
-Write-Host '  argo\skills\ea-human-reconcile -> $SkillsRoot\ea-human-reconcile (EA human draft reconcile skill)'
+Write-Host "  argo\skills\ea-human-reconcile -> $SkillsRoot\ea-human-reconcile (EA human draft reconcile skill)"
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $SkillsRoot 'ea-human-reconcile')
-Write-Host '  argo\skills\agent-search-diagnosis -> $SkillsRoot\agent-search-diagnosis (agent search diagnosis skill)'
-Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $SkillsRoot 'agent-search-diagnosis')
+# agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to Copilot.
 
 $ruleSrc = Join-Path (Join-Path $argoDir 'rules') 'archgraph.instructions.md'
 $ruleDest = Join-Path $PromptsRoot 'archgraph.instructions.md'
@@ -795,10 +862,9 @@ Copy-Item -Force -Path $depsSrc -Destination $depsDest
 $cursorSkillDest = Join-Path $CursorSkillsRoot 'argo-init'
 Write-Host "[7/22] argo\skills\argo-init -> $cursorSkillDest (Cursor)"
 Copy-Tree -Source $skillSrc -Destination $cursorSkillDest
-Write-Host '  argo\skills\ea-human-reconcile -> $CursorSkillsRoot\ea-human-reconcile (Cursor)'
+Write-Host "  argo\skills\ea-human-reconcile -> $CursorSkillsRoot\ea-human-reconcile (Cursor)"
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $CursorSkillsRoot 'ea-human-reconcile')
-Write-Host '  argo\skills\agent-search-diagnosis -> $CursorSkillsRoot\agent-search-diagnosis (Cursor)'
-Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $CursorSkillsRoot 'agent-search-diagnosis')
+# agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to Cursor.
 
 $mcpBridgeSrc = Join-Path $argoDir 'mcp-bridges'
 $mcpBridgeDest = Join-Path $CursorMcpBridgesRoot ''
@@ -808,9 +874,9 @@ Copy-Tree -Source $mcpBridgeSrc -Destination $mcpBridgeDest
 $openCodeSkillDest = Join-Path $OpenCodeSkillsRoot 'argo-init'
 Write-Host "[8/22] argo\skills\argo-init -> $openCodeSkillDest (OpenCode)"
 Copy-Tree -Source $skillSrc -Destination $openCodeSkillDest
-Write-Host '  argo\skills\ea-human-reconcile -> $OpenCodeSkillsRoot\ea-human-reconcile (OpenCode)'
+Write-Host "  argo\skills\ea-human-reconcile -> $OpenCodeSkillsRoot\ea-human-reconcile (OpenCode)"
 Copy-Tree -Source $reconcileSkillSrc -Destination (Join-Path $OpenCodeSkillsRoot 'ea-human-reconcile')
-Write-Host '  argo\skills\agent-search-diagnosis -> $OpenCodeSkillsRoot\agent-search-diagnosis (OpenCode)'
+Write-Host "  argo\skills\agent-search-diagnosis -> $OpenCodeSkillsRoot\agent-search-diagnosis (OpenCode-only: assumes opencode session export)"
 Copy-Tree -Source $diagSkillSrc -Destination (Join-Path $OpenCodeSkillsRoot 'agent-search-diagnosis')
 
 Write-Host "[9/22] argo\rules\archgraph.instructions.md -> $OpenCodeAgentsPath (OpenCode global AGENTS.md)"
@@ -849,15 +915,14 @@ if ($SkipDsh) {
 
     Write-Host "[16/22] argo\skills\argo-init -> $dshSkillDest (DeepSeek Harness skill)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $dshSkillDest
-    Write-Host '  argo\skills\ea-human-reconcile -> $DshHome\skills\ea-human-reconcile (DeepSeek Harness skill)'
+    Write-Host "  argo\skills\ea-human-reconcile -> $DshHome\skills\ea-human-reconcile (DeepSeek Harness skill)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-reconcile') -Destination (Join-Path (Join-Path $DshHome 'skills') 'ea-human-reconcile')
-    Write-Host '  argo\skills\agent-search-diagnosis -> $DshHome\skills\agent-search-diagnosis (DeepSeek Harness skill)'
-    Copy-Tree -Source $diagSkillSrc -Destination (Join-Path (Join-Path $DshHome 'skills') 'agent-search-diagnosis')
+    # agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to DeepSeek Harness.
 
     Write-Host "[17/22] dsh-argo-wakeup\index.js (single source; gate from argo\rules\archgraph.instructions.md <WakeupGuideline>) -> $DshHome\plugins\dsh-argo-wakeup\index.js (DeepSeek Harness wakeup plugin)"
     $wakeupDshPath = New-DshWakeupPlugin -DshHome $DshHome
 
-    Write-Host "[18/22] argo-workspace + argo-wakeup rows -> $patchPath (DeepSeek Harness MCP bridge + wakeup plugin)"
+    Write-Host "[18/22] argo-workspace (argo + graph-mcp) + argo-wakeup rows -> $patchPath (DeepSeek Harness MCP bridges + wakeup plugin)"
     # The generated dsh-argo-workspace bridge connects directly to the argo
     # server (no dsh-mcp-client row), registers every tool as mcp__argo__* and
     # injects the current session's workspace (SessionHeader.cwd) as the
@@ -865,9 +930,20 @@ if ($SkipDsh) {
     # user switched to. The server honors the injected workspaceRoot
     # unconditionally.
     $bridgeDshPath = New-DshWorkspaceBridge -DshHome $DshHome
+    # Deploy the federation Graph MCP stdio bridge next to the DSH plugins, so the
+    # remote graph-mcp (registry_*/mirror_*/graph_*) mounts as an ordinary local
+    # stdio server - the same bridge Cursor/Doubao already use.
+    $dshBridgeDir = Join-Path $DshHome 'mcp-bridges'
+    Copy-Tree -Source (Join-Path $argoDir 'mcp-bridges') -Destination $dshBridgeDir
+    $dshGraphBridgePath = (Join-Path $dshBridgeDir 'graph-mcp-stdio.js').Replace('\', '/')
     if ($bridgeDshPath) {
         $bridgeUrl = 'file:///' + (($bridgeDshPath -replace '\\', '/').TrimStart('/'))
-        $bridgeConfig = "    config:`n      serverPath: '$argoServer'`n"
+        # One bridge plugin mounts every server; the argo server follows the session
+        # workspace (workspaceRoot), graph-mcp does not inject workspaceRoot.
+        $serversYaml = "      servers:`n"
+        $serversYaml += "        - id: argo`n          serverPath: '$argoServer'`n          injectWorkspaceRoot: true`n"
+        $serversYaml += "        - id: graph-mcp`n          command: node`n          args:`n            - '$dshGraphBridgePath'`n          env:`n            GRAPH_MCP_URL: '$GraphMcpUrl'`n          injectWorkspaceRoot: false`n"
+        $bridgeConfig = "    config:`n" + $serversYaml
         if ($DshWorkspaces) {
             $wsList = @($DshWorkspaces.Replace('\', '/').Split(';') | ForEach-Object { "        - $_" }) -join "`n"
             $bridgeConfig += "      workspaces:`n" + $wsList + "`n"
@@ -891,10 +967,8 @@ if ($SkipDsh) {
     Write-Host "[19/22] argo\agents -> $DshHome\.agent-presets\<id> (DeepSeek Harness agent presets)"
     New-DshAgentPresets -DshHome $DshHome -AgentsSrc (Join-Path $argoDir 'agents')
 
-    Write-Host "  note: graph-mcp remote ($GraphMcpUrl) is NOT registered for DeepSeek Harness -"
-    Write-Host "  ~/.dsh/cordis.patch.yml only carries plugin rows (the dsh-argo-workspace bridge spawns"
-    Write-Host "  the local argo server); an HTTP remote MCP server has no equivalent cordis row here."
-    Write-Host "  Restart `dsh web` to activate the MCP bridge and the wakeup plugin;"
+    Write-Host "  graph-mcp registered for DeepSeek Harness as a stdio bridge -> $dshGraphBridgePath (GRAPH_MCP_URL=$GraphMcpUrl)"
+    Write-Host "  Restart `dsh web` to activate the MCP bridges and the wakeup plugin;"
     Write-Host '  new sessions pick up the global rule and the argo-init skill automatically.'
     Write-Host '  The argo tools (mcp__argo__*) auto-follow the workspace the user switched to'
     Write-Host '  in one dsh instance - no restart needed between workspaces (the server honors'
@@ -914,10 +988,9 @@ if ($SkipOpenClaw) {
 
     Write-Host "[21/22] argo\skills\argo-init -> $openClawSkillDest (OpenClaw managed skill, all agents)"
     Copy-Tree -Source (Join-Path $argoDir 'skills\argo-init') -Destination $openClawSkillDest
-Write-Host '  argo\skills\ea-human-reconcile -> $OpenClawHome\skills\ea-human-reconcile (OpenClaw managed skill, all agents)'
+Write-Host "  argo\skills\ea-human-reconcile -> $OpenClawHome\skills\ea-human-reconcile (OpenClaw managed skill, all agents)"
 Copy-Tree -Source (Join-Path $argoDir 'skills\ea-human-reconcile') -Destination (Join-Path (Join-Path $OpenClawHome 'skills') 'ea-human-reconcile')
-Write-Host '  argo\skills\agent-search-diagnosis -> $OpenClawHome\skills\agent-search-diagnosis (OpenClaw managed skill, all agents)'
-Copy-Tree -Source $diagSkillSrc -Destination (Join-Path (Join-Path $OpenClawHome 'skills') 'agent-search-diagnosis')
+# agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to OpenClaw.
 
     Write-Host '  OpenClaw injects AGENTS.md into Project Context on every session, so the wakeup'
     Write-Host '  gate (UNCONDITIONAL STARTUP GATE) is active on the next OpenClaw session; restart'
@@ -937,7 +1010,8 @@ if ($SkipDoubao) {
     # fully ported surface). MCP servers are registered through Doubao's in-app
     # custom connector UI (STDIO), not a config file, so the installer emits a
     # copy-paste connector recipe instead of writing a config.
-    $doubaoSkills = @('argo-init', 'ea-human-reconcile', 'agent-search-diagnosis')
+    # agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to Doubao.
+    $doubaoSkills = @('argo-init', 'ea-human-reconcile')
     $doubaoSkillsSrc = Join-Path $argoDir 'skills'
     Write-Host '==> Deploying Doubao (desktop agent mode) integration'
     Copy-DoubaoSkills -Root (Join-Path $DoubaoWorkspace '.user_skills') -SourceSkillsRoot $doubaoSkillsSrc -SkillNames $doubaoSkills -Label 'workspace .user_skills'
@@ -1140,6 +1214,33 @@ if ($SkipMcp) {
         Write-Host "[22/22] argo MCP server -> $(Join-Path $OpenClawHome 'openclaw.json') (OpenClaw mcp.servers.argo, env.ARGO_REPO_ROOT pinned)"
         Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $openClawRepoRoot -ArgoServer $argoServer -GraphMcpServer $openClawGraphMcpServer
     }
+}
+
+if ($SkipCodex) {
+    Write-Host 'Skipped Codex integration (-SkipCodex).'
+} else {
+    $ruleSrcContent = Get-Content $ruleSrc -Raw -Encoding UTF8
+    $codexAgentsPath = Join-Path $CodexHome 'AGENTS.md'
+    $codexSkillsRoot = Join-Path $CodexHome 'skills'
+
+    Write-Host '==> Deploying Codex integration'
+    Write-Host "[Codex 1/3] argo\rules\archgraph.instructions.md -> $codexAgentsPath (Codex global AGENTS.md, frontmatter stripped)"
+    Write-ArchGraphRuleBlock -DestPath $codexAgentsPath -RuleText $ruleSrcContent -Label 'Codex rule'
+
+    Write-Host "[Codex 2/3] argo\skills -> $codexSkillsRoot (Codex user skills: argo-init, ea-human-reconcile)"
+    Copy-DoubaoSkills -Root $codexSkillsRoot -SourceSkillsRoot (Join-Path $argoDir 'skills') -SkillNames @('argo-init', 'ea-human-reconcile') -Label 'Codex user skills'
+    # agent-search-diagnosis is OpenCode-only (it assumes `opencode` session export); not deployed to Codex.
+
+    if ($SkipMcp) {
+        Write-Host '  Skipped Codex MCP registration (-SkipMcp).'
+    } else {
+        $codexConfigPath = Join-Path $CodexHome 'config.toml'
+        Write-Host "[Codex 3/3] argo MCP (stdio) + graph-mcp -> $codexConfigPath (Codex config.toml)"
+        Write-CodexMcpConfig -ConfigPath $codexConfigPath -ArgoServer $argoServer -GraphMcpUrl $GraphMcpUrl -RepoRoot $CodexRepoRoot
+    }
+    Write-Host '  Codex injects the global AGENTS.md into every session, so the wakeup gate is'
+    Write-Host '  active on the next Codex session; skills load on trigger. Restart Codex so it'
+    Write-Host '  picks up config.toml and the new skills.'
 }
 
 $wakeupPluginPath = Join-Path $PluginsRoot 'argo-wakeup.js'

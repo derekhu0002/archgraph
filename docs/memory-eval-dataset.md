@@ -138,8 +138,9 @@
 - **MQ-17**
   - GIVEN：view 429 子视图
   - WHEN：SystemArchitecture 顶层视图（429）当前有多少个子视图？
-  - THEN：15 个；早期 12 → 新增 tb-eval-view-001、memory-eval-view-001、self-evolution-sandbox-view-001
+  - THEN：38 个（12 → 新增 tb-eval/memory-eval/self-evolution-sandbox/agent-cost-eval/framework-defaults/graph-consistency 等 → 24 → UML 2 状态机视角挂载 7 个子视图 → 31 → 沟通材料 2026-10（comm-2026-10-view-001）与 Codex 宿主适配（codex-adaptation）各 1 个 → 33 → schema/宿主适配等增量 → 37 → 对外呈现 v2（site-v2-delivery-001）→ 38）
   - 检索提示：`getArchitectureViewContext view_id=429 includeChildViews=true`
+  - 维护说明：本值的判据是「当前图纸」，图增长即需同步更新（属评测题集维护，不是记忆读取退化）
 
 - **MQ-18**
   - GIVEN：结构在愿景中的地位

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>使用介绍 · ArchGraph</title>
+  <meta name="description" content="ArchGraph 使用介绍：面向新用户的入门指南 —— 这是什么、适合谁、前置条件、安装部署、初始化工作区，以及日常怎么用。" />
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a class="brand" href="../index.html"><code>ArchGraph</code></a>
+    <div class="links">
+      <a href="getting-started.html" aria-current="page">使用介绍</a>
+      <a href="case-team-graph.html">使用案例</a>
+      <a href="capabilities.html">能力总览</a>
+      <a href="../index.html">主页</a>
+      <a class="gh-btn" href="https://github.com/derekhu0002/archgraph" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+
+  <main>
+    <p class="eyebrow">使用介绍 · Getting Started</p>
+    <h1>给新用户的入门指南</h1>
+    <p class="lead">
+      这份文档面向第一次接触 ArchGraph 的人：先讲清它是什么、能为你做什么，再一步一步带你安装、配置、
+      初始化，最后说明日常使用时你的 coding agent 会自动替你做什么。跟着读一遍，你就能把第一个项目跑起来。
+    </p>
+    <div class="toc">
+      <a href="#what">这是什么</a>
+      <a href="#who">适合谁</a>
+      <a href="#prereq">前置条件</a>
+      <a href="#install">安装与部署</a>
+      <a href="#init">初始化工作区</a>
+      <a href="#daily">日常怎么用</a>
+      <a href="#model">建模自己的东西</a>
+      <a href="#faq">常见问题</a>
+    </div>
+
+    <section id="what">
+      <h2>这是什么 / 能为你做什么</h2>
+      <p class="lead">
+        ArchGraph 是给 <strong>AI coding agent 用的「长期记忆」</strong>。它把你的项目架构建模成一张
+        <strong>意图图谱（intent graph）</strong>，并通过一个统一的 <strong>MCP 接口</strong>让 agent 读写：
+        agent 不用每次把整个项目重新读一遍，就能恢复上下文、找到「这个任务对应架构里的哪个元素」，
+        然后在改动前先定位、改动后把 commit 登记回图谱。默认用 <strong>ArchiMate 3.2 + ARGO 扩展</strong> 建模，
+        但它也支持换成你自己的业务本体（见<a href="#model">建模自己的东西</a>）。
+      </p>
+      <p class="lead">
+        一句话：<strong>它让 agent 的记忆变成一张干净、可查、可追溯的架构图，而不是一堆散落的文件。</strong>
+        写入会自动去重，所以图谱不会越用越乱，语义检索也能一直保持准确。
+      </p>
+      <p class="lead">
+        它既不是「把上下文散在文件里」，也不是「只做语义召回的向量库」，也不是「把模型与 agent 读写路径分开」的通用图/本体工具 ——
+        关键差别在于：本体是一个一等公民、受校验、运行时解析的 schema bundle，而读和写都走同一个 MCP 接口。
+        <a href="capabilities.html#compare">看与其他做法的对比（含 ArchGraph 自身成本）→</a>
+      </p>
+    </section>
+
+    <section id="who">
+      <h2>适合谁</h2>
+      <ul class="clean">
+        <li>希望让 coding agent 更「懂项目」、少走弯路的开发者。</li>
+        <li>需要把架构决策、验收测试、提交记录沉淀成可追溯资产的项目负责人。</li>
+        <li>想用自己业务领域的本体来建模（而不是通用 ArchiMate）的团队。</li>
+        <li>愿意在 GitHub Copilot / Cursor / OpenCode / DeepSeek Harness / OpenClaw / Codex 里工作的用户 —— 我们一次部署覆盖全部宿主。</li>
+      </ul>
+    </section>
+
+    <section id="prereq">
+      <h2>前置条件</h2>
+      <p class="lead">
+        用大白话说：<strong>大部分功能开箱即用，只有「结构化查询」和「语义检索」需要额外配置。</strong>
+        下面三样东西里，Node.js 一定要装；Neo4j 和 embedding 端点只有在你需要这些能力时才需要。
+      </p>
+      <table>
+        <thead>
+          <tr><th>组件</th><th>是否必需</th><th>作用（大白话）</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Node.js（&ge; 18）</td>
+            <td>必需</td>
+            <td>ArchGraph 本身和 MCP 服务端跑在 Node 上，安装它才能用。</td>
+          </tr>
+          <tr>
+            <td>Neo4j 图数据库</td>
+            <td>结构化查询 / 语义检索必需</td>
+            <td>把图谱的「结构投影」存进去，让 agent 能用只读 Cypher 做结构化查询；语义召回也依赖它存向量。可以是本地、Docker 或托管的实例。</td>
+          </tr>
+          <tr>
+            <td>Embedding / 向量端点</td>
+            <td>语义检索必需</td>
+            <td>给「语义召回」（Graph RAG）提供向量能力。任何 <strong>OpenAI 兼容的 embedding 端点</strong>都行 —— 云服务，或自建服务（离线 / 内网 / 私有部署）。</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>不配 Neo4j / embedding 会怎样？</strong> 意图图谱本身的<strong>上下文读取</strong>
+        （如 <code>getIntentElementContext</code>、<code>getArchitectureViewContext</code>）、
+        <strong>写入</strong>（建元素、建关系、建视图、校验、去重、验收登记）以及 <strong>EA 互操作</strong>
+        依然可用；失效的是 <strong>Neo4j 结构投影 / Cypher 结构查询</strong> 和 <strong>全部语义检索（Graph RAG）</strong>。
+        所以你可以先不配，等需要时再补。
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>安装与部署</h2>
+      <p class="lead">两条命令，把工具链、Skills、Rules 和 MCP 服务端一次装好，并注册进你的宿主。</p>
+      <pre><code>npm install -g archgraph-argo
+argo-deploy</code></pre>
+      <p class="lead">
+        <code>argo-deploy</code> 会自动把 <code>argo</code> MCP 服务端注册到
+        <strong>GitHub Copilot、Cursor、OpenCode、DeepSeek Harness、OpenClaw、Codex</strong>，
+        并安装对应的 skills / rules / agents。注意各宿主能力不同：
+        <strong>skills 和 rules 会装到每个宿主</strong>，而 <strong>agents（子代理定义）只装到支持它的宿主</strong> ——
+        <strong>OpenClaw 和 Codex 没有 agents</strong>（它们只接收 rules + skills + MCP 注册）。
+        对 Codex，rules 会写到 <code>~/.codex/AGENTS.md</code>（每个会话都会注入，所以唤醒门禁始终生效），
+        skills 写到 <code>~/.codex/skills/</code>。
+      </p>
+
+      <h3>交互式填写 ~/.argo/.env</h3>
+      <p class="lead">
+        <code>argo-deploy</code> 运行时会一步步问你 Neo4j 和 embedding 的连接信息，写进
+        <code>~/.argo/.env</code>。<strong>已有的、非空的值会被保留</strong>，所以你随时可以事后直接编辑该文件再重跑。
+        下表是常用的 <code>.env</code> 键（另有若干可选的语义检索调优键；完整清单见 <code>argo/.env.example</code>，未知键会被 secret 预检拒绝）：
+      </p>
+      <table>
+        <thead>
+          <tr><th>配置项</th><th>填什么</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>ARGO_EMBEDDING_PROFILE</code></td><td>embedding 提供方 profile：<code>approved</code>（默认，用下面的人工批准云端 profile）或 <code>openai-compatible</code>（自建兼容端点）。</td></tr>
+          <tr><td><code>ARGO_EMBEDDING_BASE_URL</code></td><td>embedding 端点地址（OpenAI 兼容，结尾不要带斜杠）。</td></tr>
+          <tr><td><code>ARGO_EMBEDDING_MODEL</code></td><td>embedding 模型名。</td></tr>
+          <tr><td><code>ARGO_EMBEDDING_PROVIDER</code></td><td>提供方标签（记录在证据里，也是 rerank 的回退提供方）。</td></tr>
+          <tr><td><code>ARGO_EMBEDDING_MODEL_VERSION</code></td><td>模型版本 / 资质标签（仅记录证据）。</td></tr>
+          <tr><td><code>ARGO_EMBEDDING_DIMENSIONS</code></td><td>向量维度，必须与模型一致（当前 profile 为 1536）。</td></tr>
+          <tr><td><code>ARGO_EMBEDDING_QUERY_INSTRUCTION</code></td><td>可选的查询侧指令前缀（面向 instruction-tuned 模型；文档侧不加）。</td></tr>
+          <tr><td><code>ARGO_EMBEDDING_API_KEY</code></td><td>可选的 embedding API Key（留空则用 <code>QWEN_KEY</code>）。</td></tr>
+          <tr><td><code>ARGO_NEO4J_DATABASE_URL</code></td><td>你的 Neo4j 实例地址（URI，例如 <code>neo4j://127.0.0.1:7687</code>）。</td></tr>
+          <tr><td><code>ARGO_NEO4J_DATABASE_USERNAME</code></td><td>Neo4j 用户名。</td></tr>
+          <tr><td><code>ARGO_NEO4J_DATABASE_PASSWORD</code></td><td>Neo4j 密码。</td></tr>
+          <tr><td><code>ARGO_NEO4J_DATABASE</code></td><td>可选，覆盖 Neo4j 数据库名（默认取仓库文件夹名）。</td></tr>
+          <tr><td><code>QWEN_KEY</code></td><td>embedding 端点的 API Key（例如阿里云 DashScope）。</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>自建 / 内网 / 离线怎么办？</strong> 设 <code>ARGO_EMBEDDING_PROFILE=openai-compatible</code>，
+        指向任意 OpenAI 兼容的 embedding 服务即可。详见
+        <a href="https://github.com/derekhu0002/archgraph/blob/main/docs/self-hosted-embedding-deployment.md" target="_blank" rel="noopener">docs/self-hosted-embedding-deployment.md</a>。
+      </div>
+      <div class="note">
+        <strong>部署后记得重启你的宿主。</strong> 正在运行的 MCP 客户端在启动时加载代码，
+        重启 opencode / VS Code / Cursor / OpenClaw / Codex 等，才会用到新部署。
+      </div>
+    </section>
+
+    <section id="init">
+      <h2>初始化工作区：argo init</h2>
+      <p class="lead">
+        进入你的项目后，让 coding agent 执行一次 <code>argo init</code>（它对应 MCP 调用
+        <code>initializeWorkspace</code>）。这一步会做四件事：
+      </p>
+      <ul class="clean">
+        <li>当项目里没有 <code>design/KG/SystemArchitecture.json</code> 时，创建一个初始图谱（<em>注意：仅内置默认 ArchiMate 3.2 schema 会自动创建；用自定义本体时图谱写你自己提供，否则初始化会 fail-closed</em>）。</li>
+        <li>执行第一次「JSON → Neo4j」同步，把结构投影写进图数据库。</li>
+        <li>初始化语义检索（Graph RAG）生命周期，让向量召回可用。</li>
+        <li>校验整张架构图是否合法、一致。</li>
+      </ul>
+      <p class="lead">从这一刻起，这张意图图谱就是你项目的<strong>单一事实来源（source of truth）</strong>。</p>
+      <div class="note">
+        <strong>没配 Neo4j / embedding 会怎样？</strong> 图谱创建与校验照常完成，但上面第 2、3 步（JSON → Neo4j 结构同步、语义生命周期）
+        会<strong>报告 failed</strong>。补齐前置条件后重跑 <code>argo init</code> 即可。
+      </div>
+      <div class="note">
+        <strong>默认 vs. 工作区。</strong> 全新安装默认内置 <strong>ArchiMate 3.2 + ARGO 扩展</strong>；而某个工作区可能解析到它自己的本体包（schema bundle），用 <code>extends: "default"</code> 继承默认再追加类型。
+        用 <code>queryNeo4jGraph { "schema": true }</code> 就能看到当前生效的是哪一套。
+      </div>
+    </section>
+
+    <section id="daily">
+      <h2>日常怎么用</h2>
+      <p class="lead">
+        安装和初始化只需要做一次。之后你只要<strong>打开项目、让 coding agent 干活</strong>，
+        剩下的事情它会在 ARGO 工作流里自动完成：
+      </p>
+      <div class="step">
+        <span class="step-badge">STEP 1</span>
+        <h3>先定位架构元素</h3>
+        <p class="lead">接到任务后，agent 先在意图图谱里找到「这个任务对应哪个架构元素」，而不是盲目翻文件或直接改代码。</p>
+      </div>
+      <div class="step">
+        <span class="step-badge">STEP 2</span>
+        <h3>武装 Skills / Rules</h3>
+        <p class="lead">它把该元素相关的 Skills 和 Rules 装进本次会话记忆，知道这个领域该怎么做、有什么约束。</p>
+      </div>
+      <div class="step">
+        <span class="step-badge">STEP 3</span>
+        <h3>测试先行</h3>
+        <p class="lead">先识别（必要时补上）可执行的 GIVEN-WHEN-THEN 验收测试，再动手实现，保证改动有外部视角的验证。</p>
+      </div>
+      <div class="step">
+        <span class="step-badge">STEP 4</span>
+        <h3>复用去重</h3>
+        <p class="lead">要建的元素、关系或视图如果已经存在，就<strong>复用</strong>而不是复制；语义上非常接近的同类元素会被拦下并作为候选返回，避免同一概念分裂成两份。</p>
+      </div>
+      <div class="step">
+        <span class="step-badge">STEP 5</span>
+        <h3>提交回登记</h3>
+        <p class="lead">改动提交后，agent 会把 commit id 和涉及的文件路径登记回对应的架构元素上。图谱因此自带审计轨迹。</p>
+      </div>
+      <p class="lead">
+        也就是说，<strong>你不用记这些步骤</strong> —— 它们是框架的内建行为。你只管提出需求，agent 会按上述闭环执行。
+      </p>
+    </section>
+
+    <section id="model">
+      <h2>怎么建模自己的东西</h2>
+      <p class="lead">
+        默认情况下，ArchGraph 用 <strong>ArchiMate 3.2</strong> 这套通用企业架构建模语言。但如果你有自己的业务领域，
+        可以在项目里放一份<strong>本体包（schema bundle）</strong>，ARGO 就会只用你的本体来校验和检索这个项目 ——
+        而且只影响这一个项目，不会动到全局默认。本体包可以 <code>extends: "default"</code> 继承内置默认（<strong>ArchiMate 3.2 + ARGO 扩展</strong>）再追加自己的类型。
+      </p>
+      <p class="lead">
+        <a href="case-team-graph.html">→ 看使用案例：自定义业务域本体并一步步建图（Team Graph）</a>
+      </p>
+    </section>
+
+    <section id="faq">
+      <h2>常见问题 / 排错</h2>
+      <h3>语义检索没有结果 / 报错？</h3>
+      <p class="lead">先确认 <code>~/.argo/.env</code> 里 Neo4j 和 embedding 都填对，并执行过一次 <code>argo init</code>（它才会同步投影、初始化向量）。改完 <code>.env</code> 后重跑 <code>argo-deploy</code> 并重启宿主。</p>
+      <h3>连不上 Neo4j？</h3>
+      <p class="lead">检查 <code>ARGO_NEO4J_DATABASE_URL</code> 能否从你机器访问、用户名密码是否正确。本地 / Docker 实例要确认端口已放行。</p>
+      <h3>想换 embedding 提供方 / 自建？</h3>
+      <p class="lead">改 <code>.env</code> 的 <code>ARGO_EMBEDDING_*</code>：自建时把 <code>ARGO_EMBEDDING_PROFILE</code> 设为 <code>openai-compatible</code>，并填好 base URL、模型名、维度与 API Key。</p>
+      <h3>图谱被写乱了 / 出现重复元素？</h3>
+      <p class="lead">正常路径下写入会去重、不会产生重复。若确实需要新建一个「近似重复」的对象，写入时会要求显式确认和理由 —— 这是刻意设计的保护。</p>
+      <h3>agent 一开始就报「图谱不可用」？</h3>
+      <p class="lead">先用只读的 <code>queryNeo4jGraph { "schema": true }</code> 看激活的是哪套 schema、<code>bundleValidation.status</code> 是否 <code>passed</code>。<code>failed</code> 说明本体包配置有问题，需要先修好再写。</p>
+      <h3>自定义本体下 <code>argo init</code> 报 <code>NO_DEFAULT_GRAPH</code>？</h3>
+      <p class="lead">这是预期行为：自定义本体不会自动复制内置默认图。请自己创建 <code>design/KG/SystemArchitecture.json</code> —— 见<a href="case-team-graph.html#ontology">使用案例的第一步</a>。</p>
+    </section>
+  </main>
+
+  <footer>
+    ArchGraph —— 面向 Agentic Engineering 的架构图驱动框架 ·
+    <a href="https://github.com/derekhu0002/archgraph" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>

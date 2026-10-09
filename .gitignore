@@ -19,3 +19,4 @@ scripts/at-refresh-plan.json
 scripts/at-simplify-plan.json
 results/navigation-agent-raw/
 results/
+**/.argo/temp/

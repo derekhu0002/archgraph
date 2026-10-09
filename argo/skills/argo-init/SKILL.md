@@ -17,10 +17,12 @@ disable-model-invocation: true
 ## Rules
 
 - **MUST** 调用 ARGO MCP 工具 `initializeWorkspace`（传当前工作区根）执行确定性初始化，并以其返回报告为最终判断依据。
+- **MUST** 报告当前 schema：`initializeWorkspace` 返回的 `schema`（或 harness 的 `schemaBundle`）中的 `kind`（default=内置 ArchiMate 3.2 / workspace=仓内自定义 / override）、`language`（名称）、`actorElementType`、`dir`、`guide`；输出形如 `schema: default / ArchiMate 3.2`。
 - **MUST** 报告 `mcp` / `systemArchitecture` / `neo4j` / `qeaFullProjection` / `semanticLifecycle` / `subdiagramViews` 与整体 `status`。
 - **MUST** 核验并报告：① `.qea` 投影是否成功（`qeaFullProjection.status`），且投影目标 `qeaFullProjection.qea` 是否为**本仓库自己的 .qea 文件**（解析自 `ARGO_EA_QEA` 或仓库根唯一 `*.qea`）；目标不是本仓库文件或投影失败 → 报告为告警/失败，不得视为 init 成功。
 - **MUST** 核验并报告：Neo4j 投影目标数据库名（`neo4j.database`）是否**与本仓库名一致**（仓库 basename == 数据库名）；不一致 → 报告为告警/失败。
-- **MUST NOT** 读取、打印或复述 `.env` 中的 secret 值；排查时只允许报告 key 是否存在、ACL 主体。
+- **MUST NOT** 因 schema 是自定义的而跳过 `.qea` 投影：投影对任何 schema 都执行；只有确实没有 `.qea` 目标时才允许 `noop`。
+- **MUST NOT** 读取、打印或复述 `.env` 中的 secret 值；排查时只允许报告 key 是否存在。
 - **MUST NOT** 通过 shell 手工执行 WORKSPACE 外的初始化脚本或一组无关命令来替代 `initializeWorkspace`（除非报告显示底层脚本自身失败需要排查）。
 
 ## Workflow
@@ -47,18 +49,13 @@ disable-model-invocation: true
 
 ### 3. Handle Secret File Blockers（仅当报告含 secret 相关失败）
 
-`semanticLifecycle` 或 `systemArchitecture` 失败可能源于 `.env` 安全预检。诊断（不打印 secret 值）：
+`semanticLifecycle` 或 `systemArchitecture` 失败可能源于 `.env` 预检。诊断（不打印 secret 值）：
 
-```powershell
-icacls "$env:USERPROFILE\.argo\.env"
-```
+处理规则（env 文件不做 OS ACL / 权限加固；只保证不被提交）：
 
-处理规则：
-
-- `SECRET_FILE_ACL_UNSAFE`：收紧 Windows ACL，只保留当前用户、Administrators、SYSTEM。
 - `SECRET_FILE_REPARSE_PROHIBITED`：将 `.env` 替换为普通文件（去掉符号链接/重解析点）。
 - `SECRET_FILE_PATH_PROHIBITED`：修正 `ARGO_ENV_FILE` 与安装根 `.env` 不一致的路径。
-- git 跟踪/忽略类错误（`SECRET_FILE_TRACKED` / `SECRET_FILE_NOT_IGNORED`）只在 `.env` 位于 git 仓库内时出现；全局 `.env` 位于仓库外时天然不适用。
+- git 跟踪/忽略类错误（`SECRET_FILE_TRACKED` / `SECRET_FILE_NOT_IGNORED`）：把 `.env` 加入 `.gitignore` 并 `git rm --cached`；全局 `.env` 位于仓库外时天然不适用。
 
 修复后重跑 `initializeWorkspace`。
 
@@ -72,6 +69,7 @@ icacls "$env:USERPROFILE\.argo\.env"
 
 ### 1. Environment Status
 - overall status: ok / failed
+- **解析到的 schema：kind（default/workspace/override）+ language（名称）+ actorElementType + dir/guide**（默认 ArchiMate 3.2 还是仓内自定义 schema）
 - whether mcp health passed
 - whether neo4j health passed
 - whether .qea full projection passed

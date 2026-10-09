@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1000 560" role="img" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4d6bfe"/></marker><marker id="arm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#5b6472"/></marker><marker id="ars" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#0f9d58"/></marker><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08"/></filter></defs>
+<rect x="0" y="0" width="1000" height="560" fill="#f5f7fa"/>
+<text x="50" y="46" font-size="26" fill="#0f172a" text-anchor="start" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">MCP 调用与召回时序</text>
+<text x="50" y="74" font-size="14" fill="#5b6472" text-anchor="start" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Coding Agent 通过 ARGO MCP 读写意图图谱并召回记忆</text>
+<rect x="58" y="98" width="164" height="46" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<text x="140" y="127" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Coding Agent</text>
+<line x1="140" y1="148" x2="140" y2="522" stroke="#e6e8ee" stroke-width="1.5" stroke-dasharray="5 6"/>
+<rect x="238" y="98" width="164" height="46" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<text x="320" y="127" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">ARGO MCP</text>
+<line x1="320" y1="148" x2="320" y2="522" stroke="#e6e8ee" stroke-width="1.5" stroke-dasharray="5 6"/>
+<rect x="418" y="98" width="164" height="46" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<text x="500" y="127" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">意图图谱 JSON</text>
+<line x1="500" y1="148" x2="500" y2="522" stroke="#e6e8ee" stroke-width="1.5" stroke-dasharray="5 6"/>
+<rect x="598" y="98" width="164" height="46" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<text x="680" y="127" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">Neo4j 结构投影</text>
+<line x1="680" y1="148" x2="680" y2="522" stroke="#e6e8ee" stroke-width="1.5" stroke-dasharray="5 6"/>
+<rect x="778" y="98" width="164" height="46" rx="12" fill="#ffffff" stroke="#e6e8ee" stroke-width="1.5" filter="url(#sh)"/>
+<text x="860" y="127" font-size="14" fill="#0f172a" text-anchor="middle" font-weight="700" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">向量索引</text>
+<line x1="860" y1="148" x2="860" y2="522" stroke="#e6e8ee" stroke-width="1.5" stroke-dasharray="5 6"/>
+<line x1="146" y1="178" x2="312" y2="178" stroke="#4d6bfe" stroke-width="2" marker-end="url(#ar)"/>
+<text x="230" y="169" font-size="12.5" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">validateSystemArchitecture → 通过</text>
+<line x1="146" y1="214" x2="312" y2="214" stroke="#4d6bfe" stroke-width="2" marker-end="url(#ar)"/>
+<text x="230" y="205" font-size="12.5" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">queryNeo4jGraph {schema:true}</text>
+<line x1="674" y1="240" x2="328" y2="240" stroke="#5b6472" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#arm)"/>
+<text x="500" y="231" font-size="12.5" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">返回 schemaKind / actorElementType</text>
+<line x1="146" y1="280" x2="312" y2="280" stroke="#4d6bfe" stroke-width="2" marker-end="url(#ar)"/>
+<text x="230" y="271" font-size="11.5" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">addArchitectureElement / addArchitectureRelationship / addArchitectureView</text>
+<line x1="326" y1="306" x2="492" y2="306" stroke="#4d6bfe" stroke-width="2" marker-end="url(#ar)"/>
+<text x="410" y="297" font-size="12.5" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">写入</text>
+<line x1="494" y1="332" x2="328" y2="332" stroke="#5b6472" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#arm)"/>
+<text x="410" y="323" font-size="12.5" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">ok / 已写入</text>
+<line x1="146" y1="372" x2="312" y2="372" stroke="#4d6bfe" stroke-width="2" marker-end="url(#ar)"/>
+<text x="230" y="363" font-size="12.5" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">memory_search / getSystemArchitecture</text>
+<line x1="326" y1="398" x2="852" y2="398" stroke="#5b6472" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#arm)"/>
+<text x="590" y="389" font-size="12.5" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">语义召回</text>
+<line x1="854" y1="424" x2="328" y2="424" stroke="#5b6472" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#arm)"/>
+<text x="590" y="415" font-size="12.5" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">hits</text>
+<line x1="326" y1="450" x2="492" y2="450" stroke="#5b6472" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#arm)"/>
+<text x="410" y="441" font-size="12.5" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">getSystemArchitecture</text>
+<line x1="494" y1="476" x2="328" y2="476" stroke="#5b6472" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#arm)"/>
+<text x="410" y="467" font-size="12.5" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">命中（含 matchedSnippet）</text>
+<line x1="314" y1="502" x2="148" y2="502" stroke="#5b6472" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#arm)"/>
+<text x="230" y="493" font-size="12.5" fill="#5b6472" text-anchor="middle" font-weight="400" font-family="'Segoe UI','Microsoft YaHei',Roboto,'Helvetica Neue',Arial,sans-serif">返回 hits（matchedSnippet）</text>
+</svg>

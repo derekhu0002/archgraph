@@ -3,7 +3,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
-const { applyMutations } = require('../argo/scripts/systemarchitecture-mcp-server.js');
+const { applyMutations, TOOLS } = require('../argo/scripts/systemarchitecture-mcp-server.js');
 
 function baseDocument() {
   return {
@@ -235,4 +235,69 @@ test('updateElement: op:remove with a value removes only that exact ledger entry
     { name: 'commit', value: 'aaa' },
     { name: 'commit', value: 'ccc' },
   ]);
+});
+
+test('addElement: an omitted element.id is auto-allocated as a semantic slug (issue #8)', () => {
+  // GIVEN an addElement with no id
+  // WHEN applied
+  // THEN a unique id is allocated (slug of the name) and the element is created + placed
+  const document = applyMutations(baseDocument(), [
+    { type: 'addElement', element: { name: 'Graph Wiki Federation Center', type: 'Business Object' }, view_ids: ['top'] },
+  ]).document;
+  const created = document.elements.find(e => e.type === 'Business Object' && e.name === 'Graph Wiki Federation Center');
+  assert.ok(created, 'the element must be created');
+  assert.equal(created.id, 'graph-wiki-federation-center', 'auto id is a semantic slug of the name');
+  assert.ok(document.views.find(v => v.view_id === 'top').included_elements.includes(created.id));
+});
+
+test('addElement: an omitted id gets a -00N suffix when the slug is taken', () => {
+  const graph = baseDocument();
+  graph.elements.push({ id: 'duplicate-name', name: 'Duplicate Name', type: 'Business Object' });
+  const document = applyMutations(graph, [
+    { type: 'addElement', element: { name: 'Duplicate Name', type: 'Requirement' }, view_ids: ['top'] },
+  ]).document;
+  const created = document.elements.find(e => e.type === 'Requirement' && e.name === 'Duplicate Name');
+  assert.ok(created, 'a new element is created (different type → not a dedup match)');
+  assert.equal(created.id, 'duplicate-name-002', 'a taken slug gets -002');
+});
+
+test('addElement: an explicit id colliding with a DIFFERENT element fails loudly', () => {
+  assert.throws(
+    () => applyMutations(baseDocument(), [
+      { type: 'addElement', element: { id: 'a', name: 'Different', type: 'Business Object' }, view_ids: ['top'] },
+    ]),
+    /already used by a different element/i,
+  );
+});
+
+test('addElement: an explicit id matching the same (type,name) is idempotent reuse', () => {
+  const summary = applyMutations(baseDocument(), [
+    { type: 'addElement', element: { id: 'a', name: 'A', type: 'Application Component' }, view_ids: ['top'] },
+  ]).mutationSummaries.find(entry => entry.type === 'addElement');
+  assert.equal(summary.created, false);
+  assert.equal(summary.reused, true);
+});
+
+test('addRelationship: an omitted relationship.id is auto-allocated', () => {
+  const document = applyMutations(baseDocument(), [
+    { type: 'addRelationship', relationship: { type: 'Flow', source_id: 'a', target_id: 'b', name: 'A to B' }, view_ids: ['top'] },
+  ]).document;
+  const rel = document.relationships.find(r => r.name === 'A to B');
+  assert.ok(rel, 'the relationship must be created');
+  assert.equal(rel.id, 'a-to-b', 'auto id is the slug of the relationship name');
+});
+
+test('addView: an omitted view.view_id is auto-allocated', () => {
+  const document = applyMutations(baseDocument(), [
+    { type: 'addView', view: { view_name: 'New Sub View', parent_element_id: 'parent', included_elements: [], included_relationships: [] } },
+  ]).document;
+  assert.ok(document.views.find(v => v.view_id === 'new-sub-view'), 'auto view_id is the slug of the view name');
+});
+
+test('addArchitectureElement: the tool schema documents element.id as OPTIONAL + auto-allocated', () => {
+  const tool = TOOLS.find(entry => entry.name === 'addArchitectureElement');
+  assert.ok(tool, 'addArchitectureElement must be registered');
+  const elementSchema = tool.inputSchema.properties.element;
+  assert.ok(!(elementSchema.required || []).includes('id'), 'element.id must NOT be required');
+  assert.match(elementSchema.description + tool.description, /allocat|optional/i, 'must document auto-allocation');
 });

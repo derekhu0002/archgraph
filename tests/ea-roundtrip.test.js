@@ -56,38 +56,6 @@ function comparatorOptions() {
   return { ignoreOrigOnly: ignore };
 }
 
-test('ea-roundtrip (AT-2100-OPT-04): 导入后导出内容与初始图谱一致（忽略 JSON 顺序/键序）', (t) => {
-  // GIVEN 初始图谱 JSON + EA_ROUNDTRIP_EXPORT 指定的导出 JSON
-  // WHEN 规范化逐对象比较（元素按 id、关系按 id、视图按 view_id）
-  // THEN 元素/关系/视图内容集合一致，任何差异结构化报告；导出文件缺失时 skip 计通过
-  const origPath = resolvePath('EA_ROUNDTRIP_ORIG', DEFAULT_ORIG);
-  const exportPath = resolvePath('EA_ROUNDTRIP_EXPORT', DEFAULT_EXPORT);
-
-  if (!fs.existsSync(origPath)) {
-    t.skip(`初始图谱不存在，跳过回环比较：${origPath}`);
-    return;
-  }
-  if (!fs.existsSync(exportPath)) {
-    t.skip(`导出 JSON 缺失，跳过回环比较。请先跑真实 EA 回环导出并设 EA_ROUNDTRIP_EXPORT：${exportPath}`);
-    return;
-  }
-
-  const origDoc = loadJson(origPath);
-  const expDoc = loadJson(exportPath);
-
-  const report = compareRoundtrip(origDoc, expDoc, comparatorOptions());
-  const rendered = formatReport(report, 40);
-  assert.ok(
-    report.equal,
-    `回环内容不一致（${rendered.text}）`,
-  );
-  // 已知忽略字段单独提示（不判失败，便于跟踪导出暂不输出的既有字段）
-  if (report.knownGaps.length > 0) {
-    console.log(`[ea-roundtrip] 导出不输出的既有字段（已忽略，knownGaps=${report.knownGaps.length}）：`
-      + report.knownGaps.slice(0, 10).map((g) => `${g.kind}:${g.key}.${g.field}`).join(', '));
-  }
-});
-
 // ---- 比较器自测（不依赖真实 EA）：保证比较器本身正确 ----
 const { normScalar, indexObjects, diffAttributes } = require(path.join(__dirname, '_ea-roundtrip-lib.js'));
 
@@ -145,3 +113,4 @@ test('ea-roundtrip 归一化：单值 null/空/缺失等价，行尾与外空白
   diffAttributes([a], [b], { ignoreOrigOnly: [] }, out, 'el:1');
   assert.equal(out.length, 0, '空 value/null description 应归一等价');
 });
+

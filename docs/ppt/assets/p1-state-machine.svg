@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Coding 的价值，在一个「回合」里被创造">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#475569"/></marker>
+  <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2457e6"/></marker>
+  <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0f9d63"/></marker>
+  <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#b26a04"/></marker>
+  <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#dc2f52"/></marker>
+  <marker id="arrow-cyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0e86a5"/></marker>
+  <marker id="arrow-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6d38d6"/></marker>
+</defs>
+<rect width="1280" height="720" fill="#ffffff"/>
+<rect x="0" y="0" width="1280" height="5" fill="#eaf1ff"/><rect x="0" y="0" width="220" height="5" fill="#2457e6"/>
+<text x="48" y="40" font-family="Consolas, 'Cascadia Code', ui-monospace, monospace" font-size="10.5" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">01 · 业务全景</text>
+<text x="48" y="78" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="26" font-weight="800" fill="#0f172a" text-anchor="start" opacity="1">Coding 的价值，在一个「回合」里被创造</text>
+<text x="48" y="106" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">主体＝一次 Agent 会话；主回路每转一圈，产出一份可验收的增量</text>
+<line x1="48" y1="122" x2="1232" y2="122" stroke="#eef2f7" stroke-width="1"/>
+<text x="916" y="150" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">关键状态 / 分区</text>
+<line x1="1012.15" y1="146" x2="1232" y2="146" stroke="#eef2f7" stroke-width="1"/>
+<circle cx="932" cy="180" r="11" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="932" y="184.32" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">1</text>
+<text x="954" y="177" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">Idle</text>
+<text x="954" y="193" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">空闲 / 待命</text>
+<rect x="916" y="206" width="316" height="38" rx="6" fill="#f8fafc"/>
+<circle cx="932" cy="222" r="11" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="932" y="226.32" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">2</text>
+<text x="954" y="219" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">Running</text>
+<text x="954" y="235" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">执行回合（含 6 子态）</text>
+<circle cx="932" cy="264" r="11" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="932" y="268.32" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">3</text>
+<text x="954" y="261" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">Reasoning</text>
+<text x="954" y="277" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">规划 → 计划正确率</text>
+<rect x="916" y="290" width="316" height="38" rx="6" fill="#f8fafc"/>
+<circle cx="932" cy="306" r="11" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="932" y="310.32" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">4</text>
+<text x="954" y="303" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">Retrieving</text>
+<text x="954" y="319" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">检索 → 召回率</text>
+<circle cx="932" cy="348" r="11" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="932" y="352.32" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">5</text>
+<text x="954" y="345" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">Acting</text>
+<text x="954" y="361" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">工具 / 写图</text>
+<rect x="916" y="374" width="316" height="38" rx="6" fill="#f8fafc"/>
+<circle cx="932" cy="390" r="11" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="932" y="394.32" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">6</text>
+<text x="954" y="387" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">Verifying</text>
+<text x="954" y="403" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">验收 → 通过率</text>
+<circle cx="932" cy="432" r="11" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="932" y="436.32" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">7</text>
+<text x="954" y="429" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">Finalizing</text>
+<text x="954" y="445" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">提交 / 沉淀</text>
+<rect x="916" y="458" width="316" height="38" rx="6" fill="#f8fafc"/>
+<circle cx="932" cy="474" r="11" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="932" y="478.32" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">8</text>
+<text x="954" y="471" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">AwaitingUser</text>
+<text x="954" y="487" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">等待用户（在环）</text>
+<circle cx="932" cy="516" r="11" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="932" y="520.32" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">9</text>
+<text x="954" y="513" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">后台正交区</text>
+<text x="954" y="529" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">异步，不阻塞回合</text>
+<rect x="916" y="542" width="316" height="38" rx="6" fill="#f8fafc"/>
+<circle cx="932" cy="558" r="11" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="932" y="562.32" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">10</text>
+<text x="954" y="555" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">Stopped</text>
+<text x="954" y="571" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">终态 · 成功观测点</text>
+<text x="48" y="150" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">一次 Agent 会话的状态机</text>
+<line x1="190.35" y1="146" x2="896" y2="146" stroke="#eef2f7" stroke-width="1"/>
+<rect x="110" y="152" width="610" height="244" rx="12" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.5"/>
+<text x="126" y="174" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">Running · 执行回合（复合态）</text>
+<rect x="126" y="198" width="182" height="56" rx="8" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.3"/>
+<circle cx="141" cy="213" r="9.5" fill="#2457e6" stroke="#ffffff" stroke-width="2"/><text x="141" y="216.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">3</text>
+<text x="156" y="217" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">Reasoning</text>
+<text x="138" y="238" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">规划</text>
+<rect x="324" y="198" width="182" height="56" rx="8" fill="#e6f9fd" stroke="#0e86a5" stroke-width="1.3"/>
+<circle cx="339" cy="213" r="9.5" fill="#0e86a5" stroke="#ffffff" stroke-width="2"/><text x="339" y="216.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">4</text>
+<text x="354" y="217" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#0e86a5" text-anchor="start" opacity="1">Retrieving</text>
+<text x="336" y="238" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">检索</text>
+<rect x="522" y="198" width="182" height="56" rx="8" fill="#f2eeff" stroke="#6d38d6" stroke-width="1.3"/>
+<circle cx="537" cy="213" r="9.5" fill="#6d38d6" stroke="#ffffff" stroke-width="2"/><text x="537" y="216.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">5</text>
+<text x="552" y="217" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#6d38d6" text-anchor="start" opacity="1">Acting</text>
+<text x="534" y="238" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">工具 / 写图</text>
+<rect x="126" y="278" width="182" height="56" rx="8" fill="#fff6e6" stroke="#b26a04" stroke-width="1.3"/>
+<circle cx="141" cy="293" r="9.5" fill="#b26a04" stroke="#ffffff" stroke-width="2"/><text x="141" y="296.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">8</text>
+<text x="156" y="297" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#b26a04" text-anchor="start" opacity="1">AwaitingResult</text>
+<text x="138" y="318" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">等工具结果</text>
+<rect x="324" y="278" width="182" height="56" rx="8" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.3"/>
+<circle cx="339" cy="293" r="9.5" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="339" y="296.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">6</text>
+<text x="354" y="297" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">Verifying</text>
+<text x="336" y="318" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">验收</text>
+<rect x="522" y="278" width="182" height="56" rx="8" fill="#e8faf1" stroke="#0f9d63" stroke-width="1.3"/>
+<circle cx="537" cy="293" r="9.5" fill="#0f9d63" stroke="#ffffff" stroke-width="2"/><text x="537" y="296.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">7</text>
+<text x="552" y="297" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#0f9d63" text-anchor="start" opacity="1">Finalizing</text>
+<text x="534" y="318" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">提交 / 沉淀</text>
+<line x1="308" y1="226" x2="324" y2="226" stroke="#2457e6" stroke-width="1.4" marker-end="url(#arrow-blue)"/>
+<line x1="506" y1="226" x2="522" y2="226" stroke="#0e86a5" stroke-width="1.4" marker-end="url(#arrow-cyan)"/>
+<path d="M552 254 L552 268 L166 268 L166 276" fill="none" stroke="#6d38d6" stroke-width="1.4" marker-end="url(#arrow-violet)"/>
+<line x1="138" y1="278" x2="138" y2="256" stroke="#b26a04" stroke-width="1.4" marker-end="url(#arrow-amber)"/>
+<text x="132" y="272" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#b26a04" text-anchor="start" opacity="1">工具结果</text>
+<line x1="506" y1="306" x2="522" y2="306" stroke="#0f9d63" stroke-width="1.4" marker-end="url(#arrow-green)"/>
+<path d="M364 334 L364 350 L562 350 L562 336" fill="none" stroke="#dc2f52" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arrow-rose)"/>
+<text x="370" y="364" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#dc2f52" text-anchor="start" opacity="1">验收失败 → 回流执行</text>
+<rect x="96" y="476" width="150" height="54" rx="9" fill="#f7f9fc" stroke="#5b6b82" stroke-width="1.3"/>
+<circle cx="112" cy="503" r="9.5" fill="#5b6b82" stroke="#ffffff" stroke-width="2"/><text x="112" y="506.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">1</text>
+<text x="128" y="500" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">Idle</text>
+<text x="128" y="516" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">空闲 / 待命</text>
+<rect x="420" y="476" width="190" height="54" rx="9" fill="#ffeef1" stroke="#dc2f52" stroke-width="1.3"/>
+<circle cx="436" cy="503" r="9.5" fill="#dc2f52" stroke="#ffffff" stroke-width="2"/><text x="436" y="506.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">8</text>
+<text x="452" y="500" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#dc2f52" text-anchor="start" opacity="1">AwaitingUser</text>
+<text x="452" y="516" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">等待用户（在环）</text>
+<rect x="716" y="476" width="140" height="54" rx="9" fill="#f7f9fc" stroke="#5b6b82" stroke-width="1.3"/>
+<circle cx="732" cy="503" r="9.5" fill="#5b6b82" stroke="#ffffff" stroke-width="2"/><text x="732" y="506.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">10</text>
+<text x="748" y="500" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">Stopped</text>
+<text x="748" y="516" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">终态 · 观测点</text>
+<line x1="171" y1="476" x2="150" y2="398" stroke="#2457e6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+<text x="178" y="466" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#2457e6" text-anchor="start" opacity="1">user_message</text>
+<line x1="310" y1="396" x2="310" y2="474" stroke="#5b6b82" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="316" y="412" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#475569" text-anchor="start" opacity="1">turn_done</text>
+<line x1="580" y1="396" x2="480" y2="474" stroke="#dc2f52" stroke-width="1.4" marker-end="url(#arrow-rose)"/>
+<text x="490" y="412" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#dc2f52" text-anchor="start" opacity="1">need_clarification</text>
+<line x1="460" y1="476" x2="460" y2="426" stroke="#dc2f52" stroke-width="1.4" marker-end="url(#arrow-rose)"/>
+<text x="466" y="466" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#dc2f52" text-anchor="start" opacity="1">user_reply</text>
+<line x1="610" y1="503" x2="716" y2="503" stroke="#5b6b82" stroke-width="1.4" marker-end="url(#arrow)"/>
+<text x="710" y="496" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#475569" text-anchor="end" opacity="1">stop（任意状态）→</text>
+<rect x="110" y="540" width="690" height="52" rx="10" fill="#fff6e6" stroke="#b26a04" stroke-width="1.3" stroke-dasharray="5 4"/>
+<text x="124" y="558" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" fill="#b26a04" text-anchor="start" opacity="1">后台任务（正交区域）</text>
+<circle cx="690" cy="552" r="9.5" fill="#b26a04" stroke="#ffffff" stroke-width="2"/><text x="690" y="555.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="1">9</text>
+<rect x="250" y="562" width="116" height="24" rx="6" fill="#fff6e6" stroke="#b26a04" stroke-width="1.1"/>
+<text x="308" y="578" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="600" fill="#0f172a" text-anchor="middle" opacity="1">Submitted</text>
+<line x1="366" y1="574" x2="380" y2="574" stroke="#b26a04" stroke-width="1.2" marker-end="url(#arrow-amber)"/>
+<rect x="380" y="562" width="116" height="24" rx="6" fill="#fff6e6" stroke="#b26a04" stroke-width="1.1"/>
+<text x="438" y="578" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="600" fill="#0f172a" text-anchor="middle" opacity="1">Running</text>
+<line x1="496" y1="574" x2="510" y2="574" stroke="#b26a04" stroke-width="1.2" marker-end="url(#arrow-amber)"/>
+<rect x="510" y="562" width="116" height="24" rx="6" fill="#fff6e6" stroke="#b26a04" stroke-width="1.1"/>
+<text x="568" y="578" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="600" fill="#0f172a" text-anchor="middle" opacity="1">Done</text>
+<line x1="626" y1="574" x2="640" y2="574" stroke="#b26a04" stroke-width="1.2" marker-end="url(#arrow-amber)"/>
+<rect x="640" y="562" width="116" height="24" rx="6" fill="#fff6e6" stroke="#b26a04" stroke-width="1.1"/>
+<text x="698" y="578" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="600" fill="#0f172a" text-anchor="middle" opacity="1">Failed</text>
+<path d="M568 540 L568 404" fill="none" stroke="#b26a04" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#arrow-amber)"/>
+<text x="574" y="420" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#b26a04" text-anchor="start" opacity="1">background_task_done（唤醒）</text>
+<rect x="48" y="608" width="1184" height="52" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.2"/>
+<rect x="48" y="608" width="5" height="52" rx="2" fill="#2457e6"/>
+<rect x="64" y="624" width="38.0" height="20" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1"/><text x="83" y="637.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#2457e6" text-anchor="middle" opacity="1">结论</text>
+<text x="112" y="629" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start" opacity="1">失败回流、人工在环、后台异步都被显式建模 —— 业务价值不在「模型」，而在可验收的循环。</text>
+<line x1="48" y1="682" x2="1232" y2="682" stroke="#eef2f7" stroke-width="1"/>
+<text x="48" y="698" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#64748b" text-anchor="start" opacity="1">依据：视图 uml2-coding-statemachine-view-002  ·  uml2-coding-running-view-002  ·  uml2-coding-background-view-002</text>
+<text x="1232" y="698" font-family="Consolas, 'Cascadia Code', ui-monospace, monospace" font-size="8.5" font-weight="400" fill="#94a3b8" text-anchor="end" opacity="1">ArchGraph · 01 · 业务全景</text>
+</svg>

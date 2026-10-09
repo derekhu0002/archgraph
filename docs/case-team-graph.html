@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>使用案例 · 自定义业务域本体并建图 · ArchGraph</title>
+  <meta name="description" content="ArchGraph 使用案例：以 Team Graph 为例，定义业务域本体（Agent Node / Team Node / Service Node），并一步步建元素、建关系、建视图、校验与语义召回。" />
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a class="brand" href="../index.html"><code>ArchGraph</code></a>
+    <div class="links">
+      <a href="getting-started.html">使用介绍</a>
+      <a href="case-team-graph.html" aria-current="page">使用案例</a>
+      <a href="capabilities.html">能力总览</a>
+      <a href="../index.html">主页</a>
+      <a class="gh-btn" href="https://github.com/derekhu0002/archgraph" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+
+  <main>
+    <p class="eyebrow">使用案例 · 自定义业务域本体</p>
+    <h1>用团队协作本体（Team Graph）建一张图</h1>
+    <p class="lead">
+      本页用一个<strong>真实可运行的例子</strong>演示 ArchGraph 最核心的一条路径：
+      <strong>定义你自己的业务本体 → 建元素 → 建关系 → 建视图 → 校验并做语义召回</strong>。
+      所有内容都对应仓库里的
+      <a href="https://github.com/derekhu0002/archgraph/tree/main/custom-schema" target="_blank" rel="noopener">custom-schema/</a>
+      示例，你可以直接照抄。
+    </p>
+    <p class="lead">
+      业务域：一个「团队 + 服务」的小场景。我们关心三件事 —— 谁在哪个团队、团队依赖哪些服务、服务之间谁依赖谁。
+      围绕这个业务，我们定义自己的元素和关系类型，而不是套用通用的 ArchiMate 词表。
+    </p>
+    <div class="toc">
+      <a href="#ontology">1 · 定义业务域与本体</a>
+      <a href="#elements">2 · 建元素</a>
+      <a href="#relationships">3 · 建关系</a>
+      <a href="#views">4 · 建视图</a>
+      <a href="#validate">5 · 校验与语义检索</a>
+    </div>
+
+    <section id="ontology">
+      <span class="step-badge">STEP 1 · 定义业务域与本体</span>
+      <h2>写下你的建模语言（本体包 / schema bundle）</h2>
+      <p class="lead">
+        在项目根目录放一个 <code>.argo/schema/</code>，ARGO 就会<strong>只对这个项目</strong>使用你的本体；
+        其它项目仍用默认的 ArchiMate 3.2。这个目录就是一个<strong>本体包（schema bundle）</strong>。
+      </p>
+
+      <h3>哪些文件必需、哪些可选</h3>
+      <table>
+        <thead>
+          <tr><th>文件</th><th>是否必需</th><th>作用</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>.argo/schema/SystemArchitecture.schema.json</code></td>
+            <td>独立本体包必需</td>
+            <td>图谱的 JSON Schema：结构 + 元素/关系类型枚举。若本体包用 <code>"extends": "default"</code> 继承内置默认，则本文件可省略（自动继承基座 schema）。</td>
+          </tr>
+          <tr>
+            <td><code>.argo/schema/schema-bundle.config.json</code></td>
+            <td>独立本体包<strong>必需</strong>；<code>extends</code> 时唯一必需</td>
+            <td>打包描述：语言名、<code>actorElementType</code>、不变量、<code>rules</code> 指针等。独立本体包<strong>必须</strong>在这里把 <code>actorElementType</code> 设为你的某个元素类型（或显式 <code>null</code> 表示无 actor），否则加载/校验 <strong>fail-closed</strong>；声明 <code>extends</code> 时，<strong>只放这一个 config 就够</strong>。</td>
+          </tr>
+          <tr>
+            <td><code>.argo/schema/schema-bundle.rules.json</code></td>
+            <td>可选</td>
+            <td>类型元数据 + 关系端点合法性矩阵。省略时端点校验变为<strong>宽松</strong>（任意已知类型可互连）。</td>
+          </tr>
+          <tr>
+            <td><code>.argo/schema/GUIDE.md</code></td>
+            <td>可选</td>
+            <td>给人看的指南与推荐视点。</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>两条起步路线：继承默认 vs. 完全自定义</h3>
+      <table>
+        <thead>
+          <tr><th>起步方式</th><th>你要写的东西</th><th>适用场景</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>extends: "default"</code> + config</td>
+            <td>只加 <code>.argo/schema/schema-bundle.config.json</code>，用 <code>addElementTypes</code> / <code>addRelationships</code>（可选 <code>overrideMatrix</code>）在默认之上追加自己的类型；<strong>无需</strong>自带 schema 文件。</td>
+            <td>大部分类型沿用 ArchiMate 3.2 + ARGO 扩展，只想加几个业务域类型。</td>
+          </tr>
+          <tr>
+            <td>独立全量 schema</td>
+            <td>放完整的 <code>.argo/schema/SystemArchitecture.schema.json</code>，编辑它的两个 <code>$defs</code> 枚举数组；同时<strong>必须</strong>用 <code>schema-bundle.config.json</code> 声明 <code>actorElementType</code>（取你的某个元素类型，或显式 <code>null</code>），否则加载/校验 fail-closed。<code>schema-bundle.rules.json</code> 可选（省略则端点校验宽松）。</td>
+            <td>完全自定义词表，不需要 ArchiMate 类型。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="lead">
+        <strong>要建模一个不是 Team Graph 的领域，就改下面这两个 <code>$defs</code> 枚举数组里的字符串</strong>：
+        本案例的 <code>SystemArchitecture.schema.json</code> 与内置默认相比，<strong>唯一的结构性差异</strong>就是
+        <code>$defs</code> 里的两个 <code>enum</code> 数组（<code>title</code> / <code>description</code> 只是文案，属于非结构差异）。
+        把 <code>Agent Node / Team Node / Service Node</code> 换成你的元素类型、把
+        <code>Depends On / Assigned To</code> 换成你的关系类型即可；数组里每个名字都会成为可用的类型。
+        类型枚举默认从这两把键读取（也可在 config 里用
+        <code>elementTypeEnumPath</code> / <code>relationshipTypeEnumPath</code> 指定别的键）：
+      </p>
+      <pre><code>"$defs": {
+  "archimateElementType": {
+    "type": "string",
+    "enum": ["Agent Node", "Team Node", "Service Node"]
+  },
+  "archimateRelationshipType": {
+    "type": "string",
+    "enum": ["Depends On", "Assigned To"]
+  }
+}</code></pre>
+      <p class="lead">
+        即：<code>archimateElementType.enum</code> 换成你的元素类型列表，
+        <code>archimateRelationshipType.enum</code> 换成你的关系类型列表。
+      </p>
+      <div class="note">
+        <strong>关系类型还要给出合法端点。</strong> 新增/改名关系类型后，要么在
+        <code>schema-bundle.rules.json</code> 的 <code>relationshipTargetMatrix</code> 里声明「谁能连谁」，
+        要么把 <code>schema-bundle.config.json</code> 的 <code>invariants.endpointMatrix</code> 设为 <code>false</code>
+        走宽松校验。元素类型则必须让 <code>actorElementType</code> 落在枚举里（或显式设为 <code>null</code>）。
+      </div>
+
+      <h3>步骤 1a：把本体包拷进你的项目</h3>
+      <pre><code># 只拷 schema 本体包，不要连 .argo/temp/ 这类运行时临时文件一起拷（Windows 用 Copy-Item -Recurse）
+mkdir -p &lt;your-repo&gt;/.argo
+cp -r custom-schema/.argo/schema &lt;your-repo&gt;/.argo/schema</code></pre>
+
+      <h3>步骤 1b：自己创建图谱文件（自定义本体下必需）</h3>
+      <div class="note">
+        <strong>关键约束（fail-closed）：</strong> 自定义本体时 <code>argo init</code> <strong>不会</strong>自动生成初始图谱 ——
+        因为打包的默认图不匹配你的本体。你必须<strong>先自己创建</strong> <code>design/KG/SystemArchitecture.json</code>，
+        否则初始化会明确失败（<code>NO_DEFAULT_GRAPH</code>）。这一步必须在<strong>任何 MCP 写入之前</strong>完成，也是<strong>唯一</strong>被允许手写图谱文件的一步；图谱建立后，后续修改一律走 MCP（见步骤 2）。
+      </div>
+      <p class="lead">
+        直接照抄示例内容（与
+        <a href="https://github.com/derekhu0002/archgraph/blob/main/custom-schema/design/KG/SystemArchitecture.json" target="_blank" rel="noopener">custom-schema/design/KG/SystemArchitecture.json</a>
+        一致）：
+      </p>
+      <pre><code>{
+  "name": "Team Graph",
+  "description": "Example graph validated against the custom-schema bundle (Team Graph ontology).",
+  "elements": [
+    {
+      "id": "agent-001",
+      "name": "Agent 001",
+      "type": "Agent Node",
+      "description": "An agent (business actor) assigned to a team."
+    },
+    {
+      "id": "team-a",
+      "name": "Team A",
+      "type": "Team Node",
+      "description": "A team of agents."
+    },
+    {
+      "id": "svc-a",
+      "name": "Service A",
+      "type": "Service Node",
+      "description": "A service Team A depends on."
+    },
+    {
+      "id": "svc-b",
+      "name": "Service B",
+      "type": "Service Node",
+      "description": "An upstream service Service A depends on."
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-1",
+      "name": "Agent 001 assigned to Team A",
+      "type": "Assigned To",
+      "source_id": "agent-001",
+      "target_id": "team-a",
+      "source_name": "Agent 001",
+      "target_name": "Team A",
+      "statement": "Agent 001 --(Assigned To)--&gt; Team A"
+    },
+    {
+      "id": "rel-2",
+      "name": "Team A depends on Service A",
+      "type": "Depends On",
+      "source_id": "team-a",
+      "target_id": "svc-a",
+      "source_name": "Team A",
+      "target_name": "Service A",
+      "statement": "Team A --(Depends On)--&gt; Service A"
+    },
+    {
+      "id": "rel-3",
+      "name": "Service A depends on Service B",
+      "type": "Depends On",
+      "source_id": "svc-a",
+      "target_id": "svc-b",
+      "source_name": "Service A",
+      "target_name": "Service B",
+      "statement": "Service A --(Depends On)--&gt; Service B"
+    }
+  ],
+  "views": [
+    {
+      "view_id": "view-root",
+      "view_name": "SystemArchitecture",
+      "description": "Root view holding the example team graph.",
+      "included_elements": ["agent-001", "team-a", "svc-a", "svc-b"],
+      "included_relationships": ["rel-1", "rel-2", "rel-3"]
+    }
+  ]
+}</code></pre>
+      <p class="lead">
+        写好后就可以让 agent 执行 <code>argo init</code>（<code>initializeWorkspace</code>）：它会用你的本体校验这张图、
+        做第一次 JSON → Neo4j 同步、初始化语义生命周期。之后所有写入都通过 MCP（<code>applySystemArchitectureMutation</code> 等）。
+      </p>
+
+      <h3>本体定义（本案例）</h3>
+      <p class="lead">元素类型三种、关系类型两种，以及「谁能连谁」的端点矩阵：</p>
+      <table>
+        <thead>
+          <tr><th>种类</th><th>名称</th><th>说明 / 合法端点</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>元素类型</td><td><code>Agent Node</code></td><td>一个 agent（业务执行者）。<strong>actorElementType = Agent Node</strong>，唤醒门禁用它识别「我是谁」。</td></tr>
+          <tr><td>元素类型</td><td><code>Team Node</code></td><td>一个由 agent 组成的团队。</td></tr>
+          <tr><td>元素类型</td><td><code>Service Node</code></td><td>团队所依赖的能力 / 服务。</td></tr>
+          <tr><td>关系类型</td><td><code>Assigned To</code></td><td>合法端点：<code>Agent Node → Team Node</code>；<code>Team Node → Agent Node</code>。</td></tr>
+          <tr><td>关系类型</td><td><code>Depends On</code></td><td>合法端点：<code>Team Node → {Service Node, Team Node}</code>；<code>Service Node → Service Node</code>；<code>Agent Node → {Team Node, Service Node}</code>。</td></tr>
+        </tbody>
+      </table>
+      <p class="lead">
+        另外两个不变量：根视图必须叫 <code>SystemArchitecture</code>；每个视图最多容纳 <strong>12 个元素</strong>
+        （<code>maxElementsPerView: 12</code>）。
+      </p>
+
+      <h3>schema-bundle.config.json</h3>
+      <pre><code>{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Team Graph schema bundle descriptor",
+  "language": "Team Graph",
+  "actorElementType": "Agent Node",
+  "guide": "GUIDE.md",
+  "rules": "schema-bundle.rules.json",
+  "deliveryDependencies": {
+    "sourceDependsOnTarget": ["Depends On", "Assigned To"],
+    "targetDependsOnSource": []
+  },
+  "invariants": {
+    "statementGrammar": true,
+    "endpointMatrix": true,
+    "rootViewName": "SystemArchitecture",
+    "maxElementsPerView": 12
+  }
+}</code></pre>
+
+      <h3>schema-bundle.rules.json（端点矩阵）</h3>
+      <pre><code>{
+  "elementTypeMetadata": {
+    "Agent Node":   { "layer": "Organization", "aspect": "Active Structure" },
+    "Team Node":    { "layer": "Organization", "aspect": "Active Structure" },
+    "Service Node": { "layer": "Organization", "aspect": "Behavior" }
+  },
+  "relationshipCategoryByType": {
+    "Depends On": "Dependency",
+    "Assigned To": "Assignment"
+  },
+  "relationshipTargetMatrix": {
+    "Depends On": {
+      "Team Node":    ["Service Node", "Team Node"],
+      "Service Node": ["Service Node"],
+      "Agent Node":   ["Team Node", "Service Node"]
+    },
+    "Assigned To": {
+      "Agent Node": ["Team Node"],
+      "Team Node":  ["Agent Node"]
+    }
+  }
+}</code></pre>
+
+      <figure class="diagram">
+        <img src="diagrams/team-graph-ontology.svg"
+             alt="Team Graph 本体/类型图：三种元素类型 Agent Node、Team Node、Service Node 与两种关系类型 Assigned To、Depends On，并标注 actorElementType = Agent Node 和端点合法性矩阵" />
+        <figcaption>
+          <strong>图 1 · 本体 / 类型图</strong> —— 左侧是三个元素类型（<code>Agent Node</code> 标为 actor、<code>Team Node</code>、<code>Service Node</code>）；
+          右侧是两种关系类型（<code>Assigned To</code>、<code>Depends On</code>），箭头即合法端点；角落标注 <code>maxElementsPerView=12</code>。
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="elements">
+      <span class="step-badge">STEP 2 · 建元素</span>
+      <h2>视图、元素、关系一次提交</h2>
+      <p class="lead">
+        <strong>图谱建立之后</strong>，所有写入都通过 MCP，<strong>不要手改 JSON 文件</strong>（步骤 1b 的初始 bootstrap 是唯一例外）。让 agent 调用
+        <code>applySystemArchitectureMutation</code>，传入<strong>下面这个真正可运行的批次</strong>（它不是 shell 命令）：
+        把<strong>根视图、4 个元素、3 条关系放进同一次调用</strong>，
+        由服务端按依赖关系做拓扑排序、原子写入。注意 <code>mutations</code> 的<strong>第一项是 <code>addView</code></strong>：
+        先把根视图 <code>view-root</code> 建出来，后面的元素再用 <code>view_ids: ["view-root"]</code> 挂进去 ——
+        <strong>绝不出现「元素引用了还不存在的视图」</strong>。
+      </p>
+      <pre><code>{
+  "mutations": [
+    {
+      "type": "addView",
+      "view": {
+        "view_id": "view-root",
+        "view_name": "SystemArchitecture",
+        "description": "Root view holding the example team graph."
+      }
+    },
+    {
+      "type": "addElement",
+      "element": {
+        "id": "agent-001",
+        "name": "Agent 001",
+        "type": "Agent Node",
+        "description": "An agent (business actor) assigned to a team."
+      },
+      "view_ids": ["view-root"]
+    },
+    {
+      "type": "addElement",
+      "element": {
+        "id": "team-a",
+        "name": "Team A",
+        "type": "Team Node",
+        "description": "A team of agents."
+      },
+      "view_ids": ["view-root"]
+    },
+    {
+      "type": "addElement",
+      "element": {
+        "id": "svc-a",
+        "name": "Service A",
+        "type": "Service Node",
+        "description": "A service Team A depends on."
+      },
+      "view_ids": ["view-root"]
+    },
+    {
+      "type": "addElement",
+      "element": {
+        "id": "svc-b",
+        "name": "Service B",
+        "type": "Service Node",
+        "description": "An upstream service Service A depends on."
+      },
+      "view_ids": ["view-root"]
+    },
+    {
+      "type": "addRelationship",
+      "relationship": {
+        "id": "rel-1",
+        "name": "Agent 001 assigned to Team A",
+        "type": "Assigned To",
+        "source_id": "agent-001",
+        "target_id": "team-a",
+        "source_name": "Agent 001",
+        "target_name": "Team A",
+        "statement": "Agent 001 --(Assigned To)--&gt; Team A"
+      },
+      "view_ids": ["view-root"]
+    },
+    {
+      "type": "addRelationship",
+      "relationship": {
+        "id": "rel-2",
+        "name": "Team A depends on Service A",
+        "type": "Depends On",
+        "source_id": "team-a",
+        "target_id": "svc-a",
+        "source_name": "Team A",
+        "target_name": "Service A",
+        "statement": "Team A --(Depends On)--&gt; Service A"
+      },
+      "view_ids": ["view-root"]
+    },
+    {
+      "type": "addRelationship",
+      "relationship": {
+        "id": "rel-3",
+        "name": "Service A depends on Service B",
+        "type": "Depends On",
+        "source_id": "svc-a",
+        "target_id": "svc-b",
+        "source_name": "Service A",
+        "target_name": "Service B",
+        "statement": "Service A --(Depends On)--&gt; Service B"
+      },
+      "view_ids": ["view-root"]
+    }
+  ]
+}</code></pre>
+      <div class="note">
+        <strong>为什么能一次提交？</strong> <code>applySystemArchitectureMutation</code> / <code>previewSystemArchitectureMutation</code>
+        会在批次内建依赖图并按<strong>拓扑顺序</strong>应用，所以一个 mutation 可以引用同批次里稍后才创建的对象
+        （<code>addElement</code> 加入同批次的视图、<code>addRelationship</code> 的端点同时新增、<code>addView</code> 由同批次元素做父级）。
+        真正的环会被拒绝并给出 id 链；preview 与 apply 走同一条路径，最终整份文档仍会被整体校验。
+      </div>
+      <p class="lead">
+        四个元素分别是：<code>Agent 001</code>（Agent Node）、<code>Team A</code>（Team Node）、
+        <code>Service A</code> 与 <code>Service B</code>（Service Node）。每个元素都必须至少属于一个视图，因此都带 <code>view_ids</code>。
+      </p>
+
+      <figure class="diagram">
+        <img src="diagrams/team-graph-elements-relations.svg"
+             alt="Team Graph 元素与关系图：Agent 001 通过 Assigned To 指向 Team A，Team A 通过 Depends On 指向 Service A，Service A 通过 Depends On 指向 Service B" />
+        <figcaption>
+          <strong>图 2 · 元素与关系图</strong> —— 四个节点（<code>Agent 001</code>、<code>Team A</code>、<code>Service A</code>、<code>Service B</code>）
+          与三条有向边：<code>Agent 001 --(Assigned To)--&gt; Team A</code>、
+          <code>Team A --(Depends On)--&gt; Service A</code>、<code>Service A --(Depends On)--&gt; Service B</code>。
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="relationships">
+      <span class="step-badge">STEP 3 · 建关系</span>
+      <h2>三条关系（上面同一批次里的片段）</h2>
+      <p class="lead">
+        关系也走同样的方式：让 agent 调用 <code>applySystemArchitectureMutation</code>（或单独调用
+        <code>addArchitectureRelationship</code>）。每条关系的 <code>statement</code> 必须符合
+        <code>&lt;source&gt; --(&lt;type&gt;)--&gt; &lt;target&gt;</code> 语法，且端点要落在端点矩阵允许的范围里。
+        下面是上面那个批次里三条关系的片段（是调用参数，不是 shell）：
+      </p>
+      <pre><code>// 关系 1：Agent 001 --(Assigned To)--&gt; Team A
+{
+  "type": "addRelationship",
+  "relationship": {
+    "id": "rel-1",
+    "name": "Agent 001 assigned to Team A",
+    "type": "Assigned To",
+    "source_id": "agent-001",
+    "target_id": "team-a",
+    "source_name": "Agent 001",
+    "target_name": "Team A",
+    "statement": "Agent 001 --(Assigned To)--&gt; Team A"
+  },
+  "view_ids": ["view-root"]
+}</code></pre>
+      <pre><code>// 关系 2：Team A --(Depends On)--&gt; Service A
+{ "type": "addRelationship",
+  "relationship": { "id": "rel-2", "name": "Team A depends on Service A",
+  "type": "Depends On", "source_id": "team-a", "target_id": "svc-a",
+  "source_name": "Team A", "target_name": "Service A",
+  "statement": "Team A --(Depends On)--&gt; Service A" }, "view_ids": ["view-root"] }
+
+// 关系 3：Service A --(Depends On)--&gt; Service B
+{ "type": "addRelationship",
+  "relationship": { "id": "rel-3", "name": "Service A depends on Service B",
+  "type": "Depends On", "source_id": "svc-a", "target_id": "svc-b",
+  "source_name": "Service A", "target_name": "Service B",
+  "statement": "Service A --(Depends On)--&gt; Service B" }, "view_ids": ["view-root"] }</code></pre>
+      <p class="lead">
+        图 2 已经画出了这三条关系。注意：如果端点不合法（比如让 <code>Service B</code> 去 <code>Assigned To</code>
+        <code>Agent 001</code>），写入会被端点矩阵拒绝 —— 这正是自定义本体的价值。
+      </p>
+    </section>
+
+    <section id="views">
+      <span class="step-badge">STEP 4 · 建视图</span>
+      <h2>根视图与成员纳入</h2>
+      <p class="lead">
+        根视图在批次的第一项就已创建（<code>view-root</code> / <code>SystemArchitecture</code>）。
+        批次里的每个元素和关系都通过自己的 <code>view_ids</code> 纳入其中；等价地，你也可以让 agent 单独调用
+        <code>addArchitectureView</code>，在创建视图时直接写出
+        <code>included_elements</code> 与 <code>included_relationships</code>：
+      </p>
+      <pre><code>{
+  "type": "addView",
+  "view": {
+    "view_id": "view-root",
+    "view_name": "SystemArchitecture",
+    "description": "Root view holding the example team graph.",
+    "included_elements": ["agent-001", "team-a", "svc-a", "svc-b"],
+    "included_relationships": ["rel-1", "rel-2", "rel-3"]
+  }
+}</code></pre>
+      <div class="note">
+        <strong>视图是一等公民，不是可选装饰。</strong> 元素和关系都必须挂在某个视图里；一个元素可以出现在多个视图中，
+        但同一个视图中不会重复出现（单次成员关系，与 Enterprise Architect 一致）。子视图通过元素的
+        <code>subdiagram_views</code> 挂到父元素上，用于表达「一个团队自己的视图」这类层次。
+        自定义本体的根视图名必须与 <code>rootViewName</code>（这里是 <code>SystemArchitecture</code>）一致；
+        一个视图最多 12 个元素，本例共 4 个，远在限制内。
+      </div>
+
+      <figure class="diagram">
+        <img src="diagrams/team-graph-view-composition.svg"
+             alt="视图组合图：根视图 SystemArchitecture 包含 Agent 001、Team A、Service A、Service B 四个元素与三条关系，并标注每视图 12 元素上限" />
+        <figcaption>
+          <strong>图 3 · 视图组合图</strong> —— 根视图 <code>SystemArchitecture</code> 内含 4 个元素 + 3 条关系，
+          并标注 <code>rootViewName</code> 与「≤ 12 元素/视图」；可另有一个经 <code>subdiagram_views</code> 挂载的子视图。
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="validate">
+      <span class="step-badge">STEP 5 · 校验与语义检索</span>
+      <h2>确认本体生效，并验证召回</h2>
+      <p class="lead">
+        先做整体校验，再用只读查询确认「当前生效的是哪套 schema」，最后用语义检索验证 agent 真能按意思找到东西。
+      </p>
+
+      <h3>① 校验图谱</h3>
+      <p class="lead">让 agent 调用 <code>validateSystemArchitecture</code>（无参数，校验当前工作区图谱）。</p>
+
+      <h3>② 报告激活的本体包</h3>
+      <p class="lead">让 agent 调用 <code>queryNeo4jGraph</code>，参数：</p>
+      <pre><code>{ "schema": true }</code></pre>
+      <div class="check">
+        期望返回（本案例）：
+        <code>schemaKind: "workspace"</code> ·
+        <code>schemaLanguage: "Team Graph"</code> ·
+        <code>actorElementType: "Agent Node"</code> ·
+        <code>bundleValidation.status: "passed"</code> ·
+        <code>archimateElementTypes: ["Agent Node","Team Node","Service Node"]</code>。
+        其中 <code>schemaKind: workspace</code> 表示用的是<strong>项目自定义本体</strong>，而不是内置默认（<code>default</code>）。
+      </div>
+
+      <h3>③ 语义检索 / 上下文召回</h3>
+      <p class="lead">让 agent 调用 <code>memory_search</code> 按意思找，参数：</p>
+      <pre><code>{ "query": "which team depends on Service B?" }</code></pre>
+      <p class="lead">或让 agent 调用 <code>getSystemArchitecture</code> 语义检索图谱内容，参数：</p>
+      <pre><code>{ "query": { "purpose": "general", "intent": "team dependencies and agent assignments" } }</code></pre>
+      <p class="lead">
+        召回结果应命中 <code>Team A</code> / <code>Service A</code> / <code>Service B</code> 这条依赖链，
+        以及 <code>Agent 001 --(Assigned To)--&gt; Team A</code> 的归属关系。命中卡片会带一个
+        <code>matchedSnippet</code>，告诉你「为什么它匹配」，必要时再用
+        <code>getIntentElementContext</code> 读取完整内容。
+      </p>
+
+      <figure class="diagram">
+        <img src="diagrams/team-graph-mcp-recall-sequence.svg"
+             alt="MCP 调用与召回时序图：agent 依次调用 validateSystemArchitecture、queryNeo4jGraph(schema:true)、写入工具、getSystemArchitecture / memory_search，展示从图到 Neo4j 投影再到向量召回的往返" />
+        <figcaption>
+          <strong>图 4 · MCP 调用 / 召回时序图</strong> —— 编码 agent → ARGO MCP → 意图图谱（JSON）→ Neo4j 结构投影 → 向量索引；
+          依次标注 <code>validateSystemArchitecture</code>、<code>queryNeo4jGraph {schema:true}</code>、
+          写入 <code>addArchitectureElement</code> / <code>Relationship</code> / <code>View</code>，
+          以及最终带 <code>matchedSnippet</code> 的召回结果。
+        </figcaption>
+      </figure>
+
+      <div class="check">
+        <strong>小结：</strong> 你刚刚完成了一次完整的「自定义本体建图」——
+        定义 Team Graph 本体 → 4 元素 → 3 关系 → 1 根视图 → 校验 + 语义召回。
+        这个流程对任何业务域都通用，只是把元素/关系类型和端点矩阵换成你的。
+      </div>
+    </section>
+
+    <section id="more">
+      <h2>继续往下</h2>
+      <ul class="clean">
+        <li>想了解安装与日常使用：<a href="getting-started.html">使用介绍</a>。</li>
+        <li>想一次看全部能力：<a href="capabilities.html">能力总览</a>。</li>
+        <li>想读机制设计：<a href="https://github.com/derekhu0002/archgraph/blob/main/docs/schema-bundle-decoupling.md" target="_blank" rel="noopener">docs/schema-bundle-decoupling.md</a>。</li>
+        <li>想直接照抄示例：仓库里的 <a href="https://github.com/derekhu0002/archgraph/tree/main/custom-schema" target="_blank" rel="noopener">custom-schema/</a>。</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    ArchGraph —— 面向 Agentic Engineering 的架构图驱动框架 ·
+    <a href="https://github.com/derekhu0002/archgraph" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>

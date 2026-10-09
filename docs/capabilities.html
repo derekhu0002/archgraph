@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>能力总览 · ArchGraph</title>
+  <meta name="description" content="ArchGraph 能力总览：本体与建模、Agent 长期记忆、检索、图谱质量、多宿主部署、联邦共享、互操作、可观测与成本。" />
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a class="brand" href="../index.html"><code>ArchGraph</code></a>
+    <div class="links">
+      <a href="getting-started.html">使用介绍</a>
+      <a href="case-team-graph.html">使用案例</a>
+      <a href="capabilities.html" aria-current="page">能力总览</a>
+      <a href="../index.html">主页</a>
+      <a class="gh-btn" href="https://github.com/derekhu0002/archgraph" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+
+  <main>
+    <p class="eyebrow">能力总览 · Capabilities</p>
+    <h1>框架给了你什么</h1>
+    <p class="lead">
+      ArchGraph 已经长成一个面向 coding agent 的长期记忆系统：一张你既能推理、又能信任的架构图，
+      部署在你已经在用的宿主里。下面按能力分组，逐条说明。
+    </p>
+    <div class="toc">
+      <a href="#compare">与其他做法对比</a>
+      <a href="#ontology">本体与建模</a>
+      <a href="#memory">Agent 长期记忆</a>
+      <a href="#retrieval">检索</a>
+      <a href="#quality">图谱质量</a>
+      <a href="#harness">多宿主部署</a>
+      <a href="#federation">联邦共享</a>
+      <a href="#interop">互操作</a>
+      <a href="#observability">可观测与成本</a>
+    </div>
+
+    <section id="compare">
+      <h2>与其他做法相比，ArchGraph 补上了什么</h2>
+      <p class="lead">
+        给 coding agent 提供上下文，常见有四种做法。它们各有真实的优点，也各有真实的短板 —— 下面如实列出，
+        以及当上下文变成「一张经校验的类型化图谱、走单一 MCP 接口」时，哪些问题被解决。
+      </p>
+      <table class="compare">
+        <thead>
+          <tr><th>做法</th><th>今天能给你什么</th><th>短板</th><th>ArchGraph 补上的</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>上下文散落在文件里</strong></td>
+            <td>零配置，文本就在手边。</td>
+            <td>agent 每次会话冷启动重读；「为什么」会漂移、被复制。</td>
+            <td>一张类型化图谱经 MCP 读写 —— 会话恢复上下文，默认复用而不是复制。</td>
+          </tr>
+          <tr>
+            <td><strong>通用 RAG / 向量库</strong></td>
+            <td>对文本做便宜的语义召回。</td>
+            <td>扁平片段：没有关系、没有类型、<strong>没有语义 / 类型化去重</strong>、没有单一事实来源。</td>
+            <td>语义召回<strong>建在类型化图谱之上</strong>，命中自带结构与出处。</td>
+          </tr>
+          <tr>
+            <td><strong>纯 Wiki / ADR 目录</strong></td>
+            <td>人读友好、容易评审。</td>
+            <td>机器不可消费、不做校验、会悄悄过期。</td>
+            <td>agent 与团队共用同一事实来源，每次写入都按本体包校验。</td>
+          </tr>
+          <tr>
+            <td><strong>通用图 / 本体工具</strong><br>Protégé / OWL、Neo4j、TerminusDB、Archi / EA</td>
+            <td>建模与查询能力强，<strong>也允许你扩展模型、换用自定语汇</strong>。</td>
+            <td>「模型」和「agent 的读写路径」是两回事：没有一个单一受校验接口，把类型化去重与提交可追溯一并交给 agent。</td>
+            <td>本体是一个<strong>一等公民、受校验、运行时解析</strong>的 schema bundle，并且同一套 <strong>MCP 接口</strong>既读又写这张图，内建类型化去重与可追溯。</td>
+          </tr>
+          <tr>
+            <td><strong>ArchGraph 自身的成本</strong></td>
+            <td>一套接口，覆盖类型化、受校验、运行时解析的建模与记忆。</td>
+            <td>需要你自己部署与运维，<strong>不是托管服务</strong>。</td>
+            <td>上下文读写、去重、EA 互操作只需 <strong>Node.js</strong>；语义召回另需 <strong>Neo4j</strong> + 一个 <strong>embedding 端点</strong>；部署走 <code>argo-deploy</code> + <code>~/.argo/.env</code>，<strong>部署后需重启宿主</strong>。</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>如实说明：</strong> ArchGraph 是一个需要你自己部署的<strong>框架</strong>，不是一个开箱即用的托管服务。
+        语义召回需要 <strong>Neo4j</strong> + 一个 <strong>embedding</strong> 端点；在未配置它们时，<code>argo init</code> 的结构同步与语义生命周期步骤会报告 <strong>failed</strong>，
+        但图谱本身（上下文读写、去重、EA 互操作）依然可用。
+      </div>
+    </section>
+
+    <section id="ontology">
+      <h2>本体与建模</h2>
+      <p class="lead">默认 ArchiMate 3.2，但建模语言是可插拔的 —— 你可以换成自己的业务本体。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>可自定义本体（本体包 / schema bundle）</h3>
+          <p>在项目里放一份 <code>.argo/schema/</code>，就用你自己的元素/关系类型和端点矩阵来校验、检索这个项目，只影响它，不动全局默认。全新安装内置 ArchiMate 3.2；工作区可以解析到它自己的本体包。<a href="case-team-graph.html">看使用案例 →</a></p>
+        </div>
+        <div class="card">
+          <h3>把 agent 也建进模型</h3>
+          <p>用「业务执行者 / 角色」表示 agent，并给它们各自的记忆子视图、指派关系和工作包 —— 宿主设计与产品设计落在同一个模型里。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="memory">
+      <h2>Agent 长期记忆</h2>
+      <p class="lead">一张意图图谱，通过单一 MCP 接口读写；记忆分层，会话开始只加载很小的一块。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>长期记忆 for agents</h3>
+          <p>单一意图图谱，读写在同一个 MCP 接口上。记忆分三层：会话开始加载紧凑的 T1 工作记忆，T2 长期记忆按需召回，T3 归档只在显式检索时读取 —— agent 无需一次性载入全部上下文。</p>
+        </div>
+      </div>
+      <figure class="diagram">
+        <img src="diagrams/cap-memory-tiers.svg" alt="三层 Agent 记忆：会话开始只加载紧凑的 T1 工作记忆，T2 按需召回，T3 仅显式检索时读取" />
+        <figcaption><strong>图 1 · 三层记忆</strong> —— 会话开始只加载紧凑的 T1 工作记忆；T2 按需召回；T3 仅显式检索时读取。</figcaption>
+      </figure>
+    </section>
+
+    <section id="retrieval">
+      <h2>检索</h2>
+      <p class="lead">两种找法：语义（Graph RAG）与结构（Cypher），外加可换的 embedding 和召回优先的调优。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>语义 + 结构检索</h3>
+          <p>既能在向量索引上做语义（Graph RAG）召回（可用 <code>scope</code> 收窄范围），也能用只读 Cypher 做结构查询和聚焦的上下文读取。召回宽松、尽量不漏；审计读取则严格。</p>
+        </div>
+        <div class="card">
+          <h3>自带 embedding</h3>
+          <p>语义检索可指向<strong>任意 OpenAI 兼容的 embedding 端点</strong>：沿用云端 profile，或设 <code>ARGO_EMBEDDING_PROFILE=openai-compatible</code> 换自建模型，实现离线 / 内网 / 私有部署，无厂商锁定。</p>
+        </div>
+        <div class="card">
+          <h3>读取只返回你需要的</h3>
+          <p>结构读取默认省略记账信息（commit / 测试用例台账），语义命中的结果带一个 <code>matchedSnippet</code>，说明「为什么它匹配」—— 让上下文只花在有收益的地方。</p>
+        </div>
+        <div class="card">
+          <h3>召回优先的检索调优</h3>
+          <p>可选的第二级加上「向量 + 词法」混合融合与一个 LLM 重排器（带 fail-open 保护）。调优只会扩大候选池，召回只升不降。</p>
+        </div>
+      </div>
+      <figure class="diagram">
+        <img src="diagrams/cap-lean-reads.svg" alt="精简且有据的读取：记账台账默认省略，语义命中带 matchedSnippet" />
+        <figcaption><strong>图 2 · 精简且有据的读取</strong> —— 记账台账默认省略，语义命中带 <code>matchedSnippet</code>，上下文只花在有收益的地方。</figcaption>
+      </figure>
+    </section>
+
+    <section id="quality">
+      <h2>图谱质量</h2>
+      <p class="lead">干净是设计出来的，不是靠自觉；每一次改动都可证明、可追溯。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>写入即去重</h3>
+          <p>新增元素、关系或视图时，若已有匹配就复用而不是复制；新元素若在语义上接近某个同类元素，会被拦下并作为候选返回。干净图谱才让语义召回保持准确。</p>
+        </div>
+        <div class="card">
+          <h3>每次改动可证明</h3>
+          <p>验收测试先行、是可执行的 GIVEN-WHEN-THEN；改动提交后，commit id 会登记回对应元素 —— 图谱自带历史与证据。</p>
+        </div>
+        <div class="card">
+          <h3>结构受校验</h3>
+          <p>每次写入都会按本体包和图层语义规则检查（标识、交叉引用、关系端点、视图容量），同一个视图内不会重复纳入同一成员。</p>
+        </div>
+      </div>
+      <figure class="diagram">
+        <img src="diagrams/global-architecture.svg" alt="ArchGraph 全局架构：分层视图，展示意图图谱、MCP 接口、宿主与投影之间的关系" />
+        <figcaption><strong>图 3 · 全局架构</strong> —— 一张图看清从意图图谱、MCP 读写接口到各宿主与结构投影的关系。</figcaption>
+      </figure>
+    </section>
+
+    <section id="harness">
+      <h2>多宿主部署</h2>
+      <p class="lead">一次部署，覆盖你已经在用的 coding agent 宿主。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>在任何宿主里跑</h3>
+          <p>一条 <code>argo-deploy</code> 就把 MCP 服务端、skills、rules 和 agents 注册进 GitHub Copilot、Cursor、OpenCode、DeepSeek Harness、OpenClaw、Codex —— 每个都有会话唤醒门禁。注意：skills / rules 装到每个宿主，agents 只装到支持它的宿主。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="federation">
+      <h2>联邦共享</h2>
+      <p class="lead">每个项目保留自己<strong>主权</strong>的图谱；中心只是登记 + 代理，不是内容仓库。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>联邦式图谱共享</h3>
+          <p>把可复用的架构子图发布到联邦登记中心，再按引用读取另一个项目开放的内容 —— 注册、发现、授权、读取。默认拒绝，不复制也不合并。</p>
+        </div>
+        <div class="card">
+          <h3>联邦，而非分布式</h3>
+          <p>每个项目保留一张完整、主权的 canonical 图，自己就是唯一事实来源；中心只是一本登记 + 代理（register · discover · authorize · read by reference），只存联邦元数据，永不存内容。</p>
+        </div>
+        <div class="card">
+          <h3>查询另一个项目的图</h3>
+          <p>每个读取工具都可带一个可选 <code>projectId</code>：省略就读本仓，传入就通过联邦中心读一个<strong>已授权外部项目</strong>的图 —— 只读、按引用，默认拒绝。</p>
+        </div>
+      </div>
+      <figure class="diagram">
+        <img src="diagrams/cap-federation.svg" alt="联邦式图谱共享：把子图发布到登记中心，再按引用读取另一个项目开放的内容" />
+        <figcaption><strong>图 4 · 联邦式图谱共享</strong> —— 把子图发布到登记中心，再按引用读取另一个项目开放的内容。默认拒绝；不复制、不合并。</figcaption>
+      </figure>
+    </section>
+
+    <section id="interop">
+      <h2>互操作</h2>
+      <p class="lead">与人使用的企业建模工具打通。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>Enterprise Architect 互操作</h3>
+          <p>图谱在写入时和 <code>argo init</code> 时会投影成标准 <code>.qea</code> 模型；人类在 EA 里的改动会变成一个语义 diff，由 agent 分析后再决定是否写回。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="observability">
+      <h2>可观测与成本</h2>
+      <p class="lead">让「agent 到底花了多少」变成可见。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>看见 agent 花掉的</h3>
+          <p>构建期的日志把每次工具调用及其 token 成本记到每个工作区一个文件；<code>agent-search-diagnosis</code> 技能（OpenCode）能把一次会话变成自包含的诊断包 —— 过度搜索、浪费的轮次、图↔仓往返都变得可见。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="more-links">
+      <h2>继续往下</h2>
+      <ul class="clean">
+        <li>新用户入门：<a href="getting-started.html">使用介绍</a>。</li>
+        <li>自定义本体实操：<a href="case-team-graph.html">使用案例</a>。</li>
+        <li>主页：<a href="../index.html">ArchGraph</a> · 仓库：<a href="https://github.com/derekhu0002/archgraph" target="_blank" rel="noopener">GitHub</a> · 业界洞察：<a href="insights.html">Insights</a>。</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    ArchGraph —— 面向 Agentic Engineering 的架构图驱动框架 ·
+    <a href="https://github.com/derekhu0002/archgraph" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>

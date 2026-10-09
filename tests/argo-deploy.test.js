@@ -48,6 +48,7 @@ function buildInstallArgs(opts) {
     '-OpenClawHome', opts.openClawHome,
     '-OpenClawWorkspace', opts.openClawWorkspace,
     '-SkipOpenClaw',
+    '-SkipCodex',
     '-SkipDeps',
     ...(opts.skipEnv ? ['-SkipEnv'] : []),
   ];
@@ -113,7 +114,7 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
     // 3) argo-init skill (+ global ea-human-reconcile skill)
     assert.ok(fs.existsSync(path.join(skillsRoot, 'argo-init', 'SKILL.md')));
     assert.ok(fs.existsSync(path.join(skillsRoot, 'ea-human-reconcile', 'SKILL.md')), 'Copilot ea-human-reconcile skill must be deployed');
-    assert.ok(fs.existsSync(path.join(skillsRoot, 'agent-search-diagnosis', 'SKILL.md')), 'Copilot agent-search-diagnosis skill must be deployed');
+    assert.ok(!fs.existsSync(path.join(skillsRoot, 'agent-search-diagnosis', 'SKILL.md')), 'Copilot must NOT get the OpenCode-only agent-search-diagnosis skill');
     // 4) global rule
     assert.ok(fs.existsSync(path.join(promptsRoot, 'archgraph.instructions.md')));
 
@@ -417,6 +418,7 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     const skill = fs.readFileSync(path.join(dshHome, 'skills', 'argo-init', 'SKILL.md'), 'utf8');
     assert.match(skill, /name: argo-init/, 'skill must keep its DSH-compatible frontmatter');
     assert.ok(fs.existsSync(path.join(dshHome, 'skills', 'ea-human-reconcile', 'SKILL.md')), 'DSH ea-human-reconcile skill must be deployed');
+    assert.ok(!fs.existsSync(path.join(dshHome, 'skills', 'agent-search-diagnosis', 'SKILL.md')), 'DSH must NOT get the OpenCode-only agent-search-diagnosis skill');
 
     // 3+4) bridge + wakeup rows -> ~/.dsh/cordis.patch.yml (managed block).
     // The dsh-argo-workspace bridge connects directly to the argo server; no
@@ -459,7 +461,7 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
     );
     assert.match(bridge, /export const name = 'dsh-argo-workspace'/, 'bridge must export its name');
     assert.match(bridge, /export const inject = \['tools'\]/, 'bridge must inject the tools registry');
-    assert.match(bridge, /spawn\('node', \[serverPath\]/, 'bridge must spawn the argo server directly');
+    assert.match(bridge, /spawn\(command, args/, 'bridge must spawn each configured server generically');
     assert.match(bridge, /render: \(_args, value\) => value\.content/, 'bridge must declare output.render for the tool registry');
     assert.match(bridge, /mcp__argo__/, 'bridge must register the public mcp__argo__ tool names');
     assert.doesNotMatch(bridge, /mcp__argo-core__/, 'bridge must not create internal tool names');
@@ -471,6 +473,14 @@ test('install-argo.ps1 deploys DeepSeek Harness integration from the single-sour
       'deployed workspace bridge must be byte-identical to the single-source bundle artifact',
     );
 
+    // 4d) the federation Graph MCP is mounted for DSH too: the same stdio bridge
+    // is deployed and the managed block configures a graph-mcp server next to argo.
+    const dshGraphBridge = path.join(dshHome, 'mcp-bridges', 'graph-mcp-stdio.js');
+    assert.ok(fs.existsSync(dshGraphBridge), 'DSH graph-mcp stdio bridge must be deployed');
+    assert.match(patch, /id: graph-mcp/, 'managed block must configure the graph-mcp server');
+    assert.match(patch, /GRAPH_MCP_URL/, 'graph-mcp server must carry GRAPH_MCP_URL');
+    assert.match(patch, /graph-mcp-stdio\.js/, 'graph-mcp server must spawn the stdio bridge');
+    assert.match(bridge, /config\.servers|normalizeServerSpecs/, 'bridge must support a list of servers');
 
     // 6) idempotency: a second run must not duplicate the managed block.
     const second = runInstall({ ...paths, skipEnv: true });

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Agent 产出越快，熵增与验证税越重">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#475569"/></marker>
+  <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2457e6"/></marker>
+  <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0f9d63"/></marker>
+  <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#b26a04"/></marker>
+  <marker id="arrow-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#dc2f52"/></marker>
+  <marker id="arrow-cyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0e86a5"/></marker>
+  <marker id="arrow-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6d38d6"/></marker>
+</defs>
+<rect width="1280" height="720" fill="#ffffff"/>
+<rect x="0" y="0" width="1280" height="5" fill="#eaf1ff"/><rect x="0" y="0" width="220" height="5" fill="#2457e6"/>
+<text x="48" y="40" font-family="Consolas, 'Cascadia Code', ui-monospace, monospace" font-size="10.5" font-weight="700" fill="#2457e6" text-anchor="start" opacity="1">02 · 业界痛点</text>
+<text x="48" y="78" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="26" font-weight="800" fill="#0f172a" text-anchor="start" opacity="1">Agent 产出越快，熵增与验证税越重</text>
+<text x="48" y="106" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">瓶颈正从「写代码」转移到「对齐与验证」</text>
+<line x1="48" y1="122" x2="1232" y2="122" stroke="#eef2f7" stroke-width="1"/>
+<line x1="88" y1="176" x2="1192" y2="176" stroke="#dc2f52" stroke-width="1.6" marker-end="url(#arrow-rose)"/>
+<text x="640" y="164" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#dc2f52" text-anchor="middle" opacity="1">写码越快 → 熵增与验证税越重</text>
+<rect x="48" y="210" width="278" height="250" rx="12" fill="#ffeef1" stroke="#dc2f52" stroke-width="1.2"/>
+<rect x="48" y="210" width="278" height="5" rx="2" fill="#dc2f52"/>
+<text x="68" y="320" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="24" font-weight="800" fill="#dc2f52" text-anchor="start" opacity="1">4×</text>
+<text x="68" y="346" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">重复代码块</text>
+<text x="68" y="368" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">对比 2020 年 · GitClear，2.11 亿行变更</text>
+<rect x="350" y="210" width="278" height="250" rx="12" fill="#ffeef1" stroke="#dc2f52" stroke-width="1.2"/>
+<rect x="350" y="210" width="278" height="5" rx="2" fill="#dc2f52"/>
+<text x="370" y="320" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="24" font-weight="800" fill="#dc2f52" text-anchor="start" opacity="1">30%</text>
+<text x="370" y="346" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">几乎不信任 AI 代码</text>
+<text x="370" y="368" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">DORA 2025（90% 开发者已用 AI）</text>
+<rect x="652" y="210" width="278" height="250" rx="12" fill="#ffeef1" stroke="#dc2f52" stroke-width="1.2"/>
+<rect x="652" y="210" width="278" height="5" rx="2" fill="#dc2f52"/>
+<text x="672" y="320" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="24" font-weight="800" fill="#dc2f52" text-anchor="start" opacity="1">+91%</text>
+<text x="672" y="346" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">代码评审时间</text>
+<text x="672" y="368" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">PR 量 +98% · Faros AI（二手）</text>
+<rect x="954" y="210" width="278" height="250" rx="12" fill="#ffeef1" stroke="#dc2f52" stroke-width="1.2"/>
+<rect x="954" y="210" width="278" height="5" rx="2" fill="#dc2f52"/>
+<text x="974" y="320" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="24" font-weight="800" fill="#dc2f52" text-anchor="start" opacity="1">−19%</text>
+<text x="974" y="346" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#0f172a" text-anchor="start" opacity="1">专家实测反而更慢</text>
+<text x="974" y="368" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#475569" text-anchor="start" opacity="1">METR 随机对照 · 自评却是 +20%</text>
+<rect x="48" y="608" width="1184" height="52" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1.2"/>
+<rect x="48" y="608" width="5" height="52" rx="2" fill="#2457e6"/>
+<rect x="64" y="624" width="38.0" height="20" rx="10" fill="#eaf1ff" stroke="#2457e6" stroke-width="1"/><text x="83" y="637.96" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#2457e6" text-anchor="middle" opacity="1">结论</text>
+<text x="112" y="629" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#0f172a" text-anchor="start" opacity="1">证据一致：没有共同语言与可执行门禁，Agent 加速的只是「产生返工的速度」。</text>
+<line x1="48" y1="682" x2="1232" y2="682" stroke="#eef2f7" stroke-width="1"/>
+<text x="48" y="698" font-family="'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#64748b" text-anchor="start" opacity="1">依据：GitClear 2025  ·  DORA 2025  ·  Faros AI  ·  METR arXiv:2507.09089</text>
+<text x="1232" y="698" font-family="Consolas, 'Cascadia Code', ui-monospace, monospace" font-size="8.5" font-weight="400" fill="#94a3b8" text-anchor="end" opacity="1">ArchGraph · 02 · 业界痛点</text>
+</svg>

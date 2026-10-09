@@ -1,0 +1,222 @@
+{
+  "deckId": "arc-coding-business-deck-001",
+  "title": "ArchGraph · Coding 业务价值与组织级知识图谱",
+  "subtitle": "8 页正文 + 1 页附录：业务全景 → 痛点 / 实践 → 解法 → 指标 → 检索 → 能力 → 组织级",
+  "audience": "人类伙伴（hudonghua）与项目评审",
+  "evidenceNote": "『我方』数字取自意图图谱 aos-as-*（measurement-status / measurement-result）；『业界』数字为公开来源快照并标注出处，非我方实测。排版原则：一页一个结论，图为主、字为辅。",
+  "pages": [
+    {
+      "id": "p1",
+      "kicker": "01 · 业务全景",
+      "type": "stateMachine",
+      "title": "Coding 的价值，在一个「回合」里被创造",
+      "subtitle": "主体＝一次 Agent 会话；主回路每转一圈，产出一份可验收的增量",
+      "diagram": "p1-state-machine",
+      "key": [
+        { "n": 1, "kgId": "aos-idle", "label": "Idle", "sub": "空闲 / 待命" },
+        { "n": 2, "kgId": "aos-running", "label": "Running", "sub": "执行回合（含 6 子态）" },
+        { "n": 3, "kgId": "aos-reasoning", "label": "Reasoning", "sub": "规划 → 计划正确率" },
+        { "n": 4, "kgId": "aos-retrieving", "label": "Retrieving", "sub": "检索 → 召回率" },
+        { "n": 5, "kgId": "aos-acting", "label": "Acting", "sub": "工具 / 写图" },
+        { "n": 6, "kgId": "aos-verifying", "label": "Verifying", "sub": "验收 → 通过率" },
+        { "n": 7, "kgId": "aos-finalizing", "label": "Finalizing", "sub": "提交 / 沉淀" },
+        { "n": 8, "kgId": "aos-awaiting-user", "label": "AwaitingUser", "sub": "等待用户（在环）" },
+        { "n": 9, "kgId": "aos-bg-machine", "label": "后台正交区", "sub": "异步，不阻塞回合" },
+        { "n": 10, "kgId": "aos-stopped", "label": "Stopped", "sub": "终态 · 成功观测点" }
+      ],
+      "takeaway": "失败回流、人工在环、后台异步都被显式建模 —— 业务价值不在「模型」，而在可验收的循环。",
+      "references": ["视图 uml2-coding-statemachine-view-002", "uml2-coding-running-view-002", "uml2-coding-background-view-002"]
+    },
+    {
+      "id": "p2",
+      "kicker": "02 · 业界痛点",
+      "type": "pains",
+      "title": "Agent 产出越快，熵增与验证税越重",
+      "subtitle": "瓶颈正从「写代码」转移到「对齐与验证」",
+      "diagram": "p2-pains",
+      "pains": [
+        { "n": 1, "big": "4×", "head": "重复代码块", "line": "对比 2020 年 · GitClear，2.11 亿行变更" },
+        { "n": 2, "big": "30%", "head": "几乎不信任 AI 代码", "line": "DORA 2025（90% 开发者已用 AI）" },
+        { "n": 3, "big": "+91%", "head": "代码评审时间", "line": "PR 量 +98% · Faros AI（二手）" },
+        { "n": 4, "big": "−19%", "head": "专家实测反而更慢", "line": "METR 随机对照 · 自评却是 +20%" }
+      ],
+      "takeaway": "证据一致：没有共同语言与可执行门禁，Agent 加速的只是「产生返工的速度」。",
+      "references": ["GitClear 2025", "DORA 2025", "Faros AI", "METR arXiv:2507.09089"]
+    },
+    {
+      "id": "p3",
+      "kicker": "03 · 先进实践",
+      "type": "practices",
+      "title": "成功案例的共同点：专家带 Agent",
+      "subtitle": "每一个样本，都是「一个懂全系统的专家做唯一编排者」",
+      "diagram": "p3-practices",
+      "cases": [
+        { "n": 1, "head": "OpenAI · Harness Engineering", "metric": "3 人 · 5 个月 · ~100 万行 · 手写 0", "line": "AGENTS.md 指向 docs/；用 linter 固化品味" },
+        { "n": 2, "head": "Bun · Zig→Rust 整体移植", "metric": "11 天 · ~6,700 commits · ~$165k", "line": "先写 PORTING.md，再并行 ~64 个 Agent" },
+        { "n": 3, "head": "Anthropic · 代码迁移六步法", "metric": "先建『裁判』，再翻译", "line": "不要修代码，要修产生代码的循环" },
+        { "n": 4, "head": "DHH · TerminalTextEffects 重写", "metric": "3h11m · 2.1 万行 Rust", "line": "8 个 Agent 各占一条分支，零干预" },
+        { "n": 5, "head": "OpenAI · Codex CLI 原生重写", "metric": "≈ 95.7% Rust", "line": "整框架换语言，已由 Agent 承担主体" }
+      ],
+      "takeaway": "可复制的不是模型，而是「共同语言 + 结构化上下文 + 机器裁判 + 修循环」。",
+      "references": ["openai.com/index/harness-engineering", "bun.com/blog/bun-in-rust", "claude.com/blog/ai-code-migration", "github.com/openai/codex/discussions/1174"]
+    },
+    {
+      "id": "p4",
+      "kicker": "04 · 解法",
+      "type": "solution",
+      "title": "缺的不是更强的模型，而是人与 Agent 的『共同语言』",
+      "subtitle": "本体给出语言，图谱给出载体 —— 这张图就是人机交流的窗口",
+      "diagram": "p4-solution",
+      "insight": [
+        "人必须是懂全景的专家，做唯一编排者",
+        "结构化上下文先于代码（先规则 / 依赖图）",
+        "验证器先建、由机器执行"
+      ],
+      "base": "Base：Acme（ArchiMate 3.2 + UML 2 状态机），项目可在其上 extends 领域本体",
+      "blocks": [
+        { "n": 1, "head": "本体 = 共同语言", "text": "元素 / 关系类型即词汇与语法" },
+        { "n": 2, "head": "图谱 = 承载方式", "text": "业务·架构·指标·状态机同图" },
+        { "n": 3, "head": "窗口 = 双向读写", "text": "人写意图，Agent 写实现 + 验收" },
+        { "n": 4, "head": "单项目 → 组织", "text": "跨项目引用，组成联邦知识图谱" }
+      ],
+      "takeaway": "本体保障共同语言，图谱保障可查上下文 —— 人写的意图与 Agent 写的实现 / 验收在同一张图上对齐。",
+      "references": ["docs/diagrams/core-model.svg", "argo/rules/archgraph.instructions.md"]
+    },
+    {
+      "id": "p5",
+      "kicker": "05 · 指标体系",
+      "type": "metrics",
+      "title": "20 个指标已建模，4 项已定量",
+      "subtitle": "定量项都落在框架真正提供能力的环节；整体任务层仍是空白",
+      "diagram": "p5-metrics",
+      "groups": [
+        { "n": 1, "stateLabel": "① Idle", "cn": "空闲", "metrics": ["空闲时长"], "kgId": "aos-idle" },
+        { "n": 2, "stateLabel": "② Running", "cn": "执行回合", "metrics": ["任务完成成功率", "端到端时延 / 成本"], "kgId": "aos-machine" },
+        { "n": 3, "stateLabel": "③ Reasoning", "cn": "规划", "metrics": ["计划正确率"], "kgId": "aos-reasoning" },
+        { "n": 4, "stateLabel": "④ Retrieving", "cn": "检索", "metrics": ["检索召回与排序"], "kgId": "aos-retrieving" },
+        { "n": 5, "stateLabel": "⑤ Acting", "cn": "工具 / 写图", "metrics": ["工具成功率与轮次", "去重 P/R 与无损率"], "kgId": "aos-acting" },
+        { "n": 6, "stateLabel": "⑥ Verifying", "cn": "验收", "metrics": ["验收通过率与回归"], "kgId": "aos-verifying" },
+        { "n": 7, "stateLabel": "⑦ Finalizing", "cn": "提交 / 沉淀", "metrics": ["登记完整率", "记忆准确率与拒答"], "kgId": "aos-finalizing" },
+        { "n": 8, "stateLabel": "⑧⑨ 等待态", "cn": "等工具 / 等用户", "metrics": ["等待 / 唤醒时延", "请示频率与回环"], "kgId": "aos-awaiting-result" },
+        { "n": 9, "stateLabel": "⑩⑪ 正交 / 终态", "cn": "后台 / Stopped", "metrics": ["（观测点）"], "kgId": "aos-stopped" }
+      ],
+      "status": { "measured": 4, "partial": 5, "notMeasured": 11, "note": "measured：检索召回 · 工具成功率 · 等待时延 · 记忆准确率" },
+      "takeaways": [
+        "已定量 4 项，都在『检索 / 执行 / 时延 / 记忆』—— 框架真正提供能力的环节。",
+        "最大空白在整体任务层：8 个业界基准全部未跑，整体成功率只有小样本 partial。",
+        "P0 下一步：SWE-bench Verified / Terminal-Bench，同仓同模型『挂 vs 不挂』制度对照。"
+      ],
+      "takeaway": "骨架已建、进入机制化迭代：先把整体基准补上，再把 partial 逐个升为 measured。",
+      "references": ["aos-as-* measurement-status", "视图 uml2-metric-decomp-* / uml2-metric-tradeoff-view-002"]
+    },
+    {
+      "id": "p6",
+      "kicker": "06 · 检索流程",
+      "type": "pipeline",
+      "title": "检索不是一次查询，而是一个带治理的闭环",
+      "subtitle": "写入治理决定检索上限；多路召回 + 重排是主流；评估反馈让它持续变好",
+      "diagram": "p6-pipeline",
+      "stages": [
+        { "id": "L1", "name": "数据接入与治理", "sub": "来源 / 权限 / 版本", "phase": "写入" },
+        { "id": "L2", "name": "解析与切块", "sub": "chunk / summary 粒度", "phase": "写入" },
+        { "id": "L3", "name": "嵌入与索引", "sub": "向量 + 关键词 + 双投影", "phase": "写入" },
+        { "id": "L4", "name": "图构建与对齐", "sub": "实体关系 + 本体对齐", "phase": "写入" },
+        { "id": "L5", "name": "召回", "sub": "向量 / BM25 / 图遍历", "phase": "检索" },
+        { "id": "L6", "name": "融合与重排", "sub": "RRF + 交叉 / LLM 重排", "phase": "检索" },
+        { "id": "L7", "name": "生成与 grounding", "sub": "引用可追溯 + 拒答", "phase": "生成与闭环" },
+        { "id": "L8", "name": "评估与迭代", "sub": "反馈 → 索引 / 权重 / 提示", "phase": "生成与闭环" }
+      ],
+      "coverage": [
+        { "id": "L1", "status": "covered", "metrics": "11·12", "note": "写入门禁 + 版本登记" },
+        { "id": "L2", "status": "replaced", "metrics": "4", "note": "不切块：元素 / 关系即语义单元" },
+        { "id": "L3", "status": "covered", "metrics": "4", "note": "向量 + 全文 + 结构三通道" },
+        { "id": "L4", "status": "partial", "metrics": "7·6", "note": "本体即图；社区索引暂缓" },
+        { "id": "L5", "status": "covered", "metrics": "4", "note": "语义 / 词法 / 结构三路召回" },
+        { "id": "L6", "status": "covered", "metrics": "4·8", "note": "RRF + LLM 重排" },
+        { "id": "L7", "status": "covered", "metrics": "10", "note": "证据链 + 拒答" },
+        { "id": "L8", "status": "covered", "metrics": "5·10·11", "note": "golden 题集 + A/B" }
+      ],
+      "takeaway": "写入侧的治理（去重 / 无损）在业界普遍缺失 —— 这恰是我们覆盖最深的一环。",
+      "references": ["视图 298 Harness", "graph-rag 组件", "docs/mcp-acceptance.md"]
+    },
+    {
+      "id": "p7",
+      "kicker": "07 · 我方能力",
+      "type": "capability",
+      "title": "单项目内即可用的 Graph MCP，已覆盖全流程",
+      "subtitle": "读（语义 / 上下文 / 结构）+ 写（对象 / 批次 / 门禁）+ 跨项目读取",
+      "diagram": "p7-capability",
+      "tools": [
+        { "id": "R1", "head": "读 · 语义", "text": "getSystemArchitecture · memory_search" },
+        { "id": "R2", "head": "读 · 上下文", "text": "getIntentElementContext · getArchitectureViewContext" },
+        { "id": "R3", "head": "读 · 结构", "text": "queryNeo4jGraph（只读 Cypher）" },
+        { "id": "W1", "head": "写 · 对象", "text": "add / update / remove（Element / Relationship / View）" },
+        { "id": "W2", "head": "写 · 批次", "text": "preview / applySystemArchitectureMutation · initializeWorkspace" },
+        { "id": "W3", "head": "写 · 门禁", "text": "校验 → 去重（L0 / L1）→ 无损（merge / 墓碑）" },
+        { "id": "X1", "head": "跨项目", "text": "5 个读工具带 projectId → 联邦引用" }
+      ],
+      "kpis": [
+        { "v": "94.6 → 98.7", "label": "检索 r@1（向量 → 重排）", "note": "r@5 99.4 · MRR 0.997" },
+        { "v": "2.0–2.5s", "label": "读路径时延", "note": "写 ~1.1s" },
+        { "v": "5.7ms", "label": "记忆检索", "note": "压缩 97% · 4890 token / 查询" },
+        { "v": "−43% / −39%", "label": "挂 MCP：工具 / 轮次", "note": "token −18% · 成功率 100%" }
+      ],
+      "takeaway": "检索、执行、时延、记忆已可复现度量；整体 coding 闭环与制度对照是下一步。",
+      "references": ["scripts/eval-retrieval.js", "eval-rerank.js", "memory-eval-run.js", "memory-retrieval-ab.js"]
+    },
+    {
+      "id": "p8",
+      "kicker": "08 · 组织级知识图谱",
+      "type": "federation",
+      "title": "以项目为积木，联邦式组合出组织级知识图谱",
+      "subtitle": "项目自治（主权图为唯一事实源），成员之间『引用而非拷贝』",
+      "diagram": "p8-federation",
+      "benefits": [
+        { "n": 1, "head": "质量按领域专业化", "text": "谁的业务谁建模、谁验收" },
+        { "n": 2, "head": "闭环且地基已铺好", "text": "MCP 已代做去重 / 无损 / 结构校验" },
+        { "n": 3, "head": "统一权限与授权", "text": "中心一处管控，默认拒绝" }
+      ],
+      "status": [
+        { "k": "已注册成员", "v": "23" },
+        { "k": "已授权关系", "v": "45" },
+        { "k": "跨项目读", "v": "soc-demo 实读 386 元素" }
+      ],
+      "members": ["archgraph", "graph-wiki", "abot", "my-army", "HarmonyOS-Dev-Standards", "SOC-DEMO"],
+      "takeaway": "领域自治保证质量专业；中心统一授权、默认拒绝；组合即组织级知识库，无需合并图谱。",
+      "references": ["design-federated-intent-graph-001", "overseer-federation-vision-001", "docs/external-graph-query.md"]
+    },
+    {
+      "id": "p9",
+      "kicker": "附录 A · 指标明细",
+      "type": "appendixMetrics",
+      "title": "附录：20 个指标 —— 映射 · 我方评测 · 业界 Gap",
+      "subtitle": "数据源：意图图谱 aos-as-* 的 measurement-status / measurement-result 属性",
+      "diagram": "p9-metric-detail",
+      "metrics": [
+        { "n": 1, "group": "状态级", "name": "空闲时长", "kgId": "aos-as-idle", "state": "aos-idle", "status": "not_measured", "result": "尚未采集", "benchmark": "无统一口径", "action": "需会话时间戳埋点" },
+        { "n": 2, "group": "状态级", "name": "请示频率与回环", "kgId": "aos-as-hitl", "state": "aos-awaiting-user", "status": "not_measured", "result": "尚未采集", "benchmark": "τ-bench 交互", "action": "从会话日志统计" },
+        { "n": 3, "group": "执行", "name": "计划正确率", "kgId": "aos-as-plan", "state": "aos-reasoning", "status": "partial", "result": "navigation 20/20（代理）", "benchmark": "PlanBench", "action": "建计划质量题集" },
+        { "n": 4, "group": "检索", "name": "检索召回与排序", "kgId": "aos-as-retrieve", "state": "aos-retrieving", "status": "measured", "result": "r@1 94.6→98.7 · MRR 0.997", "benchmark": "GraphRAG 80–95", "action": "补多跳 Recall" },
+        { "n": 5, "group": "执行", "name": "工具成功率与轮次", "kgId": "aos-as-tool", "state": "aos-acting", "status": "measured", "result": "成功率 100% · 轮次 −39%", "benchmark": "各 Harness 自报", "action": "扩到 50+ 题集" },
+        { "n": 6, "group": "写入", "name": "去重 P/R 与无损率", "kgId": "aos-as-write", "state": "aos-acting", "status": "partial", "result": "L1 阈值 0.85（假阳性 0.85–0.89）", "benchmark": "业界少有", "action": "建 P/R 套件" },
+        { "n": 7, "group": "验收", "name": "验收通过率与回归", "kgId": "aos-as-verify", "state": "aos-verifying", "status": "partial", "result": "AT 12/12 · 回归 38/38", "benchmark": "验证是瓶颈", "action": "AT 覆盖率守护" },
+        { "n": 8, "group": "等待", "name": "等待 / 唤醒时延", "kgId": "aos-as-wait", "state": "aos-awaiting-result", "status": "measured", "result": "读 2.0–2.5s · 写 1.1s", "benchmark": "GraphRAG 秒级", "action": "补唤醒时延" },
+        { "n": 9, "group": "沉淀", "name": "提交登记完整率", "kgId": "aos-as-commit", "state": "aos-finalizing", "status": "not_measured", "result": "无统计", "benchmark": "业界无", "action": "由台账脚本统计" },
+        { "n": 10, "group": "沉淀", "name": "记忆准确率与拒答", "kgId": "aos-as-memory", "state": "aos-finalizing", "status": "measured", "result": "100%(31/31) · 拒答 100%", "benchmark": "LongMemEval", "action": "对齐公开基准" },
+        { "n": 11, "group": "整体", "name": "任务完成成功率", "kgId": "aos-as-success", "state": "aos-machine", "status": "partial", "result": "小样本 31/31 · 20/20", "benchmark": "SWE-bench 70–76%", "action": "coding 闭环基准" },
+        { "n": 12, "group": "整体", "name": "端到端时延 / 成本", "kgId": "aos-as-e2e", "state": "aos-machine", "status": "partial", "result": "读 2.0–2.5s · 4890 token/查询", "benchmark": "口径不一", "action": "成本-召回曲线" },
+        { "n": 13, "group": "业界基准", "name": "SWE-bench Resolved%", "kgId": "aos-as-swebench", "state": "aos-machine", "status": "not_measured", "result": "未跑", "benchmark": "顶尖 70–76%", "action": "E2 制度对照" },
+        { "n": 14, "group": "业界基准", "name": "SWE-bench Verified", "kgId": "aos-as-sweverified", "state": "aos-machine", "status": "not_measured", "result": "未跑", "benchmark": "同上", "action": "同上（优先）" },
+        { "n": 15, "group": "业界基准", "name": "Terminal-Bench", "kgId": "aos-as-terminalbench", "state": "aos-machine", "status": "not_measured", "result": "未跑", "benchmark": "换 Harness 52.8→66.5", "action": "接入并出数" },
+        { "n": 16, "group": "业界基准", "name": "HumanEval / MBPP", "kgId": "aos-as-codegen", "state": "aos-machine", "status": "not_measured", "result": "未跑", "benchmark": "函数级代码", "action": "低优先" },
+        { "n": 17, "group": "业界基准", "name": "LiveCodeBench", "kgId": "aos-as-livecodebench", "state": "aos-machine", "status": "not_measured", "result": "未跑", "benchmark": "防污染", "action": "低优先" },
+        { "n": 18, "group": "业界基准", "name": "GAIA", "kgId": "aos-as-gaia", "state": "aos-machine", "status": "not_measured", "result": "未跑", "benchmark": "通用 Agent", "action": "中优先" },
+        { "n": 19, "group": "业界基准", "name": "τ-bench pass^k", "kgId": "aos-as-taubench", "state": "aos-machine", "status": "not_measured", "result": "未跑", "benchmark": "工具-用户交互", "action": "中优先" },
+        { "n": 20, "group": "业界基准", "name": "AgentBench", "kgId": "aos-as-agentbench", "state": "aos-machine", "status": "not_measured", "result": "未跑", "benchmark": "多环境", "action": "中优先" }
+      ],
+      "takeaway": "完整口径与出处见意图图谱 aos-as-* 元素属性；本页为参考附录，非汇报主线。",
+      "references": ["aos-as-* measurement-* 属性即本页数据源"]
+    }
+  ],
+  "footerNote": "ArchGraph · 本页内容与意图图谱同源（元素 id 见各页『依据』）"
+}

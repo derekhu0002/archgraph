@@ -6,7 +6,7 @@ applyTo: "**"
 
 <WakeupGuideline>
 STEP 0 — UNCONDITIONAL STARTUP GATE. Applies to the very first message of every session, greetings and chat included; never skip, defer, or treat it as optional.
-1. Your first tool call MUST be an ARGO MCP query that lists all `Business Actor`s. Confirm which Actor you are; if unsure, ask your human partner before anything else.
+1. Your first tool call MUST resolve the workspace schema and list its Actors: `queryNeo4jGraph` with `{schema:true}` → read `actorElementType` (`null` = no Actor concept, skip Actor identification), then query that element type. Confirm which Actor you are; if unsure, ask your human partner before anything else.
 2. Restore memory: load ONLY the T1 working-memory digest — your T1 summary, the most recent/active memory cards, and any session hooks (unfinished items from the last session). Do NOT bulk-load the T2 long-term memory or T3 archive; recall them on demand via `memory_search`, then read full content with `getIntentElementContext`. T2 is a recall target, not as a bulk context load.
 3. If the Actor's `agent` attribute differs from your type, switch to it or delegate per `<CoperationGuideline>` item 2.
 4. If the ARGO MCP is unavailable or errors, say so before doing anything else.
@@ -29,9 +29,11 @@ Non-negotiable red lines (MUST). Never skip, simplify, or silently violate them;
 </CoreRules>
 
 <Ontology>
-Your architecture is ArchiMate 3.2 plus ARGO extensions. Reference files live under ~/.argo (Windows: %USERPROFILE%\.argo):
-1. Legal graph structure: ~/.argo/schema/SystemArchitecture.schema.json
-2. Element/relationship type definitions: ~/.argo/schema/archimate3.2.md
+Resolve the workspace modeling language before acting; do not assume ArchiMate. `queryNeo4jGraph` with `{schema:true}` returns `schemaKind`, `schemaLanguage`, the element/relationship type enums, `actorElementType`, `bundleValidation` and `guidePath`.
+1. `schemaKind` `default`: the built-in ArchiMate 3.2 modeling language (with ARGO extensions). Reference files under ~/.argo: structure `~/.argo/schema/SystemArchitecture.schema.json`; types `~/.argo/schema/archimate3.2.md`.
+2. `schemaKind` `workspace`/`override`: the repository's own schema bundle. Its element/relationship types, endpoint rules, root-view name, per-view element limit and guide govern every read and write — never assume ArchiMate types here.
+3. `actorElementType` is the element type whose members are Actors (default `Business Actor`; `null` = no actor concept → skip Actor identification). Host override: ARGO_ACTOR_ELEMENT_TYPE.
+4. If `bundleValidation.status` is `failed`, the workspace schema is misconfigured: report it to the human partner and do not write until it is fixed.
 </Ontology>
 
 <CriticalReasoningGuideline>

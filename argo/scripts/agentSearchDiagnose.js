@@ -186,7 +186,7 @@ function diagnose(session, opts = {}) {
   const byQueryClass = {};
   const sigCount = {};
   const pathReads = {};
-  let toolMs = 0; let humanWaitMs = 0; let errors = 0; let empty = 0;
+  let toolMs = 0; let humanWaitMs = 0; let errors = 0; let empty = 0; let emptyOrError = 0;
   for (const c of tc) {
     const isHuman = c.queryClass === 'human-wait' || HUMAN_WAIT_TOOLS.some(t => String(c.tool).includes(t));
     const bt = byTool[c.tool] || (byTool[c.tool] = { calls: 0, ms: 0, tokens: 0, errors: 0 });
@@ -200,6 +200,9 @@ function diagnose(session, opts = {}) {
     }
     if (c.ok === false) { bt.errors += 1; errors += 1; }
     if ((c.outputBytes || 0) < 2) empty += 1;
+    // A failed call with empty output is ONE unproductive call, not two — count the
+    // union so the hint does not overstate "empty/error" (issue #8 口径).
+    if (c.ok === false || (c.outputBytes || 0) < 2) emptyOrError += 1;
     byQueryClass[c.queryClass] = (byQueryClass[c.queryClass] || 0) + 1;
     sigCount[c.signature] = (sigCount[c.signature] || 0) + 1;
     if (c.queryClass === 'file-read' && c.path) pathReads[c.path] = (pathReads[c.path] || 0) + 1;
@@ -245,12 +248,12 @@ function diagnose(session, opts = {}) {
     overSearch: {
       duplicateCalls: duplicates,
       repeatedReads,
-      emptyOrError: errors + empty,
+      emptyOrError,
       noProgressStreak: best,
     },
     topOffendersByTime: topByMs,
     topOffendersByTokens: topByTokens,
-    hints: buildHints({ toolCalls: tc.length, duplicates: duplicates.length, emptyOrError: errors + empty, repeatedReads: repeatedReads.length, noProgressStreak: best, modelMs, mcpMs: byBackend.graph.ms, repoToolMs: byBackend.repo.ms, roundTrips: countRoundTrips(tc), blowups: blowups.length, blowupMax: blowups.length ? blowups[0].input : 0 }),
+    hints: buildHints({ toolCalls: tc.length, duplicates: duplicates.length, emptyOrError, repeatedReads: repeatedReads.length, noProgressStreak: best, modelMs, mcpMs: byBackend.graph.ms, repoToolMs: byBackend.repo.ms, roundTrips: countRoundTrips(tc), blowups: blowups.length, blowupMax: blowups.length ? blowups[0].input : 0 }),
   };
 }
 

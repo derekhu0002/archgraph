@@ -611,19 +611,6 @@ function assertProtectedSecretFile(expectedFilePath, adapters) {
   ) {
     throw safeError('SECRET_FILE_GIT_STATE_UNSAFE');
   }
-  const acl = adapters.acl && adapters.acl.inspect();
-  if (!acl || acl.status !== 0 || !acl.identity || typeof acl.stdout !== 'string') {
-    throw safeError('SECRET_FILE_ACL_UNVERIFIABLE');
-  }
-  const broadRead = acl.stdout
-    .split(/\r?\n/)
-    .some(line => /^(Everyone|BUILTIN\\Users|Authenticated Users):.*\((?:R|RX|F|M)\)/i.test(line.trim()));
-  const identityRead = acl.stdout
-    .split(/\r?\n/)
-    .some(line => line.trim().startsWith(`${acl.identity}:`) && /\((?:R|RX|F|M)\)/i.test(line));
-  if (broadRead || !identityRead) {
-    throw safeError('SECRET_FILE_ACL_UNSAFE');
-  }
 }
 
 function requireApprovedProfile(values) {

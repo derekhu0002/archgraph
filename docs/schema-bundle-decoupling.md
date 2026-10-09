@@ -1,0 +1,298 @@
+﻿# Schema / Ontology Decoupling 鈥?Schema Bundles
+
+Status: implemented on branch `develop-separate-schema`.
+
+## 1. Goal
+
+The ARGO toolchain used to be hard-wired to one modeling language (ArchiMate 3.2 +
+ARGO extensions), duplicated across scripts, the MCP server, prompts and skills.
+This change decouples the schema so that:
+
+1. By default every graph uses the built-in **ArchiMate 3.2** schema (unchanged
+   ArchiMate 3.2 + ARGO behaviour).
+2. A repository that ships its **own schema bundle** under
+   `<workspace>/.argo/schema/` uses that schema instead 鈥?for that repository
+   only.
+
+## 2. The schema bundle
+
+A schema bundle is a directory holding the graph contract:
+
+| File | Required | Purpose |
+| --- | --- | --- |
+| `SystemArchitecture.schema.json` | yes | JSON Schema of the graph document (structure + type enums). |
+| `schema-bundle.config.json` | no | Bundle descriptor (see below). May also be embedded in the schema under the `x-schema-bundle` key. |
+| `schema-bundle.rules.json` | no | Ontology rules: element type metadata, relationship categories, endpoint legality matrix. |
+| `GUIDE.md` (or `guide`) | no | Human-readable guide / viewpoints; replaces `archimate3.2.md` for that repo. |
+
+### Resolution precedence
+
+First bundle whose directory contains `SystemArchitecture.schema.json` wins:
+
+1. `ARGO_SCHEMA_DIR` (host env, explicit override 鈥?used by tests / deployments)
+2. `<workspaceRoot>/.argo/schema/` (the repository's own schema)
+3. `<argoRoot>/schema/` (the default ArchiMate 3.2 bundle)
+
+Implementation: `argo/scripts/schema-bundle.js` 鈫?`resolveSchemaBundle`,
+`resolveTypeEnums`, `loadSchemaBundleAndOntology`.
+
+### `schema-bundle.config.json`
+
+```json
+{
+  "language": "TeamA Ontology",
+  "elementTypeEnumPath": ["$defs", "elementType", "enum"],
+  "relationshipTypeEnumPath": ["$defs", "relationshipType", "enum"],
+  "rules": "schema-bundle.rules.json",
+  "guide": "GUIDE.md",
+  "invariants": {
+    "statementGrammar": true,
+    "endpointMatrix": false,
+    "rootViewName": "SystemArchitecture",
+    "maxElementsPerView": 20
+  }
+}
+```
+
+- `language` 鈥?display name used in validation messages and MCP guidance.
+- `elementTypes` / `relationshipTypes` 鈥?inline arrays, or let them be derived
+  from the schema `$defs` (default keys `archimateElementType` /
+  `archimateRelationshipType`, or `elementType` / `relationshipType`).
+- `rules` 鈥?optional `schema-bundle.rules.json`:
+  ```json
+  {
+    "elementTypeMetadata": { "Team Node": { "layer": "Org", "aspect": "Active" } },
+    "relationshipCategoryByType": { "Depends On": "Dependency" },
+    "relationshipTargetMatrix": { "Depends On": { "Team Node": ["Service Node"] } }
+  }
+  ```
+  When omitted, element metadata is derived from the schema enums and endpoint
+  validation is **permissive** (any known type may relate to any known type).
+- `invariants` 鈥?switching the ArchiMate-specific invariants on/off for the
+  bundle. Defaults for a custom bundle: `statementGrammar: true`,
+  `endpointMatrix: <matrix present>`, `rootViewName: "SystemArchitecture"`,
+  `maxElementsPerView: 15`. Set `rootViewName: null` (no name requirement) and
+  `maxElementsPerView: null` (unlimited) to disable.
+- `deliveryDependencies` 鈥?which relationship types express a delivery
+  dependency and in which direction (`sourceDependsOnTarget` /
+  `targetDependsOnSource`). Consumed by `runArchitectureTests` (delivery-status
+  ordering) and the MCP semantic-edge walk. The default bundle declares the
+  ArchiMate mapping; a custom bundle declares its own (e.g. `Depends On`). If a
+  bundle declares none, tests still run in declaration order (no ordering
+  constraint). Referenced relationship types are validated (fail-closed).
+
+### The actor contract (bundle validation)
+
+The ARGO workflow identifies the agent through an **Actor element** (the wakeup
+gate). A custom schema could rename or omit that type, silently breaking actor
+identification 鈥?so the actor type is part of the bundle contract:
+
+- `schema-bundle.config.json` 鈫?`actorElementType` (string). Default `Business Actor`.
+- Set `"actorElementType": null` to explicitly declare the schema has **no**
+  actor/agent concept (actor identification is then skipped).
+- On load, the bundle is **validated fail-closed**; `bundleValidation.status`
+  becomes `failed` and validation/writes are blocked with a clear message when:
+  - no element/relationship types are defined;
+  - `actorElementType` is not one of the bundle's element types (fix the name
+    or set it to `null`);
+  - the endpoint matrix references unknown relationship/element types.
+
+The resolved `actorElementType` and `bundleValidation` are reported by
+`queryNeo4jGraph {schema:true}`, so an agent resolves them at runtime instead of
+assuming `Business Actor`. Host override remains `ARGO_ACTOR_ELEMENT_TYPE` for
+hosts that cannot query first (e.g. the static OpenCode wakeup hook).
+
+### Built-in default bundle
+
+`argo/schema/schema-bundle.config.json` describes the default bundle (language
+`ArchiMate 3.2`, guide `archimate3.2.md`, endpoint matrix on). Its rule data now
+ships as **data** in `argo/schema/schema-bundle.rules.json` (dialect
+`archimate-class-matrix`), not code: `argo/scripts/archimate32-rules.js` is only
+a legacy fallback for installs without that file. Because the default bundle is
+therefore a plain data bundle, it is **replaceable file-for-file** exactly like a
+custom one 鈥?swapping `~/.argo/schema/` (or `ARGO_SCHEMA_DIR`) changes the
+default language, not just a per-repo override.
+
+### Default graph (fail-closed)
+
+Only the **built-in ArchiMate 3.2 default schema** auto-provides a graph: when
+`design/KG/SystemArchitecture.json` is missing it copies the packaged default
+(`~/.argo/defaults/design/KG/SystemArchitecture.json`).
+
+For **any other schema** (a repository's `.argo/schema` bundle, `ARGO_SCHEMA_DIR`,
+or a replaced default whose dialect is not ArchiMate) the graph is the user's
+own: `argo init` does **not** copy the packaged default (it would not match the
+schema). If the workspace has no graph, init **fails closed**
+(`NO_DEFAULT_GRAPH`, message surfaced). A graph that exists but does not validate
+under the active schema also fails init (the harness validates it).
+
+### Reporting the active schema
+
+The active schema is surfaced wherever a user needs to see it:
+
+- `initializeWorkspace` result 鈫?`schema: { kind, language, dialect, dir, guide, actorElementType, bundleValidation }` (also inside the harness report as `schemaBundle`).
+- `validateSystemArchitecture` prints `鈥?passed 鈥?[schema: <kind> / <language>]`.
+- `queryNeo4jGraph { "schema": true }` 鈫?`schemaKind`, `schemaLanguage`, `schemaDialect`, `actorElementType`, `bundleValidation`.
+
+So after `argo init` / the argo-init skill, the reported `schema.kind` is
+`default` (built-in ArchiMate 3.2) or `workspace` (the repository's own bundle), and
+`schema.language` is its name (e.g. `ArchiMate 3.2` or `Team Graph`).
+
+## 3. Coupling inventory (survey) and resolution
+
+| # | Coupling point | Before | Now |
+| --- | --- | --- | --- |
+| 1 | Schema path resolution | bundled-first; the repo-local `.argo/schema` override was unreachable dead code (`systemarchitecture-mcp-server.js:resolveSchemaPath`, `validateSystemArchitecture.js`) | `schema-bundle.js` resolves `.argo/schema` (and `ARGO_SCHEMA_DIR`) **before** the default |
+| 2 | Element/relationship type enums | duplicated in `SystemArchitecture.schema.json`, `archimate32-rules.js`, `ea-qea-sync-lib.js`, `generateArchitectureDiffPlantuml.js`, `eatool/.../export-to-kg.js` | the **validation path** now reads the resolved bundle's enums; the default bundle's data moved to `schema-bundle.rules.json` (module kept only as fallback) |
+| 3 | Endpoint legality matrix | hardcoded `archimate32-rules.js` only | supplied per bundle (`schema-bundle.rules.json`, class- or type-keyed); default unchanged; custom bundles default to permissive |
+| 4 | `graph-semantics.js` invariants | hardcoded language name, `SystemArchitecture` root view, 15-element limit | parameterised by the ontology (`ontology.invariants`, `ontology.language`) |
+| 5 | MCP guidance strings | hardcoded "ArchiMate 3.2 relationship matrix" / "15 elements" / "SystemArchitecture" | derived from the resolved ontology (`addGuidanceForError(.., ontology)`) |
+| 6 | `queryNeo4jGraph {schema:true}` | read enums from a fixed `$defs.archimateElementType` | reads the resolved bundle; reports `schemaKind`, `schemaLanguage`, `schemaDir`, `guidePath` |
+| 7 | Tool descriptions | named `.argo/schema/SystemArchitecture.schema.json` / ArchiMate | reference the workspace-resolved bundle |
+| 8 | Rules `<Ontology>` | declared ArchiMate only | documents the default + `.argo/schema` override + `ARGO_ACTOR_ELEMENT_TYPE` |
+| 9 | Wakeup gate / actor type | hardcoded `Business Actor` | `ARGO_ACTOR_ELEMENT_TYPE` (default `Business Actor`); gate text notes the schema's actor type |
+| 10 | Skills (`ea-human-reconcile`, `argo-init`) | example Cypher + steps assumed ArchiMate | resolve the workspace language first; `.qea` projection documented as generic (runs for any schema) |
+| 11 | `.qea` projection | always attempted | always attempted; custom types map generically (unknown element 鈫?EA `Class` + stereotype = type name; unknown relationship 鈫?`Association`), so it is NOT skipped for custom schemas |
+| 12 | Env classification | 鈥?| `ARGO_SCHEMA_DIR`, `ARGO_ACTOR_ELEMENT_TYPE` classified as host-only keys |
+
+### Residual couplings (documented, intentional)
+
+- **Neo4j projection labels** (`Element` / `ArchitectureRelationship` / `View`,
+  `ARCHIMATE_RELATES`) are structural, not vocabulary 鈥?they stay fixed so the
+  read/query surface is stable for every ontology.
+- **`runArchitectureTests` delivery ordering** is now schema-declared, not
+  hardcoded: the bundle's `deliveryDependencies` (default bundle = the ArchiMate
+  mapping) drive both the test-runner's delivery status and the MCP
+  semantic-edge dependency walk. A custom schema that declares none runs tests in
+  declaration order (safe, no failure).
+- **EA round-trip tooling** (`ea-qea-sync-lib.js`, `eatool/*`) maps ArchiMate
+  stereotypes to EA shapes precisely. It is not a blocker for custom schemas:
+  unknown element types project to a generic EA `Class` whose stereotype is the
+  type name, and unknown relationship types project to `Association`, so `.qea`
+  projection runs for every schema (no skip).
+
+## 4. Authoring a workspace schema (example)
+
+A complete, runnable example lives in `custom-schema/` (Team Graph ontology:
+`Agent Node` / `Team Node` / `Service Node`; `Assigned To` / `Depends On`).
+It is exercised by `tests/schema-bundle.test.js` ("the shipped
+custom-schema example bundle loads and validates end-to-end").
+
+```
+<repo>/.argo/schema/
+  SystemArchitecture.schema.json   # copy the default and edit $defs enums (or write your own)
+  schema-bundle.config.json                # { "language": "...", "actorElementType": "...", "invariants": {...} }
+  schema-bundle.rules.json                 # optional matrix/metadata
+  GUIDE.md                         # optional guide
+```
+
+The MCP server resolves the bundle per call from the caller's `workspaceRoot`
+(or `ARGO_REPO_ROOT`), so one global installation serves many repositories with
+different schemas.
+
+## 5. Verification
+
+**Schema resolution** 鈥?`tests/schema-bundle.test.js` (17 cases): default
+resolution, workspace override, `ARGO_SCHEMA_DIR` precedence, custom-type
+accept/reject, actor contract / bundle validation, endpoint-matrix on/off,
+custom matrix enforcement, per-view limit, the shipped `custom-schema/` example,
+and the live MCP projection.
+
+**Docker (isolated, node + opencode)** 鈥?`sandbox/schema-decoupling/`:
+
+- `verify.js` 鈥?7 checks: toolchain install, schema acceptance tests + MCP
+  regressions, deployed MCP custom-vs-default resolution, the shipped example,
+  and `opencode mcp list` loading the deployed server.
+- `verify-all.js` 鈥?10 checks: the full surface under **both** schema modes
+  (A custom Team Graph, B default ArchiMate 3.2) against a **real Neo4j + real
+  embedding provider**, each exercising all 19 MCP tools: `initializeWorkspace`
+  (Neo4j sync + semantic lifecycle, and asserts the result reports the active
+  schema kind/language), `getSystemArchitecture` (semantic retrieval),
+  `getIntentElementContext`, `getArchitectureViewContext`, `queryNeo4jGraph`
+  (`{schema:true}` and Cypher), `memory_search`, `validateSystemArchitecture`
+  (before/after writes), every write tool (element/relationship/view
+  add路update路remove, preview, apply), and `runArchitectureTests`. It also
+  replaces the installed `~/.argo/schema` with a custom bundle and proves a
+  plain workspace adopts it (the default is replaceable), proves a custom
+  schema with no graph fails closed (the packaged graph is never copied), and
+  routes a cross-project read (`projectId=soc-demo`) to the federation center
+  (docs/external-graph-query.md). Run:
+
+  ```
+  docker run --rm --entrypoint node \
+    -v "<repo>:/repo:ro" -v "<repo>/results:/results" \
+    -v "<HOME>/.argo/.env:/env/argo.env:ro" \
+    archgraph-schema-verify /opt/verify/verify-all.js
+  ```
+
+The full Node suite is otherwise unchanged (remaining failures pre-date this
+branch: EA-import tooling, cost-log env keys, graph-content drift).
+
+## Incremental extensions (issues #3 / #4 / #5)
+
+Three declarative extensions were added to the bundle contract; all are optional
+and a bundle that does not use them behaves exactly as before.
+
+### 1. Per-element-type attribute contracts (`attributesByElementType`, #3)
+
+`schema-bundle.config.json` may constrain the metadata an element type carries:
+
+```json
+{
+  "attributesByElementType": {
+    "Rule": {
+      "required": ["ruleId", "normativity"],
+      "unique": ["ruleId"],
+      "enumByAttr": { "normativity": ["MUST", "SHOULD", "MAY", "MUST_NOT"] }
+    }
+  }
+}
+```
+
+Enforced natively by `graph-semantics.validateAttributeContracts` (ontology-
+parameterised) through BOTH the read-only validator (`validateSystemArchitecture`)
+and the write path (`validateDocument`, i.e. add/update/remove + preview/apply).
+The bundle itself is validated at load: a contract keyed on an unknown element
+type (or a malformed contract) fails `bundleValidation` closed.
+
+### 2. Bundle inheritance (`extends`, #4)
+
+A Profile may compose on a base bundle instead of forking it:
+
+```json
+{
+  "extends": "default",
+  "addElementTypes": { "Coding Rule": { "class": "Rule", "layer": "Other", "aspect": "Active Structure" } },
+  "addRelationships": {},
+  "overrideMatrix": {}
+}
+```
+
+Resolution is `base -> delta`: the element universe becomes base ∪ add (single
+source of truth), metadata/matrix merge by key, and `dialect` is inherited unless
+overridden. `extends` resolves, in order: the reserved name `default`; a
+**symbolic name the target bundle declares about itself** (`id` / `aliases` in its
+`schema-bundle.config.json`); or a path to another bundle directory. A symbolic
+name is matched against the self-declared `id`/`aliases` of each candidate bundle,
+searched in order: the built-in default bundle (which declares `id:"default"` and
+aliases `archimate3.2` / `archimate` / `base` for backward compatibility), any
+directory listed in the child's `basePaths`, the child's own directory, then its
+immediate sub-directories. A symbolic name that matches nothing falls back to a
+relative path. Framework logic hardcodes no modeling-language name — a bundle's
+identity and aliases are data. Chains are followed with cycle detection. A bundle
+that only declares `extends` (no own `SystemArchitecture.schema.json`) inherits the
+base schema document, and its added types are added to the inherited schema's type
+enum.
+
+### 3. Order-independent mutation batches (#5)
+
+`applySystemArchitectureMutation` / `previewSystemArchitectureMutation` build a
+dependency graph over the batch and apply it in topological order, so a mutation
+may reference an object created later in the same batch (`addElement` joining a
+same-batch view, `addRelationship` whose endpoints are added alongside,
+`addView` parented by a same-batch element). A genuine cycle is rejected with the
+offending id chain; preview and apply share the same `applyMutations` path and the
+final document is still validated as a whole.
+
+Acceptance (executable): `tests/schema-attribute-contracts.test.js`,
+`tests/schema-bundle-extends.test.js`, `tests/mutation-batch-order.test.js`.

@@ -13,6 +13,18 @@ const {
   loadRepositoryArgoEnvironment,
 } = require('./repositoryArgoEnvironment.js');
 const {
+  loadSchemaBundleAndOntology,
+} = require('./schema-bundle.js');
+const {
+  externalQueryRequested,
+  queryExternalRead,
+} = require('./external-graph-query.js');
+const {
+  authorizeWorkspaceWrite,
+  isWriteTool,
+  stripTrustedSessionField,
+} = require('./workspace-write-guard.js');
+const {
   getWorkspaceRoot,
   hasStaticWorkspace,
   resolveArgoPath,
@@ -127,12 +139,12 @@ const TOOLS = [
   },
   {
     name: 'getIntentElementContext',
-    description: 'read-only query that returns an intent subgraph context for one element. Uses ArchiMate semantic dependency traversal with dependencyDepth and dependentDepth, preserving native subgraph elements, relationships, and views.',
+    description: 'read-only query that returns an intent subgraph context for one element. Uses ArchiMate semantic dependency traversal with dependencyDepth and dependentDepth, preserving native subgraph elements, relationships, and views. Output is bounded by maxBytes (default ARGO_CONTEXT_MAX_BYTES or 32000): beyond it non-focus members degrade to identity (id/type/name) with a complete id manifest under truncation, so the host never silently cuts the payload. On a large/hub element leave includeAttributes/includeTestcases off and prefer queryNeo4jGraph to locate ids, then read them narrowly.',
     inputSchema: intentElementContextInputSchema(),
   },
   {
     name: 'previewSystemArchitectureMutation',
-    description: 'Use before apply for complex or risky changes. Performs a dry-run of one or more mutations, runs schema, graph, view, and ArchiMate 3.2 validation, and does not write the graph.',
+    description: 'Use before apply for complex or risky changes. Performs a dry-run of one or more mutations, runs schema, graph, view, and modeling-language validation, and does not write the graph.',
     inputSchema: mutationInputSchema(),
   },
   {
@@ -142,12 +154,18 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureElement',
-    description: 'Use for one element. Creates a new element or adds an existing element to view_ids. view_ids is required so elements never exist outside views.',
+    description: 'Use for one element. Creates a new element or adds an existing element to view_ids. view_ids is required so elements never exist outside views. element.id is OPTIONAL: omit it and the server auto-allocates a unique id (returned in the result); provide it to pin a specific id (must not collide with a different element).',
     inputSchema: {
       type: 'object',
       required: ['element', 'view_ids'],
       properties: {
-        element: { type: 'object' },
+        element: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', description: 'Element id (OPTIONAL). Omit to let the server auto-allocate a unique id (a semantic slug from the name, e.g. "graph-wiki-federation-center", suffixed -002.. if taken). If provided it must not collide with a DIFFERENT element (a same (type,name) match is idempotent reuse).' },
+          },
+          description: 'The element to create/attach. `id` is optional — omit it and the server allocates one (returned in the result).',
+        },
         view_ids: { type: 'array', minItems: 1, items: { type: 'string' } },
         onConflict: { type: 'string', enum: ['reuse', 'allowDuplicate'], description: 'Dedup policy (default reuse). reuse: find-or-create — attach an existing exact (type, name) match; a same-type semantic near-duplicate also blocks creation. allowDuplicate: create anyway (even if a duplicate exists), requires a justification.' },
         justification: { type: 'string', description: 'Required when onConflict is allowDuplicate.' },
@@ -186,7 +204,7 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureRelationship',
-    description: 'Use for one relationship. Creates a new relationship or adds an existing relationship to view_ids. relationship.type is the ArchiMate 3.2 relationship type and is validated against endpoint element types.',
+    description: 'Use for one relationship. Creates a new relationship or adds an existing relationship to view_ids. relationship.type is the ArchiMate 3.2 relationship type and is validated against endpoint element types. relationship.id is OPTIONAL: omit it and the server auto-allocates a unique id (returned in the result).',
     inputSchema: {
       type: 'object',
       required: ['relationship', 'view_ids'],
@@ -230,7 +248,7 @@ const TOOLS = [
   },
   {
     name: 'addArchitectureView',
-    description: 'Use for one view. The graph must have exactly one top-level view named SystemArchitecture; all sub-views must attach to an element with parent_element_id.',
+    description: 'Use for one view. The graph must have exactly one top-level view named SystemArchitecture; all sub-views must attach to an element with parent_element_id. view.view_id is OPTIONAL: omit it and the server auto-allocates a unique view_id (returned in the result).',
     inputSchema: {
       type: 'object',
       required: ['view'],
@@ -330,8 +348,9 @@ function intentElementContextInputSchema() {
       dependentDepth: { type: 'number', description: 'Default: 1. Semantic dependents that rely on the focus element.' },
       associationDepth: { type: 'number', description: 'Default: 1. Association neighbors are expanded at least one layer.' },
       associationNeighborDependencyDepth: { type: 'number', description: 'Default: 0. Optional dependency expansion from association neighbors.' },
-      includeAttributes: { type: 'boolean', description: 'Default: false. Include `attributes` (commit/session/release ledgers) verbatim; omitted by default from this structural read (the focus element always keeps its own).' },
-      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim; omitted by default from this structural read.' },
+      includeAttributes: { type: 'boolean', description: 'Default: false. Include `attributes` (commit/session/release ledgers) verbatim; omitted by default from this structural read (the focus element always keeps its own). On a hub element this ledger can dominate the payload.' },
+      includeTestcases: { type: 'boolean', description: 'Default: false. Include member `testcases` verbatim; omitted by default from this structural read. On a hub element this can be large.' },
+      maxBytes: { type: 'number', description: 'Optional output budget in UTF-8 bytes. Default: ARGO_CONTEXT_MAX_BYTES env or 32000. 0 = unlimited. Above the budget, non-focus members degrade to identity (id/type/name) with a complete id manifest under `truncation`; the payload is never silently truncated by the host.' },
     },
     additionalProperties: false,
   };
@@ -397,6 +416,33 @@ function resolveWorkspaceRoot(args) {
 }
 
 async function callTool(name, args = {}, progressToken = null, dependencies = undefined) {
+  // Cross-project WRITE guard (single choke point for every tool): a write tool
+  // may only target this server's HOME workspace, or a host-designated trusted
+  // session workspace when the process was launched by a trusted broker
+  // (ARGO_WORKSPACE_ROOT_TRUSTED=1). A foreign `workspaceRoot` is rejected
+  // fail-closed before any side effect; READ tools stay ungated so cross-project
+  // reading still works. See workspace-write-guard.js.
+  if (isWriteTool(name, args)) {
+    const decision = authorizeWorkspaceWrite({ tool: name, args, homeRoot: getWorkspaceRoot() });
+    if (!decision.allowed) {
+      return toolResult({
+        status: 'failed',
+        error: {
+          category: decision.category,
+          message: decision.message,
+          tool: decision.tool,
+          homeWorkspaceRoot: decision.homeWorkspaceRoot,
+          requestedWorkspaceRoot: decision.requestedWorkspaceRoot,
+          ...(decision.trustedSessionWorkspaceRoot
+            ? { trustedSessionWorkspaceRoot: decision.trustedSessionWorkspaceRoot }
+            : {}),
+        },
+      });
+    }
+  }
+  // The broker-only field is not part of any tool's schema: honor it above, then
+  // drop it before dispatch so schema validation never sees it.
+  args = stripTrustedSessionField(args);
   loadRepositoryArgoEnvironment(resolveWorkspaceRoot(args));
   try {
     const crash = require('./graph-rag/mcpCrashDiagnostics.js');
@@ -404,6 +450,23 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
     crash.markPhase('tool:' + name);
   } catch {
     // diagnostics are best-effort; never block a tool call
+  }
+  // Cross-project read: a read tool with `projectId` is routed to the federation
+  // center (never silently served from the local graph).
+  if (externalQueryRequested(name, args)) {
+    const result = await queryExternalRead({
+      workspaceRoot: resolveWorkspaceRoot(args),
+      tool: name,
+      args,
+    });
+    // getSystemArchitecture declares an outputSchema, so its result MUST carry
+    // matching structuredContent even on the cross-project path (which bypasses
+    // the systemarchitecture module's own toolResult). A missing
+    // structuredContent makes the MCP client reject the call with -32600.
+    if (name === 'getSystemArchitecture') {
+      return toolResult(result, systemArchitectureMcp.buildGetSystemArchitectureStructuredContent(result));
+    }
+    return toolResult(result);
   }
   if (name === 'initializeWorkspace') {
     const workspace = await initializeWorkspace(resolveWorkspaceRoot(args));
@@ -421,6 +484,10 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
     return toolResult({
       status: report.status,
       workspaceRoot: workspace.workspaceRoot,
+      // The resolved modeling language for this workspace (default ArchiMate 3.2 vs
+      // the repository's own .argo/schema bundle) so init names the active schema.
+      schema: workspace.schema,
+      schemaBundle: report.schemaBundle,
       targetEaName: workspace.targetEaName,
       createdFiles: workspace.createdFiles,
       updatedFiles: workspace.updatedFiles,
@@ -514,6 +581,22 @@ async function initializeWorkspace(workspaceRoot) {
   const graphTargetPath = path.join(workspaceRoot, ...WORKSPACE_GRAPH_PATH_SEGMENTS);
   const graphRelativePath = normalizeRelativePath(path.relative(workspaceRoot, graphTargetPath));
   if (!fs.existsSync(graphTargetPath)) {
+    // Only the built-in ArchiMate 3.2 default schema auto-provides a graph (the
+    // packaged default). For any custom / replaced schema the graph is the user's
+    // own: never copy the packaged (mismatched) graph — fail closed if missing.
+    let ontology = null;
+    try { ontology = loadSchemaBundleAndOntology(workspaceRoot).ontology; } catch { ontology = null; }
+    const usesPackagedDefaultGraph = !!ontology && ontology.kind === 'default' && ontology.dialect === 'archimate-class-matrix';
+    if (!usesPackagedDefaultGraph) {
+      const label = ontology ? `${ontology.kind} / ${ontology.language}` : 'unknown';
+      const error = new Error(
+        `No default graph for the custom schema (${label}): the workspace has no ${graphRelativePath}. ` +
+        'A custom schema must author its own graph; the packaged default graph is not copied because it would not match the schema. ' +
+        `Add ${graphRelativePath} to the workspace.`,
+      );
+      error.code = 'NO_DEFAULT_GRAPH';
+      throw error;
+    }
     const graphSourcePath = resolveGraphDefaultSourcePath();
     await fs.promises.mkdir(path.dirname(graphTargetPath), { recursive: true });
     await fs.promises.copyFile(graphSourcePath, graphTargetPath);
@@ -553,8 +636,28 @@ async function initializeWorkspace(workspaceRoot) {
   } catch (error) {
     qeaFullProjection = { status: 'failed', error: String(error && error.message ? error.message : error) };
   }
+  // Report which schema this workspace resolves to (default ArchiMate 3.2 vs a
+  // repository's own .argo/schema bundle) so the caller/human can see the active
+  // modeling language right after init.
+  let schema;
+  try {
+    const { bundle, ontology } = loadSchemaBundleAndOntology(workspaceRoot);
+    schema = {
+      kind: bundle.kind,
+      language: ontology.language,
+      dialect: ontology.dialect,
+      dir: bundle.relativeDir,
+      guide: bundle.guidePath ? bundle.guidePath.relativePath : null,
+      actorElementType: ontology.actorElementType,
+      bundleValidation: ontology.bundleValidation ? ontology.bundleValidation.status : null,
+    };
+  } catch (error) {
+    schema = { kind: 'unknown', error: String(error && error.message ? error.message : error) };
+  }
+
   return {
     workspaceRoot,
+    schema,
     qeaFullProjection,
     targetEaName,
     createdFiles,
@@ -621,7 +724,7 @@ function normalizeRelativePath(value) {
   return String(value).replace(/\\/g, '/');
 }
 
-function toolResult(payload) {
+function toolResult(payload, structuredContent = undefined) {
   return {
     content: [
       {
@@ -629,11 +732,20 @@ function toolResult(payload) {
         text: JSON.stringify(payload, null, 2),
       },
     ],
+    ...(structuredContent === undefined ? {} : { structuredContent }),
     isError: payload.status === 'failed',
   };
 }
 
 function canonicalInitErrorResult(error) {
+  // Workspace-bootstrap faults (e.g. a schema with no default graph) are not
+  // semantic-lifecycle secrets and must surface their message to the caller.
+  if (error && error.code === 'NO_DEFAULT_GRAPH') {
+    return toolResult({
+      status: 'failed',
+      error: { category: 'WORKSPACE_INIT_FAILED', code: error.code, message: String(error.message) },
+    });
+  }
   const result = semanticOperatorErrorResult(error);
   if (error.safeSemanticLifecycleMessage !== true) return result;
   const payload = Object.freeze({
@@ -768,6 +880,7 @@ async function handleRequest(request, dependencies = undefined) {
         && params.arguments
         && Object.prototype.hasOwnProperty.call(params.arguments, 'query')
         && params.arguments.query
+        && !externalQueryRequested(params.name, params.arguments)
       ) {
         activeDependencies = {
           semanticOperatorJourney:

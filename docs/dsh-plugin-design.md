@@ -109,6 +109,7 @@ flowchart TB
   4. `config.serverPath` 仅作覆盖，符合 config.md「可调值做成配置项、缺省可留」原则，也允许高级用户指向自建的 `~/.argo/scripts/argo-mcp-server.js`。
 - **回退链**（运行时按优先级）：`config.serverPath` → `process.env.ARGO_SERVER_PATH` → `import.meta.url` 相对定位的包内默认值；三者都不可用（定位失败）时 `console.warn` 告警并跳过工具注册（与现有 `dsh-argo-workspace` 的失败行为一致，不挂起会话）。
 - **被否方案**：patch 里写死 `config.serverPath: '<包内绝对路径>'`（不可移植）；继续 `file://` 行（无法 `dsh plugin add` 分发，非 bundle）。
+- **扩展（联邦 Graph MCP，issue #7）**：一个桥插件可挂载**多个** MCP server——`config.servers` 列表，每项含 `id`（注册前缀 `mcp__<id>__`）、`serverPath`/`command`/`args`/`env`、`injectWorkspaceRoot`。除 argo 外再挂 `graph-mcp`：`serverPath: '../argo/mcp-bridges/graph-mcp-stdio.js'`（同样以 `import.meta.url` 相对定位）、`env.GRAPH_MCP_URL`、`injectWorkspaceRoot: false`（不为远端工具注入 `workspaceRoot`）。DSH 因此也能用 `registry_*`/`mirror_*`/`graph_*`，与 Cursor/Doubao 的 stdio 桥一致；旧的单 server（`config.serverPath`）形态仍兼容。
 
 `cordis.patch.yml`（根，新文件）关键片段：
 

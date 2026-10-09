@@ -1,0 +1,908 @@
+{
+  "deckId": "archgraph-coding-business-deck-v5-001",
+  "title": "ArchGraph · Coding Agent 业务价值、应用架构与测评",
+  "subtitle": "以通用业务流程和 Harness 架构为骨架，呈现 ArchGraph 的构建位置、指标映射与现有证据",
+  "audience": "人类伙伴（hudonghua）与项目评审",
+  "evidenceNote": "架构示意逐项映射 ARGO canonical model 的元素与关系。通用 Graph RAG 流程单独标为业界参考。",
+  "pages": [
+    {
+      "id": "p1",
+      "kicker": "01 · 通用业务价值流程",
+      "type": "stateMachine",
+      "title": "Coding Agent 业务价值流程",
+      "subtitle": "Business Layer：跨业务场景的价值活动；先说明“做什么”，再进入实现架构。",
+      "diagram": "p1-state-machine",
+      "key": [
+        {
+          "n": 1,
+          "kgId": "aos-idle",
+          "label": "需求与验收口径",
+          "sub": "目标、约束、完成定义"
+        },
+        {
+          "n": 2,
+          "kgId": "aos-reasoning",
+          "label": "理解与计划",
+          "sub": "拆解任务、确定顺序"
+        },
+        {
+          "n": 3,
+          "kgId": "aos-retrieving",
+          "label": "检索上下文",
+          "sub": "代码、文档、知识图"
+        },
+        {
+          "n": 4,
+          "kgId": "aos-acting",
+          "label": "执行与迭代",
+          "sub": "改代码、用工具、读结果"
+        },
+        {
+          "n": 5,
+          "kgId": "aos-verifying",
+          "label": "验证与人审",
+          "sub": "测试、评审、必要时返工"
+        },
+        {
+          "n": 6,
+          "kgId": "aos-finalizing",
+          "label": "交付与沉淀",
+          "sub": "可验收变更、可复用经验"
+        }
+      ],
+      "takeaway": "衡量目标不是“生成了多少代码”，而是需求是否转成可验证、可接受、可持续改进的结果。",
+      "references": [
+        "视图 uml2-coding-statemachine-view-002",
+        "uml2-coding-running-view-002",
+        "uml2-coding-background-view-002"
+      ],
+      "speakerNotes": "Business Layer 描述跨行业的业务价值活动：明确目标与验收 → 理解与规划 → 获取所需上下文 → 执行与迭代 → 验证与人类校准 → 交付与沉淀。此层不指定文件搜索、RAG 或 Graph RAG 等实现。等待工具/用户、异步任务与停止均是会话执行状态，不等同业务成功。",
+      "modelView": "coding-agent-business-value-flow-001"
+    },
+    {
+      "id": "p2",
+      "kicker": "02 · APPLICATION LAYER / 通用 Harness 架构",
+      "type": "genericFramework",
+      "title": "通用 Coding Agent 应用架构",
+      "subtitle": "Application Layer：Harness 编排应用功能；普通检索、RAG 与 Graph RAG 是可选实现。",
+      "diagram": "p2-generic-framework",
+      "speakerNotes": "本页是 Application Layer 通用架构，前页是 Business Layer 业务活动；垂直映射表示多个应用组件协同支撑一个业务阶段，不是一对一产品部署图。Harness 编排会话、权限、隔离、工具与反馈。上下文访问可按任务选择普通检索（代码搜索/文件/全文）、传统 RAG（切块/向量或词法召回/重排），或 Graph RAG（实体关系/图遍历/子图上下文）。三者是可组合或替代的应用层实现选项；通用 Harness 不必自带 RAG。裁判包括测试、评审与任务指标。",
+      "evidence": [
+        {
+          "label": "人类专家",
+          "text": "界定目标与验收，保留关键决策"
+        },
+        {
+          "label": "Agent Runtime",
+          "text": "规划 → 检索 → 动作 → 验证，按反馈迭代"
+        },
+        {
+          "label": "上下文",
+          "text": "代码、文档、历史决策与可引用知识"
+        },
+        {
+          "label": "工具面",
+          "text": "编辑器 / Shell / Git / 测试 / MCP"
+        },
+        {
+          "label": "Harness",
+          "text": "规则、权限、隔离、回合与工作区"
+        },
+        {
+          "label": "裁判与观测",
+          "text": "测试 / 评审 / 指标 / 可追溯日志"
+        }
+      ],
+      "practiceStrip": [
+        "结构化上下文",
+        "机器可执行的验收",
+        "持续修正生成循环"
+      ],
+      "architectureModes": [
+        {
+          "id": "M1",
+          "name": "普通检索",
+          "detail": "代码搜索 / 文件 / 全文",
+          "when": "精确定位、低结构依赖"
+        },
+        {
+          "id": "M2",
+          "name": "RAG",
+          "detail": "切块 / 向量或词法召回 / 重排",
+          "when": "语义相关、文档型知识"
+        },
+        {
+          "id": "M3",
+          "name": "Graph RAG",
+          "detail": "实体关系 / 图遍历 / 子图上下文",
+          "when": "关系、多跳与来源约束"
+        }
+      ],
+      "modelView": "coding-agent-application-architecture-001"
+    },
+    {
+      "id": "p3",
+      "kicker": "03 · ARCHGRAPH / 两层构建点",
+      "type": "archgraphOverlay",
+      "title": "ArchGraph 在业务层与应用层中的位置",
+      "subtitle": "清楚标出框架边界：Harness 在外按需调用；图谱写入治理、语义检索与结构查询由 ArchGraph 提供。",
+      "diagram": "p3-archgraph-overlay",
+      "speakerNotes": "业务层构建点：Schema/本体把领域词汇和关系显式化；意图图谱沉淀需求、决策、架构、状态、指标、验收与证据；业务阶段、应用能力和Assessment指标可建立关系。应用层构建点：Graph MCP 提供语义/结构/上下文访问与受护栏写入；去重、无损、墓碑、验收测试与commit/path溯源形成知识治理；联邦中心支持发现、授权、按引用跨图读取。普通 Coding Agent 可以不使用 Graph RAG，Graph 是按需能力与治理方案，不是业务流程的替代品。质量维度 coverage/structure/provenance/freshness/redundancy 是拟议评测剖面，并非均已测。",
+      "layers": [
+        {
+          "id": "Business Layer",
+          "name": "领域语义与意图建模",
+          "text": "本体 / Schema → 项目意图图谱 → 阶段·能力·指标关系"
+        },
+        {
+          "id": "Application Layer",
+          "name": "知识访问与图治理接口",
+          "text": "Graph MCP → 语义/结构/子图上下文 → 受控读写"
+        },
+        {
+          "id": "Cross-cutting",
+          "name": "质量、验收与可追溯",
+          "text": "去重·无损·GWT·commit/path·授权引用"
+        }
+      ],
+      "quality": {
+        "title": "超越“搜得准不准”",
+        "items": [
+          "Coverage 覆盖",
+          "Structure 结构",
+          "Provenance 溯源",
+          "Freshness 新鲜度",
+          "Redundancy 冗余"
+        ],
+        "note": "质量剖面已提出；目前未全部量化。"
+      },
+      "modelView": "archgraph-internal-read-write-001"
+    },
+    {
+      "id": "p4",
+      "kicker": "04 · 业务 × 应用 × 指标",
+      "type": "metrics",
+      "title": "业务阶段、应用能力与指标映射",
+      "subtitle": "每个 Assessment 关联到业务活动和应用能力，为结果页提供统一口径。",
+      "diagram": "p5-metrics",
+      "groups": [
+        {
+          "n": 1,
+          "stateLabel": "① Idle",
+          "cn": "空闲",
+          "metrics": [
+            "空闲时长"
+          ],
+          "kgId": "aos-idle"
+        },
+        {
+          "n": 2,
+          "stateLabel": "② Running",
+          "cn": "执行回合",
+          "metrics": [
+            "任务完成成功率",
+            "端到端时延 / 成本"
+          ],
+          "kgId": "aos-machine"
+        },
+        {
+          "n": 3,
+          "stateLabel": "③ Reasoning",
+          "cn": "规划",
+          "metrics": [
+            "计划正确率"
+          ],
+          "kgId": "aos-reasoning"
+        },
+        {
+          "n": 4,
+          "stateLabel": "④ Retrieving",
+          "cn": "检索",
+          "metrics": [
+            "检索召回与排序"
+          ],
+          "kgId": "aos-retrieving"
+        },
+        {
+          "n": 5,
+          "stateLabel": "⑤ Acting",
+          "cn": "工具 / 写图",
+          "metrics": [
+            "工具成功率与轮次",
+            "去重 P/R 与无损率"
+          ],
+          "kgId": "aos-acting"
+        },
+        {
+          "n": 6,
+          "stateLabel": "⑥ Verifying",
+          "cn": "验收",
+          "metrics": [
+            "验收通过率与回归"
+          ],
+          "kgId": "aos-verifying"
+        },
+        {
+          "n": 7,
+          "stateLabel": "⑦ Finalizing",
+          "cn": "提交 / 沉淀",
+          "metrics": [
+            "登记完整率",
+            "记忆准确率与拒答"
+          ],
+          "kgId": "aos-finalizing"
+        },
+        {
+          "n": 8,
+          "stateLabel": "⑧⑨ 等待态",
+          "cn": "等工具 / 等用户",
+          "metrics": [
+            "等待 / 唤醒时延",
+            "请示频率与回环"
+          ],
+          "kgId": "aos-awaiting-result"
+        },
+        {
+          "n": 9,
+          "stateLabel": "⑩⑪ 正交 / 终态",
+          "cn": "后台 / Stopped",
+          "metrics": [
+            "（观测点）"
+          ],
+          "kgId": "aos-stopped"
+        }
+      ],
+      "status": {
+        "measured": 4,
+        "partial": 5,
+        "notMeasured": 11,
+        "note": "measured：检索召回 · 工具成功率 · 等待时延 · 记忆准确率"
+      },
+      "takeaways": [
+        "已定量 4 项，都在『检索 / 执行 / 时延 / 记忆』—— 框架真正提供能力的环节。",
+        "最大空白在整体任务层：8 个业界基准全部未跑，整体成功率只有小样本 partial。",
+        "P0 下一步：SWE-bench Verified / Terminal-Bench，同仓同模型『挂 vs 不挂』制度对照。"
+      ],
+      "takeaway": "骨架已建、进入机制化迭代：先把整体基准补上，再把 partial 逐个升为 measured。",
+      "references": [
+        "aos-as-* measurement-status",
+        "视图 uml2-metric-decomp-* / uml2-metric-tradeoff-view-002"
+      ],
+      "speakerNotes": "指标不是只属于一个层级：业务层定义结果与阶段，应用层提供具体观测点。表中每行将Business Layer环节映射到Application Layer能力，再列相应Assessment指标及当前测量状态。部分映射可能横跨多个阶段；完整20项见附录。当前状态 measured 4 / partial 5 / not_measured 11。",
+      "crosswalk": [
+        {
+          "stage": "理解与计划",
+          "business": "目标拆解、计划形成",
+          "application": "Planner / 任务状态",
+          "metrics": "#3 计划正确率（部分） · #11 任务成功率（部分）"
+        },
+        {
+          "stage": "检索上下文",
+          "business": "获得完成任务所需信息",
+          "application": "Context Access：普通检索 / RAG / Graph RAG",
+          "metrics": "#4 检索召回与排序（实测） · #12 端到端成本（部分）"
+        },
+        {
+          "stage": "执行与写入",
+          "business": "工具行动、修改代码与知识",
+          "application": "Tool Adapter / Graph MCP / Write Governance",
+          "metrics": "#5 工具成功率与轮次（实测） · #6 去重与无损（部分）"
+        },
+        {
+          "stage": "验证与人审",
+          "business": "确认结果符合验收边界",
+          "application": "Machine Judge / Human Review / Harness",
+          "metrics": "#7 验收通过率（部分） · #2 请示回环（未测）"
+        },
+        {
+          "stage": "交付与沉淀",
+          "business": "提交可复用结果与经验",
+          "application": "Finalizer / Memory / Provenance",
+          "metrics": "#9 登记完整率（未测） · #10 记忆准确率（实测）"
+        },
+        {
+          "stage": "等待与异步",
+          "business": "等待工具、人类或后台结果",
+          "application": "Scheduler / Event Loop / Session State",
+          "metrics": "#8 等待唤醒时延（实测） · #1 空闲时长（未测）"
+        }
+      ],
+      "modelViews": [
+        "coding-agent-business-metrics-operations-001",
+        "coding-agent-business-metrics-delivery-001",
+        "coding-agent-business-benchmarks-1-001",
+        "coding-agent-business-benchmarks-2-001"
+      ]
+    },
+    {
+      "id": "p5",
+      "kicker": "05 · APPLICATION LAYER / 知识访问选项",
+      "type": "pipeline",
+      "title": "Graph RAG 通用检索流程：写入、索引与查询",
+      "subtitle": "业界参考流程；各实现会省略、替换或扩展其中部分阶段。",
+      "diagram": "p6-pipeline",
+      "stages": [
+        {
+          "id": "L1",
+          "name": "数据接入与治理",
+          "sub": "来源 / 权限 / 版本",
+          "phase": "写入"
+        },
+        {
+          "id": "L2",
+          "name": "解析与切块",
+          "sub": "chunk / summary 粒度",
+          "phase": "写入"
+        },
+        {
+          "id": "L3",
+          "name": "嵌入与索引",
+          "sub": "向量 + 关键词 + 双投影",
+          "phase": "写入"
+        },
+        {
+          "id": "L4",
+          "name": "图构建与对齐",
+          "sub": "实体关系 + 本体对齐",
+          "phase": "写入"
+        },
+        {
+          "id": "L5",
+          "name": "召回",
+          "sub": "向量 / BM25 / 图遍历",
+          "phase": "检索"
+        },
+        {
+          "id": "L6",
+          "name": "融合与重排",
+          "sub": "RRF + 交叉 / LLM 重排",
+          "phase": "检索"
+        },
+        {
+          "id": "L7",
+          "name": "生成与 grounding",
+          "sub": "引用可追溯 + 拒答",
+          "phase": "生成与闭环"
+        },
+        {
+          "id": "L8",
+          "name": "评估与迭代",
+          "sub": "反馈 → 索引 / 权重 / 提示",
+          "phase": "生成与闭环"
+        }
+      ],
+      "coverage": [
+        {
+          "id": "L1",
+          "status": "covered",
+          "metrics": "#6·#9·#12",
+          "note": "来源、版本与写入治理"
+        },
+        {
+          "id": "L2",
+          "status": "replaced",
+          "metrics": "#4",
+          "note": "图谱元素/关系作为语义单元；不做固定文本切块"
+        },
+        {
+          "id": "L3",
+          "status": "covered",
+          "metrics": "#4",
+          "note": "语义向量、全文与结构访问"
+        },
+        {
+          "id": "L4",
+          "status": "partial",
+          "metrics": "#3·#7",
+          "note": "本体对齐；社区索引部分覆盖"
+        },
+        {
+          "id": "L5",
+          "status": "covered",
+          "metrics": "#4",
+          "note": "语义、词法、结构召回"
+        },
+        {
+          "id": "L6",
+          "status": "covered",
+          "metrics": "#4·#8",
+          "note": "融合与重排"
+        },
+        {
+          "id": "L7",
+          "status": "covered",
+          "metrics": "#10",
+          "note": "依据/证据、可追溯回答与拒答"
+        },
+        {
+          "id": "L8",
+          "status": "covered",
+          "metrics": "#5·#10·#11",
+          "note": "评估与反馈回流"
+        }
+      ],
+      "takeaway": "Graph RAG 是应用层的可选知识访问能力：以图结构扩展上下文；知识建模与写入治理决定它是否长期有效。",
+      "references": [
+        "Microsoft GraphRAG indexing dataflow",
+        "Microsoft GraphRAG query overview"
+      ],
+      "speakerNotes": "通用 Graph RAG 写入/索引与查询流程示意，节点与 Triggering 关系对应 ARGO 视图 generic-graph-rag-end-to-end-001。具体框架可能不使用图社区、LLM 抽取或混合召回，流程不是某产品实现规格。业界参考：Microsoft GraphRAG indexing dataflow https://github.com/microsoft/graphrag/blob/main/docs/index/default_dataflow.md ; query overview https://microsoft.github.io/graphrag/query/overview/ 。",
+      "modelView": "generic-graph-rag-end-to-end-001",
+      "pipeline": [
+        [
+          "graphrag-flow-ingest-001",
+          "知识写入与解析"
+        ],
+        [
+          "graphrag-flow-extract-001",
+          "实体关系抽取"
+        ],
+        [
+          "graphrag-flow-index-001",
+          "图谱与索引构建"
+        ],
+        [
+          "graphrag-flow-query-001",
+          "查询解析与改写"
+        ],
+        [
+          "graphrag-flow-retrieve-001",
+          "向量词法图遍历召回"
+        ],
+        [
+          "graphrag-flow-rerank-001",
+          "结果融合与重排"
+        ],
+        [
+          "graphrag-flow-context-001",
+          "上下文组装与溯源"
+        ],
+        [
+          "graphrag-flow-generate-001",
+          "生成回答与反馈"
+        ]
+      ]
+    },
+    {
+      "id": "p6",
+      "kicker": "06 · 已有提升与待补证据",
+      "type": "results",
+      "title": "测评结果：局部改善已见，整体优势待同口径验证",
+      "subtitle": "检索与记忆有内部证据；整体 Coding 基准和知识质量仍需补测。",
+      "diagram": "p6-results",
+      "status": {
+        "measured": 4,
+        "partial": 5,
+        "notMeasured": 11,
+        "note": "measured：检索召回 · 工具成功率 · 等待时延 · 记忆准确率"
+      },
+      "kpis": [
+        {
+          "v": "94.6 → 98.7",
+          "label": "检索 r@1（向量 → 重排）",
+          "note": "r@5 99.4 · MRR 0.997"
+        },
+        {
+          "v": "2.0–2.5s",
+          "label": "读路径时延",
+          "note": "写 ~1.1s"
+        },
+        {
+          "v": "5.7ms",
+          "label": "记忆检索",
+          "note": "压缩 97% · 4890 token / 查询"
+        },
+        {
+          "v": "−43% / −39%",
+          "label": "10 题试跑 · 工具调用 / 轮次",
+          "note": "ON 组 10/10；token −18%、工具 −43%、轮次 −39%"
+        }
+      ],
+      "pilotCaveat": "OFF 组 grep 失败并触发慢速回退，成本基线受污染；本轮差值仅作试跑观察，不据此声称普遍降本。",
+      "comparisons": [
+        {
+          "label": "内部检索对比",
+          "value": "R@1 94.6 → 98.7",
+          "note": "向量基线 → 重排；R@5 99.4，MRR 0.997"
+        },
+        {
+          "label": "端到端 Coding 基准",
+          "value": "8 项尚未运行",
+          "note": "SWE-bench / Terminal-Bench 等；不做伪比较"
+        },
+        {
+          "label": "知识库质量",
+          "value": "已定义评测维度",
+          "note": "覆盖/结构/溯源/新鲜度/冗余尚未全部量化"
+        }
+      ],
+      "next": "下一步：同任务同Harness评估普通检索 / RAG / Graph RAG；同步补整体Coding基准与知识质量长期曲线。",
+      "speakerNotes": "按应用能力呈现测评：Context Access 检索R@1 94.6→98.7（同项目向量基线到重排）；MCP/工具成功率10/10来自自建小样本；记忆题集31/31，拒答正确率100%；读路径2.0–2.5s、写约1.1s。10题A/B差值工具−43%、轮次−39%、token−18%受OFF组grep失败与慢速回退污染，仅方向性观察。不能由局部检索提升推导总体Coding成功率提升；8项整体基准未运行。下一步同模型/任务/Harness做挂载Graph与不挂载的对照，并追踪知识覆盖/结构/溯源/新鲜度/冗余。\n专家提供项目地图、可解释的把控与评审，是本项目的设计洞察；低年资工程师借此逐步学习领域本体属于尚未测量的潜在价值。图遍历在关系密集、多跳问题上有明确表达优势，但当前没有可与业界比较的多跳 Recall 数据，因此不宣称 Graph RAG 普遍优于普通检索或 RAG。"
+    },
+    {
+      "id": "p7",
+      "kicker": "07 · 组织级知识图谱",
+      "type": "federation",
+      "title": "联邦式意图图谱：自治项目通过引用协作",
+      "subtitle": "中心管理成员与授权；成员保有自己的图谱，读取返回引用。",
+      "diagram": "p8-federation",
+      "benefits": [
+        {
+          "n": 1,
+          "head": "质量按领域专业化",
+          "text": "谁的业务谁建模、谁验收"
+        },
+        {
+          "n": 2,
+          "head": "闭环且地基已铺好",
+          "text": "MCP 已代做去重 / 无损 / 结构校验"
+        },
+        {
+          "n": 3,
+          "head": "统一权限与授权",
+          "text": "中心一处管控，默认拒绝"
+        }
+      ],
+      "status": [
+        {
+          "k": "已注册成员",
+          "v": "23"
+        },
+        {
+          "k": "已授权关系",
+          "v": "45"
+        },
+        {
+          "k": "跨项目读",
+          "v": "soc-demo 实读 386 元素"
+        }
+      ],
+      "members": [
+        "archgraph",
+        "graph-wiki",
+        "abot",
+        "my-army",
+        "HarmonyOS-Dev-Standards",
+        "SOC-DEMO"
+      ],
+      "takeaway": "领域自治保证质量专业；中心统一授权、默认拒绝；组合即组织级知识库，无需合并图谱。",
+      "references": [
+        "design-federated-intent-graph-001",
+        "overseer-federation-vision-001",
+        "docs/external-graph-query.md"
+      ],
+      "speakerNotes": "联邦架构依据 federation registry 和 external graph query：中心维护成员、能力、接口与授权元数据；跨成员读取返回引用，项目图谱仍是其唯一事实源。当前快照：23 个成员、45 条授权关系，SOC-DEMO 实读 386 个元素。组织级结果来自互操作，不要求合并各项目图。\n图中组件、服务、数据对象和关系对齐视图 federated-intent-graph-architecture-001；“Access”表达经授权读取，“Federated Graph Reference”指向成员图，不表示中心合并或保存副本。",
+      "modelView": "federated-intent-graph-architecture-001"
+    },
+    {
+      "id": "p8",
+      "kicker": "附录 A · 指标明细",
+      "type": "appendixMetrics",
+      "title": "20 项指标：映射关系、当前结果与下一步",
+      "subtitle": "指标全集落在业务流程和应用能力上；“未测”表示证据缺口。",
+      "diagram": "p9-metric-detail",
+      "metrics": [
+        {
+          "n": 1,
+          "group": "状态级",
+          "name": "空闲时长",
+          "kgId": "aos-as-idle",
+          "state": "aos-idle",
+          "status": "not_measured",
+          "result": "尚未采集",
+          "benchmark": "无统一口径",
+          "action": "需会话时间戳埋点"
+        },
+        {
+          "n": 2,
+          "group": "状态级",
+          "name": "请示频率与回环",
+          "kgId": "aos-as-hitl",
+          "state": "aos-awaiting-user",
+          "status": "not_measured",
+          "result": "尚未采集",
+          "benchmark": "τ-bench 交互",
+          "action": "从会话日志统计"
+        },
+        {
+          "n": 3,
+          "group": "执行",
+          "name": "计划正确率",
+          "kgId": "aos-as-plan",
+          "state": "aos-reasoning",
+          "status": "partial",
+          "result": "navigation 20/20（代理）",
+          "benchmark": "PlanBench",
+          "action": "建计划质量题集"
+        },
+        {
+          "n": 4,
+          "group": "检索",
+          "name": "检索召回与排序",
+          "kgId": "aos-as-retrieve",
+          "state": "aos-retrieving",
+          "status": "measured",
+          "result": "r@1 94.6→98.7 · MRR 0.997",
+          "benchmark": "GraphRAG 80–95",
+          "action": "补多跳 Recall"
+        },
+        {
+          "n": 5,
+          "group": "执行",
+          "name": "工具成功率与轮次",
+          "kgId": "aos-as-tool",
+          "state": "aos-acting",
+          "status": "measured",
+          "result": "成功率 100% · 轮次 −39%",
+          "benchmark": "各 Harness 自报",
+          "action": "扩到 50+ 题集"
+        },
+        {
+          "n": 6,
+          "group": "写入",
+          "name": "去重 P/R 与无损率",
+          "kgId": "aos-as-write",
+          "state": "aos-acting",
+          "status": "partial",
+          "result": "L1 阈值 0.85（假阳性 0.85–0.89）",
+          "benchmark": "业界少有",
+          "action": "建 P/R 套件"
+        },
+        {
+          "n": 7,
+          "group": "验收",
+          "name": "验收通过率与回归",
+          "kgId": "aos-as-verify",
+          "state": "aos-verifying",
+          "status": "partial",
+          "result": "AT 12/12 · 回归 38/38",
+          "benchmark": "验证是瓶颈",
+          "action": "AT 覆盖率守护"
+        },
+        {
+          "n": 8,
+          "group": "等待",
+          "name": "等待 / 唤醒时延",
+          "kgId": "aos-as-wait",
+          "state": "aos-awaiting-result",
+          "status": "measured",
+          "result": "读 2.0–2.5s · 写 1.1s",
+          "benchmark": "GraphRAG 秒级",
+          "action": "补唤醒时延"
+        },
+        {
+          "n": 9,
+          "group": "沉淀",
+          "name": "提交登记完整率",
+          "kgId": "aos-as-commit",
+          "state": "aos-finalizing",
+          "status": "not_measured",
+          "result": "无统计",
+          "benchmark": "业界无",
+          "action": "由台账脚本统计"
+        },
+        {
+          "n": 10,
+          "group": "沉淀",
+          "name": "记忆准确率与拒答",
+          "kgId": "aos-as-memory",
+          "state": "aos-finalizing",
+          "status": "measured",
+          "result": "100%(31/31) · 拒答 100%",
+          "benchmark": "LongMemEval",
+          "action": "对齐公开基准"
+        },
+        {
+          "n": 11,
+          "group": "整体",
+          "name": "任务完成成功率",
+          "kgId": "aos-as-success",
+          "state": "aos-machine",
+          "status": "partial",
+          "result": "小样本 31/31 · 20/20",
+          "benchmark": "SWE-bench 70–76%",
+          "action": "coding 闭环基准"
+        },
+        {
+          "n": 12,
+          "group": "整体",
+          "name": "端到端时延 / 成本",
+          "kgId": "aos-as-e2e",
+          "state": "aos-machine",
+          "status": "partial",
+          "result": "读 2.0–2.5s · 4890 token/查询",
+          "benchmark": "口径不一",
+          "action": "成本-召回曲线"
+        },
+        {
+          "n": 13,
+          "group": "业界基准",
+          "name": "SWE-bench Resolved%",
+          "kgId": "aos-as-swebench",
+          "state": "aos-machine",
+          "status": "not_measured",
+          "result": "未跑",
+          "benchmark": "顶尖 70–76%",
+          "action": "E2 制度对照"
+        },
+        {
+          "n": 14,
+          "group": "业界基准",
+          "name": "SWE-bench Verified",
+          "kgId": "aos-as-sweverified",
+          "state": "aos-machine",
+          "status": "not_measured",
+          "result": "未跑",
+          "benchmark": "同上",
+          "action": "同上（优先）"
+        },
+        {
+          "n": 15,
+          "group": "业界基准",
+          "name": "Terminal-Bench",
+          "kgId": "aos-as-terminalbench",
+          "state": "aos-machine",
+          "status": "not_measured",
+          "result": "未跑",
+          "benchmark": "换 Harness 52.8→66.5",
+          "action": "接入并出数"
+        },
+        {
+          "n": 16,
+          "group": "业界基准",
+          "name": "HumanEval / MBPP",
+          "kgId": "aos-as-codegen",
+          "state": "aos-machine",
+          "status": "not_measured",
+          "result": "未跑",
+          "benchmark": "函数级代码",
+          "action": "低优先"
+        },
+        {
+          "n": 17,
+          "group": "业界基准",
+          "name": "LiveCodeBench",
+          "kgId": "aos-as-livecodebench",
+          "state": "aos-machine",
+          "status": "not_measured",
+          "result": "未跑",
+          "benchmark": "防污染",
+          "action": "低优先"
+        },
+        {
+          "n": 18,
+          "group": "业界基准",
+          "name": "GAIA",
+          "kgId": "aos-as-gaia",
+          "state": "aos-machine",
+          "status": "not_measured",
+          "result": "未跑",
+          "benchmark": "通用 Agent",
+          "action": "中优先"
+        },
+        {
+          "n": 19,
+          "group": "业界基准",
+          "name": "τ-bench pass^k",
+          "kgId": "aos-as-taubench",
+          "state": "aos-machine",
+          "status": "not_measured",
+          "result": "未跑",
+          "benchmark": "工具-用户交互",
+          "action": "中优先"
+        },
+        {
+          "n": 20,
+          "group": "业界基准",
+          "name": "AgentBench",
+          "kgId": "aos-as-agentbench",
+          "state": "aos-machine",
+          "status": "not_measured",
+          "result": "未跑",
+          "benchmark": "多环境",
+          "action": "中优先"
+        }
+      ],
+      "takeaway": "完整口径与出处见意图图谱 aos-as-* 元素属性；本页为参考附录，非汇报主线。",
+      "references": [
+        "aos-as-* measurement-* 属性即本页数据源"
+      ],
+      "speakerNotes": "完整指标表依据意图图谱 aos-as-* measurement-status / measurement-result；状态与结果在生成前逐项对照。公开基准区间仅用于比较口径，不替代本项目实测。\n业务阶段映射和应用能力映射分别来自四个 canonical 指标子视图。公开基准数字仅作口径背景，未在同一模型/任务/Harness 下运行时不作性能比较。"
+    },
+    {
+      "id": "p9",
+      "kicker": "附录 B · 业界证据",
+      "type": "industryEvidence",
+      "title": "业界实践提示：专家帮助 Agent 在生产级项目中工作",
+      "subtitle": "案例启发我们把专家脑中的项目地图变成可共享、可检查的外部模型。",
+      "diagram": "p9-evidence",
+      "pains": [
+        {
+          "n": 1,
+          "big": "4×",
+          "head": "重复代码块",
+          "line": "GitClear 2020–2024 样本；不能单独归因于 AI"
+        },
+        {
+          "n": 2,
+          "big": "30%",
+          "head": "几乎不信任 AI 代码",
+          "line": "DORA 2025 · 30% 对 AI 生成代码信任偏低"
+        },
+        {
+          "n": 3,
+          "big": "+91%",
+          "head": "代码评审时间",
+          "line": "Faros 高 AI 采用团队 · PR 评审时间 +91%"
+        },
+        {
+          "n": 4,
+          "big": "−19%",
+          "head": "专家实测反而更慢",
+          "line": "METR RCT · 16 位资深开源开发者 · 早期 2025 工具"
+        }
+      ],
+      "cases": [
+        {
+          "n": 1,
+          "head": "OpenAI · Harness Engineering",
+          "metric": "3 人 · 5 个月 · ~100 万行 · 手写 0",
+          "line": "AGENTS.md 指向 docs/；用 linter 固化品味"
+        },
+        {
+          "n": 2,
+          "head": "Bun · Zig→Rust 整体移植",
+          "metric": "11 天 · ~6,700 commits · ~$165k",
+          "line": "先写 PORTING.md，再并行 ~64 个 Agent"
+        },
+        {
+          "n": 3,
+          "head": "Anthropic · 代码迁移六步法",
+          "metric": "先建『裁判』，再翻译",
+          "line": "不要修代码，要修产生代码的循环"
+        },
+        {
+          "n": 5,
+          "head": "OpenAI · Codex CLI 原生重写",
+          "metric": "≈ 95.7% Rust",
+          "line": "整框架换语言，已由 Agent 承担主体"
+        }
+      ],
+      "speakerNotes": "业界信号与工程案例只用于提出问题、总结可复用做法，不可合并成单一效果预测。\n来源与口径：\nGitClear, 2025 report, 211 million changed lines across 2020–2024; duplicate-code trend is observational and does not establish AI as the sole cause: https://staging2.gitclear.com/ai_assistant_code_quality_2025_research\nDORA 2025, 30% report little or no trust in AI-generated code: https://dora.dev/insights/managing-ai-dependency/\nFaros AI, telemetry across 1,255 teams and 10,000+ developers; high-adoption teams showed PR review time +91% and PRs +98%: https://www.faros.ai/blog/ai-software-engineering\nMETR randomized controlled trial: 16 experienced open-source developers, 246 tasks, early-2025 tools; measured 19% slower while participants estimated 20% faster: https://metr.org/Early_2025_AI_Experienced_OS_Devs_Study-paper.pdf\nThese sources use different methods and populations; do not treat them as one causal estimate.\n来源：OpenAI Harness Engineering (3 engineers, about five months, roughly one million lines, no manually written code): https://openai.com/index/harness-engineering/\nBun Rust rewrite (11 days, 6,778 commits including merges, about $165,000 API-price estimate): https://bun.com/blog/bun-in-rust\nAnthropic large-scale migration six-step method: https://claude.com/resources/articles/ai-code-migration\nCodex CLI native rewrite discussion: https://github.com/openai/codex/discussions/1174\nDHH TerminalTextEffects figure is a reported single demonstration, not a controlled comparison; it is not used to infer typical productivity.\nOpenAI Harness Engineering 案例：三名工程师在约五个月内由 Codex 产出约一百万行代码，团队报告没有手写代码；文章强调人类设计环境、定义意图与架构、建立反馈机制。这里将“专家脑中有项目地图”作为对实践的解释，不是文章原话。来源：https://openai.com/index/harness-engineering/ 。"
+    }
+  ],
+  "footerNote": "ArchGraph · 本页内容与意图图谱同源（元素 id 见各页『依据』）",
+  "designVersion": "4.0",
+  "designDirection": {
+    "canvas": "16:9",
+    "style": "technical editorial",
+    "palette": {
+      "ink": "#152338",
+      "paper": "#F7F5EF",
+      "blue": "#315EF6",
+      "teal": "#14866D",
+      "orange": "#C65D32",
+      "muted": "#64748B",
+      "rule": "#D9DEE5"
+    },
+    "principles": [
+      "每页一种主要构图，减少重复卡片",
+      "图谱与数据图使用可编辑 PowerPoint 形状和表格",
+      "主线区分 Agent 回合与 Graph RAG 支撑流程"
+    ]
+  },
+  "revisionNote": "按人类伙伴 2026-10-07 反馈重排：将业务价值流程定位为 Business Layer，将通用 Coding Agent/Harness 定位为 Application Layer；RAG 与 Graph RAG 是应用层按需选择的知识访问方式；指标逐项关联业务环节与应用能力。",
+  "modelViews": {
+    "business": "coding-agent-business-value-flow-001",
+    "application": "coding-agent-application-architecture-001",
+    "archgraph": "archgraph-internal-read-write-001",
+    "metrics": [
+      "coding-agent-business-metrics-operations-001",
+      "coding-agent-business-metrics-delivery-001",
+      "coding-agent-business-benchmarks-1-001",
+      "coding-agent-business-benchmarks-2-001"
+    ],
+    "genericGraphRag": "generic-graph-rag-end-to-end-001",
+    "federation": "federated-intent-graph-architecture-001"
+  }
+}
