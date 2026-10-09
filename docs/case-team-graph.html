@@ -62,8 +62,8 @@
           </tr>
           <tr>
             <td><code>.argo/schema/schema-bundle.config.json</code></td>
-            <td>可选</td>
-            <td>打包描述：语言名、<code>actorElementType</code>、不变量、<code>rules</code> 指针等。声明 <code>extends</code> 时，<strong>只放这一个 config 就够</strong>。</td>
+            <td>独立本体包<strong>必需</strong>；<code>extends</code> 时唯一必需</td>
+            <td>打包描述：语言名、<code>actorElementType</code>、不变量、<code>rules</code> 指针等。独立本体包<strong>必须</strong>在这里把 <code>actorElementType</code> 设为你的某个元素类型（或显式 <code>null</code> 表示无 actor），否则加载/校验 <strong>fail-closed</strong>；声明 <code>extends</code> 时，<strong>只放这一个 config 就够</strong>。</td>
           </tr>
           <tr>
             <td><code>.argo/schema/schema-bundle.rules.json</code></td>
@@ -77,8 +77,32 @@
           </tr>
         </tbody>
       </table>
+      <h3>两条起步路线：继承默认 vs. 完全自定义</h3>
+      <table>
+        <thead>
+          <tr><th>起步方式</th><th>你要写的东西</th><th>适用场景</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>extends: "default"</code> + config</td>
+            <td>只加 <code>.argo/schema/schema-bundle.config.json</code>，用 <code>addElementTypes</code> / <code>addRelationships</code>（可选 <code>overrideMatrix</code>）在默认之上追加自己的类型；<strong>无需</strong>自带 schema 文件。</td>
+            <td>大部分类型沿用 ArchiMate 3.2 + ARGO 扩展，只想加几个业务域类型。</td>
+          </tr>
+          <tr>
+            <td>独立全量 schema</td>
+            <td>放完整的 <code>.argo/schema/SystemArchitecture.schema.json</code>，编辑它的两个 <code>$defs</code> 枚举数组；同时<strong>必须</strong>用 <code>schema-bundle.config.json</code> 声明 <code>actorElementType</code>（取你的某个元素类型，或显式 <code>null</code>），否则加载/校验 fail-closed。<code>schema-bundle.rules.json</code> 可选（省略则端点校验宽松）。</td>
+            <td>完全自定义词表，不需要 ArchiMate 类型。</td>
+          </tr>
+        </tbody>
+      </table>
+
       <p class="lead">
-        类型枚举写在 schema 的 <code>$defs</code> 里，配置默认从这两把键读取（也可在 config 里用
+        <strong>要建模一个不是 Team Graph 的领域，就改下面这两个 <code>$defs</code> 枚举数组里的字符串</strong>：
+        本案例的 <code>SystemArchitecture.schema.json</code> 与内置默认相比，<strong>唯一的结构性差异</strong>就是
+        <code>$defs</code> 里的两个 <code>enum</code> 数组（<code>title</code> / <code>description</code> 只是文案，属于非结构差异）。
+        把 <code>Agent Node / Team Node / Service Node</code> 换成你的元素类型、把
+        <code>Depends On / Assigned To</code> 换成你的关系类型即可；数组里每个名字都会成为可用的类型。
+        类型枚举默认从这两把键读取（也可在 config 里用
         <code>elementTypeEnumPath</code> / <code>relationshipTypeEnumPath</code> 指定别的键）：
       </p>
       <pre><code>"$defs": {
@@ -91,16 +115,27 @@
     "enum": ["Depends On", "Assigned To"]
   }
 }</code></pre>
+      <p class="lead">
+        即：<code>archimateElementType.enum</code> 换成你的元素类型列表，
+        <code>archimateRelationshipType.enum</code> 换成你的关系类型列表。
+      </p>
+      <div class="note">
+        <strong>关系类型还要给出合法端点。</strong> 新增/改名关系类型后，要么在
+        <code>schema-bundle.rules.json</code> 的 <code>relationshipTargetMatrix</code> 里声明「谁能连谁」，
+        要么把 <code>schema-bundle.config.json</code> 的 <code>invariants.endpointMatrix</code> 设为 <code>false</code>
+        走宽松校验。元素类型则必须让 <code>actorElementType</code> 落在枚举里（或显式设为 <code>null</code>）。
+      </div>
 
       <h3>步骤 1a：把本体包拷进你的项目</h3>
-      <pre><code># 把仓库里的示例本体包拷进你的项目（Windows 用 Copy-Item -Recurse）
-cp -r custom-schema/.argo &lt;your-repo&gt;/.argo</code></pre>
+      <pre><code># 只拷 schema 本体包，不要连 .argo/temp/ 这类运行时临时文件一起拷（Windows 用 Copy-Item -Recurse）
+mkdir -p &lt;your-repo&gt;/.argo
+cp -r custom-schema/.argo/schema &lt;your-repo&gt;/.argo/schema</code></pre>
 
       <h3>步骤 1b：自己创建图谱文件（自定义本体下必需）</h3>
       <div class="note">
         <strong>关键约束（fail-closed）：</strong> 自定义本体时 <code>argo init</code> <strong>不会</strong>自动生成初始图谱 ——
         因为打包的默认图不匹配你的本体。你必须<strong>先自己创建</strong> <code>design/KG/SystemArchitecture.json</code>，
-        否则初始化会明确失败（<code>NO_DEFAULT_GRAPH</code>）。这一步必须在<strong>任何 MCP 写入之前</strong>完成。
+        否则初始化会明确失败（<code>NO_DEFAULT_GRAPH</code>）。这一步必须在<strong>任何 MCP 写入之前</strong>完成，也是<strong>唯一</strong>被允许手写图谱文件的一步；图谱建立后，后续修改一律走 MCP（见步骤 2）。
       </div>
       <p class="lead">
         直接照抄示例内容（与
@@ -260,8 +295,9 @@ cp -r custom-schema/.argo &lt;your-repo&gt;/.argo</code></pre>
       <span class="step-badge">STEP 2 · 建元素</span>
       <h2>视图、元素、关系一次提交</h2>
       <p class="lead">
-        所有写入都通过 MCP。这里给出<strong>一个真正可运行的批次</strong>：用
-        <code>applySystemArchitectureMutation</code> 把<strong>根视图、4 个元素、3 条关系放进同一次调用</strong>，
+        <strong>图谱建立之后</strong>，所有写入都通过 MCP，<strong>不要手改 JSON 文件</strong>（步骤 1b 的初始 bootstrap 是唯一例外）。让 agent 调用
+        <code>applySystemArchitectureMutation</code>，传入<strong>下面这个真正可运行的批次</strong>（它不是 shell 命令）：
+        把<strong>根视图、4 个元素、3 条关系放进同一次调用</strong>，
         由服务端按依赖关系做拓扑排序、原子写入。注意 <code>mutations</code> 的<strong>第一项是 <code>addView</code></strong>：
         先把根视图 <code>view-root</code> 建出来，后面的元素再用 <code>view_ids: ["view-root"]</code> 挂进去 ——
         <strong>绝不出现「元素引用了还不存在的视图」</strong>。
@@ -386,9 +422,10 @@ cp -r custom-schema/.argo &lt;your-repo&gt;/.argo</code></pre>
       <span class="step-badge">STEP 3 · 建关系</span>
       <h2>三条关系（上面同一批次里的片段）</h2>
       <p class="lead">
-        关系也走同样的 <code>addRelationship</code> mutation。每条关系的 <code>statement</code> 必须符合
+        关系也走同样的方式：让 agent 调用 <code>applySystemArchitectureMutation</code>（或单独调用
+        <code>addArchitectureRelationship</code>）。每条关系的 <code>statement</code> 必须符合
         <code>&lt;source&gt; --(&lt;type&gt;)--&gt; &lt;target&gt;</code> 语法，且端点要落在端点矩阵允许的范围里。
-        下面是上面那个批次里三条关系的片段：
+        下面是上面那个批次里三条关系的片段（是调用参数，不是 shell）：
       </p>
       <pre><code>// 关系 1：Agent 001 --(Assigned To)--&gt; Team A
 {
@@ -429,7 +466,8 @@ cp -r custom-schema/.argo &lt;your-repo&gt;/.argo</code></pre>
       <h2>根视图与成员纳入</h2>
       <p class="lead">
         根视图在批次的第一项就已创建（<code>view-root</code> / <code>SystemArchitecture</code>）。
-        批次里的每个元素和关系都通过自己的 <code>view_ids</code> 纳入其中；等价地，你也可以在创建视图时直接写出
+        批次里的每个元素和关系都通过自己的 <code>view_ids</code> 纳入其中；等价地，你也可以让 agent 单独调用
+        <code>addArchitectureView</code>，在创建视图时直接写出
         <code>included_elements</code> 与 <code>included_relationships</code>：
       </p>
       <pre><code>{
@@ -468,12 +506,11 @@ cp -r custom-schema/.argo &lt;your-repo&gt;/.argo</code></pre>
       </p>
 
       <h3>① 校验图谱</h3>
-      <pre><code>// MCP 工具：validateSystemArchitecture
-{}  // 无参数，校验当前工作区图谱</code></pre>
+      <p class="lead">让 agent 调用 <code>validateSystemArchitecture</code>（无参数，校验当前工作区图谱）。</p>
 
       <h3>② 报告激活的本体包</h3>
-      <pre><code>// MCP 工具：queryNeo4jGraph
-{ "schema": true }</code></pre>
+      <p class="lead">让 agent 调用 <code>queryNeo4jGraph</code>，参数：</p>
+      <pre><code>{ "schema": true }</code></pre>
       <div class="check">
         期望返回（本案例）：
         <code>schemaKind: "workspace"</code> ·
@@ -485,10 +522,10 @@ cp -r custom-schema/.argo &lt;your-repo&gt;/.argo</code></pre>
       </div>
 
       <h3>③ 语义检索 / 上下文召回</h3>
-      <pre><code>// MCP 工具：memory_search —— 按意思找
-{ "query": "which team depends on Service B?" }</code></pre>
-      <pre><code>// MCP 工具：getSystemArchitecture —— 语义检索图谱内容
-{ "query": { "purpose": "general", "intent": "team dependencies and agent assignments" } }</code></pre>
+      <p class="lead">让 agent 调用 <code>memory_search</code> 按意思找，参数：</p>
+      <pre><code>{ "query": "which team depends on Service B?" }</code></pre>
+      <p class="lead">或让 agent 调用 <code>getSystemArchitecture</code> 语义检索图谱内容，参数：</p>
+      <pre><code>{ "query": { "purpose": "general", "intent": "team dependencies and agent assignments" } }</code></pre>
       <p class="lead">
         召回结果应命中 <code>Team A</code> / <code>Service A</code> / <code>Service B</code> 这条依赖链，
         以及 <code>Agent 001 --(Assigned To)--&gt; Team A</code> 的归属关系。命中卡片会带一个

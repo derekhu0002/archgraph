@@ -70,18 +70,17 @@ test('readme: install section documents npm deployment and the semantic prerequi
   }
 });
 
-test('readme: quick start documents argo init and the semantic caveat', () => {
-  // GIVEN the workspace bootstrap is the first user step
+test('readme: quick start is a single pointer to the one canonical recipe (no second path)', () => {
+  // GIVEN two competing starting paths confuse a newcomer
   // WHEN a reader opens the Quick start section
-  // THEN it describes argo init / initializeWorkspace, the source of truth, and the
-  //      Neo4j prerequisite boundary without overclaiming
+  // THEN it points at the one canonical build recipe, keeps no second command block,
+  //      and still names the semantic prerequisite boundary
   const section = sectionAfter(README, 'Quick start');
-  assert.ok(section, 'README should have a Quick start section');
-  assert.match(section, /argo init/, 'should mention argo init');
-  assert.match(section, /initializeWorkspace/, 'should name the initializeWorkspace MCP call');
-  assert.match(section, /single source of truth/i, 'should state the graph is the single source of truth');
+  assert.ok(section, 'README should keep a Quick start anchor');
+  assert.match(section, /build-your-own-graph/, 'Quick start must point at the canonical build recipe');
   assert.match(section, /Neo4j/, 'should name the Neo4j prerequisite for semantic retrieval');
   assert.match(section, /without them|without Neo4j/i, 'should state what still works without Neo4j');
+  assert.doesNotMatch(section, /```/, 'Quick start must not carry a second command block');
 });
 
 test('readme: supported-harnesses table lists every adapted harness including OpenClaw', () => {
@@ -158,4 +157,54 @@ test('readme: links every detail page and archived doc', () => {
     assert.match(README, new RegExp(rel.replace(/\./g, '\\.')), `README should link ${rel}`);
     assert.ok(existsSync(path.join(ROOT, rel)), `${rel} must exist`);
   }
+});
+
+test('readme: newcomer onboarding — first-use glosses, Node>=18, and an agent-phrased two-route build', () => {
+  // GIVEN a non-Chinese reader who has never heard of ArchGraph lands on the README
+  // WHEN they read the top and the build recipe
+  // THEN jargon is expanded on first use, the Node prerequisite is stated, and the
+  //      end-to-end recipe is split into two explicitly-labelled, runnable routes
+  assert.match(README, /Model Context Protocol/, 'MCP must be expanded on first use');
+  assert.match(README, /intent graph/i, 'intent graph must be named');
+  assert.match(README, /enterprise-architecture modeling language/i, 'ArchiMate must be glossed');
+  assert.match(README, /toolchain/i, 'ARGO must be glossed as the toolchain/agent layer');
+  assert.match(README, /Cypher\*{0,2} \(Neo4j's graph query language\)|Neo4j's graph query language/, 'Cypher must be glossed on first use');
+
+  const install = sectionAfter(README, 'Install');
+  assert.match(install, /Node\.js\s*(?:≥|>=)\s*18/, 'Install must state the Node.js >= 18 prerequisite');
+
+  const section = sectionAfter(README, 'Build your own graph');
+  assert.ok(section, 'README should have a Build your own graph section');
+  // two explicitly-labelled routes
+  assert.match(section, /Route A[^\n]*default ontology/i, 'must label Route A as the default-ontology route');
+  assert.match(section, /Route B[^\n]*your own ontology/i, 'must label Route B as the own-ontology route');
+  // Route A: default ontology, no schema work
+  assert.match(section, /argo init/, 'Route A must use argo init');
+  assert.match(section, /initializeWorkspace/, 'Route A must name the initializeWorkspace MCP call');
+  assert.match(section, /single source of truth/i, 'the canonical recipe must state the graph is the single source of truth');
+  // Route B: author schema AND author the graph, fail-closed
+  assert.match(section, /schema-bundle\.config\.json|SystemArchitecture\.schema\.json/, 'Route B must show how to define the ontology');
+  assert.match(section, /NO_DEFAULT_GRAPH/, 'Route B must state the fail-closed authoring behavior');
+  // build + verify through the MCP
+  assert.match(section, /applySystemArchitectureMutation/, 'must build through the MCP mutation');
+  assert.match(section, /validateSystemArchitecture/, 'must verify');
+  assert.match(section, /queryNeo4jGraph/, 'must confirm the active schema');
+  assert.match(section, /docs\/case-team-graph\.html/, 'must link the illustrated walkthrough');
+  assert.match(section, /Ask your coding agent to (?:call|run)/, 'recipes must be phrased as an instruction to the agent');
+  // M1 regression guard: never ship a batch that pre-creates a view colliding with the default root view
+  assert.doesNotMatch(section, /"view_id"\s*:\s*"view-root"/, 'must not ship an example batch with a colliding view id');
+  assert.doesNotMatch(section, /addView[\s\S]{0,80}SystemArchitecture/, 'must not pre-create the default root view');
+});
+
+test('readme: Route B requires actorElementType for a standalone schema (fail-closed), config is not optional', () => {
+  // GIVEN a newcomer authors a standalone custom schema exactly as instructed
+  // WHEN they read Route B
+  // THEN it states the config is MANDATORY (to declare actorElementType) and that
+  //      omitting it fails closed — it must not call the config optional
+  const section = sectionAfter(README, 'Build your own graph');
+  assert.match(section, /standalone/i, 'Route B must distinguish a standalone bundle');
+  assert.match(section, /actorElementType/, 'Route B must name the actor contract');
+  assert.match(section, /schema-bundle\.config\.json/, 'Route B must require the config for a standalone bundle');
+  assert.match(section, /fails closed|failed/i, 'Route B must state the fail-closed consequence');
+  assert.doesNotMatch(section, /optional `schema-bundle\.config\.json`/, 'must not call the config optional for a standalone schema');
 });

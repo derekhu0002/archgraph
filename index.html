@@ -155,6 +155,7 @@
         <a class="link" href="#ontology">Ontology</a>
         <a class="link" href="#capabilities">Capabilities</a>
         <a class="link" href="#install">Install</a>
+        <a class="link" href="#quickstart">Build your own graph</a>
         <a class="link" href="#howto">How to use</a>
         <a class="link" href="#community">Community</a>
         <a class="link" href="docs/getting-started.html">Docs</a>
@@ -171,6 +172,7 @@
       <a href="#ontology">Ontology</a>
       <a href="#capabilities">Capabilities</a>
       <a href="#install">Install</a>
+      <a href="#quickstart">Build your own graph</a>
       <a href="#howto">How to use</a>
       <a href="#community">Community</a>
       <a href="docs/getting-started.html">Docs</a>
@@ -186,7 +188,7 @@
         <p class="eyebrow">ArchGraph · architecture-graph driven Agentic Engineering</p>
         <h1>A knowledge-graph framework with an <span class="accent">ontology you define</span> — for your coding agent.</h1>
         <p class="lead">Your coding agent forgets everything between sessions, and the "why" behind your system lives nowhere. ArchGraph fixes that: it keeps one <strong>architecture graph</strong> — a picture of your project's parts and how they relate — as the agent's durable memory and your product's design, read and written over a single <strong>MCP</strong> (<strong>Model Context Protocol</strong>) server.</p>
-        <p class="lead">The graph's vocabulary — its <strong>ontology</strong>, the set of types and relationships it may hold — is yours to define. The built-in default is <strong>ArchiMate 3.2 + ARGO extensions</strong>; a repository can plug in its own. One install, one interface to learn, and a graph that stays clean because writes are deduplicated.</p>
+        <p class="lead">The graph's vocabulary — its <strong>ontology</strong>, the set of types and relationships it may hold — is yours to define. The built-in default is <strong>ArchiMate 3.2 + ARGO extensions</strong> (<strong>ArchiMate</strong> is a standard enterprise-architecture modeling language; <strong>ARGO</strong> is the toolchain and agent-workflow layer behind <code class="inline">argo-deploy</code> and <code class="inline">argo init</code>); a repository can plug in its own. One install, one interface to learn, and a graph that stays clean because writes are deduplicated.</p>
         <div class="hero-actions">
           <a class="btn primary" href="#install">Install ArchGraph</a>
           <a class="btn" href="docs/getting-started.html">Read the guide</a>
@@ -211,8 +213,8 @@
 <span class="p">$ </span>argo-deploy</pre>
           </div>
           <div class="term-panel" data-panel="init">
-            <pre><span class="p"># </span>inside your project, ask the agent to run:
-<span class="p">$ </span>argo init   <span class="muted"># initializeWorkspace MCP call</span></pre>
+            <pre><span class="p"># </span>inside your project, ask your coding agent to run <span class="muted">(not a shell command)</span>:
+argo init   <span class="muted"># the initializeWorkspace MCP call</span></pre>
           </div>
         </div>
       </div>
@@ -286,12 +288,42 @@
     <div class="container">
       <p class="kicker">Install &amp; deploy</p>
       <h2>Two commands, and you're ready.</h2>
-      <p class="lead">One <code class="inline">argo-deploy</code> registers the <strong>MCP server</strong> and installs the skills and rules into GitHub Copilot, Cursor, OpenCode, DeepSeek Harness, <strong>OpenClaw</strong>, and <strong>Codex</strong> (agents where the host supports them), then walks you through <code class="inline">~/.argo/.env</code>.</p>
+      <p class="lead"><strong>Requires Node.js ≥ 18.</strong> One <code class="inline">argo-deploy</code> registers the <strong>MCP server</strong> and installs the skills and rules into GitHub Copilot, Cursor, OpenCode, DeepSeek Harness, <strong>OpenClaw</strong>, and <strong>Codex</strong> (agents where the host supports them), then walks you through <code class="inline">~/.argo/.env</code>.</p>
       <pre class="code">npm install -g archgraph-argo
 argo-deploy</pre>
-      <p class="lead" style="margin-top:18px;">For context reads and writes, deduplication, and Enterprise Architect interop, <strong>Node.js is all you need</strong> — no database. The <strong>structural</strong> Cypher projection and all <strong>semantic</strong> Graph RAG additionally need a <strong>Neo4j</strong> instance and an OpenAI-compatible <strong>embedding</strong> endpoint; until those are configured, <code class="inline">argo init</code>'s structural sync and semantic lifecycle <strong>report failed</strong> (the graph itself is still created).</p>
+      <p class="lead" style="margin-top:18px;">For context reads and writes, deduplication, and Enterprise Architect interop, <strong>Node.js is all you need</strong> — no database. The <strong>structural</strong> Cypher (Neo4j's graph query language) projection and all <strong>semantic</strong> Graph RAG additionally need a <strong>Neo4j</strong> instance and an OpenAI-compatible <strong>embedding</strong> endpoint; until those are configured, <code class="inline">argo init</code>'s structural sync and semantic lifecycle <strong>report failed</strong> (the graph itself is still created).</p>
       <p class="lead"><strong>After deploying, restart your editor / host</strong> so it reloads the new MCP server.</p>
       <p><a class="read-more" href="docs/getting-started.html">Prerequisites and configuration →</a></p>
+    </div>
+  </section>
+
+  <section id="quickstart" class="section">
+    <div class="container">
+      <p class="kicker">Build your own graph</p>
+      <h2>Your own graph, two routes.</h2>
+      <p class="lead">Pick <strong>one</strong> route. Everything runs through your coding agent and the ARGO MCP server; the only commands you run yourself are the install. The fully-illustrated walkthrough is <a href="docs/case-team-graph.html">docs/case-team-graph.html</a> (Chinese).</p>
+
+      <h3>Route A — default ontology (fastest)</h3>
+      <p class="lead">No schema work: use the built-in <strong>ArchiMate 3.2 + ARGO extensions</strong>.</p>
+      <ol class="clean">
+        <li><strong>Install (once).</strong> Run <code class="inline">npm install -g archgraph-argo</code> then <code class="inline">argo-deploy</code> (requires <strong>Node.js ≥ 18</strong>), and restart your editor / host.</li>
+        <li><strong>Initialize.</strong> Ask your coding agent to run <code class="inline">argo init</code> (the <code class="inline">initializeWorkspace</code> MCP call) — it creates and validates <code class="inline">design/KG/SystemArchitecture.json</code>, which already holds the project's root view named <code class="inline">SystemArchitecture</code>.</li>
+        <li><strong>Add elements and relationships.</strong> Ask your coding agent to call <code class="inline">applySystemArchitectureMutation</code> and attach each item to the project's <strong>existing root view</strong> — have it resolve that view's real <code class="inline">view_id</code> first; do <strong>not</strong> pre-create a view (a second <code class="inline">SystemArchitecture</code> view would collide, and a different id would then fail). No schema work.</li>
+        <li><strong>Verify.</strong> Ask your coding agent to call <code class="inline">validateSystemArchitecture</code>, then <code class="inline">queryNeo4jGraph</code> with <code class="inline">{"schema": true}</code>.</li>
+      </ol>
+
+      <h3>Route B — your own ontology</h3>
+      <ol class="clean">
+        <li><strong>Install (once).</strong> As in Route A.</li>
+        <li><strong>Author your schema.</strong> Put your modeling language under <code class="inline">.argo/schema/</code>. A <strong>standalone</strong> bundle — a full <code class="inline">SystemArchitecture.schema.json</code>, editing its two <code class="inline">$defs</code> enum arrays, <code class="inline">archimateElementType</code> and <code class="inline">archimateRelationshipType</code> — <strong>must also declare <code class="inline">actorElementType</code> in <code class="inline">schema-bundle.config.json</code></strong>, set to one of your element types (or to <code class="inline">null</code> if your schema genuinely has no actor concept), or loading fails closed (<code class="inline">bundleValidation.status: "failed"</code>) and validation/writes are blocked. A bundle that only <code class="inline">extends: "default"</code> needs just the config; <code class="inline">schema-bundle.rules.json</code> stays optional.</li>
+        <li><strong>Author the graph yourself.</strong> With a custom schema, <code class="inline">argo init</code> does <strong>not</strong> create the graph (the packaged default would not match) and <strong>fails closed</strong> with <code class="inline">NO_DEFAULT_GRAPH</code>. Before any MCP write, create <code class="inline">design/KG/SystemArchitecture.json</code> by hand with your own types and root view, then ask your coding agent to run <code class="inline">argo init</code> to validate it.</li>
+        <li><strong>Add into YOUR root view.</strong> Ask your coding agent to call <code class="inline">applySystemArchitectureMutation</code>, attaching each element and relationship to the root view <strong>you authored</strong>.</li>
+        <li><strong>Verify.</strong> Same as Route A.</li>
+      </ol>
+
+      <p class="lead">The result looks like this — the Team Graph example (4 elements, 3 relationships, one root view):</p>
+      <img class="about-img" src="docs/diagrams/team-graph-elements-relations.svg" alt="Team Graph example — Agent 001 assigned to Team A, Team A depends on Service A, Service A depends on Service B" style="margin-top:8px;" />
+      <p><a class="read-more" href="docs/case-team-graph.html">See the full worked example (Chinese) →</a></p>
     </div>
   </section>
 
@@ -340,6 +372,7 @@ argo-deploy</pre>
         &nbsp;·&nbsp;
         <a href="https://github.com/derekhu0002/graph-wiki" target="_blank" rel="noopener">graph-wiki</a>
       </p>
+      <p class="muted" style="font-size:0.86rem;">Theme note: this homepage uses a dark theme; the detail pages under <code class="inline">docs/</code> use a light theme.</p>
     </div>
   </section>
 

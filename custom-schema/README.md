@@ -23,9 +23,14 @@ custom-schema/
 ## Use it in your repository
 
 ```bash
-# copy the drop-in bundle into your repo
-cp -r custom-schema/.argo  <your-repo>/.argo
-# then write/keep design/KG/SystemArchitecture.json using the Team Graph types
+# copy only the schema bundle into your repo (not .argo/temp/ runtime files)
+mkdir -p <your-repo>/.argo/schema
+cp -r custom-schema/.argo/schema/.  <your-repo>/.argo/schema
+# Windows (PowerShell):
+#   New-Item -ItemType Directory -Force <your-repo>/.argo/schema | Out-Null
+#   Copy-Item -Recurse -Force custom-schema/.argo/schema/* <your-repo>/.argo/schema
+# then create design/KG/SystemArchitecture.json yourself using the Team Graph types
+# (a custom schema fails closed with NO_DEFAULT_GRAPH — argo init will NOT create the graph)
 ```
 
 Resolution precedence when ARGO runs in `<your-repo>`:
@@ -54,6 +59,8 @@ queryNeo4jGraph { "schema": true }
 | `deliveryDependencies` | no | Which relationship types express a delivery dependency (`sourceDependsOnTarget` / `targetDependsOnSource`) for `runArchitectureTests` ordering; here `Depends On`/`Assigned To`. |
 | `schema-bundle.rules.json` | no | `elementTypeMetadata`, `relationshipCategoryByType`, `relationshipTargetMatrix`. |
 | `<repo>/design/KG/SystemArchitecture.json` | **yes (you author it)** | With a custom schema, `argo init` does **not** copy the packaged default graph (it would not match). If the workspace has no graph, init **fails closed** — you must create it. |
+
+`*` `actorElementType` defaults to `Business Actor`; a standalone bundle must set it to one of its own element types (or `null`), otherwise the bundle fails closed. A bundle that only `extends: "default"` needs just the config.
 
 **Bundle validation (fail-closed).** On load the bundle is checked; a failure
 blocks validation / writes with a clear message. It fails when:

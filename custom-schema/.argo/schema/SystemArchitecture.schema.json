@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "./.argo/schema/SystemArchitecture.schema.json",
   "title": "Team Graph Knowledge Graph Schema",
-  "description": "Example CUSTOM schema bundle (Team Graph ontology) for the ARGO schema-bundle mechanism. Copy custom-schema/.argo into <your-repo>/.argo to activate it for that repository only.",
+  "description": "Example CUSTOM schema bundle (Team Graph ontology) for the ARGO schema-bundle mechanism. Copy custom-schema/.argo/schema into <your-repo>/.argo/schema to activate it for that repository only.",
   "type": "object",
   "additionalProperties": false,
   "required": [

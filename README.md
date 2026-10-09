@@ -2,9 +2,11 @@
 
 **A knowledge-graph framework with an ontology you define — wired into your coding agent through one MCP interface.**
 
-For teams running coding agents on a real codebase, ArchGraph gives the agent durable, tiered long-term memory on an intent architecture graph that both you and the agent read and write through a single **MCP** server. The built-in default ontology is **ArchiMate 3.2 + ARGO extensions**, but a repository can plug in its own — and this one does. **One install, one interface to learn.**
+For teams running coding agents on a real codebase, ArchGraph gives the agent durable, tiered long-term memory on an **intent graph** — a versioned architecture graph that records *why* the system is built the way it is, not just how. You and the agent read and write it through a single **MCP** server (**MCP** = **Model Context Protocol**, the open standard that lets an AI tool call external servers as tools). The graph's shape is set by an **ontology** — its vocabulary of element and relationship types — and that ontology is yours to define. The built-in default is **ArchiMate 3.2 + ARGO extensions**, where **ArchiMate** is a standard enterprise-architecture modeling language and **ARGO** is the toolchain and agent-workflow layer behind the `argo-deploy` and `argo init` commands. A repository can plug in its own ontology — and this one does. **One install, one interface to learn.**
 
-[Install](#install) · [Quick start](#quick-start) · [Why ArchGraph](#why-archgraph) · [Capabilities](#capabilities) · [Docs](#docs) · [Community](#community)
+Ready to try it? Jump to **[Build your own graph](#build-your-own-graph)**.
+
+[Install](#install) · [Build your own graph](#build-your-own-graph) · [Why ArchGraph](#why-archgraph) · [Capabilities](#capabilities) · [Docs](#docs) · [Community](#community)
 
 ![ArchGraph core model — one graph for the agent's memory and the product's design](docs/diagrams/core-model.svg)
 
@@ -36,23 +38,59 @@ This repository is the proof: its own bundle uses `extends: "default"` and layer
 
 ## Install
 
+**Prerequisite: Node.js ≥ 18** (the ARGO toolchain and the MCP server both run on Node).
+
 ```bash
 npm install -g archgraph-argo
 argo-deploy
 ```
 
-`argo-deploy` registers the `argo` MCP server and installs the skills and rules into **GitHub Copilot, Cursor, OpenCode, DeepSeek Harness, OpenClaw, and Codex** (agents are installed where the host supports them). It then prompts for the few settings in `~/.argo/.env`. **After deploying, restart your editor / host** so it reloads the MCP server. Semantic queries additionally need **Neo4j** and an **embedding** endpoint — see [Quick start](#quick-start).
+`argo-deploy` registers the `argo` MCP server and installs the skills and rules into **GitHub Copilot, Cursor, OpenCode, DeepSeek Harness, OpenClaw, and Codex** (agents are installed where the host supports them). It then prompts for the few settings in `~/.argo/.env`. **After deploying, restart your editor / host** so it reloads the MCP server. Semantic queries additionally need **Neo4j** and an **embedding** endpoint — see [Build your own graph](#build-your-own-graph).
 
 ## Quick start
 
-```bash
-# in a fresh project, ask your coding agent to run:
-argo init        # the initializeWorkspace MCP call
-```
+There is **one** canonical start: **[Build your own graph](#build-your-own-graph)** — install once, then pick Route A (the default ontology) or Route B (your own). That section carries every step and MCP call; this one deliberately keeps no second copy, so there is only one path to follow.
 
-`argo init` creates the starter `design/KG/SystemArchitecture.json` when missing and verifies the graph; its first JSON → Neo4j sync and semantic-lifecycle steps run only once a **Neo4j** instance and an **embedding** endpoint are configured — otherwise they **report failed** (the graph itself, its context reads/writes, dedup, and EA interop still work). From then on the intent graph is the single source of truth: the agent locates the element behind a task, works test-first (GIVEN-WHEN-THEN), and registers each commit back onto the element it changed.
+**The one prerequisite that is not out of the box:** semantic (Graph RAG) retrieval needs a **Neo4j** instance and an OpenAI-compatible **embedding** endpoint. Context reads, writes, and Enterprise Architect interop work without them; the **Cypher** (Neo4j's graph query language) structural projection and all semantic retrieval need Neo4j.
 
-**The one prerequisite that is not out of the box:** semantic (Graph RAG) retrieval needs a **Neo4j** instance and an OpenAI-compatible **embedding** endpoint. Context reads, writes, and Enterprise Architect interop work without them; the Cypher structural projection and all semantic retrieval need Neo4j.
+## Build your own graph
+
+Pick **one** of two routes. Everything happens through your coding agent and the ARGO MCP server; the only commands you run yourself are the install. Once initialized, the intent graph is the single source of truth.
+
+### Route A — default ontology (fastest)
+
+No schema work: use the built-in **ArchiMate 3.2 + ARGO extensions**.
+
+1. **Install (once).** Requires **Node.js ≥ 18**.
+
+   ```bash
+   npm install -g archgraph-argo
+   argo-deploy
+   ```
+
+   Then **restart your editor / host** so it reloads the MCP server.
+
+2. **Initialize.** Ask your coding agent to run `argo init` (the `initializeWorkspace` MCP call). It creates and validates the starter `design/KG/SystemArchitecture.json`, which already contains the project's root view named `SystemArchitecture`.
+
+3. **Add elements and relationships.** Ask your coding agent to call `applySystemArchitectureMutation` and attach every new element and relationship to the project's **existing root view** — tell it to resolve that view's real `view_id` first (`queryNeo4jGraph` / `getArchitectureViewContext`). Do **not** pre-create a view: a new view called `SystemArchitecture` would collide with the one `argo init` made, and any `view_ids` pointing at a different id would then fail.
+
+4. **Verify.** Ask your coding agent to call `validateSystemArchitecture`, then `queryNeo4jGraph` with `{"schema": true}` to confirm the element and relationship types in effect.
+
+### Route B — your own ontology
+
+1. **Install (once).** As in Route A.
+
+2. **Author your schema.** Put your modeling language under `.argo/schema/`. A **standalone** bundle — a full `SystemArchitecture.schema.json`, editing its two `$defs` enum arrays, `archimateElementType` and `archimateRelationshipType` — **must also declare `actorElementType` in `schema-bundle.config.json`**, set to one of your element types (or to `null` if your schema genuinely has no actor concept), or loading fails closed (`bundleValidation.status: "failed"`) and validation/writes are blocked. A bundle that only `extends: "default"` needs just the config. `schema-bundle.rules.json` stays optional (without it, endpoint checks are permissive).
+
+3. **Author the graph yourself.** With a custom schema, `argo init` does **not** create the graph — the packaged default would not match your vocabulary — and it **fails closed** with `NO_DEFAULT_GRAPH`. Before any MCP write, create `design/KG/SystemArchitecture.json` by hand, using your own element and relationship types and your own root view. Then ask your coding agent to run `argo init` to validate it.
+
+4. **Add into YOUR root view.** Ask your coding agent to call `applySystemArchitectureMutation`, attaching each element and relationship to the root view **you authored** (not the default one).
+
+5. **Verify.** Ask your coding agent to call `validateSystemArchitecture`, then `queryNeo4jGraph` with `{"schema": true}`.
+
+The fully-illustrated, step-by-step walkthrough is **[docs/case-team-graph.html](docs/case-team-graph.html)** (Chinese), and the runnable example bundle is [`custom-schema/`](custom-schema/README.md). The result looks like this:
+
+![Team Graph example — Agent 001 assigned to Team A, Team A depends on Service A, Service A depends on Service B](docs/diagrams/team-graph-elements-relations.svg)
 
 ## Capabilities
 

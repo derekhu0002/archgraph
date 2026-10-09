@@ -196,3 +196,47 @@ test('insight-report-archived: industry insight report archived under docs/', ()
   assert.match(report, /80% more truthful/, 'report should cite the NICD study');
   assert.match(report, /参考文献/, 'report should have a references section');
 });
+
+test('english-quickstart: homepage has a two-route build recipe with Node>=18 and agent-phrased steps', () => {
+  // GIVEN a non-Chinese newcomer can only start from the English homepage
+  // WHEN they read the build recipe
+  // THEN it offers the default-ontology and own-ontology routes, names Node, and
+  //      phrases each step as an instruction to the coding agent
+  assert.match(HTML, /id="quickstart"/, 'homepage should have a quickstart section');
+  const section = slice('quickstart', 'howto');
+  assert.ok(section, 'quickstart section should sit before How to use');
+  assert.match(section, /npm install -g archgraph-argo/, 'step 1 should show the install');
+  assert.match(section, /argo init/, 'Route A should use argo init');
+  assert.match(section, /Node\.js\s*(?:≥|>=)\s*18/, 'Node.js >= 18 must be stated');
+  assert.match(section, /Route A[^\n]*default ontology/i, 'must label Route A as the default-ontology route');
+  assert.match(section, /Route B[^\n]*your own ontology/i, 'must label Route B as the own-ontology route');
+  assert.match(section, /schema-bundle\.config\.json|SystemArchitecture\.schema\.json/, 'Route B should show the ontology change');
+  assert.match(section, /NO_DEFAULT_GRAPH/, 'Route B must state fail-closed graph authoring');
+  assert.match(section, /applySystemArchitectureMutation/, 'should build through the MCP mutation');
+  assert.match(section, /validateSystemArchitecture/, 'should verify');
+  assert.match(section, /docs\/case-team-graph\.html/, 'should link the illustrated walkthrough');
+  assert.match(section, /Ask your coding agent to (?:call|run)/i, 'steps must be instructions to the agent');
+  assert.doesNotMatch(section, /"view_id"\s*:\s*"view-root"/, 'must not pre-create a view colliding with the default root view');
+});
+
+test('no-shell-prompt-init: argo init is shown as an agent instruction, not a shell $ command', () => {
+  // GIVEN argo init maps to the initializeWorkspace MCP call, not a shell binary
+  // WHEN a newcomer reads the homepage terminal
+  // THEN it is not presented with a shell prompt (checked on tag-stripped text, so inline
+  //      markup such as <span>$ </span> cannot hide a prompt), and says so explicitly
+  const text = HTML.replace(/<[^>]*>/g, ' ');
+  assert.doesNotMatch(text, /\$\s*argo init/, 'argo init must not carry a shell prompt');
+  assert.match(text, /not a shell command/i, 'the init panel should say argo init is not a shell command');
+});
+
+test('english-quickstart: Route B makes the config mandatory for a standalone schema (fail-closed)', () => {
+  // GIVEN a custom schema authored exactly as the homepage instructs must not fail closed unexpectedly
+  // WHEN a visitor reads Route B
+  // THEN it states the config is MANDATORY (declare actorElementType) and the consequence of omitting it
+  const section = slice('quickstart', 'howto');
+  assert.match(section, /standalone/i, 'Route B must distinguish a standalone bundle');
+  assert.match(section, /actorElementType/, 'Route B must name the actor contract');
+  assert.match(section, /schema-bundle\.config\.json/, 'Route B must require the config for a standalone bundle');
+  assert.match(section, /fails closed|failed/i, 'Route B must state the fail-closed consequence');
+  assert.doesNotMatch(section, /optional\s+<code[^>]*>schema-bundle\.config\.json/, 'must not call the config optional for a standalone schema');
+});
