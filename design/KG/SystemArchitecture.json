@@ -4344,7 +4344,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-09）。\n【本会话目标】人类伙伴要求以红蓝对抗方式优化本仓 README 与主页（主题：可自定义本体的知识图谱框架、MCP 无缝接入宿主、低上手成本；并新增使用介绍页与图文并茂的使用 case 详情页；主页只放大纲、细节外链）。\n【结论/交付】对外呈现 v2 完成：README 精简（222→~130 行）、主页大纲化（Hero + about/ontology/capabilities/install/howto/community，14 张能力卡与 global-architecture 图迁出）、新增中文详情页 docs/getting-started.html、docs/capabilities.html、docs/case-team-graph.html + 共享 docs/site.css + 4 张 light 主题 case SVG（scripts/gen-case-diagrams.js）。npm test 720/720（0 失败 0 跳过）；validateSystemArchitecture passed。commit 8f10fc5（T2 里程碑 overseer-site-v2-outline-detail-pages-milestone-001；WP wp-site-v2-outline-detail-pages-001 + 视图 site-v2-delivery-001）。\n【方法】蓝队 B1（README+主页大纲）/B2（中文详情页）起草 → 红队 R1/R2 挑刺（必改项：测试完整性、死链、H1 缺 framework/KG/MCP、Neo4j·agents 过度声明、case 步骤不可复现、缺图）→ 项目总管收敛落地；红队证据充分、直接决定了实现。\n【关键认知（坑）】① custom-schema 示例规则文件仍是遗留名 argob-rules.json，而加载器固定读 schema-bundle.rules.json、config 未声明 rules → 端点矩阵此前静默失效（permissive）；已重命名+声明，矩阵恢复生效。② 视图元素上限（本仓 maxElementsPerView=15）导致新增 WP 需另建子视图；LTM 视图已满需按主题子视图拆分。③ 语义去重门禁会拦新里程碑（与本仓 0.26.2 刷新里程碑 0.87），按规则以 allowDuplicate+justification 新建独立里程碑。④ memory-eval MQ-17 子视图计数随图增长需同步维护（dataset 自带维护说明）；当前 38（此前 33 已陈旧）。\n【待办】① 未 push（待人类伙伴确认）；② 详情页为浅色 docs 壳而主页深色（有意为之，若需统一可后续处理）；③ 未跑 Docker npm run acceptance（本次不涉及 MCP 接口面）。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-09）。\n【本会话目标】人类伙伴要求以红蓝对抗方式优化本仓 README 与主页（主题：可自定义本体的知识图谱框架、MCP 无缝接入宿主、低上手成本；主页只放大纲、细节外链；新增使用介绍页与图文并茂的使用 case）。\n【结论/交付】对外呈现 v2 完成：README 精简（222→~135 行）、主页大纲化、新增中文详情页 getting-started/capabilities/case-team-graph + docs/site.css + 4 张 case SVG（scripts/gen-case-diagrams.js）；新增诚实竞争优势对比（唯一权威版 docs/capabilities.html#compare）。npm test 725/725（0 失败 0 跳过）；validate passed。commit 8f10fc5（首版）+ 425189d（红蓝第2轮）。\n【方法·关键教训】首版我（总管）只让红队挑了一次刺、就由自己代改——人类伙伴指出『一次挑刺不算红蓝对抗』。真正应做的是多轮『蓝修订 → 红复攻修订后的实际文件』直到红无必改项：本轮红队复攻发现 M1 对比表是稻草人且缺成本行 / M2『只需 Node.js』与 argo init 自相矛盾 / M3 对比表三处重复破坏大纲；蓝再修订后红判定 CONVERGED（仅剩余文风项）。今后红蓝对抗务必多轮迭代，且红队必须复攻修订版与测试完整性，不得由总管代改或一次定稿。\n【关键认知（坑）】① custom-schema 示例规则文件曾是遗留名 argob-rules.json，而加载器固定读 schema-bundle.rules.json、config 未声明 rules → 端点矩阵静默失效；已重命名+声明生效。② 视图元素上限（maxElementsPerView=15）使新增 WP 需另建子视图；LTM 视图满需按主题子视图拆分（本次里程碑落在 overseer-product-001）。③ 语义去重门禁会拦新里程碑（与 0.26.2 刷新里程碑 0.87），按规则 allowDuplicate+justification 新建。④ memory-eval MQ-17 子视图计数随图增长需同步维护（当前 38）。\n【待办】① 未 push（待人类伙伴确认）；② 主页深色 / docs 浅色为有意为之；③ 未跑 Docker npm run acceptance（本次不涉及 MCP 接口面）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4367,7 +4367,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-10-09",
-          "description": "对外呈现 v2：README 精简 + 主页大纲化 + 中文详情页（红蓝对抗）"
+          "description": "对外呈现 v2（红蓝多轮对抗）"
         },
         {
           "name": "commit",
@@ -4687,6 +4687,11 @@
           "name": "commit",
           "value": "8f10fc5",
           "description": "README.md; index.html; docs/(getting-started|capabilities|case-team-graph).html; docs/site.css; docs/diagrams/team-graph-*.svg; scripts/gen-case-diagrams.js; tests/*; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "425189d",
+          "description": "README.md; index.html; docs/(getting-started|capabilities|case-team-graph).html; docs/site.css; tests/readme.test.js; tests/website.test.js; tests/docs-pages.test.js; design/KG/SystemArchitecture.json（对外呈现 v2 首版 + 红蓝第2轮迭代）"
         }
       ],
       "testcases": [
@@ -12365,6 +12370,11 @@
           "name": "commit",
           "value": "8f10fc5",
           "description": "README.md; index.html; docs/site.css; docs/getting-started.html; docs/capabilities.html; docs/case-team-graph.html; docs/diagrams/team-graph-ontology.svg; docs/diagrams/team-graph-elements-relations.svg; docs/diagrams/team-graph-view-composition.svg; docs/diagrams/team-graph-mcp-recall-sequence.svg; scripts/gen-case-diagrams.js; custom-schema/.argo/schema/schema-bundle.config.json (+ argob-rules.json→schema-bundle.rules.json); tests/readme.test.js; tests/website.test.js; tests/architecture-diagram.test.js; tests/architecture-view-context.test.js; tests/docs-pages.test.js; tests/acceptance-guardian.test.js; scripts/memory-eval-run.js; docs/memory-eval-dataset.md; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "commit",
+          "value": "425189d",
+          "description": "README.md; index.html; docs/capabilities.html; docs/getting-started.html; docs/site.css; tests/readme.test.js; tests/website.test.js; tests/docs-pages.test.js; tests/overseer-ltm-layering.test.js（红蓝第 2 轮：诚实对比表 + 去重主页大纲 + 精确声明 + 回归修复）"
         }
       ],
       "testcases": [
