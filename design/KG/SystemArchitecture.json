@@ -12516,8 +12516,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.29.5",
-          "description": "release archgraph-argo@0.29.5（初始化报告含完整本体定义 + 缺失项）；已发布/安装/部署"
+          "value": "archgraph-argo@0.29.10",
+          "description": "release archgraph-argo@0.29.10：含 issue #10 两项修复（词表对齐 9e99a8d / extends 合并矩阵 17df3f4）；npm publish shasum fa82bc95549237e876f45b125339805a2ed37afd；registry 传播确认 latest=0.29.10；npm i -g archgraph-argo + argo-deploy -SkipEnv 22/22；部署态已验证 ~/.argo/scripts/ontology-projection（model.js typeClass / cli.js materializeResolvedBundle / python classByType）。待宿主重启加载新 MCP。"
         },
         {
           "name": "deliveryStatus",
@@ -12547,6 +12547,11 @@
           "name": "commit",
           "value": "17df3f4",
           "description": "fix(ontology): CLI validates against the chain-merged bundle rules (issue #10 follow-up) — extends 型 bundle 的端点矩阵在 base 目录，cli.js 却用 loadModel(bundle.dir) 读子目录 → 矩阵为空 → 端点校验静默 no-op（describe.js 已用 bundle.rules 规避此坑，cli.js 未跟进）。修法：cli.js 新增 materializeResolvedBundle()，把 chain-merged rules/config（+ 侧车专用 ontology-axioms.json 与结构 schema 若存在）落到临时 bundle 目录，交给 JS 侧车与 Python 引擎读取。文件：argo/scripts/ontology-projection/cli.js；tests/ontology-validation-extension.test.js（AT-ovx-12：经 extends bundle 的违规边现被拦下）；npm test 746/746。"
+        },
+        {
+          "name": "commit",
+          "value": "86e7745",
+          "description": "chore(release): archgraph-argo@0.29.10 (issue #10 ontology vocabulary + extends-matrix fix) — package.json 0.29.9→0.29.10"
         }
       ]
     },
