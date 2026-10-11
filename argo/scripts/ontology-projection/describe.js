@@ -4,8 +4,6 @@
 // (types, relationship structure, endpoint matrix, constraints/invariants,
 // axioms) AND what is missing (absent constraints / axiom categories). Read-only.
 
-const fs = require('node:fs');
-const path = require('node:path');
 const { loadSchemaBundleAndOntology } = require('../schema-bundle.js');
 
 // The logical-axiom categories the ontology layer understands (ontology-axioms.json).
@@ -18,14 +16,6 @@ const AXIOM_KEYS = Object.freeze([
   'objectPropertyDomain',
   'objectPropertyRange',
 ]);
-
-function readJson(file, fallback) {
-  try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch {
-    return fallback;
-  }
-}
 
 function isEmptyAxiom(value) {
   if (value === undefined || value === null) return true;
@@ -48,9 +38,10 @@ function describeOntology({ workspaceRoot } = {}) {
   // bundle's endpoint matrix / type metadata / relationship categories.
   const rules = bundle.rules || {};
   const config = bundle.config || {};
-  const axiomsFile = path.join(bundle.dir, 'ontology-axioms.json');
-  const hasAxiomsFile = fs.existsSync(axiomsFile);
-  const axiomsRaw = readJson(axiomsFile, {}) || {};
+  // Chain-merged logical axioms (follows `extends`), like the endpoint matrix: a
+  // base bundle's axioms are honoured, not just the child dir's file.
+  const axiomsRaw = bundle.axioms || {};
+  const hasAxiomsFile = bundle.hasAxiomsFile === true;
 
   const elementTypes = Array.isArray(ontology.elementTypes) ? ontology.elementTypes.slice() : [];
   const relationshipTypes = Array.isArray(ontology.relationshipTypes) ? ontology.relationshipTypes.slice() : [];
@@ -72,6 +63,15 @@ function describeOntology({ workspaceRoot } = {}) {
   if (Object.keys(relationshipCategoryByType).length === 0) missing.structure.push('relationship categories');
   if (Object.keys(endpointMatrix).length === 0) missing.constraints.push('endpoint matrix (no schema-bundle.rules.json / empty relationshipTargetMatrix)');
   if (invariants.endpointMatrix === false) missing.constraints.push('endpointMatrix invariant disabled');
+  // Class-matrix types without a class mapping cannot be referenced by the
+  // (class-token) endpoint matrix, so they silently carry no endpoint constraints.
+  if (ontology.dialect === 'archimate-class-matrix' && Object.keys(endpointMatrix).length > 0) {
+    const classByType = rules.archimateClassByElementType || {};
+    const unmapped = elementTypes.filter((t) => !(t in classByType));
+    if (unmapped.length > 0) {
+      missing.constraints.push(`element types without a class mapping (endpoint constraints cannot reference them): ${unmapped.join(', ')}`);
+    }
+  }
   if (invariants.statementGrammar === false) missing.constraints.push('statementGrammar invariant disabled');
   if (!hasAxiomsFile) missing.axioms.push('ontology-axioms.json (no logical axioms declared)');
   for (const key of AXIOM_KEYS) {

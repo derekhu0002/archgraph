@@ -79,11 +79,15 @@ function materializeResolvedBundle(bundle) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-ontology-bundle-'));
   fs.writeFileSync(path.join(dir, 'schema-bundle.rules.json'), JSON.stringify(bundle.rules || {}));
   fs.writeFileSync(path.join(dir, 'schema-bundle.config.json'), JSON.stringify(bundle.config || {}));
-  for (const name of ['ontology-axioms.json', 'SystemArchitecture.schema.json']) {
-    const source = path.join(bundle.dir, name);
-    if (fs.existsSync(source)) {
-      fs.copyFileSync(source, path.join(dir, name));
-    }
+  // Chain-merged logical axioms (follows `extends`), not just the child dir's file:
+  // a base bundle's axioms must reach the engines too.
+  if (bundle.hasAxiomsFile && bundle.axioms) {
+    fs.writeFileSync(path.join(dir, 'ontology-axioms.json'), JSON.stringify(bundle.axioms));
+  }
+  // Structural schema for the engines' enum fallback (present only when declared).
+  const schemaFile = path.join(bundle.dir, 'SystemArchitecture.schema.json');
+  if (fs.existsSync(schemaFile)) {
+    fs.copyFileSync(schemaFile, path.join(dir, 'SystemArchitecture.schema.json'));
   }
   return dir;
 }

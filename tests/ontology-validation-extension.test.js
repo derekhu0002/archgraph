@@ -19,6 +19,7 @@ const { spawnSync } = require('node:child_process');
 
 const { resolveValidationExtensions, runValidationExtensions, validationExtensionsReport } = require('../argo/scripts/validation-extensions.js');
 const { describeOntology } = require('../argo/scripts/ontology-projection/describe.js');
+const { resolveBundleAxioms, loadSchemaBundleAndOntology } = require('../argo/scripts/schema-bundle.js');
 
 const REPO = path.resolve(__dirname, '..');
 const CLI = path.join(REPO, 'argo', 'scripts', 'ontology-projection', 'cli.js');
@@ -346,4 +347,101 @@ test('AT-ovx-12 extends bundle: CLI validates against the merged base matrix (no
     violatingResult.errors.some((e) => e.includes('Application Interface') && e.includes('Assignment')),
     JSON.stringify(violatingResult.errors),
   );
+});
+
+// AT-ovx-13: ontology axioms follow the `extends` chain (base axioms are not lost
+// just because the child dir has no ontology-axioms.json).
+test('AT-ovx-13 extends bundle: ontology axioms are chain-merged from the base', () => {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-ax-base-'));
+  const child = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-ax-child-'));
+  fs.writeFileSync(path.join(base, 'ontology-axioms.json'), JSON.stringify({
+    disjointClasses: [['Team Node', 'Service Node']],
+    functionalProperties: ['Assigned To'],
+    objectPropertyDomain: { 'Assigned To': 'Agent Node' },
+    distinctIndividuals: true,
+  }));
+  fs.writeFileSync(path.join(child, 'ontology-axioms.json'), JSON.stringify({
+    transitiveProperties: ['Depends On'],
+    objectPropertyRange: { 'Assigned To': 'Team Node' },
+  }));
+
+  const merged = resolveBundleAxioms({ dir: child, chainDirsOriginal: [base, child] });
+  assert.equal(merged.hasAxiomsFile, true);
+  assert.deepEqual(merged.axioms.disjointClasses, [['Team Node', 'Service Node']]);
+  assert.deepEqual(merged.axioms.functionalProperties, ['Assigned To']);
+  assert.deepEqual(merged.axioms.transitiveProperties, ['Depends On']);
+  assert.equal(merged.axioms.objectPropertyDomain['Assigned To'], 'Agent Node');
+  assert.equal(merged.axioms.objectPropertyRange['Assigned To'], 'Team Node');
+  assert.equal(merged.axioms.distinctIndividuals, true);
+
+  // the defect: a CHILD with NO axioms file still inherits the base's
+  const childNoAxioms = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-ax-child2-'));
+  const inherited = resolveBundleAxioms({ dir: childNoAxioms, chainDirsOriginal: [base, childNoAxioms] });
+  assert.equal(inherited.hasAxiomsFile, true);
+  assert.deepEqual(inherited.axioms.disjointClasses, [['Team Node', 'Service Node']]);
+
+  // end-to-end: describeOntology surfaces the base axioms through the extends chain
+  const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-ax-ws-'));
+  const schemaDir = path.join(ws, '.argo', 'schema');
+  const baseDir = path.join(schemaDir, 'baseline');
+  fs.mkdirSync(baseDir, { recursive: true });
+  fs.copyFileSync(path.join(FIXTURE, '.argo', 'schema', 'SystemArchitecture.schema.json'), path.join(schemaDir, 'SystemArchitecture.schema.json'));
+  fs.writeFileSync(path.join(schemaDir, 'schema-bundle.config.json'), JSON.stringify({ id: 'child', language: 'Child', actorElementType: null, extends: 'baseline' }));
+  fs.copyFileSync(path.join(FIXTURE, '.argo', 'schema', 'SystemArchitecture.schema.json'), path.join(baseDir, 'SystemArchitecture.schema.json'));
+  fs.writeFileSync(path.join(baseDir, 'schema-bundle.config.json'), JSON.stringify({ id: 'baseline', language: 'Baseline' }));
+  fs.writeFileSync(path.join(baseDir, 'schema-bundle.rules.json'), JSON.stringify({
+    dialect: 'type-matrix',
+    elementTypeMetadata: { Node: { layer: 'l', aspect: 'a' } },
+    relationshipCategoryByType: { Link: 'Custom' },
+    relationshipTargetMatrix: { Link: { Node: ['Node'] } },
+  }));
+  fs.writeFileSync(path.join(baseDir, 'ontology-axioms.json'), JSON.stringify({ disjointClasses: [['Node', 'Other']] }));
+  const o = describeOntology({ workspaceRoot: ws });
+  assert.equal(o.status, 'ok', JSON.stringify(o));
+  assert.deepEqual(o.axioms.disjointClasses, [['Node', 'Other']]);
+  assert.ok(!o.missing.axioms.includes('disjointClasses'), 'base disjointClasses must be seen as present');
+});
+
+// AT-ovx-14: for the archimate-class-matrix dialect the endpoint matrix is keyed by
+// CLASS token, so bundle self-validation must check tokens against the class vocabulary
+// (it previously skipped class-matrix bundles entirely).
+function makeClassMatrixWorkspace(matrix) {
+  const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-cmx-'));
+  const schemaDir = path.join(ws, '.argo', 'schema');
+  fs.mkdirSync(schemaDir, { recursive: true });
+  fs.copyFileSync(path.join(FIXTURE, '.argo', 'schema', 'SystemArchitecture.schema.json'), path.join(schemaDir, 'SystemArchitecture.schema.json'));
+  fs.writeFileSync(path.join(schemaDir, 'schema-bundle.config.json'), JSON.stringify({
+    language: 'CMX',
+    actorElementType: null,
+    deliveryDependencies: { sourceDependsOnTarget: [], targetDependsOnSource: [] },
+  }));
+  fs.writeFileSync(path.join(schemaDir, 'schema-bundle.rules.json'), JSON.stringify({
+    dialect: 'archimate-class-matrix',
+    elementTypeMetadata: { Foo: { layer: 'l', aspect: 'a' }, Bar: { layer: 'l', aspect: 'a' } },
+    archimateClassByElementType: { Foo: 'Foo', Bar: 'Bar' },
+    relationshipCategoryByType: { Link: 'Dependency' },
+    relationshipTargetMatrix: matrix,
+  }));
+  return ws;
+}
+
+test('AT-ovx-14 class-matrix bundle: matrix tokens are validated against the class vocabulary', () => {
+  const good = loadSchemaBundleAndOntology(makeClassMatrixWorkspace({ Link: { Foo: ['Bar'] } }));
+  assert.equal(good.ontology.bundleValidation.status, 'passed', JSON.stringify(good.ontology.bundleValidation));
+
+  const bad = loadSchemaBundleAndOntology(makeClassMatrixWorkspace({ Link: { Foo: ['Baz'] } }));
+  assert.equal(bad.ontology.bundleValidation.status, 'failed');
+  assert.ok(
+    bad.ontology.bundleValidation.errors.some((e) => /unknown element type token 'Baz'/.test(e)),
+    JSON.stringify(bad.ontology.bundleValidation.errors),
+  );
+});
+
+// AT-ovx-15: describeOntology flags class-matrix types that have no class mapping
+// (they cannot be referenced by the endpoint matrix, so they are unconstrained).
+test('AT-ovx-15 describeOntology flags class-matrix types with no class mapping', () => {
+  const o = describeOntology({ workspaceRoot: REPO });
+  assert.equal(o.status, 'ok');
+  assert.ok(o.missing.constraints.some((m) => /without a class mapping/.test(m)), JSON.stringify(o.missing.constraints));
+  assert.ok(o.missing.constraints.some((m) => /State/.test(m)), JSON.stringify(o.missing.constraints));
 });

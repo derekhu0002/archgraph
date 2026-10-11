@@ -27,10 +27,10 @@ function relIri(type) {
 
 const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
-function projectGraph(graph) {
+function projectGraph(graph, typeClass = (type) => type) {
   const lines = [];
   for (const el of graph.elements || []) {
-    lines.push(triple(indIri(el.id), iri(RDF_TYPE), typeIri(el.type)));
+    lines.push(triple(indIri(el.id), iri(RDF_TYPE), typeIri(typeClass(el.type))));
     if (el.name) {
       lines.push(triple(indIri(el.id), iri(`${NS}name`), literal(el.name)));
     }
@@ -42,8 +42,8 @@ function projectGraph(graph) {
   return lines.length ? `${lines.join('\n')}\n` : '';
 }
 
-function projectHash(graph) {
-  return hashString(projectGraph(graph));
+function projectHash(graph, typeClass) {
+  return hashString(projectGraph(graph, typeClass));
 }
 
 module.exports = { projectGraph, projectHash, NS, localName, typeIri, indIri, relIri, RDF_TYPE };

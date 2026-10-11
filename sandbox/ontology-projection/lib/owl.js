@@ -16,7 +16,7 @@ function buildOwlTriples(model) {
   const a = model.axioms;
   const lines = [];
   for (const [c1, c2] of a.disjointClasses) {
-    lines.push(triple(typeIri(c1), iri(`${OWL}disjointWith`), typeIri(c2)));
+    lines.push(triple(typeIri(model.typeClass(c1)), iri(`${OWL}disjointWith`), typeIri(model.typeClass(c2))));
   }
   for (const p of a.functionalProperties) {
     lines.push(triple(relIri(p), iri(RDF_TYPE), iri(`${OWL}FunctionalProperty`)));
@@ -31,10 +31,10 @@ function buildOwlTriples(model) {
     lines.push(triple(relIri(p), iri(RDF_TYPE), iri(`${OWL}AsymmetricProperty`)));
   }
   for (const [p, c] of Object.entries(a.objectPropertyDomain)) {
-    lines.push(triple(relIri(p), iri(`${RDFS}domain`), typeIri(c)));
+    lines.push(triple(relIri(p), iri(`${RDFS}domain`), typeIri(model.typeClass(c))));
   }
   for (const [p, c] of Object.entries(a.objectPropertyRange)) {
-    lines.push(triple(relIri(p), iri(`${RDFS}range`), typeIri(c)));
+    lines.push(triple(relIri(p), iri(`${RDFS}range`), typeIri(model.typeClass(c))));
   }
   lines.sort();
   return lines.length ? `${lines.join('\n')}\n` : '';
@@ -50,7 +50,7 @@ function checkConsistency(model, graph) {
     types.get(id).add(type);
   };
 
-  for (const el of graph.elements || []) addType(el.id, el.type);
+  for (const el of graph.elements || []) addType(el.id, model.typeClass(el.type));
   for (const rel of graph.relationships || []) {
     props.push({ s: rel.source_id, p: rel.type, o: rel.target_id, id: rel.id, derived: false });
   }
@@ -64,12 +64,12 @@ function checkConsistency(model, graph) {
       const r = a.objectPropertyRange[p];
       if (d) {
         const before = types.get(s) ? types.get(s).size : 0;
-        addType(s, d);
+        addType(s, model.typeClass(d));
         if (types.get(s).size !== before) changed = true;
       }
       if (r) {
         const before = types.get(o) ? types.get(o).size : 0;
-        addType(o, r);
+        addType(o, model.typeClass(r));
         if (types.get(o).size !== before) changed = true;
       }
     }
@@ -97,8 +97,8 @@ function checkConsistency(model, graph) {
   // disjointness
   const disjoint = new Set();
   for (const [c1, c2] of a.disjointClasses) {
-    disjoint.add(`${c1}|${c2}`);
-    disjoint.add(`${c2}|${c1}`);
+    disjoint.add(`${model.typeClass(c1)}|${model.typeClass(c2)}`);
+    disjoint.add(`${model.typeClass(c2)}|${model.typeClass(c1)}`);
   }
   for (const [id, set] of types) {
     const arr = [...set];

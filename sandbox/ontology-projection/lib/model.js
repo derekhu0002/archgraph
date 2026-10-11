@@ -20,21 +20,44 @@ function readJson(file, fallback) {
   }
 }
 
+function readSchemaEnums(bundleDir, config) {
+  const schema = readJson(path.join(bundleDir, 'SystemArchitecture.schema.json'), null);
+  const defs = schema && typeof schema.$defs === 'object' ? schema.$defs : null;
+  if (!defs) return { elementTypes: [], relationshipTypes: [] };
+  const pick = (keys) => {
+    for (const key of keys) {
+      const def = defs[key];
+      if (def && Array.isArray(def.enum)) return def.enum.slice();
+    }
+    return [];
+  };
+  return {
+    elementTypes: pick([config.elementTypeEnumKey, 'archimateElementType', 'elementType', 'elementTypes'].filter(Boolean)),
+    relationshipTypes: pick([config.relationshipTypeEnumKey, 'archimateRelationshipType', 'relationshipType', 'relationshipTypes'].filter(Boolean)),
+  };
+}
+
 function loadModel(bundleDir) {
   const config = readJson(path.join(bundleDir, 'schema-bundle.config.json'), {}) || {};
   const rules = readJson(path.join(bundleDir, 'schema-bundle.rules.json'), {}) || {};
   const axioms = readJson(path.join(bundleDir, 'ontology-axioms.json'), {}) || {};
 
-  const elementTypes = Object.keys(rules.elementTypeMetadata || {});
-  const relationshipTypes = Object.keys(rules.relationshipCategoryByType || {});
+  let elementTypes = Object.keys(rules.elementTypeMetadata || {});
+  let relationshipTypes = Object.keys(rules.relationshipCategoryByType || {});
+  // A valid bundle may declare its vocabulary ONLY in the schema enums (no rules
+  // file). Fall back to the schema enums so such a bundle is not treated as broken.
+  if (elementTypes.length === 0 || relationshipTypes.length === 0) {
+    const enums = readSchemaEnums(bundleDir, config);
+    if (elementTypes.length === 0) elementTypes = enums.elementTypes;
+    if (relationshipTypes.length === 0) relationshipTypes = enums.relationshipTypes;
+  }
   const matrix = rules.relationshipTargetMatrix || {};
-
-  if (elementTypes.length === 0) {
-    throw new Error(`bundle ${bundleDir} declares no element types`);
-  }
-  if (relationshipTypes.length === 0) {
-    throw new Error(`bundle ${bundleDir} declares no relationship types`);
-  }
+  // The endpoint matrix (and axiom class names) reference element types in the
+  // bundle's CLASS vocabulary (e.g. "BusinessObject"), while the canonical graph
+  // stores DISPLAY names (e.g. "Business Object"). archimateClassByElementType is
+  // the display->class map. Bundles whose matrix already uses the display
+  // vocabulary (no map) fall back to the type itself, so both stay consistent.
+  const classByType = rules.archimateClassByElementType || {};
 
   return {
     bundleDir,
@@ -43,6 +66,8 @@ function loadModel(bundleDir) {
     elementTypes,
     relationshipTypes,
     matrix,
+    classByType,
+    typeClass: (type) => classByType[type] || type,
     axioms: {
       disjointClasses: axioms.disjointClasses || [],
       functionalProperties: axioms.functionalProperties || [],

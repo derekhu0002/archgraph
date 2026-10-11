@@ -389,6 +389,12 @@ function mergeExtendsBundle(base, child) {
       ...(Array.isArray(base.chainDirs) && base.chainDirs.length > 0 ? base.chainDirs : [path.resolve(base.dir).toLowerCase()]),
       path.resolve(child.dir).toLowerCase(),
     ])),
+    // Base + child dirs in ORIGINAL case (base first) — for reading sidecar files
+    // off disk (a lowercased path is only case-insensitively valid on Windows).
+    chainDirsOriginal: Array.from(new Set([
+      ...(Array.isArray(base.chainDirsOriginal) && base.chainDirsOriginal.length > 0 ? base.chainDirsOriginal : [path.resolve(base.dir)]),
+      path.resolve(child.dir),
+    ])),
   };
 }
 
@@ -584,7 +590,7 @@ function validateAttributeContracts(language, elementTypeList, contracts) {
   return errors;
 }
 
-function validateBundle({ language, dialect, elementTypes, relationshipTypes, actorElementType, matrix, deliveryDependencies, attributesByElementType }) {
+function validateBundle({ language, dialect, elementTypes, relationshipTypes, actorElementType, matrix, classByType, deliveryDependencies, attributesByElementType }) {
   const errors = [];
   const elementTypeList = Array.isArray(elementTypes) ? elementTypes : [];
   const relationshipTypeList = Array.isArray(relationshipTypes) ? relationshipTypes : [];
@@ -610,19 +616,26 @@ function validateBundle({ language, dialect, elementTypes, relationshipTypes, ac
     errors.push(`schema bundle '${language}' actorElementType must be a non-empty string or null; got ${JSON.stringify(actorElementType)}`);
   }
 
-  // The endpoint matrix (type-keyed bundles only) must only reference declared types.
-  if (dialect !== 'archimate-class-matrix' && matrix && typeof matrix === 'object') {
+  // The endpoint matrix must only reference element-type tokens that exist. Its
+  // token vocabulary is dialect-dependent: an archimate-class-matrix keys by CLASS
+  // token (the values of archimateClassByElementType), a type-matrix keys by the
+  // element type itself. ('ModelConcept' is the matrix's wildcard token.)
+  if (matrix && typeof matrix === 'object') {
+    const classValues = classByType && typeof classByType === 'object' ? Object.values(classByType) : [];
+    const useClasses = dialect === 'archimate-class-matrix' && classValues.length > 0;
+    const typeTokenSet = new Set(useClasses ? classValues : elementTypeList);
+    const isKnownType = (token) => token === 'ModelConcept' || typeTokenSet.has(token);
     for (const [relationshipType, targetsBySource] of Object.entries(matrix)) {
       if (!relationshipTypeList.includes(relationshipType)) {
         errors.push(`relationshipTargetMatrix references unknown relationship type '${relationshipType}'`);
       }
       for (const [sourceType, targetList] of Object.entries(targetsBySource || {})) {
-        if (!elementTypeList.includes(sourceType)) {
-          errors.push(`relationshipTargetMatrix['${relationshipType}'] references unknown element type '${sourceType}'`);
+        if (!isKnownType(sourceType)) {
+          errors.push(`relationshipTargetMatrix['${relationshipType}'] references unknown element type token '${sourceType}'`);
         }
         for (const targetType of Array.isArray(targetList) ? targetList : []) {
-          if (targetType !== '*' && !elementTypeList.includes(targetType)) {
-            errors.push(`relationshipTargetMatrix['${relationshipType}']['${sourceType}'] references unknown element type '${targetType}'`);
+          if (targetType !== '*' && !isKnownType(targetType)) {
+            errors.push(`relationshipTargetMatrix['${relationshipType}']['${sourceType}'] references unknown element type token '${targetType}'`);
           }
         }
       }
@@ -663,12 +676,14 @@ function buildClassMatrixOntology(bundle) {
   let getMetadata;
   let getArchiMateClass;
   let validateRelationshipEndpointTypes;
+  let classByType = {};
+  let classMatrix = {};
 
   if (rules) {
     // Data-driven default: the bundle ships its own rule data (schema-bundle.rules.json),
     // so the DEFAULT schema is replaceable file-for-file exactly like a custom one.
-    const classByType = rules.archimateClassByElementType || {};
-    const classMatrix = rules.relationshipTargetMatrix || {};
+    classByType = rules.archimateClassByElementType || {};
+    classMatrix = rules.relationshipTargetMatrix || {};
     elementTypeMetadata = new Map(Object.entries(rules.elementTypeMetadata || {}));
     relationshipCategoryByType = new Map(Object.entries(rules.relationshipCategoryByType || {}));
     isSupportedElementType = (type) => elementTypeMetadata.has(type);
@@ -676,6 +691,13 @@ function buildClassMatrixOntology(bundle) {
     getMetadata = (element) => elementTypeMetadata.get(element && element.type) || {};
     getArchiMateClass = (elementOrType) => {
       const type = typeof elementOrType === 'string' ? elementOrType : elementOrType && elementOrType.type;
+      // INTENTIONAL: a type with no class mapping (e.g. a type added via `extends`
+      // without `class`) yields undefined, and the endpoint check then skips the
+      // relationship — added types are left UNCONSTRAINED by the ArchiMate matrix
+      // (see tests/uml2-state-machine-bundle.test.js AT-uml2-sm-04). Do NOT "fix"
+      // this to an identity fallback: the matrix is keyed by class tokens, so an
+      // unmapped type would then match no matrix entry and every relationship
+      // touching it would be flagged (breaking the UML-profile contract).
       return classByType[type];
     };
     validateRelationshipEndpointTypes = (relationship, source, target) => {
@@ -726,7 +748,7 @@ function buildClassMatrixOntology(bundle) {
     actorElementType,
     deliveryDependencies,
     attributesByElementType,
-    bundleValidation: validateBundle({ language, dialect: 'archimate-class-matrix', elementTypes, relationshipTypes, actorElementType, matrix: null, deliveryDependencies, attributesByElementType }),
+    bundleValidation: validateBundle({ language, dialect: 'archimate-class-matrix', elementTypes, relationshipTypes, actorElementType, matrix: classMatrix, classByType, deliveryDependencies, attributesByElementType }),
     elementTypeMetadata,
     relationshipCategoryByType,
     isSupportedElementType,
@@ -910,8 +932,49 @@ function bundleFingerprint(bundle) {
   return parts.join('|');
 }
 
+const AXIOMS_BASENAME = 'ontology-axioms.json';
+const AXIOM_ARRAY_KEYS = Object.freeze(['disjointClasses', 'functionalProperties', 'transitiveProperties', 'irreflexiveProperties', 'asymmetricProperties']);
+const AXIOM_MAP_KEYS = Object.freeze(['objectPropertyDomain', 'objectPropertyRange']);
+
+function emptyAxioms() {
+  const out = { objectPropertyDomain: {}, objectPropertyRange: {} };
+  for (const key of AXIOM_ARRAY_KEYS) out[key] = [];
+  return out;
+}
+
+// Merge ontology-axioms.json across the `extends` chain (base first, child last):
+// arrays union, maps merge by key (child wins), distinctIndividuals = nearest layer
+// that declares it. So a base bundle's logical axioms are honoured by an inheriting
+// profile — the SAME chain-merge discipline the endpoint matrix/rules already use.
+function resolveBundleAxioms(bundle) {
+  const dirs = Array.isArray(bundle.chainDirsOriginal) && bundle.chainDirsOriginal.length > 0
+    ? bundle.chainDirsOriginal
+    : [bundle.dir];
+  let axioms = emptyAxioms();
+  let hasAxiomsFile = false;
+  for (const dir of dirs) {
+    const file = path.join(dir, AXIOMS_BASENAME);
+    if (!isFile(file)) continue;
+    hasAxiomsFile = true;
+    const layer = readJsonFile(file) || {};
+    for (const key of AXIOM_ARRAY_KEYS) {
+      if (Array.isArray(layer[key])) axioms[key].push(...layer[key]);
+    }
+    for (const key of AXIOM_MAP_KEYS) {
+      if (layer[key] && typeof layer[key] === 'object') Object.assign(axioms[key], layer[key]);
+    }
+    if (layer.distinctIndividuals !== undefined) axioms.distinctIndividuals = !!layer.distinctIndividuals;
+  }
+  return { axioms: hasAxiomsFile ? axioms : null, hasAxiomsFile };
+}
+
 function loadSchemaBundleAndOntology(workspaceRoot, options = {}) {
   const bundle = resolveSchemaBundle(workspaceRoot, options);
+  // Attach the chain-merged logical axioms (sidecar-only file) so consumers read
+  // the effective axioms, not just the child dir's.
+  const { axioms: bundleAxioms, hasAxiomsFile } = resolveBundleAxioms(bundle);
+  bundle.axioms = bundleAxioms;
+  bundle.hasAxiomsFile = hasAxiomsFile;
   const cacheKey = `${bundle.kind}:${path.resolve(bundle.dir).toLowerCase()}:${bundleFingerprint(bundle)}`;
   if (ontologyCache.has(cacheKey)) {
     return { bundle, ontology: ontologyCache.get(cacheKey) };
@@ -928,5 +991,6 @@ module.exports = {
   resolveSchemaBundle,
   resolveTypeEnums,
   buildOntology,
+  resolveBundleAxioms,
   loadSchemaBundleAndOntology,
 };
