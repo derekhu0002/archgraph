@@ -67,10 +67,19 @@ const OPT_IN_KEYS = Object.freeze({
   ARGO_LIVE_PROVIDER_E2E: 'LIVE_PROVIDER_E2E_OPT_IN_REQUIRED',
   ARGO_W31_LIVE_MUTATION_VECTOR_E2E: 'W31_MUTATION_VECTOR_E2E_OPT_IN_REQUIRED',
 });
+// Ontology/axiom validation extension: user-configurable in .env. The extension
+// is OFF unless ARGO_VALIDATION_EXTENSIONS is set to a non-empty JSON list;
+// ARGO_ONTOLOGY_PYTHON / ARGO_ONTOLOGY_ENGINE tune the bundled engine.
+const ONTOLOGY_VALIDATION_KEYS = Object.freeze([
+  'ARGO_VALIDATION_EXTENSIONS',
+  'ARGO_ONTOLOGY_PYTHON',
+  'ARGO_ONTOLOGY_ENGINE',
+]);
 const READABLE_KEYS = Object.freeze([
   ...CONFIG_KEYS,
   ...OPTIONAL_CONFIG_KEYS,
   ...RETRIEVAL_TUNING_KEYS,
+  ...ONTOLOGY_VALIDATION_KEYS,
   PROFILE_KEY,
   QUERY_INSTRUCTION_KEY,
   EMBEDDING_API_KEY_KEY,
@@ -104,9 +113,8 @@ const HOST_ONLY_ENV_KEYS = Object.freeze([
   'ARGO_COST_PROFILER',
   'ARGO_COST_TRACE_MAX_BYTES',
   'ARGO_CONTEXT_MAX_BYTES',
-  'ARGO_VALIDATION_EXTENSIONS',
-  'ARGO_ONTOLOGY_PYTHON',
-  'ARGO_ONTOLOGY_ENGINE',
+  // Internal to the extension runner (set by the write hook when spawning an
+  // external validator); never user-configured in .env.
   'ARGO_VALIDATION_TOUCHED_ELEMENTS',
   'ARGO_VALIDATION_TOUCHED_RELATIONSHIPS',
   'ARGO_VALIDATION_GRAPH_FILE',

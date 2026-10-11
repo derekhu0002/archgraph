@@ -862,6 +862,22 @@ function Install-OntologyEngineDeps {
     Write-Host '  pyshacl + owlready2: OK'
 }
 
+function Set-EnvFileValue {
+    # Upsert KEY=VALUE in an env file (replaces an existing line for the key,
+    # preserves every other line). Used to write the ontology-validation switch
+    # into ~/.argo/.env so it is user-configurable in the config file.
+    param([string]$Path, [string]$Key, [string]$Value)
+    New-Item -ItemType Directory -Force -Path (Split-Path $Path) | Out-Null
+    $existing = if (Test-Path $Path) { @(Get-Content $Path) } else { @() }
+    $kept = New-Object System.Collections.Generic.List[string]
+    foreach ($l in $existing) {
+        if (-not $l.TrimStart().StartsWith("$Key=")) { $kept.Add($l) }
+    }
+    while ($kept.Count -gt 0 -and $kept[$kept.Count - 1].Trim() -eq '') { $kept.RemoveAt($kept.Count - 1) }
+    $kept.Add("$Key=$Value")
+    [System.IO.File]::WriteAllLines($Path, $kept, (New-Object System.Text.UTF8Encoding $false))
+}
+
 function Show-OntologyValidationSwitch {
     # Expose the OPTIONAL ontology-validation host switch during deploy, with its
     # meaning and how to verify its value. It is a host-level (user) environment
@@ -878,22 +894,22 @@ function Show-OntologyValidationSwitch {
     Write-Host '    framework write (delta subgraph) and init (whole graph) validation timings.'
     Write-Host '    Empty = disabled (default: no behaviour change). ARGO_ONTOLOGY_PYTHON picks'
     Write-Host '    the interpreter; ARGO_ONTOLOGY_ENGINE = real (default) | deterministic.'
-    Write-Host '    Verify the current value:'
-    Write-Host "      [Environment]::GetEnvironmentVariable('ARGO_VALIDATION_EXTENSIONS','User')"
+    $envPath = Join-Path $ArgoRoot '.env'
+    Write-Host "    Config file: $envPath   (verify:  Get-Content `"$envPath`")"
     if ($EnableOntologyValidation) {
-        [Environment]::SetEnvironmentVariable('ARGO_ONTOLOGY_PYTHON', $pyName, 'User')
-        [Environment]::SetEnvironmentVariable('ARGO_VALIDATION_EXTENSIONS', $cmdJson, 'User')
-        Write-Host '    ENABLED for the current user (persisted user env var). Value:'
+        Set-EnvFileValue -Path $envPath -Key 'ARGO_ONTOLOGY_PYTHON' -Value $pyName
+        Set-EnvFileValue -Path $envPath -Key 'ARGO_VALIDATION_EXTENSIONS' -Value $cmdJson
+        Write-Host '    ENABLED (written to the .env file above). Values:'
         Write-Host "      ARGO_ONTOLOGY_PYTHON=$pyName"
         Write-Host "      ARGO_VALIDATION_EXTENSIONS=$cmdJson"
-        Write-Host '    Restart the MCP host(s) to pick up the new user environment.'
+        Write-Host '    Restart the MCP host(s) so the argo server reloads ~/.argo/.env.'
         Write-Host '    Confirm the engine imports:'
         Write-Host "      $pyName -c `"import pyshacl, owlready2`""
     } else {
-        Write-Host '    Currently DISABLED. To enable on this machine, re-run the deploy with:'
-        Write-Host '      argo-deploy -EnableOntologyValidation'
-        Write-Host '    or set ARGO_VALIDATION_EXTENSIONS manually (current user) to:'
-        Write-Host "      $cmdJson"
+        Write-Host '    Currently DISABLED. Enable by either:'
+        Write-Host '      - re-running:  argo-deploy -EnableOntologyValidation   (writes the key below to the .env), or'
+        Write-Host '      - editing the .env above and setting:'
+        Write-Host "        ARGO_VALIDATION_EXTENSIONS=$cmdJson"
     }
 }
 
