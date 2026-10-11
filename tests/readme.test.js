@@ -100,7 +100,7 @@ test('readme: how-to-use section explains the user workflow', () => {
   // THEN it describes the workspace bootstrap and the coding-agent workflow
   const section = sectionAfter(README, 'How to use');
   assert.ok(section, 'README should have a How to use section');
-  assert.match(section, /argo init/, 'should mention the argo init workspace bootstrap');
+  assert.match(section, /argo-init/, 'should mention the argo-init workspace bootstrap');
   assert.match(section, /coding agent/i, 'should describe the coding-agent workflow');
   assert.match(section, /Skills and Rules/, 'should mention arming with Skills and Rules');
   assert.match(section, /single source of truth/i, 'should state the graph is the single source of truth');
@@ -179,8 +179,8 @@ test('readme: newcomer onboarding — first-use glosses, Node>=18, and an agent-
   assert.match(section, /Route A[^\n]*default ontology/i, 'must label Route A as the default-ontology route');
   assert.match(section, /Route B[^\n]*your own ontology/i, 'must label Route B as the own-ontology route');
   // Route A: default ontology, no schema work
-  assert.match(section, /argo init/, 'Route A must use argo init');
-  assert.match(section, /initializeWorkspace/, 'Route A must name the initializeWorkspace MCP call');
+  assert.match(section, /argo-init/, 'Route A must use the argo-init CLI');
+  assert.match(section, /workspace-init CLI|argo-init/, 'Route A must name the init CLI');
   assert.match(section, /single source of truth/i, 'the canonical recipe must state the graph is the single source of truth');
   // Route B: author schema AND author the graph, fail-closed
   assert.match(section, /schema-bundle\.config\.json|SystemArchitecture\.schema\.json/, 'Route B must show how to define the ontology');

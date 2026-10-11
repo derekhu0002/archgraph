@@ -52,7 +52,7 @@ test('intro-email: teaches the four basic-operation steps with real commands', (
   const html = readHtml();
   assert.match(html, /npm install -g archgraph-argo/, 'should show the install command');
   assert.match(html, /argo-deploy/, 'should show the deploy command');
-  assert.match(html, /argo init/, 'should show the workspace initialization step');
+  assert.match(html, /argo-init/, 'should show the workspace initialization step');
   assert.match(html, /前置准备/, 'should have a prerequisites section');
   assert.match(html, /Node\.js 18/, 'should state the Node.js requirement');
   assert.match(html, /Neo4j/, 'should name the Neo4j prerequisite');

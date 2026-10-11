@@ -1,4 +1,6 @@
 'use strict';
+
+const { runArgoInitCli } = require('./lib/argo-init-cli.js');
 /**
  * In-container framework smoke test. Runs AFTER `npx argo-deploy` against the
  * package installed from the local tarball (simulating a real user install of
@@ -56,10 +58,10 @@ function rel(p) { return path.relative(HOME, p); }
 
 async function runMcp() {
   const { callTool } = require(path.join(PACKAGE, 'argo/scripts/argo-mcp-server.js'));
-  // 0) argo init：对空工作区调用 initializeWorkspace，从部署的 defaults/ 生成初始图谱
+  // 0) argo-init CLI：对空工作区运行 argo-init，从部署的 defaults/ 生成初始图谱
   //    （2 元素 / 1 关系 / 4 视图的初始模板）——验证真实新用户的初始化流程。
   try {
-    const init = await callTool('initializeWorkspace', { workspaceRoot: WORKSPACE }, null, undefined);
+    const init = runArgoInitCli(WORKSPACE);
     const text = (init && init.content && init.content[0] && init.content[0].text) || JSON.stringify(init);
     let payload = init;
     try { payload = JSON.parse(text); } catch (_) { /* keep raw */ }

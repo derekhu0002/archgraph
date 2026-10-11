@@ -74,12 +74,10 @@ test('AT workspace-write-guard: classifies write tools (dry-run is not a write)'
   // GIVEN the set of mutating MCP tools
   assert.ok(WRITE_TOOLS.has('applySystemArchitectureMutation'));
   assert.ok(WRITE_TOOLS.has('addArchitectureElement'));
-  assert.ok(WRITE_TOOLS.has('initializeWorkspace'));
   assert.ok(WRITE_TOOLS.has('runArchitectureTests'));
   // WHEN classified
   assert.equal(isWriteTool('addArchitectureElement', {}), true);
   assert.equal(isWriteTool('applySystemArchitectureMutation', {}), true);
-  assert.equal(isWriteTool('initializeWorkspace', {}), true);
   // THEN a focused dry-run validates only and is not a write
   assert.equal(isWriteTool('addArchitectureElement', { dryRun: true }), false);
   // AND read tools are never writes

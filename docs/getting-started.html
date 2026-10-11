@@ -157,10 +157,9 @@ argo-deploy</code></pre>
     </section>
 
     <section id="init">
-      <h2>初始化工作区：argo init</h2>
+      <h2>初始化工作区：argo-init</h2>
       <p class="lead">
-        进入你的项目后，让 coding agent 执行一次 <code>argo init</code>（它对应 MCP 调用
-        <code>initializeWorkspace</code>）。这一步会做四件事：
+        进入你的项目后，让 coding agent 执行一次 <code>argo-init</code>（argo-init CLI）。这一步会做四件事：
       </p>
       <ul class="clean">
         <li>当项目里没有 <code>design/KG/SystemArchitecture.json</code> 时，创建一个初始图谱（<em>注意：仅内置默认 ArchiMate 3.2 schema 会自动创建；用自定义本体时图谱写你自己提供，否则初始化会 fail-closed</em>）。</li>
@@ -171,7 +170,7 @@ argo-deploy</code></pre>
       <p class="lead">从这一刻起，这张意图图谱就是你项目的<strong>单一事实来源（source of truth）</strong>。</p>
       <div class="note">
         <strong>没配 Neo4j / embedding 会怎样？</strong> 图谱创建与校验照常完成，但上面第 2、3 步（JSON → Neo4j 结构同步、语义生命周期）
-        会<strong>报告 failed</strong>。补齐前置条件后重跑 <code>argo init</code> 即可。
+        会<strong>报告 failed</strong>。补齐前置条件后重跑 <code>argo-init</code> 即可。
       </div>
       <div class="note">
         <strong>默认 vs. 工作区。</strong> 全新安装默认内置 <strong>ArchiMate 3.2 + ARGO 扩展</strong>；而某个工作区可能解析到它自己的本体包（schema bundle），用 <code>extends: "default"</code> 继承默认再追加类型。
@@ -230,7 +229,7 @@ argo-deploy</code></pre>
     <section id="faq">
       <h2>常见问题 / 排错</h2>
       <h3>语义检索没有结果 / 报错？</h3>
-      <p class="lead">先确认 <code>~/.argo/.env</code> 里 Neo4j 和 embedding 都填对，并执行过一次 <code>argo init</code>（它才会同步投影、初始化向量）。改完 <code>.env</code> 后重跑 <code>argo-deploy</code> 并重启宿主。</p>
+      <p class="lead">先确认 <code>~/.argo/.env</code> 里 Neo4j 和 embedding 都填对，并执行过一次 <code>argo-init</code>（它才会同步投影、初始化向量）。改完 <code>.env</code> 后重跑 <code>argo-deploy</code> 并重启宿主。</p>
       <h3>连不上 Neo4j？</h3>
       <p class="lead">检查 <code>ARGO_NEO4J_DATABASE_URL</code> 能否从你机器访问、用户名密码是否正确。本地 / Docker 实例要确认端口已放行。</p>
       <h3>想换 embedding 提供方 / 自建？</h3>
@@ -239,7 +238,7 @@ argo-deploy</code></pre>
       <p class="lead">正常路径下写入会去重、不会产生重复。若确实需要新建一个「近似重复」的对象，写入时会要求显式确认和理由 —— 这是刻意设计的保护。</p>
       <h3>agent 一开始就报「图谱不可用」？</h3>
       <p class="lead">先用只读的 <code>queryNeo4jGraph { "schema": true }</code> 看激活的是哪套 schema、<code>bundleValidation.status</code> 是否 <code>passed</code>。<code>failed</code> 说明本体包配置有问题，需要先修好再写。</p>
-      <h3>自定义本体下 <code>argo init</code> 报 <code>NO_DEFAULT_GRAPH</code>？</h3>
+      <h3>自定义本体下 <code>argo-init</code> 报 <code>NO_DEFAULT_GRAPH</code>？</h3>
       <p class="lead">这是预期行为：自定义本体不会自动复制内置默认图。请自己创建 <code>design/KG/SystemArchitecture.json</code> —— 见<a href="case-team-graph.html#ontology">使用案例的第一步</a>。</p>
     </section>
   </main>

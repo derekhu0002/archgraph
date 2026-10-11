@@ -41,9 +41,10 @@ const REQUIRED_TOOL_NAMES = [
 
 // Build the deterministic argo-init harness report (Neo4j structural sync,
 // semantic lifecycle, canonical validation, subdiagram_views consistency).
-// `includeBootstrap` is true for the standalone CLI (it calls initializeWorkspace
-// to bootstrap the workspace); the initializeWorkspace MCP tool passes false
-// because it already bootstrapped — avoids re-entrancy through ensureWorkspaceBootstrap.
+// `includeBootstrap` is true for the standalone argo-init CLI (it calls
+// initializeWorkspace to bootstrap the workspace); initializeWorkspaceReport
+// (used by the argo-init CLI) passes false because it already bootstrapped —
+// avoids re-entrancy through ensureWorkspaceBootstrap.
 async function buildHarnessReport(options = {}) {
   const { checkOnly = false, workspaceRoot, includeBootstrap = true } = options;
   const { withAlignmentLock } = require('./graph-rag/semanticAlignmentLock.js');
@@ -415,7 +416,7 @@ function formatSemanticLifecycleError(error) {
     : 'SEMANTIC_LIFECYCLE_INIT_FAILED';
   const action = typeof payload.action === 'string'
     ? payload.action
-    : 'Repair semantic lifecycle initialization, then run argo init again.';
+    : 'Repair semantic lifecycle initialization, then run argo-init again.';
   const message = payload.safeSemanticLifecycleMessage === true && typeof payload.message === 'string'
     ? payload.message
     : (typeof payload.publicMessage === 'string'

@@ -18,21 +18,22 @@ failure.
 
 ## What it verifies
 
-- **All 19 ARGO MCP tools**, exercised end-to-end over stdio JSON-RPC:
-  `initializeWorkspace`, `runArchitectureTests`, `getSystemArchitecture`,
+- **All 18 ARGO MCP tools**, exercised end-to-end over stdio JSON-RPC:
+  `runArchitectureTests`, `getSystemArchitecture`,
   `getIntentElementContext`, `getArchitectureViewContext`, `queryNeo4jGraph`,
   `memory_search`, `validateSystemArchitecture`,
   `previewSystemArchitectureMutation`, `applySystemArchitectureMutation`,
   `add/update/removeArchitectureElement`, `add/update/removeArchitectureRelationship`,
-  `add/update/removeArchitectureView`. The report asserts `tools.exercised === 19`.
+  `add/update/removeArchitectureView`. The report asserts `tools.exercised === 18`.
 - **Both schema modes**: the default ArchiMate 3.2 schema and a custom schema
   (the shipped Team Graph bundle), each with its own isolated database.
 - **Retrieval, semantic AND non-semantic**: semantic `getSystemArchitecture`
   (asserts a custom/default element is actually returned) and `memory_search`
   (asserts hits); non-semantic `queryNeo4jGraph` (`{schema:true}` and Cypher rows),
   `getIntentElementContext`, `getArchitectureViewContext`.
-- **Init & lifecycle**: `initializeWorkspace` (Neo4j sync + semantic lifecycle
-  `Aligned`) and the reported active schema (`kind`/`language`/`actorElementType`).
+- **Init & lifecycle**: the `argo-init` CLI (init moved out of the MCP tool surface)
+  runs Neo4j sync + semantic lifecycle `Aligned` and reports the active schema
+  (`kind`/`language`/`actorElementType`).
 - **Validation before and after writes** (`validateSystemArchitecture`).
 - **Fail-closed rules**: a custom schema with no graph is rejected (the packaged
   graph is never copied); the installed default bundle is replaceable.

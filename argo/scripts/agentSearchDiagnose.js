@@ -31,7 +31,7 @@ const BUNDLE_VERSION = 'temp2.2';
 const SCHEMA_VERSION = 1;
 const GRAPH_TOOLS = ['getSystemArchitecture', 'getIntentElementContext', 'getArchitectureViewContext', 'queryNeo4jGraph', 'memory_search'];
 const GRAPH_WRITE_TOOLS = ['previewSystemArchitectureMutation', 'applySystemArchitectureMutation', 'addArchitectureElement', 'updateArchitectureElement', 'removeArchitectureElement', 'addArchitectureRelationship', 'updateArchitectureRelationship', 'removeArchitectureRelationship', 'addArchitectureView', 'updateArchitectureView', 'removeArchitectureView'];
-const VALIDATOR_TOOLS = ['validateSystemArchitecture', 'runArchitectureTests', 'initializeWorkspace'];
+const VALIDATOR_TOOLS = ['validateSystemArchitecture', 'runArchitectureTests'];
 const REPO_TOOLS = ['read', 'grep', 'glob', 'list', 'bash', 'webfetch', 'edit', 'write'];
 
 function backendOf(tool) {
@@ -53,7 +53,6 @@ function classifyQuery(tool, input) {
   if (n.includes('queryNeo4jGraph')) return 'structured-cypher';
   if (n.includes('getIntentElementContext') || n.includes('getArchitectureViewContext')) return 'structured-context';
   if (n.includes('validateSystemArchitecture') || n.includes('runArchitectureTests')) return 'validate';
-  if (n.includes('initializeWorkspace')) return 'init';
   if (n.includes('previewSystemArchitectureMutation') || GRAPH_WRITE_TOOLS.some(t => n.includes(t))) return 'mutation';
   if (n.includes('read')) return 'file-read';
   if (n.includes('grep')) return 'grep';

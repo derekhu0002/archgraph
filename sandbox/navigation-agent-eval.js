@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 'use strict';
+
+const { runArgoInitCli } = require('./lib/argo-init-cli.js');
 /**
  * Full-ArchGraph navigation capability eval via an OpenCode Agent (in Docker).
  *
@@ -144,11 +146,11 @@ function loadCallTool() {
 
 async function initGraph() {
   // Full-ArchGraph navigation eval runs against the PRODUCTION intent graph
-  // (165 elements / 40 views), NOT the initializeWorkspace 2-element template.
+  // (165 elements / 40 views), NOT the argo-init 2-element template.
   // The host orchestrator mounts the repo's design/KG/SystemArchitecture.json to
   // /workspace/design/KG/SystemArchitecture.json before running. If present,
   // copy it into place (entrypoint starts from an empty workspace) so the argo
-  // tools serve the production map; otherwise fall back to initializeWorkspace.
+  // tools serve the production map; otherwise fall back to argo-init.
   const prodGraph = '/workspace/design/KG/SystemArchitecture.json';
   const mounted = '/opt/navigation-system-architecture.json';
   try {
@@ -160,7 +162,7 @@ async function initGraph() {
       return (d.elements || []).length > 2;
     }
   } catch (_) { /* fall through */ }
-  const init = await loadCallTool()('initializeWorkspace', { workspaceRoot: WORKSPACE }, null, undefined);
+  const init = runArgoInitCli(WORKSPACE);
   const text = (init && init.content && init.content[0] && init.content[0].text) || JSON.stringify(init);
   return String(text).includes('SystemArchitecture.json');
 }

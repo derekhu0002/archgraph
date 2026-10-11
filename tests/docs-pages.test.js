@@ -76,8 +76,7 @@ test('AT docs-pages: getting-started covers the real install/config/init surface
   for (const token of [
     'npm install -g archgraph-argo',
     'argo-deploy',
-    'initializeWorkspace',
-    'argo init',
+    'argo-init',
     'Neo4j',
     'embedding',
     'ARGO_NEO4J_DATABASE_URL',

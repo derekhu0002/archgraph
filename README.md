@@ -2,7 +2,7 @@
 
 **A knowledge-graph framework with an ontology you define — wired into your coding agent through one MCP interface.**
 
-For teams running coding agents on a real codebase, ArchGraph gives the agent durable, tiered long-term memory on an **intent graph** — a versioned architecture graph that records *why* the system is built the way it is, not just how. You and the agent read and write it through a single **MCP** server (**MCP** = **Model Context Protocol**, the open standard that lets an AI tool call external servers as tools). The graph's shape is set by an **ontology** — its vocabulary of element and relationship types — and that ontology is yours to define. The built-in default is **ArchiMate 3.2 + ARGO extensions**, where **ArchiMate** is a standard enterprise-architecture modeling language and **ARGO** is the toolchain and agent-workflow layer behind the `argo-deploy` and `argo init` commands. A repository can plug in its own ontology — and this one does. **One install, one interface to learn.**
+For teams running coding agents on a real codebase, ArchGraph gives the agent durable, tiered long-term memory on an **intent graph** — a versioned architecture graph that records *why* the system is built the way it is, not just how. You and the agent read and write it through a single **MCP** server (**MCP** = **Model Context Protocol**, the open standard that lets an AI tool call external servers as tools). The graph's shape is set by an **ontology** — its vocabulary of element and relationship types — and that ontology is yours to define. The built-in default is **ArchiMate 3.2 + ARGO extensions**, where **ArchiMate** is a standard enterprise-architecture modeling language and **ARGO** is the toolchain and agent-workflow layer behind the `argo-deploy` and `argo-init` commands. A repository can plug in its own ontology — and this one does. **One install, one interface to learn.**
 
 Ready to try it? Jump to **[Build your own graph](#build-your-own-graph)**.
 
@@ -105,9 +105,9 @@ No schema work: use the built-in **ArchiMate 3.2 + ARGO extensions**.
 
    Then **restart your editor / host** so it reloads the MCP server.
 
-2. **Initialize.** Ask your coding agent to run `argo init` (the `initializeWorkspace` MCP call). It creates and validates the starter `design/KG/SystemArchitecture.json`, which already contains the project's root view named `SystemArchitecture`.
+2. **Initialize.** Ask your coding agent to run `argo-init` (the workspace-init CLI). It creates and validates the starter `design/KG/SystemArchitecture.json`, which already contains the project's root view named `SystemArchitecture`.
 
-3. **Add elements and relationships.** Ask your coding agent to call `applySystemArchitectureMutation` and attach every new element and relationship to the project's **existing root view** — tell it to resolve that view's real `view_id` first (`queryNeo4jGraph` / `getArchitectureViewContext`). Do **not** pre-create a view: a new view called `SystemArchitecture` would collide with the one `argo init` made, and any `view_ids` pointing at a different id would then fail.
+3. **Add elements and relationships.** Ask your coding agent to call `applySystemArchitectureMutation` and attach every new element and relationship to the project's **existing root view** — tell it to resolve that view's real `view_id` first (`queryNeo4jGraph` / `getArchitectureViewContext`). Do **not** pre-create a view: a new view called `SystemArchitecture` would collide with the one `argo-init` made, and any `view_ids` pointing at a different id would then fail.
 
 4. **Verify.** Ask your coding agent to call `validateSystemArchitecture`, then `queryNeo4jGraph` with `{"schema": true}` to confirm the element and relationship types in effect.
 
@@ -117,7 +117,7 @@ No schema work: use the built-in **ArchiMate 3.2 + ARGO extensions**.
 
 2. **Author your schema.** Put your modeling language under `.argo/schema/`. A **standalone** bundle — a full `SystemArchitecture.schema.json`, editing its two `$defs` enum arrays, `archimateElementType` and `archimateRelationshipType` — **must also declare `actorElementType` in `schema-bundle.config.json`**, set to one of your element types (or to `null` if your schema genuinely has no actor concept), or loading fails closed (`bundleValidation.status: "failed"`) and validation/writes are blocked. A bundle that only `extends: "default"` needs just the config. `schema-bundle.rules.json` stays optional (without it, endpoint checks are permissive).
 
-3. **Author the graph yourself.** With a custom schema, `argo init` does **not** create the graph — the packaged default would not match your vocabulary — and it **fails closed** with `NO_DEFAULT_GRAPH`. Before any MCP write, create `design/KG/SystemArchitecture.json` by hand, using your own element and relationship types and your own root view. Then ask your coding agent to run `argo init` to validate it.
+3. **Author the graph yourself.** With a custom schema, `argo-init` does **not** create the graph — the packaged default would not match your vocabulary — and it **fails closed** with `NO_DEFAULT_GRAPH`. Before any MCP write, create `design/KG/SystemArchitecture.json` by hand, using your own element and relationship types and your own root view. Then ask your coding agent to run `argo-init` to validate it.
 
 4. **Add into YOUR root view.** Ask your coding agent to call `applySystemArchitectureMutation`, attaching each element and relationship to the root view **you authored** (not the default one).
 
@@ -142,7 +142,7 @@ Each line links to a short page — this is the map, not the manual.
 
 ## How to use
 
-**Initialize once** (`argo init`), then open your project and let your coding agent work. It will:
+**Initialize once** (`argo-init`), then open your project and let your coding agent work. It will:
 
 1. locate the architecture element behind the task before changing anything,
 2. arm itself with that element's Skills and Rules,

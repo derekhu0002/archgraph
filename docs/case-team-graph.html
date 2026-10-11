@@ -133,7 +133,7 @@ cp -r custom-schema/.argo/schema &lt;your-repo&gt;/.argo/schema</code></pre>
 
       <h3>步骤 1b：自己创建图谱文件（自定义本体下必需）</h3>
       <div class="note">
-        <strong>关键约束（fail-closed）：</strong> 自定义本体时 <code>argo init</code> <strong>不会</strong>自动生成初始图谱 ——
+        <strong>关键约束（fail-closed）：</strong> 自定义本体时 <code>argo-init</code> <strong>不会</strong>自动生成初始图谱 ——
         因为打包的默认图不匹配你的本体。你必须<strong>先自己创建</strong> <code>design/KG/SystemArchitecture.json</code>，
         否则初始化会明确失败（<code>NO_DEFAULT_GRAPH</code>）。这一步必须在<strong>任何 MCP 写入之前</strong>完成，也是<strong>唯一</strong>被允许手写图谱文件的一步；图谱建立后，后续修改一律走 MCP（见步骤 2）。
       </div>
@@ -214,7 +214,7 @@ cp -r custom-schema/.argo/schema &lt;your-repo&gt;/.argo/schema</code></pre>
   ]
 }</code></pre>
       <p class="lead">
-        写好后就可以让 agent 执行 <code>argo init</code>（<code>initializeWorkspace</code>）：它会用你的本体校验这张图、
+        写好后就可以让 agent 执行 <code>argo-init</code>（argo-init CLI）：它会用你的本体校验这张图、
         做第一次 JSON → Neo4j 同步、初始化语义生命周期。之后所有写入都通过 MCP（<code>applySystemArchitectureMutation</code> 等）。
       </p>
 

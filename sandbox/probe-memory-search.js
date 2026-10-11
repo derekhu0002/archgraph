@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 'use strict';
+
+const { runArgoInitCli } = require('./lib/argo-init-cli.js');
 /**
  * Probe: after the exact same A-side flow as lmem-comparison.js
  * (init -> argo-init -> ingest A -> argo-init#2), call memory_search
@@ -97,7 +99,7 @@ async function main() {
   const log = [];
   log.push(`[probe] questions=${questions.length}`);
   log.push(`[probe] init...`);
-  const init = await callTool('initializeWorkspace', { workspaceRoot: WORKSPACE }, null, undefined);
+  const init = runArgoInitCli(WORKSPACE);
   log.push(`[probe] init done`);
   const i1 = argoInit(); log.push(`[probe] argo-init#1: ${JSON.stringify(i1)}`);
   const aIng = await ingestA(); log.push(`[probe] ingest A: ${JSON.stringify(aIng)}`);

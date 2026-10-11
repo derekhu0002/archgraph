@@ -34,7 +34,6 @@ const TRUSTED_ENV = 'ARGO_WORKSPACE_ROOT_TRUSTED';
 // Tools whose invocation mutates the target workspace. `preview*` and the read
 // tools are intentionally absent.
 const WRITE_TOOLS = Object.freeze(new Set([
-  'initializeWorkspace',
   'runArchitectureTests',
   'applySystemArchitectureMutation',
   'addArchitectureElement',
@@ -54,12 +53,13 @@ function guardDisabled(env = process.env) {
 }
 
 // A focused mutation with dryRun:true validates only and never writes, so it is
-// not a write for this guard. initializeWorkspace has no dry-run.
+// not a write for this guard. (Workspace init is now the `argo-init` CLI, not an
+// MCP tool, so it is no longer in WRITE_TOOLS.)
 function isWriteTool(name, args = {}) {
   if (!WRITE_TOOLS.has(name)) {
     return false;
   }
-  if (name !== 'initializeWorkspace' && args && args.dryRun === true) {
+  if (args && args.dryRun === true) {
     return false;
   }
   return true;

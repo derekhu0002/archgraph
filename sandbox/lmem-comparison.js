@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 'use strict';
+
+const { runArgoInitCli } = require('./lib/argo-init-cli.js');
 /**
  * LongMemEval A/B comparison runner (container-side, runs AFTER argo-deploy).
  *
@@ -129,7 +131,7 @@ function configureMcp(mode) {
 const { callTool } = require(path.join(PACKAGE, 'argo/scripts/argo-mcp-server.js'));
 
 async function initGraph() {
-  const init = await callTool('initializeWorkspace', { workspaceRoot: WORKSPACE }, null, undefined);
+  const init = runArgoInitCli(WORKSPACE);
   const text = (init && init.content && init.content[0] && init.content[0].text) || JSON.stringify(init);
   return String(text).includes('SystemArchitecture.json');
 }

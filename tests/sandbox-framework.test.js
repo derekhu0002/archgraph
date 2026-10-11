@@ -65,7 +65,7 @@ test('sandbox-framework-levelb: Level B full-capability checks (Neo4j + embeddin
   assert.match(smoke, /ARGO_NEO4J_DATABASE/, 'smoke should pin an isolated Neo4j database');
   assert.match(smoke, /queryNeo4jGraph/, 'smoke should exercise queryNeo4jGraph');
   assert.match(smoke, /getSystemArchitecture/, 'smoke should exercise semantic getSystemArchitecture');
-  assert.match(smoke, /initializeWorkspace/, 'smoke should generate the initial graph via argo init');
+  assert.match(smoke, /runArgoInitCli|argo-init/, 'smoke should generate the initial graph via the argo-init CLI');
   const orc = readFileSync(ORCH, 'utf8');
   assert.match(orc, /argo.*\.env/, 'orchestrator should mount argo/.env when present');
 });

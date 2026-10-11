@@ -140,7 +140,7 @@
       <div style="margin-bottom:8px;"><strong>① 安装</strong>　执行 <span style="font-family:Consolas,monospace;background:#eef2f7;border-radius:4px;padding:1px 6px;">npm install -g archgraph-argo</span>，要求电脑已装好 <strong>Node.js 18 或以上</strong>。</div>
       <div style="margin-bottom:8px;"><strong>② 部署</strong>　执行 <span style="font-family:Consolas,monospace;background:#eef2f7;border-radius:4px;padding:1px 6px;">argo-deploy</span>，它会自动适配你平时用的工具（Copilot、Cursor、OpenCode、DeepSeek Harness、OpenClaw）。同一套方法，谁用什么工具都能用。</div>
       <div style="margin-bottom:8px;"><strong>③ 前置准备</strong>　为了让 AI 能「按意思找信息」，需要 IT 帮忙准备一个<strong>图数据库</strong>（例如 Neo4j）和一个<strong>语义检索服务</strong>（云端或内网自建均可），把地址填进 <span style="font-family:Consolas,monospace;background:#eef2f7;border-radius:4px;padding:1px 6px;">~/.argo/.env</span> 即可。</div>
-      <div><strong>④ 初始化</strong>　在一个新项目里执行 <span style="font-family:Consolas,monospace;background:#eef2f7;border-radius:4px;padding:1px 6px;">argo init</span>，它会自动建好这个项目的「地图」并自检。从这一刻起，这个项目就有记忆了。</div>
+      <div><strong>④ 初始化</strong>　在一个新项目里执行 <span style="font-family:Consolas,monospace;background:#eef2f7;border-radius:4px;padding:1px 6px;">argo-init</span>，它会自动建好这个项目的「地图」并自检。从这一刻起，这个项目就有记忆了。</div>
     </div>
     <div style="background:#f2f7fd;border-left:5px solid #1d4e89;border-radius:6px;padding:12px 18px;font-size:13.5px;margin-top:10px;">
       <strong style="color:#0f2b4c;">内网友好：</strong>内网 / 离线环境下的自建方案，我们准备了完整的部署指引，不依赖公网也能跑通。

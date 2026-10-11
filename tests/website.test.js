@@ -138,7 +138,7 @@ test('readme-sync: home page mirrors README how-to-use', () => {
   // WHEN a visitor opens the homepage in a browser
   // THEN the page mirrors the How to use section
   assert.match(HTML, /id="howto"/, 'page should have a How to use section');
-  assert.match(HTML, /argo init/, 'How to use should mention the argo init workspace bootstrap');
+  assert.match(HTML, /argo-init/, 'How to use should mention the argo-init workspace bootstrap');
   assert.match(HTML, /ArchiMate 3\.2/, 'How to use should mention ArchiMate 3.2');
   assert.match(HTML, /coding agent/i, 'How to use should describe the coding-agent workflow');
   assert.match(HTML, /single source of truth/i, 'How to use should state the graph is the single source of truth');
@@ -206,7 +206,7 @@ test('english-quickstart: homepage has a two-route build recipe with Node>=18 an
   const section = slice('quickstart', 'howto');
   assert.ok(section, 'quickstart section should sit before How to use');
   assert.match(section, /npm install -g archgraph-argo/, 'step 1 should show the install');
-  assert.match(section, /argo init/, 'Route A should use argo init');
+  assert.match(section, /argo-init/, 'Route A should use the argo-init CLI');
   assert.match(section, /Node\.js\s*(?:≥|>=)\s*18/, 'Node.js >= 18 must be stated');
   assert.match(section, /Route A[^\n]*default ontology/i, 'must label Route A as the default-ontology route');
   assert.match(section, /Route B[^\n]*your own ontology/i, 'must label Route B as the own-ontology route');
@@ -219,14 +219,12 @@ test('english-quickstart: homepage has a two-route build recipe with Node>=18 an
   assert.doesNotMatch(section, /"view_id"\s*:\s*"view-root"/, 'must not pre-create a view colliding with the default root view');
 });
 
-test('no-shell-prompt-init: argo init is shown as an agent instruction, not a shell $ command', () => {
-  // GIVEN argo init maps to the initializeWorkspace MCP call, not a shell binary
+test('argo-init-cli-panel: the init panel shows the argo-init CLI command', () => {
+  // GIVEN init moved from an MCP call to the argo-init CLI (a real shell command)
   // WHEN a newcomer reads the homepage terminal
-  // THEN it is not presented with a shell prompt (checked on tag-stripped text, so inline
-  //      markup such as <span>$ </span> cannot hide a prompt), and says so explicitly
+  // THEN the init panel shows the argo-init CLI command
   const text = HTML.replace(/<[^>]*>/g, ' ');
-  assert.doesNotMatch(text, /\$\s*argo init/, 'argo init must not carry a shell prompt');
-  assert.match(text, /not a shell command/i, 'the init panel should say argo init is not a shell command');
+  assert.match(text, /argo-init/, 'the init panel should show the argo-init CLI');
 });
 
 test('english-quickstart: Route B makes the config mandatory for a standalone schema (fail-closed)', () => {

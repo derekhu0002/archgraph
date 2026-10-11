@@ -63,7 +63,7 @@ function main() {
   // smoke.js always writes the report (even on failure), so the exit decision is
   // driven by the report, not by docker's exit code.
   fs.mkdirSync(RESULTS_DIR, { recursive: true });
-  // 初始图谱由容器内 argo init（initializeWorkspace）生成，不再挂生产图。
+  // 初始图谱由容器内 argo-init CLI 生成，不再挂生产图。
   const mounts = [
     '-v', `${tarball}:/tarball/archgraph-argo.tgz:ro`,
     '-v', `${RESULTS_DIR}:/results`,

@@ -83,7 +83,7 @@
       </table>
       <div class="note">
         <strong>如实说明：</strong> ArchGraph 是一个需要你自己部署的<strong>框架</strong>，不是一个开箱即用的托管服务。
-        语义召回需要 <strong>Neo4j</strong> + 一个 <strong>embedding</strong> 端点；在未配置它们时，<code>argo init</code> 的结构同步与语义生命周期步骤会报告 <strong>failed</strong>，
+        语义召回需要 <strong>Neo4j</strong> + 一个 <strong>embedding</strong> 端点；在未配置它们时，<code>argo-init</code> 的结构同步与语义生命周期步骤会报告 <strong>failed</strong>，
         但图谱本身（上下文读写、去重、EA 互操作）依然可用。
       </div>
     </section>
@@ -208,7 +208,7 @@
       <div class="grid">
         <div class="card">
           <h3>Enterprise Architect 互操作</h3>
-          <p>图谱在写入时和 <code>argo init</code> 时会投影成标准 <code>.qea</code> 模型；人类在 EA 里的改动会变成一个语义 diff，由 agent 分析后再决定是否写回。</p>
+          <p>图谱在写入时和 <code>argo-init</code> 时会投影成标准 <code>.qea</code> 模型；人类在 EA 里的改动会变成一个语义 diff，由 agent 分析后再决定是否写回。</p>
         </div>
       </div>
     </section>

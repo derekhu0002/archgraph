@@ -16,7 +16,7 @@ export USERPROFILE="${USERPROFILE:-/root}"
 export ARGO_REPO_ROOT="$WORKSPACE"
 export NODE_ENV=production
 
-# 干净空工作区——初始图谱由框架自身的 argo init（initializeWorkspace）生成，
+# 干净空工作区——初始图谱由框架自身的 argo-init CLI 生成，
 # 绝不复制生产图（真实新用户不会拿到生产数据）。
 echo "[sandbox] 1/3 准备干净空工作区（容器内，可随时丢弃；初始图谱由 argo init 生成）"
 rm -rf "$WORKSPACE" /tmp/install

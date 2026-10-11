@@ -37,7 +37,7 @@ function createProductionSemanticOperatorJourney(dependencies) {
         ...structuralProjection,
         workspace,
         semanticState: 'SemanticIndexPending',
-        guidance: 'Enable both canonical semantic gates with approved external configuration, then run argo init again.',
+        guidance: 'Enable both canonical semantic gates with approved external configuration, then run argo-init again.',
       };
       if (request.automaticBackfillOptIn !== true) {
         return Object.freeze(pending);
@@ -139,7 +139,7 @@ async function runCanonicalSemanticInit(dependencies, request = {}) {
   if (queryable !== true) {
     const error = safeLifecycleError(
       'SEMANTIC_QUERYABILITY_NOT_VERIFIED',
-      'Repair semantic vector queryability, then run argo init again.',
+      'Repair semantic vector queryability, then run argo-init again.',
     );
     throw await recordCanonicalInitFailure(dependencies.finalReadiness, versions, error, 'Stale');
   }
@@ -152,7 +152,7 @@ async function runCanonicalSemanticInit(dependencies, request = {}) {
   if (coherent !== true) {
     const error = safeLifecycleError(
       'SEMANTIC_GLOBAL_COHERENCE_NOT_VERIFIED',
-      'Repair semantic global coherence, then run argo init again.',
+      'Repair semantic global coherence, then run argo-init again.',
     );
     throw await recordCanonicalInitFailure(dependencies.finalReadiness, versions, error, 'Stale');
   }
@@ -236,7 +236,7 @@ async function resolveCanonicalConfiguration(configurationBehavior, request) {
     }
     throw safeLifecycleError(
       'EXTERNAL_CREDENTIALS_REQUIRED',
-      'Provide approved external semantic configuration, then run argo init again.',
+      'Provide approved external semantic configuration, then run argo-init again.',
     );
   } catch (error) {
     throw sanitizeLifecycleError(error);
@@ -315,32 +315,32 @@ function configurationMessage(category, field) {
 function configurationAction(category, field) {
   if (category === 'SECRET_FILE_UNKNOWN_KEY') {
     return field
-      ? `Remove or rename unsupported key ${field} in .argo/.env, then run argo init again.`
-      : 'Remove unsupported keys from .argo/.env, then run argo init again.';
+      ? `Remove or rename unsupported key ${field} in .argo/.env, then run argo-init again.`
+      : 'Remove unsupported keys from .argo/.env, then run argo-init again.';
   }
   if (category === 'SECRET_FILE_DUPLICATE_KEY') {
     return field
-      ? `Keep exactly one ${field} entry in .argo/.env, then run argo init again.`
-      : 'Remove duplicate keys from .argo/.env, then run argo init again.';
+      ? `Keep exactly one ${field} entry in .argo/.env, then run argo-init again.`
+      : 'Remove duplicate keys from .argo/.env, then run argo-init again.';
   }
   if (category === 'SECRET_SOURCE_CONFLICT' || category === 'LIVE_PROVIDER_CONFIGURATION_CONFLICT') {
     return field
-      ? `Make process environment and .argo/.env agree for ${field}, then run argo init again.`
-      : 'Resolve conflicting approved configuration sources, then run argo init again.';
+      ? `Make process environment and .argo/.env agree for ${field}, then run argo-init again.`
+      : 'Resolve conflicting approved configuration sources, then run argo-init again.';
   }
   if (category === 'SECRET_FILE_TRACKED') {
-    return 'Remove .argo/.env from Git tracking, add it to .gitignore, then run argo init again.';
+    return 'Remove .argo/.env from Git tracking, add it to .gitignore, then run argo-init again.';
   }
   if (category === 'SECRET_FILE_NOT_IGNORED') {
-    return 'Add .argo/.env to .gitignore, then run argo init again.';
+    return 'Add .argo/.env to .gitignore, then run argo-init again.';
   }
   if (category === 'SECRET_FILE_PATH_PROHIBITED') {
-    return 'Move semantic secrets to .argo/.env and remove alternate env file usage, then run argo init again.';
+    return 'Move semantic secrets to .argo/.env and remove alternate env file usage, then run argo-init again.';
   }
   if (category === 'SECRET_FILE_REPARSE_PROHIBITED') {
-    return 'Replace .argo/.env with a regular file, then run argo init again.';
+    return 'Replace .argo/.env with a regular file, then run argo-init again.';
   }
-  return 'Correct approved external configuration and retry argo init.';
+  return 'Correct approved external configuration and retry argo-init.';
 }
 
 function safeLifecycleError(category, action, message = category) {
@@ -355,7 +355,7 @@ function safeLifecycleError(category, action, message = category) {
 function reconciliationFailure() {
   return safeLifecycleError(
     'SEMANTIC_RECONCILIATION_FAILED',
-    'Repair the durable semantic reconciliation failure, then run argo init again.',
+    'Repair the durable semantic reconciliation failure, then run argo-init again.',
     'Semantic reconciliation failed before readiness could be verified.',
   );
 }
@@ -404,7 +404,7 @@ async function recordCanonicalInitFailure(finalReadiness, versions, error, state
   const evidence = canonicalInitReadiness(state, versions, {
     category: error.category || 'SEMANTIC_LIFECYCLE_FAILED',
     message: error.message || 'Semantic lifecycle failed.',
-    action: error.action || 'Repair semantic readiness, then run argo init again.',
+    action: error.action || 'Repair semantic readiness, then run argo-init again.',
     ...(typeof error.field === 'string' ? { field: error.field } : {}),
   });
   await finalReadiness.recordFailure(evidence);

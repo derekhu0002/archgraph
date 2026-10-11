@@ -35,7 +35,7 @@ const GRAPH_WRITE_TOOLS = [
   'addArchitectureRelationship', 'updateArchitectureRelationship', 'removeArchitectureRelationship',
   'addArchitectureView', 'updateArchitectureView', 'removeArchitectureView',
 ];
-const VALIDATOR_TOOLS = ['validateSystemArchitecture', 'runArchitectureTests', 'initializeWorkspace'];
+const VALIDATOR_TOOLS = ['validateSystemArchitecture', 'runArchitectureTests'];
 const REPO_TOOLS = ['read', 'grep', 'glob', 'list', 'bash', 'webfetch', 'edit', 'write'];
 
 function enabled() {

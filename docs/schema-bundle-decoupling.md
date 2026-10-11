@@ -121,7 +121,7 @@ Only the **built-in ArchiMate 3.2 default schema** auto-provides a graph: when
 
 For **any other schema** (a repository's `.argo/schema` bundle, `ARGO_SCHEMA_DIR`,
 or a replaced default whose dialect is not ArchiMate) the graph is the user's
-own: `argo init` does **not** copy the packaged default (it would not match the
+own: `argo-init` does **not** copy the packaged default (it would not match the
 schema). If the workspace has no graph, init **fails closed**
 (`NO_DEFAULT_GRAPH`, message surfaced). A graph that exists but does not validate
 under the active schema also fails init (the harness validates it).
@@ -130,11 +130,11 @@ under the active schema also fails init (the harness validates it).
 
 The active schema is surfaced wherever a user needs to see it:
 
-- `initializeWorkspace` result 鈫?`schema: { kind, language, dialect, dir, guide, actorElementType, bundleValidation }` (also inside the harness report as `schemaBundle`).
+- the `argo-init` report 鈫?`schema: { kind, language, dialect, dir, guide, actorElementType, bundleValidation }` (also inside the harness report as `schemaBundle`).
 - `validateSystemArchitecture` prints `鈥?passed 鈥?[schema: <kind> / <language>]`.
 - `queryNeo4jGraph { "schema": true }` 鈫?`schemaKind`, `schemaLanguage`, `schemaDialect`, `actorElementType`, `bundleValidation`.
 
-So after `argo init` / the argo-init skill, the reported `schema.kind` is
+So after `argo-init` / the argo-init skill, the reported `schema.kind` is
 `default` (built-in ArchiMate 3.2) or `workspace` (the repository's own bundle), and
 `schema.language` is its name (e.g. `ArchiMate 3.2` or `Team Graph`).
 
@@ -205,9 +205,9 @@ and the live MCP projection.
   and `opencode mcp list` loading the deployed server.
 - `verify-all.js` 鈥?10 checks: the full surface under **both** schema modes
   (A custom Team Graph, B default ArchiMate 3.2) against a **real Neo4j + real
-  embedding provider**, each exercising all 19 MCP tools: `initializeWorkspace`
-  (Neo4j sync + semantic lifecycle, and asserts the result reports the active
-  schema kind/language), `getSystemArchitecture` (semantic retrieval),
+  embedding provider**, each exercising all 18 MCP tools (init is the argo-init
+  CLI): init runs via `argo-init` (Neo4j sync + semantic lifecycle, asserts the
+  report's active schema kind/language), `getSystemArchitecture` (semantic retrieval),
   `getIntentElementContext`, `getArchitectureViewContext`, `queryNeo4jGraph`
   (`{schema:true}` and Cypher), `memory_search`, `validateSystemArchitecture`
   (before/after writes), every write tool (element/relationship/view
