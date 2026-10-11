@@ -1,0 +1,11 @@
+{
+  "language": "PROV-O",
+  "actorElementType": null,
+  "rules": "schema-bundle.rules.json",
+  "invariants": {
+    "statementGrammar": true,
+    "endpointMatrix": true,
+    "rootViewName": "SystemArchitecture",
+    "maxElementsPerView": 15
+  }
+}

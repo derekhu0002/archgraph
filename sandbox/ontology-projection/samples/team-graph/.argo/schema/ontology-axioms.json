@@ -1,0 +1,13 @@
+{
+  "_comment": "Sidecar-only, ADDITIVE OWL axiom declarations. The framework bundle format carries constraints (endpoint matrix); this file carries the logical axioms it does not. NOTE: OWL 2 DL forbids non-simple (transitive) properties in Irreflexive/Asymmetric/Disjoint object property axioms, so the multi-hop demonstration uses transitive ENTAILMENT (a legal construct) rather than a self-loop.",
+  "disjointClasses": [
+    ["Team Node", "Service Node"],
+    ["Agent Node", "Team Node"],
+    ["Agent Node", "Service Node"]
+  ],
+  "functionalProperties": ["Assigned To"],
+  "transitiveProperties": ["Depends On"],
+  "objectPropertyDomain": { "Assigned To": "Agent Node" },
+  "objectPropertyRange": { "Assigned To": "Team Node" },
+  "distinctIndividuals": true
+}

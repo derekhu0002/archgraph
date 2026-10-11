@@ -48,6 +48,11 @@ function main() {
     validateArchiMateEndpointMatrix(document, errors, { ontology });
     validateViewElementLimits(document, errors, { ontology });
 
+    const { runValidationExtensions } = require('./validation-extensions.js');
+    for (const message of runValidationExtensions({ workspaceRoot: repoRoot, graphPath: graphRelativePath, mode: 'init' }).errors) {
+        errors.push(message);
+    }
+
     if (errors.length > 0) {
         console.error(`SystemArchitecture validation failed [schema: ${bundle.kind} / ${ontology.language}]:`);
         for (const error of errors) {

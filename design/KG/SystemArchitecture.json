@@ -12473,6 +12473,21 @@
       "name": "里程碑：发布 archgraph-argo@0.28.0（main 合并 dev 后恢复稳定包名，延续主干稳定线）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "ontology-validation-extension-001",
+      "name": "本体校验扩展（Ontology Validation Extension）",
+      "type": "Application Component",
+      "description": "框架通用校验扩展点（2026）。把外部本体/推理引擎以 opt-in、fail-open 的方式挂进框架已有的两个校验时机：写入时（只校验本次改动的 delta 子图）与初始化/全量时（整个图）。core 不硬编码任何引擎，只按 ARGO_VALIDATION_EXTENSIONS 运行外部校验命令并合并其 errors；校验只读派生、绝不回写 canonical；默认关闭→现有行为字节不变。落地：argo/scripts/validation-extensions.js（通用扩展点）+ argo/scripts/ontology-projection/（生产 CLI：canonical→RDF，端点矩阵→SHACL 由 pySHACL 校验，新增 ontology-axioms.json→OWL 由 owlready2/HermiT 判一致性；写=delta，初始化=全量真引擎）。验收 tests/ontology-validation-extension.test.js（AT-ovx-1..6）+ 容器写路径 e2e（sandbox/ontology-projection/verify-write.sh）。",
+      "testcases": [
+        {
+          "name": "AT-ontology-validation-extension-01",
+          "description": "GIVEN 框架的写/初始化校验时机；WHEN 配置 ARGO_VALIDATION_EXTENSIONS 挂上本体校验扩展（写=delta、初始化=全量，真引擎 pySHACL+owlready2/HermiT）；THEN 扩展错误被合并入写/初始化校验结果，未配置时为无操作、现有行为与工具面不变；写时读的是变更后的文档、仅在增量子图上跑。",
+          "type": "Acceptance Test",
+          "Input": "tests/ontology-validation-extension.test.js",
+          "acceptanceCriteria": "tests/ontology-validation-extension.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -17371,7 +17386,8 @@
         "configurable-embedding-provider-001",
         "default-semantic-retrieval-001",
         "env-file-key-governance-001",
-        "offline-embedding-deployment-001"
+        "offline-embedding-deployment-001",
+        "ontology-validation-extension-001"
       ],
       "included_relationships": [
         "harness-read-semantic-to-hybrid-001",

@@ -1,0 +1,18 @@
+{
+  "name": "Team Graph - axiom contradiction",
+  "description": "Two independent OWL contradictions that pass the endpoint matrix: (a) 'Assigned To' is functional but agent-1 is assigned to two teams; (b) svc-x (Service Node) is a source of 'Assigned To', whose rdfs domain is Agent Node, and Agent Node is disjoint from Service Node.",
+  "elements": [
+    { "id": "agent-1", "name": "Agent 1", "type": "Agent Node" },
+    { "id": "team-a", "name": "Team A", "type": "Team Node" },
+    { "id": "team-b", "name": "Team B", "type": "Team Node" },
+    { "id": "svc-x", "name": "Service X", "type": "Service Node" }
+  ],
+  "relationships": [
+    { "id": "rel-1", "name": "Agent 1 assigned to Team A", "type": "Assigned To", "source_id": "agent-1", "target_id": "team-a", "source_name": "Agent 1", "target_name": "Team A", "statement": "Agent 1 --(Assigned To)--> Team A" },
+    { "id": "rel-2", "name": "Agent 1 assigned to Team B", "type": "Assigned To", "source_id": "agent-1", "target_id": "team-b", "source_name": "Agent 1", "target_name": "Team B", "statement": "Agent 1 --(Assigned To)--> Team B" },
+    { "id": "rel-3", "name": "Service X assigned to Team A", "type": "Assigned To", "source_id": "svc-x", "target_id": "team-a", "source_name": "Service X", "target_name": "Team A", "statement": "Service X --(Assigned To)--> Team A" }
+  ],
+  "views": [
+    { "view_id": "view-root", "view_name": "SystemArchitecture", "included_elements": ["agent-1", "team-a", "team-b", "svc-x"], "included_relationships": ["rel-1", "rel-2", "rel-3"] }
+  ]
+}

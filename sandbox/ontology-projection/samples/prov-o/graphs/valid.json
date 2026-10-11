@@ -1,0 +1,17 @@
+{
+  "name": "PROV-O - valid",
+  "description": "A valid PROV-O core graph: entity e1 wasGeneratedBy activity a1, wasAttributedTo agent ag1, and a1 used e1. All domain/range constraints hold.",
+  "elements": [
+    { "id": "e1", "name": "Entity 1", "type": "Entity" },
+    { "id": "a1", "name": "Activity 1", "type": "Activity" },
+    { "id": "ag1", "name": "Agent 1", "type": "Agent" }
+  ],
+  "relationships": [
+    { "id": "rel-1", "name": "e1 wasGeneratedBy a1", "type": "wasGeneratedBy", "source_id": "e1", "target_id": "a1", "source_name": "Entity 1", "target_name": "Activity 1", "statement": "Entity 1 --(wasGeneratedBy)--> Activity 1" },
+    { "id": "rel-2", "name": "e1 wasAttributedTo ag1", "type": "wasAttributedTo", "source_id": "e1", "target_id": "ag1", "source_name": "Entity 1", "target_name": "Agent 1", "statement": "Entity 1 --(wasAttributedTo)--> Agent 1" },
+    { "id": "rel-3", "name": "a1 used e1", "type": "used", "source_id": "a1", "target_id": "e1", "source_name": "Activity 1", "target_name": "Entity 1", "statement": "Activity 1 --(used)--> Entity 1" }
+  ],
+  "views": [
+    { "view_id": "view-root", "view_name": "SystemArchitecture", "included_elements": ["e1", "a1", "ag1"], "included_relationships": ["rel-1", "rel-2", "rel-3"] }
+  ]
+}

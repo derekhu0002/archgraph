@@ -1,0 +1,16 @@
+{
+  "name": "Team Graph - multi-hop entailment",
+  "description": "'Depends On' is transitive. A 2-edge chain (team-a -> team-b -> team-c) passes the endpoint matrix and is consistent, but the reasoner ENTAILS the non-asserted edge team-a Depends On team-c. This demonstrates multi-hop reasoning (completeness / implied knowledge) that the constraint layer alone cannot produce.",
+  "elements": [
+    { "id": "team-a", "name": "Team A", "type": "Team Node" },
+    { "id": "team-b", "name": "Team B", "type": "Team Node" },
+    { "id": "team-c", "name": "Team C", "type": "Team Node" }
+  ],
+  "relationships": [
+    { "id": "rel-1", "name": "Team A depends on Team B", "type": "Depends On", "source_id": "team-a", "target_id": "team-b", "source_name": "Team A", "target_name": "Team B", "statement": "Team A --(Depends On)--> Team B" },
+    { "id": "rel-2", "name": "Team B depends on Team C", "type": "Depends On", "source_id": "team-b", "target_id": "team-c", "source_name": "Team B", "target_name": "Team C", "statement": "Team B --(Depends On)--> Team C" }
+  ],
+  "views": [
+    { "view_id": "view-root", "view_name": "SystemArchitecture", "included_elements": ["team-a", "team-b", "team-c"], "included_relationships": ["rel-1", "rel-2"] }
+  ]
+}

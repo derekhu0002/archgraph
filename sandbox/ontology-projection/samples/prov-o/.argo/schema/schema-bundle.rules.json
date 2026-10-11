@@ -1,0 +1,21 @@
+{
+  "elementTypeMetadata": {
+    "Entity": { "layer": "Prov", "aspect": "Passive" },
+    "Activity": { "layer": "Prov", "aspect": "Behavior" },
+    "Agent": { "layer": "Prov", "aspect": "Active" }
+  },
+  "relationshipCategoryByType": {
+    "wasGeneratedBy": "Dependency",
+    "used": "Dependency",
+    "wasAttributedTo": "Dependency",
+    "wasDerivedFrom": "Dependency",
+    "actedOnBehalfOf": "Dependency"
+  },
+  "relationshipTargetMatrix": {
+    "wasGeneratedBy": { "Entity": ["Activity"] },
+    "used": { "Activity": ["Entity"] },
+    "wasAttributedTo": { "Entity": ["Agent"] },
+    "wasDerivedFrom": { "Entity": ["Entity"] },
+    "actedOnBehalfOf": { "Agent": ["Agent"] }
+  }
+}

@@ -16,6 +16,8 @@ param(
     [string]$PluginsRoot = "$env:USERPROFILE\.argo\plugins",
     [switch]$SkipEnv,
     [switch]$SkipDeps,
+    [switch]$SkipOntologyEngine,
+    [switch]$EnableOntologyValidation,
     [switch]$SkipMcp,
     [switch]$SkipDsh,
     [string]$DshHome = "$env:USERPROFILE\.dsh",
@@ -821,6 +823,80 @@ export function apply(ctx) {
     }
 }
 
+function Get-OntologyPython {
+    # Locate a Python 3 interpreter for the OPTIONAL ontology engine.
+    foreach ($cand in @('python', 'py', 'python3')) {
+        $c = Get-Command $cand -ErrorAction SilentlyContinue
+        if ($c) { return $c }
+    }
+    return $null
+}
+
+function Install-OntologyEngineDeps {
+    # Provision the OPTIONAL ontology-validation engine dependencies. Python 3 and
+    # a JRE are PREREQUISITES: they are NOT auto-installed (installing a system
+    # runtime could break a user's environment). When either is missing the deploy
+    # STOPS with a clear alert so the user can install it and re-run. The Python
+    # packages (pyshacl, owlready2) are installed via pip. Pass -SkipOntologyEngine
+    # (or -SkipDeps) to skip this step entirely.
+    Write-Host '==> Ontology validation engine (optional): checking python + java + pyshacl/owlready2'
+    $py = Get-OntologyPython
+    if (-not $py) {
+        throw 'Python 3 is required for the ontology validation engine but was not found on PATH. Install Python 3 (https://www.python.org/downloads/), make sure "python" is on PATH, then re-run: argo-deploy. To skip this step entirely, re-run with -SkipOntologyEngine.'
+    }
+    Write-Host "  python: $($py.Source)"
+    $java = Get-Command java -ErrorAction SilentlyContinue
+    if (-not $java) {
+        throw 'Java (a JRE, 11+) is required for OWL consistency (owlready2 + HermiT) but was not found on PATH. Install a JRE (e.g. Eclipse Temurin 17, https://adoptium.net/), then re-run: argo-deploy. To skip this step entirely, re-run with -SkipOntologyEngine.'
+    }
+    Write-Host "  java: $($java.Source)"
+    Write-Host '  installing python packages: pyshacl owlready2'
+    & $py.Source -m pip install --user --upgrade --disable-pip-version-check pyshacl owlready2 | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        throw "pip install of pyshacl/owlready2 failed (exit $LASTEXITCODE). Fix the Python environment, then re-run: argo-deploy."
+    }
+    $probe = (& $py.Source -c "import pyshacl, owlready2; print('ok')" 2>&1 | Out-String)
+    if ($probe -notmatch 'ok') {
+        throw "pyshacl/owlready2 import probe failed: $($probe.Trim()) . Fix the Python environment, then re-run: argo-deploy."
+    }
+    Write-Host '  pyshacl + owlready2: OK'
+}
+
+function Show-OntologyValidationSwitch {
+    # Expose the OPTIONAL ontology-validation host switch during deploy, with its
+    # meaning and how to verify its value. It is a host-level (user) environment
+    # variable, deliberately NOT written into the MCP server entries (which must
+    # stay env-free so the workspace is resolved dynamically via MCP roots).
+    param([string]$ArgoRoot)
+    $cli = (Join-Path $ArgoRoot 'scripts\ontology-projection\cli.js') -replace '\\', '/'
+    $cmdJson = '[{"name":"ontology","timings":["write","init"],"command":["node","' + $cli + '","--workspace","{workspaceRoot}","--graph","{graphPath}","--mode","{mode}"]}]'
+    $py = Get-OntologyPython
+    $pyName = if ($py) { ($py.Name -replace '\.exe$', '') } else { 'python' }
+    Write-Host ''
+    Write-Host '==> Ontology / axiom validation switch (host-level, OFF by default)'
+    Write-Host '    ARGO_VALIDATION_EXTENSIONS = JSON list of external validators run at the'
+    Write-Host '    framework write (delta subgraph) and init (whole graph) validation timings.'
+    Write-Host '    Empty = disabled (default: no behaviour change). ARGO_ONTOLOGY_PYTHON picks'
+    Write-Host '    the interpreter; ARGO_ONTOLOGY_ENGINE = real (default) | deterministic.'
+    Write-Host '    Verify the current value:'
+    Write-Host "      [Environment]::GetEnvironmentVariable('ARGO_VALIDATION_EXTENSIONS','User')"
+    if ($EnableOntologyValidation) {
+        [Environment]::SetEnvironmentVariable('ARGO_ONTOLOGY_PYTHON', $pyName, 'User')
+        [Environment]::SetEnvironmentVariable('ARGO_VALIDATION_EXTENSIONS', $cmdJson, 'User')
+        Write-Host '    ENABLED for the current user (persisted user env var). Value:'
+        Write-Host "      ARGO_ONTOLOGY_PYTHON=$pyName"
+        Write-Host "      ARGO_VALIDATION_EXTENSIONS=$cmdJson"
+        Write-Host '    Restart the MCP host(s) to pick up the new user environment.'
+        Write-Host '    Confirm the engine imports:'
+        Write-Host "      $pyName -c `"import pyshacl, owlready2`""
+    } else {
+        Write-Host '    Currently DISABLED. To enable on this machine, re-run the deploy with:'
+        Write-Host '      argo-deploy -EnableOntologyValidation'
+        Write-Host '    or set ARGO_VALIDATION_EXTENSIONS manually (current user) to:'
+        Write-Host "      $cmdJson"
+    }
+}
+
 Write-Host '==> Deploying Argo toolchain'
 
 $schemaSrc = Join-Path $argoDir 'schema'
@@ -1069,6 +1145,12 @@ if ($SkipDeps) {
     Write-Warning 'npm was not found on PATH; skipped dependency install.'
 }
 
+if ($SkipDeps -or $SkipOntologyEngine) {
+    Write-Host 'Skipped ontology-validation engine dependency install.'
+} else {
+    Install-OntologyEngineDeps
+}
+
 if ($SkipEnv) {
     Write-Host 'Skipped .env generation (-SkipEnv).'
 } else {
@@ -1258,6 +1340,8 @@ if (Test-Path $costCollectorPath) {
     Register-OpenCodePlugin -ConfigPath $OpenCodeConfigPath -PluginFilePath $costCollectorPath
     Write-Host "argo-cost-collector plugin registered -> $OpenCodeConfigPath"
 }
+
+Show-OntologyValidationSwitch -ArgoRoot $ArgoRoot
 
 Write-Host ''
 Write-Host 'Argo deployment complete.'

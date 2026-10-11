@@ -1,0 +1,32 @@
+# Real-engine Docker image: SHACL = pySHACL, OWL consistency = owlready2 + HermiT.
+# Base carries Node + the OpenCode runtime; we add Python + a JRE for HermiT.
+#
+# Build:  docker build -f sandbox/ontology-projection/Dockerfile.real -t archgraph-ontology-projection-real sandbox/ontology-projection
+# Run:    docker run --rm -v "<repo>/results:/results" archgraph-ontology-projection-real
+
+ARG BASE_IMAGE=opencode-sandbox:1.18.29
+FROM ${BASE_IMAGE}
+
+ENV HOME=/root \
+    USERPROFILE=/root \
+    NODE_ENV=production \
+    TEST_PROJECT=/test-project \
+    PIP_BREAK_SYSTEM_PACKAGES=1
+
+RUN apt-get update -o Acquire::Retries=5 -o Acquire::ForceIPv4=true \
+    && apt-get install -y --no-install-recommends \
+         -o Acquire::Retries=8 -o Acquire::http::Timeout=120 -o Acquire::ForceIPv4=true \
+         python3 python3-pip default-jre-headless \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY python/requirements.txt /tmp/ontology-requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/ontology-requirements.txt
+
+WORKDIR /opt/ontology-projection
+COPY samples samples
+COPY python python
+COPY run-real.js run-real.js
+COPY bench.js bench.js
+COPY e2e-write.js e2e-write.js
+
+ENTRYPOINT ["node", "/opt/ontology-projection/run-real.js"]

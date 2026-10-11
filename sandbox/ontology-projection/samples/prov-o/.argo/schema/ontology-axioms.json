@@ -1,0 +1,17 @@
+{
+  "_comment": "W3C PROV-O core domain/range, projected as rdfs domain/range (inference). No disjointness declared here, so a valid graph stays consistent. This is the standard-ontology confirmation target: the framework must enforce PROV-O's domain/range exactly.",
+  "objectPropertyDomain": {
+    "wasGeneratedBy": "Entity",
+    "used": "Activity",
+    "wasAttributedTo": "Entity",
+    "wasDerivedFrom": "Entity",
+    "actedOnBehalfOf": "Agent"
+  },
+  "objectPropertyRange": {
+    "wasGeneratedBy": "Activity",
+    "used": "Entity",
+    "wasAttributedTo": "Agent",
+    "wasDerivedFrom": "Entity",
+    "actedOnBehalfOf": "Agent"
+  }
+}

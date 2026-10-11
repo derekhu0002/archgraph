@@ -1,0 +1,16 @@
+{
+  "name": "Team Graph - valid",
+  "description": "A valid Team Graph sample: one agent assigned to one team, team depends on a service. No endpoint or axiom violation.",
+  "elements": [
+    { "id": "agent-1", "name": "Agent 1", "type": "Agent Node" },
+    { "id": "team-a", "name": "Team A", "type": "Team Node" },
+    { "id": "svc-a", "name": "Service A", "type": "Service Node" }
+  ],
+  "relationships": [
+    { "id": "rel-1", "name": "Agent 1 assigned to Team A", "type": "Assigned To", "source_id": "agent-1", "target_id": "team-a", "source_name": "Agent 1", "target_name": "Team A", "statement": "Agent 1 --(Assigned To)--> Team A" },
+    { "id": "rel-2", "name": "Team A depends on Service A", "type": "Depends On", "source_id": "team-a", "target_id": "svc-a", "source_name": "Team A", "target_name": "Service A", "statement": "Team A --(Depends On)--> Service A" }
+  ],
+  "views": [
+    { "view_id": "view-root", "view_name": "SystemArchitecture", "included_elements": ["agent-1", "team-a", "svc-a"], "included_relationships": ["rel-1", "rel-2"] }
+  ]
+}

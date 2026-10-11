@@ -133,6 +133,9 @@ const {
   validateAttributeContracts,
 } = require('./graph-semantics.js');
 const {
+  runValidationExtensions,
+} = require('./validation-extensions.js');
+const {
   loadSchemaBundleAndOntology,
   resolveSchemaBundle,
   resolveTypeEnums,
@@ -2519,6 +2522,15 @@ async function buildMutationResult(context, mutations, write, dependencies, loss
     touchedRelationshipIds: mutationResult.touchedRelationshipIds,
     touchedViewIds: mutationResult.viewLimitCheckIds,
   });
+  const validationExtensions = runValidationExtensions({
+    workspaceRoot: context.workspaceRoot,
+    graphPath: context.graphPath.relativePath,
+    mode: 'write',
+    document: mutationResult.document,
+    touchedElementIds: mutationResult.touchedElementIds,
+    touchedRelationshipIds: mutationResult.touchedRelationshipIds,
+  });
+  errors.push(...validationExtensions.errors);
   const afterSummary = summarizeDocument(mutationResult.document);
   const result = {
     status: errors.length === 0 ? 'passed' : 'failed',
@@ -2534,6 +2546,9 @@ async function buildMutationResult(context, mutations, write, dependencies, loss
     after: afterSummary,
     errors,
   };
+  if (validationExtensions.warnings.length > 0) {
+    result.validationWarnings = validationExtensions.warnings;
+  }
   if (errors.length > 0) {
     result.guidance = buildFailureGuidance(errors, context.ontology);
   }

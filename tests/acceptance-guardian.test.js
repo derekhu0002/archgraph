@@ -77,6 +77,7 @@ const DELIVERABLE_GUARDS = [
   ['FEATURE: schema bundle (default + custom schema decoupling)', 'tests/schema-bundle.test.js'],
   ['FEATURE: schema bundle per-type attribute contracts (attributesByElementType)', 'tests/schema-attribute-contracts.test.js'],
   ['FEATURE: schema bundle extends inheritance (base + delta)', 'tests/schema-bundle-extends.test.js'],
+  ['FEATURE: ontology validation extension (opt-in write-delta + init-full real engine)', 'tests/ontology-validation-extension.test.js'],
   ['FEATURE: Codex harness adaptation (rules/AGENTS.md + skills + MCP config.toml)', 'tests/argo-codex.test.js'],
   ['FEATURE: order-independent mutation batches (topological apply + cycle report)', 'tests/mutation-batch-order.test.js'],
   ['FEATURE: bounded structural reads (context output budget: identity fallback + complete id manifest)', 'tests/agent-read-projection.test.js'],
