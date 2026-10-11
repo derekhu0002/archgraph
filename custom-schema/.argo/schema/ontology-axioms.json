@@ -1,0 +1,13 @@
+{
+  "_comment": "Optional OWL/RDFS axioms for the Team Graph ontology, read by the ontology-validation engine (ignored by the core). See docs/ontology-authoring.md.",
+  "disjointClasses": [
+    ["Team Node", "Service Node"],
+    ["Agent Node", "Team Node"],
+    ["Agent Node", "Service Node"]
+  ],
+  "functionalProperties": ["Assigned To"],
+  "transitiveProperties": ["Depends On"],
+  "objectPropertyDomain": { "Assigned To": "Agent Node" },
+  "objectPropertyRange": { "Assigned To": "Team Node" },
+  "distinctIndividuals": true
+}

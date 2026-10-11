@@ -26,6 +26,22 @@ This bundle replaces the default ArchiMate 3.2 (+ ARGO) schema for
 - `rootViewName: "SystemArchitecture"` — exactly one top-level view with that name.
 - `maxElementsPerView: 12` — per-view element limit.
 
+## Axioms / logical constraints (optional)
+
+`ontology-axioms.json` declares the **logical** layer the endpoint matrix cannot
+express; it is read by the **ontology-validation engine** (ignored by the core),
+which catches contradictions at write (delta) and init (whole graph). This bundle
+declares:
+
+- `disjointClasses` — `Team Node` / `Service Node` / `Agent Node` are mutually exclusive;
+- `functionalProperties: ["Assigned To"]` — an `Agent Node` is assigned to at most one team;
+- `transitiveProperties: ["Depends On"]` — dependency is transitive (closure is entailed);
+- `objectPropertyDomain` / `objectPropertyRange` for `Assigned To`;
+- `distinctIndividuals: true` — so a functional-property conflict is detectable.
+
+Enable the engine with `argo-deploy -EnableOntologyValidation` (opt-in, fail-open).
+Full reference — every layer: [docs/ontology-authoring.md](../../../docs/ontology-authoring.md).
+
 ## Example viewpoints
 
 - **Organization view** — one view per team, containing its `Team Node`, its
