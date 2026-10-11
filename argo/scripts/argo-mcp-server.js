@@ -78,15 +78,6 @@ const SYSTEM_ARCHITECTURE_TOOL_NAMES = new Set([
 
 const TOOLS = [
   {
-    name: 'initializeWorkspace',
-    description: 'Bootstrap an Argo workspace by copying the EA template target and resetting stage handoff artifacts.',
-    inputSchema: {
-      type: 'object',
-      properties: {},
-      additionalProperties: false,
-    },
-  },
-  {
     name: 'runArchitectureTests',
     description: 'Execute explicit architecture testcases from the intent graph and refresh design/KG/test-failure-records.json. This MCP call can exceed client timeouts; if it times out, run the same test runner directly with: node .argo/scripts/runArchitectureTests.js',
     inputSchema: {
@@ -469,51 +460,10 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
     return toolResult(result);
   }
   if (name === 'initializeWorkspace') {
-    const workspace = await initializeWorkspace(resolveWorkspaceRoot(args));
-    // Deterministic argo-init harness report (Neo4j structural sync, semantic
-    // lifecycle, canonical validation, subdiagram_views consistency), built
-    // in-process so the argo-init skill needs no workspace-external script.
-    // Lazy require avoids a circular dependency (ensureArgoHarnessEnvironment
-    // requires this module at its top).
-    const { buildHarnessReport } = require('./ensureArgoHarnessEnvironment.js');
-    const report = await buildHarnessReport({
-      checkOnly: false,
-      workspaceRoot: workspace.workspaceRoot,
-      includeBootstrap: false,
-    });
-    return toolResult({
-      status: report.status,
-      workspaceRoot: workspace.workspaceRoot,
-      // The resolved modeling language for this workspace (default ArchiMate 3.2 vs
-      // the repository's own .argo/schema bundle) so init names the active schema.
-      schema: workspace.schema,
-      schemaBundle: report.schemaBundle,
-      targetEaName: workspace.targetEaName,
-      createdFiles: workspace.createdFiles,
-      updatedFiles: workspace.updatedFiles,
-      removedFiles: workspace.removedFiles,
-      skippedSteps: workspace.skippedSteps,
-      workspaceBootstrap: {
-        status: 'ok',
-        workspaceRoot: workspace.workspaceRoot,
-        targetEaName: workspace.targetEaName,
-        createdFiles: workspace.createdFiles,
-        updatedFiles: workspace.updatedFiles,
-        removedFiles: workspace.removedFiles,
-        skippedSteps: workspace.skippedSteps,
-      },
-      mcp: report.mcp,
-      systemArchitecture: report.systemArchitecture,
-      ontology: report.ontology,
-      ontologyValidation: report.ontologyValidation,
-      subdiagramViews: report.subdiagramViews,
-      neo4j: report.neo4j,
-      qeaFullProjection: workspace.qeaFullProjection,
-      semanticLifecycle: report.semanticLifecycle,
-      semanticState: report.semanticLifecycle && report.semanticLifecycle.state,
-      alignment: report.semanticLifecycle && report.semanticLifecycle.alignment,
-      reportPath: report.reportPath,
-    });
+    // REMOVED from the MCP tool surface (init is slow and human/skill-triggered;
+    // it caused MCP client timeouts). Use the `argo-init` CLI instead, which runs
+    // the SAME initializeWorkspaceReport() below.
+    throw new Error('initializeWorkspace is no longer an MCP tool; run the `argo-init` CLI instead.');
   }
   if (VALIDATOR_TOOL_NAMES.has(name)) {
     return validatorMcp.callTool(name, args, progressToken);
@@ -667,6 +617,50 @@ async function initializeWorkspace(workspaceRoot) {
     removedFiles,
     skippedSteps,
     status: 'ok',
+  };
+}
+
+// The full init report — identical to the former `initializeWorkspace` MCP tool
+// output. Shared by the `argo-init` CLI so the CLI and the removed tool are
+// functionally identical.
+async function initializeWorkspaceReport(workspaceRoot) {
+  const workspace = await initializeWorkspace(workspaceRoot);
+  const { buildHarnessReport } = require('./ensureArgoHarnessEnvironment.js');
+  const report = await buildHarnessReport({
+    checkOnly: false,
+    workspaceRoot: workspace.workspaceRoot,
+    includeBootstrap: false,
+  });
+  return {
+    status: report.status,
+    workspaceRoot: workspace.workspaceRoot,
+    schema: workspace.schema,
+    schemaBundle: report.schemaBundle,
+    targetEaName: workspace.targetEaName,
+    createdFiles: workspace.createdFiles,
+    updatedFiles: workspace.updatedFiles,
+    removedFiles: workspace.removedFiles,
+    skippedSteps: workspace.skippedSteps,
+    workspaceBootstrap: {
+      status: 'ok',
+      workspaceRoot: workspace.workspaceRoot,
+      targetEaName: workspace.targetEaName,
+      createdFiles: workspace.createdFiles,
+      updatedFiles: workspace.updatedFiles,
+      removedFiles: workspace.removedFiles,
+      skippedSteps: workspace.skippedSteps,
+    },
+    mcp: report.mcp,
+    systemArchitecture: report.systemArchitecture,
+    ontology: report.ontology,
+    ontologyValidation: report.ontologyValidation,
+    subdiagramViews: report.subdiagramViews,
+    neo4j: report.neo4j,
+    qeaFullProjection: workspace.qeaFullProjection,
+    semanticLifecycle: report.semanticLifecycle,
+    semanticState: report.semanticLifecycle && report.semanticLifecycle.state,
+    alignment: report.semanticLifecycle && report.semanticLifecycle.alignment,
+    reportPath: report.reportPath,
   };
 }
 
@@ -996,6 +990,7 @@ module.exports = {
   callTool,
   handleRequest,
   initializeWorkspace,
+  initializeWorkspaceReport,
   main,
   withCanonicalSemanticInitTestComposition,
 };

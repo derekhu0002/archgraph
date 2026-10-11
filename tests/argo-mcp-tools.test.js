@@ -46,13 +46,21 @@ test('AT argo-mcp-tools: generateArchitectureDiffPlantuml is removed from tools/
   assert.ok(!toolNames.includes('generateArchitectureDiffPlantuml'), 'generateArchitectureDiffPlantuml must be removed');
 });
 
+test('AT argo-mcp-tools: initializeWorkspace is removed from the MCP surface (init moved to the argo-init CLI)', () => {
+  // GIVEN init is slow and human/skill-triggered (caused MCP client timeouts)
+  const toolNames = listTools();
+  // THEN it is no longer advertised as an MCP tool ...
+  assert.ok(!toolNames.includes('initializeWorkspace'), 'initializeWorkspace must not be an MCP tool');
+  // ... and the CLI entry exists (functionally identical: initializeWorkspaceReport)
+  assert.ok(require('node:fs').existsSync(path.join(ROOT, 'bin', 'argo-init.js')), 'bin/argo-init.js must exist');
+});
+
 test('AT argo-mcp-tools: kept validators and architecture tools are still advertised', () => {
   const toolNames = listTools();
   // THEN the remaining validators and the full architecture surface are present
   for (const kept of [
     'validateSystemArchitecture',
     'runArchitectureTests',
-    'initializeWorkspace',
     'getSystemArchitecture',
     'getIntentElementContext',
     'getArchitectureViewContext',

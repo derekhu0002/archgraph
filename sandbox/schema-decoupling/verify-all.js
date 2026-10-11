@@ -29,7 +29,7 @@ const REPORT_PATH = path.join(RESULTS_DIR, 'schema-decoupling-all-report.json');
 const NODE_PATH = path.join(ARGO, 'node_modules');
 
 const ALL_TOOLS = [
-  'initializeWorkspace', 'runArchitectureTests', 'getSystemArchitecture', 'getIntentElementContext',
+  'runArchitectureTests', 'getSystemArchitecture', 'getIntentElementContext',
   'previewSystemArchitectureMutation', 'applySystemArchitectureMutation',
   'addArchitectureElement', 'updateArchitectureElement', 'removeArchitectureElement',
   'addArchitectureRelationship', 'updateArchitectureRelationship', 'removeArchitectureRelationship',
@@ -124,6 +124,21 @@ function mcpSession(calls, env, opts = {}) {
     child.stdin.write(input);
     child.stdin.end();
   });
+}
+
+function runInitCli(ws) {
+  // init moved from an MCP tool to the `argo-init` CLI (functionally identical:
+  // both run initializeWorkspaceReport). Init no longer counts as an MCP tool.
+  const cli = path.join(WORK, 'bin', 'argo-init.js');
+  const result = spawnSync(process.execPath, [cli, '--workspace', ws], {
+    encoding: 'utf8',
+    env: { ...process.env, ARGO_REPO_ROOT: ws, NODE_PATH },
+    maxBuffer: 128 * 1024 * 1024,
+    timeout: 300000,
+  });
+  if (result.error) throw new Error(`argo-init CLI error: ${result.error.message}`);
+  if (result.status !== 0) throw new Error(`argo-init CLI exited ${result.status}: ${String(result.stderr || result.stdout).slice(0, 1200)}`);
+  return JSON.parse(result.stdout);
 }
 
 function assertNotFailed(payload, key) {
@@ -353,23 +368,20 @@ async function main() {
     await record(`initializeWorkspace 鈥?${cfg.label}`, async () => {
       useDatabase(cfg.ws, cfg.db);
       await dropDatabase(cfg.db);
-      const out = await mcpSession([{ key: 'init', name: 'initializeWorkspace', arguments: { workspaceRoot: cfg.ws } }], { ARGO_REPO_ROOT: cfg.ws, NODE_PATH }, { timeoutMs: 240000 });
-      const init = assertNotFailed(out.init, 'initializeWorkspace');
-      toolsSeen.add('initializeWorkspace');
-      const report = init.report || init;
+      const report = runInitCli(cfg.ws);
       if (report && report.status && report.status !== 'ok') throw new Error(`init status=${report.status}: ${JSON.stringify(report).slice(0, 700)}`);
       // The init result must name the active schema (default vs custom + language).
-      const schemaInfo = report.schemaBundle || init.schemaBundle || init.schema;
+      const schemaInfo = report.schemaBundle || report.schema;
       if (!schemaInfo || schemaInfo.kind !== cfg.schema.kind) throw new Error(`init schema.kind=${schemaInfo && schemaInfo.kind} expected ${cfg.schema.kind}: ${JSON.stringify(schemaInfo)}`);
       if (schemaInfo.language !== cfg.schema.language) throw new Error(`init schema.language=${schemaInfo.language} expected ${cfg.schema.language}`);
       if (schemaInfo.actorElementType !== cfg.schema.actor) throw new Error(`init schema.actorElementType=${schemaInfo.actorElementType} expected ${cfg.schema.actor}`);
       // The .qea projection must run for ANY schema (generic mapping), never skip.
-      const qea = init.qeaFullProjection || report.qeaFullProjection;
+      const qea = report.qeaFullProjection;
       if (!qea || qea.status !== 'ok') throw new Error(`.qea projection not ok for ${cfg.schema.kind} schema: ${JSON.stringify(qea)}`);
       return { status: report && report.status, qeaProjection: qea.status, neo4j: report && report.neo4j && report.neo4j.status, semantic: report && report.semanticLifecycle && report.semanticLifecycle.state, schema: { kind: schemaInfo.kind, language: schemaInfo.language, dialect: schemaInfo.dialect, actorElementType: schemaInfo.actorElementType } };
     });
 
-    await record(`all 19 MCP interfaces 鈥?${cfg.label}`, async () => {
+    await record(`all 18 MCP interfaces 鈥?${cfg.label}`, async () => {
       useDatabase(cfg.ws, cfg.db);
       const calls = [...cfg.reads, ...cfg.writes];
       for (const c of calls) toolsSeen.add(c.name);

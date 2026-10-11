@@ -31,8 +31,6 @@ const GUARDIAN_ELEMENT_ID = 'acceptance-guardian-001';
 // ---- Functional acceptance registry (single source of truth) ----------------
 // [interfaceName, testFile] — each ARGO MCP interface guard.
 const MCP_INTERFACE_GUARDS = [
-  ['initializeWorkspace', 'tests/argo-workspace-bootstrap.test.js'],
-  ['initializeWorkspace', 'tests/argo-init-interface.test.js'],
   ['getSystemArchitecture', 'tests/argo-mcp-tools.test.js'],
   ['getSystemArchitecture', 'tests/argo-global-install.test.js'],
   ['getSystemArchitecture', 'tests/argo-semantic-scope.test.js'],
@@ -61,7 +59,7 @@ const DELIVERABLE_GUARDS = [
   ['RULE: change-tier gate', 'tests/argo-rules-change-tier.test.js'],
   ['RULE: capability delegation', 'tests/argo-rules-capability-delegation.test.js'],
   ['RULE: content storage (docs into KG)', 'tests/argo-rules-content-storage.test.js'],
-  ['SKILL: argo-init drives initializeWorkspace (functional, no external script)', 'tests/argo-init-interface.test.js'],
+  ['SKILL: argo-init drives the argo-init CLI (init removed from MCP; functionally identical)', 'tests/argo-init-interface.test.js'],
   ['Schema / ArchiMate 3.2 constraint', 'tests/aml-standard.test.js'],
   ['Neo4j structural projection & sync', 'tests/neo4j-sync-staleness.test.js'],
   ['Secret .env preflight (never-committed; ACL not enforced)', 'tests/semantic-env-guard.test.js'],
@@ -104,7 +102,6 @@ test('AT acceptance-guardian: every registry entry maps to an existing, non-empt
 test('AT acceptance-guardian: every ARGO MCP interface has a functional guard', () => {
   // GIVEN the canonical ARGO MCP interface set exposed to agents
   const interfaces = [
-    'initializeWorkspace',
     'getSystemArchitecture',
     'getIntentElementContext',
     'getArchitectureViewContext',
