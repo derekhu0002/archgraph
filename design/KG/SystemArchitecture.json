@@ -12478,7 +12478,7 @@
       "id": "ontology-validation-extension-001",
       "name": "本体校验扩展（Ontology Validation Extension）",
       "type": "Application Component",
-      "description": "框架通用校验扩展点（2026）。把外部本体/推理引擎以 opt-in、fail-open 的方式挂进框架已有的两个校验时机：写入时（只校验本次改动的 delta 子图）与初始化/全量时（整个图）。core 不硬编码任何引擎，只按 ARGO_VALIDATION_EXTENSIONS 运行外部校验命令并合并其 errors；校验只读派生、绝不回写 canonical；默认关闭→现有行为字节不变。落地：argo/scripts/validation-extensions.js（通用扩展点）+ argo/scripts/ontology-projection/（生产 CLI：canonical→RDF，端点矩阵→SHACL 由 pySHACL 校验，新增 ontology-axioms.json→OWL 由 owlready2/HermiT 判一致性；写=delta，初始化=全量真引擎）。验收 tests/ontology-validation-extension.test.js（AT-ovx-1..6）+ 容器写路径 e2e（sandbox/ontology-projection/verify-write.sh）。",
+      "description": "框架通用校验扩展点（2026）。把外部本体/推理引擎以 opt-in、fail-close 的方式挂进框架已有的两个校验时机：写入时（只校验本次改动的 delta 子图）与初始化/全量时（整个图）。core 不硬编码任何引擎，只按 ARGO_VALIDATION_EXTENSIONS 运行外部校验命令并合并其 errors；配置了校验器却不可用/出错 → 阻断错误（fail-close，绝不静默跳过；可用 onError:\"warn\" 逐条退回建议型）；校验只读派生、绝不回写 canonical；默认关闭→现有行为字节不变。落地：argo/scripts/validation-extensions.js（通用扩展点）+ argo/scripts/ontology-projection/（生产 CLI：canonical→RDF，端点矩阵→SHACL 由 pySHACL 校验，新增 ontology-axioms.json→OWL 由 owlready2/HermiT 判一致性；写=delta，初始化=全量真引擎）。验收 tests/ontology-validation-extension.test.js（AT-ovx-1..6 + AT-ovx-3b）+ 容器写路径 e2e（sandbox/ontology-projection/verify-write.sh）。",
       "testcases": [
         {
           "name": "AT-ontology-validation-extension-01",
@@ -12522,6 +12522,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "179b585",
+          "description": "feat(ontology): 校验扩展默认 fail-close（配置了却不可用/出错=阻断错误；onError=warn 逐条退回建议型）— argo/scripts/validation-extensions.js; argo/scripts/ontology-projection/cli.js; argo/.env.example; argo/scripts/ontology-projection/EXTENSION_PROTOCOL.md; index.html; README.md; custom-schema/.argo/schema/GUIDE.md; docs/ontology-authoring.md; install-argo.ps1; tests/ontology-validation-extension.test.js"
         }
       ]
     }
