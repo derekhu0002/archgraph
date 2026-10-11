@@ -12516,8 +12516,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.29.4",
-          "description": "release archgraph-argo@0.29.4（含 fail-close + 初始化报告 ontologyValidation + loadModel 修复）；已发布/安装/部署；npm test 740/740（开关 ON，真引擎）"
+          "value": "archgraph-argo@0.29.5",
+          "description": "release archgraph-argo@0.29.5（初始化报告含完整本体定义 + 缺失项）；已发布/安装/部署"
         },
         {
           "name": "deliveryStatus",
@@ -12532,6 +12532,11 @@
           "name": "commit",
           "value": "4b25344",
           "description": "feat(ontology): 初始化报告新增 ontologyValidation 字段（status/configured/extensions/errors/warnings，可见本体校验结果含 disabled/空）+ 修复 loadModel 对无 rules 的合法 bundle（仅 schema 枚举声明类型）不再报错（回退到 schema 枚举）— argo/scripts/ontology-projection/lib/model.js; argo/scripts/validation-extensions.js; argo/scripts/ensureArgoHarnessEnvironment.js; argo/scripts/argo-mcp-server.js; tests/ontology-validation-extension.test.js（AT-ovx-7）"
+        },
+        {
+          "name": "commit",
+          "value": "937e38a",
+          "description": "feat(ontology): 初始化报告新增 ontology 字段（describeOntology）——完整本体定义：元素/关系结构、端点矩阵、constraints/invariants、axioms（disjoint/functional/transitive/irreflexive/asymmetric/domain-range/distinctIndividuals）+ missing（缺失的 structure/constraints/axiom 类别）— argo/scripts/ontology-projection/describe.js; argo/scripts/ensureArgoHarnessEnvironment.js; argo/scripts/argo-mcp-server.js; tests/ontology-validation-extension.test.js（AT-ovx-8）；npm test 741/741"
         }
       ]
     }
