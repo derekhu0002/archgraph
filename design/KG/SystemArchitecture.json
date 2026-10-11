@@ -4344,7 +4344,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-09）。\n【本会话目标】人类伙伴要求以红蓝对抗方式优化本仓 README 与主页（主题：可自定义本体的知识图谱框架、MCP 无缝接入宿主、低上手成本；主页只放大纲、细节外链；新增使用介绍页与图文并茂的使用 case）。\n【结论/交付】对外呈现 v2 完成：README 精简（222→~135 行）、主页大纲化、新增中文详情页 getting-started/capabilities/case-team-graph + docs/site.css + 4 张 case SVG（scripts/gen-case-diagrams.js）；新增诚实竞争优势对比（唯一权威版 docs/capabilities.html#compare）。npm test 725/725（0 失败 0 跳过）；validate passed。commit 8f10fc5（首版）+ 425189d（红蓝第2轮）。\n【方法·关键教训】首版我（总管）只让红队挑了一次刺、就由自己代改——人类伙伴指出『一次挑刺不算红蓝对抗』。真正应做的是多轮『蓝修订 → 红复攻修订后的实际文件』直到红无必改项：本轮红队复攻发现 M1 对比表是稻草人且缺成本行 / M2『只需 Node.js』与 argo init 自相矛盾 / M3 对比表三处重复破坏大纲；蓝再修订后红判定 CONVERGED（仅剩余文风项）。今后红蓝对抗务必多轮迭代，且红队必须复攻修订版与测试完整性，不得由总管代改或一次定稿。\n【关键认知（坑）】① custom-schema 示例规则文件曾是遗留名 argob-rules.json，而加载器固定读 schema-bundle.rules.json、config 未声明 rules → 端点矩阵静默失效；已重命名+声明生效。② 视图元素上限（maxElementsPerView=15）使新增 WP 需另建子视图；LTM 视图满需按主题子视图拆分（本次里程碑落在 overseer-product-001）。③ 语义去重门禁会拦新里程碑（与 0.26.2 刷新里程碑 0.87），按规则 allowDuplicate+justification 新建。④ memory-eval MQ-17 子视图计数随图增长需同步维护（当前 38）。\n【待办】① 未 push（待人类伙伴确认）；② 主页深色 / docs 浅色为有意为之；③ 未跑 Docker npm run acceptance（本次不涉及 MCP 接口面）。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-11）。\n【目标】以扩展方式把“本体/公理校验”引入框架，用真推理引擎做一致性校验，并正式发布→部署→重启后彻底验证。\n【交付】opt-in 通用校验扩展点 argo/scripts/validation-extensions.js（ARGO_VALIDATION_EXTENSIONS；写=delta 子图、初始化=全量；fail-open；core 不耦合引擎）+ 生产本体引擎 argo/scripts/ontology-projection/（canonical→RDF；端点矩阵→SHACL=pySHACL；axioms→OWL=owlready2/HermiT）；钩子挂 systemarchitecture-mcp-server.js（写）+ validateSystemArchitecture.js（初始化）。开关为 ~/.argo/.env 可配键（ARGO_VALIDATION_EXTENSIONS/ARGO_ONTOLOGY_PYTHON/ARGO_ONTOLOGY_ENGINE）；install-argo.ps1 自动装 pip pyshacl/owlready2（Python/JRE 为前置：缺失即停+告警，不自动装）。测试：tests/ontology-validation-extension.test.js(AT-ovx-1..6)+guardian 条目+scripts/ontology-acceptance.js(写路径 e2e)+sandbox/ontology-projection 隔离 Docker 环境(Team Graph+PROV-O)+部署后验证 harness。\n【结论/验证】正式版 archgraph-argo@0.29.1 已发布/全局安装/部署；开关 ON；pyshacl 0.40.1+owlready2 0.51。彻底验证全绿：①部署引擎(CLI) valid 无错/endpoint-violation SHACL/axiom-contradiction OWL inconsistent/multihop 无错；②已部署 MCP 初始化时机 ON→FAILED+[ontology]OWL、OFF→PASSED、合法→PASSED；③fail-open（假解释器→仅告警不阻断）；④已部署 MCP 写入时机 合法写 passed、矛盾写 blocked、关开关 passed。npm test 738/738。\n【关键决策/教训】①投影一次到 RDF：SHACL 管约束、OWL 管公理（OWL domain/range 是推理非约束）；②热路径=delta 子图（实测平坦 ~0.8–1.1s，与规模无关），全量真引擎放初始化/离线（实测 80→160 关系 ×8，超线性）；③扩展必须 opt-in、fail-open、core↔引擎解耦；④真引擎当场抓出样本“transitive+irreflexive”是 OWL 2 DL 非法组合（骨架引擎漏掉）；⑤写时校验必须传“变更后的文档”（读磁盘旧图会漏本次改动）；⑥delta 子图不可顺关系传递膨胀（冻结种子 1 跳）；⑦npm 发布须走本机 Clash 代理 127.0.0.1:7890（npm 默认不继承系统代理）。\n【坑】①真引擎每写 +~1s（python+JVM 冷启）；②容器内 MCP 写会卡在语义对齐（需真实运行时/凭据）。commits d9ee436/2f6e100/d94f79e/2e54f75/e09bf64。\n【待办】无（开关按人类要求保持开启）。【复用】diagnosis/bench 脚本在 sandbox/ontology-projection/。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4366,8 +4366,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-09",
-          "description": "对外呈现 v2（红蓝多轮对抗）"
+          "value": "2026-10-11",
+          "description": "本体校验扩展发布+部署+彻底验证"
         },
         {
           "name": "commit",
@@ -12486,6 +12486,42 @@
           "type": "Acceptance Test",
           "Input": "tests/ontology-validation-extension.test.js",
           "acceptanceCriteria": "tests/ontology-validation-extension.test.js"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "d9ee436",
+          "description": "feat(ontology): opt-in ontology/axiom validation extension — argo/scripts/validation-extensions.js（通用扩展点）; argo/scripts/ontology-projection/**（cli.js/lib/python）; argo/scripts/systemarchitecture-mcp-server.js（写 hook）; argo/scripts/validateSystemArchitecture.js（初始化 hook）; install-argo.ps1; argo/.env.example; tests/ontology-validation-extension.test.js; scripts/ontology-acceptance.js; sandbox/ontology-projection/**; tests/acceptance-guardian.test.js; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "2f6e100",
+          "description": "chore(release): archgraph-argo@0.29.0 — package.json（首个含本体校验扩展的正式版）"
+        },
+        {
+          "name": "commit",
+          "value": "d94f79e",
+          "description": "feat(ontology): 开关改为 .env 可配 — argo/scripts/graph-rag/liveEmbeddingProviderConfig.js（ARGO_VALIDATION_EXTENSIONS/ARGO_ONTOLOGY_PYTHON/ARGO_ONTOLOGY_ENGINE 移入 READABLE_KEYS）; argo/.env.example（PART 1）; install-argo.ps1（-EnableOntologyValidation 写 ~/.argo/.env）"
+        },
+        {
+          "name": "commit",
+          "value": "2e54f75",
+          "description": "chore(release): archgraph-argo@0.29.1 — package.json"
+        },
+        {
+          "name": "commit",
+          "value": "e09bf64",
+          "description": "test(ontology): 部署后验证 harness — sandbox/ontology-projection/verify-deployed.js（已部署 MCP 初始化时机）; verify-deployed-write.js（已部署 MCP 写入时机）"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.29.1",
+          "description": "已发布 npm 正式版（latest）+ 全局安装 + argo-deploy -EnableOntologyValidation 部署；真引擎 pySHACL 0.40.1 + owlready2/HermiT 在写(delta)/初始化(全量)两个时机生效。部署后彻底验证全绿：部署引擎(CLI)四样本正确；已部署 MCP 初始化时机 ON→矛盾图 FAILED/OFF→PASSED/合法→PASSED；fail-open 生效；写入时机 合法写 passed / 矛盾写 blocked / 关开关 passed。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
         }
       ]
     }
