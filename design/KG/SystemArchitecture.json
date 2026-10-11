@@ -12552,6 +12552,11 @@
           "name": "commit",
           "value": "86e7745",
           "description": "chore(release): archgraph-argo@0.29.10 (issue #10 ontology vocabulary + extends-matrix fix) — package.json 0.29.9→0.29.10"
+        },
+        {
+          "name": "verification",
+          "value": "2026-10-11 部署后验收通过（archgraph-argo@0.29.10）",
+          "description": "宿主重启后用已部署 ~/.argo 代码验收（真引擎 pySHACL 0.40.1 + owlready2/HermiT 0.51 已确认安装并实际运行）：① rv-business（issue #10 复现仓，用部署默认 bundle，无本地 .argo/schema）—— 修复前真引擎报 SHACL 误报（Requirement --Association--> Business Object），现在 deterministic 与 real 引擎均 {\"errors\":[],\"warnings\":[]}；涉事边 rel-eco-req-pool-001（req-rv-ecosystem-focus-001 --Association--> obj-rv-investment-watchlist-2026-09-001）确认合法。② archgraph 自身（extends default）—— deterministic 与 real 均 {\"errors\":[],\"warnings\":[]}，验证 extends 合并矩阵修复。两项缺陷闭合。"
         }
       ]
     },
