@@ -49,15 +49,23 @@ def read_model(bundle_dir):
         "elementTypes": list((rules.get("elementTypeMetadata") or {}).keys()),
         "relationshipTypes": list((rules.get("relationshipCategoryByType") or {}).keys()),
         "matrix": rules.get("relationshipTargetMatrix") or {},
+        # display name -> class token (e.g. "Business Object" -> "BusinessObject").
+        # The endpoint matrix / axioms use the CLASS vocabulary; the canonical graph
+        # stores DISPLAY names. Bundles already in the display vocabulary have no map.
+        "classByType": rules.get("archimateClassByElementType") or {},
         "axioms": axioms,
     }
 
 
-def build_data_graph(graph):
+def type_class(class_by_type, value):
+    return class_by_type.get(value, value)
+
+
+def build_data_graph(graph, class_by_type):
     g = Graph()
     for el in graph.get("elements", []):
         s = IDNS[el["id"]]
-        g.add((s, RDF.type, CLS[local(el["type"])]))
+        g.add((s, RDF.type, CLS[local(type_class(class_by_type, el["type"]))]))
         if el.get("name"):
             g.add((s, EX.name, Literal(el["name"])))
     for rel in graph.get("relationships", []):
@@ -105,7 +113,7 @@ def run_shacl(data_graph, shapes_graph):
     return {"conforms": bool(conforms), "violations": violations}
 
 
-def build_ontology_graph(data_graph, axioms):
+def build_ontology_graph(data_graph, axioms, class_by_type):
     g = Graph()
     for triple in data_graph:
         g.add(triple)
@@ -118,9 +126,9 @@ def build_ontology_graph(data_graph, axioms):
         return REL[local(name)]
 
     for c1, c2 in axioms.get("disjointClasses", []):
-        classes.add(c1)
-        classes.add(c2)
-        g.add((CLS[local(c1)], OWL.disjointWith, CLS[local(c2)]))
+        classes.add(type_class(class_by_type, c1))
+        classes.add(type_class(class_by_type, c2))
+        g.add((CLS[local(type_class(class_by_type, c1))], OWL.disjointWith, CLS[local(type_class(class_by_type, c2))]))
     for name in axioms.get("functionalProperties", []):
         g.add((prop_iri(name), RDF.type, OWL.FunctionalProperty))
     for name in axioms.get("transitiveProperties", []):
@@ -130,11 +138,11 @@ def build_ontology_graph(data_graph, axioms):
     for name in axioms.get("asymmetricProperties", []):
         g.add((prop_iri(name), RDF.type, OWL.AsymmetricProperty))
     for name, c in axioms.get("objectPropertyDomain", {}).items():
-        classes.add(c)
-        g.add((prop_iri(name), RDFS.domain, CLS[local(c)]))
+        classes.add(type_class(class_by_type, c))
+        g.add((prop_iri(name), RDFS.domain, CLS[local(type_class(class_by_type, c))]))
     for name, c in axioms.get("objectPropertyRange", {}).items():
-        classes.add(c)
-        g.add((prop_iri(name), RDFS.range, CLS[local(c)]))
+        classes.add(type_class(class_by_type, c))
+        g.add((prop_iri(name), RDFS.range, CLS[local(type_class(class_by_type, c))]))
 
     # declare the element types used in the data as owl:Class too
     for type_iri in set(data_graph.objects(None, RDF.type)):
@@ -221,7 +229,7 @@ def main():
 
     model = read_model(args.bundle)
     graph = load_json(args.graph, {})
-    data_graph = build_data_graph(graph)
+    data_graph = build_data_graph(graph, model["classByType"])
 
     findings = {"shacl": None, "owl": None}
     try:
@@ -229,7 +237,7 @@ def main():
     except Exception as error:  # noqa: BLE001
         findings["shacl"] = {"error": f"{type(error).__name__}: {error}"}
     try:
-        findings["owl"] = run_owl(build_ontology_graph(data_graph, model["axioms"]))
+        findings["owl"] = run_owl(build_ontology_graph(data_graph, model["axioms"], model["classByType"]))
     except Exception as error:  # noqa: BLE001
         findings["owl"] = {"error": f"{type(error).__name__}: {error}"}
     if isinstance(findings["owl"], dict):

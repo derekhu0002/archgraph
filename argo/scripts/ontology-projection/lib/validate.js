@@ -16,7 +16,7 @@ function validateGraph(model, graph) {
   return {
     status: shaclViolations.length === 0 && owlInconsistencies.length === 0 ? 'passed' : 'failed',
     language: model.language,
-    projectionHash: projectHash(graph),
+    projectionHash: projectHash(graph, model.typeClass),
     shacl: { violations: shaclViolations },
     owl: { inconsistencies: owlInconsistencies },
   };

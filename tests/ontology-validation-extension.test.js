@@ -222,3 +222,77 @@ test('AT-ovx-6 write scope=delta restricts validation to the touched subgraph', 
   assert.equal(delta.errors.length, 1, JSON.stringify(delta.errors));
   assert.match(delta.errors[0], /Agent 1/);
 });
+
+// GitHub issue #10: the sidecar must read the SAME type vocabulary the core does.
+// The endpoint matrix/axioms use CLASS tokens ("BusinessObject") while the graph
+// stores DISPLAY names ("Business Object"); archimateClassByElementType is the
+// bridge. Without it a legal edge is a false positive and every multi-word SOURCE
+// type silently escapes its endpoint constraints.
+const DEFAULT_BUNDLE = path.join(REPO, 'argo', 'schema');
+
+function makeDefaultWorkspace(graph) {
+  const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-ovx-def-'));
+  const schemaDir = path.join(ws, '.argo', 'schema');
+  fs.mkdirSync(schemaDir, { recursive: true });
+  for (const name of ['SystemArchitecture.schema.json', 'schema-bundle.config.json', 'schema-bundle.rules.json']) {
+    fs.copyFileSync(path.join(DEFAULT_BUNDLE, name), path.join(schemaDir, name));
+  }
+  const graphDir = path.join(ws, 'design', 'KG');
+  fs.mkdirSync(graphDir, { recursive: true });
+  fs.writeFileSync(path.join(graphDir, 'SystemArchitecture.json'), JSON.stringify(graph));
+  return ws;
+}
+
+test('AT-ovx-10 default bundle: class vocabulary aligned (no false positive; multi-word source enforced)', () => {
+  // (a) LEGAL Requirement --Association--> Business Object must NOT be flagged
+  //     (before: instance class Business_Object vs shape BusinessObject ->误报).
+  const legal = makeDefaultWorkspace({
+    name: 'vocab-legal', description: 'legal multi-word-target edge',
+    elements: [
+      { id: 'req-1', name: 'Req', type: 'Requirement' },
+      { id: 'obj-1', name: 'Obj', type: 'Business Object' },
+    ],
+    relationships: [
+      { id: 'r1', name: 'Req assoc Obj', type: 'Association', source_id: 'req-1', target_id: 'obj-1', source_name: 'Req', target_name: 'Obj', statement: 'Req --(Association)--> Obj' },
+    ],
+    views: [{ view_id: 'v', view_name: 'SystemArchitecture', included_elements: ['req-1', 'obj-1'], included_relationships: ['r1'] }],
+  });
+  const legalResult = runCli(legal, 'write');
+  assert.deepEqual(legalResult.errors, [], JSON.stringify(legalResult));
+
+  // (b) a violating edge whose SOURCE is a multi-word type (Application Interface)
+  //     was previously SILENTLY SKIPPED (display name never matched the token);
+  //     Application Interface --Assignment--> Business Object is outside the matrix.
+  const violating = makeDefaultWorkspace({
+    name: 'vocab-violating', description: 'multi-word source violation',
+    elements: [
+      { id: 'if-1', name: 'IF', type: 'Application Interface' },
+      { id: 'obj-1', name: 'Obj', type: 'Business Object' },
+    ],
+    relationships: [
+      { id: 'r1', name: 'IF assigns Obj', type: 'Assignment', source_id: 'if-1', target_id: 'obj-1', source_name: 'IF', target_name: 'Obj', statement: 'IF --(Assignment)--> Obj' },
+    ],
+    views: [{ view_id: 'v', view_name: 'SystemArchitecture', included_elements: ['if-1', 'obj-1'], included_relationships: ['r1'] }],
+  });
+  const violatingResult = runCli(violating, 'write');
+  assert.ok(violatingResult.errors.length >= 1, JSON.stringify(violatingResult));
+  assert.ok(
+    violatingResult.errors.some((e) => e.includes('Application Interface') && e.includes('Assignment')),
+    JSON.stringify(violatingResult.errors),
+  );
+});
+
+test('AT-ovx-11 default bundle: instance classes and shapes share one class vocabulary', () => {
+  const { loadModel } = require('../argo/scripts/ontology-projection/lib/model.js');
+  const { projectGraph } = require('../argo/scripts/ontology-projection/lib/project.js');
+  const { buildShapes } = require('../argo/scripts/ontology-projection/lib/shapes.js');
+  const model = loadModel(DEFAULT_BUNDLE);
+
+  const projected = projectGraph({ elements: [{ id: 'o', name: 'O', type: 'Business Object' }], relationships: [] }, model.typeClass);
+  assert.match(projected, /<https:\/\/archgraph\.local\/class\/BusinessObject>/);
+  assert.ok(!/class\/Business_Object/.test(projected), projected);
+
+  const shapes = buildShapes(model);
+  assert.match(shapes, /ex:BusinessObject/);
+  assert.ok(!/ex:Business_Object/.test(shapes), 'shapes must not use the display-name underscore form');
+});

@@ -52,6 +52,12 @@ function loadModel(bundleDir) {
     if (relationshipTypes.length === 0) relationshipTypes = enums.relationshipTypes;
   }
   const matrix = rules.relationshipTargetMatrix || {};
+  // The endpoint matrix (and axiom class names) reference element types in the
+  // bundle's CLASS vocabulary (e.g. "BusinessObject"), while the canonical graph
+  // stores DISPLAY names (e.g. "Business Object"). archimateClassByElementType is
+  // the display->class map. Bundles whose matrix already uses the display
+  // vocabulary (no map) fall back to the type itself, so both stay consistent.
+  const classByType = rules.archimateClassByElementType || {};
 
   return {
     bundleDir,
@@ -60,6 +66,8 @@ function loadModel(bundleDir) {
     elementTypes,
     relationshipTypes,
     matrix,
+    classByType,
+    typeClass: (type) => classByType[type] || type,
     axioms: {
       disjointClasses: axioms.disjointClasses || [],
       functionalProperties: axioms.functionalProperties || [],

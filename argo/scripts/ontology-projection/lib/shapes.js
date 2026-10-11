@@ -21,10 +21,10 @@ function buildShapes(model) {
       blocks.push(
         [
           `ex:${node} a sh:NodeShape ;`,
-          `  sh:targetClass ex:${localName(sourceType)} ;`,
+          `  sh:targetClass ex:${localName(model.typeClass(sourceType))} ;`,
           '  sh:property [',
           `    sh:path ex:${localName(relType)} ;`,
-          `    sh:class ${targets.map((t) => `ex:${localName(t)}`).join(', ')} ;`,
+          `    sh:class ${targets.map((t) => `ex:${localName(model.typeClass(t))}`).join(', ')} ;`,
           `    sh:message "${sourceType} --${relType}--> must target { ${targets.join(', ')} }" ;`,
           '  ] .',
         ].join('\n'),
@@ -44,9 +44,12 @@ function checkEndpoints(model, graph) {
     const src = byId.get(rel.source_id);
     const tgt = byId.get(rel.target_id);
     if (!src || !tgt) continue;
-    const allowed = bySource[src.type];
+    // Normalize the graph's DISPLAY types into the matrix's CLASS vocabulary so
+    // both sides compare in the same namespace (identity for display-vocab bundles).
+    const allowed = bySource[model.typeClass(src.type)];
     if (!allowed) continue;
-    if (!allowed.some((t) => t === tgt.type || t === '*')) {
+    const targetClass = model.typeClass(tgt.type);
+    if (!allowed.some((t) => t === targetClass || t === '*')) {
       violations.push({
         code: 'SHACL_ENDPOINT',
         relationshipId: rel.id,
