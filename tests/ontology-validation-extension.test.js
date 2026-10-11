@@ -17,7 +17,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
-const { resolveValidationExtensions, runValidationExtensions } = require('../argo/scripts/validation-extensions.js');
+const { resolveValidationExtensions, runValidationExtensions, validationExtensionsReport } = require('../argo/scripts/validation-extensions.js');
 
 const REPO = path.resolve(__dirname, '..');
 const CLI = path.join(REPO, 'argo', 'scripts', 'ontology-projection', 'cli.js');
@@ -122,6 +122,29 @@ test('AT-ovx-5 malformed configuration is ignored (no crash)', () => {
   assert.deepEqual(resolveValidationExtensions({ ARGO_VALIDATION_EXTENSIONS: 'not json' }), []);
   assert.deepEqual(resolveValidationExtensions({ ARGO_VALIDATION_EXTENSIONS: '{"a":1}' }), []);
   assert.deepEqual(resolveValidationExtensions({ ARGO_VALIDATION_EXTENSIONS: '[]' }), []);
+});
+
+test('AT-ovx-7 validationExtensionsReport surfaces the ontology result (disabled / passed / failed)', () => {
+  const disabled = validationExtensionsReport({ workspaceRoot: '/x', graphPath: 'g.json', env: {} });
+  assert.equal(disabled.status, 'disabled');
+  assert.equal(disabled.configured, false);
+  assert.deepEqual(disabled.errors, []);
+
+  const passEnv = {
+    ARGO_VALIDATION_EXTENSIONS: JSON.stringify([{ name: 'ontology', timings: ['init'], command: nodeEval('process.stdout.write(JSON.stringify({errors:[]}))') }]),
+  };
+  const pass = validationExtensionsReport({ workspaceRoot: '/x', graphPath: 'g.json', env: passEnv });
+  assert.equal(pass.status, 'passed');
+  assert.equal(pass.configured, true);
+  assert.deepEqual(pass.extensions, ['ontology']);
+  assert.deepEqual(pass.errors, []);
+
+  const failEnv = {
+    ARGO_VALIDATION_EXTENSIONS: JSON.stringify([{ name: 'ontology', timings: ['init'], command: nodeEval('process.stdout.write(JSON.stringify({errors:["OWL: inconsistent"]}))') }]),
+  };
+  const fail = validationExtensionsReport({ workspaceRoot: '/x', graphPath: 'g.json', env: failEnv });
+  assert.equal(fail.status, 'failed');
+  assert.ok(fail.errors.some((e) => /OWL/.test(e)), JSON.stringify(fail.errors));
 });
 
 test('AT-ovx-6 write scope=delta restricts validation to the touched subgraph', () => {

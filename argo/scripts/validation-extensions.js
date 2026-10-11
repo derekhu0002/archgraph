@@ -127,4 +127,22 @@ function runValidationExtensions({ workspaceRoot, graphPath, mode, document, tou
   return { errors, warnings };
 }
 
-module.exports = { ENV_KEY, resolveValidationExtensions, runValidationExtensions, runExtension };
+// Structured report of the configured validation extensions at a given timing —
+// surfaced in the init report so the ontology/reasoning result is visible (incl.
+// when it is empty / disabled).
+function validationExtensionsReport({ workspaceRoot, graphPath, mode = 'init', env = process.env } = {}) {
+  const extensions = resolveValidationExtensions(env);
+  if (extensions.length === 0) {
+    return { status: 'disabled', configured: false, extensions: [], errors: [], warnings: [] };
+  }
+  const result = runValidationExtensions({ workspaceRoot, graphPath, mode, env });
+  return {
+    status: result.errors.length > 0 ? 'failed' : 'passed',
+    configured: true,
+    extensions: extensions.map((ext) => ext.name),
+    errors: result.errors,
+    warnings: result.warnings,
+  };
+}
+
+module.exports = { ENV_KEY, resolveValidationExtensions, runValidationExtensions, runExtension, validationExtensionsReport };

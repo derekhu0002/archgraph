@@ -26,6 +26,9 @@ const {
 const {
   repairSubdiagramViews,
 } = require('./repair-subdiagram-views.js');
+const {
+  validationExtensionsReport,
+} = require('./validation-extensions.js');
 
 const REQUIRED_TOOL_NAMES = [
   'getSystemArchitecture',
@@ -75,6 +78,10 @@ async function runHarnessReport({ checkOnly, workspaceRoot, includeBootstrap }) 
     }
     report.mcp = verifyArgoMcpServer({ workspaceRoot });
     report.systemArchitecture = await verifyCanonicalSystemArchitecture({ workspaceRoot });
+    // Ontology / reasoning extension result (opt-in): visible in the init report
+    // so it is clear whether it ran and whether it is empty. Fail-close when
+    // configured and unavailable (see validation-extensions.js).
+    report.ontologyValidation = validationExtensionsReport({ workspaceRoot, graphPath: DEFAULT_GRAPH_PATH });
     report.subdiagramViews = report.systemArchitecture.status === 'ok'
       ? await ensureSubdiagramViewsConsistency({ checkOnly, workspaceRoot })
       : {
@@ -93,7 +100,7 @@ async function runHarnessReport({ checkOnly, workspaceRoot, includeBootstrap }) 
     report.error = formatErrorForReport(error);
   }
 
-  for (const section of ['workspaceBootstrap', 'mcp', 'systemArchitecture', 'neo4j', 'semanticLifecycle', 'subdiagramViews']) {
+  for (const section of ['workspaceBootstrap', 'mcp', 'systemArchitecture', 'ontologyValidation', 'neo4j', 'semanticLifecycle', 'subdiagramViews']) {
     if (report[section] && report[section].status === 'failed') {
       report.status = 'failed';
     }

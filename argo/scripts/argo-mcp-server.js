@@ -504,6 +504,7 @@ async function callTool(name, args = {}, progressToken = null, dependencies = un
       },
       mcp: report.mcp,
       systemArchitecture: report.systemArchitecture,
+      ontologyValidation: report.ontologyValidation,
       subdiagramViews: report.subdiagramViews,
       neo4j: report.neo4j,
       qeaFullProjection: workspace.qeaFullProjection,
