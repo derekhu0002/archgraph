@@ -12516,8 +12516,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.29.11",
-          "description": "release archgraph-argo@0.29.11（extends 公理链合并 + class-matrix 词元校验 + 侧车漂移守卫）；npm publish shasum db125c84a9678ff55bd591e777056b5462814074；latest 确认；npm i -g archgraph-argo + argo-deploy -SkipEnv 完成；部署态已核 schema-bundle.js(resolveBundleAxioms/chainDirsOriginal/useClasses) 与 describe.js(without a class mapping/bundle.axioms)。"
+          "value": "archgraph-argo@0.29.12",
+          "description": "release archgraph-argo@0.29.12（issue #11 端点矩阵 '*' 通配）；npm publish shasum fc7b08e34c249660aacb9a08d8591d1a3f12d07e（经本机代理 127.0.0.1:7890 发布，直连超时）；registry 传播确认；npm i -g archgraph-argo + argo-deploy -SkipEnv 完成；部署态已核：python validate_ontology.py 在 wildcard 样本上 conforms=true。"
         },
         {
           "name": "deliveryStatus",
@@ -12562,6 +12562,11 @@
           "name": "commit",
           "value": "d63225a",
           "description": "fix(ontology): extend-bundle axioms, class-matrix token validation, sidecar drift guard — 举一反三 扫同类问题后的三项加固：B1 schema-bundle.js resolveBundleAxioms() 沿 extends 链合并 ontology-axioms.json（base 先/child 后），describe.js 与 cli.js 改用合并公理，新增 chainDirsOriginal（原始大小写链）；C2 validateBundle() 对 archimate-class-matrix 也校验矩阵词元 ∈ classByElementType 值域（此前 matrix:null 整块跳过），ModelConcept 豁免；E1 describe.js 新增“无 class 映射的类型（端点约束无法引用）→ 无端点约束”提示；C1 同步 sandbox 侧车副本到生产 + tests/ontology-sidecar-drift.test.js 漂移守卫（验收守卫登记）。A1（核心 getArchiMateClass identity fallback）经 AT-uml2-sm-04 证伪为“设计使然的 fail-open”已回退。AT-ovx-13/14/15 + AT-ovx-drift；npm test 750/750；validateSystemArchitecture passed。"
+        },
+        {
+          "name": "commit",
+          "value": "159792f",
+          "description": "fix(ontology): honor the '*' wildcard target in the endpoint matrix (issue #11) — pySHACL 投影把目标 '*' 编译为 local('*')='_'，要求不存在的类 → 每条 '*' 规则的边都误报；JS 引擎早已将 '*' 视为无约束，两引擎不一致。修：python/validate_ontology.py build_shapes_graph() 当 targets 含 '*' 时不发射形状（无约束）；lib/shapes.js buildShapes() 同样跳过（Turtle 产物不再出现 ex:_）；schema-bundle.js class-matrix 校验器也将 '*' 视为通配（与 ModelConcept 并列）。新增真引擎样本 sandbox/ontology-projection/samples/wildcard + run-real.js/at.test.js；AT-ovx-16；npm test 751/751。"
         }
       ]
     },
@@ -12598,6 +12603,11 @@
           "name": "release",
           "value": "archgraph-argo@0.29.11",
           "description": "发布/安装/部署 archgraph-argo@0.29.11（shasum db125c84...）；部署态已核。"
+        },
+        {
+          "name": "commit",
+          "value": "159792f",
+          "description": "issue #11 修复：pySHACL 投影未处理端点矩阵 '*' 通配（local('*')='_' → 每条边误报），与 JS 引擎不一致。修 Python build_shapes_graph + JS buildShapes + 核心 class-matrix 校验器；真引擎样本 wildcard；AT-ovx-16；npm test 751/751。发布 archgraph-argo@0.29.12（shasum fc7b08e3...，经代理发布）。教训：任何引擎/投影都有 local() 归一，通配符须在归一之前处理；两引擎（JS/Python）语义必须一致。"
         }
       ]
     }
