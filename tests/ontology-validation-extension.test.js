@@ -5,7 +5,8 @@
 //
 // AT-ovx-1  no ARGO_VALIDATION_EXTENSIONS  -> no-op (default behaviour unchanged)
 // AT-ovx-2  a configured extension that reports errors -> errors are merged (blocking)
-// AT-ovx-3  an unavailable/failing extension -> fail-open (warning, never a block)
+// AT-ovx-3  a configured-but-unavailable extension -> fail-close (blocking error)
+// AT-ovx-3b onError:"warn" opts an entry back to advisory
 // AT-ovx-4  the ontology CLI (write mode) flags a constraint violation and passes a valid graph
 // AT-ovx-5  malformed configuration is ignored (no crash)
 
@@ -82,10 +83,22 @@ test('AT-ovx-2 configured extension errors are merged (blocking)', () => {
   assert.deepEqual(result.warnings, []);
 });
 
-test('AT-ovx-3 unavailable/failing extension -> fail-open (warning, never a block)', () => {
+test('AT-ovx-3 configured-but-unavailable extension -> fail-close (blocking error)', () => {
   const env = {
     ARGO_VALIDATION_EXTENSIONS: JSON.stringify([
       { name: 'ghost', timings: ['write'], command: ['definitely-not-a-real-binary-xyz'] },
+    ]),
+  };
+  const result = runValidationExtensions({ workspaceRoot: '/x', graphPath: 'g.json', mode: 'write', env });
+  assert.equal(result.warnings.length, 0);
+  assert.equal(result.errors.length, 1);
+  assert.match(result.errors[0], /unavailable/);
+});
+
+test('AT-ovx-3b onError:"warn" opts an entry back to advisory (non-blocking)', () => {
+  const env = {
+    ARGO_VALIDATION_EXTENSIONS: JSON.stringify([
+      { name: 'ghost', onError: 'warn', timings: ['write'], command: ['definitely-not-a-real-binary-xyz'] },
     ]),
   };
   const result = runValidationExtensions({ workspaceRoot: '/x', graphPath: 'g.json', mode: 'write', env });

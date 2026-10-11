@@ -885,7 +885,7 @@ function Show-OntologyValidationSwitch {
     # stay env-free so the workspace is resolved dynamically via MCP roots).
     param([string]$ArgoRoot)
     $cli = (Join-Path $ArgoRoot 'scripts\ontology-projection\cli.js') -replace '\\', '/'
-    $cmdJson = '[{"name":"ontology","timings":["write","init"],"command":["node","' + $cli + '","--workspace","{workspaceRoot}","--graph","{graphPath}","--mode","{mode}"]}]'
+    $cmdJson = '[{"name":"ontology","timings":["write","init"],"onError":"error","command":["node","' + $cli + '","--workspace","{workspaceRoot}","--graph","{graphPath}","--mode","{mode}"]}]'
     $py = Get-OntologyPython
     $pyName = if ($py) { ($py.Name -replace '\.exe$', '') } else { 'python' }
     Write-Host ''

@@ -43,7 +43,7 @@ Your schema bundle already enforces endpoint rules. ArchGraph can go further and
 - **logical contradictions** (OWL inconsistency — e.g. an element that is two disjoint types, or a single-valued slot with two values), and
 - **constraint violations** (SHACL, compiled from your endpoint matrix).
 
-It is **opt-in and off by default**; when enabled it is **fail-open** (an unavailable engine warns, it never blocks a write).
+It is **opt-in and off by default**; when enabled it is **fail-close** — a configured-but-unavailable engine is a **blocking error**, not a silent pass (an advisory validator can opt out per entry with `onError: "warn"`).
 
 **Enable it.**
 

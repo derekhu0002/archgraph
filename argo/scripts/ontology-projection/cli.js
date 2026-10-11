@@ -89,7 +89,8 @@ function main() {
     const { bundle } = require('../schema-bundle.js').loadSchemaBundleAndOntology(workspaceRoot);
     bundleDir = bundle.dir;
   } catch (error) {
-    emit(errors, [`ontology validator skipped (no resolvable schema bundle): ${error.message}`]);
+    errors.push(`ontology validator failed (no resolvable schema bundle): ${error.message}`);
+    emit(errors, warnings);
     return;
   }
 
@@ -99,7 +100,8 @@ function main() {
     model = loadModel(bundleDir);
     graph = JSON.parse(fs.readFileSync(graphFile, 'utf8'));
   } catch (error) {
-    emit(errors, [`ontology validator skipped: ${error.message}`]);
+    errors.push(`ontology validator failed: ${error.message}`);
+    emit(errors, warnings);
     return;
   }
 
@@ -133,11 +135,12 @@ function main() {
     { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 120000 },
   );
   if (proc.error || proc.status !== 0) {
-    emit(errors, [
+    errors.push(
       `ontology real engine unavailable (${python}): ${
         (proc.error && proc.error.message) || String(proc.stderr || '').slice(0, 300)
       }`,
-    ]);
+    );
+    emit(errors, warnings);
     return;
   }
 
@@ -145,14 +148,15 @@ function main() {
   try {
     findings = JSON.parse(fs.readFileSync(outFile, 'utf8'));
   } catch (error) {
-    emit(errors, [`ontology engine output unreadable: ${error.message}`]);
+    errors.push(`ontology engine output unreadable: ${error.message}`);
+    emit(errors, warnings);
     return;
   }
   const shacl = findings.shacl || {};
   const owl = findings.owl || {};
-  if (shacl.error) warnings.push(`SHACL engine error: ${shacl.error}`);
+  if (shacl.error) errors.push(`SHACL engine error: ${shacl.error}`);
   for (const violation of shacl.violations || []) errors.push(`SHACL: ${violation.message || violation.focusNode}`);
-  if (owl.error) warnings.push(`OWL engine error: ${owl.error}`);
+  if (owl.error) errors.push(`OWL engine error: ${owl.error}`);
   if (owl.consistent === false) {
     errors.push(`OWL: graph is inconsistent (${(owl.inconsistentClasses || []).join(', ') || 'ontology-level'})`);
   }

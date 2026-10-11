@@ -39,7 +39,7 @@ declares:
 - `objectPropertyDomain` / `objectPropertyRange` for `Assigned To`;
 - `distinctIndividuals: true` — so a functional-property conflict is detectable.
 
-Enable the engine with `argo-deploy -EnableOntologyValidation` (opt-in, fail-open).
+Enable the engine with `argo-deploy -EnableOntologyValidation` (opt-in; fail-close — a configured-but-unavailable engine is a blocking error, not a silent pass).
 Full reference — every layer: [docs/ontology-authoring.md](../../../docs/ontology-authoring.md).
 
 ## Example viewpoints

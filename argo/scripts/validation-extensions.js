@@ -12,11 +12,12 @@
 // to stdout:
 //     { "errors": ["..."], "warnings": ["..."] }
 // Errors are merged into the framework's validation errors (blocking); warnings
-// are surfaced but never block. It is FAIL-OPEN by design: a missing/failing
-// backend degrades to a warning, never to a spurious block.
+// are surfaced but never block. It is FAIL-CLOSE by design: an extension that is
+// configured but unavailable/broken is a BLOCKING error, not a silent pass. An
+// advisory validator can opt out per entry with "onError":"warn".
 //
 // Configure with ARGO_VALIDATION_EXTENSIONS (JSON array). Example:
-//   [{"name":"ontology","timings":["write","init"],
+//   [{"name":"ontology","timings":["write","init"],"onError":"error",
 //     "command":["node","/path/to/ontology-projection/cli.js",
 //                "--workspace","{workspaceRoot}","--graph","{graphPath}","--mode","{mode}"]}]
 // No extensions configured => a no-op (default behaviour is unchanged).
@@ -44,6 +45,8 @@ function resolveValidationExtensions(env = process.env) {
       name: String(entry.name || 'extension'),
       command: entry.command.map(String),
       timings: Array.isArray(entry.timings) && entry.timings.length ? entry.timings.map(String) : ['init'],
+      // Fail-close by default; "warn" makes this entry's infrastructure failures advisory.
+      onError: entry.onError === 'warn' ? 'warn' : 'error',
     }));
 }
 
@@ -76,14 +79,18 @@ function runExtension(ext, ctx) {
     env: { ...process.env, ...ctx.childEnv },
   });
   const out = { errors: [], warnings: [] };
+  // Fail-close by default: a configured-but-unavailable/broken validator is a
+  // BLOCKING error (no silent pass). Set onError:"warn" for advisory validators.
+  const strict = ext.onError !== 'warn';
+  const infra = (message) => { (strict ? out.errors : out.warnings).push(message); };
   if (result.error) {
-    out.warnings.push(`validation extension '${ext.name}' unavailable: ${result.error.message}`);
+    infra(`validation extension '${ext.name}' unavailable: ${result.error.message}`);
     return out;
   }
   const findings = lastJsonLine(result.stdout);
   const hasErrors = Array.isArray(findings.errors) && findings.errors.length > 0;
   if (result.status !== 0 && !hasErrors) {
-    out.warnings.push(
+    infra(
       `validation extension '${ext.name}' exited ${result.status}: ${String(result.stderr || '').slice(0, 500)}`,
     );
   }

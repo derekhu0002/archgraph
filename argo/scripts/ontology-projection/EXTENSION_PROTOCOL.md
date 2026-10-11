@@ -49,8 +49,10 @@ Print **one JSON object** to stdout (the **last** parseable JSON line wins):
 ```
 - `errors` → merged into the framework's validation errors (**blocking** at that timing).
 - `warnings` → surfaced but never block.
-- **Fail-open**: if the command is missing / exits non-zero / prints nothing, the
-  framework records a *warning* and continues — it never falsely blocks a write.
+- **Fail-close (default)**: if the command is missing / exits non-zero, the
+  framework records a **blocking error** — a validator you configured is never
+  silently skipped. Set `"onError":"warn"` on an entry to make an advisory
+  validator's infrastructure failures non-blocking (warn).
 
 ## Timings
 - **`write`**: runs on every preview/apply mutation, on the **post-mutation

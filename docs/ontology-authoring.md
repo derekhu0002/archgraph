@@ -70,7 +70,7 @@ Example:
 
 ## How it is used
 - **Always on (core)**: types, endpoint matrix, statement grammar, view limits, bundle validation (`bundleValidation.status`).
-- **Opt-in (ontology engine)**: the axioms — checked at **write** (the change's delta) and **init** (the whole graph) by **pySHACL + owlready2/HermiT**. Enable with `argo-deploy -EnableOntologyValidation` (see [EXTENSION_PROTOCOL.md](../argo/scripts/ontology-projection/EXTENSION_PROTOCOL.md)); off by default, fail-open.
+- **Opt-in (ontology engine)**: the axioms — checked at **write** (the change's delta) and **init** (the whole graph) by **pySHACL + owlready2/HermiT**. Enable with `argo-deploy -EnableOntologyValidation` (see [EXTENSION_PROTOCOL.md](../argo/scripts/ontology-projection/EXTENSION_PROTOCOL.md)); off by default; **fail-close** (a configured engine that is unavailable is a blocking error, not a silent pass).
 
 ## Minimal template for a new project
 ```
