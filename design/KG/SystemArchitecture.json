@@ -12555,8 +12555,8 @@
         },
         {
           "name": "verification",
-          "value": "2026-10-11 部署后验收通过（archgraph-argo@0.29.11）",
-          "description": "宿主重启后用已部署 ~/.argo 代码验收（真引擎 pySHACL+owlready2/HermiT）：① archgraph（extends default）bundleValidation=passed；describeOntology 正确输出 E1 提示（无 class 映射类型：State/Initial State/Final State/Composite State/Choice/Entry Point/Exit Point）。② C2：合法 class-matrix 矩阵=passed；非法词元 Baz=failed（报 unknown element type token 'Baz'）。③ B1：无 axioms 文件的 child 仍继承 base 的 disjointClasses/functionalProperties。④ 真引擎 CLI：archgraph 与 rv-business 均 {\"errors\":[],\"warnings\":[]}（无回归）。⑤ 宿主 .env 确认 ARGO_VALIDATION_EXTENSIONS 开启（fail-close）。"
+          "value": "2026-10-11 部署后验收通过（archgraph-argo@0.29.12）",
+          "description": "宿主重启后用已部署 ~/.argo 代码验收：① issue #11 复现（type-matrix Composition:{Grouping:['*']} + Grouping--Composition-->Grouping）——部署 CLI deterministic 与 real(pySHACL) 均 {\"errors\":[],\"warnings\":[]}（修复前 real 必报 must target ['*']）。② 回归：archgraph（extends）与 rv-business（default）真引擎均 clean。"
         },
         {
           "name": "commit",
