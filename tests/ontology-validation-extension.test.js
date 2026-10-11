@@ -185,6 +185,18 @@ test('AT-ovx-8 describeOntology reports the full definition (types, matrix, cons
   assert.ok(lean.missing.axioms.includes('functionalProperties'), JSON.stringify(lean.missing.axioms));
 });
 
+test('AT-ovx-9 describeOntology follows the extends chain (base endpoint matrix is not reported missing)', () => {
+  // GIVEN this repo's own bundle (schema-bundle.config.json with "extends": "default")
+  const o = describeOntology({ workspaceRoot: REPO });
+  assert.equal(o.status, 'ok');
+  // THEN the base bundle's endpoint matrix / metadata / categories are present
+  assert.ok(Object.keys(o.endpointMatrix).length > 0, 'base endpoint matrix must be present via extends');
+  assert.ok(Object.keys(o.elementTypeMetadata).length > 0, 'base type metadata must be present via extends');
+  assert.ok(Object.keys(o.relationshipCategoryByType).length > 0, 'base relationship categories must be present via extends');
+  // AND the endpoint matrix is NOT wrongly reported as missing
+  assert.ok(!o.missing.constraints.some((m) => /endpoint matrix/.test(m)), JSON.stringify(o.missing.constraints));
+});
+
 test('AT-ovx-6 write scope=delta restricts validation to the touched subgraph', () => {
   const graph = {
     name: 'delta-scope',

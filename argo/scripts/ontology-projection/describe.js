@@ -43,8 +43,11 @@ function describeOntology({ workspaceRoot } = {}) {
     return { status: 'failed', error: String(error && error.message ? error.message : error) };
   }
 
-  const rules = readJson(path.join(bundle.dir, 'schema-bundle.rules.json'), {}) || {};
-  const config = readJson(path.join(bundle.dir, 'schema-bundle.config.json'), {}) || {};
+  // Use the RESOLVED, chain-merged rules/config from the bundle (this follows the
+  // `extends` chain). Reading the raw child bundle dir would miss the base
+  // bundle's endpoint matrix / type metadata / relationship categories.
+  const rules = bundle.rules || {};
+  const config = bundle.config || {};
   const axiomsFile = path.join(bundle.dir, 'ontology-axioms.json');
   const hasAxiomsFile = fs.existsSync(axiomsFile);
   const axiomsRaw = readJson(axiomsFile, {}) || {};
