@@ -18,7 +18,11 @@ disable-model-invocation: true
 
 - **MUST** 运行 **CLI 命令 `argo-init`**（默认当前工作区；或 `argo-init --workspace <dir>`）执行确定性初始化，并以其输出的报告为最终判断依据。
 - **MUST** 报告当前 schema：报告里 `schema`（或 `schemaBundle`）中的 `kind`（default=内置 ArchiMate 3.2 / workspace=仓内自定义 / override）、`language`（名称）、`actorElementType`、`dir`、`guide`；输出形如 `schema: default / ArchiMate 3.2`。
-- **MUST** 报告 `mcp` / `systemArchitecture` / `neo4j` / `qeaFullProjection` / `semanticLifecycle` / `subdiagramViews` 与整体 `status`。
+- **MUST** 报告 `mcp` / `systemArchitecture` / `ontology` / `ontologyValidation` / `neo4j` / `qeaFullProjection` / `semanticLifecycle` / `subdiagramViews` 与整体 `status`。
+- **MUST** 在面向用户的总结里明确给出两件事并逐条判「正常/不正常」：
+  - ① **本体是否正常**（`ontology.status`；一句定义摘要：language + 元素/关系类型数 + 端点矩阵有无 + constraints + axioms；并列出缺失项 `ontology.missing` 的 structure/constraints/axioms）；
+  - ② **本体校验引擎是否正常**（`ontologyValidation.status`：`passed`=正常 / `failed`=异常（附 `errors`）/ `disabled`=未启用）。
+  **若任一不正常或未启用，必须在总结中显著说明**（否则用户无法感知）——不得只贴报告 JSON、不得省略。
 - **MUST** 核验并报告：① `.qea` 投影是否成功（`qeaFullProjection.status`），且投影目标 `qeaFullProjection.qea` 是否为**本仓库自己的 .qea 文件**（解析自 `ARGO_EA_QEA` 或仓库根唯一 `*.qea`）；目标不是本仓库文件或投影失败 → 报告为告警/失败，不得视为 init 成功。
 - **MUST** 核验并报告：Neo4j 投影目标数据库名（`neo4j.database`）是否**与本仓库名一致**（仓库 basename == 数据库名）；不一致 → 报告为告警/失败。
 - **MUST NOT** 因 schema 是自定义的而跳过 `.qea` 投影：投影对任何 schema 都执行；只有确实没有 `.qea` 目标时才允许 `noop`。
@@ -84,3 +88,8 @@ disable-model-invocation: true
 ### 3. Semantic Lifecycle Status
 - whether semantic lifecycle init ran, skipped, or failed
 - state/alignment/readiness summary when available
+
+### 4. Ontology Status
+- **本体是否正常**：`ontology.status`；一句定义摘要（`language` + 元素/关系类型数 + 端点矩阵有无 + `invariants`(constraints) + `axioms`）；并**列出缺失项**（`ontology.missing` 的 `structure` / `constraints` / `axioms`）。
+- **本体校验引擎是否正常**：`ontologyValidation.status`——`passed`=正常运行且无问题；`failed`=**异常**（附 `ontologyValidation.errors`）；`disabled`=**未启用**（说明 `ARGO_VALIDATION_EXTENSIONS` 未配置）。
+- **任一项不正常（`failed` / `disabled` / 本体定义异常）必须在总结中显著指出**，不能省略。
