@@ -23,6 +23,9 @@ const CASES = [
   { dir: 'team-graph', graph: 'multihop-entailment.json', expect: { shaclConforms: true, owlConsistent: true, entails: [['team-a', 'team-c']] } },
   { dir: 'prov-o', graph: 'valid.json', expect: { shaclConforms: true, owlConsistent: true } },
   { dir: 'prov-o', graph: 'endpoint-violation.json', expect: { shaclConforms: false } },
+  // issue #11: a `*` target is "any target" -> unconstrained; must conform (was a
+  // false violation because the pySHACL projection compiled '*' as class `_`).
+  { dir: 'wildcard', graph: 'valid.json', expect: { shaclConforms: true, owlConsistent: true } },
 ];
 
 function copyDir(src, dest) {

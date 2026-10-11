@@ -1,0 +1,14 @@
+{
+  "name": "Wildcard - valid",
+  "description": "Grouping --Composition--> Grouping under a `*` (any target) rule; the wildcard means the endpoint is unconstrained, so this MUST conform (regression for the pySHACL engine compiling '*' as a bogus class).",
+  "elements": [
+    { "id": "g1", "name": "G1", "type": "Grouping" },
+    { "id": "g2", "name": "G2", "type": "Grouping" }
+  ],
+  "relationships": [
+    { "id": "c1", "name": "G1 comp G2", "type": "Composition", "source_id": "g1", "target_id": "g2", "source_name": "G1", "target_name": "G2", "statement": "G1 --(Composition)--> G2" }
+  ],
+  "views": [
+    { "view_id": "view-root", "view_name": "SystemArchitecture", "included_elements": ["g1", "g2"], "included_relationships": ["c1"] }
+  ]
+}

@@ -27,6 +27,7 @@ const SAMPLES = path.join(ROOT, 'samples');
 const REPO = path.resolve(ROOT, '..', '..');
 const TG = path.join(SAMPLES, 'team-graph');
 const PO = path.join(SAMPLES, 'prov-o');
+const WC = path.join(SAMPLES, 'wildcard');
 
 function model(dir) {
   return loadModel(path.join(dir, '.argo', 'schema'));
@@ -55,8 +56,8 @@ function dirManifest(dir) {
   return manifest;
 }
 
-test('AT-1 GIVEN the valid samples (Team Graph + PROV-O) WHEN validated THEN zero SHACL violations', () => {
-  for (const [dir, name] of [[TG, 'valid.json'], [PO, 'valid.json']]) {
+test('AT-1 GIVEN the valid samples (Team Graph + PROV-O + Wildcard) WHEN validated THEN zero SHACL violations', () => {
+  for (const [dir, name] of [[TG, 'valid.json'], [PO, 'valid.json'], [WC, 'valid.json']]) {
     const result = validateGraph(model(dir), graph(dir, name));
     assert.equal(result.shacl.violations.length, 0, JSON.stringify(result.shacl.violations));
   }

@@ -77,6 +77,12 @@ def build_shapes_graph(matrix):
     g = Graph()
     for rel_type, by_source in matrix.items():
         for source_type, targets in by_source.items():
+            # '*' is the wildcard "any target" token: the endpoint is UNCONSTRAINED,
+            # so emit no shape for it. Without this, local('*') -> '_' makes the shape
+            # require a non-existent class and every edge is a false violation (the
+            # deterministic JS engine already treats '*' as unconstrained).
+            if "*" in targets:
+                continue
             node = EX["shape_" + local(source_type) + "_" + local(rel_type)]
             prop = BNode()
             g.add((node, RDF.type, SH.NodeShape))

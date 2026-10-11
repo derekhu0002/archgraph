@@ -17,6 +17,10 @@ function buildShapes(model) {
     const bySource = model.matrix[relType];
     if (!bySource) continue;
     for (const [sourceType, targets] of Object.entries(bySource)) {
+      // '*' = any target allowed -> unconstrained; emit no shape for it (mirrors
+      // checkEndpoints and the real-engine SHACL projection). Otherwise localName('*')
+      // would emit a bogus `ex:_` class.
+      if (Array.isArray(targets) && targets.includes('*')) continue;
       const node = `${localName(sourceType)}_${localName(relType)}`;
       blocks.push(
         [

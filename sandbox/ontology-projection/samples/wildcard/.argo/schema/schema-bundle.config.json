@@ -1,0 +1,15 @@
+{
+  "language": "Wildcard",
+  "actorElementType": null,
+  "rules": "schema-bundle.rules.json",
+  "deliveryDependencies": {
+    "sourceDependsOnTarget": [],
+    "targetDependsOnSource": []
+  },
+  "invariants": {
+    "statementGrammar": true,
+    "endpointMatrix": true,
+    "rootViewName": "SystemArchitecture",
+    "maxElementsPerView": 12
+  }
+}

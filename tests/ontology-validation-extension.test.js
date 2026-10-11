@@ -445,3 +445,53 @@ test('AT-ovx-15 describeOntology flags class-matrix types with no class mapping'
   assert.ok(o.missing.constraints.some((m) => /without a class mapping/.test(m)), JSON.stringify(o.missing.constraints));
   assert.ok(o.missing.constraints.some((m) => /State/.test(m)), JSON.stringify(o.missing.constraints));
 });
+
+// Issue #11: a `*` target means "any target" (unconstrained). The pySHACL projection
+// compiled it as a bogus `ex:_` class -> one false violation per edge; the JS engine
+// honored it. Both must treat `*` as unconstrained.
+function makeTypeMatrixWorkspace(matrix, graph) {
+  const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-tmx-'));
+  const schemaDir = path.join(ws, '.argo', 'schema');
+  fs.mkdirSync(schemaDir, { recursive: true });
+  fs.copyFileSync(path.join(FIXTURE, '.argo', 'schema', 'SystemArchitecture.schema.json'), path.join(schemaDir, 'SystemArchitecture.schema.json'));
+  fs.writeFileSync(path.join(schemaDir, 'schema-bundle.config.json'), JSON.stringify({
+    language: 'TMX', actorElementType: null,
+    deliveryDependencies: { sourceDependsOnTarget: [], targetDependsOnSource: [] },
+  }));
+  fs.writeFileSync(path.join(schemaDir, 'schema-bundle.rules.json'), JSON.stringify({
+    dialect: 'type-matrix',
+    elementTypeMetadata: { Grouping: { layer: 'l', aspect: 'a' }, Item: { layer: 'l', aspect: 'a' } },
+    relationshipCategoryByType: { Composition: 'Structural' },
+    relationshipTargetMatrix: matrix,
+  }));
+  const graphDir = path.join(ws, 'design', 'KG');
+  fs.mkdirSync(graphDir, { recursive: true });
+  fs.writeFileSync(path.join(graphDir, 'SystemArchitecture.json'), JSON.stringify(graph));
+  return ws;
+}
+
+const WILDCARD_GRAPH = {
+  name: 'wildcard', description: 'Grouping --Composition--> Grouping taxonomy',
+  elements: [{ id: 'g1', name: 'G1', type: 'Grouping' }, { id: 'g2', name: 'G2', type: 'Grouping' }],
+  relationships: [{ id: 'c1', name: 'G1 comp G2', type: 'Composition', source_id: 'g1', target_id: 'g2', source_name: 'G1', target_name: 'G2', statement: 'G1 --(Composition)--> G2' }],
+  views: [{ view_id: 'v', view_name: 'SystemArchitecture', included_elements: ['g1', 'g2'], included_relationships: ['c1'] }],
+};
+
+test('AT-ovx-16 wildcard `*` target is unconstrained in every engine', () => {
+  // GIVEN a bundle whose matrix allows any target (`*`)
+  const ws = makeTypeMatrixWorkspace({ Composition: { Grouping: ['*'] } }, WILDCARD_GRAPH);
+  // WHEN validated THEN no false violation (deterministic engine)
+  const res = runCli(ws, 'write');
+  assert.deepEqual(res.errors, [], JSON.stringify(res));
+
+  // AND the compiled SHACL artifact must NOT emit a bogus `ex:_` class for '*'
+  const { loadModel } = require('../argo/scripts/ontology-projection/lib/model.js');
+  const { buildShapes } = require('../argo/scripts/ontology-projection/lib/shapes.js');
+  const shapes = buildShapes(loadModel(path.join(ws, '.argo', 'schema')));
+  assert.ok(!/ex:_/.test(shapes), `wildcard must not compile to ex:_ :\n${shapes}`);
+
+  // AND a genuine (non-wildcard) disallowed target is STILL enforced
+  const strict = makeTypeMatrixWorkspace({ Composition: { Grouping: ['Item'] } }, WILDCARD_GRAPH);
+  const strictRes = runCli(strict, 'write');
+  assert.ok(strictRes.errors.length >= 1, JSON.stringify(strictRes));
+});

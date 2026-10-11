@@ -714,7 +714,7 @@ function buildClassMatrixOntology(bundle) {
         return [];
       }
       const allowedTargets = classMatrix[type] && classMatrix[type][sourceClass];
-      if (!allowedTargets || !allowedTargets.some((allowed) => allowed === targetClass || allowed === 'ModelConcept')) {
+      if (!allowedTargets || !allowedTargets.some((allowed) => allowed === targetClass || allowed === 'ModelConcept' || allowed === '*')) {
         return ['relationships \'' + relationship.id + '\' violates ArchiMate 3.2 relationship matrix: ' + source.type + ' \'' + source.name + '\' cannot ' + type + ' ' + target.type + ' \'' + target.name + '\''];
       }
       return [];
