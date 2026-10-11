@@ -69,6 +69,25 @@ function emit(errors, warnings) {
   process.stdout.write(JSON.stringify({ errors, warnings }));
 }
 
+// The sidecar (this CLI + the Python engine) reads its bundle from a directory.
+// For an `extends` bundle the effective rules live in the CHAIN-MERGED bundle,
+// not the child dir: the base dir holds the endpoint matrix / type metadata, so
+// reading the raw child dir would silently empty the matrix and disable endpoint
+// validation. Materialize the merged rules/config (plus the sidecar-only axioms
+// file and the structural schema when present) into a temp dir the engines read.
+function materializeResolvedBundle(bundle) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-ontology-bundle-'));
+  fs.writeFileSync(path.join(dir, 'schema-bundle.rules.json'), JSON.stringify(bundle.rules || {}));
+  fs.writeFileSync(path.join(dir, 'schema-bundle.config.json'), JSON.stringify(bundle.config || {}));
+  for (const name of ['ontology-axioms.json', 'SystemArchitecture.schema.json']) {
+    const source = path.join(bundle.dir, name);
+    if (fs.existsSync(source)) {
+      fs.copyFileSync(source, path.join(dir, name));
+    }
+  }
+  return dir;
+}
+
 function main() {
   const workspaceRoot = path.resolve(arg('workspace', process.cwd()));
   const mode = arg('mode', 'write');
@@ -87,7 +106,7 @@ function main() {
   let bundleDir;
   try {
     const { bundle } = require('../schema-bundle.js').loadSchemaBundleAndOntology(workspaceRoot);
-    bundleDir = bundle.dir;
+    bundleDir = materializeResolvedBundle(bundle);
   } catch (error) {
     errors.push(`ontology validator failed (no resolvable schema bundle): ${error.message}`);
     emit(errors, warnings);

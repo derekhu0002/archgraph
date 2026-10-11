@@ -296,3 +296,54 @@ test('AT-ovx-11 default bundle: instance classes and shapes share one class voca
   assert.match(shapes, /ex:BusinessObject/);
   assert.ok(!/ex:Business_Object/.test(shapes), 'shapes must not use the display-name underscore form');
 });
+
+// Follow-up to issue #10: an `extends` bundle keeps its endpoint matrix in the
+// BASE dir. The CLI must validate against the CHAIN-MERGED rules, not the raw
+// child dir — otherwise the matrix is silently empty and endpoints go unchecked
+// (the same "silently no-op" failure mode, one level up).
+function makeExtendsWorkspace(graph) {
+  const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-ovx-ext-'));
+  const schemaDir = path.join(ws, '.argo', 'schema');
+  fs.mkdirSync(schemaDir, { recursive: true });
+  fs.writeFileSync(path.join(schemaDir, 'schema-bundle.config.json'), JSON.stringify({
+    language: 'ExtendsTest', actorElementType: 'Business Actor', extends: 'default',
+  }));
+  const graphDir = path.join(ws, 'design', 'KG');
+  fs.mkdirSync(graphDir, { recursive: true });
+  fs.writeFileSync(path.join(graphDir, 'SystemArchitecture.json'), JSON.stringify(graph));
+  return ws;
+}
+
+test('AT-ovx-12 extends bundle: CLI validates against the merged base matrix (not the empty child dir)', () => {
+  const elements = [
+    { id: 'x-1', name: 'X', type: 'Application Interface' },
+    { id: 'o-1', name: 'O', type: 'Business Object' },
+  ];
+  const views = [{ view_id: 'v', view_name: 'SystemArchitecture', included_elements: ['x-1', 'o-1'], included_relationships: ['r1'] }];
+  // no ARGO_SCHEMA_DIR override, so the workspace `.argo/schema` (extends: default) resolves
+  const env = { ARGO_SCHEMA_DIR: '' };
+
+  // a legal edge under the inherited ArchiMate matrix must NOT be flagged
+  const legal = makeExtendsWorkspace({
+    name: 'extends-legal', description: 'legal edge through the extends bundle',
+    elements: [{ id: 'req-1', name: 'Req', type: 'Requirement' }, { id: 'o-1', name: 'O', type: 'Business Object' }],
+    relationships: [{ id: 'r1', name: 'Req assoc O', type: 'Association', source_id: 'req-1', target_id: 'o-1', source_name: 'Req', target_name: 'O', statement: 'Req --(Association)--> O' }],
+    views: [{ view_id: 'v', view_name: 'SystemArchitecture', included_elements: ['req-1', 'o-1'], included_relationships: ['r1'] }],
+  });
+  assert.deepEqual(runCli(legal, 'write', { env }).errors, []);
+
+  // a violating edge (Application Interface --Assignment--> Business Object) proves the
+  // inherited matrix is actually enforced — it was silently skipped before this fix
+  const violating = makeExtendsWorkspace({
+    name: 'extends-violating', description: 'endpoint violation through the extends bundle',
+    elements,
+    relationships: [{ id: 'r1', name: 'X assigns O', type: 'Assignment', source_id: 'x-1', target_id: 'o-1', source_name: 'X', target_name: 'O', statement: 'X --(Assignment)--> O' }],
+    views,
+  });
+  const violatingResult = runCli(violating, 'write', { env });
+  assert.ok(violatingResult.errors.length >= 1, JSON.stringify(violatingResult));
+  assert.ok(
+    violatingResult.errors.some((e) => e.includes('Application Interface') && e.includes('Assignment')),
+    JSON.stringify(violatingResult.errors),
+  );
+});
