@@ -12537,6 +12537,37 @@
           "name": "commit",
           "value": "937e38a",
           "description": "feat(ontology): 初始化报告新增 ontology 字段（describeOntology）——完整本体定义：元素/关系结构、端点矩阵、constraints/invariants、axioms（disjoint/functional/transitive/irreflexive/asymmetric/domain-range/distinctIndividuals）+ missing（缺失的 structure/constraints/axiom 类别）— argo/scripts/ontology-projection/describe.js; argo/scripts/ensureArgoHarnessEnvironment.js; argo/scripts/argo-mcp-server.js; tests/ontology-validation-extension.test.js（AT-ovx-8）；npm test 741/741"
+        },
+        {
+          "name": "commit",
+          "value": "9e99a8d",
+          "description": "fix(ontology): align sidecar type vocabulary with the core — GitHub issue #10. 端点矩阵/公理用 class 词元(BusinessObject) 而 canonical 图存 display 名(Business Object) → 合法边误报 + 多词源类型约束静默跳过。以 bundle 的 archimateClassByElementType 归一(无映射则原样，兼容 team-graph/PROV-O)。文件：argo/scripts/ontology-projection/lib/model.js（classByType+typeClass）、project.js/shapes.js/validate.js（实例与 shapes 同词表、checkEndpoints 同词表比对）、owl.js（公理类名归一）、python/validate_ontology.py（build_data_graph/build_ontology_graph 映射类型）；tests/ontology-validation-extension.test.js（AT-ovx-10 合法边通过+多词源违规被拦、AT-ovx-11 实例与 shapes 同词表）；npm test 745/745。"
+        },
+        {
+          "name": "commit",
+          "value": "17df3f4",
+          "description": "fix(ontology): CLI validates against the chain-merged bundle rules (issue #10 follow-up) — extends 型 bundle 的端点矩阵在 base 目录，cli.js 却用 loadModel(bundle.dir) 读子目录 → 矩阵为空 → 端点校验静默 no-op（describe.js 已用 bundle.rules 规避此坑，cli.js 未跟进）。修法：cli.js 新增 materializeResolvedBundle()，把 chain-merged rules/config（+ 侧车专用 ontology-axioms.json 与结构 schema 若存在）落到临时 bundle 目录，交给 JS 侧车与 Python 引擎读取。文件：argo/scripts/ontology-projection/cli.js；tests/ontology-validation-extension.test.js（AT-ovx-12：经 extends bundle 的违规边现被拦下）；npm test 746/746。"
+        }
+      ]
+    },
+    {
+      "id": "overseer-mem-ontology-vocab-fix-001",
+      "type": "Business Object",
+      "name": "里程碑：本体投影侧车类型词表对齐修复（issue #10）",
+      "description": "里程碑（2026-10-11，项目总管）：修复 GitHub issue #10——本体投影侧车的 SHACL 端点矩阵校验混用两套类型词表（实例侧用 display 名 localName→Business_Object，形状侧用 archimate-class 词元 BusinessObject，IRI 永不相等）→ 对合法边（如 Requirement --Association--> Business Object）误报违规，且所有多词源类型的端点约束静默失效。修法：以 bundle 的 archimateClassByElementType 归一（无映射则原样，兼容 team-graph/PROV-O 等 display 词表 bundle），与核心 schema-bundle.js getArchiMateClass 一致；覆盖 JS 侧车(model/project/shapes/owl/validate) 与 Python 真引擎(validate_ontology.py)双侧。范围：纯框架代码，不改 schema 定义、不动任何项目图谱、无需重调。验收 AT-ovx-10（合法边通过 + 多词源违规被拦下）+ AT-ovx-11（实例类与 shapes 同词表）；npm test 745/745；validateSystemArchitecture 通过。commit 9e99a8d。附带发现（未修，待人类伙伴裁决）：extends 型 bundle 的 cli.js 用 loadModel(bundle.dir) 读的是子目录（无 rules）→ 基座端点矩阵为空 → 端点校验静默 no-op；describe.js 已用 chain-merged 的 bundle.rules 规避此坑，cli.js 尚未跟进，属同族“静默失效”缺陷。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "9e99a8d",
+          "description": "fix(ontology): align sidecar type vocabulary with the core (issue #10)"
         }
       ]
     }
@@ -17175,7 +17206,8 @@
       "parent_element_name": "项目总管",
       "description": "项目总管 T2 长期记忆子视图：建模语言/状态机/指标体系（assessment）相关里程碑。",
       "included_elements": [
-        "overseer-milestone-uml2-statemachine-metric-model-001"
+        "overseer-milestone-uml2-statemachine-metric-model-001",
+        "overseer-mem-ontology-vocab-fix-001"
       ],
       "included_relationships": []
     },
