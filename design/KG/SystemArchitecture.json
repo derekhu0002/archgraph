@@ -12516,8 +12516,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.29.10",
-          "description": "release archgraph-argo@0.29.10：含 issue #10 两项修复（词表对齐 9e99a8d / extends 合并矩阵 17df3f4）；npm publish shasum fa82bc95549237e876f45b125339805a2ed37afd；registry 传播确认 latest=0.29.10；npm i -g archgraph-argo + argo-deploy -SkipEnv 22/22；部署态已验证 ~/.argo/scripts/ontology-projection（model.js typeClass / cli.js materializeResolvedBundle / python classByType）。待宿主重启加载新 MCP。"
+          "value": "archgraph-argo@0.29.11",
+          "description": "release archgraph-argo@0.29.11（extends 公理链合并 + class-matrix 词元校验 + 侧车漂移守卫）；npm publish shasum db125c84a9678ff55bd591e777056b5462814074；latest 确认；npm i -g archgraph-argo + argo-deploy -SkipEnv 完成；部署态已核 schema-bundle.js(resolveBundleAxioms/chainDirsOriginal/useClasses) 与 describe.js(without a class mapping/bundle.axioms)。"
         },
         {
           "name": "deliveryStatus",
@@ -12557,6 +12557,11 @@
           "name": "verification",
           "value": "2026-10-11 部署后验收通过（archgraph-argo@0.29.10）",
           "description": "宿主重启后用已部署 ~/.argo 代码验收（真引擎 pySHACL 0.40.1 + owlready2/HermiT 0.51 已确认安装并实际运行）：① rv-business（issue #10 复现仓，用部署默认 bundle，无本地 .argo/schema）—— 修复前真引擎报 SHACL 误报（Requirement --Association--> Business Object），现在 deterministic 与 real 引擎均 {\"errors\":[],\"warnings\":[]}；涉事边 rel-eco-req-pool-001（req-rv-ecosystem-focus-001 --Association--> obj-rv-investment-watchlist-2026-09-001）确认合法。② archgraph 自身（extends default）—— deterministic 与 real 均 {\"errors\":[],\"warnings\":[]}，验证 extends 合并矩阵修复。两项缺陷闭合。"
+        },
+        {
+          "name": "commit",
+          "value": "d63225a",
+          "description": "fix(ontology): extend-bundle axioms, class-matrix token validation, sidecar drift guard — 举一反三 扫同类问题后的三项加固：B1 schema-bundle.js resolveBundleAxioms() 沿 extends 链合并 ontology-axioms.json（base 先/child 后），describe.js 与 cli.js 改用合并公理，新增 chainDirsOriginal（原始大小写链）；C2 validateBundle() 对 archimate-class-matrix 也校验矩阵词元 ∈ classByElementType 值域（此前 matrix:null 整块跳过），ModelConcept 豁免；E1 describe.js 新增“无 class 映射的类型（端点约束无法引用）→ 无端点约束”提示；C1 同步 sandbox 侧车副本到生产 + tests/ontology-sidecar-drift.test.js 漂移守卫（验收守卫登记）。A1（核心 getArchiMateClass identity fallback）经 AT-uml2-sm-04 证伪为“设计使然的 fail-open”已回退。AT-ovx-13/14/15 + AT-ovx-drift；npm test 750/750；validateSystemArchitecture passed。"
         }
       ]
     },
@@ -12583,6 +12588,16 @@
           "name": "verification",
           "value": "2026-10-11 发起方 rv-business 端到端验证通过 + issue #10 已关闭",
           "description": "rv-business 在 archgraph-argo@0.29.10 上端到端验证：validateSystemArchitecture passed；完整 argo-init overall status ok（systemArchitecture/subdiagramViews/mcp/neo4j(42/49/12,matches=true)/qeaFullProjection/semanticLifecycle 均 ok；ontologyValidation passed 0 errors）。关键对照：原触发边 rel-eco-req-pool-001 未改动，failed→passed。无阻塞，GitHub issue #10 已关闭。两同族缺陷（词表混用 + extends 静默 no-op）全部闭合。"
+        },
+        {
+          "name": "commit",
+          "value": "d63225a",
+          "description": "举一反三扫同类问题后的加固（issue #10 跟进）：B1 extends 链合并 ontology-axioms.json（resolveBundleAxioms + chainDirsOriginal；describe/cli 用合并公理）；C2 class-matrix dialect 也校验矩阵词元（此前整块跳过）；E1 describe 提示无 class 映射类型无端点约束；C1 sandbox 侧车副本同步生产 + 漂移守卫测试。A1（核心 identity fallback）经 AT-uml2-sm-04 证伪为设计使然的 added-type fail-open，已回退（不得“修”）。AT-ovx-13/14/15+drift；npm test 750/750。"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.29.11",
+          "description": "发布/安装/部署 archgraph-argo@0.29.11（shasum db125c84...）；部署态已核。"
         }
       ]
     }
