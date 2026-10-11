@@ -29,6 +29,9 @@ const {
 const {
   validationExtensionsReport,
 } = require('./validation-extensions.js');
+const {
+  describeOntology,
+} = require('./ontology-projection/describe.js');
 
 const REQUIRED_TOOL_NAMES = [
   'getSystemArchitecture',
@@ -82,6 +85,9 @@ async function runHarnessReport({ checkOnly, workspaceRoot, includeBootstrap }) 
     // so it is clear whether it ran and whether it is empty. Fail-close when
     // configured and unavailable (see validation-extensions.js).
     report.ontologyValidation = validationExtensionsReport({ workspaceRoot, graphPath: DEFAULT_GRAPH_PATH });
+    // The full ontology definition + what is missing (structure / constraints /
+    // axioms), so the init report shows the whole modeling contract and its gaps.
+    report.ontology = describeOntology({ workspaceRoot });
     report.subdiagramViews = report.systemArchitecture.status === 'ok'
       ? await ensureSubdiagramViewsConsistency({ checkOnly, workspaceRoot })
       : {

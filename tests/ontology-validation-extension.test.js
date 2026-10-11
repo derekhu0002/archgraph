@@ -18,6 +18,7 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const { resolveValidationExtensions, runValidationExtensions, validationExtensionsReport } = require('../argo/scripts/validation-extensions.js');
+const { describeOntology } = require('../argo/scripts/ontology-projection/describe.js');
 
 const REPO = path.resolve(__dirname, '..');
 const CLI = path.join(REPO, 'argo', 'scripts', 'ontology-projection', 'cli.js');
@@ -63,6 +64,24 @@ function makeWorkspaceWithGraph(graph) {
   const graphDir = path.join(ws, 'design', 'KG');
   fs.mkdirSync(graphDir, { recursive: true });
   fs.writeFileSync(path.join(graphDir, 'SystemArchitecture.json'), JSON.stringify(graph));
+  return ws;
+}
+
+function makeLeanWorkspace() {
+  const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-ovx-lean-'));
+  const dir = path.join(ws, '.argo', 'schema');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.copyFileSync(path.join(FIXTURE, '.argo', 'schema', 'SystemArchitecture.schema.json'), path.join(dir, 'SystemArchitecture.schema.json'));
+  fs.writeFileSync(path.join(dir, 'schema-bundle.config.json'), JSON.stringify({ language: 'Lean', actorElementType: 'Agent Node' }));
+  // deliberately NO schema-bundle.rules.json and NO ontology-axioms.json
+  const g = path.join(ws, 'design', 'KG');
+  fs.mkdirSync(g, { recursive: true });
+  fs.writeFileSync(path.join(g, 'SystemArchitecture.json'), JSON.stringify({
+    name: 'Lean', description: 'd',
+    elements: [{ id: 'agent-1', name: 'A', type: 'Agent Node' }],
+    relationships: [{ id: 'r', name: 'r', type: 'Depends On', source_id: 'agent-1', target_id: 'agent-1', source_name: 'A', target_name: 'A', statement: 'A --(Depends On)--> A' }],
+    views: [{ view_id: 'v', view_name: 'SystemArchitecture', included_elements: ['agent-1'], included_relationships: ['r'] }],
+  }));
   return ws;
 }
 
@@ -145,6 +164,25 @@ test('AT-ovx-7 validationExtensionsReport surfaces the ontology result (disabled
   const fail = validationExtensionsReport({ workspaceRoot: '/x', graphPath: 'g.json', env: failEnv });
   assert.equal(fail.status, 'failed');
   assert.ok(fail.errors.some((e) => /OWL/.test(e)), JSON.stringify(fail.errors));
+});
+
+test('AT-ovx-8 describeOntology reports the full definition (types, matrix, constraints, axioms) + the gaps', () => {
+  // rich bundle (rules + axioms) -> definition present, no structural/constraint/axiom-file gaps
+  const rich = describeOntology({ workspaceRoot: FIXTURE });
+  assert.equal(rich.status, 'ok');
+  assert.ok(rich.elementTypes.includes('Team Node') && rich.elementTypes.includes('Service Node'), JSON.stringify(rich.elementTypes));
+  assert.ok(rich.endpointMatrix['Depends On'], 'endpoint matrix present');
+  assert.ok(Object.keys(rich.invariants).length > 0, 'invariants present');
+  assert.ok(rich.axioms.disjointClasses.length >= 1, 'axioms present');
+  assert.ok(!rich.missing.axioms.includes('ontology-axioms.json'), 'rich bundle has an axioms file');
+  assert.ok(!rich.missing.constraints.some((m) => /endpoint matrix/.test(m)), 'rich bundle has an endpoint matrix');
+
+  // lean bundle (no rules, no axioms) -> the gaps are named
+  const lean = describeOntology({ workspaceRoot: makeLeanWorkspace() });
+  assert.equal(lean.status, 'ok');
+  assert.ok(lean.missing.constraints.some((m) => /endpoint matrix/.test(m)), JSON.stringify(lean.missing.constraints));
+  assert.ok(lean.missing.axioms.some((m) => /ontology-axioms\.json/.test(m)), JSON.stringify(lean.missing.axioms));
+  assert.ok(lean.missing.axioms.includes('functionalProperties'), JSON.stringify(lean.missing.axioms));
 });
 
 test('AT-ovx-6 write scope=delta restricts validation to the touched subgraph', () => {

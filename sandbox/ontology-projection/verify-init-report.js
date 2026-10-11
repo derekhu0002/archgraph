@@ -35,7 +35,16 @@ child.on('exit', () => {
   const report = JSON.parse(line.result.content[0].text);
   console.log('status:', report.status);
   console.log('schemaBundle.language:', report.schemaBundle && report.schemaBundle.language);
-  console.log('ontologyValidation:', JSON.stringify(report.ontologyValidation, null, 2));
+  const o = report.ontology || {};
+  if (o.status === 'ok') {
+    console.log('ontology: language=', o.language, 'elementTypes=', JSON.stringify(o.elementTypes), 'relationshipTypes=', JSON.stringify(o.relationshipTypes));
+    console.log('ontology.endpointMatrix keys:', Object.keys(o.endpointMatrix || {}));
+    console.log('ontology.axioms keys present:', Object.keys(o.axioms || {}).filter((k) => { const v = o.axioms[k]; return Array.isArray(v) ? v.length : (typeof v === 'object' ? Object.keys(v).length : v); }));
+    console.log('ontology.missing:', JSON.stringify(o.missing, null, 2));
+  } else {
+    console.log('ontology:', JSON.stringify(o));
+  }
+  console.log('ontologyValidation:', JSON.stringify(report.ontologyValidation));
 });
 child.stdin.write(input);
 child.stdin.end();
