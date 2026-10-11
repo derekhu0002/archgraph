@@ -155,6 +155,7 @@
         <a class="link" href="#ontology">Ontology</a>
         <a class="link" href="#capabilities">Capabilities</a>
         <a class="link" href="#install">Install</a>
+        <a class="link" href="#validation">Validation</a>
         <a class="link" href="#quickstart">Build your own graph</a>
         <a class="link" href="#howto">How to use</a>
         <a class="link" href="#community">Community</a>
@@ -172,6 +173,7 @@
       <a href="#ontology">Ontology</a>
       <a href="#capabilities">Capabilities</a>
       <a href="#install">Install</a>
+      <a href="#validation">Validation</a>
       <a href="#quickstart">Build your own graph</a>
       <a href="#howto">How to use</a>
       <a href="#community">Community</a>
@@ -294,6 +296,17 @@ argo-deploy</pre>
       <p class="lead" style="margin-top:18px;">For context reads and writes, deduplication, and Enterprise Architect interop, <strong>Node.js is all you need</strong> — no database. The <strong>structural</strong> Cypher (Neo4j's graph query language) projection and all <strong>semantic</strong> Graph RAG additionally need a <strong>Neo4j</strong> instance and an OpenAI-compatible <strong>embedding</strong> endpoint; until those are configured, <code class="inline">argo init</code>'s structural sync and semantic lifecycle <strong>report failed</strong> (the graph itself is still created).</p>
       <p class="lead"><strong>After deploying, restart your editor / host</strong> so it reloads the new MCP server.</p>
       <p><a class="read-more" href="docs/getting-started.html">Prerequisites and configuration →</a></p>
+    </div>
+  </section>
+
+  <section id="validation" class="section">
+    <div class="container">
+      <p class="kicker">Ontology validation (optional)</p>
+      <h2>Catch logical contradictions, not just type errors.</h2>
+      <p class="lead">Your schema bundle enforces endpoint rules. ArchGraph can also run a <strong>real ontology / reasoning engine</strong> at its existing validation timings — <strong>on write</strong> (the change's delta subgraph) and <strong>at init</strong> (the whole graph) — to catch <strong>OWL logical contradictions</strong> (e.g. an element that is two disjoint types, or a single-valued slot with two values) and <strong>SHACL constraint violations</strong>. It is <strong>opt-in, off by default</strong>, and <strong>fail-open</strong> (an unavailable engine warns, never blocks).</p>
+      <pre class="code">argo-deploy -EnableOntologyValidation</pre>
+      <p class="lead">That writes the switch into <code class="inline">~/.argo/.env</code> (no hand-editing); restart your host to apply, then verify with <code class="inline">Get-Content "$env:USERPROFILE\.argo\.env"</code>. The engine is <strong>pySHACL + owlready2/HermiT</strong> — the deployer installs the Python packages, and needs <strong>Python 3</strong> + a <strong>JRE</strong>: if either is missing it alerts and <strong>stops</strong> (it never installs a system runtime; <code class="inline">-SkipOntologyEngine</code> skips the step).</p>
+      <p><a class="read-more" href="docs/capabilities.html">More capabilities →</a></p>
     </div>
   </section>
 

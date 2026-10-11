@@ -36,6 +36,41 @@ This repository is the proof: its own bundle uses `extends: "default"` and layer
 
 → Worked example — define an ontology, then build the graph step by step: **[docs/case-team-graph.html](docs/case-team-graph.html)** · runnable bundle: [`custom-schema/`](custom-schema/README.md)
 
+## Ontology validation (optional)
+
+Your schema bundle already enforces endpoint rules. ArchGraph can go further and run a **real ontology / reasoning engine** at the same validation timings the framework already uses — **on write** (the change's delta subgraph) and **at init** (the whole graph) — to catch what a schema alone cannot:
+
+- **logical contradictions** (OWL inconsistency — e.g. an element that is two disjoint types, or a single-valued slot with two values), and
+- **constraint violations** (SHACL, compiled from your endpoint matrix).
+
+It is **opt-in and off by default**; when enabled it is **fail-open** (an unavailable engine warns, it never blocks a write).
+
+**Enable it.**
+
+```bash
+argo-deploy -EnableOntologyValidation
+```
+
+That writes two keys into `~/.argo/.env` (the same file the deployer configures) — you don't hand-edit them:
+
+```
+ARGO_ONTOLOGY_PYTHON=python
+ARGO_VALIDATION_EXTENSIONS=[{"name":"ontology","timings":["write","init"],"command":["node","<argo>/scripts/ontology-projection/cli.js","--workspace","{workspaceRoot}","--graph","{graphPath}","--mode","{mode}"]}]
+```
+
+Then **restart your editor / host** so the MCP server reloads `~/.argo/.env`. Turn it off by clearing the `ARGO_VALIDATION_EXTENSIONS` line (or deploying without the flag) and restarting.
+
+**Dependencies.** The engine is **pySHACL** + **owlready2/HermiT**. The deployer installs the Python packages (`pyshacl`, `owlready2`) for you; **Python 3 and a JRE** are prerequisites — if either is missing the deploy **stops with an alert** (it never installs a system runtime), so install them and re-run `argo-deploy`. Pass `-SkipOntologyEngine` to skip the engine step entirely.
+
+**Verify.**
+
+```bash
+Get-Content "$env:USERPROFILE\.argo\.env" | Select-String ARGO_VALIDATION_EXTENSIONS   # ~/.argo/.env on macOS/Linux
+python -c "import pyshacl, owlready2; print('ok')"
+```
+
+The extension point is **open-closed**: any external validator that speaks the small contract (argv tokens `{workspaceRoot}` / `{graphPath}` / `{mode}`; reads the post-mutation document and touched ids from the environment; prints `{errors, warnings}`) is added as **one entry** in `ARGO_VALIDATION_EXTENSIONS` — no framework change. Spec: [`argo/scripts/ontology-projection/EXTENSION_PROTOCOL.md`](argo/scripts/ontology-projection/EXTENSION_PROTOCOL.md).
+
 ## Install
 
 **Prerequisite: Node.js ≥ 18** (the ARGO toolchain and the MCP server both run on Node).
