@@ -12591,8 +12591,8 @@
         },
         {
           "name": "verification",
-          "value": "2026-10-11 发起方 rv-business 端到端验证通过 + issue #10 已关闭",
-          "description": "rv-business 在 archgraph-argo@0.29.10 上端到端验证：validateSystemArchitecture passed；完整 argo-init overall status ok（systemArchitecture/subdiagramViews/mcp/neo4j(42/49/12,matches=true)/qeaFullProjection/semanticLifecycle 均 ok；ontologyValidation passed 0 errors）。关键对照：原触发边 rel-eco-req-pool-001 未改动，failed→passed。无阻塞，GitHub issue #10 已关闭。两同族缺陷（词表混用 + extends 静默 no-op）全部闭合。"
+          "value": "2026-10-11 issue #11 已关闭（HarmonyOS-Dev-Standards 端到端验证通过）",
+          "description": "发起方在 HarmonyOS-Dev-Standards（dialect=type-matrix，Composition.Grouping=['*']）验证：argo-init overall ok，ontologyValidation 由 failed(40 errors)→passed(0)，systemArchitecture 恢复 ok，图谱无 diff。我方独立复核：该仓恰有 40 条 Grouping --Composition--> Grouping 边（与 40 误报吻合）；部署 0.29.12 下 wildcard 复现 deterministic+real 均通过；archgraph/rv-business 真引擎无回归。GitHub issue #11 已关闭（completed）。"
         },
         {
           "name": "commit",
