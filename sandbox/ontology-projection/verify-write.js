@@ -7,8 +7,11 @@
 //
 //   A. a normal (valid) MCP write SUCCEEDS with the ontology extension ON
 //      -> the extension never falsely blocks a legitimate write (the must-have).
-//   B. a write introducing an OWL contradiction FAILS at the write timing with
-//      the real engine's finding.
+//   B. a write introducing a logical CONTRADICTION FAILS at the write timing with
+//      the real engine's finding. The workspace uses the `functional-open` axioms
+//      (`Assigned To` functional, NO `distinctIndividuals`) — issue #12 — so this
+//      proves the real engine blocks a closed-world functional conflict the OWL
+//      reasoner alone would miss (it used to silently pass).
 //   C. the same contradicting write SUCCEEDS with the extension OFF (control).
 
 const fs = require('node:fs');
@@ -152,7 +155,7 @@ async function main() {
 
   const b = await mcpSession([...warmCalls, ...contradictionCalls], { ...baseEnv, ARGO_VALIDATION_EXTENSIONS: extensionEnv });
   const bErrors = JSON.stringify(b.w.errors || []);
-  check('B. contradicting MCP write blocked by real engine (extension ON)', b.w.status === 'failed' && /OWL|ontology/i.test(bErrors), JSON.stringify(b.w).slice(0, 900));
+  check('B. contradicting MCP write blocked by real engine (extension ON)', b.w.status === 'failed' && /functional 'Assigned To'.*2 distinct values/i.test(bErrors), JSON.stringify(b.w).slice(0, 900));
 
   const c = await mcpSession([...warmCalls, ...contradictionCalls], baseEnv);
   check('C. control: same write passes with extension OFF', c.w.status === 'passed', JSON.stringify({ status: c.w.status, errors: c.w.errors }).slice(0, 500));

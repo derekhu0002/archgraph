@@ -26,6 +26,11 @@ const CASES = [
   // issue #11: a `*` target is "any target" -> unconstrained; must conform (was a
   // false violation because the pySHACL projection compiled '*' as class `_`).
   { dir: 'wildcard', graph: 'valid.json', expect: { shaclConforms: true, owlConsistent: true } },
+  // issue #12: `Assigned To` is functional WITHOUT `distinctIndividuals`, so OWL
+  // open-world semantics alone entails the two targets EQUAL (no inconsistency).
+  // The closed-world functional check must still flag OWL_FUNCTIONAL, matching the
+  // deterministic engine (it used to silently pass on the real engine).
+  { dir: 'functional-open', graph: 'functional-open.json', expect: { shaclConforms: true, owlInconsistencyCodes: ['OWL_FUNCTIONAL'] } },
 ];
 
 function copyDir(src, dest) {
@@ -62,6 +67,12 @@ function evaluate(findings, expect) {
   }
   if (expect.owlConsistent !== undefined && owl.consistent !== expect.owlConsistent) {
     failures.push(`expected OWL consistent=${expect.owlConsistent}, got ${owl.consistent}`);
+  }
+  for (const code of expect.owlInconsistencyCodes || []) {
+    const codes = (owl.inconsistencies || []).map((entry) => entry.code);
+    if (!codes.includes(code)) {
+      failures.push(`expected OWL inconsistency ${code}, got ${JSON.stringify(codes)}`);
+    }
   }
   for (const [s, o] of expect.entails || []) {
     const entailed = (owl.entailed && owl.entailed['Depends On']) || [];

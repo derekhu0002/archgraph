@@ -1,0 +1,16 @@
+{
+  "name": "Team Graph - functional conflict (open world)",
+  "description": "`Assigned To` is functional but agent-1 is assigned to TWO teams (team-a, team-b). The endpoint matrix is satisfied, and there is NO `distinctIndividuals`, so OWL open-world semantics alone would entail team-a = team-b (no inconsistency) — the closed-world functional check must still report OWL_FUNCTIONAL (issue #12).",
+  "elements": [
+    { "id": "agent-1", "name": "Agent 1", "type": "Agent Node" },
+    { "id": "team-a", "name": "Team A", "type": "Team Node" },
+    { "id": "team-b", "name": "Team B", "type": "Team Node" }
+  ],
+  "relationships": [
+    { "id": "rel-1", "name": "Agent 1 assigned to Team A", "type": "Assigned To", "source_id": "agent-1", "target_id": "team-a", "source_name": "Agent 1", "target_name": "Team A", "statement": "Agent 1 --(Assigned To)--> Team A" },
+    { "id": "rel-2", "name": "Agent 1 assigned to Team B", "type": "Assigned To", "source_id": "agent-1", "target_id": "team-b", "source_name": "Agent 1", "target_name": "Team B", "statement": "Agent 1 --(Assigned To)--> Team B" }
+  ],
+  "views": [
+    { "view_id": "view-root", "view_name": "SystemArchitecture", "included_elements": ["agent-1", "team-a", "team-b"], "included_relationships": ["rel-1", "rel-2"] }
+  ]
+}

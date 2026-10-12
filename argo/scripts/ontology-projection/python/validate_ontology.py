@@ -9,8 +9,11 @@ Inputs mirror the sidecar contract:
 
 Engines (real, not a skeleton):
   * SHACL  : pySHACL  (constraints compiled from the endpoint matrix)
-  * OWL    : owlready2 + HermiT  (disjoint / functional / transitive / irreflexive
-             / rdfs domain-range, with owl:AllDifferent for closed-world distinctness)
+  * OWL    : owlready2 + HermiT  (disjoint / transitive / irreflexive / rdfs
+             domain-range, with owl:AllDifferent for closed-world distinctness)
+             plus a CLOSED-WORLD functional-property check (`functionalProperties`
+             = "at most one", matching the deterministic engine and SHACL
+             sh:maxCount 1; see functional_conflicts / issue #12)
 
 It never writes the canonical graph; findings are a derived read-model.
 """
@@ -226,6 +229,41 @@ def transitive_entailment(data_graph, axioms):
     return entailed
 
 
+def functional_conflicts(data_graph, axioms):
+    """Closed-world functional-property conflicts (issue #12).
+
+    OWL open-world semantics does NOT treat two values of a functional property
+    as an inconsistency unless the values are forced distinct (owl:AllDifferent
+    or disjoint classes) — it merely entails them equal. But a `functionalProperties`
+    entry is an "at most one" BUSINESS constraint (SHACL `sh:maxCount 1`), which is
+    how the dependency-free deterministic engine already enforces it (a source with
+    more than one distinct value is a conflict, `OWL_FUNCTIONAL`). This keeps the
+    real engine's verdict identical to the deterministic one for that axiom, so
+    engine-consistency holds and a functional violation blocks the write even when
+    `distinctIndividuals` is omitted. Message/code mirror
+    argo/scripts/ontology-projection/lib/owl.js checkConsistency exactly.
+    """
+    conflicts = []
+    for prop in axioms.get("functionalProperties", []):
+        puri = REL[local(prop)]
+        by_subject = {}
+        for subject, value in data_graph.subject_objects(puri):
+            by_subject.setdefault(subject, set()).add(value)
+        for subject in sorted(by_subject, key=str):
+            values = by_subject[subject]
+            if len(values) > 1:
+                sid = str(subject).rsplit("/", 1)[-1]
+                distinct = sorted(str(v).rsplit("/", 1)[-1] for v in values)
+                conflicts.append({
+                    "code": "OWL_FUNCTIONAL",
+                    "subject": sid,
+                    "property": prop,
+                    "values": distinct,
+                    "message": f"functional '{prop}' of '{sid}' has {len(distinct)} distinct values: {', '.join(distinct)}",
+                })
+    return conflicts
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--bundle", required=True)
@@ -247,6 +285,10 @@ def main():
     except Exception as error:  # noqa: BLE001
         findings["owl"] = {"error": f"{type(error).__name__}: {error}"}
     if isinstance(findings["owl"], dict):
+        # Closed-world functional conflicts, alongside the reasoner's verdict (issue #12).
+        if "error" not in findings["owl"]:
+            findings["owl"].setdefault("inconsistencies", [])
+            findings["owl"]["inconsistencies"].extend(functional_conflicts(data_graph, model["axioms"]))
         findings["owl"].setdefault("entailed", transitive_entailment(data_graph, model["axioms"]))
 
     with open(args.out, "w", encoding="utf-8") as handle:

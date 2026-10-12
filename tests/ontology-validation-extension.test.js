@@ -495,3 +495,38 @@ test('AT-ovx-16 wildcard `*` target is unconstrained in every engine', () => {
   const strictRes = runCli(strict, 'write');
   assert.ok(strictRes.errors.length >= 1, JSON.stringify(strictRes));
 });
+
+// Issue #12: `Assigned To` is functional WITHOUT `distinctIndividuals`. Under pure OWL
+// open-world semantics two distinct targets are merely entailed EQUAL (NOT an
+// inconsistency), so the real engine silently passed the write. A functional property
+// is an "at most one" constraint, so BOTH engines must report the conflict with the
+// same closed-world rule (deterministic here; the real engine via the sandbox
+// `functional-open` sample + run-real.js in the container acceptance). This locks the
+// cross-engine contract on the deterministic side.
+const FUNCTIONAL_FIXTURE = path.join(REPO, 'sandbox', 'ontology-projection', 'samples', 'functional-open');
+
+function makeFunctionalWorkspace() {
+  const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-ovx-fn-'));
+  const schemaDir = path.join(ws, '.argo', 'schema');
+  fs.mkdirSync(schemaDir, { recursive: true });
+  for (const name of fs.readdirSync(path.join(FUNCTIONAL_FIXTURE, '.argo', 'schema'))) {
+    fs.copyFileSync(path.join(FUNCTIONAL_FIXTURE, '.argo', 'schema', name), path.join(schemaDir, name));
+  }
+  const graphDir = path.join(ws, 'design', 'KG');
+  fs.mkdirSync(graphDir, { recursive: true });
+  fs.copyFileSync(path.join(FUNCTIONAL_FIXTURE, 'graphs', 'functional-open.json'), path.join(graphDir, 'SystemArchitecture.json'));
+  return ws;
+}
+
+test('AT-ovx-17 functional conflict is enforced WITHOUT distinctIndividuals (engine-consistency contract)', () => {
+  const ws = makeFunctionalWorkspace();
+  // `distinctIndividuals` is deliberately absent
+  const axioms = JSON.parse(fs.readFileSync(path.join(ws, '.argo', 'schema', 'ontology-axioms.json'), 'utf8'));
+  assert.notEqual(axioms.distinctIndividuals, true, 'the sample must NOT declare distinctIndividuals');
+
+  const res = runCli(ws, 'write');
+  assert.ok(
+    res.errors.some((e) => /functional 'Assigned To' of 'agent-1' has 2 distinct values/.test(e)),
+    JSON.stringify(res),
+  );
+});

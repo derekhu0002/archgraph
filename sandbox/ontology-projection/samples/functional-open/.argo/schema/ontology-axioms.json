@@ -1,0 +1,10 @@
+{
+  "_comment": "issue #12 regression sample: `Assigned To` is functional (an Agent Node is assigned to at most one Team Node), declared WITHOUT `distinctIndividuals`. Under pure OWL open-world semantics two distinct targets are merely entailed EQUAL (no inconsistency), so the real engine used to silently pass. The closed-world functional check must flag it identically to the deterministic engine (SHACL sh:maxCount 1).",
+  "disjointClasses": [],
+  "functionalProperties": ["Assigned To"],
+  "transitiveProperties": [],
+  "irreflexiveProperties": [],
+  "asymmetricProperties": [],
+  "objectPropertyDomain": {},
+  "objectPropertyRange": {}
+}

@@ -180,6 +180,11 @@ function main() {
   if (shacl.error) errors.push(`SHACL engine error: ${shacl.error}`);
   for (const violation of shacl.violations || []) errors.push(`SHACL: ${violation.message || violation.focusNode}`);
   if (owl.error) errors.push(`OWL engine error: ${owl.error}`);
+  // Explicit logical conflicts (e.g. the closed-world functional check): surface
+  // each with the same `OWL: <message>` form the deterministic engine uses.
+  for (const conflict of owl.inconsistencies || []) {
+    errors.push(`OWL: ${conflict.message || conflict.code || 'inconsistency'}`);
+  }
   if (owl.consistent === false) {
     errors.push(`OWL: graph is inconsistent (${(owl.inconsistentClasses || []).join(', ') || 'ontology-level'})`);
   }
