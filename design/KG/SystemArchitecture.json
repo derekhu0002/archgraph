@@ -4348,7 +4348,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-14 · 第四轮）。\n【主线】跨项目评审：受 graph-wiki（个人知识库管理员）之邀，以 ArchGraph 框架项目视角评审其技术论文《去中心化组织级知识图谱构建》（graph-wiki/community/DECENTRALIZED-ORG-KNOWLEDGE-GRAPH.md）。纯只读评审，未改任何文件、本仓无提交。\n【过程与结论】三轮：①初审【需修改】——指出 §五/§六/§十“中枢只持元数据/不承载内容”与 §八“副本托管”自相矛盾（实时 mirror_list=24，全部成员已镜像）；“去中心化”措辞与框架官方定位（design-federated-intent-graph-001，commit 302e534：称联邦式、非分布式、非纯 P2P）不一致；Mem0 数据被误标为“基准头部成绩”；ref[7] 日期区间误标；确认 4 篇 arXiv 引文（2307.03172/2404.16130/2310.08560/2410.10813）与 LongMemEval ~30% 掉点均准确。②复审【需修改】——7 项修订均落实，唯 §十仍残留“只连不载”矛盾。③终审【通过】。\n【关键事实核验（可复用）】registry_discover=24 成员；mirror_list=24 镜像（副本托管为普遍形态）；read-projection-gain 65 次/51.6%/中位 36.4%/P90 73.7%、sandbox 29/29、ontology 9/9、schema 10/10 均与 results/* 一致；LongMemEval 94.4%/LOCOMO 92.5% 实为 Mem0 官方自报（docs/memory-eval-benchmarks.md:20-22），非基准头部成绩；BEAM 桶名 1M/10M。\n【待办】无（评审已闭环）。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-15 · 数学本体洞察与联邦提交）。\n【诉求】人类伙伴：洞察业界有无类似『数学本体』，目标是解数学难题 → 产出本体清单并提交联邦中心（已确认）。\n【结论（取证）】业界存在数学本体/KG：OntoMathPRO(arXiv:1702.05112)、MaRDI MathModDB/MathAlgoDB(arXiv:2310.20443/2408.10003/2403.17778/2606.27933)、几何解题本体 solution-graph(arXiv:2509.02758)、AM-MKG(arXiv:2601.05298)；但『解难题』引擎=形式化栈(Mathlib+Lean/Coq/Isabelle)+LLM 证明器(AlphaProof/AlphaGeometry/LEAP/Hilbert/Ax-Prover)，自动形式化是瓶颈(arXiv:2608.20153)；本体负责知识组织/检索，不负责证明正确性。检索受限：本机 Google/Wikipedia/DDG 被拦，可达源仅 arxiv/cn.bing/semanticscholar(429 限流)/zhihu。\n【交付】① 本体清单：Mathematics schema bundle（standalone；actorElementType=Mathematician；15 元素类型：Mathematical Domain/Concept/Definition/Axiom/Theorem/Conjecture/Proof/Counterexample/Technique/Problem/Solution Step/Skill/Formal Library/Benchmark/Mathematician；13 关系类型 + 端点矩阵 + deliveryDependencies）。② 提交联邦中心：graph-mcp ontology_submit id=archgraph-mathematics v1.0.0，validation.valid=true（standalone/15/13/rules/guide），中心源 commit 4e9bdf5，ontology_list 9→10；本仓未落 custom-schema/math 文件（人类伙伴选择只入联邦）。\n【图谱登记】新增 T2 分层视图 overseer-ontology-001 + 里程碑 overseer-milestone-mathematics-ontology-001；commit a2f4d2e + 登记 90d85fe；npm test 753/753（0 fail 0 skip）。\n【待办】如需可复用/可版本化，将 bundle 落本仓 custom-schema/math 并 wire 进 catalog（参照 IPD commit a96cbe8）；后续可注册 math 项目成员并在 Lean 形式化层做真验证。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4370,8 +4370,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-14",
-          "description": "跨项目评审 graph-wiki 论文《去中心化组织级知识图谱构建》：三轮评审终审【通过】；纯只读未改文件"
+          "value": "2026-10-15",
+          "description": "数学本体洞察 + Mathematics 本体提交联邦中心（archgraph-mathematics@1.0.0）；T2 里程碑登记"
         },
         {
           "name": "commit",
