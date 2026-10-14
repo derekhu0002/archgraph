@@ -1,0 +1,369 @@
+{
+  "name": "Mathematics",
+  "description": "Example graph validated against the custom-schema bundle (Mathematics ontology): a number-theory slice with a theorem, its proof, a refuted conjecture, a problem with solution steps, and the formal/benchmark layer.",
+  "elements": [
+    {
+      "id": "mathematician-euclid",
+      "name": "Euclid",
+      "type": "Mathematician",
+      "description": "The researcher/prover (actor) who studies number theory and solved the infinitude problem."
+    },
+    {
+      "id": "domain-number-theory",
+      "name": "Number Theory",
+      "type": "Mathematical Domain",
+      "description": "The branch of mathematics studying the integers and primes."
+    },
+    {
+      "id": "concept-integer",
+      "name": "Integer",
+      "type": "Concept",
+      "description": "The set Z of whole numbers."
+    },
+    {
+      "id": "concept-prime",
+      "name": "Prime Number",
+      "type": "Concept",
+      "description": "An integer greater than 1 with no positive divisors other than 1 and itself."
+    },
+    {
+      "id": "def-prime",
+      "name": "Definition of a Prime Number",
+      "type": "Definition",
+      "description": "n > 1 is prime iff its only positive divisors are 1 and n."
+    },
+    {
+      "id": "axiom-well-ordering",
+      "name": "Well-Ordering Principle",
+      "type": "Axiom",
+      "description": "Every non-empty set of positive integers has a least element."
+    },
+    {
+      "id": "conjecture-euler-polynomial",
+      "name": "Euler's Polynomial is Always Prime",
+      "type": "Conjecture",
+      "description": "Conjecture: n^2 + n + 41 is prime for every non-negative integer n."
+    },
+    {
+      "id": "theorem-infinitude-primes",
+      "name": "Infinitude of the Primes",
+      "type": "Theorem",
+      "description": "There are infinitely many prime numbers."
+    },
+    {
+      "id": "technique-contradiction",
+      "name": "Proof by Contradiction",
+      "type": "Technique",
+      "description": "Assume the negation and derive a contradiction."
+    },
+    {
+      "id": "proof-euclid-infinitude",
+      "name": "Euclid's Proof of the Infinitude of the Primes",
+      "type": "Proof",
+      "description": "Assume finitely many primes p1..pn; then N = p1*...*pn + 1 is divisible by none of them, contradiction."
+    },
+    {
+      "id": "counterexample-euler-n40",
+      "name": "n = 40 refutes Euler's Polynomial",
+      "type": "Counterexample",
+      "description": "At n = 40, n^2 + n + 41 = 1681 = 41^2 is composite."
+    },
+    {
+      "id": "problem-prove-infinitude",
+      "name": "Prove There Are Infinitely Many Primes",
+      "type": "Problem",
+      "description": "A number-theory problem to be solved."
+    },
+    {
+      "id": "step-assume-finite",
+      "name": "Assume Finitely Many Primes",
+      "type": "Solution Step",
+      "description": "Suppose the primes are exactly p1, ..., pn."
+    },
+    {
+      "id": "step-construct-n",
+      "name": "Construct N = p1*...*pn + 1",
+      "type": "Solution Step",
+      "description": "Build a number coprime to every assumed prime to reach a contradiction."
+    },
+    {
+      "id": "skill-contradiction",
+      "name": "Constructive Contradiction",
+      "type": "Skill",
+      "description": "The competency to build a witness that contradicts a finiteness assumption."
+    },
+    {
+      "id": "formallibrary-mathlib",
+      "name": "Mathlib (Lean 4)",
+      "type": "Formal Library",
+      "description": "The Lean 4 mathematical library holding the formalized statement and proof."
+    },
+    {
+      "id": "benchmark-minif2f",
+      "name": "miniF2F",
+      "type": "Benchmark",
+      "description": "A formal theorem-proving benchmark spanning olympiad and high-school mathematics."
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-defines-prime",
+      "name": "Definition of a prime defines Prime Number",
+      "type": "Defines",
+      "source_id": "def-prime",
+      "target_id": "concept-prime",
+      "source_name": "Definition of a Prime Number",
+      "target_name": "Prime Number",
+      "statement": "Definition of a Prime Number --(Defines)--> Prime Number"
+    },
+    {
+      "id": "rel-def-prime-depends-integer",
+      "name": "Prime definition depends on Integer",
+      "type": "Depends On",
+      "source_id": "def-prime",
+      "target_id": "concept-integer",
+      "source_name": "Definition of a Prime Number",
+      "target_name": "Integer",
+      "statement": "Definition of a Prime Number --(Depends On)--> Integer"
+    },
+    {
+      "id": "rel-theorem-depends-def-prime",
+      "name": "Infinitude theorem depends on the prime definition",
+      "type": "Depends On",
+      "source_id": "theorem-infinitude-primes",
+      "target_id": "def-prime",
+      "source_name": "Infinitude of the Primes",
+      "target_name": "Definition of a Prime Number",
+      "statement": "Infinitude of the Primes --(Depends On)--> Definition of a Prime Number"
+    },
+    {
+      "id": "rel-theorem-depends-well-ordering",
+      "name": "Infinitude theorem depends on the well-ordering principle",
+      "type": "Depends On",
+      "source_id": "theorem-infinitude-primes",
+      "target_id": "axiom-well-ordering",
+      "source_name": "Infinitude of the Primes",
+      "target_name": "Well-Ordering Principle",
+      "statement": "Infinitude of the Primes --(Depends On)--> Well-Ordering Principle"
+    },
+    {
+      "id": "rel-proof-depends-technique",
+      "name": "Euclid's proof depends on proof by contradiction",
+      "type": "Depends On",
+      "source_id": "proof-euclid-infinitude",
+      "target_id": "technique-contradiction",
+      "source_name": "Euclid's Proof of the Infinitude of the Primes",
+      "target_name": "Proof by Contradiction",
+      "statement": "Euclid's Proof of the Infinitude of the Primes --(Depends On)--> Proof by Contradiction"
+    },
+    {
+      "id": "rel-proves-infinitude",
+      "name": "Euclid's proof proves the infinitude theorem",
+      "type": "Proves",
+      "source_id": "proof-euclid-infinitude",
+      "target_id": "theorem-infinitude-primes",
+      "source_name": "Euclid's Proof of the Infinitude of the Primes",
+      "target_name": "Infinitude of the Primes",
+      "statement": "Euclid's Proof of the Infinitude of the Primes --(Proves)--> Infinitude of the Primes"
+    },
+    {
+      "id": "rel-applies-contradiction",
+      "name": "Euclid's proof applies proof by contradiction",
+      "type": "Applies Technique",
+      "source_id": "proof-euclid-infinitude",
+      "target_id": "technique-contradiction",
+      "source_name": "Euclid's Proof of the Infinitude of the Primes",
+      "target_name": "Proof by Contradiction",
+      "statement": "Euclid's Proof of the Infinitude of the Primes --(Applies Technique)--> Proof by Contradiction"
+    },
+    {
+      "id": "rel-refutes-euler",
+      "name": "n = 40 refutes Euler's polynomial conjecture",
+      "type": "Refutes",
+      "source_id": "counterexample-euler-n40",
+      "target_id": "conjecture-euler-polynomial",
+      "source_name": "n = 40 refutes Euler's Polynomial",
+      "target_name": "Euler's Polynomial is Always Prime",
+      "statement": "n = 40 refutes Euler's Polynomial --(Refutes)--> Euler's Polynomial is Always Prime"
+    },
+    {
+      "id": "rel-prime-belongs-domain",
+      "name": "Prime Number belongs to Number Theory",
+      "type": "Belongs To",
+      "source_id": "concept-prime",
+      "target_id": "domain-number-theory",
+      "source_name": "Prime Number",
+      "target_name": "Number Theory",
+      "statement": "Prime Number --(Belongs To)--> Number Theory"
+    },
+    {
+      "id": "rel-theorem-belongs-domain",
+      "name": "Infinitude theorem belongs to Number Theory",
+      "type": "Belongs To",
+      "source_id": "theorem-infinitude-primes",
+      "target_id": "domain-number-theory",
+      "source_name": "Infinitude of the Primes",
+      "target_name": "Number Theory",
+      "statement": "Infinitude of the Primes --(Belongs To)--> Number Theory"
+    },
+    {
+      "id": "rel-technique-belongs-domain",
+      "name": "Proof by contradiction belongs to Number Theory",
+      "type": "Belongs To",
+      "source_id": "technique-contradiction",
+      "target_id": "domain-number-theory",
+      "source_name": "Proof by Contradiction",
+      "target_name": "Number Theory",
+      "statement": "Proof by Contradiction --(Belongs To)--> Number Theory"
+    },
+    {
+      "id": "rel-problem-belongs-domain",
+      "name": "Infinitude problem belongs to Number Theory",
+      "type": "Belongs To",
+      "source_id": "problem-prove-infinitude",
+      "target_id": "domain-number-theory",
+      "source_name": "Prove There Are Infinitely Many Primes",
+      "target_name": "Number Theory",
+      "statement": "Prove There Are Infinitely Many Primes --(Belongs To)--> Number Theory"
+    },
+    {
+      "id": "rel-solves-problem",
+      "name": "Euclid's proof solves the infinitude problem",
+      "type": "Solves",
+      "source_id": "proof-euclid-infinitude",
+      "target_id": "problem-prove-infinitude",
+      "source_name": "Euclid's Proof of the Infinitude of the Primes",
+      "target_name": "Prove There Are Infinitely Many Primes",
+      "statement": "Euclid's Proof of the Infinitude of the Primes --(Solves)--> Prove There Are Infinitely Many Primes"
+    },
+    {
+      "id": "rel-step-assume",
+      "name": "Infinitude problem has step: assume finitely many primes",
+      "type": "Has Step",
+      "source_id": "problem-prove-infinitude",
+      "target_id": "step-assume-finite",
+      "source_name": "Prove There Are Infinitely Many Primes",
+      "target_name": "Assume Finitely Many Primes",
+      "statement": "Prove There Are Infinitely Many Primes --(Has Step)--> Assume Finitely Many Primes"
+    },
+    {
+      "id": "rel-step-construct",
+      "name": "Infinitude problem has step: construct N",
+      "type": "Has Step",
+      "source_id": "problem-prove-infinitude",
+      "target_id": "step-construct-n",
+      "source_name": "Prove There Are Infinitely Many Primes",
+      "target_name": "Construct N = p1*...*pn + 1",
+      "statement": "Prove There Are Infinitely Many Primes --(Has Step)--> Construct N = p1*...*pn + 1"
+    },
+    {
+      "id": "rel-problem-requires-skill",
+      "name": "Infinitude problem requires constructive contradiction",
+      "type": "Requires Skill",
+      "source_id": "problem-prove-infinitude",
+      "target_id": "skill-contradiction",
+      "source_name": "Prove There Are Infinitely Many Primes",
+      "target_name": "Constructive Contradiction",
+      "statement": "Prove There Are Infinitely Many Primes --(Requires Skill)--> Constructive Contradiction"
+    },
+    {
+      "id": "rel-technique-requires-skill",
+      "name": "Proof by contradiction requires constructive contradiction",
+      "type": "Requires Skill",
+      "source_id": "technique-contradiction",
+      "target_id": "skill-contradiction",
+      "source_name": "Proof by Contradiction",
+      "target_name": "Constructive Contradiction",
+      "statement": "Proof by Contradiction --(Requires Skill)--> Constructive Contradiction"
+    },
+    {
+      "id": "rel-formalized-mathlib",
+      "name": "Infinitude theorem is formalized in Mathlib",
+      "type": "Formalized In",
+      "source_id": "theorem-infinitude-primes",
+      "target_id": "formallibrary-mathlib",
+      "source_name": "Infinitude of the Primes",
+      "target_name": "Mathlib (Lean 4)",
+      "statement": "Infinitude of the Primes --(Formalized In)--> Mathlib (Lean 4)"
+    },
+    {
+      "id": "rel-evaluated-minif2f",
+      "name": "Infinitude problem is evaluated by miniF2F",
+      "type": "Evaluated By",
+      "source_id": "problem-prove-infinitude",
+      "target_id": "benchmark-minif2f",
+      "source_name": "Prove There Are Infinitely Many Primes",
+      "target_name": "miniF2F",
+      "statement": "Prove There Are Infinitely Many Primes --(Evaluated By)--> miniF2F"
+    },
+    {
+      "id": "rel-euclid-studies-domain",
+      "name": "Euclid studies Number Theory",
+      "type": "Studies",
+      "source_id": "mathematician-euclid",
+      "target_id": "domain-number-theory",
+      "source_name": "Euclid",
+      "target_name": "Number Theory",
+      "statement": "Euclid --(Studies)--> Number Theory"
+    },
+    {
+      "id": "rel-euclid-studies-problem",
+      "name": "Euclid studies the infinitude problem",
+      "type": "Studies",
+      "source_id": "mathematician-euclid",
+      "target_id": "problem-prove-infinitude",
+      "source_name": "Euclid",
+      "target_name": "Prove There Are Infinitely Many Primes",
+      "statement": "Euclid --(Studies)--> Prove There Are Infinitely Many Primes"
+    }
+  ],
+  "views": [
+    {
+      "view_id": "view-root",
+      "view_name": "SystemArchitecture",
+      "description": "Root view holding the example mathematics graph.",
+      "included_elements": [
+        "mathematician-euclid",
+        "domain-number-theory",
+        "concept-integer",
+        "concept-prime",
+        "def-prime",
+        "axiom-well-ordering",
+        "conjecture-euler-polynomial",
+        "theorem-infinitude-primes",
+        "technique-contradiction",
+        "proof-euclid-infinitude",
+        "counterexample-euler-n40",
+        "problem-prove-infinitude",
+        "step-assume-finite",
+        "step-construct-n",
+        "skill-contradiction",
+        "formallibrary-mathlib",
+        "benchmark-minif2f"
+      ],
+      "included_relationships": [
+        "rel-defines-prime",
+        "rel-def-prime-depends-integer",
+        "rel-theorem-depends-def-prime",
+        "rel-theorem-depends-well-ordering",
+        "rel-proof-depends-technique",
+        "rel-proves-infinitude",
+        "rel-applies-contradiction",
+        "rel-refutes-euler",
+        "rel-prime-belongs-domain",
+        "rel-theorem-belongs-domain",
+        "rel-technique-belongs-domain",
+        "rel-problem-belongs-domain",
+        "rel-solves-problem",
+        "rel-step-assume",
+        "rel-step-construct",
+        "rel-problem-requires-skill",
+        "rel-technique-requires-skill",
+        "rel-formalized-mathlib",
+        "rel-evaluated-minif2f",
+        "rel-euclid-studies-domain",
+        "rel-euclid-studies-problem"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "_comment": "Optional OWL/RDFS axioms for the Mathematics ontology, read by the ontology-validation engine (ignored by the core). See docs/ontology-authoring.md.",
+  "disjointClasses": [
+    ["Theorem", "Conjecture"],
+    ["Theorem", "Axiom"],
+    ["Conjecture", "Axiom"],
+    ["Proof", "Counterexample"],
+    ["Concept", "Definition"],
+    ["Problem", "Benchmark"],
+    ["Formal Library", "Benchmark"]
+  ],
+  "functionalProperties": ["Proves", "Solves", "Formalized In"],
+  "transitiveProperties": ["Depends On", "Specializes"],
+  "objectPropertyDomain": { "Proves": "Proof" },
+  "objectPropertyRange": { "Proves": "Theorem" },
+  "distinctIndividuals": true
+}

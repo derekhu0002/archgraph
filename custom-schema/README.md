@@ -21,6 +21,7 @@ mechanism and every layer are documented in
 | [`uml2/`](uml2/README.md) | UML 2 | `Actor` | Software structure, use cases and state machines | OMG UML 2 |
 | [`sysml/`](sysml/README.md) | SysML | `Actor` | Blocks, requirements, verification and allocation | OMG SysML |
 | [`ipd/`](ipd/README.md) | IPD | `Role` | R&D IPD phases, gates, deliverables and the standards that govern them | PACE / Stage-Gate; ISO 15288 / 29148 / 26262 / APQP |
+| [`math/`](math/README.md) | Mathematics | `Mathematician` | Mathematical knowledge, research and problem solving (concepts/theorems/proofs; problems/steps/skills; formal libraries/benchmarks) | OntoMathPRO / MaRDI; Mathlib + Lean |
 
 Each bundle is self-contained:
 

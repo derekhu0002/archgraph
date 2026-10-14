@@ -1,0 +1,135 @@
+{
+  "elementTypeMetadata": {
+    "Mathematical Domain": {
+      "layer": "Knowledge",
+      "aspect": "Passive Structure"
+    },
+    "Concept": {
+      "layer": "Knowledge",
+      "aspect": "Passive Structure"
+    },
+    "Definition": {
+      "layer": "Knowledge",
+      "aspect": "Passive Structure"
+    },
+    "Axiom": {
+      "layer": "Knowledge",
+      "aspect": "Passive Structure"
+    },
+    "Theorem": {
+      "layer": "Knowledge",
+      "aspect": "Passive Structure"
+    },
+    "Conjecture": {
+      "layer": "Knowledge",
+      "aspect": "Passive Structure"
+    },
+    "Counterexample": {
+      "layer": "Knowledge",
+      "aspect": "Passive Structure"
+    },
+    "Proof": {
+      "layer": "Knowledge",
+      "aspect": "Behavior"
+    },
+    "Technique": {
+      "layer": "Knowledge",
+      "aspect": "Behavior"
+    },
+    "Problem": {
+      "layer": "Solving",
+      "aspect": "Behavior"
+    },
+    "Solution Step": {
+      "layer": "Solving",
+      "aspect": "Behavior"
+    },
+    "Skill": {
+      "layer": "Solving",
+      "aspect": "Passive Structure"
+    },
+    "Formal Library": {
+      "layer": "Formalization",
+      "aspect": "Passive Structure"
+    },
+    "Benchmark": {
+      "layer": "Formalization",
+      "aspect": "Passive Structure"
+    },
+    "Mathematician": {
+      "layer": "Organization",
+      "aspect": "Active Structure"
+    }
+  },
+  "relationshipCategoryByType": {
+    "Defines": "Structure",
+    "Depends On": "Dependency",
+    "Proves": "Realization",
+    "Refutes": "Influence",
+    "Applies Technique": "Realization",
+    "Belongs To": "Structure",
+    "Solves": "Realization",
+    "Has Step": "Composition",
+    "Requires Skill": "Dependency",
+    "Formalized In": "Realization",
+    "Evaluated By": "Association",
+    "Specializes": "Specialization",
+    "Studies": "Association"
+  },
+  "relationshipTargetMatrix": {
+    "Defines": {
+      "Definition": ["Concept"]
+    },
+    "Depends On": {
+      "Theorem": ["Theorem", "Definition", "Axiom", "Concept"],
+      "Conjecture": ["Theorem", "Definition", "Axiom", "Concept"],
+      "Proof": ["Theorem", "Definition", "Axiom", "Technique"],
+      "Definition": ["Concept", "Axiom"],
+      "Concept": ["Concept", "Axiom"],
+      "Technique": ["Theorem", "Concept"]
+    },
+    "Proves": {
+      "Proof": ["Theorem"]
+    },
+    "Refutes": {
+      "Counterexample": ["Conjecture", "Theorem"]
+    },
+    "Applies Technique": {
+      "Proof": ["Technique"]
+    },
+    "Belongs To": {
+      "Concept": ["Mathematical Domain"],
+      "Theorem": ["Mathematical Domain"],
+      "Technique": ["Mathematical Domain"],
+      "Problem": ["Mathematical Domain"]
+    },
+    "Solves": {
+      "Proof": ["Problem"]
+    },
+    "Has Step": {
+      "Proof": ["Solution Step"],
+      "Problem": ["Solution Step"]
+    },
+    "Requires Skill": {
+      "Problem": ["Skill"],
+      "Theorem": ["Skill"],
+      "Technique": ["Skill"]
+    },
+    "Formalized In": {
+      "Theorem": ["Formal Library"],
+      "Proof": ["Formal Library"]
+    },
+    "Evaluated By": {
+      "Theorem": ["Benchmark"],
+      "Problem": ["Benchmark"],
+      "Skill": ["Benchmark"]
+    },
+    "Specializes": {
+      "Concept": ["Concept"],
+      "Theorem": ["Theorem"]
+    },
+    "Studies": {
+      "Mathematician": ["Mathematical Domain", "Problem"]
+    }
+  }
+}
