@@ -1,0 +1,84 @@
+{
+  "elementTypeMetadata": {
+    "Party": {
+      "layer": "Business",
+      "aspect": "Active Structure"
+    },
+    "Legal Agreement": {
+      "layer": "Business",
+      "aspect": "Passive Structure"
+    },
+    "Product": {
+      "layer": "Business",
+      "aspect": "Passive Structure"
+    },
+    "Contract": {
+      "layer": "Business",
+      "aspect": "Passive Structure"
+    },
+    "Lifecycle Event": {
+      "layer": "Business",
+      "aspect": "Behavior"
+    },
+    "Cashflow": {
+      "layer": "Business",
+      "aspect": "Behavior"
+    },
+    "Observation": {
+      "layer": "Technology",
+      "aspect": "Passive Structure"
+    }
+  },
+  "relationshipCategoryByType": {
+    "Entered Into": "Association",
+    "Governed By": "Aggregation",
+    "Based On": "Composition",
+    "Derived From": "Specialization",
+    "Has Event": "Composition",
+    "Triggers": "Triggering",
+    "Payable To": "Flow",
+    "Observed By": "Access"
+  },
+  "relationshipTargetMatrix": {
+    "Entered Into": {
+      "Party": [
+        "Contract"
+      ]
+    },
+    "Governed By": {
+      "Contract": [
+        "Legal Agreement"
+      ]
+    },
+    "Based On": {
+      "Contract": [
+        "Product"
+      ]
+    },
+    "Derived From": {
+      "Product": [
+        "Product"
+      ]
+    },
+    "Has Event": {
+      "Contract": [
+        "Lifecycle Event"
+      ]
+    },
+    "Triggers": {
+      "Lifecycle Event": [
+        "Cashflow"
+      ]
+    },
+    "Payable To": {
+      "Cashflow": [
+        "Party"
+      ]
+    },
+    "Observed By": {
+      "Cashflow": [
+        "Observation"
+      ]
+    }
+  }
+}

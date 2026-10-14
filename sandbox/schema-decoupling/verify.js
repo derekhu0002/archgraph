@@ -227,7 +227,7 @@ function main() {
 
   record('deployed MCP loads the shipped custom-schema example (Team Graph) end-to-end', () => {
     const server = path.join(ARGO, 'scripts', 'argo-mcp-server.js');
-    const exampleWorkspace = path.join(WORK, 'custom-schema');
+    const exampleWorkspace = path.join(WORK, 'custom-schema', 'team-graph');
     const [schema, validate] = mcpCall(server, [
       { name: 'queryNeo4jGraph', arguments: { schema: true, workspaceRoot: exampleWorkspace } },
       { name: 'validateSystemArchitecture', arguments: { workspaceRoot: exampleWorkspace } },

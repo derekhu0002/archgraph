@@ -12516,8 +12516,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.29.12",
-          "description": "release archgraph-argo@0.29.12（issue #11 端点矩阵 '*' 通配）；npm publish shasum fc7b08e34c249660aacb9a08d8591d1a3f12d07e（经本机代理 127.0.0.1:7890 发布，直连超时）；registry 传播确认；npm i -g archgraph-argo + argo-deploy -SkipEnv 完成；部署态已核：python validate_ontology.py 在 wildcard 样本上 conforms=true。"
+          "value": "archgraph-argo@0.29.13",
+          "description": "Issue #12 fix — real (pySHACL+owlready2/HermiT) engine now enforces functionalProperties closed-world (OWL_FUNCTIONAL), matching the deterministic engine, even without distinctIndividuals. Commits: 04b3b07 (fix), 8e74b1c (release). npm publish shasum ef5aa57d89aa142b7b77ee001e26bb68d5aa62c7; npm i -g archgraph-argo + argo-deploy -SkipEnv done; deployed ~/.argo verified: init + write real engine both report \"OWL: functional 'Assigned To' of 'agent-1' has 2 distinct values\". Host restart pending for end-to-end verification."
         },
         {
           "name": "deliveryStatus",
@@ -12555,7 +12555,7 @@
         },
         {
           "name": "verification",
-          "value": "2026-10-11 部署后验收通过（archgraph-argo@0.29.12）",
+          "value": "2026-10-12 deployed artifact verified on the functional-open scenario (init=whole + write=delta, real engine)",
           "description": "宿主重启后用已部署 ~/.argo 代码验收：① issue #11 复现（type-matrix Composition:{Grouping:['*']} + Grouping--Composition-->Grouping）——部署 CLI deterministic 与 real(pySHACL) 均 {\"errors\":[],\"warnings\":[]}（修复前 real 必报 must target ['*']）。② 回归：archgraph（extends）与 rv-business（default）真引擎均 clean。"
         },
         {
@@ -12567,6 +12567,11 @@
           "name": "commit",
           "value": "159792f",
           "description": "fix(ontology): honor the '*' wildcard target in the endpoint matrix (issue #11) — pySHACL 投影把目标 '*' 编译为 local('*')='_'，要求不存在的类 → 每条 '*' 规则的边都误报；JS 引擎早已将 '*' 视为无约束，两引擎不一致。修：python/validate_ontology.py build_shapes_graph() 当 targets 含 '*' 时不发射形状（无约束）；lib/shapes.js buildShapes() 同样跳过（Turtle 产物不再出现 ex:_）；schema-bundle.js class-matrix 校验器也将 '*' 视为通配（与 ModelConcept 并列）。新增真引擎样本 sandbox/ontology-projection/samples/wildcard + run-real.js/at.test.js；AT-ovx-16；npm test 751/751。"
+        },
+        {
+          "name": "commit",
+          "value": "04b3b07",
+          "description": "fix(ontology): enforce functional axioms closed-world in the real engine (issue #12). Real OWL engine only flagged functional conflicts when values were forced distinct; now reports the same OWL_FUNCTIONAL the deterministic engine does. Files: argo/scripts/ontology-projection/python/validate_ontology.py; argo/scripts/ontology-projection/cli.js; sandbox/ontology-projection/python/validate_ontology.py (drift copy); sandbox/ontology-projection/run-real.js, verify-write.js, verify-write.sh; sandbox/ontology-projection/samples/functional-open/**; tests/ontology-validation-extension.test.js (AT-ovx-17)."
         }
       ]
     },
@@ -12608,6 +12613,37 @@
           "name": "commit",
           "value": "159792f",
           "description": "issue #11 修复：pySHACL 投影未处理端点矩阵 '*' 通配（local('*')='_' → 每条边误报），与 JS 引擎不一致。修 Python build_shapes_graph + JS buildShapes + 核心 class-matrix 校验器；真引擎样本 wildcard；AT-ovx-16；npm test 751/751。发布 archgraph-argo@0.29.12（shasum fc7b08e3...，经代理发布）。教训：任何引擎/投影都有 local() 归一，通配符须在归一之前处理；两引擎（JS/Python）语义必须一致。"
+        }
+      ]
+    },
+    {
+      "id": "overseer-mem-issue12-functional-closedworld-001",
+      "name": "里程碑：issue #12 修复——real 引擎封闭世界执行 functional 公理（0.29.13）",
+      "type": "Business Object",
+      "description": "【T2 · 里程碑】GitHub issue #12「MCP 写入路径未执行本体公理校验」的诊断与修复。\n\n现象（ipddev 项目）：写路径经 applySystemArchitectureMutation 写入违反函数性公理（归属于：每个功能至多一个部件）的数据，status=passed/written=true；手工跑 cli --engine deterministic 却报 OWL_FUNCTIONAL → 报告者误判为「write 时未运行本体校验」。\n\n真因（证据）：写路径确实运行本体校验（systemarchitecture-mcp-server.js:2525 runValidationExtensions mode=write，fail-close）。分歧在两个引擎：deterministic(JS lib/owl.js) 把 functionalProperties 当封闭世界『至多一』；real(pySHACL+owlready2/HermiT) 走 OWL 开放世界——两个取值只会被推断相等，除非 distinctIndividuals/不相交类强制互异，否则不构成不一致 → 静默放行。ipddev axioms 未设 distinctIndividuals。受控实验：同图，无 distinctIndividuals → real 通过/deterministic 报；有 distinctIndividuals → 两者都报。另：README.md/index.html 承诺 real 引擎能捕获『single-valued slot with two values』，与 ontology-authoring.md 的 distinctIndividuals 前置说明自相矛盾。\n\n修复（最小副作用路径，Tier 2）：在 real 引擎 python/validate_ontology.py 新增 functional_conflicts()，把 functional 冲突作为 findings.owl.inconsistencies 的 OWL_FUNCTIONAL 条目（code/message 与 lib/owl.js 完全一致）；cli.js real 分支 surface owl.inconsistencies（`OWL: <message>`）。不改 deterministic 引擎、不改默认 bundle（无 axioms → 字节不变）。\n\n验收（先行）：新增 sandbox 样本 functional-open（functional 无 distinctIndividuals）+ run-real.js 断言（容器 11/11 通过）；verify-write.sh 改用 functional-open axioms + verify-write.js 断言精确消息（MCP 真写路径 A/B/C 通过）；npm 侧 AT-ovx-17 锁跨引擎契约；host 已用部署件直接验证 init+write 均报 functional。npm test 752/752。\n\n发布/部署：commit 04b3b07（fix）+ 8e74b1c（release 0.29.13）；npm publish（经 127.0.0.1:7890 代理）shasum ef5aa57d89aa142b7b77ee001e26bb68d5aa62c7；npm i -g archgraph-argo + argo-deploy -SkipEnv；宿主 ~/.argo 已含修复，ARGO_VALIDATION_EXTENSIONS（write+init，onError=error）已启用。待人类伙伴重启宿主做端到端验证，通过后回复 issue。\n\n可复用坑：① 两引擎（deterministic JS vs real Python）对 OWL functional 语义分叉——OWA 不把『两个取值』当矛盾，封闭世界才当；凡『至多一』业务约束须显式封闭世界执行。② 报告者用 --engine deterministic 手工自证、却对比默认 real 路径，造成误判——自证须与生产同引擎。③ 容器 verify-write 的 init 步骤本机因无法访问阿里云 embedding 端点而 SEMANTIC_OPERATOR_ERROR（与本次改动无关，已用原 axioms 对照复现确认）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "04b3b07",
+          "description": "fix(ontology): enforce functional axioms closed-world in the real engine (issue #12)"
+        },
+        {
+          "name": "commit",
+          "value": "8e74b1c",
+          "description": "chore(release): archgraph-argo@0.29.13"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.29.13",
+          "description": "shasum ef5aa57d89aa142b7b77ee001e26bb68d5aa62c7"
         }
       ]
     }
@@ -16810,7 +16846,8 @@
         "overseer-argo-0-24-1-release-001",
         "overseer-argo-0-24-2-release-001",
         "overseer-milestone-schema-cross-project-001",
-        "overseer-argo-0-28-0-release-001"
+        "overseer-argo-0-28-0-release-001",
+        "overseer-mem-issue12-functional-closedworld-001"
       ],
       "included_relationships": []
     },

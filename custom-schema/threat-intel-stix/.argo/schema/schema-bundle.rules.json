@@ -1,0 +1,140 @@
+{
+  "elementTypeMetadata": {
+    "Threat Actor": {
+      "layer": "Threat",
+      "aspect": "Active Structure"
+    },
+    "Intrusion Set": {
+      "layer": "Threat",
+      "aspect": "Active Structure"
+    },
+    "Campaign": {
+      "layer": "Threat",
+      "aspect": "Behavior"
+    },
+    "Attack Pattern": {
+      "layer": "Threat",
+      "aspect": "Behavior"
+    },
+    "Malware": {
+      "layer": "Threat",
+      "aspect": "Active Structure"
+    },
+    "Tool": {
+      "layer": "Threat",
+      "aspect": "Active Structure"
+    },
+    "Vulnerability": {
+      "layer": "Threat",
+      "aspect": "Passive Structure"
+    },
+    "Indicator": {
+      "layer": "Threat",
+      "aspect": "Passive Structure"
+    },
+    "Identity": {
+      "layer": "Business",
+      "aspect": "Active Structure"
+    },
+    "Course of Action": {
+      "layer": "Threat",
+      "aspect": "Behavior"
+    },
+    "Observed Data": {
+      "layer": "Threat",
+      "aspect": "Passive Structure"
+    }
+  },
+  "relationshipCategoryByType": {
+    "Attributed To": "Attribution",
+    "Uses": "Usage",
+    "Targets": "Targeting",
+    "Indicates": "Indication",
+    "Mitigates": "Mitigation",
+    "Exploits": "Exploitation",
+    "Based On": "Derivation",
+    "Related To": "Association"
+  },
+  "relationshipTargetMatrix": {
+    "Attributed To": {
+      "Intrusion Set": [
+        "Threat Actor"
+      ],
+      "Campaign": [
+        "Threat Actor"
+      ]
+    },
+    "Uses": {
+      "Threat Actor": [
+        "Attack Pattern",
+        "Malware",
+        "Tool"
+      ],
+      "Intrusion Set": [
+        "Attack Pattern",
+        "Malware",
+        "Tool"
+      ],
+      "Campaign": [
+        "Attack Pattern",
+        "Malware",
+        "Tool"
+      ],
+      "Malware": [
+        "Attack Pattern"
+      ]
+    },
+    "Targets": {
+      "Threat Actor": [
+        "Identity",
+        "Vulnerability"
+      ],
+      "Intrusion Set": [
+        "Identity",
+        "Vulnerability"
+      ],
+      "Campaign": [
+        "Identity",
+        "Vulnerability"
+      ],
+      "Attack Pattern": [
+        "Identity",
+        "Vulnerability"
+      ]
+    },
+    "Indicates": {
+      "Indicator": [
+        "Malware",
+        "Attack Pattern",
+        "Threat Actor",
+        "Intrusion Set",
+        "Campaign"
+      ]
+    },
+    "Mitigates": {
+      "Course of Action": [
+        "Attack Pattern",
+        "Malware",
+        "Tool",
+        "Vulnerability"
+      ]
+    },
+    "Exploits": {
+      "Malware": [
+        "Vulnerability"
+      ],
+      "Tool": [
+        "Vulnerability"
+      ],
+      "Attack Pattern": [
+        "Vulnerability"
+      ]
+    },
+    "Based On": {
+      "Indicator": [
+        "Observed Data"
+      ]
+    },
+    "Related To": {}
+  }
+}

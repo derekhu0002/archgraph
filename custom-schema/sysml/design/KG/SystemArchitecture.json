@@ -1,0 +1,213 @@
+{
+  "name": "SysML",
+  "description": "Example graph validated against the SysML schema bundle (an adaptive-cruise-control block with derived requirements, verification and allocation).",
+  "elements": [
+    {
+      "id": "req-acc",
+      "name": "REQ-1 Provide Adaptive Cruise Control",
+      "type": "Requirement",
+      "description": "A top-level requirement."
+    },
+    {
+      "id": "req-dist",
+      "name": "REQ-2 Maintain Safe Distance",
+      "type": "Requirement",
+      "description": "Derived requirement."
+    },
+    {
+      "id": "block-acc",
+      "name": "Adaptive Cruise Controller",
+      "type": "Block",
+      "description": "The controller block."
+    },
+    {
+      "id": "block-radar",
+      "name": "Radar Sensor",
+      "type": "Block",
+      "description": "A sensor block."
+    },
+    {
+      "id": "block-throttle",
+      "name": "Throttle Actuator",
+      "type": "Block",
+      "description": "An actuator block."
+    },
+    {
+      "id": "vtype-speed",
+      "name": "Speed",
+      "type": "Value Type",
+      "description": "A value type."
+    },
+    {
+      "id": "activity-detect",
+      "name": "Detect Lead Vehicle",
+      "type": "Activity",
+      "description": "A sensing activity."
+    },
+    {
+      "id": "action-measure",
+      "name": "Measure Distance",
+      "type": "Action",
+      "description": "A measuring action."
+    },
+    {
+      "id": "tc-dist",
+      "name": "TC-1 Distance Test",
+      "type": "Test Case",
+      "description": "A verification test case."
+    },
+    {
+      "id": "actor-driver",
+      "name": "Driver",
+      "type": "Actor",
+      "description": "The driver actor."
+    },
+    {
+      "id": "port-radar",
+      "name": "Radar Port",
+      "type": "Port",
+      "description": "A sensor port."
+    },
+    {
+      "id": "port-cruise",
+      "name": "Cruise Port",
+      "type": "Port",
+      "description": "A controller port."
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-req-dist-derive-req-acc",
+      "name": "REQ-2 Maintain Safe Distance derive REQ-1 Provide Adaptive Cruise Control",
+      "type": "Derive",
+      "source_id": "req-dist",
+      "target_id": "req-acc",
+      "source_name": "REQ-2 Maintain Safe Distance",
+      "target_name": "REQ-1 Provide Adaptive Cruise Control",
+      "statement": "REQ-2 Maintain Safe Distance --(Derive)--> REQ-1 Provide Adaptive Cruise Control"
+    },
+    {
+      "id": "rel-block-acc-satisfy-req-acc",
+      "name": "Adaptive Cruise Controller satisfy REQ-1 Provide Adaptive Cruise Control",
+      "type": "Satisfy",
+      "source_id": "block-acc",
+      "target_id": "req-acc",
+      "source_name": "Adaptive Cruise Controller",
+      "target_name": "REQ-1 Provide Adaptive Cruise Control",
+      "statement": "Adaptive Cruise Controller --(Satisfy)--> REQ-1 Provide Adaptive Cruise Control"
+    },
+    {
+      "id": "rel-tc-dist-verify-req-acc",
+      "name": "TC-1 Distance Test verify REQ-1 Provide Adaptive Cruise Control",
+      "type": "Verify",
+      "source_id": "tc-dist",
+      "target_id": "req-acc",
+      "source_name": "TC-1 Distance Test",
+      "target_name": "REQ-1 Provide Adaptive Cruise Control",
+      "statement": "TC-1 Distance Test --(Verify)--> REQ-1 Provide Adaptive Cruise Control"
+    },
+    {
+      "id": "rel-block-acc-composition-block-radar",
+      "name": "Adaptive Cruise Controller composition Radar Sensor",
+      "type": "Composition",
+      "source_id": "block-acc",
+      "target_id": "block-radar",
+      "source_name": "Adaptive Cruise Controller",
+      "target_name": "Radar Sensor",
+      "statement": "Adaptive Cruise Controller --(Composition)--> Radar Sensor"
+    },
+    {
+      "id": "rel-block-acc-composition-block-throttle",
+      "name": "Adaptive Cruise Controller composition Throttle Actuator",
+      "type": "Composition",
+      "source_id": "block-acc",
+      "target_id": "block-throttle",
+      "source_name": "Adaptive Cruise Controller",
+      "target_name": "Throttle Actuator",
+      "statement": "Adaptive Cruise Controller --(Composition)--> Throttle Actuator"
+    },
+    {
+      "id": "rel-block-acc-allocate-activity-detect",
+      "name": "Adaptive Cruise Controller allocate Detect Lead Vehicle",
+      "type": "Allocate",
+      "source_id": "block-acc",
+      "target_id": "activity-detect",
+      "source_name": "Adaptive Cruise Controller",
+      "target_name": "Detect Lead Vehicle",
+      "statement": "Adaptive Cruise Controller --(Allocate)--> Detect Lead Vehicle"
+    },
+    {
+      "id": "rel-action-measure-allocate-block-radar",
+      "name": "Measure Distance allocate Radar Sensor",
+      "type": "Allocate",
+      "source_id": "action-measure",
+      "target_id": "block-radar",
+      "source_name": "Measure Distance",
+      "target_name": "Radar Sensor",
+      "statement": "Measure Distance --(Allocate)--> Radar Sensor"
+    },
+    {
+      "id": "rel-actor-driver-association-block-acc",
+      "name": "Driver association Adaptive Cruise Controller",
+      "type": "Association",
+      "source_id": "actor-driver",
+      "target_id": "block-acc",
+      "source_name": "Driver",
+      "target_name": "Adaptive Cruise Controller",
+      "statement": "Driver --(Association)--> Adaptive Cruise Controller"
+    },
+    {
+      "id": "rel-block-radar-association-vtype-speed",
+      "name": "Radar Sensor association Speed",
+      "type": "Association",
+      "source_id": "block-radar",
+      "target_id": "vtype-speed",
+      "source_name": "Radar Sensor",
+      "target_name": "Speed",
+      "statement": "Radar Sensor --(Association)--> Speed"
+    },
+    {
+      "id": "rel-port-radar-item-flow-port-cruise",
+      "name": "Radar Port item flow Cruise Port",
+      "type": "Item Flow",
+      "source_id": "port-radar",
+      "target_id": "port-cruise",
+      "source_name": "Radar Port",
+      "target_name": "Cruise Port",
+      "statement": "Radar Port --(Item Flow)--> Cruise Port"
+    }
+  ],
+  "views": [
+    {
+      "view_id": "view-root",
+      "view_name": "SystemArchitecture",
+      "description": "Root view holding the example SysML graph.",
+      "included_elements": [
+        "req-acc",
+        "req-dist",
+        "block-acc",
+        "block-radar",
+        "block-throttle",
+        "vtype-speed",
+        "activity-detect",
+        "action-measure",
+        "tc-dist",
+        "actor-driver",
+        "port-radar",
+        "port-cruise"
+      ],
+      "included_relationships": [
+        "rel-req-dist-derive-req-acc",
+        "rel-block-acc-satisfy-req-acc",
+        "rel-tc-dist-verify-req-acc",
+        "rel-block-acc-composition-block-radar",
+        "rel-block-acc-composition-block-throttle",
+        "rel-block-acc-allocate-activity-detect",
+        "rel-action-measure-allocate-block-radar",
+        "rel-actor-driver-association-block-acc",
+        "rel-block-radar-association-vtype-speed",
+        "rel-port-radar-item-flow-port-cruise"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,200 @@
+{
+  "elementTypeMetadata": {
+    "Class": {
+      "layer": "UML Structure",
+      "aspect": "Passive Structure"
+    },
+    "Interface": {
+      "layer": "UML Structure",
+      "aspect": "Passive Structure"
+    },
+    "Enumeration": {
+      "layer": "UML Structure",
+      "aspect": "Passive Structure"
+    },
+    "Data Type": {
+      "layer": "UML Structure",
+      "aspect": "Passive Structure"
+    },
+    "Package": {
+      "layer": "UML Structure",
+      "aspect": "Passive Structure"
+    },
+    "Component": {
+      "layer": "UML Structure",
+      "aspect": "Active Structure"
+    },
+    "Actor": {
+      "layer": "UML Structure",
+      "aspect": "Active Structure"
+    },
+    "Use Case": {
+      "layer": "UML Behavior",
+      "aspect": "Behavior"
+    },
+    "State": {
+      "layer": "UML Behavior",
+      "aspect": "Behavior"
+    },
+    "Initial State": {
+      "layer": "UML Behavior",
+      "aspect": "Behavior"
+    },
+    "Final State": {
+      "layer": "UML Behavior",
+      "aspect": "Behavior"
+    },
+    "Composite State": {
+      "layer": "UML Behavior",
+      "aspect": "Behavior"
+    },
+    "Choice": {
+      "layer": "UML Behavior",
+      "aspect": "Behavior"
+    },
+    "Activity": {
+      "layer": "UML Behavior",
+      "aspect": "Behavior"
+    },
+    "Action": {
+      "layer": "UML Behavior",
+      "aspect": "Behavior"
+    }
+  },
+  "relationshipCategoryByType": {
+    "Generalization": "Structural",
+    "Realization": "Structural",
+    "Association": "Structural",
+    "Aggregation": "Structural",
+    "Composition": "Structural",
+    "Dependency": "Dependency",
+    "Transition": "Dynamic",
+    "Include": "Behavioral",
+    "Extend": "Behavioral",
+    "Control Flow": "Dynamic"
+  },
+  "relationshipTargetMatrix": {
+    "Generalization": {
+      "Class": [
+        "Class"
+      ],
+      "Interface": [
+        "Interface"
+      ],
+      "Enumeration": [
+        "Enumeration"
+      ],
+      "Data Type": [
+        "Data Type"
+      ],
+      "Component": [
+        "Component"
+      ],
+      "Use Case": [
+        "Use Case"
+      ],
+      "Actor": [
+        "Actor"
+      ],
+      "Package": [
+        "Package"
+      ]
+    },
+    "Realization": {
+      "Class": [
+        "Interface"
+      ],
+      "Component": [
+        "Interface"
+      ]
+    },
+    "Association": {
+      "Class": [
+        "Class"
+      ],
+      "Use Case": [
+        "Actor"
+      ],
+      "Actor": [
+        "Use Case"
+      ],
+      "Component": [
+        "Component"
+      ],
+      "Package": [
+        "Package"
+      ]
+    },
+    "Aggregation": {
+      "Class": [
+        "Class"
+      ]
+    },
+    "Composition": {
+      "Class": [
+        "Class"
+      ],
+      "Composite State": [
+        "State",
+        "Composite State",
+        "Initial State",
+        "Final State"
+      ]
+    },
+    "Dependency": {
+      "Class": [
+        "Class",
+        "Interface"
+      ],
+      "Interface": [
+        "Class"
+      ],
+      "Package": [
+        "Package"
+      ],
+      "Component": [
+        "Component",
+        "Interface"
+      ],
+      "Use Case": [
+        "Use Case"
+      ]
+    },
+    "Transition": {
+      "State": [
+        "State",
+        "Choice",
+        "Final State",
+        "Composite State"
+      ],
+      "Initial State": [
+        "State",
+        "Composite State"
+      ],
+      "Choice": [
+        "State",
+        "Final State"
+      ],
+      "Composite State": [
+        "State",
+        "Final State",
+        "Choice"
+      ]
+    },
+    "Include": {
+      "Use Case": [
+        "Use Case"
+      ]
+    },
+    "Extend": {
+      "Use Case": [
+        "Use Case"
+      ]
+    },
+    "Control Flow": {
+      "Action": [
+        "Action"
+      ]
+    }
+  }
+}

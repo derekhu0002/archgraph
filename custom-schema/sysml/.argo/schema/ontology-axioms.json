@@ -1,0 +1,41 @@
+{
+  "_comment": "Optional OWL/RDFS axioms for the SysML ontology, read by the ontology-validation engine (ignored by the core). See docs/ontology-authoring.md.",
+  "disjointClasses": [
+    [
+      "Block",
+      "Requirement"
+    ],
+    [
+      "Requirement",
+      "Test Case"
+    ],
+    [
+      "Activity",
+      "State"
+    ],
+    [
+      "Block",
+      "Value Type"
+    ],
+    [
+      "Actor",
+      "Block"
+    ],
+    [
+      "Block",
+      "Port"
+    ]
+  ],
+  "functionalProperties": [],
+  "transitiveProperties": [
+    "Generalization",
+    "Derive"
+  ],
+  "objectPropertyDomain": {
+    "Satisfy": "Block"
+  },
+  "objectPropertyRange": {
+    "Satisfy": "Requirement"
+  },
+  "distinctIndividuals": true
+}

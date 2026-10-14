@@ -1,0 +1,166 @@
+{
+  "name": "UML 2",
+  "description": "Example graph validated against the UML 2 schema bundle (a checkout use case, a domain class model and a payment state machine).",
+  "elements": [
+    {
+      "id": "actor-customer",
+      "name": "Customer",
+      "type": "Actor",
+      "description": "An external actor."
+    },
+    {
+      "id": "uc-checkout",
+      "name": "Checkout",
+      "type": "Use Case",
+      "description": "The checkout use case."
+    },
+    {
+      "id": "uc-pay",
+      "name": "Pay Order",
+      "type": "Use Case",
+      "description": "Included payment use case."
+    },
+    {
+      "id": "class-order",
+      "name": "Order",
+      "type": "Class",
+      "description": "A domain class."
+    },
+    {
+      "id": "class-payment",
+      "name": "Payment",
+      "type": "Class",
+      "description": "A domain class."
+    },
+    {
+      "id": "iface-gateway",
+      "name": "Payment Gateway",
+      "type": "Interface",
+      "description": "A provided interface."
+    },
+    {
+      "id": "class-stripe",
+      "name": "Stripe Adapter",
+      "type": "Class",
+      "description": "Realizes the gateway interface."
+    },
+    {
+      "id": "state-created",
+      "name": "Created",
+      "type": "State",
+      "description": "Payment created."
+    },
+    {
+      "id": "state-authorized",
+      "name": "Authorized",
+      "type": "State",
+      "description": "Payment authorized."
+    },
+    {
+      "id": "state-settled",
+      "name": "Settled",
+      "type": "Final State",
+      "description": "Payment settled."
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-actor-customer-association-uc-checkout",
+      "name": "Customer association Checkout",
+      "type": "Association",
+      "source_id": "actor-customer",
+      "target_id": "uc-checkout",
+      "source_name": "Customer",
+      "target_name": "Checkout",
+      "statement": "Customer --(Association)--> Checkout"
+    },
+    {
+      "id": "rel-uc-checkout-include-uc-pay",
+      "name": "Checkout include Pay Order",
+      "type": "Include",
+      "source_id": "uc-checkout",
+      "target_id": "uc-pay",
+      "source_name": "Checkout",
+      "target_name": "Pay Order",
+      "statement": "Checkout --(Include)--> Pay Order"
+    },
+    {
+      "id": "rel-class-order-association-class-payment",
+      "name": "Order association Payment",
+      "type": "Association",
+      "source_id": "class-order",
+      "target_id": "class-payment",
+      "source_name": "Order",
+      "target_name": "Payment",
+      "statement": "Order --(Association)--> Payment"
+    },
+    {
+      "id": "rel-class-stripe-realization-iface-gateway",
+      "name": "Stripe Adapter realization Payment Gateway",
+      "type": "Realization",
+      "source_id": "class-stripe",
+      "target_id": "iface-gateway",
+      "source_name": "Stripe Adapter",
+      "target_name": "Payment Gateway",
+      "statement": "Stripe Adapter --(Realization)--> Payment Gateway"
+    },
+    {
+      "id": "rel-class-payment-dependency-iface-gateway",
+      "name": "Payment dependency Payment Gateway",
+      "type": "Dependency",
+      "source_id": "class-payment",
+      "target_id": "iface-gateway",
+      "source_name": "Payment",
+      "target_name": "Payment Gateway",
+      "statement": "Payment --(Dependency)--> Payment Gateway"
+    },
+    {
+      "id": "rel-state-created-transition-state-authorized",
+      "name": "Created transition Authorized",
+      "type": "Transition",
+      "source_id": "state-created",
+      "target_id": "state-authorized",
+      "source_name": "Created",
+      "target_name": "Authorized",
+      "statement": "Created --(Transition)--> Authorized"
+    },
+    {
+      "id": "rel-state-authorized-transition-state-settled",
+      "name": "Authorized transition Settled",
+      "type": "Transition",
+      "source_id": "state-authorized",
+      "target_id": "state-settled",
+      "source_name": "Authorized",
+      "target_name": "Settled",
+      "statement": "Authorized --(Transition)--> Settled"
+    }
+  ],
+  "views": [
+    {
+      "view_id": "view-root",
+      "view_name": "SystemArchitecture",
+      "description": "Root view holding the example UML 2 graph (use case + class + state machine).",
+      "included_elements": [
+        "actor-customer",
+        "uc-checkout",
+        "uc-pay",
+        "class-order",
+        "class-payment",
+        "iface-gateway",
+        "class-stripe",
+        "state-created",
+        "state-authorized",
+        "state-settled"
+      ],
+      "included_relationships": [
+        "rel-actor-customer-association-uc-checkout",
+        "rel-uc-checkout-include-uc-pay",
+        "rel-class-order-association-class-payment",
+        "rel-class-stripe-realization-iface-gateway",
+        "rel-class-payment-dependency-iface-gateway",
+        "rel-state-created-transition-state-authorized",
+        "rel-state-authorized-transition-state-settled"
+      ]
+    }
+  ]
+}

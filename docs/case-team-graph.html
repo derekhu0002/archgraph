@@ -26,7 +26,7 @@
       本页用一个<strong>真实可运行的例子</strong>演示 ArchGraph 最核心的一条路径：
       <strong>定义你自己的业务本体 → 建元素 → 建关系 → 建视图 → 校验并做语义召回</strong>。
       所有内容都对应仓库里的
-      <a href="https://github.com/derekhu0002/archgraph/tree/main/custom-schema" target="_blank" rel="noopener">custom-schema/</a>
+      <a href="https://github.com/derekhu0002/archgraph/tree/main/custom-schema/team-graph" target="_blank" rel="noopener">custom-schema/team-graph/</a>
       示例，你可以直接照抄。
     </p>
     <p class="lead">
@@ -129,7 +129,7 @@
       <h3>步骤 1a：把本体包拷进你的项目</h3>
       <pre><code># 只拷 schema 本体包，不要连 .argo/temp/ 这类运行时临时文件一起拷（Windows 用 Copy-Item -Recurse）
 mkdir -p &lt;your-repo&gt;/.argo
-cp -r custom-schema/.argo/schema &lt;your-repo&gt;/.argo/schema</code></pre>
+cp -r custom-schema/team-graph/.argo/schema &lt;your-repo&gt;/.argo/schema</code></pre>
 
       <h3>步骤 1b：自己创建图谱文件（自定义本体下必需）</h3>
       <div class="note">
@@ -139,7 +139,7 @@ cp -r custom-schema/.argo/schema &lt;your-repo&gt;/.argo/schema</code></pre>
       </div>
       <p class="lead">
         直接照抄示例内容（与
-        <a href="https://github.com/derekhu0002/archgraph/blob/main/custom-schema/design/KG/SystemArchitecture.json" target="_blank" rel="noopener">custom-schema/design/KG/SystemArchitecture.json</a>
+        <a href="https://github.com/derekhu0002/archgraph/blob/main/custom-schema/team-graph/design/KG/SystemArchitecture.json" target="_blank" rel="noopener">custom-schema/team-graph/design/KG/SystemArchitecture.json</a>
         一致）：
       </p>
       <pre><code>{
@@ -557,7 +557,7 @@ cp -r custom-schema/.argo/schema &lt;your-repo&gt;/.argo/schema</code></pre>
         <li>想了解安装与日常使用：<a href="getting-started.html">使用介绍</a>。</li>
         <li>想一次看全部能力：<a href="capabilities.html">能力总览</a>。</li>
         <li>想读机制设计：<a href="https://github.com/derekhu0002/archgraph/blob/main/docs/schema-bundle-decoupling.md" target="_blank" rel="noopener">docs/schema-bundle-decoupling.md</a>。</li>
-        <li>想直接照抄示例：仓库里的 <a href="https://github.com/derekhu0002/archgraph/tree/main/custom-schema" target="_blank" rel="noopener">custom-schema/</a>。</li>
+        <li>想直接照抄示例：仓库里的 <a href="https://github.com/derekhu0002/archgraph/tree/main/custom-schema/team-graph" target="_blank" rel="noopener">custom-schema/team-graph/</a>。</li>
       </ul>
     </section>
   </main>

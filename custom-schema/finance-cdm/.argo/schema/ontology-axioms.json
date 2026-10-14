@@ -1,0 +1,68 @@
+{
+  "_comment": "Optional OWL/RDFS axioms for the Finance CDM ontology, read by the ontology-validation engine (ignored by the core). See docs/ontology-authoring.md.",
+  "disjointClasses": [
+    [
+      "Party",
+      "Legal Agreement"
+    ],
+    [
+      "Party",
+      "Product"
+    ],
+    [
+      "Party",
+      "Contract"
+    ],
+    [
+      "Party",
+      "Cashflow"
+    ],
+    [
+      "Legal Agreement",
+      "Product"
+    ],
+    [
+      "Legal Agreement",
+      "Contract"
+    ],
+    [
+      "Legal Agreement",
+      "Cashflow"
+    ],
+    [
+      "Product",
+      "Contract"
+    ],
+    [
+      "Product",
+      "Cashflow"
+    ],
+    [
+      "Contract",
+      "Cashflow"
+    ],
+    [
+      "Lifecycle Event",
+      "Cashflow"
+    ],
+    [
+      "Observation",
+      "Product"
+    ]
+  ],
+  "functionalProperties": [
+    "Governed By",
+    "Based On",
+    "Observed By"
+  ],
+  "transitiveProperties": [
+    "Derived From"
+  ],
+  "objectPropertyDomain": {
+    "Entered Into": "Party"
+  },
+  "objectPropertyRange": {
+    "Entered Into": "Contract"
+  },
+  "distinctIndividuals": true
+}

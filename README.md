@@ -34,7 +34,7 @@ A knowledge-graph framework that speaks only one language is not a framework. Ar
 
 This repository is the proof: its own bundle uses `extends: "default"` and layers a **UML 2 state-machine profile** on top, resolved at runtime from `.argo/schema/` rather than hardcoded in the framework.
 
-→ Worked example — define an ontology, then build the graph step by step: **[docs/case-team-graph.html](docs/case-team-graph.html)** · runnable bundle: [`custom-schema/`](custom-schema/README.md) · full authoring reference (types, relationship structure, axioms/constraints): **[docs/ontology-authoring.md](docs/ontology-authoring.md)**
+→ Worked example — define an ontology, then build the graph step by step: **[docs/case-team-graph.html](docs/case-team-graph.html)** · prebuilt ontology catalog: [`custom-schema/`](custom-schema/README.md) (Team Graph · Finance CDM · Industry 4.0 AAS · STIX Threat Intelligence · UML 2 · SysML) · full authoring reference (types, relationship structure, axioms/constraints): **[docs/ontology-authoring.md](docs/ontology-authoring.md)**
 
 ## Ontology validation (optional)
 
@@ -123,7 +123,7 @@ No schema work: use the built-in **ArchiMate 3.2 + ARGO extensions**.
 
 5. **Verify.** Ask your coding agent to call `validateSystemArchitecture`, then `queryNeo4jGraph` with `{"schema": true}`.
 
-The fully-illustrated, step-by-step walkthrough is **[docs/case-team-graph.html](docs/case-team-graph.html)** (Chinese), and the runnable example bundle is [`custom-schema/`](custom-schema/README.md). The result looks like this:
+The fully-illustrated, step-by-step walkthrough is **[docs/case-team-graph.html](docs/case-team-graph.html)** (Chinese), and the prebuilt example bundles are catalogued in [`custom-schema/`](custom-schema/README.md). The result looks like this:
 
 ![Team Graph example — Agent 001 assigned to Team A, Team A depends on Service A, Service A depends on Service B](docs/diagrams/team-graph-elements-relations.svg)
 

@@ -1,0 +1,152 @@
+{
+  "elementTypeMetadata": {
+    "Block": {
+      "layer": "SysML Structure",
+      "aspect": "Passive Structure"
+    },
+    "Actor": {
+      "layer": "SysML Structure",
+      "aspect": "Active Structure"
+    },
+    "Value Type": {
+      "layer": "SysML Structure",
+      "aspect": "Passive Structure"
+    },
+    "Interface Block": {
+      "layer": "SysML Structure",
+      "aspect": "Active Structure"
+    },
+    "Constraint Block": {
+      "layer": "SysML Structure",
+      "aspect": "Passive Structure"
+    },
+    "Requirement": {
+      "layer": "Requirement",
+      "aspect": "Passive Structure"
+    },
+    "Test Case": {
+      "layer": "Verification",
+      "aspect": "Behavior"
+    },
+    "Activity": {
+      "layer": "SysML Behavior",
+      "aspect": "Behavior"
+    },
+    "Action": {
+      "layer": "SysML Behavior",
+      "aspect": "Behavior"
+    },
+    "State": {
+      "layer": "SysML Behavior",
+      "aspect": "Behavior"
+    },
+    "Port": {
+      "layer": "SysML Structure",
+      "aspect": "Passive Structure"
+    },
+    "Package": {
+      "layer": "SysML Structure",
+      "aspect": "Passive Structure"
+    }
+  },
+  "relationshipCategoryByType": {
+    "Generalization": "Structural",
+    "Association": "Structural",
+    "Composition": "Structural",
+    "Aggregation": "Structural",
+    "Satisfy": "Verification",
+    "Verify": "Verification",
+    "Derive": "Requirement",
+    "Refine": "Requirement",
+    "Trace": "Requirement",
+    "Allocate": "Allocation",
+    "Binding Connector": "Parametric",
+    "Item Flow": "Flow"
+  },
+  "relationshipTargetMatrix": {
+    "Generalization": {
+      "Block": [
+        "Block"
+      ],
+      "Requirement": [
+        "Requirement"
+      ],
+      "Value Type": [
+        "Value Type"
+      ],
+      "Constraint Block": [
+        "Constraint Block"
+      ]
+    },
+    "Association": {
+      "Block": [
+        "Block",
+        "Value Type"
+      ],
+      "Actor": [
+        "Block"
+      ]
+    },
+    "Composition": {
+      "Block": [
+        "Block"
+      ]
+    },
+    "Aggregation": {
+      "Block": [
+        "Block"
+      ]
+    },
+    "Satisfy": {
+      "Block": [
+        "Requirement"
+      ],
+      "Interface Block": [
+        "Requirement"
+      ]
+    },
+    "Verify": {
+      "Test Case": [
+        "Requirement"
+      ]
+    },
+    "Derive": {
+      "Requirement": [
+        "Requirement"
+      ]
+    },
+    "Refine": {
+      "Block": [
+        "Requirement"
+      ],
+      "Requirement": [
+        "Requirement"
+      ]
+    },
+    "Trace": {},
+    "Allocate": {
+      "Block": [
+        "Activity"
+      ],
+      "Activity": [
+        "Block"
+      ],
+      "Action": [
+        "Block"
+      ]
+    },
+    "Binding Connector": {
+      "Constraint Block": [
+        "Block"
+      ],
+      "Block": [
+        "Constraint Block"
+      ]
+    },
+    "Item Flow": {
+      "Port": [
+        "Port"
+      ]
+    }
+  }
+}

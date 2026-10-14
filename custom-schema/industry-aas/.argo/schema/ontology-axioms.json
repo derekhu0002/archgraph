@@ -1,0 +1,46 @@
+{
+  "_comment": "Optional OWL/RDFS axioms for the Industry 4.0 AAS ontology, read by the ontology-validation engine (ignored by the core). See docs/ontology-authoring.md.",
+  "disjointClasses": [
+    [
+      "Asset Administrator",
+      "Administration Shell"
+    ],
+    [
+      "Asset Administrator",
+      "Asset"
+    ],
+    [
+      "Asset Administrator",
+      "Submodel"
+    ],
+    [
+      "Administration Shell",
+      "Asset"
+    ],
+    [
+      "Asset",
+      "Submodel"
+    ],
+    [
+      "Submodel",
+      "Submodel Element"
+    ],
+    [
+      "Capability",
+      "Operation"
+    ]
+  ],
+  "functionalProperties": [
+    "Represents"
+  ],
+  "transitiveProperties": [
+    "Contains"
+  ],
+  "objectPropertyDomain": {
+    "Administers": "Asset Administrator"
+  },
+  "objectPropertyRange": {
+    "Administers": "Administration Shell"
+  },
+  "distinctIndividuals": true
+}

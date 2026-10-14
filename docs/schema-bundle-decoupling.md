@@ -173,7 +173,9 @@ So after `argo-init` / the argo-init skill, the reported `schema.kind` is
 
 ## 4. Authoring a workspace schema (example)
 
-A complete, runnable example lives in `custom-schema/` (Team Graph ontology:
+Complete, runnable examples live under `custom-schema/` (a catalog of prebuilt
+ontologies: `team-graph/`, `finance-cdm/`, `industry-aas/`, `threat-intel-stix/`).
+The canonical worked example is `custom-schema/team-graph/` (Team Graph ontology:
 `Agent Node` / `Team Node` / `Service Node`; `Assigned To` / `Depends On`).
 It is exercised by `tests/schema-bundle.test.js` ("the shipped
 custom-schema example bundle loads and validates end-to-end").
@@ -195,7 +197,7 @@ different schemas.
 **Schema resolution** 鈥?`tests/schema-bundle.test.js` (17 cases): default
 resolution, workspace override, `ARGO_SCHEMA_DIR` precedence, custom-type
 accept/reject, actor contract / bundle validation, endpoint-matrix on/off,
-custom matrix enforcement, per-view limit, the shipped `custom-schema/` example,
+custom matrix enforcement, per-view limit, the shipped `custom-schema/team-graph/` example,
 and the live MCP projection.
 
 **Docker (isolated, node + opencode)** 鈥?`sandbox/schema-decoupling/`:

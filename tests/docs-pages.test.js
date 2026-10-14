@@ -177,8 +177,8 @@ test('AT docs-pages: case page teaches a different domain (edit schema enums) an
   assert.match(html, /archimateRelationshipType/, 'must name the relationship enum key to edit');
   assert.match(html, /schema-bundle\.config\.json/, 'must show the extends route');
   assert.match(html, /extends/, 'must frame the two start routes');
-  assert.match(html, /custom-schema\/\.argo\/schema/, 'copy step must point at the schema dir directly');
-  assert.doesNotMatch(html, /cp -r custom-schema\/\.argo(?![\/\w])/, 'copy must not take the whole .argo (temp/ included)');
+  assert.match(html, /custom-schema\/team-graph\/\.argo\/schema/, 'copy step must point at the schema dir directly');
+  assert.doesNotMatch(html, /cp -r custom-schema\/team-graph\/\.argo(?![\/\w])/, 'copy must not take the whole .argo (temp/ included)');
   assert.match(html, /让 agent/, 'MCP recipes must be phrased as instructions to the agent');
   // precision: the only STRUCTURAL difference is the two enum arrays; title/description are cosmetic
   assert.match(html, /唯一的结构性差异/, 'must call the two enum arrays the only structural difference');
@@ -186,12 +186,12 @@ test('AT docs-pages: case page teaches a different domain (edit schema enums) an
 });
 
 test('AT docs-pages: custom-schema README copies only the schema bundle and states fail-closed authoring', () => {
-  // GIVEN custom-schema/ is the runnable example a reader copies into their repo
+  // GIVEN custom-schema/team-graph/ is the runnable example a reader copies into their repo
   // WHEN they follow its "use it in your repository" step
   // THEN it copies .argo/schema only (never the whole .argo with temp/), and it
   //      states the custom-schema fail-closed rule so the graph is authored first
-  const readme = readFileSync(path.join(ROOT, 'custom-schema', 'README.md'), 'utf8');
-  assert.match(readme, /cp -r custom-schema\/\.argo\/schema/, 'must copy only the schema dir');
-  assert.doesNotMatch(readme, /cp -r custom-schema\/\.argo(?![\/\w])/, 'must not copy the whole .argo (temp/ included)');
+  const readme = readFileSync(path.join(ROOT, 'custom-schema', 'team-graph', 'README.md'), 'utf8');
+  assert.match(readme, /cp -r custom-schema\/team-graph\/\.argo\/schema/, 'must copy only the schema dir');
+  assert.doesNotMatch(readme, /cp -r custom-schema\/team-graph\/\.argo(?![\/\w])/, 'must not copy the whole .argo (temp/ included)');
   assert.match(readme, /NO_DEFAULT_GRAPH/, 'must state the fail-closed custom-schema behavior');
 });

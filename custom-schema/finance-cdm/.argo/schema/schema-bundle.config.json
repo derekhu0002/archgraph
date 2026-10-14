@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Finance CDM schema bundle descriptor",
+  "description": "Prebuilt CUSTOM schema bundle. Declares the Finance CDM ontology: element/relationship types, endpoint legality (schema-bundle.rules.json), the actor element type used by the ARGO wakeup gate, and the graph invariants.",
+  "language": "Finance CDM",
+  "actorElementType": "Party",
+  "guide": "GUIDE.md",
+  "rules": "schema-bundle.rules.json",
+  "deliveryDependencies": {
+    "sourceDependsOnTarget": [
+      "Based On",
+      "Governed By",
+      "Has Event"
+    ],
+    "targetDependsOnSource": []
+  },
+  "invariants": {
+    "statementGrammar": true,
+    "endpointMatrix": true,
+    "rootViewName": "SystemArchitecture",
+    "maxElementsPerView": 15
+  }
+}

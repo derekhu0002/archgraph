@@ -1,4 +1,4 @@
-# `custom-schema/` — recommended example of a repository-defined schema
+# `custom-schema/team-graph/` — Team Graph ontology example
 
 This directory is a **complete, runnable example** of the ARGO schema-bundle
 mechanism. A repository that ships its own modeling language puts it under
@@ -6,16 +6,18 @@ mechanism. A repository that ships its own modeling language puts it under
 against its own schema instead of the default ArchiMate 3.2 (+ ARGO).
 
 The example is a small **Team Graph** ontology (`Agent Node` / `Team Node` /
-`Service Node`; `Assigned To` / `Depends On`).
+`Service Node`; `Assigned To` / `Depends On`). It is one of the prebuilt
+ontologies catalogued in [`../README.md`](../README.md).
 
 ## Layout
 
 ```
-custom-schema/
-  README.md                              # this file
+custom-schema/team-graph/
+  README.md                                     # this file
   .argo/schema/SystemArchitecture.schema.json   # graph JSON Schema + type enums
-  .argo/schema/schema-bundle.config.json                # bundle descriptor
-  .argo/schema/schema-bundle.rules.json                 # type metadata + endpoint matrix
+  .argo/schema/schema-bundle.config.json        # bundle descriptor
+  .argo/schema/schema-bundle.rules.json         # type metadata + endpoint matrix
+  .argo/schema/ontology-axioms.json             # optional OWL/RDFS axioms
   .argo/schema/GUIDE.md                         # human-readable guide
   design/KG/SystemArchitecture.json             # example graph using the types
 ```
@@ -25,10 +27,10 @@ custom-schema/
 ```bash
 # copy only the schema bundle into your repo (not .argo/temp/ runtime files)
 mkdir -p <your-repo>/.argo/schema
-cp -r custom-schema/.argo/schema/.  <your-repo>/.argo/schema
+cp -r custom-schema/team-graph/.argo/schema/.  <your-repo>/.argo/schema
 # Windows (PowerShell):
 #   New-Item -ItemType Directory -Force <your-repo>/.argo/schema | Out-Null
-#   Copy-Item -Recurse -Force custom-schema/.argo/schema/* <your-repo>/.argo/schema
+#   Copy-Item -Recurse -Force custom-schema/team-graph/.argo/schema/* <your-repo>/.argo/schema
 # then create design/KG/SystemArchitecture.json yourself using the Team Graph types
 # (a custom schema fails closed with NO_DEFAULT_GRAPH — argo-init will NOT create the graph)
 ```

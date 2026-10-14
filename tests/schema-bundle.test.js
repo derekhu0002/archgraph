@@ -359,7 +359,7 @@ test('AT schema-bundle: the default ontology declares the ArchiMate delivery dep
 
 test('AT schema-bundle: a custom bundle declares its OWN delivery dependencies', () => {
   // GIVEN the shipped custom example (Team Graph)
-  const { ontology } = loadSchemaBundleAndOntology(path.join(ROOT, 'custom-schema'));
+  const { ontology } = loadSchemaBundleAndOntology(path.join(ROOT, 'custom-schema', 'team-graph'));
   // THEN runArchitectureTests / semantic edges use the schema's own relationship types
   assert.deepEqual(ontology.deliveryDependencies.sourceDependsOnTarget, ['Depends On', 'Assigned To']);
   assert.deepEqual(ontology.deliveryDependencies.targetDependsOnSource, []);
@@ -507,8 +507,8 @@ test('AT schema-bundle: MCP validateSystemArchitecture fails closed on an invali
 });
 
 test('AT schema-bundle: the shipped custom-schema example bundle loads and validates end-to-end', () => {
-  // GIVEN the recommended example bundle checked into custom-schema/
-  const workspace = path.join(ROOT, 'custom-schema');
+  // GIVEN the recommended example bundle checked into custom-schema/team-graph/
+  const workspace = path.join(ROOT, 'custom-schema', 'team-graph');
   // WHEN its ontology is resolved and its example graph is validated through the MCP
   const { ontology } = loadSchemaBundleAndOntology(workspace);
   assert.equal(ontology.language, 'Team Graph');
@@ -517,4 +517,31 @@ test('AT schema-bundle: the shipped custom-schema example bundle loads and valid
   const payload = runServerTool('validateSystemArchitecture', { workspaceRoot: workspace }, { ARGO_REPO_ROOT: workspace });
   // THEN both pass (the documented example is executable, not just descriptive)
   assert.equal(payload.status, 'passed', JSON.stringify(payload).slice(0, 500));
+});
+
+test('AT schema-bundle: every prebuilt ontology in custom-schema/ loads and validates end-to-end', () => {
+  // GIVEN the catalog of prebuilt ontology bundles under custom-schema/
+  const catalog = path.join(ROOT, 'custom-schema');
+  const bundles = fs.readdirSync(catalog, { withFileTypes: true })
+    .filter(e => e.isDirectory()
+      && fs.existsSync(path.join(catalog, e.name, '.argo', 'schema', 'schema-bundle.config.json')))
+    .map(e => e.name)
+    .sort();
+  // THEN the expected catalog is present...
+  for (const name of ['team-graph', 'finance-cdm', 'industry-aas', 'threat-intel-stix', 'uml2', 'sysml']) {
+    assert.ok(bundles.includes(name), `custom-schema/${name} must exist`);
+  }
+  // AND each bundle's ontology builds, its fail-closed bundle validation passes,
+  //     and the shipped example graph validates under its own schema
+  for (const name of bundles) {
+    const workspace = path.join(catalog, name);
+    const { ontology } = loadSchemaBundleAndOntology(workspace);
+    assert.equal(
+      ontology.bundleValidation.status,
+      'passed',
+      `${name}: bundle validation must pass (${JSON.stringify(ontology.bundleValidation.errors)})`,
+    );
+    const graph = JSON.parse(fs.readFileSync(path.join(workspace, 'design', 'KG', 'SystemArchitecture.json'), 'utf8'));
+    assert.deepEqual(validateAll(graph, ontology), [], `${name}: example graph must validate under its own schema`);
+  }
 });

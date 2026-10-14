@@ -1,0 +1,117 @@
+{
+  "elementTypeMetadata": {
+    "Phase": {
+      "layer": "IPD Process",
+      "aspect": "Behavior"
+    },
+    "Decision Checkpoint": {
+      "layer": "IPD Governance",
+      "aspect": "Behavior"
+    },
+    "Technical Review": {
+      "layer": "IPD Governance",
+      "aspect": "Behavior"
+    },
+    "Deliverable": {
+      "layer": "IPD Artifact",
+      "aspect": "Passive Structure"
+    },
+    "Role": {
+      "layer": "IPD Organization",
+      "aspect": "Active Structure"
+    },
+    "Process Area": {
+      "layer": "IPD Discipline",
+      "aspect": "Behavior"
+    },
+    "Standard": {
+      "layer": "External Standard",
+      "aspect": "Passive Structure"
+    },
+    "Requirement": {
+      "layer": "IPD Artifact",
+      "aspect": "Passive Structure"
+    },
+    "Risk": {
+      "layer": "IPD Governance",
+      "aspect": "Passive Structure"
+    }
+  },
+  "relationshipCategoryByType": {
+    "Precedes": "Sequencing",
+    "Gated By": "Governance",
+    "Produces": "Production",
+    "Performed By": "Assignment",
+    "Accountable For": "Assignment",
+    "Governed By": "Compliance",
+    "Reviews": "Verification",
+    "Satisfies": "Realization",
+    "Mitigates": "Risk"
+  },
+  "relationshipTargetMatrix": {
+    "Precedes": {
+      "Phase": [
+        "Phase"
+      ]
+    },
+    "Gated By": {
+      "Phase": [
+        "Decision Checkpoint",
+        "Technical Review"
+      ]
+    },
+    "Produces": {
+      "Phase": [
+        "Deliverable"
+      ],
+      "Process Area": [
+        "Deliverable"
+      ]
+    },
+    "Performed By": {
+      "Process Area": [
+        "Role"
+      ],
+      "Phase": [
+        "Role"
+      ]
+    },
+    "Accountable For": {
+      "Role": [
+        "Decision Checkpoint"
+      ]
+    },
+    "Governed By": {
+      "Process Area": [
+        "Standard"
+      ],
+      "Deliverable": [
+        "Standard"
+      ],
+      "Phase": [
+        "Standard"
+      ]
+    },
+    "Reviews": {
+      "Technical Review": [
+        "Deliverable"
+      ],
+      "Decision Checkpoint": [
+        "Deliverable"
+      ]
+    },
+    "Satisfies": {
+      "Deliverable": [
+        "Requirement"
+      ]
+    },
+    "Mitigates": {
+      "Process Area": [
+        "Risk"
+      ],
+      "Deliverable": [
+        "Risk"
+      ]
+    }
+  }
+}

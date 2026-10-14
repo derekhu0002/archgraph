@@ -24,7 +24,7 @@ const ARGO = path.join(HOME, '.argo');
 const SERVER = path.join(ARGO, 'scripts', 'argo-mcp-server.js');
 const CLI = path.join(ARGO, 'scripts', 'ontology-projection', 'cli.js');
 const NODE_PATH = path.join(ARGO, 'node_modules');
-const WS = '/work/custom-schema';
+const WS = '/work/custom-schema/team-graph';
 const DB = 'schema-bundle-custom';
 
 const ENV_SUPPORTED_KEYS = [

@@ -1,0 +1,411 @@
+{
+  "name": "IPD",
+  "description": "Example graph validated against the IPD schema bundle (phases and gates, disciplines mapped to their governing standards, deliverables, requirements and risks).",
+  "elements": [
+    {
+      "id": "ph-concept",
+      "name": "Concept Phase",
+      "type": "Phase",
+      "description": "IPD Concept stage."
+    },
+    {
+      "id": "ph-plan",
+      "name": "Plan Phase",
+      "type": "Phase",
+      "description": "IPD Plan stage."
+    },
+    {
+      "id": "ph-develop",
+      "name": "Develop Phase",
+      "type": "Phase",
+      "description": "IPD Develop stage."
+    },
+    {
+      "id": "ph-qualify",
+      "name": "Qualify Phase",
+      "type": "Phase",
+      "description": "IPD Qualify/Verify stage."
+    },
+    {
+      "id": "ph-launch",
+      "name": "Launch Phase",
+      "type": "Phase",
+      "description": "IPD Launch/Release stage."
+    },
+    {
+      "id": "dcp1",
+      "name": "DCP1 Concept Decision",
+      "type": "Decision Checkpoint",
+      "description": "Decision checkpoint closing the Concept phase."
+    },
+    {
+      "id": "tr3",
+      "name": "TR3 Design Review",
+      "type": "Technical Review",
+      "description": "Technical review of the design."
+    },
+    {
+      "id": "pa-req",
+      "name": "Requirements Engineering",
+      "type": "Process Area",
+      "description": "Elicit, specify and manage requirements."
+    },
+    {
+      "id": "pa-se",
+      "name": "Systems Engineering",
+      "type": "Process Area",
+      "description": "System life-cycle engineering."
+    },
+    {
+      "id": "pa-safety",
+      "name": "Functional Safety",
+      "type": "Process Area",
+      "description": "Safety life-cycle management."
+    },
+    {
+      "id": "std-29148",
+      "name": "ISO/IEC/IEEE 29148",
+      "type": "Standard",
+      "description": "Requirements engineering standard."
+    },
+    {
+      "id": "std-15288",
+      "name": "ISO/IEC/IEEE 15288",
+      "type": "Standard",
+      "description": "System life cycle processes."
+    },
+    {
+      "id": "std-26262",
+      "name": "ISO 26262",
+      "type": "Standard",
+      "description": "Automotive functional safety."
+    },
+    {
+      "id": "std-apqp",
+      "name": "AIAG APQP",
+      "type": "Standard",
+      "description": "Advanced Product Quality Planning."
+    },
+    {
+      "id": "std-stagegate",
+      "name": "Stage-Gate",
+      "type": "Standard",
+      "description": "Stage-Gate (Cooper) new-product process."
+    },
+    {
+      "id": "std-cmmi",
+      "name": "CMMI",
+      "type": "Standard",
+      "description": "Capability Maturity Model Integration."
+    },
+    {
+      "id": "role-ipmt",
+      "name": "IPMT",
+      "type": "Role",
+      "description": "Integrated Portfolio Management Team."
+    },
+    {
+      "id": "role-pdt",
+      "name": "PDT",
+      "type": "Role",
+      "description": "Product Development Team."
+    },
+    {
+      "id": "del-reqs",
+      "name": "Requirements Specification",
+      "type": "Deliverable",
+      "description": "The requirements baseline."
+    },
+    {
+      "id": "del-arch",
+      "name": "Architecture Specification",
+      "type": "Deliverable",
+      "description": "The system architecture."
+    },
+    {
+      "id": "del-fmea",
+      "name": "Design FMEA",
+      "type": "Deliverable",
+      "description": "Failure mode and effects analysis."
+    },
+    {
+      "id": "req-safety",
+      "name": "Safety Goal",
+      "type": "Requirement",
+      "description": "A functional-safety goal."
+    },
+    {
+      "id": "risk-supply",
+      "name": "Key Component Supply Risk",
+      "type": "Risk",
+      "description": "Supply risk for a key component."
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-ph-concept-precedes-ph-plan",
+      "name": "Concept Phase precedes Plan Phase",
+      "type": "Precedes",
+      "source_id": "ph-concept",
+      "target_id": "ph-plan",
+      "source_name": "Concept Phase",
+      "target_name": "Plan Phase",
+      "statement": "Concept Phase --(Precedes)--> Plan Phase"
+    },
+    {
+      "id": "rel-ph-plan-precedes-ph-develop",
+      "name": "Plan Phase precedes Develop Phase",
+      "type": "Precedes",
+      "source_id": "ph-plan",
+      "target_id": "ph-develop",
+      "source_name": "Plan Phase",
+      "target_name": "Develop Phase",
+      "statement": "Plan Phase --(Precedes)--> Develop Phase"
+    },
+    {
+      "id": "rel-ph-develop-precedes-ph-qualify",
+      "name": "Develop Phase precedes Qualify Phase",
+      "type": "Precedes",
+      "source_id": "ph-develop",
+      "target_id": "ph-qualify",
+      "source_name": "Develop Phase",
+      "target_name": "Qualify Phase",
+      "statement": "Develop Phase --(Precedes)--> Qualify Phase"
+    },
+    {
+      "id": "rel-ph-qualify-precedes-ph-launch",
+      "name": "Qualify Phase precedes Launch Phase",
+      "type": "Precedes",
+      "source_id": "ph-qualify",
+      "target_id": "ph-launch",
+      "source_name": "Qualify Phase",
+      "target_name": "Launch Phase",
+      "statement": "Qualify Phase --(Precedes)--> Launch Phase"
+    },
+    {
+      "id": "rel-ph-concept-gated-by-dcp1",
+      "name": "Concept Phase gated by DCP1 Concept Decision",
+      "type": "Gated By",
+      "source_id": "ph-concept",
+      "target_id": "dcp1",
+      "source_name": "Concept Phase",
+      "target_name": "DCP1 Concept Decision",
+      "statement": "Concept Phase --(Gated By)--> DCP1 Concept Decision"
+    },
+    {
+      "id": "rel-ph-develop-gated-by-tr3",
+      "name": "Develop Phase gated by TR3 Design Review",
+      "type": "Gated By",
+      "source_id": "ph-develop",
+      "target_id": "tr3",
+      "source_name": "Develop Phase",
+      "target_name": "TR3 Design Review",
+      "statement": "Develop Phase --(Gated By)--> TR3 Design Review"
+    },
+    {
+      "id": "rel-pa-req-produces-del-reqs",
+      "name": "Requirements Engineering produces Requirements Specification",
+      "type": "Produces",
+      "source_id": "pa-req",
+      "target_id": "del-reqs",
+      "source_name": "Requirements Engineering",
+      "target_name": "Requirements Specification",
+      "statement": "Requirements Engineering --(Produces)--> Requirements Specification"
+    },
+    {
+      "id": "rel-pa-se-produces-del-arch",
+      "name": "Systems Engineering produces Architecture Specification",
+      "type": "Produces",
+      "source_id": "pa-se",
+      "target_id": "del-arch",
+      "source_name": "Systems Engineering",
+      "target_name": "Architecture Specification",
+      "statement": "Systems Engineering --(Produces)--> Architecture Specification"
+    },
+    {
+      "id": "rel-pa-safety-produces-del-fmea",
+      "name": "Functional Safety produces Design FMEA",
+      "type": "Produces",
+      "source_id": "pa-safety",
+      "target_id": "del-fmea",
+      "source_name": "Functional Safety",
+      "target_name": "Design FMEA",
+      "statement": "Functional Safety --(Produces)--> Design FMEA"
+    },
+    {
+      "id": "rel-pa-req-governed-by-std-29148",
+      "name": "Requirements Engineering governed by ISO/IEC/IEEE 29148",
+      "type": "Governed By",
+      "source_id": "pa-req",
+      "target_id": "std-29148",
+      "source_name": "Requirements Engineering",
+      "target_name": "ISO/IEC/IEEE 29148",
+      "statement": "Requirements Engineering --(Governed By)--> ISO/IEC/IEEE 29148"
+    },
+    {
+      "id": "rel-pa-se-governed-by-std-15288",
+      "name": "Systems Engineering governed by ISO/IEC/IEEE 15288",
+      "type": "Governed By",
+      "source_id": "pa-se",
+      "target_id": "std-15288",
+      "source_name": "Systems Engineering",
+      "target_name": "ISO/IEC/IEEE 15288",
+      "statement": "Systems Engineering --(Governed By)--> ISO/IEC/IEEE 15288"
+    },
+    {
+      "id": "rel-pa-safety-governed-by-std-26262",
+      "name": "Functional Safety governed by ISO 26262",
+      "type": "Governed By",
+      "source_id": "pa-safety",
+      "target_id": "std-26262",
+      "source_name": "Functional Safety",
+      "target_name": "ISO 26262",
+      "statement": "Functional Safety --(Governed By)--> ISO 26262"
+    },
+    {
+      "id": "rel-ph-plan-governed-by-std-stagegate",
+      "name": "Plan Phase governed by Stage-Gate",
+      "type": "Governed By",
+      "source_id": "ph-plan",
+      "target_id": "std-stagegate",
+      "source_name": "Plan Phase",
+      "target_name": "Stage-Gate",
+      "statement": "Plan Phase --(Governed By)--> Stage-Gate"
+    },
+    {
+      "id": "rel-ph-develop-governed-by-std-apqp",
+      "name": "Develop Phase governed by AIAG APQP",
+      "type": "Governed By",
+      "source_id": "ph-develop",
+      "target_id": "std-apqp",
+      "source_name": "Develop Phase",
+      "target_name": "AIAG APQP",
+      "statement": "Develop Phase --(Governed By)--> AIAG APQP"
+    },
+    {
+      "id": "rel-pa-req-governed-by-std-cmmi",
+      "name": "Requirements Engineering governed by CMMI",
+      "type": "Governed By",
+      "source_id": "pa-req",
+      "target_id": "std-cmmi",
+      "source_name": "Requirements Engineering",
+      "target_name": "CMMI",
+      "statement": "Requirements Engineering --(Governed By)--> CMMI"
+    },
+    {
+      "id": "rel-del-reqs-satisfies-req-safety",
+      "name": "Requirements Specification satisfies Safety Goal",
+      "type": "Satisfies",
+      "source_id": "del-reqs",
+      "target_id": "req-safety",
+      "source_name": "Requirements Specification",
+      "target_name": "Safety Goal",
+      "statement": "Requirements Specification --(Satisfies)--> Safety Goal"
+    },
+    {
+      "id": "rel-del-fmea-mitigates-risk-supply",
+      "name": "Design FMEA mitigates Key Component Supply Risk",
+      "type": "Mitigates",
+      "source_id": "del-fmea",
+      "target_id": "risk-supply",
+      "source_name": "Design FMEA",
+      "target_name": "Key Component Supply Risk",
+      "statement": "Design FMEA --(Mitigates)--> Key Component Supply Risk"
+    },
+    {
+      "id": "rel-tr3-reviews-del-arch",
+      "name": "TR3 Design Review reviews Architecture Specification",
+      "type": "Reviews",
+      "source_id": "tr3",
+      "target_id": "del-arch",
+      "source_name": "TR3 Design Review",
+      "target_name": "Architecture Specification",
+      "statement": "TR3 Design Review --(Reviews)--> Architecture Specification"
+    },
+    {
+      "id": "rel-pa-req-performed-by-role-pdt",
+      "name": "Requirements Engineering performed by PDT",
+      "type": "Performed By",
+      "source_id": "pa-req",
+      "target_id": "role-pdt",
+      "source_name": "Requirements Engineering",
+      "target_name": "PDT",
+      "statement": "Requirements Engineering --(Performed By)--> PDT"
+    },
+    {
+      "id": "rel-role-ipmt-accountable-for-dcp1",
+      "name": "IPMT accountable for DCP1 Concept Decision",
+      "type": "Accountable For",
+      "source_id": "role-ipmt",
+      "target_id": "dcp1",
+      "source_name": "IPMT",
+      "target_name": "DCP1 Concept Decision",
+      "statement": "IPMT --(Accountable For)--> DCP1 Concept Decision"
+    },
+    {
+      "id": "rel-ph-concept-performed-by-role-ipmt",
+      "name": "Concept Phase performed by IPMT",
+      "type": "Performed By",
+      "source_id": "ph-concept",
+      "target_id": "role-ipmt",
+      "source_name": "Concept Phase",
+      "target_name": "IPMT",
+      "statement": "Concept Phase --(Performed By)--> IPMT"
+    }
+  ],
+  "views": [
+    {
+      "view_id": "view-root",
+      "view_name": "SystemArchitecture",
+      "description": "Root view holding the example IPD graph.",
+      "included_elements": [
+        "ph-concept",
+        "ph-plan",
+        "ph-develop",
+        "ph-qualify",
+        "ph-launch",
+        "dcp1",
+        "tr3",
+        "pa-req",
+        "pa-se",
+        "pa-safety",
+        "std-29148",
+        "std-15288",
+        "std-26262",
+        "std-apqp",
+        "std-stagegate",
+        "std-cmmi",
+        "role-ipmt",
+        "role-pdt",
+        "del-reqs",
+        "del-arch",
+        "del-fmea",
+        "req-safety",
+        "risk-supply"
+      ],
+      "included_relationships": [
+        "rel-ph-concept-precedes-ph-plan",
+        "rel-ph-plan-precedes-ph-develop",
+        "rel-ph-develop-precedes-ph-qualify",
+        "rel-ph-qualify-precedes-ph-launch",
+        "rel-ph-concept-gated-by-dcp1",
+        "rel-ph-develop-gated-by-tr3",
+        "rel-pa-req-produces-del-reqs",
+        "rel-pa-se-produces-del-arch",
+        "rel-pa-safety-produces-del-fmea",
+        "rel-pa-req-governed-by-std-29148",
+        "rel-pa-se-governed-by-std-15288",
+        "rel-pa-safety-governed-by-std-26262",
+        "rel-ph-plan-governed-by-std-stagegate",
+        "rel-ph-develop-governed-by-std-apqp",
+        "rel-pa-req-governed-by-std-cmmi",
+        "rel-del-reqs-satisfies-req-safety",
+        "rel-del-fmea-mitigates-risk-supply",
+        "rel-tr3-reviews-del-arch",
+        "rel-pa-req-performed-by-role-pdt",
+        "rel-role-ipmt-accountable-for-dcp1",
+        "rel-ph-concept-performed-by-role-ipmt"
+      ]
+    }
+  ]
+}

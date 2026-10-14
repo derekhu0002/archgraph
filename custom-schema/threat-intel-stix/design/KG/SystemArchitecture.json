@@ -1,0 +1,206 @@
+{
+  "name": "STIX Threat Intelligence",
+  "description": "Example graph validated against the STIX Threat Intelligence schema bundle (an APT campaign with TTPs, vulnerability, indicator and mitigation).",
+  "elements": [
+    {
+      "id": "ta-aptx",
+      "name": "APT-X",
+      "type": "Threat Actor",
+      "description": "A tracked threat actor."
+    },
+    {
+      "id": "is-aptx",
+      "name": "APT-X Intrusion Set",
+      "type": "Intrusion Set",
+      "description": "A clustered set of activity attributed to APT-X."
+    },
+    {
+      "id": "campaign-nightfall",
+      "name": "Operation Nightfall",
+      "type": "Campaign",
+      "description": "A named campaign."
+    },
+    {
+      "id": "ap-phish",
+      "name": "Spearphishing Attachment",
+      "type": "Attack Pattern",
+      "description": "An ATT&CK technique."
+    },
+    {
+      "id": "mal-loader",
+      "name": "Nightfall Loader",
+      "type": "Malware",
+      "description": "A malware loader."
+    },
+    {
+      "id": "tool-c2",
+      "name": "C2 Framework",
+      "type": "Tool",
+      "description": "A command-and-control tool."
+    },
+    {
+      "id": "vuln-cve",
+      "name": "CVE-2026-1234",
+      "type": "Vulnerability",
+      "description": "An exploited vulnerability."
+    },
+    {
+      "id": "ind-hash",
+      "name": "Malicious Hash Indicator",
+      "type": "Indicator",
+      "description": "A file-hash indicator."
+    },
+    {
+      "id": "identity-bank",
+      "name": "Target Bank",
+      "type": "Identity",
+      "description": "A targeted identity."
+    },
+    {
+      "id": "coa-patch",
+      "name": "Patch CVE-2026-1234",
+      "type": "Course of Action",
+      "description": "A mitigation."
+    },
+    {
+      "id": "obs-payload",
+      "name": "Observed Payload Capture",
+      "type": "Observed Data",
+      "description": "Observed network data."
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-is-aptx-attributed-to-ta-aptx",
+      "name": "APT-X Intrusion Set attributed to APT-X",
+      "type": "Attributed To",
+      "source_id": "is-aptx",
+      "target_id": "ta-aptx",
+      "source_name": "APT-X Intrusion Set",
+      "target_name": "APT-X",
+      "statement": "APT-X Intrusion Set --(Attributed To)--> APT-X"
+    },
+    {
+      "id": "rel-campaign-nightfall-attributed-to-ta-aptx",
+      "name": "Operation Nightfall attributed to APT-X",
+      "type": "Attributed To",
+      "source_id": "campaign-nightfall",
+      "target_id": "ta-aptx",
+      "source_name": "Operation Nightfall",
+      "target_name": "APT-X",
+      "statement": "Operation Nightfall --(Attributed To)--> APT-X"
+    },
+    {
+      "id": "rel-is-aptx-uses-ap-phish",
+      "name": "APT-X Intrusion Set uses Spearphishing Attachment",
+      "type": "Uses",
+      "source_id": "is-aptx",
+      "target_id": "ap-phish",
+      "source_name": "APT-X Intrusion Set",
+      "target_name": "Spearphishing Attachment",
+      "statement": "APT-X Intrusion Set --(Uses)--> Spearphishing Attachment"
+    },
+    {
+      "id": "rel-is-aptx-uses-mal-loader",
+      "name": "APT-X Intrusion Set uses Nightfall Loader",
+      "type": "Uses",
+      "source_id": "is-aptx",
+      "target_id": "mal-loader",
+      "source_name": "APT-X Intrusion Set",
+      "target_name": "Nightfall Loader",
+      "statement": "APT-X Intrusion Set --(Uses)--> Nightfall Loader"
+    },
+    {
+      "id": "rel-ta-aptx-uses-tool-c2",
+      "name": "APT-X uses C2 Framework",
+      "type": "Uses",
+      "source_id": "ta-aptx",
+      "target_id": "tool-c2",
+      "source_name": "APT-X",
+      "target_name": "C2 Framework",
+      "statement": "APT-X --(Uses)--> C2 Framework"
+    },
+    {
+      "id": "rel-campaign-nightfall-targets-identity-bank",
+      "name": "Operation Nightfall targets Target Bank",
+      "type": "Targets",
+      "source_id": "campaign-nightfall",
+      "target_id": "identity-bank",
+      "source_name": "Operation Nightfall",
+      "target_name": "Target Bank",
+      "statement": "Operation Nightfall --(Targets)--> Target Bank"
+    },
+    {
+      "id": "rel-mal-loader-exploits-vuln-cve",
+      "name": "Nightfall Loader exploits CVE-2026-1234",
+      "type": "Exploits",
+      "source_id": "mal-loader",
+      "target_id": "vuln-cve",
+      "source_name": "Nightfall Loader",
+      "target_name": "CVE-2026-1234",
+      "statement": "Nightfall Loader --(Exploits)--> CVE-2026-1234"
+    },
+    {
+      "id": "rel-ind-hash-indicates-mal-loader",
+      "name": "Malicious Hash Indicator indicates Nightfall Loader",
+      "type": "Indicates",
+      "source_id": "ind-hash",
+      "target_id": "mal-loader",
+      "source_name": "Malicious Hash Indicator",
+      "target_name": "Nightfall Loader",
+      "statement": "Malicious Hash Indicator --(Indicates)--> Nightfall Loader"
+    },
+    {
+      "id": "rel-ind-hash-based-on-obs-payload",
+      "name": "Malicious Hash Indicator based on Observed Payload Capture",
+      "type": "Based On",
+      "source_id": "ind-hash",
+      "target_id": "obs-payload",
+      "source_name": "Malicious Hash Indicator",
+      "target_name": "Observed Payload Capture",
+      "statement": "Malicious Hash Indicator --(Based On)--> Observed Payload Capture"
+    },
+    {
+      "id": "rel-coa-patch-mitigates-vuln-cve",
+      "name": "Patch CVE-2026-1234 mitigates CVE-2026-1234",
+      "type": "Mitigates",
+      "source_id": "coa-patch",
+      "target_id": "vuln-cve",
+      "source_name": "Patch CVE-2026-1234",
+      "target_name": "CVE-2026-1234",
+      "statement": "Patch CVE-2026-1234 --(Mitigates)--> CVE-2026-1234"
+    }
+  ],
+  "views": [
+    {
+      "view_id": "view-root",
+      "view_name": "SystemArchitecture",
+      "description": "Root view holding the example threat-intelligence graph.",
+      "included_elements": [
+        "ta-aptx",
+        "is-aptx",
+        "campaign-nightfall",
+        "ap-phish",
+        "mal-loader",
+        "tool-c2",
+        "vuln-cve",
+        "ind-hash",
+        "identity-bank",
+        "coa-patch",
+        "obs-payload"
+      ],
+      "included_relationships": [
+        "rel-is-aptx-attributed-to-ta-aptx",
+        "rel-campaign-nightfall-attributed-to-ta-aptx",
+        "rel-is-aptx-uses-ap-phish",
+        "rel-is-aptx-uses-mal-loader",
+        "rel-ta-aptx-uses-tool-c2",
+        "rel-campaign-nightfall-targets-identity-bank",
+        "rel-mal-loader-exploits-vuln-cve",
+        "rel-ind-hash-indicates-mal-loader",
+        "rel-ind-hash-based-on-obs-payload",
+        "rel-coa-patch-mitigates-vuln-cve"
+      ]
+    }
+  ]
+}

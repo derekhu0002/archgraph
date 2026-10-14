@@ -3,7 +3,7 @@
 A repository defines its modeling language by dropping a **schema bundle** under
 `<workspace>/.argo/schema/`. Everything the framework reads about your ontology
 lives there, in **four layers** (+ an optional human guide). This page is the
-author's reference; the runnable example is [`custom-schema/`](../custom-schema/README.md).
+author's reference; the runnable examples are catalogued in [`custom-schema/README.md`](../custom-schema/README.md).
 
 | Layer | File | Answers |
 |---|---|---|
@@ -83,6 +83,7 @@ Example:
 <your-repo>/design/KG/SystemArchitecture.json   # you author it (a custom schema fails closed without it)
 ```
 
-Runnable references: [`custom-schema/`](../custom-schema/README.md) and the
-ontology-engine samples (Team Graph + PROV-O) under
+Runnable references: the prebuilt bundles under [`custom-schema/`](../custom-schema/README.md)
+(Team Graph, Finance CDM, Industry 4.0 AAS, STIX Threat Intelligence, UML 2, SysML)
+and the ontology-engine samples (Team Graph + PROV-O) under
 [`sandbox/ontology-projection/samples/`](../sandbox/ontology-projection/samples/).

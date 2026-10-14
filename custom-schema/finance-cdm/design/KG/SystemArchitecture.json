@@ -1,0 +1,210 @@
+{
+  "name": "Finance CDM",
+  "description": "Example graph validated against the Finance CDM schema bundle (a small interest-rate-swap lifecycle).",
+  "elements": [
+    {
+      "id": "party-bank",
+      "name": "Acme Bank",
+      "type": "Party",
+      "description": "A dealer party to the swap."
+    },
+    {
+      "id": "party-corp",
+      "name": "Beta Corp",
+      "type": "Party",
+      "description": "A corporate counterparty."
+    },
+    {
+      "id": "agreement-isda",
+      "name": "ISDA Master Agreement 2026",
+      "type": "Legal Agreement",
+      "description": "The governing master agreement."
+    },
+    {
+      "id": "product-index",
+      "name": "USD SOFR Index",
+      "type": "Product",
+      "description": "The underlying floating-rate index."
+    },
+    {
+      "id": "product-swap",
+      "name": "USD SOFR OIS Swap",
+      "type": "Product",
+      "description": "The economic product definition."
+    },
+    {
+      "id": "contract-irs",
+      "name": "IRS-2026-001",
+      "type": "Contract",
+      "description": "The executed swap contract."
+    },
+    {
+      "id": "event-exec",
+      "name": "Execution",
+      "type": "Lifecycle Event",
+      "description": "The contract execution event."
+    },
+    {
+      "id": "cf-fixed",
+      "name": "Fixed Leg Payment",
+      "type": "Cashflow",
+      "description": "A fixed-leg cashflow."
+    },
+    {
+      "id": "cf-float",
+      "name": "Floating Leg Payment",
+      "type": "Cashflow",
+      "description": "A floating-leg cashflow."
+    },
+    {
+      "id": "obs-sofr",
+      "name": "SOFR Fixing 2026-01-15",
+      "type": "Observation",
+      "description": "A market observation."
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-party-bank-entered-into-contract-irs",
+      "name": "Acme Bank entered into IRS-2026-001",
+      "type": "Entered Into",
+      "source_id": "party-bank",
+      "target_id": "contract-irs",
+      "source_name": "Acme Bank",
+      "target_name": "IRS-2026-001",
+      "statement": "Acme Bank --(Entered Into)--> IRS-2026-001"
+    },
+    {
+      "id": "rel-party-corp-entered-into-contract-irs",
+      "name": "Beta Corp entered into IRS-2026-001",
+      "type": "Entered Into",
+      "source_id": "party-corp",
+      "target_id": "contract-irs",
+      "source_name": "Beta Corp",
+      "target_name": "IRS-2026-001",
+      "statement": "Beta Corp --(Entered Into)--> IRS-2026-001"
+    },
+    {
+      "id": "rel-contract-irs-governed-by-agreement-isda",
+      "name": "IRS-2026-001 governed by ISDA Master Agreement 2026",
+      "type": "Governed By",
+      "source_id": "contract-irs",
+      "target_id": "agreement-isda",
+      "source_name": "IRS-2026-001",
+      "target_name": "ISDA Master Agreement 2026",
+      "statement": "IRS-2026-001 --(Governed By)--> ISDA Master Agreement 2026"
+    },
+    {
+      "id": "rel-contract-irs-based-on-product-swap",
+      "name": "IRS-2026-001 based on USD SOFR OIS Swap",
+      "type": "Based On",
+      "source_id": "contract-irs",
+      "target_id": "product-swap",
+      "source_name": "IRS-2026-001",
+      "target_name": "USD SOFR OIS Swap",
+      "statement": "IRS-2026-001 --(Based On)--> USD SOFR OIS Swap"
+    },
+    {
+      "id": "rel-product-swap-derived-from-product-index",
+      "name": "USD SOFR OIS Swap derived from USD SOFR Index",
+      "type": "Derived From",
+      "source_id": "product-swap",
+      "target_id": "product-index",
+      "source_name": "USD SOFR OIS Swap",
+      "target_name": "USD SOFR Index",
+      "statement": "USD SOFR OIS Swap --(Derived From)--> USD SOFR Index"
+    },
+    {
+      "id": "rel-contract-irs-has-event-event-exec",
+      "name": "IRS-2026-001 has event Execution",
+      "type": "Has Event",
+      "source_id": "contract-irs",
+      "target_id": "event-exec",
+      "source_name": "IRS-2026-001",
+      "target_name": "Execution",
+      "statement": "IRS-2026-001 --(Has Event)--> Execution"
+    },
+    {
+      "id": "rel-event-exec-triggers-cf-fixed",
+      "name": "Execution triggers Fixed Leg Payment",
+      "type": "Triggers",
+      "source_id": "event-exec",
+      "target_id": "cf-fixed",
+      "source_name": "Execution",
+      "target_name": "Fixed Leg Payment",
+      "statement": "Execution --(Triggers)--> Fixed Leg Payment"
+    },
+    {
+      "id": "rel-event-exec-triggers-cf-float",
+      "name": "Execution triggers Floating Leg Payment",
+      "type": "Triggers",
+      "source_id": "event-exec",
+      "target_id": "cf-float",
+      "source_name": "Execution",
+      "target_name": "Floating Leg Payment",
+      "statement": "Execution --(Triggers)--> Floating Leg Payment"
+    },
+    {
+      "id": "rel-cf-fixed-payable-to-party-bank",
+      "name": "Fixed Leg Payment payable to Acme Bank",
+      "type": "Payable To",
+      "source_id": "cf-fixed",
+      "target_id": "party-bank",
+      "source_name": "Fixed Leg Payment",
+      "target_name": "Acme Bank",
+      "statement": "Fixed Leg Payment --(Payable To)--> Acme Bank"
+    },
+    {
+      "id": "rel-cf-float-payable-to-party-corp",
+      "name": "Floating Leg Payment payable to Beta Corp",
+      "type": "Payable To",
+      "source_id": "cf-float",
+      "target_id": "party-corp",
+      "source_name": "Floating Leg Payment",
+      "target_name": "Beta Corp",
+      "statement": "Floating Leg Payment --(Payable To)--> Beta Corp"
+    },
+    {
+      "id": "rel-cf-float-observed-by-obs-sofr",
+      "name": "Floating Leg Payment observed by SOFR Fixing 2026-01-15",
+      "type": "Observed By",
+      "source_id": "cf-float",
+      "target_id": "obs-sofr",
+      "source_name": "Floating Leg Payment",
+      "target_name": "SOFR Fixing 2026-01-15",
+      "statement": "Floating Leg Payment --(Observed By)--> SOFR Fixing 2026-01-15"
+    }
+  ],
+  "views": [
+    {
+      "view_id": "view-root",
+      "view_name": "SystemArchitecture",
+      "description": "Root view holding the example swap lifecycle graph.",
+      "included_elements": [
+        "party-bank",
+        "party-corp",
+        "agreement-isda",
+        "product-index",
+        "product-swap",
+        "contract-irs",
+        "event-exec",
+        "cf-fixed",
+        "cf-float",
+        "obs-sofr"
+      ],
+      "included_relationships": [
+        "rel-party-bank-entered-into-contract-irs",
+        "rel-party-corp-entered-into-contract-irs",
+        "rel-contract-irs-governed-by-agreement-isda",
+        "rel-contract-irs-based-on-product-swap",
+        "rel-product-swap-derived-from-product-index",
+        "rel-contract-irs-has-event-event-exec",
+        "rel-event-exec-triggers-cf-fixed",
+        "rel-event-exec-triggers-cf-float",
+        "rel-cf-fixed-payable-to-party-bank",
+        "rel-cf-float-payable-to-party-corp",
+        "rel-cf-float-observed-by-obs-sofr"
+      ]
+    }
+  ]
+}

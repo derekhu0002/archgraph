@@ -1,0 +1,152 @@
+{
+  "name": "Industry 4.0 AAS",
+  "description": "Example graph validated against the Industry 4.0 AAS schema bundle (a pump asset with its administration shell and submodels).",
+  "elements": [
+    {
+      "id": "admin-line-a",
+      "name": "Plant Line A Administrator",
+      "type": "Asset Administrator",
+      "description": "The administrator of line A assets."
+    },
+    {
+      "id": "shell-pump",
+      "name": "Pump P-101 Administration Shell",
+      "type": "Administration Shell",
+      "description": "The digital shell of pump P-101."
+    },
+    {
+      "id": "asset-pump",
+      "name": "Pump P-101",
+      "type": "Asset",
+      "description": "A physical pump."
+    },
+    {
+      "id": "sm-nameplate",
+      "name": "Nameplate Submodel",
+      "type": "Submodel",
+      "description": "Nameplate submodel."
+    },
+    {
+      "id": "sm-techdata",
+      "name": "TechnicalData Submodel",
+      "type": "Submodel",
+      "description": "Technical data submodel."
+    },
+    {
+      "id": "sme-serial",
+      "name": "SerialNumber Property",
+      "type": "Submodel Element",
+      "description": "The serial number property."
+    },
+    {
+      "id": "cap-pressure",
+      "name": "Pressure Control Capability",
+      "type": "Capability",
+      "description": "A capability of the pump."
+    },
+    {
+      "id": "op-setpressure",
+      "name": "SetPressure Operation",
+      "type": "Operation",
+      "description": "An invocable operation."
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-admin-line-a-administers-shell-pump",
+      "name": "Plant Line A Administrator administers Pump P-101 Administration Shell",
+      "type": "Administers",
+      "source_id": "admin-line-a",
+      "target_id": "shell-pump",
+      "source_name": "Plant Line A Administrator",
+      "target_name": "Pump P-101 Administration Shell",
+      "statement": "Plant Line A Administrator --(Administers)--> Pump P-101 Administration Shell"
+    },
+    {
+      "id": "rel-shell-pump-represents-asset-pump",
+      "name": "Pump P-101 Administration Shell represents Pump P-101",
+      "type": "Represents",
+      "source_id": "shell-pump",
+      "target_id": "asset-pump",
+      "source_name": "Pump P-101 Administration Shell",
+      "target_name": "Pump P-101",
+      "statement": "Pump P-101 Administration Shell --(Represents)--> Pump P-101"
+    },
+    {
+      "id": "rel-shell-pump-contains-sm-nameplate",
+      "name": "Pump P-101 Administration Shell contains Nameplate Submodel",
+      "type": "Contains",
+      "source_id": "shell-pump",
+      "target_id": "sm-nameplate",
+      "source_name": "Pump P-101 Administration Shell",
+      "target_name": "Nameplate Submodel",
+      "statement": "Pump P-101 Administration Shell --(Contains)--> Nameplate Submodel"
+    },
+    {
+      "id": "rel-shell-pump-contains-sm-techdata",
+      "name": "Pump P-101 Administration Shell contains TechnicalData Submodel",
+      "type": "Contains",
+      "source_id": "shell-pump",
+      "target_id": "sm-techdata",
+      "source_name": "Pump P-101 Administration Shell",
+      "target_name": "TechnicalData Submodel",
+      "statement": "Pump P-101 Administration Shell --(Contains)--> TechnicalData Submodel"
+    },
+    {
+      "id": "rel-sm-techdata-contains-sme-serial",
+      "name": "TechnicalData Submodel contains SerialNumber Property",
+      "type": "Contains",
+      "source_id": "sm-techdata",
+      "target_id": "sme-serial",
+      "source_name": "TechnicalData Submodel",
+      "target_name": "SerialNumber Property",
+      "statement": "TechnicalData Submodel --(Contains)--> SerialNumber Property"
+    },
+    {
+      "id": "rel-asset-pump-provides-capability-cap-pressure",
+      "name": "Pump P-101 provides capability Pressure Control Capability",
+      "type": "Provides Capability",
+      "source_id": "asset-pump",
+      "target_id": "cap-pressure",
+      "source_name": "Pump P-101",
+      "target_name": "Pressure Control Capability",
+      "statement": "Pump P-101 --(Provides Capability)--> Pressure Control Capability"
+    },
+    {
+      "id": "rel-op-setpressure-realizes-cap-pressure",
+      "name": "SetPressure Operation realizes Pressure Control Capability",
+      "type": "Realizes",
+      "source_id": "op-setpressure",
+      "target_id": "cap-pressure",
+      "source_name": "SetPressure Operation",
+      "target_name": "Pressure Control Capability",
+      "statement": "SetPressure Operation --(Realizes)--> Pressure Control Capability"
+    }
+  ],
+  "views": [
+    {
+      "view_id": "view-root",
+      "view_name": "SystemArchitecture",
+      "description": "Root view holding the example asset administration shell graph.",
+      "included_elements": [
+        "admin-line-a",
+        "shell-pump",
+        "asset-pump",
+        "sm-nameplate",
+        "sm-techdata",
+        "sme-serial",
+        "cap-pressure",
+        "op-setpressure"
+      ],
+      "included_relationships": [
+        "rel-admin-line-a-administers-shell-pump",
+        "rel-shell-pump-represents-asset-pump",
+        "rel-shell-pump-contains-sm-nameplate",
+        "rel-shell-pump-contains-sm-techdata",
+        "rel-sm-techdata-contains-sme-serial",
+        "rel-asset-pump-provides-capability-cap-pressure",
+        "rel-op-setpressure-realizes-cap-pressure"
+      ]
+    }
+  ]
+}

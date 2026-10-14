@@ -1,0 +1,75 @@
+{
+  "elementTypeMetadata": {
+    "Asset Administrator": {
+      "layer": "Technology",
+      "aspect": "Active Structure"
+    },
+    "Administration Shell": {
+      "layer": "Technology",
+      "aspect": "Active Structure"
+    },
+    "Asset": {
+      "layer": "Technology",
+      "aspect": "Passive Structure"
+    },
+    "Submodel": {
+      "layer": "Technology",
+      "aspect": "Passive Structure"
+    },
+    "Submodel Element": {
+      "layer": "Technology",
+      "aspect": "Passive Structure"
+    },
+    "Capability": {
+      "layer": "Technology",
+      "aspect": "Behavior"
+    },
+    "Operation": {
+      "layer": "Technology",
+      "aspect": "Behavior"
+    }
+  },
+  "relationshipCategoryByType": {
+    "Administers": "Assignment",
+    "Represents": "Association",
+    "Contains": "Composition",
+    "Provides Capability": "Assignment",
+    "Realizes": "Realization",
+    "Requires": "Dependency"
+  },
+  "relationshipTargetMatrix": {
+    "Administers": {
+      "Asset Administrator": [
+        "Administration Shell"
+      ]
+    },
+    "Represents": {
+      "Administration Shell": [
+        "Asset"
+      ]
+    },
+    "Contains": {
+      "Administration Shell": [
+        "Submodel"
+      ],
+      "Submodel": [
+        "Submodel Element"
+      ]
+    },
+    "Provides Capability": {
+      "Asset": [
+        "Capability"
+      ]
+    },
+    "Realizes": {
+      "Operation": [
+        "Capability"
+      ]
+    },
+    "Requires": {
+      "Capability": [
+        "Capability"
+      ]
+    }
+  }
+}

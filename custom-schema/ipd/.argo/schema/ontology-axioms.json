@@ -1,0 +1,56 @@
+{
+  "_comment": "Optional OWL/RDFS axioms for the IPD ontology, read by the ontology-validation engine (ignored by the core). See docs/ontology-authoring.md.",
+  "disjointClasses": [
+    [
+      "Phase",
+      "Standard"
+    ],
+    [
+      "Process Area",
+      "Standard"
+    ],
+    [
+      "Deliverable",
+      "Standard"
+    ],
+    [
+      "Role",
+      "Standard"
+    ],
+    [
+      "Phase",
+      "Deliverable"
+    ],
+    [
+      "Deliverable",
+      "Requirement"
+    ],
+    [
+      "Phase",
+      "Process Area"
+    ],
+    [
+      "Standard",
+      "Requirement"
+    ],
+    [
+      "Role",
+      "Deliverable"
+    ],
+    [
+      "Standard",
+      "Phase"
+    ]
+  ],
+  "functionalProperties": [],
+  "transitiveProperties": [
+    "Precedes"
+  ],
+  "objectPropertyDomain": {
+    "Satisfies": "Deliverable"
+  },
+  "objectPropertyRange": {
+    "Satisfies": "Requirement"
+  },
+  "distinctIndividuals": true
+}

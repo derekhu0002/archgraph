@@ -22,7 +22,7 @@ const HOME = process.env.HOME || '/root';
 const ARGO = path.join(HOME, '.argo');
 const WORK = '/work';
 const SERVER = path.join(ARGO, 'scripts', 'argo-mcp-server.js');
-const WS_CUSTOM = path.join(WORK, 'custom-schema');
+const WS_CUSTOM = path.join(WORK, 'custom-schema', 'team-graph');
 const WS_DEFAULT = '/ws-default';
 const RESULTS_DIR = fs.existsSync('/results') ? '/results' : '/tmp';
 const REPORT_PATH = path.join(RESULTS_DIR, 'schema-decoupling-all-report.json');
@@ -400,7 +400,7 @@ async function main() {
   // is replaceable, not hard-wired.
   await record('the installed default bundle is replaceable (swap ~/.argo/schema)', async () => {
     delete process.env.ARGO_SCHEMA_DIR;
-    mustRun('sh', ['-c', `rm -rf ${ARGO}/schema && cp -r ${WORK}/custom-schema/.argo/schema ${ARGO}/schema && mkdir -p /ws-replaced/design/KG && cp ${WORK}/custom-schema/design/KG/SystemArchitecture.json /ws-replaced/design/KG/SystemArchitecture.json`]);
+    mustRun('sh', ['-c', `rm -rf ${ARGO}/schema && cp -r ${WORK}/custom-schema/team-graph/.argo/schema ${ARGO}/schema && mkdir -p /ws-replaced/design/KG && cp ${WORK}/custom-schema/team-graph/design/KG/SystemArchitecture.json /ws-replaced/design/KG/SystemArchitecture.json`]);
     const out = await mcpSession([
       { key: 'schema', name: 'queryNeo4jGraph', arguments: { workspaceRoot: '/ws-replaced', schema: true } },
     ], { ARGO_REPO_ROOT: '/ws-replaced', NODE_PATH }, { timeoutMs: 60000 });
@@ -414,7 +414,7 @@ async function main() {
   // A custom schema must author its own graph; init never copies the packaged
   // (mismatched) graph and fails closed when the graph is missing.
   await record('custom schema without a graph fails closed (no packaged-graph copy)', async () => {
-    mustRun('sh', ['-c', 'rm -rf /ws-nograph && mkdir -p /ws-nograph/.argo && cp -r /work/custom-schema/.argo/schema /ws-nograph/.argo/schema']);
+    mustRun('sh', ['-c', 'rm -rf /ws-nograph && mkdir -p /ws-nograph/.argo && cp -r /work/custom-schema/team-graph/.argo/schema /ws-nograph/.argo/schema']);
     const b = await mcpSession([{ key: 'init', name: 'initializeWorkspace', arguments: { workspaceRoot: '/ws-nograph' } }], { ARGO_REPO_ROOT: '/ws-nograph', NODE_PATH }, { timeoutMs: 120000 });
     const text = JSON.stringify(b.init);
     if (!/No default graph for the custom schema/.test(text)) throw new Error(`expected fail-closed 'No default graph', got: ${text.slice(0, 500)}`);

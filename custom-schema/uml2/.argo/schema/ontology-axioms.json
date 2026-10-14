@@ -1,0 +1,44 @@
+{
+  "_comment": "Optional OWL/RDFS axioms for the UML 2 ontology, read by the ontology-validation engine (ignored by the core). See docs/ontology-authoring.md.",
+  "disjointClasses": [
+    [
+      "Class",
+      "Interface"
+    ],
+    [
+      "Class",
+      "State"
+    ],
+    [
+      "State",
+      "Activity"
+    ],
+    [
+      "Actor",
+      "Use Case"
+    ],
+    [
+      "Class",
+      "Use Case"
+    ],
+    [
+      "Interface",
+      "Component"
+    ],
+    [
+      "State",
+      "Final State"
+    ]
+  ],
+  "functionalProperties": [],
+  "transitiveProperties": [
+    "Generalization"
+  ],
+  "objectPropertyDomain": {
+    "Realization": "Class"
+  },
+  "objectPropertyRange": {
+    "Realization": "Interface"
+  },
+  "distinctIndividuals": true
+}

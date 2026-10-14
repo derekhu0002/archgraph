@@ -53,7 +53,7 @@ Full reference — every layer: [docs/ontology-authoring.md](../../../docs/ontol
 ```bash
 # copy only the schema bundle (not .argo/temp/ runtime files)
 mkdir -p <your-repo>/.argo/schema
-cp -r custom-schema/.argo/schema/.  <your-repo>/.argo/schema   # Windows: New-Item -Force the dir, then Copy-Item -Recurse -Force
+cp -r custom-schema/team-graph/.argo/schema/.  <your-repo>/.argo/schema   # Windows: New-Item -Force the dir, then Copy-Item -Recurse -Force
 # then create design/KG/SystemArchitecture.json yourself using these types
 # (a custom schema fails closed with NO_DEFAULT_GRAPH — argo-init will NOT create the graph)
 ```
