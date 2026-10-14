@@ -12695,6 +12695,11 @@
           "name": "federationOntology",
           "value": "archgraph-mathematics@1.0.0",
           "description": "联邦中心本体资产 id；中心源 commit 4e9bdf5010bceb3df147465dcb22e5fa6eb247f1；language=Mathematics；actorElementType=Mathematician；elementTypeCount=15；relationshipTypeCount=13。"
+        },
+        {
+          "name": "commit",
+          "value": "a2f4d2e",
+          "description": "feat(ontology): submit Mathematics ontology to federation center; register overseer milestone — federation ontology_submit archgraph-mathematics@1.0.0 (center commit 4e9bdf5); graph overseer-ontology-001 + overseer-milestone-mathematics-ontology-001; tests/overseer-ltm-layering.test.js; design/KG/SystemArchitecture.json; archgraph.qea; npm test 753/753"
         }
       ]
     }
