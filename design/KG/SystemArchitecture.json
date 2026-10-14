@@ -3487,6 +3487,10 @@
         {
           "view_id": "overseer-comm-001",
           "view_name": "项目总管记忆·沟通与汇报交付"
+        },
+        {
+          "view_id": "overseer-ontology-001",
+          "view_name": "项目总管记忆·本体与联邦资产"
         }
       ],
       "attributes": [
@@ -12671,6 +12675,28 @@
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（新增经验卡片 overseer-lesson-env-mail-acl-001：~/.argo/.env.mail ACL 解除并对齐 .env）"
         }
       ]
+    },
+    {
+      "id": "overseer-milestone-mathematics-ontology-001",
+      "name": "里程碑：数学本体 Mathematics 提交联邦中心（研究/解题本体资产）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-10-15，项目总管）：应人类伙伴要求洞察业界数学本体并产出、提交可复用本体资产。① 业界结论：存在数学本体/KG（OntoMathPRO arXiv:1702.05112；MaRDI MathModDB/MathAlgoDB arXiv:2310.20443 / 2408.10003 / 2403.17778 / 2606.27933；几何解题本体 solution-graph arXiv:2509.02758），但『解难题』的引擎是形式化栈（Mathlib+Lean/Coq/Isabelle）+ LLM 证明器（AlphaProof/AlphaGeometry、LEAP、Hilbert、Ax-Prover…），自动形式化是瓶颈（arXiv:2608.20153），本体负责知识组织与检索。② 产出架构：独立 schema bundle『Mathematics』（custom-schema 契约，standalone，actorElementType=Mathematician；15 元素类型 Mathematical Domain/Concept/Definition/Axiom/Theorem/Conjecture/Proof/Counterexample/Technique/Problem/Solution Step/Skill/Formal Library/Benchmark/Mathematician；13 关系类型 Defines/Depends On/Proves/Refutes/Applies Technique/Belongs To/Solves/Has Step/Requires Skill/Formalized In/Evaluated By/Specializes/Studies + 端点矩阵 + deliveryDependencies + GUIDE）。③ 提交联邦中心：graph-mcp ontology_submit id=archgraph-mathematics v1.0.0，validation.valid=true（standalone / 15 元素 / 13 关系 / rules / guide），中心 commit 4e9bdf5，ontology_list count 9→10。本次零代码逻辑改动（纯本体/图谱资产）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "federationOntology",
+          "value": "archgraph-mathematics@1.0.0",
+          "description": "联邦中心本体资产 id；中心源 commit 4e9bdf5010bceb3df147465dcb22e5fa6eb247f1；language=Mathematics；actorElementType=Mathematician；elementTypeCount=15；relationshipTypeCount=13。"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -17649,6 +17675,16 @@
       "description": "对外呈现 v2 交付视图：README 精简 + 主页大纲化 + 中文详情页（getting-started / case / capabilities）的工作包与交付物。",
       "included_elements": [
         "wp-site-v2-outline-detail-pages-001"
+      ]
+    },
+    {
+      "view_id": "overseer-ontology-001",
+      "view_name": "项目总管记忆·本体与联邦资产",
+      "parent_element_id": "project-overseer-001",
+      "parent_element_name": "项目总管",
+      "description": "项目总管 T2 记忆分层视图：自定义本体 bundle 与联邦资产（提交/复用）的工作记录。",
+      "included_elements": [
+        "overseer-milestone-mathematics-ontology-001"
       ]
     }
   ]

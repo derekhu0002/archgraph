@@ -16,7 +16,7 @@ const GRAPH = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'KG', 'System
 
 const ACTOR = 'project-overseer-001';
 const CORE = 'overseer-ltm-001';
-const LAYERS = ['overseer-rules-001', 'overseer-retrieval-001', 'overseer-product-001'];
+const LAYERS = ['overseer-rules-001', 'overseer-retrieval-001', 'overseer-product-001', 'overseer-ontology-001'];
 const CORE_REQUIRED = ['overseer-memory-tiers-001', 'overseer-vision-001', 'overseer-wiki-eval-001'];
 const MEMBERS_BY_VIEW = {
   'overseer-ltm-001': [
@@ -41,6 +41,9 @@ const MEMBERS_BY_VIEW = {
     'overseer-community-linkage-001', 'overseer-framework-series-001', 'overseer-homepage-v3-kglibrary-retire-001',
     'overseer-multiagent-delegation-plan-001', 'overseer-site-v2-outline-detail-pages-milestone-001',
     'overseer-teamai-insight-001', 'overseer-view-geometry-route-fix-001',
+  ],
+  'overseer-ontology-001': [
+    'overseer-milestone-mathematics-ontology-001',
   ],
 };
 
