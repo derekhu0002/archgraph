@@ -84,6 +84,6 @@ Example:
 ```
 
 Runnable references: the prebuilt bundles under [`custom-schema/`](../custom-schema/README.md)
-(Team Graph, Finance CDM, Industry 4.0 AAS, STIX Threat Intelligence, UML 2, SysML)
+(Team Graph, Finance CDM, Industry 4.0 AAS, STIX Threat Intelligence, UML 2, SysML, IPD)
 and the ontology-engine samples (Team Graph + PROV-O) under
 [`sandbox/ontology-projection/samples/`](../sandbox/ontology-projection/samples/).

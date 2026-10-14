@@ -20,6 +20,7 @@ mechanism and every layer are documented in
 | [`threat-intel-stix/`](threat-intel-stix/README.md) | STIX Threat Intelligence | `Threat Actor` | Threat actors, campaigns, TTPs, indicators and mitigations | OASIS STIX 2.1 |
 | [`uml2/`](uml2/README.md) | UML 2 | `Actor` | Software structure, use cases and state machines | OMG UML 2 |
 | [`sysml/`](sysml/README.md) | SysML | `Actor` | Blocks, requirements, verification and allocation | OMG SysML |
+| [`ipd/`](ipd/README.md) | IPD | `Role` | R&D IPD phases, gates, deliverables and the standards that govern them | PACE / Stage-Gate; ISO 15288 / 29148 / 26262 / APQP |
 
 Each bundle is self-contained:
 

@@ -528,7 +528,7 @@ test('AT schema-bundle: every prebuilt ontology in custom-schema/ loads and vali
     .map(e => e.name)
     .sort();
   // THEN the expected catalog is present...
-  for (const name of ['team-graph', 'finance-cdm', 'industry-aas', 'threat-intel-stix', 'uml2', 'sysml']) {
+  for (const name of ['team-graph', 'finance-cdm', 'industry-aas', 'threat-intel-stix', 'uml2', 'sysml', 'ipd']) {
     assert.ok(bundles.includes(name), `custom-schema/${name} must exist`);
   }
   // AND each bundle's ontology builds, its fail-closed bundle validation passes,

@@ -34,7 +34,7 @@ A knowledge-graph framework that speaks only one language is not a framework. Ar
 
 This repository is the proof: its own bundle uses `extends: "default"` and layers a **UML 2 state-machine profile** on top, resolved at runtime from `.argo/schema/` rather than hardcoded in the framework.
 
-→ Worked example — define an ontology, then build the graph step by step: **[docs/case-team-graph.html](docs/case-team-graph.html)** · prebuilt ontology catalog: [`custom-schema/`](custom-schema/README.md) (Team Graph · Finance CDM · Industry 4.0 AAS · STIX Threat Intelligence · UML 2 · SysML) · full authoring reference (types, relationship structure, axioms/constraints): **[docs/ontology-authoring.md](docs/ontology-authoring.md)**
+→ Worked example — define an ontology, then build the graph step by step: **[docs/case-team-graph.html](docs/case-team-graph.html)** · prebuilt ontology catalog: [`custom-schema/`](custom-schema/README.md) (Team Graph · Finance CDM · Industry 4.0 AAS · STIX Threat Intelligence · UML 2 · SysML · IPD) · full authoring reference (types, relationship structure, axioms/constraints): **[docs/ontology-authoring.md](docs/ontology-authoring.md)**
 
 ## Ontology validation (optional)
 
