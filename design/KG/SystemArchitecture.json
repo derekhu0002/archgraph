@@ -4344,7 +4344,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-11 · 第三轮）。\n【主线】处理外部项目（rv-business、HarmonyOS-Dev-Standards）提的两个真实 issue + 举一反三扫同类缺陷 → 修复/发布/部署/验证/关闭。\n【已交付】\n① issue #10（本体投影侧车词表混用 display vs class token）：修 9e99a8d——以 bundle.archimateClassByElementType 归一（无映射原样兜底），覆盖 JS+Python 双侧；顺带修 extends 型 bundle cli.js 读子目录致矩阵为空静默 no-op（17df3f4）。发布 archgraph-argo@0.29.10；rv-business 端到端验证（validateSystemArchitecture passed、argo-init ok、ontologyValidation passed），issue #10 已关闭。\n② 举一反三扫描同族加固 d63225a：B1 extends 链合并 ontology-axioms.json（新增 resolveBundleAxioms + chainDirsOriginal）；C2 class-matrix dialect 也校验矩阵词元（此前整块跳过）；E1 describe 提示“无 class 映射类型无端点约束”；C1 sandbox 侧车副本同步生产 + 漂移守卫测试。发布 0.29.11。A1（核心 getArchiMateClass identity fallback）经现有 AT-uml2-sm-04 证伪为“设计使然的 added-type fail-open”→已回退（不得“修”）。\n③ issue #11（pySHACL 真引擎不识别端点矩阵 '*' 通配，与 JS 引擎分歧）：修 159792f——Python build_shapes_graph 遇 targets 含 '*' 不发射形状；JS buildShapes 同样跳过；核心 class-matrix 校验器接受 '*'。真引擎样本 sandbox/.../samples/wildcard + AT-ovx-16。发布 0.29.12；HarmonyOS-Dev-Standards 端到端验证（dialect=type-matrix, Composition.Grouping=['*']，确切 40 条 Grouping-Composition 边由 failed(40 errors)→passed(0)，图谱无 diff），issue #11 已关闭。\n【关键决策/理由】① 修复一律“验收测试先行”——正是既有 AT 及时挡下 A1 误判（诚实回退）。② 只改框架代码：不动 schema 定义、不动任何项目图谱，升级后各项目无需重调。③ D1（graph-rag/productionGraphRagRuntime.js 硬编码 ArchiMate 关系名）违反框架语言无关红线，但会改检索排序→影响 recall/precision，按 overseer-retrieval-recall-first-001 不得随修复发布，须单独立项做 AB 评估。\n【T1 环境坑】① 发布/推送直连被阻：npm publish 直连 registry.npmjs.org、git push 直连 github.com:443 均超时/失败——必须走本机代理 http://127.0.0.1:7890（HTTPS_PROXY/HTTP_PROXY，或 git -c http.proxy=...）。② 硬性发布流程：npm view 确认传播 → npm i -g archgraph-argo（不写版本/tag）→ argo-deploy -SkipEnv → 通知宿主重启。③ 部署器 -SkipEnv 不改 ~/.argo/.env；宿主 ARGO_VALIDATION_EXTENSIONS 已开启（onError=error fail-close）。\n【待办】① 建议新增“引擎一致性”验收（同输入 deterministic vs real 判定必须一致）——最能防 #11 这类双引擎分歧；尚未实现，已向人类伙伴给出方案选项。② D1 通用性参数化（单独立项 + AB）。\n【长期记忆】详情见 T2 卡 overseer-mem-ontology-vocab-fix-001；全部提交已 push origin/main（HEAD=7895439）。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-14 · 第四轮）。\n【主线】跨项目评审：受 graph-wiki（个人知识库管理员）之邀，以 ArchGraph 框架项目视角评审其技术论文《去中心化组织级知识图谱构建》（graph-wiki/community/DECENTRALIZED-ORG-KNOWLEDGE-GRAPH.md）。纯只读评审，未改任何文件、本仓无提交。\n【过程与结论】三轮：①初审【需修改】——指出 §五/§六/§十“中枢只持元数据/不承载内容”与 §八“副本托管”自相矛盾（实时 mirror_list=24，全部成员已镜像）；“去中心化”措辞与框架官方定位（design-federated-intent-graph-001，commit 302e534：称联邦式、非分布式、非纯 P2P）不一致；Mem0 数据被误标为“基准头部成绩”；ref[7] 日期区间误标；确认 4 篇 arXiv 引文（2307.03172/2404.16130/2310.08560/2410.10813）与 LongMemEval ~30% 掉点均准确。②复审【需修改】——7 项修订均落实，唯 §十仍残留“只连不载”矛盾。③终审【通过】。\n【关键事实核验（可复用）】registry_discover=24 成员；mirror_list=24 镜像（副本托管为普遍形态）；read-projection-gain 65 次/51.6%/中位 36.4%/P90 73.7%、sandbox 29/29、ontology 9/9、schema 10/10 均与 results/* 一致；LongMemEval 94.4%/LOCOMO 92.5% 实为 Mem0 官方自报（docs/memory-eval-benchmarks.md:20-22），非基准头部成绩；BEAM 桶名 1M/10M。\n【待办】无（评审已闭环）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4366,8 +4366,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-11",
-          "description": "本体校验( fail-close)+init改 argo-init CLI+报告 ontology/ontologyValidation+describe extends 修复；发布到 0.29.9"
+          "value": "2026-10-14",
+          "description": "跨项目评审 graph-wiki 论文《去中心化组织级知识图谱构建》：三轮评审终审【通过】；纯只读未改文件"
         },
         {
           "name": "commit",
@@ -12646,6 +12646,26 @@
           "description": "shasum ef5aa57d89aa142b7b77ee001e26bb68d5aa62c7"
         }
       ]
+    },
+    {
+      "id": "overseer-lesson-env-mail-acl-001",
+      "type": "Business Object",
+      "name": "经验：~/.argo/.env.mail 的 ACL 锁定与对齐 .env（邮件授权码文件权限）",
+      "description": "【背景】~/.argo/.env.mail 存 MAIL_126_AUTH_CODE（供 scripts/send-html-email.js 与 SOC-DEMO 发信）。2026-10-14 人类伙伴要求『解除 Env.email 的权限限制』。\n【症状】.env.mail 与同目录 .env 权限不一致：.env 未保护、继承 ~/.argo 的 4 条 ACE（CodexSandboxUsers:RX、SYSTEM:F、Administrators:F、remoteadmin:F）；.env.mail 却 AreAccessRulesProtected=true（断开继承）、仅有显式 ACE〔SYSTEM:F、Administrators:F、remoteadmin:Read〕——即使用者不能写、受限的沙箱/Agent 不能读（发信不可用）。\n【修复】对齐 .env：执行 icacls \"C:\\Users\\remoteadmin\\.argo\\.env.mail\" /reset —— 清除全部显式 ACE 并恢复继承；结果 4 条 ACE 全部 (I) 继承、与 .env 逐条一致（remoteadmin 恢复 FullControl，CodexSandboxUsers 获得 (I)(RX)）。\n【坑】PowerShell Set-Acl 会把 SACL 一并写入，非提权进程无 SeSecurityPrivilege → 抛 PrivilegeNotHeldException 而失败；只改 DACL 应改用 icacls（仅需 WRITE_DAC，文件所有者为 remoteadmin 即可）。\n【备注】本机宿主操作，无仓库提交；凭据文件本体不落库。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "recordedAt",
+          "value": "2026-10-14"
+        },
+        {
+          "name": "hostAction",
+          "value": "icacls C:\\Users\\remoteadmin\\.argo\\.env.mail /reset"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -17034,7 +17054,8 @@
         "overseer-lesson-framework-generality-001",
         "design-federated-intent-graph-001",
         "overseer-lesson-clash-proxy-https-001",
-        "overseer-lesson-argo-mcp-crash-diagnosis-001"
+        "overseer-lesson-argo-mcp-crash-diagnosis-001",
+        "overseer-lesson-env-mail-acl-001"
       ],
       "included_relationships": []
     },
