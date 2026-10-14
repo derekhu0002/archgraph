@@ -12664,6 +12664,11 @@
         {
           "name": "hostAction",
           "value": "icacls C:\\Users\\remoteadmin\\.argo\\.env.mail /reset"
+        },
+        {
+          "name": "commit",
+          "value": "233fa28",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（新增经验卡片 overseer-lesson-env-mail-acl-001：~/.argo/.env.mail ACL 解除并对齐 .env）"
         }
       ]
     }
