@@ -4696,6 +4696,11 @@
           "name": "commit",
           "value": "425189d",
           "description": "README.md; index.html; docs/(getting-started|capabilities|case-team-graph).html; docs/site.css; tests/readme.test.js; tests/website.test.js; tests/docs-pages.test.js; design/KG/SystemArchitecture.json（对外呈现 v2 首版 + 红蓝第2轮迭代）"
+        },
+        {
+          "name": "commit",
+          "value": "1034069",
+          "description": "docs(kg): overwrite T1 working-memory digest (Mathematics ontology insight + federation submission); design/KG/SystemArchitecture.json; archgraph.qea"
         }
       ],
       "testcases": [
