@@ -12249,6 +12249,14 @@ function getArchiMateClass(elementOrType) {
   return ARCHIMATE_CLASS_BY_ELEMENT_TYPE[type];
 }
 
+// The endpoint matrix's wildcard TARGET tokens: an allowed-target list containing
+// any of these means the endpoint is UNCONSTRAINED. Both tokens must be honored
+// (issue #14): the data-driven core validator (`schema-bundle.js`) and the
+// projection engines accept `*` AND `ModelConcept`; this legacy module must match
+// so the shared contract never diverges.
+const WILDCARD_TARGET_TOKENS = Object.freeze(['*', 'ModelConcept']);
+const isWildcardTarget = (token) => WILDCARD_TARGET_TOKENS.includes(token);
+
 function validateRelationshipEndpointTypes(relationship, source, target) {
   if (!relationship || !source || !target) {
     return [];
@@ -12263,7 +12271,7 @@ function validateRelationshipEndpointTypes(relationship, source, target) {
     return [];
   }
   const allowedTargets = RELATIONSHIP_TARGET_MATRIX[relationshipType] && RELATIONSHIP_TARGET_MATRIX[relationshipType][sourceClass];
-  if (!allowedTargets || !allowedTargets.some(allowed => allowed === targetClass || allowed === 'ModelConcept')) {
+  if (!allowedTargets || !allowedTargets.some(allowed => allowed === targetClass || isWildcardTarget(allowed))) {
     return ['relationships \'' + relationship.id + '\' violates ArchiMate 3.2 relationship matrix: ' + source.type + ' \'' + source.name + '\' cannot ' + relationshipType + ' ' + target.type + ' \'' + target.name + '\''];
   }
   return [];
@@ -12296,6 +12304,8 @@ module.exports = {
   isSupportedRelationshipType,
   getMetadata,
   getArchiMateClass,
+  WILDCARD_TARGET_TOKENS,
+  isWildcardTarget,
   validateRelationshipEndpointTypes,
   auditRelationshipEndpointTypes,
 };

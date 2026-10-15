@@ -664,6 +664,14 @@ function validateDeliveryDependencies(language, relationshipTypeList, deliveryDe
   return errors;
 }
 
+// Endpoint-matrix wildcard TARGET tokens: an allowed-target list containing any
+// of these means the endpoint is UNCONSTRAINED. Both core builders (class-matrix
+// and type-matrix) and the legacy ArchiMate module share this contract, and the
+// ontology-projection engines mirror it (issue #14). Kept in one place so the
+// tokens cannot drift apart within core.
+const WILDCARD_MATRIX_TOKENS = Object.freeze(['*', 'ModelConcept']);
+const isWildcardMatrixToken = (token) => WILDCARD_MATRIX_TOKENS.includes(token);
+
 function buildClassMatrixOntology(bundle) {
   const language = typeof bundle.config.language === 'string' && bundle.config.language.trim() !== ''
     ? bundle.config.language.trim()
@@ -714,7 +722,7 @@ function buildClassMatrixOntology(bundle) {
         return [];
       }
       const allowedTargets = classMatrix[type] && classMatrix[type][sourceClass];
-      if (!allowedTargets || !allowedTargets.some((allowed) => allowed === targetClass || allowed === 'ModelConcept' || allowed === '*')) {
+      if (!allowedTargets || !allowedTargets.some((allowed) => allowed === targetClass || isWildcardMatrixToken(allowed))) {
         return ['relationships \'' + relationship.id + '\' violates ArchiMate 3.2 relationship matrix: ' + source.type + ' \'' + source.name + '\' cannot ' + type + ' ' + target.type + ' \'' + target.name + '\''];
       }
       return [];
@@ -828,7 +836,7 @@ function buildTypeMatrixOntology(bundle) {
     if (!allowedTargets) {
       return [];
     }
-    const ok = allowedTargets.some((allowed) => allowed === target.type || allowed === '*');
+    const ok = allowedTargets.some((allowed) => allowed === target.type || isWildcardMatrixToken(allowed));
     if (!ok) {
       return [`relationships '${relationship.id}' violates ${matrixErrorLabel}: ${source.type} '${source.name}' cannot ${type} ${target.type} '${target.name}'`];
     }
@@ -993,4 +1001,6 @@ module.exports = {
   buildOntology,
   resolveBundleAxioms,
   loadSchemaBundleAndOntology,
+  WILDCARD_MATRIX_TOKENS,
+  isWildcardMatrixToken,
 };

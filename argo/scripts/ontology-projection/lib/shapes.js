@@ -11,16 +11,26 @@ const { localName } = require('./project.js');
 
 const SH = 'http://www.w3.org/ns/shacl#';
 
+// Endpoint-matrix wildcard TARGET tokens: an allowed-target list containing any
+// of these means the endpoint is UNCONSTRAINED. The core class-matrix validator
+// honors BOTH (`schema-bundle.js` endpoint check, `archimate32-rules.js`), so the
+// projection engines must too (issue #14; `ModelConcept` was left behind when
+// issue #11 fixed `*`). Kept in one place so the two tokens cannot drift apart.
+const WILDCARD_TARGET_TOKENS = Object.freeze(['*', 'ModelConcept']);
+const isWildcardTarget = (token) => WILDCARD_TARGET_TOKENS.includes(token);
+
 function buildShapes(model) {
   const blocks = [];
   for (const relType of model.relationshipTypes) {
     const bySource = model.matrix[relType];
     if (!bySource) continue;
     for (const [sourceType, targets] of Object.entries(bySource)) {
-      // '*' = any target allowed -> unconstrained; emit no shape for it (mirrors
-      // checkEndpoints and the real-engine SHACL projection). Otherwise localName('*')
-      // would emit a bogus `ex:_` class.
-      if (Array.isArray(targets) && targets.includes('*')) continue;
+      // A wildcard target token (`*` or `ModelConcept`) = any target allowed ->
+      // unconstrained; emit no shape for it (mirrors checkEndpoints and the
+      // real-engine SHACL projection). Otherwise localName('*') would emit a bogus
+      // `ex:_` class and `ModelConcept` a bogus `ex:ModelConcept` class that no
+      // instance can satisfy (one false violation per edge).
+      if (Array.isArray(targets) && targets.some(isWildcardTarget)) continue;
       const node = `${localName(sourceType)}_${localName(relType)}`;
       blocks.push(
         [
@@ -53,7 +63,7 @@ function checkEndpoints(model, graph) {
     const allowed = bySource[model.typeClass(src.type)];
     if (!allowed) continue;
     const targetClass = model.typeClass(tgt.type);
-    if (!allowed.some((t) => t === targetClass || t === '*')) {
+    if (!allowed.some((t) => t === targetClass || isWildcardTarget(t))) {
       violations.push({
         code: 'SHACL_ENDPOINT',
         relationshipId: rel.id,
@@ -67,4 +77,4 @@ function checkEndpoints(model, graph) {
   return violations;
 }
 
-module.exports = { buildShapes, checkEndpoints, SH };
+module.exports = { buildShapes, checkEndpoints, SH, WILDCARD_TARGET_TOKENS, isWildcardTarget };

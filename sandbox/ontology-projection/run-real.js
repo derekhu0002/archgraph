@@ -26,6 +26,10 @@ const CASES = [
   // issue #11: a `*` target is "any target" -> unconstrained; must conform (was a
   // false violation because the pySHACL projection compiled '*' as class `_`).
   { dir: 'wildcard', graph: 'valid.json', expect: { shaclConforms: true, owlConsistent: true } },
+  // issue #14: `ModelConcept` is the sibling wildcard target token -> unconstrained;
+  // must conform on the real engine (was a false violation because the projection
+  // compiled `ModelConcept` as a class no instance can ever be).
+  { dir: 'model-concept', graph: 'valid.json', expect: { shaclConforms: true, owlConsistent: true } },
   // issue #12: `Assigned To` is functional WITHOUT `distinctIndividuals`, so OWL
   // open-world semantics alone entails the two targets EQUAL (no inconsistency).
   // The closed-world functional check must still flag OWL_FUNCTIONAL, matching the

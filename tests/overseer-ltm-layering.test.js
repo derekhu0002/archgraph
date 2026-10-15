@@ -34,7 +34,8 @@ const MEMBERS_BY_VIEW = {
   'overseer-retrieval-001': [
     'overseer-community-probe-001', 'overseer-harness-view-relations-001', 'overseer-mem-agent-cost-harness-001',
     'overseer-mem-semantic-threshold-calibration-001', 'overseer-milestone-read-projection-001',
-    'overseer-rerank-latency-fix-001', 'overseer-semantic-projection-oom-001', 'overseer-semantic-seed-prefix-fix-001',
+    'overseer-rerank-latency-fix-001', 'overseer-rerank-native-qwen-transport-001',
+    'overseer-semantic-projection-oom-001', 'overseer-semantic-seed-prefix-fix-001',
   ],
   'overseer-product-001': [
     'overseer-agent-model-unification-001', 'overseer-archgraph-intro-pdf-001', 'overseer-codex-adaptation-001',

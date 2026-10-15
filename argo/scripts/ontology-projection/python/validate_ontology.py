@@ -33,6 +33,13 @@ CLS = Namespace("https://archgraph.local/class/")
 IDNS = Namespace("https://archgraph.local/id/")
 SH = Namespace("http://www.w3.org/ns/shacl#")
 
+# Endpoint-matrix wildcard TARGET tokens: an allowed-target list containing any
+# of these means the endpoint is UNCONSTRAINED. The core class-matrix validator
+# honors BOTH, so the projection engines must too (issue #14; `ModelConcept` was
+# left behind when issue #11 fixed `*`). Kept in one place so the tokens cannot
+# drift apart.
+WILDCARD_TARGETS = frozenset({"*", "ModelConcept"})
+
 
 def local(value):
     return "".join(ch if ch.isalnum() else "_" for ch in str(value))
@@ -80,11 +87,12 @@ def build_shapes_graph(matrix):
     g = Graph()
     for rel_type, by_source in matrix.items():
         for source_type, targets in by_source.items():
-            # '*' is the wildcard "any target" token: the endpoint is UNCONSTRAINED,
-            # so emit no shape for it. Without this, local('*') -> '_' makes the shape
-            # require a non-existent class and every edge is a false violation (the
-            # deterministic JS engine already treats '*' as unconstrained).
-            if "*" in targets:
+            # A wildcard target token (`*` or `ModelConcept`) means "any target":
+            # the endpoint is UNCONSTRAINED, so emit no shape for it. Without this,
+            # local('*') -> '_' (and `ModelConcept` -> a class no instance can be)
+            # makes the shape require a non-existent class and every edge is a false
+            # violation (the deterministic JS engine treats both as unconstrained).
+            if WILDCARD_TARGETS.intersection(targets):
                 continue
             node = EX["shape_" + local(source_type) + "_" + local(rel_type)]
             prop = BNode()

@@ -1,0 +1,13 @@
+{
+  "dialect": "type-matrix",
+  "elementTypeMetadata": {
+    "Grouping": { "layer": "Test", "aspect": "Structure" },
+    "Item": { "layer": "Test", "aspect": "Structure" }
+  },
+  "relationshipCategoryByType": {
+    "Composition": "Structural"
+  },
+  "relationshipTargetMatrix": {
+    "Composition": { "Grouping": ["ModelConcept"] }
+  }
+}

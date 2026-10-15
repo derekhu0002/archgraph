@@ -496,6 +496,28 @@ test('AT-ovx-16 wildcard `*` target is unconstrained in every engine', () => {
   assert.ok(strictRes.errors.length >= 1, JSON.stringify(strictRes));
 });
 
+// Issue #14: `ModelConcept` is the SIBLING wildcard token — the core class-matrix
+// validator (`schema-bundle.js`) treats BOTH `*` and `ModelConcept` as "any
+// target". Issue #11 fixed only `*`; this locks `ModelConcept` for both engines.
+test('AT-ovx-18 ModelConcept wildcard target is unconstrained in every engine', () => {
+  // GIVEN a bundle whose matrix allows any target via the ModelConcept token
+  const ws = makeTypeMatrixWorkspace({ Composition: { Grouping: ['ModelConcept'] } }, WILDCARD_GRAPH);
+  // WHEN validated THEN no false violation (deterministic engine)
+  const res = runCli(ws, 'write');
+  assert.deepEqual(res.errors, [], JSON.stringify(res));
+
+  // AND the compiled SHACL artifact must NOT emit a bogus ModelConcept class
+  const { loadModel } = require('../argo/scripts/ontology-projection/lib/model.js');
+  const { buildShapes } = require('../argo/scripts/ontology-projection/lib/shapes.js');
+  const shapes = buildShapes(loadModel(path.join(ws, '.argo', 'schema')));
+  assert.ok(!/ModelConcept/.test(shapes), `wildcard must not compile to a ModelConcept class :\n${shapes}`);
+
+  // AND a genuine (non-wildcard) disallowed target is STILL enforced
+  const strict = makeTypeMatrixWorkspace({ Composition: { Grouping: ['Item'] } }, WILDCARD_GRAPH);
+  const strictRes = runCli(strict, 'write');
+  assert.ok(strictRes.errors.length >= 1, JSON.stringify(strictRes));
+});
+
 // Issue #12: `Assigned To` is functional WITHOUT `distinctIndividuals`. Under pure OWL
 // open-world semantics two distinct targets are merely entailed EQUAL (NOT an
 // inconsistency), so the real engine silently passed the write. A functional property

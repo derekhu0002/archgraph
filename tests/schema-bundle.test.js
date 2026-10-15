@@ -22,6 +22,8 @@ const {
   resolveTypeEnums,
   loadSchemaBundleAndOntology,
   buildOntology,
+  WILDCARD_MATRIX_TOKENS,
+  isWildcardMatrixToken,
 } = require('../argo/scripts/schema-bundle.js');
 const argoMcp = require('../argo/scripts/argo-mcp-server.js');
 const qeaLib = require('../argo/scripts/ea-qea-sync-lib.js');
@@ -237,6 +239,49 @@ test('AT schema-bundle: a custom rules matrix enforces its own endpoint legality
   // THEN it is rejected with the custom language's matrix label
   assert.equal(ontology.invariants.endpointMatrix, true);
   assert.ok(errors.some(e => e.includes('violates TeamA Ontology relationship matrix')), JSON.stringify(errors));
+});
+
+test('AT schema-bundle: matrix wildcard tokens (* and ModelConcept) mean any target', () => {
+  // GIVEN a custom schema whose matrix allows any target via a wildcard token
+  for (const token of ['*', 'ModelConcept']) {
+    const workspace = makeTempWorkspace();
+    writeCustomBundle(workspace, {
+      endpointMatrix: true,
+      rules: { relationshipTargetMatrix: { 'Depends On': { 'Team Node': [token] } } },
+    });
+    const { ontology } = loadSchemaBundleAndOntology(workspace);
+    // WHEN Team Node --Depends On--> Service Node is validated
+    const errors = validateAll(customGraph(), ontology);
+    // THEN the endpoint is unconstrained (both tokens are wildcards)
+    assert.deepEqual(errors, [], `${token} must leave the endpoint unconstrained: ${JSON.stringify(errors)}`);
+  }
+  // AND a non-wildcard disallowed target is STILL enforced (the wildcard cannot mask it)
+  const ws = makeTempWorkspace();
+  writeCustomBundle(ws, {
+    endpointMatrix: true,
+    rules: { relationshipTargetMatrix: { 'Depends On': { 'Team Node': [] } } },
+  });
+  const { ontology } = loadSchemaBundleAndOntology(ws);
+  assert.ok(
+    validateAll(customGraph(), ontology).some(e => e.includes('relationship matrix')),
+    'a disallowed non-wildcard target must still be rejected',
+  );
+});
+
+test('AT schema-bundle: all core endpoint validators share the same wildcard tokens', () => {
+  // GIVEN the two data-driven core builders and the legacy ArchiMate fallback
+  const legacy = require('../argo/scripts/archimate32-rules.js');
+  // WHEN the wildcard TARGET predicate is applied
+  // THEN both `*` and `ModelConcept` are wildcard, and a concrete type is not
+  // (so every core validator implements one wildcard contract — issue #14)
+  assert.deepEqual(Array.from(WILDCARD_MATRIX_TOKENS).sort(), ['*', 'ModelConcept']);
+  assert.equal(isWildcardMatrixToken('*'), true);
+  assert.equal(isWildcardMatrixToken('ModelConcept'), true);
+  assert.equal(isWildcardMatrixToken('Team Node'), false);
+  assert.deepEqual(Array.from(legacy.WILDCARD_TARGET_TOKENS).sort(), ['*', 'ModelConcept']);
+  assert.equal(legacy.isWildcardTarget('*'), true);
+  assert.equal(legacy.isWildcardTarget('ModelConcept'), true);
+  assert.equal(legacy.isWildcardTarget('Team Node'), false);
 });
 
 test('AT schema-bundle: per-view element limit comes from the resolved ontology', () => {
