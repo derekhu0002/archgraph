@@ -12622,6 +12622,11 @@
           "name": "commit",
           "value": "04b3b07",
           "description": "fix(ontology): enforce functional axioms closed-world in the real engine (issue #12). Real OWL engine only flagged functional conflicts when values were forced distinct; now reports the same OWL_FUNCTIONAL the deterministic engine does. Files: argo/scripts/ontology-projection/python/validate_ontology.py; argo/scripts/ontology-projection/cli.js; sandbox/ontology-projection/python/validate_ontology.py (drift copy); sandbox/ontology-projection/run-real.js, verify-write.js, verify-write.sh; sandbox/ontology-projection/samples/functional-open/**; tests/ontology-validation-extension.test.js (AT-ovx-17)."
+        },
+        {
+          "name": "commit",
+          "value": "65391fc",
+          "description": "fix(ontology): honor the ModelConcept wildcard token across ALL validators (issue #14) — 投影两引擎 lib/shapes.js + python/validate_ontology.py 共享通配集合 {*, ModelConcept}；schema-bundle.js type-matrix 核心校验器补上 ModelConcept（class-matrix 已有）、两构建器共享 isWildcardMatrixToken；archimate32-rules.js 遗留校验器补上 *；sandbox 新增 model-concept 真引擎样本 + run-real.js case；tests AT-ovx-18 + 核心通配契约 AT + 侧车副本同步"
         }
       ]
     },
@@ -12755,10 +12760,11 @@
       ]
     },
     {
+      "id": "overseer-rerank-native-qwen-transport-001",
       "type": "Business Object",
       "name": "里程碑：rerank 原生 cross-encoder 传输 + 服务切换千问 qwen3.7-text-rerank（issue #13）",
+      "parent": "project-overseer-001",
       "description": "里程碑（2026-10-15，项目总管，issue #13）：采纳方案 A——rerankRetrieval.js 新增 native cross-encoder 传输（ARGO_RERANK_TRANSPORT=native，默认 chat 向后兼容）：DashScope text-rerank 契约 {model,input:{query,documents},parameters:{return_documents,top_n}}，origin baseUrl 自动追加 /api/v1/services/rerank/text-rerank/text-rerank、完整 endpoint URL 原样使用；output.results 按 relevance_score 降序映射回候选 id（与 chat parseRerankOrder 同构，下游不变），fail-open 语义两传输一致。验收：AT-rerank-10/11/12；契约以真实 QWEN_KEY 实测（HTTP 200）。仓库回归 npm test 756/756（0 fail 0 skip，28.5s）。服务切换：~/.argo/.env rerank 已从 api.deepseek.com/deepseek-flash 切到 dashscope native + qwen3.7-text-rerank（仓库新代码实测语义查询 1.6s，此前 DeepSeek 挂起致 MCP -32001 超时、npm test 卡死>15min）。关键坑（0.20.1 同类复现）：常驻 MCP 仍是旧部署代码，其 .env 白名单不认识 ARGO_RERANK_TRANSPORT，整份 .env 被 SECRET_FILE_UNKNOWN_KEY 拒绝→LIVE_PROVIDER_CONFIGURATION_REQUIRED 全语义路径瘫痪；处置=先从 ~/.argo/.env 临时摘除该键（旧代码 chat→404→fail-open，语义恢复），正确顺序=先发布+argo-deploy+重启宿主加载新代码，再把 ARGO_RERANK_TRANSPORT=native 加回生效。deepseek-pro 不在本仓（属 graph-wiki 机配置），本仓既有示例已把 deepseek 示例改为 dashscope native。交付 commit 10e3cd4；图谱登记 semantic-rerank-001。",
-      "classifier": "milestone",
       "attributes": [
         {
           "name": "memoryTier",
@@ -12788,9 +12794,33 @@
           "value": "archgraph-argo@0.29.14",
           "description": "npm publish shasum 0c13c3736aed3a8c6fb9da685cf5dfcd521cc8d0 → registry 传播轮询第 10 次可见 → npm i -g archgraph-argo@0.29.14 → argo-deploy -SkipEnv 完成（部署产物含 native 传输+白名单）→ ~/.argo/.env 加回 ARGO_RERANK_TRANSPORT=native（qwen3.7-text-rerank/dashscope）；待宿主重启加载新常驻 MCP 后全量生效"
         }
-      ],
-      "id": "rerank-cross-encoder-qwen3-7-text-rerank-issue-13",
-      "parent": "project-overseer-001"
+      ]
+    },
+    {
+      "id": "overseer-mem-ontology-wildcard-fix-001",
+      "type": "Business Object",
+      "name": "里程碑：端点矩阵通配符 token 全量对齐修复（issue #14）",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-10-15，项目总管，issue #14）：修「端点矩阵通配符 token 各校验器不一致」——core class-matrix 校验器（schema-bundle.js）认 `*` 与 `ModelConcept`，但两个投影引擎（JSON shapes.js / pySHACL validate_ontology.py）只认 `*`，core 的 type-matrix 构建器也只认 `*`，遗留模块 archimate32-rules.js 又只认 `ModelConcept` → 用 `ModelConcept` 当目标通配的 bundle（如 UTP 2.2）在 init/validate 下每条边误报 SHACL 违规、subdiagramViews 被连带跳过。修复：统一通配集合 {*, ModelConcept}——投影两引擎共享 isWildcardTarget/WILDCARD_TARGETS（不发射假类）、schema-bundle.js 两构建器共享 isWildcardMatrixToken、archimate32-rules.js 补全（对其静态矩阵为防御性对齐）。验收：AT-ovx-18（ModelConcept 两引擎无违规 + 不发射假类 + 负向控制）；核心通配契约 AT；新 sandbox 样本 model-concept；host 与容器真引擎（pySHACL+owlready2）均 12/12 conform（含 model-concept/wildcard）；npm test 759/759（0 fail 0 skip）。同时修复本会话前遗留回归：#13 的 T2 记忆元素未遵守 overseer- 命名 → 改名 overseer-rerank-native-qwen-transport-001 并同步 tests/overseer-ltm-layering。commit 65391fc。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "commit",
+          "value": "65391fc",
+          "description": "argo/scripts/ontology-projection/lib/shapes.js; argo/scripts/ontology-projection/python/validate_ontology.py; argo/scripts/schema-bundle.js; argo/scripts/archimate32-rules.js; sandbox/ontology-projection/**; tests/ontology-validation-extension.test.js; tests/schema-bundle.test.js; tests/overseer-ltm-layering.test.js"
+        },
+        {
+          "name": "issue",
+          "value": "gh#14"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -17027,7 +17057,7 @@
         "overseer-mem-agent-cost-harness-001",
         "overseer-milestone-read-projection-001",
         "overseer-harness-view-relations-001",
-        "rerank-cross-encoder-qwen3-7-text-rerank-issue-13"
+        "overseer-rerank-native-qwen-transport-001"
       ],
       "included_relationships": []
     },
@@ -17431,7 +17461,8 @@
       "description": "项目总管 T2 长期记忆子视图：建模语言/状态机/指标体系（assessment）相关里程碑。",
       "included_elements": [
         "overseer-milestone-uml2-statemachine-metric-model-001",
-        "overseer-mem-ontology-vocab-fix-001"
+        "overseer-mem-ontology-vocab-fix-001",
+        "overseer-mem-ontology-wildcard-fix-001"
       ],
       "included_relationships": []
     },
@@ -17770,7 +17801,8 @@
       "description": "对外呈现 v2 交付视图：README 精简 + 主页大纲化 + 中文详情页（getting-started / case / capabilities）的工作包与交付物。",
       "included_elements": [
         "wp-site-v2-outline-detail-pages-001"
-      ]
+      ],
+      "included_relationships": []
     },
     {
       "view_id": "overseer-ontology-001",
@@ -17780,7 +17812,8 @@
       "description": "项目总管 T2 记忆分层视图：自定义本体 bundle 与联邦资产（提交/复用）的工作记录。",
       "included_elements": [
         "overseer-milestone-mathematics-ontology-001"
-      ]
+      ],
+      "included_relationships": []
     }
   ]
 }
