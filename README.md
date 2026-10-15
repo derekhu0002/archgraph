@@ -2,6 +2,8 @@
 
 **A knowledge-graph framework with an ontology you define — wired into your coding agent through one MCP interface.**
 
+**English** · [简体中文](README.zh-CN.md)
+
 For teams running coding agents on a real codebase, ArchGraph gives the agent durable, tiered long-term memory on an **intent graph** — a versioned architecture graph that records *why* the system is built the way it is, not just how. You and the agent read and write it through a single **MCP** server (**MCP** = **Model Context Protocol**, the open standard that lets an AI tool call external servers as tools). The graph's shape is set by an **ontology** — its vocabulary of element and relationship types — and that ontology is yours to define. The built-in default is **ArchiMate 3.2 + ARGO extensions**, where **ArchiMate** is a standard enterprise-architecture modeling language and **ARGO** is the toolchain and agent-workflow layer behind the `argo-deploy` and `argo-init` commands. A repository can plug in its own ontology — and this one does. **One install, one interface to learn.**
 
 Ready to try it? Jump to **[Build your own graph](#build-your-own-graph)**.
