@@ -2,6 +2,8 @@
 
 // Run the argo-init CLI (workspace init moved out of the MCP tool surface).
 // Returns the parsed report (identical to the former initializeWorkspace tool).
+// Passes --json: the CLI's DEFAULT output is a concise human summary; programmatic
+// callers need the FULL report, which --json still emits verbatim.
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -22,7 +24,7 @@ function resolveArgoInit() {
 
 function runArgoInitCli(workspaceRoot, extraEnv = {}) {
   const { cmd, args } = resolveArgoInit();
-  const result = spawnSync(cmd, [...args, '--workspace', workspaceRoot], {
+  const result = spawnSync(cmd, [...args, '--workspace', workspaceRoot, '--json'], {
     encoding: 'utf8',
     env: { ...process.env, ARGO_REPO_ROOT: workspaceRoot, ...extraEnv },
     maxBuffer: 128 * 1024 * 1024,

@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # ARGO INIT
 
-`argo-init` 是一个 **CLI 命令**（`argo-init [--workspace <dir>]`，默认当前目录），完成确定性初始化：工作区 bootstrap（缺 `SystemArchitecture.json` / EA 模型文件（`.qea`）自动生成）+ Neo4j 结构投影同步 + **.qea 全量投影（整库清空重建，逻辑同 Neo4j init）** + 语义生命周期初始化 + canonical 校验 + 本体定义/校验 + subdiagram_views 一致性，并输出完整报告。**初始化已从 MCP 接口移除**（它慢、且只由人/技能手动触发，长耗时曾导致 MCP 客户端超时）；CLI 与原来的 MCP 接口**功能一致**（同一 `initializeWorkspaceReport`）。
+`argo-init` 是一个 **CLI 命令**（`argo-init [--workspace <dir>]`，默认当前目录），完成确定性初始化：工作区 bootstrap（缺 `SystemArchitecture.json` / EA 模型文件（`.qea`）自动生成）+ Neo4j 结构投影同步 + **.qea 全量投影（整库清空重建，逻辑同 Neo4j init）** + 语义生命周期初始化 + canonical 校验 + 本体定义/校验 + subdiagram_views 一致性。**默认输出简明摘要**（约十行：整体状态 + schema + 各阶段状态 + 本体/本体校验 + Neo4j 库名与 `.qea` 目标的一致性核验 + 报告路径）；需要完整报告时用 **`argo-init --json`**（完整报告始终写入 `.argo/temp/argo-harness-init-report.json`，不因摘要而丢失）。**初始化已从 MCP 接口移除**（它慢、且只由人/技能手动触发，长耗时曾导致 MCP 客户端超时）；CLI 与原来的 MCP 接口**功能一致**（同一 `initializeWorkspaceReport`）。
 
 - 工作区缺少 `design/KG/SystemArchitecture.json` 时自动从部署的 `defaults` 拷贝默认模板；缺 EA 模型文件（仓库根无 `.qea`/`.feap`/`.eap`）时以当前项目名拷贝默认 `.qea` 模板（不再补建遗留 `.feap`）。
 - 本机 Neo4j 连接可用，canonical 意图图完成至少一次 JSON -> Neo4j 初始同步并通过一致性校验；**投影到的 Neo4j 数据库名称必须与本仓库名称一致**（如仓库 archgraph → 库 archgraph），不一致须报告为告警/失败。
@@ -16,7 +16,7 @@ disable-model-invocation: true
 
 ## Rules
 
-- **MUST** 运行 **CLI 命令 `argo-init`**（默认当前工作区；或 `argo-init --workspace <dir>`）执行确定性初始化，并以其输出的报告为最终判断依据。
+- **MUST** 运行 **CLI 命令 `argo-init`**（默认当前工作区；或 `argo-init --workspace <dir>`）执行确定性初始化，并以其输出为最终判断依据。默认输出即为**简明摘要**（含 schema、各阶段状态、本体/本体校验，以及 Neo4j 库名与 `.qea` 目标的一致性核验）；需要逐字段细节时才用 `argo-init --json` 取完整报告（完整报告同时写入 `.argo/temp/argo-harness-init-report.json`）。
 - **MUST** 报告当前 schema：报告里 `schema`（或 `schemaBundle`）中的 `kind`（default=内置 ArchiMate 3.2 / workspace=仓内自定义 / override）、`language`（名称）、`actorElementType`、`dir`、`guide`；输出形如 `schema: default / ArchiMate 3.2`。
 - **MUST** 报告 `mcp` / `systemArchitecture` / `ontology` / `ontologyValidation` / `neo4j` / `qeaFullProjection` / `semanticLifecycle` / `subdiagramViews` 与整体 `status`。
 - **MUST** 在面向用户的总结里明确给出两件事并逐条判「正常/不正常」：
@@ -33,7 +33,7 @@ disable-model-invocation: true
 
 ### 1. Run Deterministic Init via the `argo-init` CLI
 
-运行 **`argo-init`**（默认当前工作区；或 `argo-init --workspace <dir>`）。这条 CLI 与原来的 MCP `initializeWorkspace` 接口**功能一致**（同一 `initializeWorkspaceReport`），完成全部确定性步骤并输出报告：
+运行 **`argo-init`**（默认当前工作区；或 `argo-init --workspace <dir>`）。这条 CLI 与原来的 MCP `initializeWorkspace` 接口**功能一致**（同一 `initializeWorkspaceReport`），完成全部确定性步骤，**默认输出简明摘要**（`argo-init --json` 输出完整报告 JSON；完整报告始终写入 `.argo/temp/argo-harness-init-report.json`）：
 
 - `workspaceBootstrap`：缺 `SystemArchitecture.json` / EA 模型文件时自动生成 `.qea`（createdFiles / skippedSteps；仓库根已有 `.qea`/`.feap` 时不重复补建）
 - `mcp`：ARGO MCP 健康（协议 / tools-list / ping）
