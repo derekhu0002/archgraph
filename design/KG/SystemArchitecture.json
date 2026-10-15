@@ -7157,9 +7157,14 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "10e3cd4",
+          "description": "argo/scripts/graph-rag/rerankRetrieval.js（native cross-encoder 分支+resolveRerankTransport/nativeRerankEndpoint/parseNativeRerankOrder）; liveEmbeddingProviderConfig.js（ARGO_RERANK_TRANSPORT 入白名单）; argo/.env.example; tests/rerank-retrieval.test.js（AT-rerank-10..12，issue #13）"
         }
       ],
-      "description": "语义二阶段重排（Rerank）：在向量/混合检索候选池后用 LLM listwise 重排（chat/completions），按相关性将目标顶到前排，显著提升 recall@1（尤其精确名/元素）。策略：默认关（ARGO_SEMANTIC_RERANK=0），开时用更大候选池（pool=20）重排后取 topK；fail-open（错误返回 null→保持原序）；保留 kill switch；写前同路径→对写入侧轻微可逆。评测（scripts/eval-rerank.js，150 样本，qwen-turbo）：4-way vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优，但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再启用。provider/model 与 embedding 解耦：resolveRerankProvider 优先 ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL，未设则回落 embedding 配置（baseUrl/qwenKey/provider）与默认模型 qwen-turbo（可选 ARGO_SEMANTIC_RERANK_MODEL 仅改模型）。参数：ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js、liveEmbeddingProviderConfig.js。",
+      "description": "语义二阶段重排（Rerank）：在向量/混合检索候选池后按相关性重排，显著提升 recall@1（尤其精确名/元素）。两种传输：chat（默认）= LLM listwise（chat/completions）；native = 真正的 cross-encoder 重排服务（DashScope text-rerank 契约，ARGO_RERANK_TRANSPORT=native，baseUrl 可为 origin（自动追加 /api/v1/services/rerank/text-rerank/text-rerank）或含 /services/rerank/ 的完整 endpoint 原样使用；output.results 按 relevance_score 降序映射回候选 id，与 chat 输出同构，下游 applyRerankOrder 不变）。策略：默认关（ARGO_SEMANTIC_RERANK=0），开时用更大候选池（pool=20）重排后取 topK；fail-open（错误/超时返回 null→保持原序，两种传输一致）；保留 kill switch；写前同路径→对写入侧轻微可逆。评测（scripts/eval-rerank.js，150 样本，qwen-turbo）：4-way vector r@1 95.3 / hybrid 96.0 / rerank(vector) 92.7 / rerank(hybrid) 99.3（r@5 100、MRR .997）——组合最优，但 rerank 对提示/模型敏感、噪声大，需大样本+调优后再启用。provider/model 与 embedding 解耦：resolveRerankProvider 优先 ARGO_RERANK_BASE_URL/ARGO_RERANK_API_KEY/ARGO_RERANK_PROVIDER/ARGO_RERANK_MODEL/ARGO_RERANK_TRANSPORT，未设则回落 embedding 配置（baseUrl/qwenKey/provider）与默认模型 qwen-turbo（可选 ARGO_SEMANTIC_RERANK_MODEL 仅改模型）。参数：ARGO_SEMANTIC_RERANK_POOL（20）、ARGO_SEMANTIC_RERANK_RETURN（8）。源码：argo/scripts/graph-rag/rerankRetrieval.js、defaultSemanticRetrieval.js、liveEmbeddingProviderConfig.js。",
       "id": "semantic-rerank-001",
       "name": "语义二阶段重排（Rerank）",
       "parent": "1961",
@@ -7226,6 +7231,27 @@
           "name": "AT-rerank-09",
           "description": "GIVEN thinking-off 配置；WHEN ARGO_RERANK_DISABLE_THINKING=0 或 ARGO_RERANK_THINKING_PARAM=<json> 自定义；THEN 可关闭/替换为任意 provider 所需字段（如 reasoning_effort=none）；且当 provider 拒绝该字段(400)时自动去掉重试一次，rerank 不因不兼容而丢失（守召回）。",
           "type": "Acceptance Test"
+        },
+        {
+          "name": "AT-rerank-10",
+          "type": "Acceptance Test",
+          "description": "GIVEN ARGO_RERANK_TRANSPORT；WHEN resolveRerankTransport/resolveRerankProvider；THEN 未设/未知值一律 chat（向后兼容），native 启用原生传输且 provider 携带 transportMode。",
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js"
+        },
+        {
+          "name": "AT-rerank-11",
+          "type": "Acceptance Test",
+          "description": "GIVEN native 传输；WHEN rerankCandidates；THEN origin baseUrl 自动追加 text-rerank 路径、含 /services/rerank/ 的完整 endpoint 原样使用；请求体={model,input:{query,documents},parameters:{return_documents:false,top_n}}；output.results 按 relevance_score 降序映射回规范 id（与 chat 输出同构）。",
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js"
+        },
+        {
+          "name": "AT-rerank-12",
+          "type": "Acceptance Test",
+          "description": "GIVEN native 传输；WHEN 供应商错误/超时/坏 payload/缺 key；THEN fail-open（null/空顺序保持融合序），不阻塞查询。",
+          "Input": "tests/rerank-retrieval.test.js",
+          "acceptanceCriteria": "tests/rerank-retrieval.test.js"
         }
       ],
       "type": "Application Component"
@@ -12727,6 +12753,33 @@
           "description": "feat(ontology): add Mathematics prebuilt ontology to custom-schema + catalog — custom-schema/math/**(SystemArchitecture.schema.json/schema-bundle.config.json/schema-bundle.rules.json/ontology-axioms.json/GUIDE.md + design/KG 示例图谱); custom-schema/README.md; README.md; docs/ontology-authoring.md; tests/schema-bundle.test.js; npm test 753/753"
         }
       ]
+    },
+    {
+      "type": "Business Object",
+      "name": "里程碑：rerank 原生 cross-encoder 传输 + 服务切换千问 qwen3.7-text-rerank（issue #13）",
+      "description": "里程碑（2026-10-15，项目总管，issue #13）：采纳方案 A——rerankRetrieval.js 新增 native cross-encoder 传输（ARGO_RERANK_TRANSPORT=native，默认 chat 向后兼容）：DashScope text-rerank 契约 {model,input:{query,documents},parameters:{return_documents,top_n}}，origin baseUrl 自动追加 /api/v1/services/rerank/text-rerank/text-rerank、完整 endpoint URL 原样使用；output.results 按 relevance_score 降序映射回候选 id（与 chat parseRerankOrder 同构，下游不变），fail-open 语义两传输一致。验收：AT-rerank-10/11/12；契约以真实 QWEN_KEY 实测（HTTP 200）。仓库回归 npm test 756/756（0 fail 0 skip，28.5s）。服务切换：~/.argo/.env rerank 已从 api.deepseek.com/deepseek-flash 切到 dashscope native + qwen3.7-text-rerank（仓库新代码实测语义查询 1.6s，此前 DeepSeek 挂起致 MCP -32001 超时、npm test 卡死>15min）。关键坑（0.20.1 同类复现）：常驻 MCP 仍是旧部署代码，其 .env 白名单不认识 ARGO_RERANK_TRANSPORT，整份 .env 被 SECRET_FILE_UNKNOWN_KEY 拒绝→LIVE_PROVIDER_CONFIGURATION_REQUIRED 全语义路径瘫痪；处置=先从 ~/.argo/.env 临时摘除该键（旧代码 chat→404→fail-open，语义恢复），正确顺序=先发布+argo-deploy+重启宿主加载新代码，再把 ARGO_RERANK_TRANSPORT=native 加回生效。deepseek-pro 不在本仓（属 graph-wiki 机配置），本仓既有示例已把 deepseek 示例改为 dashscope native。交付 commit 10e3cd4；图谱登记 semantic-rerank-001。",
+      "classifier": "milestone",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "commit",
+          "value": "10e3cd4",
+          "description": "argo/scripts/graph-rag/rerankRetrieval.js; liveEmbeddingProviderConfig.js; argo/.env.example; tests/rerank-retrieval.test.js"
+        },
+        {
+          "name": "issue",
+          "value": "gh#13"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "id": "rerank-cross-encoder-qwen3-7-text-rerank-issue-13",
+      "parent": "project-overseer-001"
     }
   ],
   "relationships": [
@@ -16962,7 +17015,8 @@
         "overseer-semantic-projection-oom-001",
         "overseer-mem-agent-cost-harness-001",
         "overseer-milestone-read-projection-001",
-        "overseer-harness-view-relations-001"
+        "overseer-harness-view-relations-001",
+        "rerank-cross-encoder-qwen3-7-text-rerank-issue-13"
       ],
       "included_relationships": []
     },
