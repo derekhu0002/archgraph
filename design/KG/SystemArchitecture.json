@@ -12865,6 +12865,11 @@
           "name": "commit",
           "value": "76ee99b",
           "description": "feat(argo-init): concise default summary + --json full report — argo/scripts/argoInitSummary.js; bin/argo-init.js; sandbox/lib/argo-init-cli.js; argo/skills/argo-init/SKILL.md; tests/argo-init-interface.test.js"
+        },
+        {
+          "name": "commit",
+          "value": "ce1742c",
+          "description": "test: 跟踪新增子视图 harness-argo-init-cli 的精确计数守卫（architecture-view-context 的 view 429 子视图集 + memory-eval MQ-17 childViewCount 38→39）"
         }
       ]
     },
