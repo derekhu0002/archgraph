@@ -12775,7 +12775,8 @@
         },
         {
           "name": "status",
-          "value": "ACTIVE"
+          "value": "ACTIVE",
+          "description": "重启后复验通过（2026-10-15 11:4x）：常驻 0.29.14 加载、新键白名单通过、memory_search/语义读正常、phase 面包屑 retrieval:rerank:done（新 pid）、部署码直测 native 返回真实序。issue #13 关闭。"
         },
         {
           "name": "commit",
