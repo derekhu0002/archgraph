@@ -86,6 +86,9 @@ test('AT argo-init: default output is a CONCISE summary (no full report dump)', 
   // ... and does NOT dump the huge detail
   assert.ok(!/endpointMatrix/.test(out), 'must not print the endpoint matrix');
   assert.ok(out.length < 4096, `summary must stay small, was ${out.length} chars`);
+  // AND a report object without `mode` (the CLI return shape) still reads cleanly
+  const cliShaped = renderInitSummary({ ...report, mode: undefined });
+  assert.match(cliShaped, /mode: prepare-and-check/, 'absent mode must not render as n/a');
 });
 
 test('AT argo-init: summary surfaces failures (blocking sections)', () => {

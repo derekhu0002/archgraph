@@ -80,7 +80,9 @@ function renderInitSummary(report) {
 
   const lines = [];
   lines.push(`ARGO INIT  ${overall}`);
-  lines.push(`workspace: ${repoName} (${workspaceRoot})   mode: ${report.mode || 'n/a'}`);
+  // The argo-init CLI always runs prepare-and-check (never check-only); the
+  // returned report object may omit `mode`, so default it instead of printing n/a.
+  lines.push(`workspace: ${repoName} (${workspaceRoot})   mode: ${report.mode || 'prepare-and-check'}`);
   lines.push(`schema: ${schemaLine}`);
 
   const bootstrap = report.workspaceBootstrap || {};
