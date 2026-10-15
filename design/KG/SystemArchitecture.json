@@ -4348,7 +4348,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-15 · issue #13：rerank 原生 cross-encoder 传输 + 服务切换千问）。\n【诉求】人类伙伴：看 GitHub 新 issue #13，将 rerank 机制兼容真正的 rerank 服务，并把当前 rerank 服务替换成千问 qwen3.7-text-rerank（不考虑 graph-wiki 止血）。\n【交付】方案 A 落地：rerankRetrieval.js 新增 native 分支（ARGO_RERANK_TRANSPORT=native，默认 chat 向后兼容，fail-open 不变；origin 自动追加 /api/v1/services/rerank/text-rerank/text-rerank，含 /services/rerank/ 的完整 URL 原样用；relevance_score 降序→候选 id，与 chat 同构）；ARGO_RERANK_TRANSPORT 入白名单+.env.example；AT-rerank-10/11/12；npm test 756/756（0 fail 0 skip，28.5s）。发布 archgraph-argo@0.29.14（shasum 0c13c37）→ npm i -g → argo-deploy -SkipEnv → ~/.argo/.env 加回 transport=native。commits 10e3cd4/43b3b53/880c094/5942b33；图谱：semantic-rerank-001 挂 AT 10..12 + T2 里程碑 rerank-cross-encoder-qwen3-7-text-rerank-issue-13；issue #13 已评论交付详情（未关闭，待重启复验）。\n【关键决定】方案 A（人类裁决）；契约真实 QWEN_KEY 实测 HTTP 200 后再写解析；deepseek-pro 不在本仓（graph-wiki 机配置），本仓示例改用真实 dashscope native 模型。\n【坑（复现 0.20.1 同类）】新 .env 键 + 未部署的旧常驻代码 = SECRET_FILE_UNKNOWN_KEY 拒整份 .env → 全语义路径 LIVE_PROVIDER_CONFIGURATION_REQUIRED；正确顺序=先发部署→重启→再加键（本次已按此收口，重启前旧进程仍报 embeddingLifecycle=Failed 属预期窗口）。另：npm test 曾因 deepseek rerank 挂起卡死 >15min（memory-eval 每题语义×3 次全量 harness），切 native 后 28.5s。\n【承接待办】① 人类伙伴重启宿主加载 0.29.14 常驻 MCP；② 重启后复验：MCP 语义查询带 native rerank 正常、embeddingLifecycle 回 Aligned；③ 复验后可关 issue #13；④ graph-wiki 侧同步改 native（那边自己处理）。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-15 · issue #14：端点矩阵通配符 token 对齐）。\n【诉求】人类伙伴：看 GitHub 新 issue #14，分析是否需修；要求“发现的问题全部修改”，且要考虑对所有场景的影响。\n【交付】统一所有校验器的通配符目标 token 为共享集合 {*, ModelConcept}：①投影两引擎（ontology-projection/lib/shapes.js 的 isWildcardTarget + python/validate_ontology.py 的 WILDCARD_TARGETS，均不发射假类）；②core schema-bundle.js：type-matrix 构建器补上 ModelConcept（class-matrix 已有）、两构建器共享 isWildcardMatrixToken；③遗留 archimate32-rules.js 补上 *（契约对齐）。验收：AT-ovx-18（ModelConcept 两引擎无违规+不发射假类+负向控制）、core 通配契约 AT、新 sandbox 样本 model-concept + run-real.js case；npm test 759/759；host python 与容器真引擎各 12/12。\n【发布】archgraph-argo@0.29.15（commits 65391fc/8f8d55d/400956c）已发布 + 全局安装 + argo-deploy；待宿主重启生效；issue #14 已回复并关闭。\n【顺带修复】本会话前遗留回归：issue #13 的 T2 记忆元素未遵守 overseer- 命名 → 改名 overseer-rerank-native-qwen-transport-001 并同步 tests/overseer-ltm-layering（之前 #13 收尾未跑 npm test 导致漏网）。\n【坑/教训】①同一“端点矩阵通配符”契约在代码库里有 5 处独立实现（2 投影引擎 + 2 core 构建器 + 1 遗留模块），修一处不够——须全网扫同语义比较。②容器 acceptance:ontology 的 init 步骤本机 SEMANTIC_OPERATOR_ERROR 为既有环境限制（访问不到阿里云 embedding 端点），与改动无关；写路径 A/B/C 正常。③新增 T2 记忆元素到被 overseer-ltm-layering 精确断言的视图须同 commit 同步该测试（且 id 必须 overseer- 前缀）。\n【承接】无未完成项（重启后如异常再查）。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -12566,8 +12566,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.29.13",
-          "description": "Issue #12 fix — real (pySHACL+owlready2/HermiT) engine now enforces functionalProperties closed-world (OWL_FUNCTIONAL), matching the deterministic engine, even without distinctIndividuals. Commits: 04b3b07 (fix), 8e74b1c (release). npm publish shasum ef5aa57d89aa142b7b77ee001e26bb68d5aa62c7; npm i -g archgraph-argo + argo-deploy -SkipEnv done; deployed ~/.argo verified: init + write real engine both report \"OWL: functional 'Assigned To' of 'agent-1' has 2 distinct values\". Host restart pending for end-to-end verification."
+          "value": "archgraph-argo@0.29.15",
+          "description": "Issue #14 fix（端点矩阵通配符 token 对齐：投影两引擎 + core type-matrix 构建器 + 遗留 archimate32-rules 统一 {*, ModelConcept}）。npm publish（经 127.0.0.1:7890 代理）→ registry 传播第 8 次可见 → npm i -g archgraph-argo@0.29.15 → argo-deploy -SkipEnv 完成；宿主 ~/.argo 已含修复（shapes.js/python/schema-bundle/archimate32-rules 均命中）。待宿主重启加载新常驻 MCP。"
         },
         {
           "name": "deliveryStatus",
@@ -12627,6 +12627,11 @@
           "name": "commit",
           "value": "65391fc",
           "description": "fix(ontology): honor the ModelConcept wildcard token across ALL validators (issue #14) — 投影两引擎 lib/shapes.js + python/validate_ontology.py 共享通配集合 {*, ModelConcept}；schema-bundle.js type-matrix 核心校验器补上 ModelConcept（class-matrix 已有）、两构建器共享 isWildcardMatrixToken；archimate32-rules.js 遗留校验器补上 *；sandbox 新增 model-concept 真引擎样本 + run-real.js case；tests AT-ovx-18 + 核心通配契约 AT + 侧车副本同步"
+        },
+        {
+          "name": "commit",
+          "value": "400956c",
+          "description": "package.json（release archgraph-argo@0.29.15）"
         }
       ]
     },
