@@ -12776,6 +12776,16 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "43b3b53",
+          "description": "package.json（release archgraph-argo@0.29.14）"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.29.14",
+          "description": "npm publish shasum 0c13c3736aed3a8c6fb9da685cf5dfcd521cc8d0 → registry 传播轮询第 10 次可见 → npm i -g archgraph-argo@0.29.14 → argo-deploy -SkipEnv 完成（部署产物含 native 传输+白名单）→ ~/.argo/.env 加回 ARGO_RERANK_TRANSPORT=native（qwen3.7-text-rerank/dashscope）；待宿主重启加载新常驻 MCP 后全量生效"
         }
       ],
       "id": "rerank-cross-encoder-qwen3-7-text-rerank-issue-13",
