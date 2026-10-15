@@ -12880,6 +12880,11 @@
           "name": "release",
           "value": "archgraph-argo@0.29.16",
           "description": "argo-init 默认输出精简（384KB→~687B 摘要）+ --json 全量。npm publish（经 127.0.0.1:7890 代理）→ registry 传播第 7 次可见 → npm i -g archgraph-argo@0.29.16 → argo-deploy -SkipEnv 完成；全局包 0.29.16 已含 renderInitSummary，~/.argo/scripts/argoInitSummary.js 已部署；CLI 非常驻，无需重启即生效（人类伙伴仍选择重启）。"
+        },
+        {
+          "name": "commit",
+          "value": "63d34b9",
+          "description": "fix(argo-init): 摘要 mode 默认值（CLI 返回对象无 mode）——避免打印 'n/a'；argo/scripts/argoInitSummary.js + tests/argo-init-interface.test.js"
         }
       ]
     },
