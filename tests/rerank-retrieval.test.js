@@ -9,11 +9,15 @@ const {
   DEFAULT_RERANK_MODEL,
   DEFAULT_RERANK_POOL,
   DEFAULT_RERANK_RETURN,
+  NATIVE_RERANK_PATH,
   isRerankEnabled,
   rerankConfig,
   rerankTimeoutMs,
   resolveRerankProvider,
   resolveRerankThinkingOff,
+  resolveRerankTransport,
+  nativeRerankEndpoint,
+  parseNativeRerankOrder,
   parseRerankOrder,
   applyRerankOrder,
   rerankCandidates,
@@ -76,10 +80,10 @@ test('AT-rerank-04: rerankCandidates parses the chat response and fails open', a
 // embedding configuration (qwen by default).
 test('AT-rerank-06: rerank provider is independent of embedding (qwen fallback + overrides)', () => {
   const embedding = { embeddingBaseUrl: 'https://emb/v1', qwenKey: 'EK', embeddingProvider: 'aliyun' };
-  assert.deepEqual(resolveRerankProvider(embedding, {}), { baseUrl: 'https://emb/v1', apiKey: 'EK', model: DEFAULT_RERANK_MODEL, provider: 'aliyun' });
+  assert.deepEqual(resolveRerankProvider(embedding, {}), { baseUrl: 'https://emb/v1', apiKey: 'EK', model: DEFAULT_RERANK_MODEL, provider: 'aliyun', transportMode: 'chat' });
   assert.deepEqual(
     resolveRerankProvider(embedding, { ARGO_RERANK_BASE_URL: 'https://other/v1', ARGO_RERANK_API_KEY: 'OK', ARGO_RERANK_MODEL: 'qwen-plus', ARGO_RERANK_PROVIDER: 'other' }),
-    { baseUrl: 'https://other/v1', apiKey: 'OK', model: 'qwen-plus', provider: 'other' },
+    { baseUrl: 'https://other/v1', apiKey: 'OK', model: 'qwen-plus', provider: 'other', transportMode: 'chat' },
   );
   // model-only override keeps the embedding provider/endpoint
   const modelOnly = resolveRerankProvider(embedding, { ARGO_SEMANTIC_RERANK_MODEL: 'qwen-max' });
@@ -146,4 +150,80 @@ test('AT-rerank-09: thinking-off is configurable and never breaks rerank on reje
   const order = await rerankCandidates({ query: 'q', candidates, provider, transport: rejecting, maxReturn: 2 });
   assert.deepEqual(order, ['Element:b', 'Element:a'], 'rerank must still succeed after dropping the unsupported field');
   assert.deepEqual(seen, [true, false], 'attempt with the field, then one retry without it');
+});
+
+// AT-rerank-10: the rerank transport is selectable — 'chat' (default, listwise
+// LLM over /chat/completions) or 'native' (real cross-encoder rerank service,
+// e.g. DashScope text-rerank). Backward compatible: unset/unknown = chat.
+test('AT-rerank-10: ARGO_RERANK_TRANSPORT selects chat (default) or native', () => {
+  assert.equal(resolveRerankTransport({}), 'chat', 'default keeps the listwise chat transport');
+  assert.equal(resolveRerankTransport({ ARGO_RERANK_TRANSPORT: '' }), 'chat');
+  assert.equal(resolveRerankTransport({ ARGO_RERANK_TRANSPORT: 'native' }), 'native');
+  assert.equal(resolveRerankTransport({ ARGO_RERANK_TRANSPORT: ' NATIVE ' }), 'native', 'case/space tolerant');
+  assert.equal(resolveRerankTransport({ ARGO_RERANK_TRANSPORT: 'cross-encoder' }), 'chat', 'unknown values fall back to chat');
+  assert.equal(resolveRerankProvider({}, { ARGO_RERANK_TRANSPORT: 'native' }).transportMode, 'native', 'provider carries the mode');
+});
+
+// AT-rerank-11: native transport speaks the DashScope text-rerank contract:
+// origin baseUrl gets the native path appended, a full endpoint URL is used
+// verbatim; the body is {model,input:{query,documents},parameters:{...}} (NO
+// chat messages / thinking fields); the parsed {index,relevance_score} results
+// map back to canonical candidate ids ordered best-first (same shape as the
+// chat path, so applyRerankOrder downstream is unchanged).
+test('AT-rerank-11: native transport sends the text-rerank contract and maps scores to ids', async () => {
+  const candidates = [
+    { id: 'Element:a', searchText: 'a personal knowledge base admin maintains the wiki' },
+    { id: 'Element:b', searchText: 'b federation member registers to the center' },
+    { id: 'Element:c', searchText: 'c the graph schema validates archimate types' },
+  ];
+  let seen;
+  const capture = {
+    request: async (url, options) => {
+      seen = { url, body: JSON.parse(options.body), headers: options.headers };
+      return { ok: true, json: async () => ({ output: { results: [
+        { index: 0, relevance_score: 0.894 },
+        { index: 2, relevance_score: 0.24 },
+        { index: 1, relevance_score: 0.128 },
+      ] } }) };
+    },
+  };
+  const provider = { baseUrl: 'https://dashscope.aliyuncs.com', apiKey: 'k', model: 'qwen3.7-text-rerank', provider: 'dashscope', transportMode: 'native' };
+  const order = await rerankCandidates({ query: 'knowledge base admin', candidates, provider, transport: capture, maxReturn: 3 });
+  assert.equal(seen.url, `https://dashscope.aliyuncs.com${NATIVE_RERANK_PATH}`, 'origin baseUrl gets the native path');
+  assert.equal(seen.headers.Authorization, 'Bearer k');
+  assert.deepEqual(Object.keys(seen.body).sort(), ['input', 'model', 'parameters'], 'native body is the rerank contract, not a chat request');
+  assert.equal(seen.body.model, 'qwen3.7-text-rerank');
+  assert.equal(seen.body.input.query, 'knowledge base admin');
+  assert.deepEqual(seen.body.input.documents, candidates.map(c => c.searchText), 'documents carry the candidate texts in pool order');
+  assert.equal(seen.body.parameters.return_documents, false);
+  assert.equal(seen.body.parameters.top_n, 3);
+  assert.deepEqual(order, ['Element:a', 'Element:c', 'Element:b'], 'relevance_score desc maps to canonical ids');
+
+  // Full endpoint URL (already contains /services/rerank/) is used verbatim.
+  seen = undefined;
+  const full = 'https://dashscope.aliyuncs.com/api/v1/services/rerank/text-rerank/text-rerank';
+  await rerankCandidates({ query: 'q', candidates, provider: { ...provider, baseUrl: full }, transport: capture, maxReturn: 3 });
+  assert.equal(seen.url, full, 'endpoint-style baseUrl used as-is');
+
+  // parseNativeRerankOrder is defensive: scores re-sorted, bad entries ignored.
+  assert.deepEqual(parseNativeRerankOrder({ output: { results: [
+    { index: 1, relevance_score: 0.1 }, { index: 0, relevance_score: 0.9 },
+    { index: 9, relevance_score: 0.5 }, 'junk', { index: 2 },
+  ] } }, ['x', 'y', 'z']), ['x', 'y'], 'sorted by score desc, out-of-range/missing-score entries dropped');
+  assert.deepEqual(parseNativeRerankOrder(null, ['x']), []);
+  assert.deepEqual(parseNativeRerankOrder({}, ['x']), []);
+  assert.equal(nativeRerankEndpoint('https://origin/'), `https://origin${NATIVE_RERANK_PATH}`, 'trailing slash stripped');
+});
+
+// AT-rerank-12: native transport is fail-open like chat: any transport error,
+// non-ok response, missing config, or malformed payload yields null/empty order
+// so the caller keeps the fused ranking (never blocks the query).
+test('AT-rerank-12: native transport fails open on error/timeout/bad payload', async () => {
+  const candidates = [{ id: 'Element:a', searchText: 'A' }, { id: 'Element:b', searchText: 'B' }];
+  const provider = { baseUrl: 'https://dashscope.aliyuncs.com', apiKey: 'k', model: 'qwen3.7-text-rerank', transportMode: 'native' };
+  assert.equal(await rerankCandidates({ query: 'q', candidates, provider, transport: { request: async () => ({ ok: false, status: 429, json: async () => ({}) }) } }), null);
+  assert.equal(await rerankCandidates({ query: 'q', candidates, provider, transport: { request: async () => { throw new Error('timeout'); } } }), null);
+  assert.equal(await rerankCandidates({ query: 'q', candidates, provider: { ...provider, apiKey: '' }, transport: { request: async () => ({ ok: true, json: async () => ({}) }) } }), null, 'missing apiKey short-circuits');
+  const badPayload = { request: async () => ({ ok: true, json: async () => ({ code: 'InvalidParameter', message: 'boom' }) }) };
+  assert.deepEqual(await rerankCandidates({ query: 'q', candidates, provider, transport: badPayload }), [], 'bad payload = empty order = original order downstream');
 });
