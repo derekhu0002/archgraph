@@ -12870,6 +12870,16 @@
           "name": "commit",
           "value": "ce1742c",
           "description": "test: 跟踪新增子视图 harness-argo-init-cli 的精确计数守卫（architecture-view-context 的 view 429 子视图集 + memory-eval MQ-17 childViewCount 38→39）"
+        },
+        {
+          "name": "commit",
+          "value": "4a1ad79",
+          "description": "package.json（release archgraph-argo@0.29.16）"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.29.16",
+          "description": "argo-init 默认输出精简（384KB→~687B 摘要）+ --json 全量。npm publish（经 127.0.0.1:7890 代理）→ registry 传播第 7 次可见 → npm i -g archgraph-argo@0.29.16 → argo-deploy -SkipEnv 完成；全局包 0.29.16 已含 renderInitSummary，~/.argo/scripts/argoInitSummary.js 已部署；CLI 非常驻，无需重启即生效（人类伙伴仍选择重启）。"
         }
       ]
     },
