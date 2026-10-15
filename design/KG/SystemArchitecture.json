@@ -1373,6 +1373,10 @@
         {
           "view_id": "archgraph-internal-read-write-001",
           "view_name": "ArchGraph 实现：读写治理与检索"
+        },
+        {
+          "view_id": "harness-argo-init-cli",
+          "view_name": "Harness 初始化（argo-init CLI）"
         }
       ],
       "description": "Harness 分组：承载 ARGO/ArchGraph 框架自身的机制设计视图（view 298 Harness）。视图内以关系显式化两条核心链路：读（默认语义检索 → 语义混合检索/RRF → 语义二阶段重排；由语义投影与可配置嵌入提供者 Serving/供数据；结构投影 Serving 只读 Cypher 查询 → 社区索引）；写（图谱校验 → 写入去重门禁 → 无损写入门禁 → 语义/向量投影生命周期）。2026-09-27 首次为 view 298 补齐 11 条关系（commit 3fb9c4a），此前仅有平铺成员、无连线。",
@@ -4348,7 +4352,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-15 · issue #14：端点矩阵通配符 token 对齐）。\n【诉求】人类伙伴：看 GitHub 新 issue #14，分析是否需修；要求“发现的问题全部修改”，且要考虑对所有场景的影响。\n【交付】统一所有校验器的通配符目标 token 为共享集合 {*, ModelConcept}：①投影两引擎（ontology-projection/lib/shapes.js 的 isWildcardTarget + python/validate_ontology.py 的 WILDCARD_TARGETS，均不发射假类）；②core schema-bundle.js：type-matrix 构建器补上 ModelConcept（class-matrix 已有）、两构建器共享 isWildcardMatrixToken；③遗留 archimate32-rules.js 补上 *（契约对齐）。验收：AT-ovx-18（ModelConcept 两引擎无违规+不发射假类+负向控制）、core 通配契约 AT、新 sandbox 样本 model-concept + run-real.js case；npm test 759/759；host python 与容器真引擎各 12/12。\n【发布】archgraph-argo@0.29.15（commits 65391fc/8f8d55d/400956c）已发布 + 全局安装 + argo-deploy；待宿主重启生效；issue #14 已回复并关闭。\n【顺带修复】本会话前遗留回归：issue #13 的 T2 记忆元素未遵守 overseer- 命名 → 改名 overseer-rerank-native-qwen-transport-001 并同步 tests/overseer-ltm-layering（之前 #13 收尾未跑 npm test 导致漏网）。\n【坑/教训】①同一“端点矩阵通配符”契约在代码库里有 5 处独立实现（2 投影引擎 + 2 core 构建器 + 1 遗留模块），修一处不够——须全网扫同语义比较。②容器 acceptance:ontology 的 init 步骤本机 SEMANTIC_OPERATOR_ERROR 为既有环境限制（访问不到阿里云 embedding 端点），与改动无关；写路径 A/B/C 正常。③新增 T2 记忆元素到被 overseer-ltm-layering 精确断言的视图须同 commit 同步该测试（且 id 必须 overseer- 前缀）。\n【承接】无未完成项（重启后如异常再查）。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-15 · issue #14 通配符对齐 + argo-init 输出精简）。\n【诉求】①看 issue #14 并修复（要求“发现的问题全部修改”、考虑所有场景影响）；②argo init 反馈过于复杂过长 → 分析+方案+实施。\n【交付1 · issue #14】端点矩阵通配符 token 全量对齐为 {*, ModelConcept}：投影两引擎（ontology-projection/lib/shapes.js 的 isWildcardTarget + python/validate_ontology.py 的 WILDCARD_TARGETS）、core schema-bundle.js 两构建器（type-matrix 补 ModelConcept；共享 isWildcardMatrixToken）、遗留 archimate32-rules.js（补 *）。验收：AT-ovx-18 + core 通配契约 AT + sandbox model-concept 样本；npm test 759/759；host+容器真引擎 12/12。发布 archgraph-argo@0.29.15（commits 65391fc/8f8d55d/400956c/bb5bc50，已推公开 main，远端 tip bb5bc50）。issue #14 已独立复验通过并关闭。\n【交付2 · argo-init 输出精简】默认摘要（~687B vs 384KB）+ --json 全量；新增 argo/scripts/argoInitSummary.js + bin/argo-init.js 分支；sandbox 调用方传 --json；SKILL.md 同步；AT-argo-init-01/02/03；npm test 762/762。commit 76ee99b。图谱新增 argo-init-cli-001 + 子视图 harness-argo-init-cli。\n【关键决定】①通配符契约在库里有 5 处独立实现，只改一处不够——统一为共享集合防漂移；②argo-init 默认摘要 + --json 全量（报告对象不改，最小风险，信息不丢——完整报告仍写 .argo/temp/）。\n【坑/教训】①同一语义契约多处实现须全网扫；②`sandbox/lib/argo-init-cli.js` 是唯一 JSON.parse(stdout) 的调用方，改默认输出必须同步它；③PowerShell Set-Content -Encoding utf8 会写 BOM 破坏 JSON（用 node fs 写）；④issue #13 遗留：T2 记忆元素未守 overseer- 命名致 overseer-ltm-layering 失败（已改名同步）。\n【承接】待办：本次 argo-init 变更未发布/部署（需时报发布链路）；如需推送远端再 push。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -12826,6 +12830,65 @@
           "value": "ACTIVE"
         }
       ]
+    },
+    {
+      "type": "Application Component",
+      "name": "argo-init CLI（工作区确定性初始化）",
+      "id": "argo-init-cli-001",
+      "parent": "1961",
+      "description": "argo-init CLI（bin/argo-init.js）：工作区确定性初始化的命令行入口，运行与已移除 MCP 工具相同的 initializeWorkspaceReport（同一实现）——bootstrap + Neo4j 结构同步 + .qea 全量投影 + 语义生命周期 + canonical 校验 + 本体定义/校验 + subdiagram_views 一致性。输出契约（2026-10-15 优化）：默认输出简明摘要（约十行：整体状态 + schema + 各阶段状态 + 本体/本体校验 + Neo4j 库名与 .qea 目标的一致性核验 + 报告路径），修复前默认把 ~384KB 完整报告（其中端点矩阵 ~180KB）pretty-JSON 全量刷屏、污染终端与 Agent 上下文；--json（--verbose 别名）输出完整报告 JSON（与旧行为逐字段一致）；完整报告始终写入 .argo/temp/argo-harness-init-report.json。摘要渲染为纯函数 argo/scripts/argoInitSummary.js（防御式：不抛错、容忍部分报告）。程序化调用方 sandbox/lib/argo-init-cli.js 显式传 --json 取全量。",
+      "testcases": [
+        {
+          "name": "AT-argo-init-01",
+          "type": "Acceptance Test",
+          "description": "GIVEN 一份 ok 报告（含 ~180KB 端点矩阵）；WHEN 默认渲染（argoInitSummary.renderInitSummary）；THEN 输出保持精简（<4KB）、含整体状态/schema/ontologyValidation/各阶段状态/neo4j 库名与 .qea 目标一致性核验/报告路径，且不含 endpointMatrix。",
+          "Input": "tests/argo-init-interface.test.js",
+          "acceptanceCriteria": "tests/argo-init-interface.test.js"
+        },
+        {
+          "name": "AT-argo-init-02",
+          "type": "Acceptance Test",
+          "description": "GIVEN 一份 failed 报告（如 neo4j 不可达）；WHEN 默认渲染；THEN 整体状态显示 FAILED 并逐条列出失败阶段与错误摘要（failures:）。",
+          "Input": "tests/argo-init-interface.test.js",
+          "acceptanceCriteria": "tests/argo-init-interface.test.js"
+        },
+        {
+          "name": "AT-argo-init-03",
+          "type": "Acceptance Test",
+          "description": "GIVEN argo-init CLI；WHEN 无参 vs --json；THEN 默认打印简明摘要、--json 打印完整报告且共用同一渲染模块；sandbox 程序化调用方显式传 --json 保持全量对象。",
+          "Input": "tests/argo-init-interface.test.js",
+          "acceptanceCriteria": "tests/argo-init-interface.test.js"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "76ee99b",
+          "description": "feat(argo-init): concise default summary + --json full report — argo/scripts/argoInitSummary.js; bin/argo-init.js; sandbox/lib/argo-init-cli.js; argo/skills/argo-init/SKILL.md; tests/argo-init-interface.test.js"
+        }
+      ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "commit",
+          "value": "76ee99b",
+          "description": "argo/scripts/argoInitSummary.js; bin/argo-init.js; sandbox/lib/argo-init-cli.js; argo/skills/argo-init/SKILL.md; tests/argo-init-interface.test.js"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "里程碑（2026-10-15，项目总管）：argo-init 初始化反馈精简。现象：人类伙伴反馈 init 后反馈内容过于复杂过长。根因（实测）：bin/argo-init.js:39 无条件 JSON.stringify(report,null,2) 全量打印 —— 本仓报告 384KB（ontology.endpointMatrix 181KB + neo4j.verification 38.5KB 占 58%），污染终端与 Agent 上下文。方案（人类伙伴评审接受）：默认输出简明摘要（约十行：整体状态 + schema + 各阶段状态 + 本体/本体校验 + neo4j 库名与 .qea 目标一致性核验 + 报告路径）；--json（--verbose 别名）输出完整报告 JSON（逐字段与旧行为一致）；完整报告仍始终写入 .argo/temp/argo-harness-init-report.json（信息不丢）；报告对象本身不改（只在 CLI 层摘要，最小风险）；程序化调用方 sandbox/lib/argo-init-cli.js 显式传 --json。落地：新增纯函数 argo/scripts/argoInitSummary.js（防御式不抛错）；bin/argo-init.js 分支；SKILL.md 文档化。验收：tests/argo-init-interface.test.js 新增 3 条 AT（AT-argo-init-01 摘要<4KB 且无 endpointMatrix、AT-argo-init-02 失败阶段逐条提示、AT-argo-init-03 CLI 默认摘要/--json 全量与调用方带 --json）；npm test 762/762（0 fail 0 skip）；实测本仓报告摘要 687 字节（vs 384KB）。图谱：新增 Application Component argo-init-cli-001 + 子视图 harness-argo-init-cli（Harness 1961 下；view 298 已满 15 成员）。commit 76ee99b。",
+      "id": "overseer-mem-argo-init-summary-001",
+      "name": "里程碑：argo-init 默认输出精简（384KB → 687B 摘要 + --json 全量）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -17490,7 +17553,8 @@
     {
       "description": "项目总管 T2 长期记忆分层子视图：对外/对内沟通材料与汇报交付（PPT/PDF/邮件）。id 不含 -ltm- 以免与 T2 召回视图（按 /-ltm-/ 解析）冲突。",
       "included_elements": [
-        "overseer-milestone-coding-business-deck-001"
+        "overseer-milestone-coding-business-deck-001",
+        "overseer-mem-argo-init-summary-001"
       ],
       "included_relationships": [],
       "parent_element_id": "project-overseer-001",
@@ -17819,6 +17883,15 @@
         "overseer-milestone-mathematics-ontology-001"
       ],
       "included_relationships": []
+    },
+    {
+      "view_name": "Harness 初始化（argo-init CLI）",
+      "parent_element_id": "1961",
+      "description": "Harness 下的初始化 CLI 视图：承载 argo-init（工作区确定性初始化：bootstrap + Neo4j 结构同步 + .qea 全量投影 + 语义生命周期 + canonical 校验 + 本体定义/校验 + subdiagram_views 一致性）及其输出契约。",
+      "view_id": "harness-argo-init-cli",
+      "included_elements": [
+        "argo-init-cli-001"
+      ]
     }
   ]
 }
