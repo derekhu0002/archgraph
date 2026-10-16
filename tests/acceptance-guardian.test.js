@@ -78,6 +78,7 @@ const DELIVERABLE_GUARDS = [
   ['FEATURE: ontology validation extension (opt-in write-delta + init-full real engine)', 'tests/ontology-validation-extension.test.js'],
   ['FEATURE: ontology sidecar drift guard (sandbox copy == production)', 'tests/ontology-sidecar-drift.test.js'],
   ['FEATURE: Codex harness adaptation (rules/AGENTS.md + skills + MCP config.toml)', 'tests/argo-codex.test.js'],
+  ['FEATURE: Linux/WSL deployment (install-argo.sh POSIX deployer + argo-deploy dispatch)', 'tests/argo-deploy-linux.test.js'],
   ['FEATURE: order-independent mutation batches (topological apply + cycle report)', 'tests/mutation-batch-order.test.js'],
   ['FEATURE: bounded structural reads (context output budget: identity fallback + complete id manifest)', 'tests/agent-read-projection.test.js'],
   ['FEATURE: Coding business deck v2 (editable nine-slide deliverable)', 'tests/coding-business-deck-v2.test.js'],
