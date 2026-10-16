@@ -1,6 +1,6 @@
 {
   "name": "archgraph-argo",
-  "version": "0.29.16",
+  "version": "0.29.17",
   "description": "Deploy the ArchGraph ARGO toolchain, skills, and rules (schema, scripts, argo-init skill, global rule) with one command.",
   "license": "MIT",
   "bin": {
@@ -22,6 +22,7 @@
     "argo/.env.example",
     "vendor",
     "install-argo.ps1",
+    "install-argo.sh",
     "bin",
     "cordis.patch.yml",
     "dsh-argo-workspace",
