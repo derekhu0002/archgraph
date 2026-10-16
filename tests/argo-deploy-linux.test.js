@@ -105,6 +105,18 @@ test('the npm package ships the POSIX deployer', () => {
   assert.ok(manifest.files.includes('install-argo.ps1'), 'package.json files must still include install-argo.ps1');
 });
 
+test('install-argo.ps1 installs the ontology python deps on externally-managed Linux/macOS', () => {
+  // GIVEN the ontology-validation engine needs pyshacl + owlready2 via pip
+  // WHEN the installer provisions them on a PEP 668 system (Debian/Ubuntu)
+  // THEN it passes --break-system-packages on non-Windows so the default deploy
+  //   does NOT abort with "externally-managed-environment".
+  const script = fs.readFileSync(PG_SCRIPT, 'utf8');
+  assert.match(script, /--break-system-packages/, 'pip step must pass --break-system-packages off Windows');
+  assert.match(script, /IsWindows/, 'pip step must branch on the platform');
+  assert.match(script, /pyshacl/, 'must still install pyshacl');
+  assert.match(script, /owlready2/, 'must still install owlready2');
+});
+
 // --- behaviour: a real deploy into a throwaway Linux home -------------------
 
 const IS_WINDOWS = process.platform === 'win32';

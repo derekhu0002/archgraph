@@ -851,7 +851,13 @@ function Install-OntologyEngineDeps {
     }
     Write-Host "  java: $($java.Source)"
     Write-Host '  installing python packages: pyshacl owlready2'
-    & $py.Source -m pip install --user --upgrade --disable-pip-version-check pyshacl owlready2 | Out-Host
+    # Debian/Ubuntu (PEP 668) mark the system Python as externally managed, so a
+    # user install needs --break-system-packages on Linux/macOS; Windows does not.
+    $onWindows = ($PSVersionTable.PSVersion.Major -lt 6) -or $IsWindows
+    $pipArgs = @('-m', 'pip', 'install', '--user', '--upgrade', '--disable-pip-version-check')
+    if (-not $onWindows) { $pipArgs += '--break-system-packages' }
+    $pipArgs += @('pyshacl', 'owlready2')
+    & $py.Source @pipArgs | Out-Host
     if ($LASTEXITCODE -ne 0) {
         throw "pip install of pyshacl/owlready2 failed (exit $LASTEXITCODE). Fix the Python environment, then re-run: argo-deploy."
     }
