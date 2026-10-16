@@ -4352,7 +4352,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-15 · issue #14 + argo-init 输出精简）。\n【本会话两项交付】\n① issue #14（端点矩阵通配符 token 全量对齐）：把 {*, ModelConcept} 统一到 5 处校验器（投影两引擎 lib/shapes.js + python/validate_ontology.py；core schema-bundle.js class-matrix+type-matrix 两构建器共享 isWildcardMatrixToken；遗留 archimate32-rules.js）。验收 AT-ovx-18 + core 通配契约 AT + sandbox model-concept 样本；npm test 759/759；host+容器真引擎 12/12。发布 archgraph-argo@0.29.15，推公开 main。issue #14 已独立复验通过并关闭。\n② argo-init 反馈精简：默认输出 ~755B 摘要（原 385KB pretty JSON，其中 ontology.endpointMatrix ~180KB），--json 输出全量（逐字段与旧一致），完整报告仍写 .argo/temp/argo-harness-init-report.json；新增纯函数 argo/scripts/argoInitSummary.js + bin/argo-init.js 分支；sandbox 调用方显式传 --json；SKILL.md 同步。发布 archgraph-argo@0.29.16 并部署，人类伙伴重启后已复验（默认 exit0/755B，--json 385046B 有效）。\n【未完成/承接】mode 显示为 'n/a' 的小瑕疵已源码修正（commit 63d34b9）但尚未进发布；如需生效可切 archgraph-argo@0.29.17（发布+部署即可，CLI 非常驻）。\n【关键决定】①同一语义契约多处实现须全网扫并统一（防漂移）；②argo-init 默认摘要 + --json 全量，不动报告对象（最小风险、信息不丢）；③记忆元素命名一律 overseer- 前缀。\n【坑/教训】①sandbox/lib/argo-init-cli.js 是唯一 JSON.parse(stdout) 调用方，改默认输出必须同步它；②新增子/视图会打破多处精确计数守卫（overseer-ltm-layering、architecture-view-context 的 view 429、memory-eval MQ-17），须同 commit 同步；③issue #13 遗留回归（记忆元素未守 overseer- 命名）曾致 npm test 红——收尾必跑全量；④PowerShell Set-Content -Encoding utf8 与 > 重定向会写 BOM 破坏 JSON，统一用 node fs/spawn；⑤npm publish/install/push 需先设 HTTPS_PROXY=http://127.0.0.1:7890。\n【提交（已推 origin/main，tip d040ba5）】65391fc/8f8d55d/400956c/bb5bc50（#14）、76ee99b/96f0cf7/ce1742c/6bf1918/4a1ad79/07df111/63d34b9/d040ba5（argo-init）。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-16/17 · WSL/Linux 部署适配 + 本体引擎 Linux pip 修复）。\n【本会话交付】\n① WSL/Linux 部署器：新增 install-argo.sh（POSIX 包装——解析 $HOME+XDG、导出 USERPROFILE/APPDATA/LOCALAPPDATA 兜底、向 install-argo.ps1 传显式前斜杠 -*(Root|Path) 参数，并跳过调用方已传参以防参数重复绑定）；bin/argo-deploy.js 非 Windows 平台分派到它；package.json files 纳入；新增 tests/argo-deploy-linux.test.js + acceptance-guardian 条目。根因：install-argo.ps1 默认依赖 %USERPROFILE%/%APPDATA%/%LOCALAPPDATA% 且用反斜杠拼路径 → Linux/WSL 写到 /.argo 并产生字面反斜杠文件名。\n② 本体引擎 Linux pip 修复：install-argo.ps1 安装 pyshacl/owlready2 的步骤在非 Windows 追加 --break-system-packages（Ubuntu 24.04 PEP 668）→ 默认部署即装上引擎。\n【发布/部署】archgraph-argo@0.29.17（部署器）+ @0.29.18（pip 修复）→ 全局安装 → argo-deploy -EnableOntologyValidation（不再 -SkipOntologyEngine）→ 本机校验 ontologyValidation 由 disabled → passed；已装 Java JRE 17 + pip + pyshacl 0.40.1/owlready2 0.51，~/.argo/.env 写 ARGO_VALIDATION_EXTENSIONS。\n【环境】opencode 改为从 ~ 通用启动（新增 ~/opencode-web.sh：从 $HOME 起、项目无关；+ systemd user 单元，未启用）；/etc/gai.conf 加 precedence ::ffff:0:0/96 100 强制 IPv4；生成 ~/.ssh/id_ed25519 并推 origin。\n【关键决定】①框架部署器必须 WSL/Linux 适配：env→$HOME、路径用 Join-Path/显式前斜杠传参、pip 兼容 PEP668；②opencode 从 ~ 通用启动而非绑定单一项目；③发布里程碑命名高度相似属正常，允许 onConflict=allowDuplicate。\n【坑/教训】①WSL 无 USERPROFILE/APPDATA/LOCALAPPDATA → install-argo.ps1 写错根目录并产字面反斜杠文件；②Ubuntu 24.04 pip --user 被 PEP668 拒（须 --break-system-packages）；③不得用 -SkipOntologyEngine 绕过依赖缺失（会跳过本地校验）；④WSL 对 github.com 默认 IPv6 优先解析会卡死，需 gai.conf 强制 IPv4 + git 直连（禁用 proxy）；⑤本仓存在 remote.origin.pushurl=https 覆盖 SSH，须 unset。\n【提交（已推 origin/main，tip c31bd77）】a88cba2(feat deploy)、2a68fcd(0.29.17)、9f21e3a(pip fix)、c31bd77(0.29.18)。\n【承接/待办】完整报告 JSON（argo-init --json 与 .argo/temp/argo-harness-init-report.json）缺席 qeaFullProjection 段，仅 CLI 摘要可见——疑似报告序列化遗漏，待排查。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4374,8 +4374,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-15",
-          "description": "中文版 README 交付并登记"
+          "value": "2026-10-17",
+          "description": "WSL/Linux 部署适配 + 本体引擎 Linux pip 修复会话"
         },
         {
           "name": "commit",
@@ -12909,6 +12909,44 @@
       "name": "里程碑：argo-init 默认输出精简（384KB → 687B 摘要 + --json 全量）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（release 0.29.18：本体引擎 Linux pip 修复）",
+          "name": "release",
+          "value": "archgraph-argo@0.29.18"
+        },
+        {
+          "description": "package.json（release 0.29.17：WSL/Linux POSIX 部署器）",
+          "name": "release",
+          "value": "archgraph-argo@0.29.17"
+        },
+        {
+          "description": "install-argo.sh; bin/argo-deploy.js; package.json; tests/argo-deploy-linux.test.js; tests/acceptance-guardian.test.js",
+          "name": "commit",
+          "value": "a88cba2"
+        },
+        {
+          "description": "package.json（release archgraph-argo@0.29.17）",
+          "name": "commit",
+          "value": "2a68fcd"
+        },
+        {
+          "description": "install-argo.ps1（本体 python 依赖在非 Windows 用 --break-system-packages）; tests/argo-deploy-linux.test.js",
+          "name": "commit",
+          "value": "9f21e3a"
+        },
+        {
+          "description": "package.json（release archgraph-argo@0.29.18）",
+          "name": "commit",
+          "value": "c31bd77"
+        }
+      ],
+      "description": "里程碑（2026-10-16/17）：发布 archgraph-argo@0.29.17 + @0.29.18 —— 把框架部署器适配到 WSL/Linux，并修复本体校验引擎在 Ubuntu 24.04 的 pip 安装。\n内容：① 新增 install-argo.sh（POSIX 包装：解析 $HOME + XDG、导出 Windows 命名变量兜底、向 install-argo.ps1 传显式前斜杠 -*(Root|Path) 参数并跳过调用方已传参以防重复绑定）；bin/argo-deploy.js 非 Windows 平台分派到它；package.json files 纳入。根因：install-argo.ps1 默认依赖 %USERPROFILE%/%APPDATA%/%LOCALAPPDATA% 且用反斜杠拼路径，Linux/WSL 下写到 /.argo 并产生字面反斜杠文件名。② install-argo.ps1 本体 python 依赖安装分支：非 Windows 追加 --break-system-packages（Ubuntu 24.04 PEP 668），默认部署即装上引擎。③ 回归 tests/argo-deploy-linux.test.js + acceptance-guardian 条目。\n部署：npm i -g archgraph-argo@latest → argo-deploy -EnableOntologyValidation（不再 -SkipOntologyEngine）；本地校验 ontologyValidation 由 disabled → passed（Java JRE 17 + pyshacl 0.40.1 + owlready2 0.51 已装，~/.argo/.env 写 ARGO_VALIDATION_EXTENSIONS）。",
+      "id": "overseer-argo-0-29-18-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.29.18（WSL/Linux 部署器 + 本体引擎 Linux pip 修复）",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -17110,7 +17148,8 @@
         "overseer-argo-0-24-2-release-001",
         "overseer-milestone-schema-cross-project-001",
         "overseer-argo-0-28-0-release-001",
-        "overseer-mem-issue12-functional-closedworld-001"
+        "overseer-mem-issue12-functional-closedworld-001",
+        "overseer-argo-0-29-18-release-001"
       ],
       "included_relationships": []
     },
