@@ -20,3 +20,4 @@ scripts/at-simplify-plan.json
 results/navigation-agent-raw/
 results/
 **/.argo/temp/
+.paperclip-runtime
