@@ -13051,6 +13051,11 @@
         {
           "name": "media_id",
           "value": "BRZAMZ3b-CaOBH8qdG2KTccv-LgCU3OdJg8Y5AqGIV_oEyxeRhrFBhSIw-pKAX07"
+        },
+        {
+          "name": "commit",
+          "value": "d806189",
+          "description": "design/KG/SystemArchitecture.json — WeChat draft creation verified via read-only draft/batchget; media_id BRZAMZ3b-CaOBH8qdG2KTccv-LgCU3OdJg8Y5AqGIV_oEyxeRhrFBhSIw-pKAX07, status draft_created"
         }
       ],
       "testcases": [
@@ -13084,6 +13089,11 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "d806189",
+          "description": "design/KG/SystemArchitecture.json — recorded verified WeChat draft result and media_id"
         }
       ],
       "testcases": [
@@ -17352,7 +17362,8 @@
         "overseer-agent-model-unification-001",
         "overseer-archgraph-intro-pdf-001",
         "overseer-codex-adaptation-001",
-        "overseer-site-v2-outline-detail-pages-milestone-001"
+        "overseer-site-v2-outline-detail-pages-milestone-001",
+        "langgraph-windmill-paperclip"
       ],
       "included_relationships": []
     },
