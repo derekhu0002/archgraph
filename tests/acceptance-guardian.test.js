@@ -87,6 +87,7 @@ const DELIVERABLE_GUARDS = [
   ['FEATURE: Coding business deck v5 (canonical business and application model alignment)', 'tests/coding-business-deck-v5.test.js'],
   ['MODEL: generic Coding Agent business and application architecture', 'tests/coding-agent-architecture-model.test.js'],
   ['Deliverable: Agent-era human-agent collaboration article', 'tests/agent-era-human-agent-loop.test.js'],
+  ['Deliverable: Agent-era human-agent WeChat draft', 'tests/wechat-agent-era-human-agent-loop.test.js'],
   ['Deliverable: inline-image HTML email delivery', 'tests/send-html-email.test.js'],
 ];
 
