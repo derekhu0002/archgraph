@@ -12947,6 +12947,154 @@
       "id": "overseer-argo-0-29-18-release-001",
       "name": "里程碑：发布 archgraph-argo@0.29.18（WSL/Linux 部署器 + 本体引擎 Linux pip 修复）",
       "type": "Business Object"
+    },
+    {
+      "type": "Business Object",
+      "name": "评估：多项目控制面选型（LangGraph / Windmill / Paperclip）",
+      "parent": "project-overseer-001",
+      "description": "评估（2026-10-18，项目总管；会话结论，未实施）：多项目 ArchGraph 协作控制面的选型。\n【结论】无现成 OSS 同时满足「加载项目 / 项目即默认 Agent / 组织关系 / GitHub Issue 同步 / 心跳触发 OpenCode / 分派 trace」；可行路径=薄控制面（项目/任务/组织/事件）+ Runtime Gateway（OpenCode 适配器）+ 调度内核 + trace。\n【LangGraph】不适合做底座：单元是 graph/thread/run；LangSmith Deployment 是运行时控制面（自托管控制面需 Enterprise+K8s；standalone Agent Server 无 control plane），不管 project/issue/org；LangSmith/Langfuse 仅适合 trace/eval。\n【Windmill】适合做控制面内核但非成品：v1.839.0（2026-10-16）活跃；Docker Compose+Postgres+Worker；提供 schedule/queue/retry/timeout/approval/SSE/OTel/MCP；缺项目注册、Issue 同步、组织图、OpenCode 会话管理。CE 内部自用免费（AGPL/Apache；社区版含非开源功能，转售/托管需商业许可）。\n【推荐方案（若重启）】Windmill 管短步骤 + Gateway 管长会话；Issue 是接口、DB 是状态；Postgres lease 做 per-project 串行（CE 无 concurrency limit）；MCP 暴露 task_event/task_dispatch 让 OpenCode 上报子任务；trace=events+task DAG+OTel；组织关系 DAG 不绑权限；UI 隐去 Agent。\n【边界/坑】并发限制、Dedicated Worker、自动扩缩、审批表单/权限、SSO、HTTP tracing、无限保留均 EE；CE 最多 3 workspace、Job 保留 30 天；长会话不要塞 worker；Windows worker EE，建议 WSL/Linux；OpenCode 不拿控制面密钥。\n【决策】Windmill 暂缓；人类伙伴表示继续 Paperclip 打磨（具体指向待确认）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "planningState",
+          "value": "评估完成"
+        },
+        {
+          "name": "decidedBy",
+          "value": "人类伙伴"
+        },
+        {
+          "name": "decision",
+          "value": "park-windmill-control-plane",
+          "description": "2026-10-18：Windmill 控制面方案暂缓不实施；后续优先 Paperclip 打磨（具体指向待确认）。"
+        },
+        {
+          "name": "sessionDate",
+          "value": "2026-10-18"
+        }
+      ],
+      "id": "langgraph-windmill-paperclip"
+    },
+    {
+      "id": "agent-era-human-agent-loop-001",
+      "type": "Business Object",
+      "name": "文章：AI 时代的人机协作闭环与上下文治理",
+      "parent": "1249",
+      "description": "面向技术与产品读者的中文沟通文章：以人提出尚不知如何实现的目标为开场，构建目标定义—Agent 探索执行—人类证据验收—失败诊断反馈闭环；分析目标、环境、上下文和执行质量四类偏差；将上下文治理延伸为记忆写入去重、冲突时效处理、本体约束、无损可追溯，以及面向任务的最小可信读取；结合 ArchGraph 总体任务成功率、记忆和检索指标解释系统评价层级与小样本局限。",
+      "attributes": [
+        {
+          "name": "doc",
+          "value": "docs/agent-era-human-agent-loop.html"
+        },
+        {
+          "name": "article",
+          "value": "AI 时代，人如何与 Agent 一起完成原本做不到的事\n先看两种不同的使用方式。常见用法是：人已经知道要做什么、也大致知道怎么做，于是让 AI 帮自己做得更快。更深一层的人机交互范式则是：人提出一个重要、甚至自己不知道如何实现的目标；Agent 负责探索路径与执行；人根据证据判断是否达到目标。两者的差别，不只是效率，而是 Agent 是否把人的能力边界向外推。\n\n——从目标定义、人类验收到上下文与记忆治理\n\n摘要\n当 Agent 只被当作聊天框或自动化工具时，人们往往用它重复自己已经会做的事。更深的变化，是人可以提出一个重要、但自己暂时不知道如何实现的目标，把探索和执行交给 Agent，再以证据和验收标准判断结果。这个过程不是一次性的“提问—回答”，而是一个目标驱动、证据验收、治理反馈的人机协作闭环。要让闭环可靠，问题定义、执行环境、上下文和记忆都必须可治理。尤其是记忆：写入阶段的结构、去重和冲突处理，决定了日后能否只取出最小而可信的上下文。ArchGraph 项目的指标体系提供了一个初步观察框架：以任务完成结果为整体目标，以检索、记忆、工具和验收等指标作为诊断信号，同时诚实保留当前评测的小样本边界。\n\n一、Agent 带来的变化，不只是把熟悉的事做快\n我们很容易把 Agent 看成一个更方便的聊天工具：给它一段文本，让它总结；给它一段代码，让它补全；让它替我们完成一件原本就知道怎么做的工作。这些用法有价值，但没有触及 Agent 最重要的变化。\n\n更值得关注的情况是：人想解决一个重要问题，却还没有清晰的实现路径；可能缺少相关知识、经验或执行能力，甚至不知道应该从哪里开始。过去，这类目标常常止步于“想做但不会做”。现在，人可以先把问题和目标交给 Agent，让它帮助探索方案、补齐环境并完成执行，再由人判断结果是否真正达到目的。\n\n这并不意味着人不再需要专业判断。恰恰相反，人的工作从亲自掌握每一步操作，更多转向选择值得解决的问题、明确边界、提供关键约束，并对结果作出判断。判断可以由验收标准、证据和必要的专业审查支撑，不必等同于“人必须事先知道全部答案”。\n\n二、人机交互从问答走向闭环\n一个可用的协作结构包含四个动作：人定义目标；Agent 探索和执行；人检查证据并验收；双方根据偏差修正问题或执行条件。\n\n目标不必一开始就有详细方案。人可以只知道希望达到什么、为什么重要、哪些结果不可接受。Agent 的任务是把目标转成可推进的工作：澄清关键歧义，必要时拆分子问题，识别所需工具和环境，执行并反馈结果与证据。对结果的评价，则回到人类伙伴的目标和约束。\n\n如果结果不合格，下一步不是简单地重复提示，而是诊断失败发生在哪一层。问题可能在目标本身：范围含糊、约束遗漏、成功标准不清；也可能在执行过程：环境缺失、上下文混乱、工具调用失败，或 Agent 推理与验证不足。只有找到原因，反馈才会带来改进。\n\n图 1 展示这个总体闭环：人的目标进入 Agent 的计划与执行，结果和证据返回验收；未通过时，问题会回到需要修正的环节。\n\n三、偏差诊断：目标、环境、上下文和执行\n目标定义是闭环的入口。对大型问题，人未必需要先给出完整解法，但应尽可能说明目标、范围、约束和验收方式。若这些信息确实未知，Agent 应提出有区分度的问题，或把假设明确标出，再继续能独立推进的部分。\n\n环境决定 Agent 能否实际行动。要查询最新行业事实，需要可用且获准的检索能力；要构建软件，需要代码、依赖、构建和运行环境；要执行外部动作，还需要对应的授权和接口。缺少环境时，Agent 应指出缺口、补环境或请求协助，而不是把无法验证的答案包装成事实。\n\n上下文决定 Agent 在当前任务中能看到什么。上下文过长会占据有限的注意力预算；来源相互矛盾、状态过期或适用范围不明，也会让决策偏离目标。因而上下文治理有两个互补要求：只给任务相关且必要的材料，同时保证材料的含义、来源和适用范围足够清楚。\n\nAgent 自身的执行质量也要检查：是否按计划工作、工具是否成功、关键结论是否有证据、结果是否经过验收。把这些失败原因区分开，才能知道应该修改目标、环境、上下文，还是执行策略。\n\n四、上下文治理从记忆写入开始\n很多任务所需的上下文来自长期记忆。人类交流时会先回忆相关信息，再决定是否查找外部资料；Agent 也需要可靠的记忆定位和读取能力。要从大量历史中快速找出相关信息，存储阶段就必须有足够结构。若写入时把不同事实、时间、出处和状态混成一团，后续检索再强，也很难稳定还原其含义。\n\n因此，记忆治理不能只发生在读取时。写入至少要处理几类问题：\n\n• 去重与复用：遇到相同对象或知识时先查已有内容，优先复用或更新，减少重复事实和冲突副本。\n• 冲突与时效：发现可能相反的陈述时，保留来源、时间、适用范围和状态，判断是否真为同一命题。最新记录未必天然权威，旧记录也可能仍适用于另一范围。\n• 本体与结构：用明确的概念、类型和关系承载知识，让后续可以按类别、关系和边界检索。与此同时，模型要允许发现新概念，并以受控方式扩展。\n• 无损与可追溯：修订时避免静默删掉仍有价值的内容；需要替换或删除时保留变化依据，必要时让人确认。\n\n“用一个更高层原则解决冲突”有时有效，但不能当作通用逻辑消解器。现实中的冲突往往是来源可信度、时间、适用范围或价值取舍不同。系统应先把冲突显性化，再依据预先说明的权威层级与原则判断；若证据不足或价值选择属于人，应保留不确定性并交由人决定，而不是任意选一句。\n\n图 2 展示从资料进入、经治理门禁形成结构化知识，再从相关局部取回精简证据包的路径。它强调：检索从治理后的知识开始，不是绕过写入质量直接搜索原始材料。\n\n五、读取时追求“足够小、足够干净、足以完成”\n结构化存储的目的不是让分类本身变得复杂，而是让读取更可靠。读取可以先用语义理解问题的大意，结合词汇命中、图结构和适用范围确定候选，再按相关性排序并取回必要上下文。ArchGraph 的读取工具链可按任务组合：先用带 purpose 与 intent 的全局语义检索定位候选；需要补足精确词面命中时，叠加向量与词法/BM25 的混合召回，并通过 RRF 融合；候选较多时再做二阶段重排序；命中后用 getIntentElementContext 沿焦点元素读取相关子图，或者用 getArchitectureViewContext 完整读取一个视图的成员与关系。若任务确实要求穷尽性盘点，再逐视图展开所需范围；完整视图提取有明确边界。整图提取（例如不带 query 的完整架构读取）只适合确需全局盘点的场景，仍应按范围分步展开，避免把整张图无差别铺入上下文。一次全局召回之后，可以沿相关关系继续深入；但应只扩展到回答当前任务所需的范围。\n\n最小上下文不是机械地追求最少字数。上下文少到缺少关键约束、证据或验收条件，Agent 同样会失败。更实际的目标是：只提供完成当前目标所需的材料，并让每项关键结论都能追溯到依据。\n\n纯净上下文也不是把一切分歧都预先抹掉。应区分确定事实、不同来源的说法、已过期状态和未决争议。必要时把冲突与假设显式交给 Agent，要求它遵循明确的来源优先级，或者停止并向人求证。这样才能让“少而相关”与“可信可判断”同时成立。\n\n六、用整体结果和局部信号评价系统\n如果要把这套协作方法变成工程实践，就需要知道它有没有帮助人真正完成目标。ArchGraph 的指标图将任务完成成功率作为整体结果指标，并把计划、检索、工具、验收等局部指标连接到整体任务结果；另设端到端时延、成本和可复现性，观察结果的代价与稳定性。\n\n记忆和检索指标是诊断层，不是最终目标。项目评测口径分别关注查询层的准确、召回、时延与成本、证据溯源和可读性，以及写入层的冲突识别、实体归一、结构拓扑、保真压缩和增量更新。这样的分层对应一个重要原则：读取的效果最终要回到任务价值；写入的效果，则应通过它对准确性、召回、上下文成本和维护成本的影响来判断。\n\n项目已有评测提供了一些阶段性信号：自建记忆评测题集最近记录为 31/31，通过率 100%；导航 20/20；一组 10 题的对照评测也记录 100%。检索黄金集的部分评测记录了向量召回@1 94.6%、召回@5 99.4%、MRR 0.967；加入二阶段重排的若干轮实验在不同样本和配置下达到更高的首位召回。它们说明某些受控子任务可以被量化和回归，并不等于整体 Agent 工作效果已被证明。\n\n整体任务完成成功率在图谱中仍标记为 partial：上述都是自建的小样本或专项任务，还不是覆盖真实 coding 任务全流程的整体基准。不同记录中也出现了不同轮次的 token、延迟与压缩率数值；在实验标识、数据集和统计口径统一以前，不应把它们拼成同一条性能结论。图 4 将“整体结果”和“局部诊断”画在不同层级，提醒我们用整体成功率回答“有没有完成”，再用局部指标回答“为什么成功或失败”。\n\n七、从观点到可运行的方法\n要让闭环不止停留在理念，可以把一次任务看成一个带证据的工作单元：写清目标和验收条件；记录 Agent 使用的关键上下文、环境和工具；为关键结果保留证据；验收失败时把问题归到目标、环境、上下文或执行；修正后重跑相关验收，并把可复用的决策沉淀到长期记忆。\n\n这也为个人和团队带来不同的能力要求。人不必预先掌握所有实现细节，但需要能够提出值得解决的问题，做出边界选择，并对结果作出负责的判断。Agent 不只是服从指令的接口，而是一个需要被提供环境、上下文和可检验目标的执行参与者。系统的设计，则要同时支持写入治理、按需读取、过程证据和结果验收。\n\n结语：把能力边界交给协作来扩展\nAI 时代一个值得认真对待的变化，是人能够发起自己尚不懂如何实现的目标。Agent 可以探索和执行，但结果是否满足目标，仍要回到人的判断和验收；失败也不必归咎于一句含糊的“模型不够聪明”，而要拆解为目标、环境、上下文和执行问题。\n\n长期记忆是这套协作结构的重要基础。它不仅要能存得下，更要能在写入时保持可辨识、可追溯、可更新，在读取时给出与任务相称的上下文。最终，衡量这些设计的，不是图谱有多复杂或检索分数有多高，而是人和 Agent 是否能更可靠地完成原本难以完成的工作。"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "name": "recipient",
+          "value": "hudonghua@huawei.com"
+        },
+        {
+          "name": "commit",
+          "value": "cab06f73d8ac19150a02e3fba3c6f27b44c438ed",
+          "description": "docs/agent-era-human-agent-loop.html; docs/assets/agent-loop-blueprint.png; docs/assets/memory-governance-blueprint.png; docs/assets/retrieval-pipeline-blueprint.png; docs/assets/context-metrics-blueprint.png; scripts/send-html-email.js; tests/agent-era-human-agent-loop.test.js; tests/send-html-email.test.js; tests/acceptance-guardian.test.js"
+        },
+        {
+          "name": "repoPaths",
+          "value": "docs/agent-era-human-agent-loop.html; docs/assets/agent-loop-blueprint.png; docs/assets/memory-governance-blueprint.png; docs/assets/retrieval-pipeline-blueprint.png; docs/assets/context-metrics-blueprint.png"
+        },
+        {
+          "name": "commit",
+          "value": "f27d5da1fb6b06c5a761f03d0e7332f670e2f555",
+          "description": "docs/agent-era-human-agent-loop.html; tests/agent-era-human-agent-loop.test.js（补充整图提取的边界与逐视图展开说明）"
+        },
+        {
+          "name": "deliveryMethod",
+          "value": "SMTP 126 SSL smtp.126.com:465"
+        },
+        {
+          "name": "emailSubject",
+          "value": "AI 时代的人机协作、记忆治理与检索"
+        },
+        {
+          "name": "wechatMarkdown",
+          "value": "docs/agent-era-human-agent-loop.wechat.md"
+        },
+        {
+          "name": "wechatStatus",
+          "value": "draft_created"
+        },
+        {
+          "name": "wechatWhitelistIP",
+          "value": "223.74.103.149"
+        },
+        {
+          "name": "wechatAssets",
+          "value": "docs/assets/agent-loop-blueprint-wechat.jpg; docs/assets/memory-governance-blueprint-wechat.jpg; docs/assets/retrieval-pipeline-blueprint-wechat.jpg; docs/assets/context-metrics-blueprint-wechat.jpg"
+        },
+        {
+          "name": "commit",
+          "value": "ef18e6e",
+          "description": "docs/agent-era-human-agent-loop.wechat.md; docs/assets/agent-loop-blueprint-wechat.jpg; docs/assets/memory-governance-blueprint-wechat.jpg; docs/assets/retrieval-pipeline-blueprint-wechat.jpg; docs/assets/context-metrics-blueprint-wechat.jpg; tests/wechat-agent-era-human-agent-loop.test.js; tests/acceptance-guardian.test.js — WeChat rendition prepared; draft remains blocked by 40164 IP whitelist; no media_id"
+        },
+        {
+          "name": "media_id",
+          "value": "BRZAMZ3b-CaOBH8qdG2KTccv-LgCU3OdJg8Y5AqGIV_oEyxeRhrFBhSIw-pKAX07"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-agent-era-human-agent-loop-01",
+          "type": "Acceptance Test",
+          "description": "GIVEN 完整文章和三张原创工程蓝图配图；WHEN 检查本地 HTML、资源和图谱登记；THEN 文章呈现目标驱动的人机闭环、环境/上下文/执行诊断、记忆写入治理、整体与局部指标及测量边界，且正文全文与文件路径存入图谱。",
+          "Input": "tests/agent-era-human-agent-loop.test.js",
+          "acceptanceCriteria": "tests/agent-era-human-agent-loop.test.js"
+        },
+        {
+          "name": "AT-agent-era-wechat-draft-01",
+          "type": "Acceptance Test",
+          "description": "GIVEN canonical HTML article and four model-generated illustrations; WHEN preparing its WeChat draft rendition; THEN the Markdown has title/author/digest/banner_path, preserves the interaction paradigm, memory governance and retrieval methods, embeds only local images below 1 MB, and the graph records the rendition path.",
+          "Input": "tests/wechat-agent-era-human-agent-loop.test.js",
+          "acceptanceCriteria": "tests/wechat-agent-era-human-agent-loop.test.js"
+        }
+      ]
+    },
+    {
+      "id": "wpp-mem-agent-era-wechat-001",
+      "name": "SessionRecord-AgentEraHumanAgentLoop-WeChat",
+      "type": "Business Object",
+      "parent": "2755",
+      "description": "公众号发布员会话记录（2026-10-18）：目标——将《AI 时代，人如何与 Agent 一起完成原本做不到的事》转为公众号格式并创建草稿。进展：从图谱权威 HTML 转为 docs/agent-era-human-agent-loop.wechat.md，保留人机交互范式、上下文/记忆治理、检索工具链及指标边界；四张模型生成图保留原图并生成 1280px、均小于 1 MB 的上传副本；本地转换与 3 项草稿准备验收通过。遵循公众号发布员职责，仅运行 wechat:draft，未调用 publish/sendall。CLI 不在本机且 npm 包返回 404；按技能记录从 ai-chen2050/obsidian-wechat-public-platform GitHub 仓库克隆，依赖安装于系统 Temp，离线 convert 成功。草稿创建在刷新 access_token 阶段被微信拒绝：40164 invalid ip，当前出口 IPv4 223.74.103.149（返回 ::ffff:223.74.103.149），不在公众号后台 IP 白名单；尚未创建草稿，无 media_id。待办：由人类在微信公众号后台将 223.74.103.149 加入 IP 白名单，确认生效后重试 wechat:draft，并用 draft/batchget 核验目标标题后登记 media_id/status。可复用教训：正文内嵌图片需低于 1 MB；npm registry 上未发布 wechat-public-cli 时依技能指定 GitHub 源安装；40164 只能由账号管理员更新白名单解决，不得绕过；保持草稿与公开发布分离。\\n\\n【续办结果】人类确认白名单已保存并扫码确认后，使用显式 --config 指向仓库 wechat-public.config.json，只运行一次 wechat:draft；CLI 返回 media_id BRZAMZ3b-CaOBH8qdG2KTccv-LgCU3OdJg8Y5AqGIV_oEyxeRhrFBhSIw-pKAX07。随后通过只读 draft/batchget 核验 total_count=7、target_found=true，标题完全匹配《AI 时代，人如何与 Agent 一起完成原本做不到的事》，请求无错误；API 响应未提供 request_id，CLI 草稿创建也未输出 request_id。未调用 publish/freepublish/sendall，草稿尚未公开发布。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "testcases": [
+        {
+          "name": "AT-agent-era-wechat-memory-01",
+          "type": "Acceptance Test",
+          "description": "GIVEN the publisher's WeChat task reached a platform access blocker; WHEN the Actor's T2 memory is read; THEN it records the article transformation, draft-only boundary, exact 40164 whitelist cause and IP, recovery step, and reusable CLI/image lessons.",
+          "Input": "tests/wechat-agent-era-human-agent-loop.test.js",
+          "acceptanceCriteria": "tests/wechat-agent-era-human-agent-loop.test.js"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -16782,7 +16930,8 @@
         "wpp-mem-multi-role-001",
         "wpp-mem-skill-coev-001",
         "wpp-mem-mem-eval-article-001",
-        "wpp-mem-opencode-model-remap-001"
+        "wpp-mem-opencode-model-remap-001",
+        "wpp-mem-agent-era-wechat-001"
       ],
       "included_relationships": []
     },
@@ -17602,7 +17751,8 @@
         "deck-p4-graph-rag-flow-001",
         "deck-p5-federated-org-graph-001",
         "coding-business-deck-pptx-001",
-        "wp-coding-business-deck-001"
+        "wp-coding-business-deck-001",
+        "agent-era-human-agent-loop-001"
       ],
       "included_relationships": [],
       "parent_element_id": "1249",
