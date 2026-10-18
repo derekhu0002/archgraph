@@ -23,6 +23,7 @@
 const tls = require('node:tls');
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 
 const HOST = process.env.SMTP_HOST || 'smtp.126.com';
 const PORT = Number(process.env.SMTP_PORT || 465);
@@ -54,6 +55,85 @@ function wrap76(base64) {
 
 function rfc2822Date() {
   return new Date().toUTCString().replace(/GMT$/, '+0000');
+}
+
+function prepareInlineImages(html, htmlPath) {
+  const root = path.resolve(path.dirname(htmlPath));
+  const inlineImages = [];
+  const rewritten = html.replace(/\bsrc=(['"])([^'"]+)\1/gi, (whole, quote, src) => {
+    if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(src)) return whole;
+    const filePath = path.resolve(root, decodeURIComponent(src));
+    const relative = path.relative(root, filePath);
+    if (relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative)) {
+      throw new Error('local email image must stay inside the HTML directory: ' + src);
+    }
+    if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+      throw new Error('local email image not found: ' + filePath);
+    }
+    const extension = path.extname(filePath).toLowerCase();
+    const mimeTypes = {
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+    };
+    const mimeType = mimeTypes[extension];
+    if (!mimeType) throw new Error('unsupported local email image type: ' + extension);
+    const contentId = 'archgraph-image-' + (inlineImages.length + 1) + '@localhost';
+    inlineImages.push({
+      contentId,
+      filename: path.basename(filePath),
+      mimeType,
+      content: fs.readFileSync(filePath),
+    });
+    return 'src=' + quote + 'cid:' + contentId + quote;
+  });
+  return { html: rewritten, inlineImages };
+}
+
+function buildMessage(html, htmlPath) {
+  const prepared = prepareInlineImages(html, htmlPath);
+  const baseHeaders = [
+    'From: ' + encodeWord(NAME) + ' <' + FROM + '>',
+    'To: ' + TO.join(', '),
+    'Subject: ' + encodeWord(SUBJECT),
+    'Date: ' + rfc2822Date(),
+    'MIME-Version: 1.0',
+  ];
+
+  if (prepared.inlineImages.length === 0) {
+    const headers = baseHeaders.concat([
+      'Content-Type: text/html; charset=UTF-8',
+      'Content-Transfer-Encoding: base64',
+    ]).join('\r\n');
+    return { message: headers + '\r\n\r\n' + wrap76(b64(prepared.html)) + '\r\n', inlineImages: [] };
+  }
+
+  const boundary = 'archgraph-' + crypto.randomBytes(18).toString('hex');
+  const headers = baseHeaders.concat([
+    'Content-Type: multipart/related; boundary="' + boundary + '"',
+  ]).join('\r\n');
+  const parts = [
+    '--' + boundary,
+    'Content-Type: text/html; charset=UTF-8',
+    'Content-Transfer-Encoding: base64',
+    '',
+    wrap76(b64(prepared.html)),
+  ];
+  for (const image of prepared.inlineImages) {
+    parts.push(
+      '--' + boundary,
+      'Content-Type: ' + image.mimeType + '; name="' + image.filename + '"',
+      'Content-Transfer-Encoding: base64',
+      'Content-ID: <' + image.contentId + '>',
+      'Content-Disposition: inline; filename="' + image.filename + '"',
+      '',
+      wrap76(image.content.toString('base64')),
+    );
+  }
+  parts.push('--' + boundary + '--', '');
+  return { message: headers + '\r\n\r\n' + parts.join('\r\n'), inlineImages: prepared.inlineImages };
 }
 
 function assertConfig() {
@@ -131,17 +211,7 @@ async function connect() {
 async function main() {
   assertConfig();
   const html = fs.readFileSync(HTML_PATH, 'utf8');
-  const body = wrap76(b64(html));
-  const headers = [
-    'From: ' + encodeWord(NAME) + ' <' + FROM + '>',
-    'To: ' + TO.join(', '),
-    'Subject: ' + encodeWord(SUBJECT),
-    'Date: ' + rfc2822Date(),
-    'MIME-Version: 1.0',
-    'Content-Type: text/html; charset=UTF-8',
-    'Content-Transfer-Encoding: base64',
-  ].join('\r\n');
-  const message = headers + '\r\n\r\n' + body + '\r\n';
+  const { message, inlineImages } = buildMessage(html, HTML_PATH);
 
   if (DRY_RUN) {
     console.log('[send-html-email] dry-run ok');
@@ -150,6 +220,7 @@ async function main() {
     console.log('  to       :', TO.join(', '));
     console.log('  subject  :', SUBJECT);
     console.log('  html     :', HTML_PATH, '(' + html.length + ' chars)');
+    console.log('  inline images :', inlineImages.length);
     return;
   }
 
@@ -172,4 +243,8 @@ async function main() {
   }
 }
 
-main().catch((err) => fail(err && err.message ? err.message : String(err)));
+if (require.main === module) {
+  main().catch((err) => fail(err && err.message ? err.message : String(err)));
+}
+
+module.exports = { buildMessage, prepareInlineImages };
