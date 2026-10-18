@@ -4715,6 +4715,11 @@
           "name": "commit",
           "value": "d755c8f",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记 1d545d9 到 overseer-site-v2-outline-detail-pages-milestone-001）"
+        },
+        {
+          "name": "commit",
+          "value": "e49a68e",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-10-18 会话摘要：文章/邮件/公众号草稿状态、Neo4j canonical 全量投影一致性核验；T1 过期状态修正）"
         }
       ],
       "testcases": [
@@ -12902,6 +12907,11 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "e49a68e",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（追加 2026-10-18 Neo4j 结构投影只读全量核验结果与复用方法）"
         }
       ],
       "description": "里程碑（2026-10-15，项目总管）：argo-init 初始化反馈精简。现象：人类伙伴反馈 init 后反馈内容过于复杂过长。根因（实测）：bin/argo-init.js:39 无条件 JSON.stringify(report,null,2) 全量打印 —— 本仓报告 384KB（ontology.endpointMatrix 181KB + neo4j.verification 38.5KB 占 58%），污染终端与 Agent 上下文。方案（人类伙伴评审接受）：默认输出简明摘要（约十行：整体状态 + schema + 各阶段状态 + 本体/本体校验 + neo4j 库名与 .qea 目标一致性核验 + 报告路径）；--json（--verbose 别名）输出完整报告 JSON（逐字段与旧行为一致）；完整报告仍始终写入 .argo/temp/argo-harness-init-report.json（信息不丢）；报告对象本身不改（只在 CLI 层摘要，最小风险）；程序化调用方 sandbox/lib/argo-init-cli.js 显式传 --json。落地：新增纯函数 argo/scripts/argoInitSummary.js（防御式不抛错）；bin/argo-init.js 分支；SKILL.md 文档化。验收：tests/argo-init-interface.test.js 新增 3 条 AT（AT-argo-init-01 摘要<4KB 且无 endpointMatrix、AT-argo-init-02 失败阶段逐条提示、AT-argo-init-03 CLI 默认摘要/--json 全量与调用方带 --json）；npm test 762/762（0 fail 0 skip）；实测本仓报告摘要 687 字节（vs 384KB）。图谱：新增 Application Component argo-init-cli-001 + 子视图 harness-argo-init-cli（Harness 1961 下；view 298 已满 15 成员）。commit 76ee99b。\n\n【续 · 2026-10-18 Neo4j 结构投影只读全量核验】人类伙伴询问当前 Neo4j 投影与 canonical 是否有偏差。通过 ARGO MCP 递归读取 canonical 全部 93 个视图，再用 graphKey=design/KG/SystemArchitecture.json 的只读 Cypher 查询逐项核对投影：418 elements、298 relationships、93 views 的 ID 集合和 raw_json 对象内容均完全一致；included element/relationship memberships 分别为 541/319，HAS_SUBDIAGRAM 为 92，均与 canonical 一致；298 条关系的源/目标端点链接匹配，未发现孤立元素、关系或视图。数据库 archgraph，schema workspace / Acme + UML 2 State Machine，bundle validation passed。避免运行 argo-init：该命令会重建 .qea，超出只读审计范围。",
