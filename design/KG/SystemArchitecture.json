@@ -4352,7 +4352,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-16/17 · WSL/Linux 部署适配 + 本体引擎 Linux pip 修复）。\n【本会话交付】\n① WSL/Linux 部署器：新增 install-argo.sh（POSIX 包装——解析 $HOME+XDG、导出 USERPROFILE/APPDATA/LOCALAPPDATA 兜底、向 install-argo.ps1 传显式前斜杠 -*(Root|Path) 参数，并跳过调用方已传参以防参数重复绑定）；bin/argo-deploy.js 非 Windows 平台分派到它；package.json files 纳入；新增 tests/argo-deploy-linux.test.js + acceptance-guardian 条目。根因：install-argo.ps1 默认依赖 %USERPROFILE%/%APPDATA%/%LOCALAPPDATA% 且用反斜杠拼路径 → Linux/WSL 写到 /.argo 并产生字面反斜杠文件名。\n② 本体引擎 Linux pip 修复：install-argo.ps1 安装 pyshacl/owlready2 的步骤在非 Windows 追加 --break-system-packages（Ubuntu 24.04 PEP 668）→ 默认部署即装上引擎。\n【发布/部署】archgraph-argo@0.29.17（部署器）+ @0.29.18（pip 修复）→ 全局安装 → argo-deploy -EnableOntologyValidation（不再 -SkipOntologyEngine）→ 本机校验 ontologyValidation 由 disabled → passed；已装 Java JRE 17 + pip + pyshacl 0.40.1/owlready2 0.51，~/.argo/.env 写 ARGO_VALIDATION_EXTENSIONS。\n【环境】opencode 改为从 ~ 通用启动（新增 ~/opencode-web.sh：从 $HOME 起、项目无关；+ systemd user 单元，未启用）；/etc/gai.conf 加 precedence ::ffff:0:0/96 100 强制 IPv4；生成 ~/.ssh/id_ed25519 并推 origin。\n【关键决定】①框架部署器必须 WSL/Linux 适配：env→$HOME、路径用 Join-Path/显式前斜杠传参、pip 兼容 PEP668；②opencode 从 ~ 通用启动而非绑定单一项目；③发布里程碑命名高度相似属正常，允许 onConflict=allowDuplicate。\n【坑/教训】①WSL 无 USERPROFILE/APPDATA/LOCALAPPDATA → install-argo.ps1 写错根目录并产字面反斜杠文件；②Ubuntu 24.04 pip --user 被 PEP668 拒（须 --break-system-packages）；③不得用 -SkipOntologyEngine 绕过依赖缺失（会跳过本地校验）；④WSL 对 github.com 默认 IPv6 优先解析会卡死，需 gai.conf 强制 IPv4 + git 直连（禁用 proxy）；⑤本仓存在 remote.origin.pushurl=https 覆盖 SSH，须 unset。\n【提交（已推 origin/main，tip c31bd77）】a88cba2(feat deploy)、2a68fcd(0.29.17)、9f21e3a(pip fix)、c31bd77(0.29.18)。\n【承接/待办】完整报告 JSON（argo-init --json 与 .argo/temp/argo-harness-init-report.json）缺席 qeaFullProjection 段，仅 CLI 摘要可见——疑似报告序列化遗漏，待排查。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-18 · Agent 人机协作文章、公众号草稿与图谱核验）\n\n【会话目标与进展】围绕“人提出重要但路径未知的目标—Agent 探索执行—人基于证据验收—按偏差治理反馈”的交互范式，完成中文 HTML 文章和 4 张模型生成、带文字说明的工程设计图。文章涵盖目标/环境/上下文/执行偏差、记忆写入治理、语义/混合检索/重排序/最小上下文/整图提取，以及整体成功率与局部诊断指标的边界。文章、图片和邮件已交付，文章提交 cab06f73d8ac19150a02e3fba3c6f27b44c438ed；后续 HTML 补充提交 f27d5da1fb6b06c5a761f03d0e7332f670e2f555。\n\n【公众号状态】白名单已由人类伙伴保存并扫码确认；仅重试 wechat:draft 后创建成功，并经 draft/batchget 核验标题。状态 draft_created，media_id=BRZAMZ3b-CaOBH8qdG2KTccv-LgCU3OdJg8Y5AqGIV_oEyxeRhrFBhSIw-pKAX07；没有调用公开发布/群发 API，待人类在公众号后台手动发布。邮件已由 126 邮箱发送至 hudonghua@huawei.com。\n\n【Neo4j 投影核验】workspace schema=Acme + UML 2 State Machine，校验通过；graphKey=design/KG/SystemArchitecture.json，数据库 archgraph。只读遍历 canonical 全部 93 个视图，核对 418 元素、298 关系、93 视图的 ID 与原始对象内容，全部一致；视图成员计数 541/319、子视图链接 92 均一致；关系端点无不匹配，未发现孤立对象。结论：本次未发现 canonical 与 Neo4j 结构投影偏差。\n\n【讨论结论】记忆治理应前移至写入：去重/复用、显式处理冲突与时效、使用结构/本体、无损可追溯；读取只注入任务所需且可验证的最小上下文。冲突不能只靠抽象“终极原则”自动消解，应按来源、时间、范围与权威性判断，不确定时交回人类。\n\n【待续】公众号草稿由人类手动发布；统一评测口径和实验版本，补齐 coding 端到端任务成功率基准；Windmill 控制面方案仍暂缓，Paperclip 后续指向待确认。\n\n【复用经验】只读核对时，递归读取 ARGO canonical views 并与 queryNeo4jGraph 数据逐项比对；不要把会全量重建 .qea 的 argo-init 当成只读审计命令。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4374,8 +4374,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-17",
-          "description": "WSL/Linux 部署适配 + 本体引擎 Linux pip 修复会话"
+          "value": "2026-10-18",
+          "description": "本会话：公众号草稿创建并核验；Neo4j canonical 结构投影全量对象一致"
         },
         {
           "name": "commit",
@@ -4429,8 +4429,8 @@
         },
         {
           "name": "decision",
-          "value": "rules-are-agent-facing-not-human-docs",
-          "description": "规则/AGENTS.md 是 Agent 的提示，不是给人阅读的文档：只写行为契约（Agent 该做什么/怎么判定），不写工具内部实现（归一化算法/键公式/阈值/环境变量/字段名）与解释性论证。GraphDeduplication 已改写（5ea4509）；2026-09-11 已对 argo/rules/archgraph.instructions.md 全量 Agent 视角重写（a2ac65d）并同步 ~/.config/opencode/AGENTS.md。今后新增或修订规则一律遵循。"
+          "value": "park-windmill-control-plane",
+          "description": "2026-10-18 人类伙伴决定：Windmill 控制面方案暂缓，不实施；后续优先继续 Paperclip 打磨（具体指向待确认）。"
         },
         {
           "name": "commit",
@@ -12904,7 +12904,7 @@
           "value": "ACTIVE"
         }
       ],
-      "description": "里程碑（2026-10-15，项目总管）：argo-init 初始化反馈精简。现象：人类伙伴反馈 init 后反馈内容过于复杂过长。根因（实测）：bin/argo-init.js:39 无条件 JSON.stringify(report,null,2) 全量打印 —— 本仓报告 384KB（ontology.endpointMatrix 181KB + neo4j.verification 38.5KB 占 58%），污染终端与 Agent 上下文。方案（人类伙伴评审接受）：默认输出简明摘要（约十行：整体状态 + schema + 各阶段状态 + 本体/本体校验 + neo4j 库名与 .qea 目标一致性核验 + 报告路径）；--json（--verbose 别名）输出完整报告 JSON（逐字段与旧行为一致）；完整报告仍始终写入 .argo/temp/argo-harness-init-report.json（信息不丢）；报告对象本身不改（只在 CLI 层摘要，最小风险）；程序化调用方 sandbox/lib/argo-init-cli.js 显式传 --json。落地：新增纯函数 argo/scripts/argoInitSummary.js（防御式不抛错）；bin/argo-init.js 分支；SKILL.md 文档化。验收：tests/argo-init-interface.test.js 新增 3 条 AT（AT-argo-init-01 摘要<4KB 且无 endpointMatrix、AT-argo-init-02 失败阶段逐条提示、AT-argo-init-03 CLI 默认摘要/--json 全量与调用方带 --json）；npm test 762/762（0 fail 0 skip）；实测本仓报告摘要 687 字节（vs 384KB）。图谱：新增 Application Component argo-init-cli-001 + 子视图 harness-argo-init-cli（Harness 1961 下；view 298 已满 15 成员）。commit 76ee99b。",
+      "description": "里程碑（2026-10-15，项目总管）：argo-init 初始化反馈精简。现象：人类伙伴反馈 init 后反馈内容过于复杂过长。根因（实测）：bin/argo-init.js:39 无条件 JSON.stringify(report,null,2) 全量打印 —— 本仓报告 384KB（ontology.endpointMatrix 181KB + neo4j.verification 38.5KB 占 58%），污染终端与 Agent 上下文。方案（人类伙伴评审接受）：默认输出简明摘要（约十行：整体状态 + schema + 各阶段状态 + 本体/本体校验 + neo4j 库名与 .qea 目标一致性核验 + 报告路径）；--json（--verbose 别名）输出完整报告 JSON（逐字段与旧行为一致）；完整报告仍始终写入 .argo/temp/argo-harness-init-report.json（信息不丢）；报告对象本身不改（只在 CLI 层摘要，最小风险）；程序化调用方 sandbox/lib/argo-init-cli.js 显式传 --json。落地：新增纯函数 argo/scripts/argoInitSummary.js（防御式不抛错）；bin/argo-init.js 分支；SKILL.md 文档化。验收：tests/argo-init-interface.test.js 新增 3 条 AT（AT-argo-init-01 摘要<4KB 且无 endpointMatrix、AT-argo-init-02 失败阶段逐条提示、AT-argo-init-03 CLI 默认摘要/--json 全量与调用方带 --json）；npm test 762/762（0 fail 0 skip）；实测本仓报告摘要 687 字节（vs 384KB）。图谱：新增 Application Component argo-init-cli-001 + 子视图 harness-argo-init-cli（Harness 1961 下；view 298 已满 15 成员）。commit 76ee99b。\n\n【续 · 2026-10-18 Neo4j 结构投影只读全量核验】人类伙伴询问当前 Neo4j 投影与 canonical 是否有偏差。通过 ARGO MCP 递归读取 canonical 全部 93 个视图，再用 graphKey=design/KG/SystemArchitecture.json 的只读 Cypher 查询逐项核对投影：418 elements、298 relationships、93 views 的 ID 集合和 raw_json 对象内容均完全一致；included element/relationship memberships 分别为 541/319，HAS_SUBDIAGRAM 为 92，均与 canonical 一致；298 条关系的源/目标端点链接匹配，未发现孤立元素、关系或视图。数据库 archgraph，schema workspace / Acme + UML 2 State Machine，bundle validation passed。避免运行 argo-init：该命令会重建 .qea，超出只读审计范围。",
       "id": "overseer-mem-argo-init-summary-001",
       "name": "里程碑：argo-init 默认输出精简（384KB → 687B 摘要 + --json 全量）",
       "parent": "project-overseer-001",
