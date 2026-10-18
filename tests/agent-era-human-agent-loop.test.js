@@ -48,7 +48,7 @@ test('agent-era article: renders original model-generated engineering illustrati
   assert.match(source, /人机协作闭环/);
   assert.match(source, /记忆写入治理/);
   assert.match(source, /整体指标/);
-  for (const phrase of ['语义检索', '混合召回', '重排序', 'getIntentElementContext', 'getArchitectureViewContext']) {
+  for (const phrase of ['语义检索', '混合召回', '重排序', 'getIntentElementContext', 'getArchitectureViewContext', '整图提取']) {
     assert.ok(source.includes(phrase), 'article should explain retrieval technique ' + phrase);
   }
 });
