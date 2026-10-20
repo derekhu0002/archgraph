@@ -1257,6 +1257,11 @@
           "name": "commit",
           "value": "97cc978",
           "description": "install-argo.ps1（Windows 硬门：$isWindowsHost=$env:OS -eq 'Windows_NT'，即使显式传 -OpenCodeSystemConfigPath 或 OPENCODE_SYSTEM_CONFIG_PATH 也一律忽略，零写入零输出）; tests/argo-deploy.test.js（Windows 硬门用例 + 用 OS 清空覆盖 POSIX 分支的部署/幂等/不可写告警）; design/KG/SystemArchitecture.json; archgraph.qea"
+        },
+        {
+          "name": "commit",
+          "value": "ca60524",
+          "description": "package.json（release archgraph-argo@0.29.19；npm publish 成功 shasum 4fac5ff3；Windows npm i -g + argo-deploy -SkipEnv；WSL ocpc root npm i -g + OPENCODE_SYSTEM_CONFIG_PATH=/etc/opencode/opencode.json argo-deploy -SkipEnv；opencode debug config 验证 mcp.argo 与 /etc/opencode/AGENTS.md；issue #16 已回复并关闭）"
         }
       ],
       "testcases": [
@@ -4384,7 +4389,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-20 · GitHub issue #16：OpenCode 系统级 managed 配置部署）\n\n【会话目标】处理 issue #16（Linux/WSL 安装未部署 /etc/opencode/opencode.json）。人类伙伴随后要求扩大为“整套 user 级 graph 框架配置都写进系统层”，且不接受 instruction 重复；最终要求 Windows 上即使显式设置也一律忽略。\n\n【已交付】opt-in：-OpenCodeSystemConfigPath / OPENCODE_SYSTEM_CONFIG_PATH（默认空=跳过）。启用后把整套配置部署到配置 JSON 同目录：opencode.json（mcp.argo + mcp.graph-mcp + instructions + skills.paths + plugin）、AGENTS.md、skills/{argo-init,ea-human-reconcile,agent-search-diagnosis}；保留原有键、幂等；不可写或 JSON 带注释时清晰 warning 且安装继续。\n\n【关键决策】(1) 规则单一来源：系统层 AGENTS.md 写入 instructions 后，从用户级 ~/.config/opencode/AGENTS.md 移除 ArchGraph 规则块（保留用户内容），避免 OpenCode 把全局 AGENTS.md 与 instructions 叠加导致规则注入两次、浪费上下文。(2) Windows 硬门：$isWindowsHost = ($env:OS -eq 'Windows_NT')；Windows 上即使传参/设环境变量也忽略（零写入、零输出）。(3) plugin 复用 ~/.argo/plugins 相同 file spec（按 spec 去重）；同名 skill 按 name 去重（managed 胜出）。\n\n【举证】改动前 4bccf46 vs HEAD 在 Windows 实跑（同时传 flag+env）：105 vs 105 文件、行尾归一后 0 内容差异、stdout 0 差异、系统目录未创建。真实 opencode 验证（隔离 HOME/ProgramData）：instructions 仅 1 个 AGENTS.md、每个 skill 仅 1 条、用户级 AGENTS.md 已移除。\n\n【测试】argo-deploy 14/14（含 Windows 硬门与 POSIX 分支）；agent-search-diagnosis 7/7（把过宽的 @(...) 断言收紧为 Copy-DoubaoSkills 行）；全量 777 项 775 通过，仅剩 2 个既有图谱漂移失败（langgraph-windmill-paperclip 未按 overseer- 前缀，位于 overseer-product-001），与本改动无关。\n\n【提交】87cf1f7 / e9852bc（MCP 首版）；95255be / 5440efa（整套配置）；eb65f0d / c059c01（规则单一来源）；c6fdf61 / 0256d26（Windows 零输出差异）；97cc978 / f41fd89（Windows 硬门）。WP 1361 挂 AT-1361-03。\n\n【待续】发布/部署（npm publish + argo-deploy -SkipEnv）并关闭 issue #16；修复 2 个既有图谱漂移失败；issue #15（WSL 安装验证）后续处理。\n\n【复用经验】OpenCode 合并语义：instructions 数组拼接（同路径去重）、全局 AGENTS.md 始终自动加载并与 instructions 叠加；skills 按 name 去重（managed 覆盖）；plugin 按 spec 去重；managed 对冲突键优先（skills 会被覆盖）。managed 目录：Linux /etc/opencode、Windows %ProgramData%\\opencode。PS 5.1 无 $IsWindows，用 $env:OS 判断宿主。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-20 · GitHub issue #16：OpenCode 系统级 managed 配置部署）\n\n【会话目标】处理 issue #16（Linux/WSL 安装未部署 /etc/opencode/opencode.json）。人类伙伴随后要求扩大为“整套 user 级 graph 框架配置都写进系统层”，且不接受 instruction 重复；最终要求 Windows 上即使显式设置也一律忽略。\n\n【已交付】opt-in：-OpenCodeSystemConfigPath / OPENCODE_SYSTEM_CONFIG_PATH（默认空=跳过）。启用后把整套配置部署到配置 JSON 同目录：opencode.json（mcp.argo + mcp.graph-mcp + instructions + skills.paths + plugin）、AGENTS.md、skills/{argo-init,ea-human-reconcile,agent-search-diagnosis}；保留原有键、幂等；不可写或 JSON 带注释时清晰 warning 且安装继续。\n\n【关键决策】(1) 规则单一来源：系统层 AGENTS.md 写入 instructions 后，从用户级 ~/.config/opencode/AGENTS.md 移除 ArchGraph 规则块（保留用户内容），避免 OpenCode 把全局 AGENTS.md 与 instructions 叠加导致规则注入两次、浪费上下文。(2) Windows 硬门：$isWindowsHost = ($env:OS -eq 'Windows_NT')；Windows 上即使传参/设环境变量也忽略（零写入、零输出）。(3) plugin 复用 ~/.argo/plugins 相同 file spec（按 spec 去重）；同名 skill 按 name 去重（managed 胜出）。\n\n【举证】改动前 4bccf46 vs HEAD 在 Windows 实跑（同时传 flag+env）：105 vs 105 文件、行尾归一后 0 内容差异、stdout 0 差异、系统目录未创建。真实 opencode 验证（隔离 HOME/ProgramData）：instructions 仅 1 个 AGENTS.md、每个 skill 仅 1 条、用户级 AGENTS.md 已移除。\n\n【测试】argo-deploy 14/14（含 Windows 硬门与 POSIX 分支）；agent-search-diagnosis 7/7（把过宽的 @(...) 断言收紧为 Copy-DoubaoSkills 行）；全量 777 项 775 通过，仅剩 2 个既有图谱漂移失败（langgraph-windmill-paperclip 未按 overseer- 前缀，位于 overseer-product-001），与本改动无关。\n\n【提交】87cf1f7 / e9852bc（MCP 首版）；95255be / 5440efa（整套配置）；eb65f0d / c059c01（规则单一来源）；c6fdf61 / 0256d26（Windows 零输出差异）；97cc978 / f41fd89（Windows 硬门）；ca60524（release archgraph-argo@0.29.19）。WP 1361 挂 AT-1361-03。\n\n【发布与部署】archgraph-argo@0.29.19 已发布（shasum 4fac5ff3）。Windows：全局安装 + argo-deploy -SkipEnv；系统层硬关闭（未创建 %ProgramData%\\opencode，用户规则仍在）。WSL(ocpc, root)：全局安装 + OPENCODE_SYSTEM_CONFIG_PATH=/etc/opencode/opencode.json argo-deploy -SkipEnv；/etc/opencode/{opencode.json,AGENTS.md,skills} 已落地，原有 instructions/skills/plugin/experimental 保留，用户级 AGENTS.md 规则块已移除；opencode debug config 可见 mcp.argo，skills 各 1 条。issue #16 已回复并关闭（comment 6289252973）。\n\n【待续】修复 2 个既有图谱漂移失败；issue #15（WSL 安装验证）后续处理。\n\n【复用经验】OpenCode 合并语义：instructions 数组拼接（同路径去重）、全局 AGENTS.md 始终自动加载并与 instructions 叠加；skills 按 name 去重（managed 覆盖）；plugin 按 spec 去重；managed 对冲突键优先（skills 会被覆盖）。managed 目录：Linux /etc/opencode、Windows %ProgramData%\\opencode。PS 5.1 无 $IsWindows，用 $env:OS 判断宿主。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4407,7 +4412,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-10-20",
-          "description": "本会话：issue #16 系统级 managed 配置（整套配置 + 规则单一来源 + Windows 硬门），含前后差分与真实 opencode 验证"
+          "description": "发布 archgraph-argo@0.29.19 并在 Windows + WSL 部署；issue #16 已关闭"
         },
         {
           "name": "commit",
