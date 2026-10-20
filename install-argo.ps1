@@ -198,6 +198,111 @@ function Write-McpConfig {
     [System.IO.File]::WriteAllText($Path, $json, (New-Object System.Text.UTF8Encoding $false))
 }
 
+function Add-ConfigListEntry {
+    # Append Value to a JSON list unless it is already present (idempotent).
+    param($List, [string]$Value)
+    $items = @()
+    if ($null -ne $List) { $items = @($List) }
+    if (-not ($items -contains $Value)) { $items += $Value }
+    return ,$items
+}
+
+function Write-OpenCodeSystemConfig {
+    # Deploy the WHOLE framework configuration into the OpenCode system managed
+    # directory (the JSON's own directory), not just the MCP block:
+    #   <dir>/opencode.json  -> mcp.argo + mcp.graph-mcp, instructions, skills, plugin
+    #   <dir>/AGENTS.md      -> the ArchGraph rule (managed instruction file)
+    #   <dir>/skills/<name>  -> the OpenCode skills (argo-init, ea-human-reconcile,
+    #                           agent-search-diagnosis)
+    # The managed layer always merges on top of the user layer, so an agent
+    # launched by an external control plane keeps the framework even when
+    # ~/.config/opencode is missing or unusable. Plugin specs deliberately point
+    # at the SAME files as the user-level config so both layers de-duplicate
+    # into a single load. Opt-in: callers pass an empty path to skip entirely.
+    param(
+        [string]$ConfigPath,
+        [string]$SkillsRoot,
+        [string]$PluginsRoot,
+        [string]$RulePath,
+        [string]$ArgoServer,
+        [string]$GraphMcpUrl,
+        [switch]$SkipMcp
+    )
+
+    $dir = Split-Path -Parent $ConfigPath
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+    # 1) Rules -> <dir>/AGENTS.md (registered as a managed instruction file).
+    $agentsPath = Join-Path $dir 'AGENTS.md'
+    Add-AgentsRule -AgentsPath $agentsPath -RulePath $RulePath
+
+    # 2) Skills -> <dir>/skills (OpenCode discovers extra roots from config.skills).
+    $sourceSkillsRoot = Join-Path (Join-Path $PSScriptRoot 'argo') 'skills'
+    foreach ($skillName in @('argo-init', 'ea-human-reconcile', 'agent-search-diagnosis')) {
+        $source = Join-Path $sourceSkillsRoot $skillName
+        if (Test-Path $source) {
+            Copy-Tree -Source $source -Destination (Join-Path $SkillsRoot $skillName)
+        }
+    }
+
+    # 3) MCP -> identical registration to the user-level config.
+    if (-not $SkipMcp) {
+        Write-McpConfig -Path $ConfigPath -ServersKey 'mcp' -ServerConfig ([ordered]@{
+            type    = 'local'
+            command = @('node', $ArgoServer)
+            enabled = $true
+        }) -ExtraServers ([ordered]@{ 'graph-mcp' = [ordered]@{
+            type    = 'remote'
+            url     = $GraphMcpUrl
+            enabled = $true
+        } }) -ThrowOnParseError
+    }
+
+    # 4) Instructions / skills / plugins -> managed JSON (highest-priority layer).
+    $root = [ordered]@{}
+    if (Test-Path $ConfigPath) {
+        try {
+            $existing = Get-Content $ConfigPath -Raw | ConvertFrom-Json
+            foreach ($p in $existing.PSObject.Properties) { $root[$p.Name] = $p.Value }
+        } catch {
+            throw "existing config is not plain JSON: $($_.Exception.Message)"
+        }
+    }
+    if (-not $root.Contains('$schema')) { $root['$schema'] = 'https://opencode.ai/config.json' }
+
+    $root['instructions'] = Add-ConfigListEntry $root['instructions'] ($agentsPath.Replace('\', '/'))
+
+    $skillsEntry = $SkillsRoot.Replace('\', '/')
+    $skillsValue = if ($root.Contains('skills')) { $root['skills'] } else { $null }
+    if ($null -eq $skillsValue) {
+        $root['skills'] = @($skillsEntry)
+    } elseif ($skillsValue -is [System.Array] -or $skillsValue -is [string]) {
+        $root['skills'] = Add-ConfigListEntry $skillsValue $skillsEntry
+    } else {
+        # Object form ({ paths, urls }): merge into paths, keep urls and any
+        # other keys the host already had.
+        $paths = @()
+        if ($skillsValue.PSObject.Properties.Name -contains 'paths' -and $null -ne $skillsValue.paths) {
+            $paths = @($skillsValue.paths)
+        }
+        $merged = [ordered]@{}
+        foreach ($p in $skillsValue.PSObject.Properties) { $merged[$p.Name] = $p.Value }
+        $merged['paths'] = Add-ConfigListEntry $paths $skillsEntry
+        $root['skills'] = $merged
+    }
+
+    foreach ($pluginFile in @('argo-wakeup.js', 'argo-cost-collector.js')) {
+        $pluginPath = Join-Path $PluginsRoot $pluginFile
+        if (Test-Path $pluginPath) {
+            $url = 'file:///' + (($pluginPath -replace '\\', '/').TrimStart('/'))
+            $root['plugin'] = Add-ConfigListEntry $root['plugin'] $url
+        }
+    }
+
+    $json = $root | ConvertTo-Json -Depth 10
+    [System.IO.File]::WriteAllText($ConfigPath, $json, (New-Object System.Text.UTF8Encoding $false))
+}
+
 function Register-OpenCodePlugin {
     param(
         [string]$ConfigPath,
@@ -1318,27 +1423,6 @@ if ($SkipMcp) {
     }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpOpenCode })
     Write-Host "argo MCP config written -> $OpenCodeConfigPath"
 
-    if ($OpenCodeSystemConfigPath) {
-        # OpenCode also merges a system-level managed config directory (Linux/WSL
-        # default: /etc/opencode). Deploying it keeps agents launched by external
-        # control planes (usually as root) in sync with framework upgrades
-        # instead of relying on a hand-maintained file. Opt-in: an empty path
-        # keeps the historical behaviour and never creates /etc/opencode.
-        Write-Host "==> Registering argo MCP server in OpenCode system managed config ($OpenCodeSystemConfigPath)"
-        try {
-            Write-McpConfig -Path $OpenCodeSystemConfigPath -ServersKey 'mcp' -ServerConfig ([ordered]@{
-                type    = 'local'
-                command = @('node', $argoServer)
-                enabled = $true
-            }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpOpenCode }) -ThrowOnParseError
-            Write-Host "argo MCP config written -> $OpenCodeSystemConfigPath"
-        } catch {
-            Write-Warning "Could not update the OpenCode system managed config at ${OpenCodeSystemConfigPath}: $($_.Exception.Message) Continuing without it."
-        }
-    } else {
-        Write-Host '  OpenCode system managed config skipped (set -OpenCodeSystemConfigPath or OPENCODE_SYSTEM_CONFIG_PATH to deploy /etc/opencode/opencode.json).'
-    }
-
     if (-not $SkipOpenClaw) {
         # The repo root to pin for OpenClaw defaults to the installer's own
         # location; -OpenClawRepoRoot overrides it (e.g. for tests or when the
@@ -1347,6 +1431,33 @@ if ($SkipMcp) {
         Write-Host "[22/22] argo MCP server -> $(Join-Path $OpenClawHome 'openclaw.json') (OpenClaw mcp.servers.argo, env.ARGO_REPO_ROOT pinned)"
         Write-OpenClawMcpConfig -OpenClawHome $OpenClawHome -RepoRoot $openClawRepoRoot -ArgoServer $argoServer -GraphMcpServer $openClawGraphMcpServer
     }
+}
+
+if ($OpenCodeSystemConfigPath) {
+    # OpenCode also merges a system-level managed config directory (Linux/WSL
+    # default: /etc/opencode). Deploy the whole framework config there - rules,
+    # skills and plugins in addition to MCP - so agents launched by an external
+    # control plane (usually as root) keep working when the user-level
+    # ~/.config/opencode layer is missing or unusable. Opt-in: an empty path
+    # keeps the historical behaviour and never creates /etc/opencode.
+    Write-Host "==> Deploying OpenCode system managed config -> $OpenCodeSystemConfigPath"
+    try {
+        $systemSkillsRoot = Join-Path (Split-Path -Parent $OpenCodeSystemConfigPath) 'skills'
+        $systemArgoServer = (Join-Path $ArgoRoot 'scripts\argo-mcp-server.js').Replace('\', '/')
+        Write-OpenCodeSystemConfig `
+            -ConfigPath $OpenCodeSystemConfigPath `
+            -SkillsRoot $systemSkillsRoot `
+            -PluginsRoot $PluginsRoot `
+            -RulePath $ruleSrc `
+            -ArgoServer $systemArgoServer `
+            -GraphMcpUrl $GraphMcpUrl `
+            -SkipMcp:$SkipMcp
+        Write-Host "managed config written -> $OpenCodeSystemConfigPath (AGENTS.md, skills, mcp, plugin)"
+    } catch {
+        Write-Warning "Could not update the OpenCode system managed config at ${OpenCodeSystemConfigPath}: $($_.Exception.Message) Continuing without it."
+    }
+} else {
+    Write-Host '  OpenCode system managed config skipped (set -OpenCodeSystemConfigPath or OPENCODE_SYSTEM_CONFIG_PATH to deploy /etc/opencode).'
 }
 
 if ($SkipCodex) {

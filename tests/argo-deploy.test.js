@@ -230,15 +230,19 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
   }
 });
 
-test('install-argo.ps1 merges argo + graph-mcp into an opt-in OpenCode system managed config', () => {
+test('install-argo.ps1 deploys the whole framework config into an opt-in OpenCode system managed tree', () => {
   // GIVEN OpenCode also merges a system-level managed config (on Linux/WSL:
   //   /etc/opencode/opencode.json) next to the user-level config
   // WHEN the installer runs with -OpenCodeSystemConfigPath pointing at it
-  // THEN argo and graph-mcp are registered there while every non-MCP key and
-  //   any pre-existing MCP entry are preserved, and a re-run is idempotent.
+  // THEN the WHOLE framework config is deployed next to the JSON (AGENTS.md,
+  //   skills, instructions, plugins) in addition to argo + graph-mcp, while
+  //   pre-existing keys/entries are preserved and a re-run is idempotent.
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-system-config-'));
   const paths = hostPaths(tmp);
   const systemConfigPath = path.join(tmp, 'etc', 'opencode', 'opencode.json');
+  const systemDir = path.dirname(systemConfigPath);
+  const systemAgentsPath = path.join(systemDir, 'AGENTS.md');
+  const systemSkillsRoot = path.join(systemDir, 'skills');
   const seeded = {
     $schema: 'https://opencode.ai/config.json',
     instructions: ['/etc/opencode/AGENTS.md'],
@@ -246,16 +250,40 @@ test('install-argo.ps1 merges argo + graph-mcp into an opt-in OpenCode system ma
     plugin: ['file:///etc/opencode/plugins/example.js'],
     mcp: { existing: { type: 'remote', url: 'https://example.test/mcp', enabled: true } },
   };
-  fs.mkdirSync(path.dirname(systemConfigPath), { recursive: true });
+  fs.mkdirSync(systemDir, { recursive: true });
   fs.writeFileSync(systemConfigPath, JSON.stringify(seeded, null, 2), 'utf8');
   try {
     const result = runInstall({ ...paths, skipEnv: true, openCodeSystemConfigPath: systemConfigPath });
     assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
 
     const cfg = JSON.parse(fs.readFileSync(systemConfigPath, 'utf8'));
-    assert.deepEqual(cfg.instructions, seeded.instructions, 'instructions must be preserved');
-    assert.deepEqual(cfg.skills, seeded.skills, 'skills must be preserved');
-    assert.deepEqual(cfg.plugin, seeded.plugin, 'plugin must be preserved');
+
+    // The managed instruction file is deployed and registered, without dropping
+    // the pre-existing instruction paths.
+    assert.ok(fs.existsSync(systemAgentsPath), 'AGENTS.md must be deployed next to the managed config');
+    assert.match(fs.readFileSync(systemAgentsPath, 'utf8'), /UNCONDITIONAL STARTUP GATE/, 'managed AGENTS.md must carry the wakeup gate');
+    assert.ok(cfg.instructions.includes('/etc/opencode/AGENTS.md'), 'pre-existing instruction paths must be preserved');
+    assert.ok(
+      cfg.instructions.includes(systemAgentsPath.replace(/\\/g, '/')),
+      'the managed AGENTS.md must be registered as an instruction file',
+    );
+
+    // Every OpenCode skill is copied and its root is registered.
+    for (const name of ['argo-init', 'ea-human-reconcile', 'agent-search-diagnosis']) {
+      assert.ok(fs.existsSync(path.join(systemSkillsRoot, name, 'SKILL.md')), `managed skills must include ${name}`);
+    }
+    assert.deepEqual(
+      cfg.skills.paths,
+      ['/etc/opencode/skills', systemSkillsRoot.replace(/\\/g, '/')],
+      'skill roots must be merged, not replaced',
+    );
+
+    // Plugins are registered with the SAME specs as the user-level config so a
+    // merged config loads each plugin once (identical specs are de-duplicated).
+    assert.ok(cfg.plugin.includes('file:///etc/opencode/plugins/example.js'), 'pre-existing plugins must be preserved');
+    assert.ok(cfg.plugin.some((p) => p.endsWith('/argo-wakeup.js')), 'the wakeup plugin must be registered');
+    assert.ok(cfg.plugin.some((p) => p.endsWith('/argo-cost-collector.js')), 'the cost collector must be registered');
+
     assert.ok(cfg.mcp, 'system managed config must carry an mcp map');
     assert.ok(cfg.mcp.existing, 'an unrelated pre-existing MCP entry must be preserved');
     assert.equal(cfg.mcp.argo.type, 'local');
@@ -272,9 +300,14 @@ test('install-argo.ps1 merges argo + graph-mcp into an opt-in OpenCode system ma
     assert.equal(second.status, 0, `second install exited with ${second.status}: ${second.stderr}`);
     const cfg2 = JSON.parse(fs.readFileSync(systemConfigPath, 'utf8'));
     assert.deepEqual(cfg2.mcp, cfg.mcp, 're-installing must leave the MCP map unchanged');
-    assert.deepEqual(cfg2.instructions, seeded.instructions);
-    assert.deepEqual(cfg2.skills, seeded.skills);
-    assert.deepEqual(cfg2.plugin, seeded.plugin);
+    assert.deepEqual(cfg2.instructions, cfg.instructions, 're-installing must not duplicate instructions');
+    assert.deepEqual(cfg2.skills, cfg.skills, 're-installing must not duplicate skill roots');
+    assert.deepEqual(cfg2.plugin, cfg.plugin, 're-installing must not duplicate plugins');
+    assert.equal(
+      (fs.readFileSync(systemAgentsPath, 'utf8').match(/ArchGraph ARGO Workflow Rules/g) || []).length,
+      1,
+      're-installing must not duplicate the managed rule block',
+    );
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
@@ -296,6 +329,10 @@ test('install-argo.ps1 skips the OpenCode system managed config unless a path or
     });
     assert.equal(skipped.status, 0, `install script exited with ${skipped.status}: ${skipped.stderr}`);
     assert.ok(!fs.existsSync(systemConfigPath), 'no system managed config may be created by default');
+    assert.ok(
+      !fs.existsSync(path.join(path.dirname(systemConfigPath), 'AGENTS.md')),
+      'no system managed tree may be created by default',
+    );
 
     const viaEnv = runInstall({
       ...paths,
@@ -304,9 +341,19 @@ test('install-argo.ps1 skips the OpenCode system managed config unless a path or
     });
     assert.equal(viaEnv.status, 0, `install script exited with ${viaEnv.status}: ${viaEnv.stderr}`);
     assert.ok(fs.existsSync(systemConfigPath), 'OPENCODE_SYSTEM_CONFIG_PATH must opt in to the system managed config');
+    const systemDir = path.dirname(systemConfigPath);
+    assert.ok(fs.existsSync(path.join(systemDir, 'AGENTS.md')), 'the env-var path must deploy the managed AGENTS.md');
+    assert.ok(
+      fs.existsSync(path.join(systemDir, 'skills', 'argo-init', 'SKILL.md')),
+      'the env-var path must deploy the managed skills',
+    );
     const cfg = JSON.parse(fs.readFileSync(systemConfigPath, 'utf8'));
     assert.ok(cfg.mcp && cfg.mcp.argo, 'the env-var path must register argo');
     assert.ok(cfg.mcp['graph-mcp'], 'the env-var path must register graph-mcp');
+    assert.ok(
+      cfg.instructions.some((p) => p.endsWith('/AGENTS.md')),
+      'the managed AGENTS.md must be registered as an instruction',
+    );
 
     // An unwritable destination (its parent is a regular file) must warn and let
     // the rest of the deploy continue, not abort the whole installation.

@@ -129,5 +129,13 @@ test('AT-agent-search-diagnosis-04: the skill + script ship with the framework a
   assert.doesNotMatch(installer, /\$CursorSkillsRoot 'agent-search-diagnosis'/, 'Cursor must not get the OpenCode-only diagnosis skill');
   assert.doesNotMatch(installer, /\$OpenClawHome[^\r\n]*agent-search-diagnosis/, 'OpenClaw must not get the OpenCode-only diagnosis skill');
   assert.doesNotMatch(installer, /\$DshHome[^\r\n]*agent-search-diagnosis/, 'DSH must not get the OpenCode-only diagnosis skill');
-  assert.doesNotMatch(installer, /@\([^)]*agent-search-diagnosis/, 'Doubao skill list must not include the OpenCode-only diagnosis skill');
+  // Doubao and Codex copy their skill list through Copy-DoubaoSkills; none of
+  // those calls may pick up the OpenCode-only diagnosis skill. (The OpenCode
+  // system managed config legitimately deploys it, so a blanket "@(...)" scan
+  // would be wrong.)
+  const sharedSkillDeploys = installer.split(/\r?\n/).filter((line) => /Copy-DoubaoSkills/.test(line));
+  assert.ok(sharedSkillDeploys.length > 0, 'installer must declare the shared Doubao/Codex skill deploys');
+  for (const line of sharedSkillDeploys) {
+    assert.doesNotMatch(line, /agent-search-diagnosis/, 'Doubao/Codex skill lists must not include the OpenCode-only diagnosis skill');
+  }
 });

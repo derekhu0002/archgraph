@@ -1257,7 +1257,7 @@
         {
           "Input": "tests/argo-deploy.test.js",
           "acceptanceCriteria": "tests/argo-deploy.test.js",
-          "description": "GIVEN OpenCode 在 Linux/WSL 除用户级配置外还会合并系统级 managed 配置 /etc/opencode/opencode.json；WHEN 安装器以 -OpenCodeSystemConfigPath 或环境变量 OPENCODE_SYSTEM_CONFIG_PATH 指定该路径（默认空=跳过，普通部署不创建 /etc/opencode）；THEN 该文件写入 mcp.argo（local，node <ArgoRoot>/scripts/argo-mcp-server.js）与 mcp.graph-mcp（remote，url），且原有 instructions/skills/plugin 及既有 MCP 条目逐项保留；WHEN 连续运行两次 THEN 幂等（MCP map 不变、无重复）；WHEN 目标不可写（父路径为普通文件/无权限）THEN 输出清晰的 warning 且整个安装继续（exit 0）；install-argo.sh 透传 OPENCODE_SYSTEM_CONFIG_PATH 且默认空。",
+          "description": "GIVEN OpenCode 在 Linux/WSL 除用户级配置外还会合并系统级 managed 层 /etc/opencode；WHEN 安装器以 -OpenCodeSystemConfigPath 或环境变量 OPENCODE_SYSTEM_CONFIG_PATH 指定该 JSON（默认空=跳过，普通部署不创建 /etc/opencode）；THEN 除 mcp.argo（local，node <ArgoRoot>/scripts/argo-mcp-server.js）与 mcp.graph-mcp（remote，url）外，还把整套框架配置部署到同一目录并在 JSON 中注册：<dir>/AGENTS.md（规则，写入 instructions 且去重）、<dir>/skills/{argo-init,ea-human-reconcile,agent-search-diagnosis}（合并进 skills.paths）、plugin 复用 ~/.argo/plugins 的相同 file:// spec（与用户级合并后按 spec 去重，避免重复加载）；原有 instructions/skills/plugin/MCP 条目逐项保留；WHEN 连续运行两次 THEN 幂等（数组/规则块无重复）；WHEN 目标不可写或配置含注释不可解析 THEN 输出清晰 warning 且整个安装继续（exit 0）；install-argo.sh 透传 OPENCODE_SYSTEM_CONFIG_PATH 且默认空。",
           "name": "AT-1361-03",
           "type": "Acceptance Test"
         }

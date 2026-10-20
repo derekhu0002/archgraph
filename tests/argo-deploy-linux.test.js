@@ -178,12 +178,22 @@ if (HAVE_BASH && HAVE_PWSH) {
 
       // OPENCODE_SYSTEM_CONFIG_PATH opts in to the system-level managed config;
       // the wrapper forwards it so external control planes launched as root see
-      // the same argo + graph-mcp registration as the user-level config.
+      // the same framework config as the user-level layer: MCP, rules, skills.
       assert.ok(fs.existsSync(systemConfigPath), 'OPENCODE_SYSTEM_CONFIG_PATH must be honoured');
       const systemCfg = JSON.parse(fs.readFileSync(systemConfigPath, 'utf8'));
       assert.ok(systemCfg.mcp && systemCfg.mcp.argo, 'system managed config must register argo');
       assert.equal(systemCfg.mcp.argo.command[0], 'node');
       assert.ok(systemCfg.mcp['graph-mcp'], 'system managed config must register graph-mcp');
+      const systemDir = path.dirname(systemConfigPath);
+      assert.ok(fs.existsSync(path.join(systemDir, 'AGENTS.md')), 'system AGENTS.md must be deployed');
+      assert.ok(
+        fs.existsSync(path.join(systemDir, 'skills', 'argo-init', 'SKILL.md')),
+        'system skills must be deployed',
+      );
+      assert.ok(
+        systemCfg.instructions.includes(path.join(systemDir, 'AGENTS.md').replace(/\\/g, '/')),
+        'system AGENTS.md must be registered as an instruction',
+      );
 
       // No .env in non-interactive mode.
       assert.ok(!fs.existsSync(path.join(tmp, '.argo', '.env')), '.env must not be generated when -SkipEnv is set');
