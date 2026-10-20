@@ -1247,6 +1247,11 @@
           "name": "commit",
           "value": "eb65f0d",
           "description": "install-argo.ps1（规则单一来源：系统层 AGENTS.md 写入 instructions 后，从用户级 ~/.config/opencode/AGENTS.md 移除 ArchGraph 规则块并保留用户内容，避免 OpenCode 叠加注入两次；新增 Remove-AgentsRuleBlock）; tests/argo-deploy.test.js; tests/argo-deploy-linux.test.js; design/KG/SystemArchitecture.json; archgraph.qea（issue #16 去重修复）"
+        },
+        {
+          "name": "commit",
+          "value": "c6fdf61",
+          "description": "install-argo.ps1（系统层提示仅非 Windows 输出，Windows 默认部署零输出差异）; tests/argo-deploy.test.js（Windows 不得输出该提示的断言 + 与前版本逐文件对比举证：105 文件同集、EOL 归一后 0 内容差异、stdout 仅尾部空行差异）"
         }
       ],
       "testcases": [
