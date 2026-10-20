@@ -262,6 +262,16 @@ test('install-argo.ps1 deploys the whole framework config into an opt-in OpenCod
     // the pre-existing instruction paths.
     assert.ok(fs.existsSync(systemAgentsPath), 'AGENTS.md must be deployed next to the managed config');
     assert.match(fs.readFileSync(systemAgentsPath, 'utf8'), /UNCONDITIONAL STARTUP GATE/, 'managed AGENTS.md must carry the wakeup gate');
+    // Exactly ONE rule source: OpenCode concatenates the global AGENTS.md with
+    // config.instructions, so the user-level block must not survive alongside
+    // the managed copy (it would inject the rule twice and waste context).
+    if (fs.existsSync(paths.openCodeAgentsPath)) {
+      assert.doesNotMatch(
+        fs.readFileSync(paths.openCodeAgentsPath, 'utf8'),
+        /ArchGraph ARGO Workflow Rules/,
+        'the user-level rule block must be removed when the rule lives in the managed layer',
+      );
+    }
     assert.ok(cfg.instructions.includes('/etc/opencode/AGENTS.md'), 'pre-existing instruction paths must be preserved');
     assert.ok(
       cfg.instructions.includes(systemAgentsPath.replace(/\\/g, '/')),
@@ -333,6 +343,12 @@ test('install-argo.ps1 skips the OpenCode system managed config unless a path or
       !fs.existsSync(path.join(path.dirname(systemConfigPath), 'AGENTS.md')),
       'no system managed tree may be created by default',
     );
+    // Without the system layer the rule still lives in the user-level AGENTS.md.
+    assert.match(
+      fs.readFileSync(paths.openCodeAgentsPath, 'utf8'),
+      /ArchGraph ARGO Workflow Rules/,
+      'the user-level rule must stay when the system layer is not enabled',
+    );
 
     const viaEnv = runInstall({
       ...paths,
@@ -354,6 +370,14 @@ test('install-argo.ps1 skips the OpenCode system managed config unless a path or
       cfg.instructions.some((p) => p.endsWith('/AGENTS.md')),
       'the managed AGENTS.md must be registered as an instruction',
     );
+    // The env-var path must also leave exactly one rule source.
+    if (fs.existsSync(paths.openCodeAgentsPath)) {
+      assert.doesNotMatch(
+        fs.readFileSync(paths.openCodeAgentsPath, 'utf8'),
+        /ArchGraph ARGO Workflow Rules/,
+        'the user-level rule block must be removed when the system layer is enabled',
+      );
+    }
 
     // An unwritable destination (its parent is a regular file) must warn and let
     // the rest of the deploy continue, not abort the whole installation.

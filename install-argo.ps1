@@ -198,6 +198,39 @@ function Write-McpConfig {
     [System.IO.File]::WriteAllText($Path, $json, (New-Object System.Text.UTF8Encoding $false))
 }
 
+function Remove-AgentsRuleBlock {
+    # Remove the ArchGraph rule block from an AGENTS.md while preserving any
+    # content the user authored around it. Used when the whole rule is deployed
+    # to the system managed layer: OpenCode concatenates the global AGENTS.md
+    # with config.instructions, so keeping both copies would inject the rule
+    # twice and waste context.
+    param([string]$AgentsPath)
+
+    if (-not (Test-Path $AgentsPath)) { return }
+    $existing = Get-Content $AgentsPath -Raw -Encoding UTF8
+    $marker = 'ArchGraph ARGO Workflow Rules'
+    $markerIdx = $existing.IndexOf($marker)
+    if ($markerIdx -lt 0) { return }
+
+    $startIdx = $existing.LastIndexOf('---', $markerIdx)
+    if ($startIdx -lt 0) { $startIdx = 0 }
+    $endIdx = Get-ArchGraphRuleBlockEndIndex -Text $existing -From $markerIdx
+    if ($endIdx -lt 0) { return }
+    $endLen = Get-ArchGraphRuleBlockEndTagLength -Text $existing -Index $endIdx
+
+    $before = $existing.Substring(0, $startIdx).TrimEnd()
+    $after = $existing.Substring($endIdx + $endLen).TrimStart()
+    $combined = $before
+    if ($combined.Length -gt 0 -and $after.Length -gt 0) { $combined += "`n`n" }
+    $combined += $after
+
+    if ([string]::IsNullOrWhiteSpace($combined)) {
+        Remove-Item -Force -LiteralPath $AgentsPath
+    } else {
+        [System.IO.File]::WriteAllText($AgentsPath, $combined, (New-Object System.Text.UTF8Encoding $false))
+    }
+}
+
 function Add-ConfigListEntry {
     # Append Value to a JSON list unless it is already present (idempotent).
     param($List, [string]$Value)
@@ -226,6 +259,7 @@ function Write-OpenCodeSystemConfig {
         [string]$RulePath,
         [string]$ArgoServer,
         [string]$GraphMcpUrl,
+        [string]$RemoveRuleFromAgentsPath,
         [switch]$SkipMcp
     )
 
@@ -233,8 +267,14 @@ function Write-OpenCodeSystemConfig {
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
     # 1) Rules -> <dir>/AGENTS.md (registered as a managed instruction file).
+    # The user-level ArchGraph block is removed afterwards: OpenCode concatenates
+    # the global AGENTS.md with config.instructions, so two copies would burn
+    # context twice. Exactly one rule source remains (the system managed layer).
     $agentsPath = Join-Path $dir 'AGENTS.md'
     Add-AgentsRule -AgentsPath $agentsPath -RulePath $RulePath
+    if ($RemoveRuleFromAgentsPath) {
+        Remove-AgentsRuleBlock -AgentsPath $RemoveRuleFromAgentsPath
+    }
 
     # 2) Skills -> <dir>/skills (OpenCode discovers extra roots from config.skills).
     $sourceSkillsRoot = Join-Path (Join-Path $PSScriptRoot 'argo') 'skills'
@@ -1451,6 +1491,7 @@ if ($OpenCodeSystemConfigPath) {
             -RulePath $ruleSrc `
             -ArgoServer $systemArgoServer `
             -GraphMcpUrl $GraphMcpUrl `
+            -RemoveRuleFromAgentsPath $OpenCodeAgentsPath `
             -SkipMcp:$SkipMcp
         Write-Host "managed config written -> $OpenCodeSystemConfigPath (AGENTS.md, skills, mcp, plugin)"
     } catch {

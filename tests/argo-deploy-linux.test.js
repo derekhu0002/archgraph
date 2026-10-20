@@ -173,7 +173,12 @@ if (HAVE_BASH && HAVE_PWSH) {
       assert.ok(cfg.mcp && cfg.mcp.argo, 'OpenCode config must register the argo MCP server');
       assert.ok(cfg.mcp.argo.command[1].startsWith(tmp), 'MCP command must point into the deployed HOME');
 
-      assert.ok(fs.existsSync(path.join(tmp, '.config', 'opencode', 'AGENTS.md')), 'OpenCode global rule must be written');
+      const userAgentsPath = path.join(tmp, '.config', 'opencode', 'AGENTS.md');
+      assert.ok(
+        !fs.existsSync(userAgentsPath) ||
+          !fs.readFileSync(userAgentsPath, 'utf8').includes('ArchGraph ARGO Workflow Rules'),
+        'the rule must not be duplicated in the user-level AGENTS.md when the system layer is enabled',
+      );
       assert.ok(fs.existsSync(path.join(tmp, '.cursor', 'mcp.json')), 'Cursor MCP config must be written under HOME');
 
       // OPENCODE_SYSTEM_CONFIG_PATH opts in to the system-level managed config;
