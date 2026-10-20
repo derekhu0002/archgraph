@@ -1242,6 +1242,11 @@
           "name": "commit",
           "value": "95255be",
           "description": "install-argo.ps1（系统级 managed 配置扩为整套 OpenCode 框架配置：<dir>/opencode.json 写入 mcp.argo+mcp.graph-mcp、instructions=<dir>/AGENTS.md、skills=<dir>/skills、plugin 复用 ~/.argo/plugins 同 spec 去重；新增 Write-OpenCodeSystemConfig/Add-ConfigListEntry；保留既有键并幂等）；tests/argo-deploy.test.js; tests/argo-deploy-linux.test.js; tests/agent-search-diagnosis.test.js（把过宽的 @(...) 断言收紧为 Copy-DoubaoSkills 调用行，保留 Doubao/Codex 不得部署 diagnosis skill 的原意）; design/KG/SystemArchitecture.json; archgraph.qea（issue #16 扩展：不只是 MCP，整套配置）"
+        },
+        {
+          "name": "commit",
+          "value": "eb65f0d",
+          "description": "install-argo.ps1（规则单一来源：系统层 AGENTS.md 写入 instructions 后，从用户级 ~/.config/opencode/AGENTS.md 移除 ArchGraph 规则块并保留用户内容，避免 OpenCode 叠加注入两次；新增 Remove-AgentsRuleBlock）; tests/argo-deploy.test.js; tests/argo-deploy-linux.test.js; design/KG/SystemArchitecture.json; archgraph.qea（issue #16 去重修复）"
         }
       ],
       "testcases": [
