@@ -1497,7 +1497,10 @@ if ($OpenCodeSystemConfigPath) {
     } catch {
         Write-Warning "Could not update the OpenCode system managed config at ${OpenCodeSystemConfigPath}: $($_.Exception.Message) Continuing without it."
     }
-} else {
+} elseif ($env:OS -ne 'Windows_NT') {
+    # Linux/WSL-only hint: the system managed layer is a POSIX deployment
+    # concern (/etc/opencode). On Windows the default deploy stays byte-for-byte
+    # identical, so it must not even add an output line.
     Write-Host '  OpenCode system managed config skipped (set -OpenCodeSystemConfigPath or OPENCODE_SYSTEM_CONFIG_PATH to deploy /etc/opencode).'
 }
 

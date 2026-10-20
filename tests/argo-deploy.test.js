@@ -338,6 +338,15 @@ test('install-argo.ps1 skips the OpenCode system managed config unless a path or
       env: { OPENCODE_SYSTEM_CONFIG_PATH: '' },
     });
     assert.equal(skipped.status, 0, `install script exited with ${skipped.status}: ${skipped.stderr}`);
+    // Windows is out of scope for the system managed layer: a default deploy
+    // must not print a Linux-only hint either (zero output change).
+    if (process.platform === 'win32') {
+      assert.doesNotMatch(
+        `${skipped.stdout || ''}${skipped.stderr || ''}`,
+        /system managed config/i,
+        'Windows must not emit the Linux-only managed-config hint',
+      );
+    }
     assert.ok(!fs.existsSync(systemConfigPath), 'no system managed config may be created by default');
     assert.ok(
       !fs.existsSync(path.join(path.dirname(systemConfigPath), 'AGENTS.md')),
