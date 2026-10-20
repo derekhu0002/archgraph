@@ -4384,7 +4384,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-18 · Agent 人机协作文章、公众号草稿与图谱核验）\n\n【会话目标与进展】围绕“人提出重要但路径未知的目标—Agent 探索执行—人基于证据验收—按偏差治理反馈”的交互范式，完成中文 HTML 文章和 4 张模型生成、带文字说明的工程设计图。文章涵盖目标/环境/上下文/执行偏差、记忆写入治理、语义/混合检索/重排序/最小上下文/整图提取，以及整体成功率与局部诊断指标的边界。文章、图片和邮件已交付，文章提交 cab06f73d8ac19150a02e3fba3c6f27b44c438ed；后续 HTML 补充提交 f27d5da1fb6b06c5a761f03d0e7332f670e2f555。\n\n【公众号状态】白名单已由人类伙伴保存并扫码确认；仅重试 wechat:draft 后创建成功，并经 draft/batchget 核验标题。状态 draft_created，media_id=BRZAMZ3b-CaOBH8qdG2KTccv-LgCU3OdJg8Y5AqGIV_oEyxeRhrFBhSIw-pKAX07；没有调用公开发布/群发 API，待人类在公众号后台手动发布。邮件已由 126 邮箱发送至 hudonghua@huawei.com。\n\n【Neo4j 投影核验】workspace schema=Acme + UML 2 State Machine，校验通过；graphKey=design/KG/SystemArchitecture.json，数据库 archgraph。只读遍历 canonical 全部 93 个视图，核对 418 元素、298 关系、93 视图的 ID 与原始对象内容，全部一致；视图成员计数 541/319、子视图链接 92 均一致；关系端点无不匹配，未发现孤立对象。结论：本次未发现 canonical 与 Neo4j 结构投影偏差。\n\n【讨论结论】记忆治理应前移至写入：去重/复用、显式处理冲突与时效、使用结构/本体、无损可追溯；读取只注入任务所需且可验证的最小上下文。冲突不能只靠抽象“终极原则”自动消解，应按来源、时间、范围与权威性判断，不确定时交回人类。\n\n【待续】公众号草稿由人类手动发布；统一评测口径和实验版本，补齐 coding 端到端任务成功率基准；Windmill 控制面方案仍暂缓，Paperclip 后续指向待确认。\n\n【复用经验】只读核对时，递归读取 ARGO canonical views 并与 queryNeo4jGraph 数据逐项比对；不要把会全量重建 .qea 的 argo-init 当成只读审计命令。",
+      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-20 · GitHub issue #16：OpenCode 系统级 managed 配置部署）\n\n【会话目标】处理 issue #16（Linux/WSL 安装未部署 /etc/opencode/opencode.json）。人类伙伴随后要求扩大为“整套 user 级 graph 框架配置都写进系统层”，且不接受 instruction 重复；最终要求 Windows 上即使显式设置也一律忽略。\n\n【已交付】opt-in：-OpenCodeSystemConfigPath / OPENCODE_SYSTEM_CONFIG_PATH（默认空=跳过）。启用后把整套配置部署到配置 JSON 同目录：opencode.json（mcp.argo + mcp.graph-mcp + instructions + skills.paths + plugin）、AGENTS.md、skills/{argo-init,ea-human-reconcile,agent-search-diagnosis}；保留原有键、幂等；不可写或 JSON 带注释时清晰 warning 且安装继续。\n\n【关键决策】(1) 规则单一来源：系统层 AGENTS.md 写入 instructions 后，从用户级 ~/.config/opencode/AGENTS.md 移除 ArchGraph 规则块（保留用户内容），避免 OpenCode 把全局 AGENTS.md 与 instructions 叠加导致规则注入两次、浪费上下文。(2) Windows 硬门：$isWindowsHost = ($env:OS -eq 'Windows_NT')；Windows 上即使传参/设环境变量也忽略（零写入、零输出）。(3) plugin 复用 ~/.argo/plugins 相同 file spec（按 spec 去重）；同名 skill 按 name 去重（managed 胜出）。\n\n【举证】改动前 4bccf46 vs HEAD 在 Windows 实跑（同时传 flag+env）：105 vs 105 文件、行尾归一后 0 内容差异、stdout 0 差异、系统目录未创建。真实 opencode 验证（隔离 HOME/ProgramData）：instructions 仅 1 个 AGENTS.md、每个 skill 仅 1 条、用户级 AGENTS.md 已移除。\n\n【测试】argo-deploy 14/14（含 Windows 硬门与 POSIX 分支）；agent-search-diagnosis 7/7（把过宽的 @(...) 断言收紧为 Copy-DoubaoSkills 行）；全量 777 项 775 通过，仅剩 2 个既有图谱漂移失败（langgraph-windmill-paperclip 未按 overseer- 前缀，位于 overseer-product-001），与本改动无关。\n\n【提交】87cf1f7 / e9852bc（MCP 首版）；95255be / 5440efa（整套配置）；eb65f0d / c059c01（规则单一来源）；c6fdf61 / 0256d26（Windows 零输出差异）；97cc978 / f41fd89（Windows 硬门）。WP 1361 挂 AT-1361-03。\n\n【待续】发布/部署（npm publish + argo-deploy -SkipEnv）并关闭 issue #16；修复 2 个既有图谱漂移失败；issue #15（WSL 安装验证）后续处理。\n\n【复用经验】OpenCode 合并语义：instructions 数组拼接（同路径去重）、全局 AGENTS.md 始终自动加载并与 instructions 叠加；skills 按 name 去重（managed 覆盖）；plugin 按 spec 去重；managed 对冲突键优先（skills 会被覆盖）。managed 目录：Linux /etc/opencode、Windows %ProgramData%\\opencode。PS 5.1 无 $IsWindows，用 $env:OS 判断宿主。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4406,8 +4406,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-18",
-          "description": "本会话：公众号草稿创建并核验；Neo4j canonical 结构投影全量对象一致"
+          "value": "2026-10-20",
+          "description": "本会话：issue #16 系统级 managed 配置（整套配置 + 规则单一来源 + Windows 硬门），含前后差分与真实 opencode 验证"
         },
         {
           "name": "commit",
