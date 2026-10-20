@@ -253,7 +253,9 @@ test('install-argo.ps1 deploys the whole framework config into an opt-in OpenCod
   fs.mkdirSync(systemDir, { recursive: true });
   fs.writeFileSync(systemConfigPath, JSON.stringify(seeded, null, 2), 'utf8');
   try {
-    const result = runInstall({ ...paths, skipEnv: true, openCodeSystemConfigPath: systemConfigPath });
+    // This suite runs on Windows PowerShell; clearing OS simulates the POSIX
+  // branch where the system managed layer exists.
+  const result = runInstall({ ...paths, skipEnv: true, openCodeSystemConfigPath: systemConfigPath, env: { OS: '' } });
     assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
 
     const cfg = JSON.parse(fs.readFileSync(systemConfigPath, 'utf8'));
@@ -306,7 +308,7 @@ test('install-argo.ps1 deploys the whole framework config into an opt-in OpenCod
     assert.equal(cfg.mcp['graph-mcp'].enabled, true);
 
     // Idempotent: a second deploy must not duplicate or reorder the entries.
-    const second = runInstall({ ...paths, skipEnv: true, openCodeSystemConfigPath: systemConfigPath });
+    const second = runInstall({ ...paths, skipEnv: true, openCodeSystemConfigPath: systemConfigPath, env: { OS: '' } });
     assert.equal(second.status, 0, `second install exited with ${second.status}: ${second.stderr}`);
     const cfg2 = JSON.parse(fs.readFileSync(systemConfigPath, 'utf8'));
     assert.deepEqual(cfg2.mcp, cfg.mcp, 're-installing must leave the MCP map unchanged');
@@ -323,23 +325,30 @@ test('install-argo.ps1 deploys the whole framework config into an opt-in OpenCod
   }
 });
 
-test('install-argo.ps1 skips the OpenCode system managed config unless a path or OPENCODE_SYSTEM_CONFIG_PATH is set', () => {
-  // GIVEN the default install must keep the current behaviour (no /etc writes)
-  // WHEN the installer runs without the new parameter / environment variable
-  // THEN no system managed config is created; WHEN OPENCODE_SYSTEM_CONFIG_PATH
-  //   is set, THEN that path receives the argo + graph-mcp registration.
+test('install-argo.ps1 hard-disables the OpenCode system managed config on Windows', () => {
+  // GIVEN the system managed layer is a Linux/WSL concern (/etc/opencode)
+  // WHEN the installer runs on Windows - by default, with
+  //   OPENCODE_SYSTEM_CONFIG_PATH, or with -OpenCodeSystemConfigPath
+  // THEN it must be completely ignored: no system tree, no hint, no change to
+  //   the user-level rule. Clearing OS then gives the POSIX branch coverage
+  //   (feature works, is idempotent, and survives an unwritable destination).
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-system-config-default-'));
   const paths = hostPaths(tmp);
   const systemConfigPath = path.join(tmp, 'etc', 'opencode', 'opencode.json');
+  const systemDir = path.dirname(systemConfigPath);
+  const rulePattern = /ArchGraph ARGO Workflow Rules/;
+  const noSystemTree = (label) => {
+    assert.ok(!fs.existsSync(systemConfigPath), `${label}: no system managed config may be created`);
+    assert.ok(!fs.existsSync(path.join(systemDir, 'AGENTS.md')), `${label}: no system managed tree may be created`);
+  };
   try {
+    // 1) Default Windows deploy: no system tree, user rule stays, no hint.
     const skipped = runInstall({
       ...paths,
       skipEnv: true,
       env: { OPENCODE_SYSTEM_CONFIG_PATH: '' },
     });
     assert.equal(skipped.status, 0, `install script exited with ${skipped.status}: ${skipped.stderr}`);
-    // Windows is out of scope for the system managed layer: a default deploy
-    // must not print a Linux-only hint either (zero output change).
     if (process.platform === 'win32') {
       assert.doesNotMatch(
         `${skipped.stdout || ''}${skipped.stderr || ''}`,
@@ -347,26 +356,56 @@ test('install-argo.ps1 skips the OpenCode system managed config unless a path or
         'Windows must not emit the Linux-only managed-config hint',
       );
     }
-    assert.ok(!fs.existsSync(systemConfigPath), 'no system managed config may be created by default');
-    assert.ok(
-      !fs.existsSync(path.join(path.dirname(systemConfigPath), 'AGENTS.md')),
-      'no system managed tree may be created by default',
-    );
-    // Without the system layer the rule still lives in the user-level AGENTS.md.
+    noSystemTree('default');
     assert.match(
       fs.readFileSync(paths.openCodeAgentsPath, 'utf8'),
-      /ArchGraph ARGO Workflow Rules/,
-      'the user-level rule must stay when the system layer is not enabled',
+      rulePattern,
+      'the user-level rule must stay when the system layer is off',
     );
 
-    const viaEnv = runInstall({
+    // 2) Windows hard-off even when explicitly enabled (flag).
+    const forcedFlag = runInstall({
+      ...paths,
+      skipEnv: true,
+      openCodeSystemConfigPath: systemConfigPath,
+    });
+    assert.equal(forcedFlag.status, 0, `install script exited with ${forcedFlag.status}: ${forcedFlag.stderr}`);
+    noSystemTree('explicit flag');
+    assert.match(
+      fs.readFileSync(paths.openCodeAgentsPath, 'utf8'),
+      rulePattern,
+      'the user-level rule must stay on Windows even when the flag is set',
+    );
+    if (process.platform === 'win32') {
+      assert.doesNotMatch(
+        `${forcedFlag.stdout || ''}${forcedFlag.stderr || ''}`,
+        /system managed config/i,
+        'an ignored Windows flag must not print anything either',
+      );
+    }
+
+    // 3) Windows hard-off even when the environment variable is set.
+    const forcedEnv = runInstall({
       ...paths,
       skipEnv: true,
       env: { OPENCODE_SYSTEM_CONFIG_PATH: systemConfigPath },
     });
+    assert.equal(forcedEnv.status, 0, `install script exited with ${forcedEnv.status}: ${forcedEnv.stderr}`);
+    noSystemTree('env var');
+    assert.match(
+      fs.readFileSync(paths.openCodeAgentsPath, 'utf8'),
+      rulePattern,
+      'the user-level rule must stay on Windows even when the env var is set',
+    );
+
+    // 4) POSIX branch (simulated): the env var opts in and the whole tree lands.
+    const viaEnv = runInstall({
+      ...paths,
+      skipEnv: true,
+      env: { OS: '', OPENCODE_SYSTEM_CONFIG_PATH: systemConfigPath },
+    });
     assert.equal(viaEnv.status, 0, `install script exited with ${viaEnv.status}: ${viaEnv.stderr}`);
-    assert.ok(fs.existsSync(systemConfigPath), 'OPENCODE_SYSTEM_CONFIG_PATH must opt in to the system managed config');
-    const systemDir = path.dirname(systemConfigPath);
+    assert.ok(fs.existsSync(systemConfigPath), 'OPENCODE_SYSTEM_CONFIG_PATH must opt in on the POSIX branch');
     assert.ok(fs.existsSync(path.join(systemDir, 'AGENTS.md')), 'the env-var path must deploy the managed AGENTS.md');
     assert.ok(
       fs.existsSync(path.join(systemDir, 'skills', 'argo-init', 'SKILL.md')),
@@ -379,27 +418,29 @@ test('install-argo.ps1 skips the OpenCode system managed config unless a path or
       cfg.instructions.some((p) => p.endsWith('/AGENTS.md')),
       'the managed AGENTS.md must be registered as an instruction',
     );
-    // The env-var path must also leave exactly one rule source.
     if (fs.existsSync(paths.openCodeAgentsPath)) {
       assert.doesNotMatch(
         fs.readFileSync(paths.openCodeAgentsPath, 'utf8'),
-        /ArchGraph ARGO Workflow Rules/,
+        rulePattern,
         'the user-level rule block must be removed when the system layer is enabled',
       );
     }
 
-    // An unwritable destination (its parent is a regular file) must warn and let
-    // the rest of the deploy continue, not abort the whole installation.
+    // 5) POSIX branch: an unwritable destination warns and lets the deploy finish.
     const blockedParent = path.join(tmp, 'blocked');
     fs.writeFileSync(blockedParent, 'not a directory', 'utf8');
     const blocked = runInstall({
       ...paths,
       skipEnv: true,
       openCodeSystemConfigPath: path.join(blockedParent, 'opencode.json'),
+      env: { OS: '' },
     });
     assert.equal(blocked.status, 0, `install must survive an unwritable system config: ${blocked.stderr}`);
-    const output = `${blocked.stdout || ''}${blocked.stderr || ''}`;
-    assert.match(output, /Could not update the OpenCode system managed config/, 'must emit a clear warning');
+    assert.match(
+      `${blocked.stdout || ''}${blocked.stderr || ''}`,
+      /Could not update the OpenCode system managed config/,
+      'must emit a clear warning',
+    );
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

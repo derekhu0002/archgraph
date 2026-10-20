@@ -1272,7 +1272,7 @@
         {
           "Input": "tests/argo-deploy.test.js",
           "acceptanceCriteria": "tests/argo-deploy.test.js",
-          "description": "GIVEN OpenCode 在 Linux/WSL 除用户级配置外还会合并系统级 managed 层 /etc/opencode，且会把全局 AGENTS.md 与 instructions 叠加；WHEN 安装器以 -OpenCodeSystemConfigPath 或 OPENCODE_SYSTEM_CONFIG_PATH 指定该 JSON（默认空=跳过，不创建 /etc/opencode）；THEN 除 mcp.argo + mcp.graph-mcp 外，还把整套框架配置部署到同一目录并注册：<dir>/AGENTS.md 作为规则唯一来源写入 instructions，同时从用户级 ~/.config/opencode/AGENTS.md 移除 ArchGraph 规则块（保留用户自有内容，避免规则重复注入）；<dir>/skills/{argo-init,ea-human-reconcile,agent-search-diagnosis} 合并进 skills.paths（与用户级同名 skill 按 name 去重）；plugin 复用 ~/.argo/plugins 的相同 file:// spec（按 spec 去重）；原有 instructions/skills/plugin/MCP 条目逐项保留；连续两次运行幂等；目标不可写或配置含注释不可解析时输出清晰 warning 且安装继续（exit 0）；install-argo.sh 透传 OPENCODE_SYSTEM_CONFIG_PATH 且默认空。",
+          "description": "GIVEN OpenCode 在 Linux/WSL 除用户级配置外还会合并系统级 managed 层 /etc/opencode，且会把全局 AGENTS.md 与 instructions 叠加；WHEN 安装器以 -OpenCodeSystemConfigPath 或 OPENCODE_SYSTEM_CONFIG_PATH 指定该 JSON（默认空=跳过）；THEN 仅在非 Windows 宿主生效，Windows 上即使显式设置也一律忽略（零写入、零输出差异），Linux/WSL 上除 mcp.argo + mcp.graph-mcp 外还把整套框架配置部署到同一目录：<dir>/AGENTS.md 作为规则唯一来源写入 instructions，同时从用户级 ~/.config/opencode/AGENTS.md 移除 ArchGraph 规则块（保留用户自有内容，避免重复注入）；<dir>/skills/{argo-init,ea-human-reconcile,agent-search-diagnosis} 合并进 skills.paths（同名 skill 按 name 去重）；plugin 复用 ~/.argo/plugins 的相同 file:// spec（按 spec 去重）；原有 instructions/skills/plugin/MCP 条目逐项保留；连续两次运行幂等；目标不可写或配置含注释不可解析时输出清晰 warning 且安装继续（exit 0）；install-argo.sh 透传 OPENCODE_SYSTEM_CONFIG_PATH 且默认空。",
           "name": "AT-1361-03",
           "type": "Acceptance Test"
         }

@@ -41,6 +41,11 @@ param(
 $ErrorActionPreference = 'Stop'
 $repoRoot = $PSScriptRoot
 $argoDir = Join-Path $repoRoot 'argo'
+# The system managed layer (/etc/opencode) is a Linux/WSL deployment concern.
+# On Windows this is a hard off-switch: even an explicitly supplied
+# -OpenCodeSystemConfigPath / OPENCODE_SYSTEM_CONFIG_PATH is ignored, so the
+# Windows deploy stays byte-for-byte identical.
+$isWindowsHost = ($env:OS -eq 'Windows_NT')
 
 # OpenCode-only model-id remap. argo/agents/*.agent.md is a single source shared
 # verbatim across Copilot / Cursor / OpenCode (and DSH presets), so the original
@@ -1473,7 +1478,7 @@ if ($SkipMcp) {
     }
 }
 
-if ($OpenCodeSystemConfigPath) {
+if ($OpenCodeSystemConfigPath -and -not $isWindowsHost) {
     # OpenCode also merges a system-level managed config directory (Linux/WSL
     # default: /etc/opencode). Deploy the whole framework config there - rules,
     # skills and plugins in addition to MCP - so agents launched by an external
@@ -1497,7 +1502,7 @@ if ($OpenCodeSystemConfigPath) {
     } catch {
         Write-Warning "Could not update the OpenCode system managed config at ${OpenCodeSystemConfigPath}: $($_.Exception.Message) Continuing without it."
     }
-} elseif ($env:OS -ne 'Windows_NT') {
+} elseif (-not $isWindowsHost) {
     # Linux/WSL-only hint: the system managed layer is a POSIX deployment
     # concern (/etc/opencode). On Windows the default deploy stays byte-for-byte
     # identical, so it must not even add an output line.
