@@ -1237,6 +1237,11 @@
           "name": "commit",
           "value": "87cf1f7",
           "description": "install-argo.ps1 (新增 -OpenCodeSystemConfigPath / OPENCODE_SYSTEM_CONFIG_PATH，复用 Write-McpConfig 写入系统级 managed 配置 mcp.argo+mcp.graph-mcp，保留非 MCP 键，不可写仅 warning；Write-McpConfig 新增 -ThrowOnParseError 防止覆写不可解析的 managed 配置); install-argo.sh (透传 OPENCODE_SYSTEM_CONFIG_PATH，默认空=跳过); tests/argo-deploy.test.js (AT-1361-03); tests/argo-deploy-linux.test.js; design/KG/SystemArchitecture.json（GitHub issue #16）"
+        },
+        {
+          "name": "commit",
+          "value": "95255be",
+          "description": "install-argo.ps1（系统级 managed 配置扩为整套 OpenCode 框架配置：<dir>/opencode.json 写入 mcp.argo+mcp.graph-mcp、instructions=<dir>/AGENTS.md、skills=<dir>/skills、plugin 复用 ~/.argo/plugins 同 spec 去重；新增 Write-OpenCodeSystemConfig/Add-ConfigListEntry；保留既有键并幂等）；tests/argo-deploy.test.js; tests/argo-deploy-linux.test.js; tests/agent-search-diagnosis.test.js（把过宽的 @(...) 断言收紧为 Copy-DoubaoSkills 调用行，保留 Doubao/Codex 不得部署 diagnosis skill 的原意）; design/KG/SystemArchitecture.json; archgraph.qea（issue #16 扩展：不只是 MCP，整套配置）"
         }
       ],
       "testcases": [
