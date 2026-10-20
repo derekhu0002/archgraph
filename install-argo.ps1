@@ -9,6 +9,7 @@ param(
     [string]$OpenCodeSkillsRoot = "$env:USERPROFILE\.config\opencode\skills",
     [string]$OpenCodeAgentsPath = "$env:USERPROFILE\.config\opencode\AGENTS.md",
     [string]$OpenCodeConfigPath = "$env:USERPROFILE\.config\opencode\opencode.json",
+    [string]$OpenCodeSystemConfigPath = $env:OPENCODE_SYSTEM_CONFIG_PATH,
     [string]$CopilotAgentsRoot = "$env:USERPROFILE\.copilot\agents",
     [string]$CursorAgentsRoot = "$env:USERPROFILE\.cursor\agents",
     [string]$CursorRulesRoot = "$env:USERPROFILE\.cursor\rules",
@@ -153,7 +154,8 @@ function Write-McpConfig {
         [string]$Path,
         [string]$ServersKey,
         $ServerConfig,
-        [System.Collections.IDictionary]$ExtraServers = $null
+        [System.Collections.IDictionary]$ExtraServers = $null,
+        [switch]$ThrowOnParseError
     )
 
     $root = [ordered]@{}
@@ -164,6 +166,12 @@ function Write-McpConfig {
                 $root[$p.Name] = $p.Value
             }
         } catch {
+            # A hand-maintained managed config (e.g. JSONC with comments) must
+            # never be silently replaced. When the caller asks for strictness,
+            # surface the parse failure so it can warn and leave the file alone.
+            if ($ThrowOnParseError) {
+                throw "existing config is not plain JSON: $($_.Exception.Message)"
+            }
             # Ignore an unparseable existing file and start fresh.
         }
     }
@@ -1309,6 +1317,27 @@ if ($SkipMcp) {
         enabled = $true
     }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpOpenCode })
     Write-Host "argo MCP config written -> $OpenCodeConfigPath"
+
+    if ($OpenCodeSystemConfigPath) {
+        # OpenCode also merges a system-level managed config directory (Linux/WSL
+        # default: /etc/opencode). Deploying it keeps agents launched by external
+        # control planes (usually as root) in sync with framework upgrades
+        # instead of relying on a hand-maintained file. Opt-in: an empty path
+        # keeps the historical behaviour and never creates /etc/opencode.
+        Write-Host "==> Registering argo MCP server in OpenCode system managed config ($OpenCodeSystemConfigPath)"
+        try {
+            Write-McpConfig -Path $OpenCodeSystemConfigPath -ServersKey 'mcp' -ServerConfig ([ordered]@{
+                type    = 'local'
+                command = @('node', $argoServer)
+                enabled = $true
+            }) -ExtraServers ([ordered]@{ 'graph-mcp' = $graphMcpOpenCode }) -ThrowOnParseError
+            Write-Host "argo MCP config written -> $OpenCodeSystemConfigPath"
+        } catch {
+            Write-Warning "Could not update the OpenCode system managed config at ${OpenCodeSystemConfigPath}: $($_.Exception.Message) Continuing without it."
+        }
+    } else {
+        Write-Host '  OpenCode system managed config skipped (set -OpenCodeSystemConfigPath or OPENCODE_SYSTEM_CONFIG_PATH to deploy /etc/opencode/opencode.json).'
+    }
 
     if (-not $SkipOpenClaw) {
         # The repo root to pin for OpenClaw defaults to the installer's own

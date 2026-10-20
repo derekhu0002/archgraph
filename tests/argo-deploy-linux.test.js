@@ -71,11 +71,20 @@ test('install-argo.sh is a POSIX deployer that resolves XDG/home and drives inst
     '-CursorSkillsRoot', '-CursorMcpPath', '-CursorMcpBridgesRoot',
     '-CursorAgentsRoot', '-CursorRulesRoot',
     '-OpenCodeSkillsRoot', '-OpenCodeAgentsPath', '-OpenCodeAgentsRoot', '-OpenCodeConfigPath',
+    '-OpenCodeSystemConfigPath',
     '-CopilotAgentsRoot', '-PluginsRoot',
     '-DshHome', '-OpenClawHome', '-OpenClawWorkspace', '-DoubaoHome', '-DoubaoWorkspace', '-CodexHome',
   ]) {
     assert.ok(script.includes(param), `must pass ${param}`);
   }
+
+  // The system-level managed config (/etc/opencode/opencode.json) is opt-in:
+  // the wrapper forwards the env var verbatim and defaults it to empty, so a
+  // plain deploy never creates /etc/opencode.
+  assert.ok(
+    script.includes('OPENCODE_SYSTEM_CONFIG_PATH="${OPENCODE_SYSTEM_CONFIG_PATH:-}"'),
+    'OPENCODE_SYSTEM_CONFIG_PATH must default to empty (opt-in)',
+  );
 
   // Caller flags are forwarded verbatim; caller-supplied path flags are not
   // duplicated (PowerShell rejects a parameter bound twice).
@@ -130,6 +139,7 @@ if (HAVE_BASH && HAVE_PWSH) {
     // THEN the toolchain lands under that HOME on forward-slash paths and no file
     //   with a backslash in its name is created anywhere.
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-sh-deploy-'));
+    const systemConfigPath = path.join(tmp, 'etc', 'opencode', 'opencode.json');
     try {
       const result = spawnSync('bash', [
         SH_SCRIPT,
@@ -147,6 +157,7 @@ if (HAVE_BASH && HAVE_PWSH) {
           USERPROFILE: '',
           APPDATA: '',
           LOCALAPPDATA: '',
+          OPENCODE_SYSTEM_CONFIG_PATH: systemConfigPath,
         },
       });
       assert.equal(result.status, 0, `install-argo.sh exited with ${result.status}: ${result.stderr}`);
@@ -164,6 +175,15 @@ if (HAVE_BASH && HAVE_PWSH) {
 
       assert.ok(fs.existsSync(path.join(tmp, '.config', 'opencode', 'AGENTS.md')), 'OpenCode global rule must be written');
       assert.ok(fs.existsSync(path.join(tmp, '.cursor', 'mcp.json')), 'Cursor MCP config must be written under HOME');
+
+      // OPENCODE_SYSTEM_CONFIG_PATH opts in to the system-level managed config;
+      // the wrapper forwards it so external control planes launched as root see
+      // the same argo + graph-mcp registration as the user-level config.
+      assert.ok(fs.existsSync(systemConfigPath), 'OPENCODE_SYSTEM_CONFIG_PATH must be honoured');
+      const systemCfg = JSON.parse(fs.readFileSync(systemConfigPath, 'utf8'));
+      assert.ok(systemCfg.mcp && systemCfg.mcp.argo, 'system managed config must register argo');
+      assert.equal(systemCfg.mcp.argo.command[0], 'node');
+      assert.ok(systemCfg.mcp['graph-mcp'], 'system managed config must register graph-mcp');
 
       // No .env in non-interactive mode.
       assert.ok(!fs.existsSync(path.join(tmp, '.argo', '.env')), '.env must not be generated when -SkipEnv is set');

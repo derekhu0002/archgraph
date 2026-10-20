@@ -50,6 +50,7 @@ function buildInstallArgs(opts) {
     '-SkipOpenClaw',
     '-SkipCodex',
     '-SkipDeps',
+    ...(opts.openCodeSystemConfigPath ? ['-OpenCodeSystemConfigPath', opts.openCodeSystemConfigPath] : []),
     ...(opts.skipEnv ? ['-SkipEnv'] : []),
   ];
 }
@@ -81,6 +82,9 @@ function runInstall(opts) {
   const spawnOpts = { cwd: ROOT, encoding: 'utf8' };
   if (opts.timeout) {
     spawnOpts.timeout = opts.timeout;
+  }
+  if (opts.env) {
+    spawnOpts.env = { ...process.env, ...opts.env };
   }
   return spawnSync('powershell.exe', buildInstallArgs(opts), spawnOpts);
 }
@@ -221,6 +225,101 @@ test('install-argo.ps1 deploys toolchain, skill, and rules without secrets or te
       'OpenCode config must register the agent-cost collector plugin',
     );
 
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('install-argo.ps1 merges argo + graph-mcp into an opt-in OpenCode system managed config', () => {
+  // GIVEN OpenCode also merges a system-level managed config (on Linux/WSL:
+  //   /etc/opencode/opencode.json) next to the user-level config
+  // WHEN the installer runs with -OpenCodeSystemConfigPath pointing at it
+  // THEN argo and graph-mcp are registered there while every non-MCP key and
+  //   any pre-existing MCP entry are preserved, and a re-run is idempotent.
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-system-config-'));
+  const paths = hostPaths(tmp);
+  const systemConfigPath = path.join(tmp, 'etc', 'opencode', 'opencode.json');
+  const seeded = {
+    $schema: 'https://opencode.ai/config.json',
+    instructions: ['/etc/opencode/AGENTS.md'],
+    skills: { paths: ['/etc/opencode/skills'] },
+    plugin: ['file:///etc/opencode/plugins/example.js'],
+    mcp: { existing: { type: 'remote', url: 'https://example.test/mcp', enabled: true } },
+  };
+  fs.mkdirSync(path.dirname(systemConfigPath), { recursive: true });
+  fs.writeFileSync(systemConfigPath, JSON.stringify(seeded, null, 2), 'utf8');
+  try {
+    const result = runInstall({ ...paths, skipEnv: true, openCodeSystemConfigPath: systemConfigPath });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+
+    const cfg = JSON.parse(fs.readFileSync(systemConfigPath, 'utf8'));
+    assert.deepEqual(cfg.instructions, seeded.instructions, 'instructions must be preserved');
+    assert.deepEqual(cfg.skills, seeded.skills, 'skills must be preserved');
+    assert.deepEqual(cfg.plugin, seeded.plugin, 'plugin must be preserved');
+    assert.ok(cfg.mcp, 'system managed config must carry an mcp map');
+    assert.ok(cfg.mcp.existing, 'an unrelated pre-existing MCP entry must be preserved');
+    assert.equal(cfg.mcp.argo.type, 'local');
+    assert.equal(cfg.mcp.argo.command[0], 'node');
+    assert.ok(cfg.mcp.argo.command[1].endsWith('argo-mcp-server.js'));
+    assert.equal(cfg.mcp.argo.enabled, true);
+    assert.ok(cfg.mcp['graph-mcp'], 'graph-mcp must be registered in the system managed config');
+    assert.equal(cfg.mcp['graph-mcp'].type, 'remote');
+    assert.equal(cfg.mcp['graph-mcp'].url, 'https://argo.derekworkspacev5.com/mcp');
+    assert.equal(cfg.mcp['graph-mcp'].enabled, true);
+
+    // Idempotent: a second deploy must not duplicate or reorder the entries.
+    const second = runInstall({ ...paths, skipEnv: true, openCodeSystemConfigPath: systemConfigPath });
+    assert.equal(second.status, 0, `second install exited with ${second.status}: ${second.stderr}`);
+    const cfg2 = JSON.parse(fs.readFileSync(systemConfigPath, 'utf8'));
+    assert.deepEqual(cfg2.mcp, cfg.mcp, 're-installing must leave the MCP map unchanged');
+    assert.deepEqual(cfg2.instructions, seeded.instructions);
+    assert.deepEqual(cfg2.skills, seeded.skills);
+    assert.deepEqual(cfg2.plugin, seeded.plugin);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('install-argo.ps1 skips the OpenCode system managed config unless a path or OPENCODE_SYSTEM_CONFIG_PATH is set', () => {
+  // GIVEN the default install must keep the current behaviour (no /etc writes)
+  // WHEN the installer runs without the new parameter / environment variable
+  // THEN no system managed config is created; WHEN OPENCODE_SYSTEM_CONFIG_PATH
+  //   is set, THEN that path receives the argo + graph-mcp registration.
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-system-config-default-'));
+  const paths = hostPaths(tmp);
+  const systemConfigPath = path.join(tmp, 'etc', 'opencode', 'opencode.json');
+  try {
+    const skipped = runInstall({
+      ...paths,
+      skipEnv: true,
+      env: { OPENCODE_SYSTEM_CONFIG_PATH: '' },
+    });
+    assert.equal(skipped.status, 0, `install script exited with ${skipped.status}: ${skipped.stderr}`);
+    assert.ok(!fs.existsSync(systemConfigPath), 'no system managed config may be created by default');
+
+    const viaEnv = runInstall({
+      ...paths,
+      skipEnv: true,
+      env: { OPENCODE_SYSTEM_CONFIG_PATH: systemConfigPath },
+    });
+    assert.equal(viaEnv.status, 0, `install script exited with ${viaEnv.status}: ${viaEnv.stderr}`);
+    assert.ok(fs.existsSync(systemConfigPath), 'OPENCODE_SYSTEM_CONFIG_PATH must opt in to the system managed config');
+    const cfg = JSON.parse(fs.readFileSync(systemConfigPath, 'utf8'));
+    assert.ok(cfg.mcp && cfg.mcp.argo, 'the env-var path must register argo');
+    assert.ok(cfg.mcp['graph-mcp'], 'the env-var path must register graph-mcp');
+
+    // An unwritable destination (its parent is a regular file) must warn and let
+    // the rest of the deploy continue, not abort the whole installation.
+    const blockedParent = path.join(tmp, 'blocked');
+    fs.writeFileSync(blockedParent, 'not a directory', 'utf8');
+    const blocked = runInstall({
+      ...paths,
+      skipEnv: true,
+      openCodeSystemConfigPath: path.join(blockedParent, 'opencode.json'),
+    });
+    assert.equal(blocked.status, 0, `install must survive an unwritable system config: ${blocked.stderr}`);
+    const output = `${blocked.stdout || ''}${blocked.stderr || ''}`;
+    assert.match(output, /Could not update the OpenCode system managed config/, 'must emit a clear warning');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

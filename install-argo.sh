@@ -20,8 +20,10 @@
 #                     [-SkipOpenClaw] [-SkipDoubao] [-SkipCodex] [-EnableOntologyValidation]
 #   Every flag install-argo.ps1 accepts is forwarded verbatim.
 #   Override a destination through the environment (ARGO_ROOT, OPENCODE_CONFIG_PATH,
-#   CURSOR_MCP_PATH, ...), never through a command-line path flag, so this wrapper
-#   can always supply a full parameter set without colliding with the caller.
+#   OPENCODE_SYSTEM_CONFIG_PATH, CURSOR_MCP_PATH, ...), never through a command-line
+#   path flag, so this wrapper can always supply a full parameter set without
+#   colliding with the caller. OPENCODE_SYSTEM_CONFIG_PATH is opt-in: leave it
+#   empty (default) and no system-level managed config (/etc/opencode) is written.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -63,6 +65,9 @@ OPENCODE_SKILLS_ROOT="${OPENCODE_SKILLS_ROOT:-$XDG_CONFIG/opencode/skills}"
 OPENCODE_AGENTS_PATH="${OPENCODE_AGENTS_PATH:-$XDG_CONFIG/opencode/AGENTS.md}"
 OPENCODE_AGENTS_ROOT="${OPENCODE_AGENTS_ROOT:-$XDG_CONFIG/opencode/agents}"
 OPENCODE_CONFIG_PATH="${OPENCODE_CONFIG_PATH:-$XDG_CONFIG/opencode/opencode.json}"
+# System-level managed config (OpenCode merges /etc/opencode on Linux/WSL).
+# Opt-in on purpose: empty means "skip", so an ordinary deploy never writes /etc.
+OPENCODE_SYSTEM_CONFIG_PATH="${OPENCODE_SYSTEM_CONFIG_PATH:-}"
 COPILOT_AGENTS_ROOT="${COPILOT_AGENTS_ROOT:-$HOME_DIR/.copilot/agents}"
 PLUGINS_ROOT="${PLUGINS_ROOT:-$ARGO_ROOT/plugins}"
 DSH_HOME="${DSH_HOME:-$HOME_DIR/.dsh}"
@@ -117,6 +122,7 @@ add -OpenCodeSkillsRoot "$OPENCODE_SKILLS_ROOT"
 add -OpenCodeAgentsPath "$OPENCODE_AGENTS_PATH"
 add -OpenCodeAgentsRoot "$OPENCODE_AGENTS_ROOT"
 add -OpenCodeConfigPath "$OPENCODE_CONFIG_PATH"
+add -OpenCodeSystemConfigPath "$OPENCODE_SYSTEM_CONFIG_PATH"
 add -CopilotAgentsRoot "$COPILOT_AGENTS_ROOT"
 add -PluginsRoot "$PLUGINS_ROOT"
 add -DshHome "$DSH_HOME"
