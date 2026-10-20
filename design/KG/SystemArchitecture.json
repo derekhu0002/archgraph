@@ -1232,6 +1232,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "87cf1f7",
+          "description": "install-argo.ps1 (新增 -OpenCodeSystemConfigPath / OPENCODE_SYSTEM_CONFIG_PATH，复用 Write-McpConfig 写入系统级 managed 配置 mcp.argo+mcp.graph-mcp，保留非 MCP 键，不可写仅 warning；Write-McpConfig 新增 -ThrowOnParseError 防止覆写不可解析的 managed 配置); install-argo.sh (透传 OPENCODE_SYSTEM_CONFIG_PATH，默认空=跳过); tests/argo-deploy.test.js (AT-1361-03); tests/argo-deploy-linux.test.js; design/KG/SystemArchitecture.json（GitHub issue #16）"
         }
       ],
       "testcases": [
