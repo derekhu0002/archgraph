@@ -1252,6 +1252,11 @@
           "name": "commit",
           "value": "c6fdf61",
           "description": "install-argo.ps1（系统层提示仅非 Windows 输出，Windows 默认部署零输出差异）; tests/argo-deploy.test.js（Windows 不得输出该提示的断言 + 与前版本逐文件对比举证：105 文件同集、EOL 归一后 0 内容差异、stdout 仅尾部空行差异）"
+        },
+        {
+          "name": "commit",
+          "value": "97cc978",
+          "description": "install-argo.ps1（Windows 硬门：$isWindowsHost=$env:OS -eq 'Windows_NT'，即使显式传 -OpenCodeSystemConfigPath 或 OPENCODE_SYSTEM_CONFIG_PATH 也一律忽略，零写入零输出）; tests/argo-deploy.test.js（Windows 硬门用例 + 用 OS 清空覆盖 POSIX 分支的部署/幂等/不可写告警）; design/KG/SystemArchitecture.json; archgraph.qea"
         }
       ],
       "testcases": [
