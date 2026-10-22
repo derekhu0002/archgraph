@@ -18,19 +18,5 @@
   },
   "addRelationships": {
     "Transition": "Dynamic"
-  },
-  "principleIndex": {
-    "indexElementId": "principle-index-001",
-    "principlesElementType": "Principle",
-    "viewId": "principles-index-view",
-    "attributes": {
-      "tier": "principleTier",
-      "summary": "summary",
-      "trigger": "triggerKeywords"
-    },
-    "tiers": {
-      "resident": "L0",
-      "onDemand": "L1"
-    }
   }
 }

@@ -3054,12 +3054,7 @@
           "description": "argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; argo/scripts/schema-bundle.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; .argo/schema/schema-bundle.config.json; tests/argo-rules-principle-index.test.js; tests/schema-bundle-principle-index.test.js; tests/principles-index-catalog.test.js; tests/acceptance-guardian.test.js（原则索引改为 bundle 声明式、默认包不变）"
         }
       ],
-      "subdiagram_views": [
-        {
-          "view_id": "principles-index-view",
-          "view_name": "原则索引（Principles Index）"
-        }
-      ]
+      "subdiagram_views": []
     },
     {
       "id": "2780",
@@ -3614,18 +3609,6 @@
           "description": "design/KG/SystemArchitecture.json（项目总管 LTM 记录 ArchiMate 定位）"
         },
         {
-          "name": "principleTier",
-          "value": "L1"
-        },
-        {
-          "name": "summary",
-          "value": "建模语言是分类编目的手段不是目标；让读写变慢就应简化。"
-        },
-        {
-          "name": "triggerKeywords",
-          "value": "本体,schema,建模语言,元素类型,视图设计"
-        },
-        {
           "name": "status",
           "value": "ACTIVE"
         }
@@ -3808,18 +3791,6 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
-        },
-        {
-          "name": "principleTier",
-          "value": "L0"
-        },
-        {
-          "name": "summary",
-          "value": "文档内容一律存 KG；必须留在仓库的内容也要回 KG 登记摘要、路径与 commit。"
-        },
-        {
-          "name": "triggerKeywords",
-          "value": "写文档,生成材料,放到仓库,文档归档"
         },
         {
           "name": "status",
@@ -4445,18 +4416,6 @@
           "value": "delivered"
         },
         {
-          "name": "principleTier",
-          "value": "L0"
-        },
-        {
-          "name": "summary",
-          "value": "记忆分 T1/T2/T3；开工只载 T1，T2 两步回忆，归档只移不删。"
-        },
-        {
-          "name": "triggerKeywords",
-          "value": "记忆读写,上下文预算,会话摘要,归档"
-        },
-        {
           "name": "status",
           "value": "ACTIVE"
         }
@@ -4467,7 +4426,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话 · 2026-10-22 · 原则按 skill 式管理，框架通用化）\n\n【会话目标】1) 回答“现有规则是否强制开工前加载全部原则”→没有：STEP 0 只载 T1，原则在 T2 靠 memory_search 召回。2) 落地“原则像 skill 一样管理”。\n\n【关键教训（人类伙伴纠正）】第一版把本仓的 principle-index-001 / principles-index-view / principleTier / triggerKeywords 写进 argo/rules 与唤醒插件——项目数据进了框架核心，违反 AGENTS.md 框架通用性。第二版改为 opt-in 声明式。\n\n【最终交付】commit dd1fff5（首版）+ 22e5f77（通用化重构）：\n- 契约：workspace schema bundle 可声明 principleIndex（indexElementId / principlesElementType / viewId / attributes{tier,summary,trigger} / tiers{resident,onDemand}）；schema-bundle.js 解析 + fail-closed 校验；queryNeo4jGraph {schema:true} 与 argo-init 透出；未声明=null → 跳过；默认包不声明 → 行为逐字节不变。\n- 规则：<PrincipleIndexGuideline> + CoreRule 13；STEP 0 条件加载声明的 indexElementId（仅索引，禁批量正文）；确定性检查点（提方案/做取舍/改规则/改检索/写图/删内容前先扫索引）。\n- 本仓 opt-in：.argo/schema/schema-bundle.config.json；索引元素 principle-index-001（零关系边，560 字符）+ principles-index-view；5 条 Principle 带 tier/summary/trigger。\n- 测试：argo-rules-principle-index（框架规则）、schema-bundle-principle-index（声明契约）、principles-index-catalog（本仓数据）；npm test 796/796。\n- 顺带修复既有漂移：langgraph-windmill-paperclip → overseer-langgraph-windmill-paperclip-001。\n\n【待续】重启 MCP 后 schema:true 才返回 principleIndex；发布 + argo-deploy 后全局生效。\n\n【坑】addArchitectureElement 客户端超时但服务端可能已写入——先查询确认。\n\n【复用】规则只描述行为，定位信息必须是 bundle 数据；渐进披露的前提是索引常驻。",
+      "description": "项目总管工作记忆摘要（会话 · 2026-10-22 · 原则按 skill 式管理：仅交付框架能力）\n\n【会话目标】1) 回答“现有规则是否强制开工前加载全部原则”→没有：STEP 0 只载 T1，原则在 T2 靠 memory_search 召回。2) 在【核心框架】提供“原则像 skill 一样管理”的通用能力。\n\n【交付（commit dd1fff5 → 22e5f77）】- 契约：schema bundle 可选声明 principleIndex（indexElementId / principlesElementType / viewId / attributes{tier,summary,trigger} / tiers{resident,onDemand}）；schema-bundle.js 解析 + fail-closed 校验；queryNeo4jGraph {schema:true} 与 argo-init 透出；未声明=null → 跳过；默认包不声明 → 行为逐字节不变。\n- 规则：<PrincipleIndexGuideline> + CoreRule 13；STEP 0 仅在声明存在时加载 indexElementId（仅索引，禁批量正文）；确定性检查点（提方案/做取舍/改规则/改检索/写图/删内容前先扫索引）。\n- 测试：argo-rules-principle-index（规则契约）、schema-bundle-principle-index（声明：未声明/合法/extends/非法）；全量 npm test 全绿。\n\n【两次纠正（人类伙伴）】1. 第一版把本仓 id/视图/属性名硬编码进 argo/rules 与唤醒插件 → 改为 bundle 声明式。2. 第二版又在本仓 .argo/schema 与图谱里做了 opt-in（配置/索引视图/索引元素/属性）→ 超出范围，已全部移除。教训：交付能力 ≠ 本项目采纳。\n\n【待续】重启 MCP 后 schema:true 才返回 principleIndex；发布 + argo-deploy 后全局生效。\n\n【坑】addArchitectureElement 客户端超时但服务端可能已写入——先查询确认。\n\n【复用】规则只描述行为，定位信息必须是 bundle 数据；渐进披露的前提是索引常驻。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -7669,18 +7628,6 @@
           "name": "commit",
           "value": "29f17e6",
           "description": "design/KG/SystemArchitecture.json（Project Overseer 原则：检索召回/检出优先）"
-        },
-        {
-          "name": "principleTier",
-          "value": "L1"
-        },
-        {
-          "name": "summary",
-          "value": "任何优化不得牺牲检索召回/检出，只能持平或提升；宁可多花性能。"
-        },
-        {
-          "name": "triggerKeywords",
-          "value": "检索优化,rerank,截断,候选池,缩小范围,性能取舍"
         }
       ]
     },
@@ -9828,18 +9775,6 @@
           "value": "delivered"
         },
         {
-          "name": "principleTier",
-          "value": "L1"
-        },
-        {
-          "name": "summary",
-          "value": "单场景优化必须证明不劣化其他场景（场景×规模剖面），不接受肉眼改善。"
-        },
-        {
-          "name": "triggerKeywords",
-          "value": "框架改动,规则改动,工具改动,优化提案,评测方案"
-        },
-        {
           "name": "status",
           "value": "ACTIVE"
         }
@@ -11167,7 +11102,7 @@
       "id": "overseer-lesson-framework-generality-001",
       "name": "规则/经验：框架保持建模语言中立，不因项目需求硬编码语言名",
       "type": "Business Object",
-      "description": "【原则】作为 ArchGraph 框架的负责项目，argo/** 必须保持两类解耦：(a) 框架↔插件；(b) 框架↔本体 schema。不能因为某个消费项目（如 HarmonyOS-Dev-Standards）的 issue 示例，就把具体语言/项目名或插件写进框架核心逻辑。\n【踩坑 1（issue #4）】实现 extends 时硬编码了别名 'archimate3.2'/'archimate'；修正为只保留中性保留名 'default'（或路径）。commit d2e1e18。\n【踩坑 2】mergeExtendsBundle 一度把 dialect 默认成 'archimate-class-matrix'——又一处语言名进入通用逻辑；修正为只继承 base/child 的 dialect，缺省由 ontology 构建器根据 bundle 声明的 rules 决定。commit 461f569。\n【同时修正】mergeExtendsBundle 并集 base ontology 类型(不丢 base)；无自有 schema 时把新增类型并入继承 schema 枚举。\n【规约】消费项目需求只能用【可选、声明式、通用】机制满足（bundle schema/rules/config）；无法泛化则停下向人类伙伴提出取舍，不弱化通用契约。默认包行为除非 opt-in 否则逐字节不变。已入仓库根 AGENTS.md «Framework generality»（含两条解耦轴）。\n【踩坑 3（2026-10-22，原则索引）】首次实现「原则按 skill 管理」时，把本仓的 principle-index-001 / principles-index-view / principleTier / triggerKeywords 直接写进 argo/rules 与唤醒门插件——又一次项目数据进核心。修正：schema bundle 新增可选 principleIndex 声明（indexElementId / principlesElementType / viewId / attributes / tiers），由 schema-bundle.js 解析并 fail-closed 校验，queryNeo4jGraph {schema:true} 透出；规则只按声明取值，未声明=null 则跳过；默认包不声明，行为不变。commit 22e5f77。\n【规律】凡是「只有某个仓库能回答的定位信息」都必须是 bundle 数据；规则只描述行为，不描述数据。",
+      "description": "【原则】作为 ArchGraph 框架的负责项目，argo/** 必须保持两类解耦：(a) 框架↔插件；(b) 框架↔本体 schema。不能因为某个消费项目（如 HarmonyOS-Dev-Standards）的 issue 示例，就把具体语言/项目名或插件写进框架核心逻辑。\n【踩坑 1（issue #4）】实现 extends 时硬编码了别名 'archimate3.2'/'archimate'；修正为只保留中性保留名 'default'（或路径）。commit d2e1e18。\n【踩坑 2】mergeExtendsBundle 一度把 dialect 默认成 'archimate-class-matrix'——又一处语言名进入通用逻辑；修正为只继承 base/child 的 dialect，缺省由 ontology 构建器根据 bundle 声明的 rules 决定。commit 461f569。\n【同时修正】mergeExtendsBundle 并集 base ontology 类型(不丢 base)；无自有 schema 时把新增类型并入继承 schema 枚举。\n【规约】消费项目需求只能用【可选、声明式、通用】机制满足（bundle schema/rules/config）；无法泛化则停下向人类伙伴提出取舍，不弱化通用契约。默认包行为除非 opt-in 否则逐字节不变。已入仓库根 AGENTS.md «Framework generality»（含两条解耦轴）。\n【踩坑 3（2026-10-22，原则索引）】首次实现「原则按 skill 管理」时，把本仓的 principle-index-001 / principles-index-view / principleTier / triggerKeywords 直接写进 argo/rules 与唤醒门插件——项目数据进核心。修正：schema bundle 新增可选 principleIndex 声明（定位/属性/层级全部数据化），schema-bundle.js fail-closed 校验，规则只按声明取值、未声明=null 跳过，默认包不变。commit 22e5f77。\n【踩坑 4（2026-10-22，同一次）】把“落地框架能力”做成了“让本仓采纳”：顺手改了本仓 .argo/schema 配置、建了索引视图/元素。人类伙伴纠正：要的是核心框架优化，不是本项目优化。已全部回退。规律：交付能力 ≠ 采纳能力；opt-in 的启用是使用方决定，框架侧只提供机制与测试。\n【规律】凡是「只有某个仓库能回答的定位信息」都必须是 bundle 数据；规则只描述行为，不描述数据。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -13261,45 +13196,6 @@
       ]
     },
     {
-      "attributes": [
-        {
-          "name": "principleIndexVersion",
-          "value": "1"
-        },
-        {
-          "name": "loadAt",
-          "value": "session-start (STEP 0, index only)"
-        },
-        {
-          "name": "status",
-          "value": "ACTIVE"
-        },
-        {
-          "name": "commit",
-          "value": "dd1fff5",
-          "description": "design/KG/SystemArchitecture.json; tests/argo-rules-principle-index.test.js; tests/acceptance-guardian.test.js（新增原则索引元素 + principles-index-view；索引常驻、正文按需）"
-        },
-        {
-          "name": "commit",
-          "value": "22e5f77",
-          "description": "design/KG/SystemArchitecture.json; .argo/schema/schema-bundle.config.json; tests/principles-index-catalog.test.js（本仓以 principleIndex 声明 opt-in；索引由框架通用契约驱动）"
-        }
-      ],
-      "description": "原则索引 v1（Principles Index）。会话开工时加载本索引（仅此一份）；正文按触发词再取。\n协议：本索引只给一句摘要。命中触发词时用 getIntentElementContext(id) 取正文后再决策。\n检查点（MUST）：提出方案 / 做取舍 / 改规则 / 改检索 / 写图 / 删内容之前，先扫描本索引。\nL0 常驻红线（正文已固化在规则章节，不在此重复加载）：\n- archgraph-content-storage-policy-001｜文档内容一律存 KG，仓库档回 KG 登记摘要｜规则 <ContentStoragePolicy>\n- overseer-memory-tiers-001｜记忆 T1/T2/T3，开工只载 T1，归档只移不删｜规则 <MemoryTierConventions>\nL1 判断题（命中触发词才加载正文）：\n- overseer-retrieval-recall-first-001｜优化不得牺牲召回/检出，只能持平或提升｜触发：检索优化 / rerank / 截断 / 候选池 / 性能取舍\n- framework-optimization-cross-scenario-001｜单场景优化须证明不劣化其他场景（场景×规模剖面）｜触发：框架 / 规则 / 工具改动 / 优化提案\n- overseer-archimate-role-001｜建模语言是分类手段不是目标，拖慢读写就简化｜触发：本体 / schema / 建模语言 / 元素类型",
-      "id": "principle-index-001",
-      "name": "原则索引（Principles Index）",
-      "testcases": [
-        {
-          "Input": "tests/principles-index-catalog.test.js",
-          "acceptanceCriteria": "tests/principles-index-catalog.test.js",
-          "description": "GIVEN 本工作区在 schema bundle 中声明 principleIndex；WHEN 校验图谱；THEN 索引元素/视图存在、每条原则按声明的属性带层级与触发词、索引完整且无关系边。",
-          "name": "AT-principle-catalog-01",
-          "type": "Acceptance Test"
-        }
-      ],
-      "type": "Business Object"
-    },
-    {
       "id": "overseer-langgraph-windmill-paperclip-001",
       "type": "Business Object",
       "name": "评估：多项目控制面选型（LangGraph / Windmill / Paperclip）",
@@ -13371,9 +13267,14 @@
           "name": "commit",
           "value": "d463cda",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（里程碑修正登记 d463cda）"
+        },
+        {
+          "name": "commit",
+          "value": "pending",
+          "description": "scope 修正：移除本仓 opt-in（配置/图谱），仅保留框架能力"
         }
       ],
-      "description": "里程碑（2026-10-22，项目总管）：把原则改成 skill 式渐进披露，且以【框架通用、opt-in】方式落地。\n【起点】人类伙伴问：现有规则是否强制开工前加载全部原则？答：没有——STEP 0 只载 T1 摘要，原则散落在 T2，靠 memory_search 召回，召不到=不存在。\n【第一次实现（dd1fff5，已被修正）】分 L0 常驻/L1 按需两层、索引常驻+正文按需、确定性检查点。但把本仓的 principle-index-001 / principles-index-view / principleTier / triggerKeywords 硬编码进 argo/rules 与唤醒插件——错误：项目数据进了框架核心。\n【人类伙伴纠正】该场景属于整个 ArchGraph 框架，不能只为本仓修改。\n【最终设计（commit 22e5f77）】可选声明式契约：schema bundle 新增 principleIndex（indexElementId / principlesElementType / viewId / attributes{tier,summary,trigger} / tiers{resident,onDemand}）；schema-bundle.js 解析并 fail-closed 校验（未知原则类型/字段缺失/层级相同都判 failed），queryNeo4jGraph {schema:true} 与 argo-init 报告透出；规则只按声明取值，null 则跳过且不去 hunt；默认包不声明 → 行为逐字节不变。本仓在 .argo/schema 声明 opt-in。\n【分层】resident 层=已固化在常驻规则章节的红线（绝不改为按需）；onDemand 层=判断题，索引常驻+正文按需。摘要层必须常驻，否则从“忘记加载”退化为“未知的未知”；触发从自述改为确定性检查点。\n【验收】npm test 796/796；validateSystemArchitecture 通过；框架规则/插件/核心代码零硬编码项目定位。\n【待续】运行中的 MCP 需重启后 queryNeo4jGraph {schema:true} 才会返回 principleIndex（旧进程持有旧代码）；发布+argo-deploy 后全局宿主生效。\n【坑】addArchitectureElement 客户端超时但服务端已写入——超时后先查询确认，勿重复创建。",
+      "description": "里程碑（2026-10-22，项目总管）：把原则改成 skill 式渐进披露——交付本体是【核心框架能力】，不是本项目的采纳。\n【起点】人类伙伴问：现有规则是否强制开工前加载全部原则？答：没有——STEP 0 只载 T1 摘要，原则散落在 T2，靠 memory_search 召回，召不到=不存在。\n【交付（commit dd1fff5 → 22e5f77）】①可选声明式契约：workspace schema bundle 可声明 principleIndex（indexElementId / principlesElementType / viewId / attributes{tier,summary,trigger} / tiers{resident,onDemand}）；schema-bundle.js 解析 + fail-closed 校验（未知原则类型/字段缺失/层级相同→failed）；queryNeo4jGraph {schema:true} 与 argo-init 报告透出。②规则：<PrincipleIndexGuideline> + CoreRule 13；STEP 0 仅在声明存在时加载 indexElementId（仅索引，禁批量正文），null 则跳过；确定性检查点（提方案/做取舍/改规则/改检索/写图/删内容前先扫索引）。③默认包不声明 → 行为逐字节不变。\n【分层设计】resident 层=已固化在常驻规则章节的红线（绝不改为按需）；onDemand 层=判断题，索引常驻+正文按需。摘要层必须常驻，否则从“忘记加载”退化为“未知的未知”；触发从自述改为确定性检查点。\n【两次纠正（人类伙伴）】1) 第一版把本仓的 id/视图/属性名硬编码进 argo/rules 与唤醒插件——项目数据进了框架核心，改为 bundle 声明式。2) 第二版又在本仓 .argo/schema 与图谱里做了 opt-in 与索引视图/元素——超出范围；已全部移除，本仓保持未声明状态。教训：能力交付 ≠ 本项目采纳。\n【验收】npm test 全绿（框架侧：argo-rules-principle-index + schema-bundle-principle-index）；validateSystemArchitecture 通过；框架规则/插件/核心代码零项目定位。\n【待续】运行中的 MCP 需重启后 schema:true 才返回 principleIndex。\n【坑】addArchitectureElement 客户端超时但服务端可能已写入——先查询确认。",
       "id": "overseer-principle-index-001",
       "name": "里程碑：原则按 skill 式管理（原则索引常驻 + 正文按需）",
       "parent": "project-overseer-001",
@@ -18385,21 +18286,6 @@
       "view_id": "harness-argo-init-cli",
       "included_elements": [
         "argo-init-cli-001"
-      ],
-      "included_relationships": []
-    },
-    {
-      "view_id": "principles-index-view",
-      "view_name": "原则索引（Principles Index）",
-      "parent_element_id": "archgraph-workflow-rules",
-      "description": "以 skill 式渐进披露管理原则：索引常驻、正文按需。挂在工作流规则元素下，成员为全部 Principle 元素与该索引文档。",
-      "included_elements": [
-        "overseer-retrieval-recall-first-001",
-        "framework-optimization-cross-scenario-001",
-        "overseer-archimate-role-001",
-        "overseer-memory-tiers-001",
-        "archgraph-content-storage-policy-001",
-        "principle-index-001"
       ],
       "included_relationships": []
     }
