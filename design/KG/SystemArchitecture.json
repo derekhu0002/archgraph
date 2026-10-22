@@ -3052,6 +3052,11 @@
           "name": "commit",
           "value": "22e5f77",
           "description": "argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; argo/scripts/schema-bundle.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; .argo/schema/schema-bundle.config.json; tests/argo-rules-principle-index.test.js; tests/schema-bundle-principle-index.test.js; tests/principles-index-catalog.test.js; tests/acceptance-guardian.test.js（原则索引改为 bundle 声明式、默认包不变）"
+        },
+        {
+          "name": "commit",
+          "value": "1a81622",
+          "description": "package.json; argo/scripts/schema-bundle.js; argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; tests/*（release archgraph-argo@0.29.20 + 全宿主部署：原则目录基本能力）"
         }
       ],
       "subdiagram_views": []
@@ -13302,6 +13307,11 @@
           "name": "commit",
           "value": "b2c6ade",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（基本能力定稿登记 b2c6ade）"
+        },
+        {
+          "name": "commit",
+          "value": "1a81622",
+          "description": "package.json（release archgraph-argo@0.29.20 发布并部署：dev beta 0.29.20-beta.1 已先验证）"
         }
       ],
       "description": "里程碑（2026-10-22，项目总管）：原则按 skill 式管理——最终形态是【框架基本能力】，既不需要声明，也不改任何项目。\n【起点】现有规则不强制开工前加载原则：STEP 0 只载 T1，原则散落在 T2 靠 memory_search 召回。\n【三次迭代】① dd1fff5：L0 常驻/L1 按需两层 + 索引常驻/正文按需 + 确定性检查点，但把本仓 id/视图/属性名硬编码进 argo/rules 与唤醒插件——项目数据进核心。② 22e5f77：改为 bundle 可选声明 + fail-closed 校验；但同时在本仓 .argo/schema 与图谱做了 opt-in（配置/索引视图/元素/属性）——超出范围，后已回退（a3216bb）。③ 2186c40（最终，人类伙伴要求“做成基本能力”）：框架在 schema-bundle.js 内置默认契约，无需任何声明即生效。\n【最终契约】DEFAULT_PRINCIPLE_INDEX = { indexElementId:'principle-index-001', principlesElementType:null, viewId:null, attributes:{tier:'principleTier',summary:'summary',trigger:'triggerKeywords'}, tiers:{resident:'resident',onDemand:'on-demand'} }；ontology-neutral（不假设原则元素类型）；bundle 可逐字段覆盖；\"principleIndex\": null 显式关闭；非法覆盖 fail-closed。queryNeo4jGraph {schema:true} 与 argo-init 透出。\n【规则】<PrincipleIndexGuideline> + CoreRule 13；STEP 0 按 indexElementId 读描述（零行=尚无索引，继续）；正文按需 getIntentElementContext；确定性检查点；新增/修改原则时必须登记入索引（缺失则创建）。\n【验收】npm test 792/792；validateSystemArchitecture 通过；本仓无任何配置/图谱改动（principleIndex 解析为框架默认值）。\n【待续】运行中的 MCP 需重启后 schema:true 才返回 principleIndex。\n【坑】addArchitectureElement 客户端超时但服务端可能已写入——先查询确认。",
