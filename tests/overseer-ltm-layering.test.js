@@ -40,6 +40,7 @@ const MEMBERS_BY_VIEW = {
   'overseer-product-001': [
     'overseer-agent-model-unification-001', 'overseer-archgraph-intro-pdf-001', 'overseer-codex-adaptation-001',
     'overseer-community-linkage-001', 'overseer-framework-series-001', 'overseer-homepage-v3-kglibrary-retire-001',
+    'overseer-langgraph-windmill-paperclip-001',
     'overseer-multiagent-delegation-plan-001', 'overseer-site-v2-outline-detail-pages-milestone-001',
     'overseer-teamai-insight-001', 'overseer-view-geometry-route-fix-001',
   ],

@@ -59,6 +59,7 @@ const DELIVERABLE_GUARDS = [
   ['RULE: change-tier gate', 'tests/argo-rules-change-tier.test.js'],
   ['RULE: capability delegation', 'tests/argo-rules-capability-delegation.test.js'],
   ['RULE: content storage (docs into KG)', 'tests/argo-rules-content-storage.test.js'],
+  ['RULE: skill-style principle index (L0 resident / L1 on-demand)', 'tests/argo-rules-principle-index.test.js'],
   ['SKILL: argo-init drives the argo-init CLI (init removed from MCP; functionally identical)', 'tests/argo-init-interface.test.js'],
   ['Schema / ArchiMate 3.2 constraint', 'tests/aml-standard.test.js'],
   ['Neo4j structural projection & sync', 'tests/neo4j-sync-staleness.test.js'],

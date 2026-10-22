@@ -2867,6 +2867,13 @@
           "description": "GIVEN ARGO 工作流规则已维护；WHEN Agent 参与联邦（注册/发现/授权/读取）；THEN 规则声明 <FederationGuideline>：注册/注销无需外部审批、发现成员、先授权后读取、默认拒绝、读返回引用而非副本、单一中心经 graph MCP；CoreRules 引用该准则。",
           "name": "AT-rules-06",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/argo-rules-principle-index.test.js",
+          "acceptanceCriteria": "tests/argo-rules-principle-index.test.js",
+          "description": "GIVEN 规则含 <PrincipleIndexGuideline>；WHEN 检查；THEN L0 常驻红线与 L1 按需判断题分层、STEP 0 载索引、检查点必扫索引。",
+          "name": "AT-rules-07",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
@@ -3028,6 +3035,12 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        }
+      ],
+      "subdiagram_views": [
+        {
+          "view_id": "principles-index-view",
+          "view_name": "原则索引（Principles Index）"
         }
       ]
     },
@@ -3582,6 +3595,22 @@
           "name": "commit",
           "value": "79d5676",
           "description": "design/KG/SystemArchitecture.json（项目总管 LTM 记录 ArchiMate 定位）"
+        },
+        {
+          "name": "principleTier",
+          "value": "L1"
+        },
+        {
+          "name": "summary",
+          "value": "建模语言是分类编目的手段不是目标；让读写变慢就应简化。"
+        },
+        {
+          "name": "triggerKeywords",
+          "value": "本体,schema,建模语言,元素类型,视图设计"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
         }
       ]
     },
@@ -3762,6 +3791,22 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "principleTier",
+          "value": "L0"
+        },
+        {
+          "name": "summary",
+          "value": "文档内容一律存 KG；必须留在仓库的内容也要回 KG 登记摘要、路径与 commit。"
+        },
+        {
+          "name": "triggerKeywords",
+          "value": "写文档,生成材料,放到仓库,文档归档"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
         }
       ]
     },
@@ -4381,6 +4426,22 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "principleTier",
+          "value": "L0"
+        },
+        {
+          "name": "summary",
+          "value": "记忆分 T1/T2/T3；开工只载 T1，T2 两步回忆，归档只移不删。"
+        },
+        {
+          "name": "triggerKeywords",
+          "value": "记忆读写,上下文预算,会话摘要,归档"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
         }
       ]
     },
@@ -7571,6 +7632,18 @@
           "name": "commit",
           "value": "29f17e6",
           "description": "design/KG/SystemArchitecture.json（Project Overseer 原则：检索召回/检出优先）"
+        },
+        {
+          "name": "principleTier",
+          "value": "L1"
+        },
+        {
+          "name": "summary",
+          "value": "任何优化不得牺牲检索召回/检出，只能持平或提升；宁可多花性能。"
+        },
+        {
+          "name": "triggerKeywords",
+          "value": "检索优化,rerank,截断,候选池,缩小范围,性能取舍"
         }
       ]
     },
@@ -9716,6 +9789,22 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "principleTier",
+          "value": "L1"
+        },
+        {
+          "name": "summary",
+          "value": "单场景优化必须证明不劣化其他场景（场景×规模剖面），不接受肉眼改善。"
+        },
+        {
+          "name": "triggerKeywords",
+          "value": "框架改动,规则改动,工具改动,优化提案,评测方案"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
         }
       ]
     },
@@ -12996,40 +13085,6 @@
       "type": "Business Object"
     },
     {
-      "type": "Business Object",
-      "name": "评估：多项目控制面选型（LangGraph / Windmill / Paperclip）",
-      "parent": "project-overseer-001",
-      "description": "评估（2026-10-18，项目总管；会话结论，未实施）：多项目 ArchGraph 协作控制面的选型。\n【结论】无现成 OSS 同时满足「加载项目 / 项目即默认 Agent / 组织关系 / GitHub Issue 同步 / 心跳触发 OpenCode / 分派 trace」；可行路径=薄控制面（项目/任务/组织/事件）+ Runtime Gateway（OpenCode 适配器）+ 调度内核 + trace。\n【LangGraph】不适合做底座：单元是 graph/thread/run；LangSmith Deployment 是运行时控制面（自托管控制面需 Enterprise+K8s；standalone Agent Server 无 control plane），不管 project/issue/org；LangSmith/Langfuse 仅适合 trace/eval。\n【Windmill】适合做控制面内核但非成品：v1.839.0（2026-10-16）活跃；Docker Compose+Postgres+Worker；提供 schedule/queue/retry/timeout/approval/SSE/OTel/MCP；缺项目注册、Issue 同步、组织图、OpenCode 会话管理。CE 内部自用免费（AGPL/Apache；社区版含非开源功能，转售/托管需商业许可）。\n【推荐方案（若重启）】Windmill 管短步骤 + Gateway 管长会话；Issue 是接口、DB 是状态；Postgres lease 做 per-project 串行（CE 无 concurrency limit）；MCP 暴露 task_event/task_dispatch 让 OpenCode 上报子任务；trace=events+task DAG+OTel；组织关系 DAG 不绑权限；UI 隐去 Agent。\n【边界/坑】并发限制、Dedicated Worker、自动扩缩、审批表单/权限、SSO、HTTP tracing、无限保留均 EE；CE 最多 3 workspace、Job 保留 30 天；长会话不要塞 worker；Windows worker EE，建议 WSL/Linux；OpenCode 不拿控制面密钥。\n【决策】Windmill 暂缓；人类伙伴表示继续 Paperclip 打磨（具体指向待确认）。",
-      "attributes": [
-        {
-          "name": "memoryTier",
-          "value": "T2"
-        },
-        {
-          "name": "status",
-          "value": "ACTIVE"
-        },
-        {
-          "name": "planningState",
-          "value": "评估完成"
-        },
-        {
-          "name": "decidedBy",
-          "value": "人类伙伴"
-        },
-        {
-          "name": "decision",
-          "value": "park-windmill-control-plane",
-          "description": "2026-10-18：Windmill 控制面方案暂缓不实施；后续优先 Paperclip 打磨（具体指向待确认）。"
-        },
-        {
-          "name": "sessionDate",
-          "value": "2026-10-18"
-        }
-      ],
-      "id": "langgraph-windmill-paperclip"
-    },
-    {
       "id": "agent-era-human-agent-loop-001",
       "type": "Business Object",
       "name": "文章：AI 时代的人机协作闭环与上下文治理",
@@ -13150,6 +13205,69 @@
           "description": "GIVEN the publisher's WeChat task reached a platform access blocker; WHEN the Actor's T2 memory is read; THEN it records the article transformation, draft-only boundary, exact 40164 whitelist cause and IP, recovery step, and reusable CLI/image lessons.",
           "Input": "tests/wechat-agent-era-human-agent-loop.test.js",
           "acceptanceCriteria": "tests/wechat-agent-era-human-agent-loop.test.js"
+        }
+      ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "principleIndexVersion",
+          "value": "1"
+        },
+        {
+          "name": "loadAt",
+          "value": "session-start (STEP 0, index only)"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "原则索引 v1（Principles Index）。会话开工时加载本索引（仅此一份）；正文按触发词再取。\n协议：本索引只给一句摘要。命中触发词时用 getIntentElementContext(id) 取正文后再决策。\n检查点（MUST）：提出方案 / 做取舍 / 改规则 / 改检索 / 写图 / 删内容之前，先扫描本索引。\nL0 常驻红线（正文已固化在规则章节，不在此重复加载）：\n- archgraph-content-storage-policy-001｜文档内容一律存 KG，仓库档回 KG 登记摘要｜规则 <ContentStoragePolicy>\n- overseer-memory-tiers-001｜记忆 T1/T2/T3，开工只载 T1，归档只移不删｜规则 <MemoryTierConventions>\nL1 判断题（命中触发词才加载正文）：\n- overseer-retrieval-recall-first-001｜优化不得牺牲召回/检出，只能持平或提升｜触发：检索优化 / rerank / 截断 / 候选池 / 性能取舍\n- framework-optimization-cross-scenario-001｜单场景优化须证明不劣化其他场景（场景×规模剖面）｜触发：框架 / 规则 / 工具改动 / 优化提案\n- overseer-archimate-role-001｜建模语言是分类手段不是目标，拖慢读写就简化｜触发：本体 / schema / 建模语言 / 元素类型",
+      "id": "principle-index-001",
+      "name": "原则索引（Principles Index）",
+      "testcases": [
+        {
+          "Input": "tests/argo-rules-principle-index.test.js",
+          "acceptanceCriteria": "tests/argo-rules-principle-index.test.js",
+          "description": "GIVEN 原则按 skill 式管理（索引常驻、正文按需）；WHEN 会话开工与检查点；THEN 索引必载且完整、每条原则声明 L0/L1 与触发词、索引无关系边且体量受限。",
+          "name": "AT-principle-index-01",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
+    },
+    {
+      "id": "overseer-langgraph-windmill-paperclip-001",
+      "type": "Business Object",
+      "name": "评估：多项目控制面选型（LangGraph / Windmill / Paperclip）",
+      "parent": "project-overseer-001",
+      "description": "评估（2026-10-18，项目总管；会话结论，未实施）：多项目 ArchGraph 协作控制面的选型。\n【结论】无现成 OSS 同时满足「加载项目 / 项目即默认 Agent / 组织关系 / GitHub Issue 同步 / 心跳触发 OpenCode / 分派 trace」；可行路径=薄控制面（项目/任务/组织/事件）+ Runtime Gateway（OpenCode 适配器）+ 调度内核 + trace。\n【LangGraph】不适合做底座：单元是 graph/thread/run；LangSmith Deployment 是运行时控制面（自托管控制面需 Enterprise+K8s；standalone Agent Server 无 control plane），不管 project/issue/org；LangSmith/Langfuse 仅适合 trace/eval。\n【Windmill】适合做控制面内核但非成品：v1.839.0（2026-10-16）活跃；Docker Compose+Postgres+Worker；提供 schedule/queue/retry/timeout/approval/SSE/OTel/MCP；缺项目注册、Issue 同步、组织图、OpenCode 会话管理。CE 内部自用免费（AGPL/Apache；社区版含非开源功能，转售/托管需商业许可）。\n【推荐方案（若重启）】Windmill 管短步骤 + Gateway 管长会话；Issue 是接口、DB 是状态；Postgres lease 做 per-project 串行（CE 无 concurrency limit）；MCP 暴露 task_event/task_dispatch 让 OpenCode 上报子任务；trace=events+task DAG+OTel；组织关系 DAG 不绑权限；UI 隐去 Agent。\n【边界/坑】并发限制、Dedicated Worker、自动扩缩、审批表单/权限、SSO、HTTP tracing、无限保留均 EE；CE 最多 3 workspace、Job 保留 30 天；长会话不要塞 worker；Windows worker EE，建议 WSL/Linux；OpenCode 不拿控制面密钥。\n【决策】Windmill 暂缓；人类伙伴表示继续 Paperclip 打磨（具体指向待确认）。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "planningState",
+          "value": "评估完成"
+        },
+        {
+          "name": "decidedBy",
+          "value": "人类伙伴"
+        },
+        {
+          "name": "decision",
+          "value": "park-windmill-control-plane",
+          "description": "2026-10-18：Windmill 控制面方案暂缓不实施；后续优先 Paperclip 打磨（具体指向待确认）。"
+        },
+        {
+          "name": "sessionDate",
+          "value": "2026-10-18"
         }
       ]
     }
@@ -17410,7 +17528,7 @@
         "overseer-archgraph-intro-pdf-001",
         "overseer-codex-adaptation-001",
         "overseer-site-v2-outline-detail-pages-milestone-001",
-        "langgraph-windmill-paperclip"
+        "overseer-langgraph-windmill-paperclip-001"
       ],
       "included_relationships": []
     },
@@ -18158,7 +18276,23 @@
       "view_id": "harness-argo-init-cli",
       "included_elements": [
         "argo-init-cli-001"
-      ]
+      ],
+      "included_relationships": []
+    },
+    {
+      "view_id": "principles-index-view",
+      "view_name": "原则索引（Principles Index）",
+      "parent_element_id": "archgraph-workflow-rules",
+      "description": "以 skill 式渐进披露管理原则：索引常驻、正文按需。挂在工作流规则元素下，成员为全部 Principle 元素与该索引文档。",
+      "included_elements": [
+        "overseer-retrieval-recall-first-001",
+        "framework-optimization-cross-scenario-001",
+        "overseer-archimate-role-001",
+        "overseer-memory-tiers-001",
+        "archgraph-content-storage-policy-001",
+        "principle-index-001"
+      ],
+      "included_relationships": []
     }
   ]
 }
