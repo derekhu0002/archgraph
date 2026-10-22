@@ -2874,6 +2874,13 @@
           "description": "GIVEN 规则含 <PrincipleIndexGuideline>；WHEN 检查；THEN L0 常驻红线与 L1 按需判断题分层、STEP 0 载索引、检查点必扫索引。",
           "name": "AT-rules-07",
           "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/schema-bundle-principle-index.test.js",
+          "acceptanceCriteria": "tests/schema-bundle-principle-index.test.js",
+          "description": "GIVEN schema bundle 的 principleIndex 为可选声明；WHEN 未声明/合法声明/继承/非法声明；THEN 未声明为 null 且保持默认行为、合法声明按数据透出、非法声明 fail-closed。",
+          "name": "AT-rules-08",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
@@ -13248,10 +13255,10 @@
       "name": "原则索引（Principles Index）",
       "testcases": [
         {
-          "Input": "tests/argo-rules-principle-index.test.js",
-          "acceptanceCriteria": "tests/argo-rules-principle-index.test.js",
-          "description": "GIVEN 原则按 skill 式管理（索引常驻、正文按需）；WHEN 会话开工与检查点；THEN 索引必载且完整、每条原则声明 L0/L1 与触发词、索引无关系边且体量受限。",
-          "name": "AT-principle-index-01",
+          "Input": "tests/principles-index-catalog.test.js",
+          "acceptanceCriteria": "tests/principles-index-catalog.test.js",
+          "description": "GIVEN 本工作区在 schema bundle 中声明 principleIndex；WHEN 校验图谱；THEN 索引元素/视图存在、每条原则按声明的属性带层级与触发词、索引完整且无关系边。",
+          "name": "AT-principle-catalog-01",
           "type": "Acceptance Test"
         }
       ],

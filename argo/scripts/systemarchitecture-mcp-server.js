@@ -3760,6 +3760,7 @@ function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
       schemaKind: bundle.kind,
       schemaDialect: ontology.dialect,
       actorElementType: ontology.actorElementType,
+      principleIndex: ontology.principleIndex || null,
       bundleValidation: ontology.bundleValidation,
     };
     schemaBundleInfo = {

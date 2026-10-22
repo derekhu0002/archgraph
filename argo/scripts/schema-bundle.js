@@ -520,6 +520,87 @@ function resolveActorElementType(config) {
   return DEFAULT_ACTOR_ELEMENT_TYPE;
 }
 
+// Optional principle catalog (skill-style progressive disclosure): a bundle may
+// declare WHERE its principles live so the workflow keeps only a compact index
+// resident and fetches principle bodies on demand. Absent/null => the workspace
+// declares no catalog and principle loading is skipped. The core never knows a
+// concrete element id, element type or attribute name; every locator is data.
+function resolvePrincipleIndex(config) {
+  const raw = config && config.principleIndex;
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return null;
+  }
+  const objectOrNull = (value) => (value && typeof value === 'object' && !Array.isArray(value) ? value : null);
+  const attributes = objectOrNull(raw.attributes);
+  const tiers = objectOrNull(raw.tiers);
+  return {
+    indexElementId: raw.indexElementId,
+    principlesElementType: Object.prototype.hasOwnProperty.call(raw, 'principlesElementType')
+      ? raw.principlesElementType
+      : null,
+    viewId: typeof raw.viewId === 'string' ? raw.viewId : null,
+    attributes: attributes
+      ? { tier: attributes.tier, summary: attributes.summary, trigger: attributes.trigger }
+      : null,
+    tiers: tiers
+      ? { resident: tiers.resident, onDemand: tiers.onDemand }
+      : null,
+  };
+}
+
+const PRINCIPLE_INDEX_ATTRIBUTE_KEYS = Object.freeze(['tier', 'summary', 'trigger']);
+const PRINCIPLE_INDEX_TIER_KEYS = Object.freeze(['resident', 'onDemand']);
+
+function validatePrincipleIndex(language, elementTypeList, principleIndex) {
+  const errors = [];
+  if (principleIndex === null || principleIndex === undefined) {
+    return errors;
+  }
+  if (typeof principleIndex !== 'object' || Array.isArray(principleIndex)) {
+    errors.push(`schema bundle '${language}' principleIndex must be an object or null`);
+    return errors;
+  }
+  if (typeof principleIndex.indexElementId !== 'string' || principleIndex.indexElementId.trim() === '') {
+    errors.push(`schema bundle '${language}' principleIndex.indexElementId must be a non-empty string`);
+  }
+  if (principleIndex.principlesElementType !== null) {
+    if (typeof principleIndex.principlesElementType !== 'string' || principleIndex.principlesElementType.trim() === '') {
+      errors.push(`schema bundle '${language}' principleIndex.principlesElementType must be a non-empty string or null`);
+    } else if (!elementTypeList.includes(principleIndex.principlesElementType)) {
+      errors.push(
+        `schema bundle '${language}' principleIndex.principlesElementType '${principleIndex.principlesElementType}' is not one of its element types (one of: ${elementTypeList.join(', ') || '(none)'})`,
+      );
+    }
+  }
+  if (principleIndex.viewId !== null && (typeof principleIndex.viewId !== 'string' || principleIndex.viewId.trim() === '')) {
+    errors.push(`schema bundle '${language}' principleIndex.viewId must be a non-empty string or null`);
+  }
+  if (!principleIndex.attributes) {
+    errors.push(`schema bundle '${language}' principleIndex.attributes must declare ${PRINCIPLE_INDEX_ATTRIBUTE_KEYS.join('/')}`);
+  } else {
+    for (const key of PRINCIPLE_INDEX_ATTRIBUTE_KEYS) {
+      const value = principleIndex.attributes[key];
+      if (typeof value !== 'string' || value.trim() === '') {
+        errors.push(`schema bundle '${language}' principleIndex.attributes.${key} must be a non-empty string`);
+      }
+    }
+  }
+  if (!principleIndex.tiers) {
+    errors.push(`schema bundle '${language}' principleIndex.tiers must declare ${PRINCIPLE_INDEX_TIER_KEYS.join('/')}`);
+  } else {
+    for (const key of PRINCIPLE_INDEX_TIER_KEYS) {
+      const value = principleIndex.tiers[key];
+      if (typeof value !== 'string' || value.trim() === '') {
+        errors.push(`schema bundle '${language}' principleIndex.tiers.${key} must be a non-empty string`);
+      }
+    }
+    if (principleIndex.tiers.resident && principleIndex.tiers.resident === principleIndex.tiers.onDemand) {
+      errors.push(`schema bundle '${language}' principleIndex.tiers.resident and .onDemand must be distinct`);
+    }
+  }
+  return errors;
+}
+
 // Per-element-type attribute contract (issue #3): declare that an element type
 // must carry certain attributes, that some attribute values are a controlled
 // vocabulary, and that some attribute values are unique within the type.
@@ -590,7 +671,7 @@ function validateAttributeContracts(language, elementTypeList, contracts) {
   return errors;
 }
 
-function validateBundle({ language, dialect, elementTypes, relationshipTypes, actorElementType, matrix, classByType, deliveryDependencies, attributesByElementType }) {
+function validateBundle({ language, dialect, elementTypes, relationshipTypes, actorElementType, matrix, classByType, deliveryDependencies, attributesByElementType, principleIndex }) {
   const errors = [];
   const elementTypeList = Array.isArray(elementTypes) ? elementTypes : [];
   const relationshipTypeList = Array.isArray(relationshipTypes) ? relationshipTypes : [];
@@ -644,6 +725,7 @@ function validateBundle({ language, dialect, elementTypes, relationshipTypes, ac
 
   errors.push(...validateDeliveryDependencies(language, relationshipTypeList, deliveryDependencies));
   errors.push(...validateAttributeContracts(language, elementTypeList, attributesByElementType));
+  errors.push(...validatePrincipleIndex(language, elementTypeList, principleIndex));
 
   return { status: errors.length === 0 ? 'passed' : 'failed', errors };
 }
@@ -744,6 +826,7 @@ function buildClassMatrixOntology(bundle) {
   const actorElementType = resolveActorElementType(bundle.config);
   const deliveryDependencies = resolveDeliveryDependencies(bundle.config, 'archimate-class-matrix');
   const attributesByElementType = resolveAttributeContracts(bundle.config);
+  const principleIndex = resolvePrincipleIndex(bundle.config);
   return finalizeOntology({
     kind: bundle.kind,
     dialect: 'archimate-class-matrix',
@@ -756,7 +839,8 @@ function buildClassMatrixOntology(bundle) {
     actorElementType,
     deliveryDependencies,
     attributesByElementType,
-    bundleValidation: validateBundle({ language, dialect: 'archimate-class-matrix', elementTypes, relationshipTypes, actorElementType, matrix: classMatrix, classByType, deliveryDependencies, attributesByElementType }),
+    principleIndex,
+    bundleValidation: validateBundle({ language, dialect: 'archimate-class-matrix', elementTypes, relationshipTypes, actorElementType, matrix: classMatrix, classByType, deliveryDependencies, attributesByElementType, principleIndex }),
     elementTypeMetadata,
     relationshipCategoryByType,
     isSupportedElementType,
@@ -816,6 +900,7 @@ function buildTypeMatrixOntology(bundle) {
   const relationshipTypes = Array.from(relationshipCategoryByType.keys());
   const deliveryDependencies = resolveDeliveryDependencies(config, 'type-matrix');
   const attributesByElementType = resolveAttributeContracts(config);
+  const principleIndex = resolvePrincipleIndex(config);
   const getArchiMateClass = (elementOrType) => {
     const type = typeof elementOrType === 'string' ? elementOrType : elementOrType && elementOrType.type;
     return type;
@@ -855,7 +940,8 @@ function buildTypeMatrixOntology(bundle) {
     actorElementType,
     deliveryDependencies,
     attributesByElementType,
-    bundleValidation: validateBundle({ language, dialect: 'type-matrix', elementTypes, relationshipTypes, actorElementType, matrix, deliveryDependencies, attributesByElementType }),
+    principleIndex,
+    bundleValidation: validateBundle({ language, dialect: 'type-matrix', elementTypes, relationshipTypes, actorElementType, matrix, deliveryDependencies, attributesByElementType, principleIndex }),
     elementTypeMetadata,
     relationshipCategoryByType,
     isSupportedElementType: (type) => elementTypeMetadata.has(type),
@@ -998,6 +1084,7 @@ module.exports = {
   RULES_BASENAME,
   resolveSchemaBundle,
   resolveTypeEnums,
+  resolvePrincipleIndex,
   buildOntology,
   resolveBundleAxioms,
   loadSchemaBundleAndOntology,

@@ -601,6 +601,7 @@ async function initializeWorkspace(workspaceRoot) {
       dir: bundle.relativeDir,
       guide: bundle.guidePath ? bundle.guidePath.relativePath : null,
       actorElementType: ontology.actorElementType,
+      principleIndex: ontology.principleIndex || null,
       bundleValidation: ontology.bundleValidation ? ontology.bundleValidation.status : null,
     };
   } catch (error) {
