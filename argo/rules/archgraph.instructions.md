@@ -8,7 +8,7 @@ applyTo: "**"
 STEP 0 — UNCONDITIONAL STARTUP GATE. Applies to the very first message of every session, greetings and chat included; never skip, defer, or treat it as optional.
 1. Your first tool call MUST resolve the workspace schema and list its Actors: `queryNeo4jGraph` with `{schema:true}` → read `actorElementType` (`null` = no Actor concept, skip Actor identification), then query that element type. Confirm which Actor you are; if unsure, ask your human partner before anything else.
 2. Restore memory: load ONLY the T1 working-memory digest — your T1 summary, the most recent/active memory cards, and any session hooks (unfinished items from the last session). Do NOT bulk-load the T2 long-term memory or T3 archive; recall them on demand via `memory_search`, then read full content with `getIntentElementContext`. T2 is a recall target, not as a bulk context load.
-3. Load the principles index only if the workspace schema bundle declares one (`queryNeo4jGraph` `{schema:true}` → `principleIndex`): `getIntentElementContext` on its `indexElementId` in the same startup step, never every principle body. If `principleIndex` is null, skip — do not hunt for a principles view. See `<PrincipleIndexGuideline>`.
+3. Load the principles index. The catalog is a base capability (`queryNeo4jGraph` `{schema:true}` → `principleIndex`; a bundle may override it, `"principleIndex": null` disables it): read the element named by its `indexElementId` with `queryNeo4jGraph` (`MATCH (e:Element {graphKey:$graphKey, id:'<indexElementId>'}) RETURN e.description`). Zero rows means no catalog yet — continue. Load the index only, never every principle body. See `<PrincipleIndexGuideline>`.
 4. If the Actor's `agent` attribute differs from your type, switch to it or delegate per `<CoperationGuideline>` item 2.
 5. If the ARGO MCP is unavailable or errors, say so before doing anything else.
 </WakeupGuideline>
@@ -27,7 +27,7 @@ Non-negotiable red lines (MUST). Never skip, simplify, or silently violate them;
 10. Reason critically: challenge the human partner with evidence — your native knowledge, the repository, and the intent graph — instead of agreeing by default; never silently comply with an unsound request. See `<CriticalReasoningGuideline>`.
 11. Never lose content silently: writes that reduce existing content must be lossless (merge/delta) or explicitly acknowledged (`acknowledgeLoss`), and destructive removals are tombstoned. See `<LosslessWrite>`.
 12. Federate by reference, never by copy: register/discover/authorize/read through the federation center (graph MCP surface); a read returns a reference, not a copy; cross-member access is denied by default. See `<FederationGuideline>`.
-13. Manage principles like skills: when the workspace schema bundle declares a principle catalog, load its index at session start, keep the resident tier in the always-loaded rule, and load an on-demand principle body only when its trigger matches a checkpoint. See `<PrincipleIndexGuideline>`.
+13. Manage principles like skills: load the principles index at session start (a base capability surfaced by the schema read), keep the resident tier in the always-loaded rule, and load an on-demand principle body only when its trigger matches a checkpoint. See `<PrincipleIndexGuideline>`.
 </CoreRules>
 
 <Ontology>
@@ -40,13 +40,14 @@ Resolve the workspace modeling language before acting; do not assume ArchiMate. 
 
 <PrincipleIndexGuideline>
 Principles are managed like skills: one compact index is resident, principle bodies load on demand. Never bulk-load every principle.
-1. Resolve the catalog from the workspace, never from a hardcoded name. `queryNeo4jGraph` with `{schema:true}` returns `principleIndex`. If it is null, this workspace declares no principle catalog: skip this guideline entirely and do not hunt for a principles view. If it is declared, use its `indexElementId`, `principlesElementType`, `viewId`, `attributes` and `tiers` values exactly as declared — this core stays modeling-language- and project-agnostic.
-2. Two tiers. The declared `tiers.resident` value marks red lines already encoded in an always-resident rule section; they stay resident and MUST NOT be moved to on-demand (their principle element is the rationale, not the load path). The declared `tiers.onDemand` value marks judgment principles with no governing rule section; only their index summary is resident.
-3. Load the index at session start. `getIntentElementContext` on the declared `indexElementId` in the same startup step as the T1 memory digest (STEP 0). It lists every principle: id, one-line summary, tier and load triggers.
+1. The catalog is a base capability, not an opt-in. `queryNeo4jGraph` with `{schema:true}` returns `principleIndex` filled with framework defaults; a workspace bundle may override any field, and `"principleIndex": null` disables it. Use the returned `indexElementId`, `principlesElementType`, `viewId`, `attributes` and `tiers` values exactly as returned — never hardcode them.
+2. Two tiers. `tiers.resident` marks red lines already encoded in an always-resident rule section; they stay resident and MUST NOT be moved to on-demand (their principle element is the rationale, not the load path). `tiers.onDemand` marks judgment principles with no governing rule section; only their index summary is resident.
+3. Load the index at session start. In the same startup step as the T1 memory digest (STEP 0), read the description of the element named by `indexElementId`. Zero rows means no catalog exists yet — continue without inventing one.
 4. Load a body only when triggered. At these checkpoints you MUST scan the index first: proposing a design or a trade-off, changing rules or retrieval/ranking, writing or deleting graph content, designing the schema/ontology. If a trigger matches, read the body with `getIntentElementContext(id)` BEFORE deciding. If none matches, proceed.
-5. Cite the principle you applied. When a loaded principle shaped the decision, name its id in the answer so the human partner can audit the judgment.
-6. Keep the index complete and cheap. Every element of the declared `principlesElementType` MUST be listed in the index (no orphan); the index stays an id + one-line summary + trigger list, never full bodies. When it outgrows a few thousand characters, split it into themed sub-indexes rather than growing it.
-7. Keep it opt-in. Adding a catalog is a bundle declaration (`principleIndex` in the workspace schema bundle), not a core change: a workspace without it keeps the unchanged default behavior.
+5. Keep the catalog alive. When you add or change a principle, register it in the index (id, tier, one-line summary, load triggers); create the index element if it is missing, using a document/object element type valid in this workspace and attaching it to a suitable view. Never let a principle exist uncatalogued once a catalog exists.
+6. Cite the principle you applied. When a loaded principle shaped the decision, name its id in the answer so the human partner can audit the judgment.
+7. Keep the index cheap. It stays an id + one-line summary + trigger list, never full bodies. When it outgrows a few thousand characters, split it into themed sub-indexes rather than growing it.
+8. Never let the catalog drift. If `principlesElementType` is set, every element of that type MUST be listed (no orphan); if it is null, the index itself is the only source of truth and MUST stay complete.
 </PrincipleIndexGuideline>
 
 <CriticalReasoningGuideline>

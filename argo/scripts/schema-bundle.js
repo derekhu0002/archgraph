@@ -520,36 +520,72 @@ function resolveActorElementType(config) {
   return DEFAULT_ACTOR_ELEMENT_TYPE;
 }
 
-// Optional principle catalog (skill-style progressive disclosure): a bundle may
-// declare WHERE its principles live so the workflow keeps only a compact index
-// resident and fetches principle bodies on demand. Absent/null => the workspace
-// declares no catalog and principle loading is skipped. The core never knows a
-// concrete element id, element type or attribute name; every locator is data.
-function resolvePrincipleIndex(config) {
-  const raw = config && config.principleIndex;
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-    return null;
-  }
-  const objectOrNull = (value) => (value && typeof value === 'object' && !Array.isArray(value) ? value : null);
-  const attributes = objectOrNull(raw.attributes);
-  const tiers = objectOrNull(raw.tiers);
-  return {
-    indexElementId: raw.indexElementId,
-    principlesElementType: Object.prototype.hasOwnProperty.call(raw, 'principlesElementType')
-      ? raw.principlesElementType
-      : null,
-    viewId: typeof raw.viewId === 'string' ? raw.viewId : null,
-    attributes: attributes
-      ? { tier: attributes.tier, summary: attributes.summary, trigger: attributes.trigger }
-      : null,
-    tiers: tiers
-      ? { resident: tiers.resident, onDemand: tiers.onDemand }
-      : null,
-  };
-}
+// Principle catalog (skill-style progressive disclosure) is a BASE capability:
+// every workspace gets a catalog contract without declaring anything. Only a
+// compact index is resident; principle bodies load on demand. The defaults are
+// ontology-neutral (no principle element type, neutral tier tokens) and can be
+// overridden field-by-field by a workspace bundle. Setting
+// `"principleIndex": null` disables the capability explicitly.
+//
+// This mirrors the existing `actorElementType` contract: a framework default in
+// code (a convention), overridable as bundle data, never project-specific.
+const DEFAULT_PRINCIPLE_INDEX = Object.freeze({
+  indexElementId: 'principle-index-001',
+  principlesElementType: null,
+  viewId: null,
+  attributes: Object.freeze({ tier: 'principleTier', summary: 'summary', trigger: 'triggerKeywords' }),
+  tiers: Object.freeze({ resident: 'resident', onDemand: 'on-demand' }),
+});
 
 const PRINCIPLE_INDEX_ATTRIBUTE_KEYS = Object.freeze(['tier', 'summary', 'trigger']);
 const PRINCIPLE_INDEX_TIER_KEYS = Object.freeze(['resident', 'onDemand']);
+
+function resolvePrincipleIndex(config) {
+  const hasDeclaration = Boolean(config) && Object.prototype.hasOwnProperty.call(config, 'principleIndex');
+  if (hasDeclaration && config.principleIndex === null) {
+    return null; // explicit opt-out
+  }
+  const resolved = {
+    indexElementId: DEFAULT_PRINCIPLE_INDEX.indexElementId,
+    principlesElementType: DEFAULT_PRINCIPLE_INDEX.principlesElementType,
+    viewId: DEFAULT_PRINCIPLE_INDEX.viewId,
+    attributes: { ...DEFAULT_PRINCIPLE_INDEX.attributes },
+    tiers: { ...DEFAULT_PRINCIPLE_INDEX.tiers },
+  };
+  if (!hasDeclaration) {
+    return resolved;
+  }
+  const raw = config.principleIndex;
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    // Malformed declaration: keep the raw value so validation fails closed.
+    return { indexElementId: raw, principlesElementType: null, viewId: null, attributes: {}, tiers: {} };
+  }
+  const pick = (key) => (Object.prototype.hasOwnProperty.call(raw, key) ? raw[key] : resolved[key]);
+  resolved.indexElementId = pick('indexElementId');
+  resolved.principlesElementType = pick('principlesElementType');
+  resolved.viewId = pick('viewId');
+  if (Object.prototype.hasOwnProperty.call(raw, 'attributes')) {
+    const attributes = raw.attributes;
+    if (attributes && typeof attributes === 'object' && !Array.isArray(attributes)) {
+      for (const key of PRINCIPLE_INDEX_ATTRIBUTE_KEYS) {
+        if (Object.prototype.hasOwnProperty.call(attributes, key)) resolved.attributes[key] = attributes[key];
+      }
+    } else {
+      resolved.attributes = attributes;
+    }
+  }
+  if (Object.prototype.hasOwnProperty.call(raw, 'tiers')) {
+    const tiers = raw.tiers;
+    if (tiers && typeof tiers === 'object' && !Array.isArray(tiers)) {
+      for (const key of PRINCIPLE_INDEX_TIER_KEYS) {
+        if (Object.prototype.hasOwnProperty.call(tiers, key)) resolved.tiers[key] = tiers[key];
+      }
+    } else {
+      resolved.tiers = tiers;
+    }
+  }
+  return resolved;
+}
 
 function validatePrincipleIndex(language, elementTypeList, principleIndex) {
   const errors = [];
@@ -575,7 +611,7 @@ function validatePrincipleIndex(language, elementTypeList, principleIndex) {
   if (principleIndex.viewId !== null && (typeof principleIndex.viewId !== 'string' || principleIndex.viewId.trim() === '')) {
     errors.push(`schema bundle '${language}' principleIndex.viewId must be a non-empty string or null`);
   }
-  if (!principleIndex.attributes) {
+  if (!principleIndex.attributes || typeof principleIndex.attributes !== 'object' || Array.isArray(principleIndex.attributes)) {
     errors.push(`schema bundle '${language}' principleIndex.attributes must declare ${PRINCIPLE_INDEX_ATTRIBUTE_KEYS.join('/')}`);
   } else {
     for (const key of PRINCIPLE_INDEX_ATTRIBUTE_KEYS) {
@@ -585,7 +621,7 @@ function validatePrincipleIndex(language, elementTypeList, principleIndex) {
       }
     }
   }
-  if (!principleIndex.tiers) {
+  if (!principleIndex.tiers || typeof principleIndex.tiers !== 'object' || Array.isArray(principleIndex.tiers)) {
     errors.push(`schema bundle '${language}' principleIndex.tiers must declare ${PRINCIPLE_INDEX_TIER_KEYS.join('/')}`);
   } else {
     for (const key of PRINCIPLE_INDEX_TIER_KEYS) {
@@ -1085,6 +1121,7 @@ module.exports = {
   resolveSchemaBundle,
   resolveTypeEnums,
   resolvePrincipleIndex,
+  DEFAULT_PRINCIPLE_INDEX,
   buildOntology,
   resolveBundleAxioms,
   loadSchemaBundleAndOntology,
