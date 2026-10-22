@@ -3035,6 +3035,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "dd1fff5",
+          "description": "argo/rules/archgraph.instructions.md; dsh-argo-wakeup/index.js; argo/plugins/argo-wakeup.js; tests/argo-rules-principle-index.test.js; tests/acceptance-guardian.test.js; design/KG/SystemArchitecture.json（新增 <PrincipleIndexGuideline> + CoreRule 13 + STEP 0 加载原则索引；AT-rules-07）"
         }
       ],
       "subdiagram_views": [
@@ -4450,7 +4455,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话收尾 · 2026-10-20 · GitHub issue #16：OpenCode 系统级 managed 配置部署）\n\n【会话目标】处理 issue #16（Linux/WSL 安装未部署 /etc/opencode/opencode.json）。人类伙伴随后要求扩大为“整套 user 级 graph 框架配置都写进系统层”，且不接受 instruction 重复；最终要求 Windows 上即使显式设置也一律忽略。\n\n【已交付】opt-in：-OpenCodeSystemConfigPath / OPENCODE_SYSTEM_CONFIG_PATH（默认空=跳过）。启用后把整套配置部署到配置 JSON 同目录：opencode.json（mcp.argo + mcp.graph-mcp + instructions + skills.paths + plugin）、AGENTS.md、skills/{argo-init,ea-human-reconcile,agent-search-diagnosis}；保留原有键、幂等；不可写或 JSON 带注释时清晰 warning 且安装继续。\n\n【关键决策】(1) 规则单一来源：系统层 AGENTS.md 写入 instructions 后，从用户级 ~/.config/opencode/AGENTS.md 移除 ArchGraph 规则块（保留用户内容），避免 OpenCode 把全局 AGENTS.md 与 instructions 叠加导致规则注入两次、浪费上下文。(2) Windows 硬门：$isWindowsHost = ($env:OS -eq 'Windows_NT')；Windows 上即使传参/设环境变量也忽略（零写入、零输出）。(3) plugin 复用 ~/.argo/plugins 相同 file spec（按 spec 去重）；同名 skill 按 name 去重（managed 胜出）。\n\n【举证】改动前 4bccf46 vs HEAD 在 Windows 实跑（同时传 flag+env）：105 vs 105 文件、行尾归一后 0 内容差异、stdout 0 差异、系统目录未创建。真实 opencode 验证（隔离 HOME/ProgramData）：instructions 仅 1 个 AGENTS.md、每个 skill 仅 1 条、用户级 AGENTS.md 已移除。\n\n【测试】argo-deploy 14/14（含 Windows 硬门与 POSIX 分支）；agent-search-diagnosis 7/7（把过宽的 @(...) 断言收紧为 Copy-DoubaoSkills 行）；全量 777 项 775 通过，仅剩 2 个既有图谱漂移失败（langgraph-windmill-paperclip 未按 overseer- 前缀，位于 overseer-product-001），与本改动无关。\n\n【提交】87cf1f7 / e9852bc（MCP 首版）；95255be / 5440efa（整套配置）；eb65f0d / c059c01（规则单一来源）；c6fdf61 / 0256d26（Windows 零输出差异）；97cc978 / f41fd89（Windows 硬门）；ca60524（release archgraph-argo@0.29.19）。WP 1361 挂 AT-1361-03。\n\n【发布与部署】archgraph-argo@0.29.19 已发布（shasum 4fac5ff3）。Windows：全局安装 + argo-deploy -SkipEnv；系统层硬关闭（未创建 %ProgramData%\\opencode，用户规则仍在）。WSL(ocpc, root)：全局安装 + OPENCODE_SYSTEM_CONFIG_PATH=/etc/opencode/opencode.json argo-deploy -SkipEnv；/etc/opencode/{opencode.json,AGENTS.md,skills} 已落地，原有 instructions/skills/plugin/experimental 保留，用户级 AGENTS.md 规则块已移除；opencode debug config 可见 mcp.argo，skills 各 1 条。issue #16 已回复并关闭（comment 6289252973）。\n\n【待续】修复 2 个既有图谱漂移失败；issue #15（WSL 安装验证）后续处理。\n\n【复用经验】OpenCode 合并语义：instructions 数组拼接（同路径去重）、全局 AGENTS.md 始终自动加载并与 instructions 叠加；skills 按 name 去重（managed 覆盖）；plugin 按 spec 去重；managed 对冲突键优先（skills 会被覆盖）。managed 目录：Linux /etc/opencode、Windows %ProgramData%\\opencode。PS 5.1 无 $IsWindows，用 $env:OS 判断宿主。",
+      "description": "项目总管工作记忆摘要（会话 · 2026-10-22 · 原则按 skill 式管理）\n\n【会话目标】回答“现有规则是否强制开工前加载全部原则”，并落地“原则像 skill 一样管理”（索引常驻、正文按需）。\n\n【结论】当前没有该强制：STEP 0 只载 T1；5 条 Principle 散落（3 条在 T2 的 overseer-ltm-001），靠 memory_search 召回，召不到=不存在。\n\n【已交付 commit dd1fff5】规则新增 <PrincipleIndexGuideline> + CoreRule 13，STEP 0 增第 3 步载 principle-index-001（仅索引，禁批量正文）；argo/plugins/argo-wakeup.js 与生成产牁 dsh-argo-wakeup/index.js 同步。图谱新增 principles-index-view（挂 archgraph-workflow-rules）+ 索引元素 principle-index-001（零关系边）；7 条 Principle 补 principleTier(L0/L1)+summary+triggerKeywords。测试 tests/argo-rules-principle-index.test.js（7 AT）+ guardian 条目 + AT-rules-07。顺带修复既有 T2 漂移：langgraph-windmill-paperclip → overseer-langgraph-windmill-paperclip-001。\n\n【关键决策】(1) 分两层：L0（可静默违反且不可逆）保持常驻，绝不改按需；L1（判断题）索引常驻+正文按需。(2) 摘要层必须常驻——skill 可行的前提是 name+description 预载，否则退化为“未知的未知”。(3) 触发从 Agent 自述改为确定性检查点（提方案/做取舍/改规则/改检索/写图/删内容前先扫索引）。(4) 索引元素不加任何关系边，避免 getIntentElementContext 拉出正文。\n\n【验收】npm test 784/784（此前 777 项中 2 个既有图谱漂移失败已清零）；validateSystemArchitecture 通过；索引 560 字符（上限 3000）。\n\n【坑】addArchitectureElement 可能客户端超时但服务端已写入——超时后先查询确认，勿重复创建。\n\n【待续】可考虑把索引加载并入单次 MCP 调用；大索引时按主题拆分。\n\n【复用经验】规则文件常驻≠原则常驻；渐进披露的前提是“索引常驻”。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4472,8 +4477,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-20",
-          "description": "发布 archgraph-argo@0.29.19 并在 Windows + WSL 部署；issue #16 已关闭"
+          "value": "2026-10-22",
+          "description": "原则按 skill 式管理（索引常驻/正文按需）+ CoreRule 13 + 索引视图与元素"
         },
         {
           "name": "commit",
@@ -4818,6 +4823,11 @@
           "name": "commit",
           "value": "e49a68e",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（2026-10-18 会话摘要：文章/邮件/公众号草稿状态、Neo4j canonical 全量投影一致性核验；T1 过期状态修正）"
+        },
+        {
+          "name": "commit",
+          "value": "dd1fff5",
+          "description": "design/KG/SystemArchitecture.json; argo/rules/archgraph.instructions.md; tests/argo-rules-principle-index.test.js（T1 摘要覆盖写）"
         }
       ],
       "testcases": [
@@ -13221,6 +13231,11 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "dd1fff5",
+          "description": "design/KG/SystemArchitecture.json; tests/argo-rules-principle-index.test.js; tests/acceptance-guardian.test.js（新增原则索引元素 + principles-index-view；索引常驻、正文按需）"
         }
       ],
       "description": "原则索引 v1（Principles Index）。会话开工时加载本索引（仅此一份）；正文按触发词再取。\n协议：本索引只给一句摘要。命中触发词时用 getIntentElementContext(id) 取正文后再决策。\n检查点（MUST）：提出方案 / 做取舍 / 改规则 / 改检索 / 写图 / 删内容之前，先扫描本索引。\nL0 常驻红线（正文已固化在规则章节，不在此重复加载）：\n- archgraph-content-storage-policy-001｜文档内容一律存 KG，仓库档回 KG 登记摘要｜规则 <ContentStoragePolicy>\n- overseer-memory-tiers-001｜记忆 T1/T2/T3，开工只载 T1，归档只移不删｜规则 <MemoryTierConventions>\nL1 判断题（命中触发词才加载正文）：\n- overseer-retrieval-recall-first-001｜优化不得牺牲召回/检出，只能持平或提升｜触发：检索优化 / rerank / 截断 / 候选池 / 性能取舍\n- framework-optimization-cross-scenario-001｜单场景优化须证明不劣化其他场景（场景×规模剖面）｜触发：框架 / 规则 / 工具改动 / 优化提案\n- overseer-archimate-role-001｜建模语言是分类手段不是目标，拖慢读写就简化｜触发：本体 / schema / 建模语言 / 元素类型",
@@ -13268,8 +13283,39 @@
         {
           "name": "sessionDate",
           "value": "2026-10-18"
+        },
+        {
+          "name": "commit",
+          "value": "dd1fff5",
+          "description": "design/KG/SystemArchitecture.json; tests/overseer-ltm-layering.test.js（id 由 langgraph-windmill-paperclip 改为 overseer- 前缀，修复既有 T2 分层漂移）"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        },
+        {
+          "description": "argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; design/KG/SystemArchitecture.json; tests/argo-rules-principle-index.test.js; tests/acceptance-guardian.test.js; tests/overseer-ltm-layering.test.js",
+          "name": "commit",
+          "value": "dd1fff5"
+        }
+      ],
+      "description": "里程碑（2026-10-22，项目总管）：把原则改成 skill 式渐进披露。\n【起点】人类伙伴问：现有规则是否强制开工前加载全部原则？答：没有——STEP 0 只载 T1 摘要，5 条 Principle 散落（3 条在 overseer-ltm-001 的 T2），靠 memory_search 召回，召不到=不存在。\n【设计】分两层：L0=可静默违反且不可逆的红线，已固化在常驻规则章节，绝不改为按需；L1=判断题，索引常驻+正文按需。摘要层必须常驻（skill 可行的前提是 name+description 预载），否则会从“忘记加载”退化为“未知的未知”；触发改为确定性检查点（提方案/做取舍/改规则/改检索/写图/删内容前先扫索引）。\n【交付（commit dd1fff5）】规则新增 <PrincipleIndexGuideline> + CoreRule 13，STEP 0 增第 3 步加载 principle-index-001（仅索引，禁批量正文）；argo/plugins/argo-wakeup.js 与生成产牁 dsh-argo-wakeup/index.js 同步。图谱新增 principles-index-view（挂 archgraph-workflow-rules）+ 索引元素 principle-index-001（零关系边，加载为 O(索引)）；7 条 Principle 补 principleTier(L0/L1)+summary+triggerKeywords。测试 tests/argo-rules-principle-index.test.js（7 AT）+ guardian 条目 + AT-rules-07。\n【顺带修复】既有 T2 分层漂移 langgraph-windmill-paperclip → overseer-langgraph-windmill-paperclip-001（T1 记的 2 个失败已清零）。\n【验收】npm test 784/784；validateSystemArchitecture 通过；索引 560 字符（上限 3000）。\n【坑】addArchitectureElement 客户端超时但服务端已写入——超时后先查询确认，勿重复创建。\n【待续】可考虑把索引加载并入单次 MCP 调用（省一次往返）；大索引时按主题拆分。",
+      "id": "overseer-principle-index-001",
+      "name": "里程碑：原则按 skill 式管理（原则索引常驻 + 正文按需）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -17490,7 +17536,8 @@
         "overseer-milestone-critical-reasoning-001",
         "overseer-milestone-lossless-write-001",
         "overseer-cross-project-dispatch-001",
-        "overseer-argo-mcp-verification-001"
+        "overseer-argo-mcp-verification-001",
+        "overseer-principle-index-001"
       ],
       "included_relationships": []
     },
