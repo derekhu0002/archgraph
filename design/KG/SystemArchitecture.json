@@ -4828,6 +4828,11 @@
           "name": "commit",
           "value": "dd1fff5",
           "description": "design/KG/SystemArchitecture.json; argo/rules/archgraph.instructions.md; tests/argo-rules-principle-index.test.js（T1 摘要覆盖写）"
+        },
+        {
+          "name": "commit",
+          "value": "a663ca0",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-ltm-layering.test.js（T1 摘要覆盖写 + 登记 a663ca0）"
         }
       ],
       "testcases": [
@@ -13309,6 +13314,11 @@
           "description": "argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; design/KG/SystemArchitecture.json; tests/argo-rules-principle-index.test.js; tests/acceptance-guardian.test.js; tests/overseer-ltm-layering.test.js",
           "name": "commit",
           "value": "dd1fff5"
+        },
+        {
+          "name": "commit",
+          "value": "a663ca0",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea; tests/overseer-ltm-layering.test.js（T2 里程碑登记 a663ca0）"
         }
       ],
       "description": "里程碑（2026-10-22，项目总管）：把原则改成 skill 式渐进披露。\n【起点】人类伙伴问：现有规则是否强制开工前加载全部原则？答：没有——STEP 0 只载 T1 摘要，5 条 Principle 散落（3 条在 overseer-ltm-001 的 T2），靠 memory_search 召回，召不到=不存在。\n【设计】分两层：L0=可静默违反且不可逆的红线，已固化在常驻规则章节，绝不改为按需；L1=判断题，索引常驻+正文按需。摘要层必须常驻（skill 可行的前提是 name+description 预载），否则会从“忘记加载”退化为“未知的未知”；触发改为确定性检查点（提方案/做取舍/改规则/改检索/写图/删内容前先扫索引）。\n【交付（commit dd1fff5）】规则新增 <PrincipleIndexGuideline> + CoreRule 13，STEP 0 增第 3 步加载 principle-index-001（仅索引，禁批量正文）；argo/plugins/argo-wakeup.js 与生成产牁 dsh-argo-wakeup/index.js 同步。图谱新增 principles-index-view（挂 archgraph-workflow-rules）+ 索引元素 principle-index-001（零关系边，加载为 O(索引)）；7 条 Principle 补 principleTier(L0/L1)+summary+triggerKeywords。测试 tests/argo-rules-principle-index.test.js（7 AT）+ guardian 条目 + AT-rules-07。\n【顺带修复】既有 T2 分层漂移 langgraph-windmill-paperclip → overseer-langgraph-windmill-paperclip-001（T1 记的 2 个失败已清零）。\n【验收】npm test 784/784；validateSystemArchitecture 通过；索引 560 字符（上限 3000）。\n【坑】addArchitectureElement 客户端超时但服务端已写入——超时后先查询确认，勿重复创建。\n【待续】可考虑把索引加载并入单次 MCP 调用（省一次往返）；大索引时按主题拆分。",
