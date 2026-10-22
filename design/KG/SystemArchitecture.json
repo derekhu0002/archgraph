@@ -4850,6 +4850,11 @@
           "name": "commit",
           "value": "22e5f77",
           "description": "T1 摘要覆盖写：原则索引改为 bundle 声明式（框架通用）"
+        },
+        {
+          "name": "commit",
+          "value": "d463cda",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（T1 摘要登记 d463cda）"
         }
       ],
       "testcases": [
@@ -11191,6 +11196,11 @@
           "name": "commit",
           "value": "22e5f77",
           "description": "schema bundle principleIndex 声明化：把项目定位信息从框架规则移回 bundle 数据"
+        },
+        {
+          "name": "commit",
+          "value": "d463cda",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（踩坑3 登记 d463cda）"
         }
       ]
     },
@@ -13356,6 +13366,11 @@
           "name": "commit",
           "value": "22e5f77",
           "description": "schema-bundle.js / systemarchitecture-mcp-server.js / argo-mcp-server.js / argo/rules/archgraph.instructions.md / argo/plugins/argo-wakeup.js / .argo/schema/schema-bundle.config.json / tests/*（principleIndex 声明化重构）"
+        },
+        {
+          "name": "commit",
+          "value": "d463cda",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（里程碑修正登记 d463cda）"
         }
       ],
       "description": "里程碑（2026-10-22，项目总管）：把原则改成 skill 式渐进披露，且以【框架通用、opt-in】方式落地。\n【起点】人类伙伴问：现有规则是否强制开工前加载全部原则？答：没有——STEP 0 只载 T1 摘要，原则散落在 T2，靠 memory_search 召回，召不到=不存在。\n【第一次实现（dd1fff5，已被修正）】分 L0 常驻/L1 按需两层、索引常驻+正文按需、确定性检查点。但把本仓的 principle-index-001 / principles-index-view / principleTier / triggerKeywords 硬编码进 argo/rules 与唤醒插件——错误：项目数据进了框架核心。\n【人类伙伴纠正】该场景属于整个 ArchGraph 框架，不能只为本仓修改。\n【最终设计（commit 22e5f77）】可选声明式契约：schema bundle 新增 principleIndex（indexElementId / principlesElementType / viewId / attributes{tier,summary,trigger} / tiers{resident,onDemand}）；schema-bundle.js 解析并 fail-closed 校验（未知原则类型/字段缺失/层级相同都判 failed），queryNeo4jGraph {schema:true} 与 argo-init 报告透出；规则只按声明取值，null 则跳过且不去 hunt；默认包不声明 → 行为逐字节不变。本仓在 .argo/schema 声明 opt-in。\n【分层】resident 层=已固化在常驻规则章节的红线（绝不改为按需）；onDemand 层=判断题，索引常驻+正文按需。摘要层必须常驻，否则从“忘记加载”退化为“未知的未知”；触发从自述改为确定性检查点。\n【验收】npm test 796/796；validateSystemArchitecture 通过；框架规则/插件/核心代码零硬编码项目定位。\n【待续】运行中的 MCP 需重启后 queryNeo4jGraph {schema:true} 才会返回 principleIndex（旧进程持有旧代码）；发布+argo-deploy 后全局宿主生效。\n【坑】addArchitectureElement 客户端超时但服务端已写入——超时后先查询确认，勿重复创建。",
