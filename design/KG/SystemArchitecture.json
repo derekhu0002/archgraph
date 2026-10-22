@@ -4814,6 +4814,11 @@
           "name": "commit",
           "value": "d463cda",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（T1 摘要登记 d463cda）"
+        },
+        {
+          "name": "commit",
+          "value": "a3216bb",
+          "description": "design/KG/SystemArchitecture.json; .argo/schema/schema-bundle.config.json; archgraph.qea; tests/acceptance-guardian.test.js（回退本仓 opt-in，仅留框架能力）"
         }
       ],
       "testcases": [
@@ -11136,6 +11141,11 @@
           "name": "commit",
           "value": "d463cda",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（踩坑3 登记 d463cda）"
+        },
+        {
+          "name": "commit",
+          "value": "a3216bb",
+          "description": "回退本仓 opt-in（配置/图谱），确认“交付能力 ≠ 本项目采纳”"
         }
       ]
     },
@@ -13270,8 +13280,8 @@
         },
         {
           "name": "commit",
-          "value": "pending",
-          "description": "scope 修正：移除本仓 opt-in（配置/图谱），仅保留框架能力"
+          "value": "a3216bb",
+          "description": "回退本仓 opt-in：.argo/schema principleIndex 声明 + 图谱索引视图/元素 + 项目 tier/summary/trigger 属性"
         }
       ],
       "description": "里程碑（2026-10-22，项目总管）：把原则改成 skill 式渐进披露——交付本体是【核心框架能力】，不是本项目的采纳。\n【起点】人类伙伴问：现有规则是否强制开工前加载全部原则？答：没有——STEP 0 只载 T1 摘要，原则散落在 T2，靠 memory_search 召回，召不到=不存在。\n【交付（commit dd1fff5 → 22e5f77）】①可选声明式契约：workspace schema bundle 可声明 principleIndex（indexElementId / principlesElementType / viewId / attributes{tier,summary,trigger} / tiers{resident,onDemand}）；schema-bundle.js 解析 + fail-closed 校验（未知原则类型/字段缺失/层级相同→failed）；queryNeo4jGraph {schema:true} 与 argo-init 报告透出。②规则：<PrincipleIndexGuideline> + CoreRule 13；STEP 0 仅在声明存在时加载 indexElementId（仅索引，禁批量正文），null 则跳过；确定性检查点（提方案/做取舍/改规则/改检索/写图/删内容前先扫索引）。③默认包不声明 → 行为逐字节不变。\n【分层设计】resident 层=已固化在常驻规则章节的红线（绝不改为按需）；onDemand 层=判断题，索引常驻+正文按需。摘要层必须常驻，否则从“忘记加载”退化为“未知的未知”；触发从自述改为确定性检查点。\n【两次纠正（人类伙伴）】1) 第一版把本仓的 id/视图/属性名硬编码进 argo/rules 与唤醒插件——项目数据进了框架核心，改为 bundle 声明式。2) 第二版又在本仓 .argo/schema 与图谱里做了 opt-in 与索引视图/元素——超出范围；已全部移除，本仓保持未声明状态。教训：能力交付 ≠ 本项目采纳。\n【验收】npm test 全绿（框架侧：argo-rules-principle-index + schema-bundle-principle-index）；validateSystemArchitecture 通过；框架规则/插件/核心代码零项目定位。\n【待续】运行中的 MCP 需重启后 schema:true 才返回 principleIndex。\n【坑】addArchitectureElement 客户端超时但服务端可能已写入——先查询确认。",
