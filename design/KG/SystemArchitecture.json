@@ -13325,6 +13325,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "d53551c",
+          "description": "argo/scripts/file-lock.js; argo/scripts/graph-write-lock.js; argo/scripts/graph-rag/semanticAlignmentLock.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; tests/graph-write-lock.test.js; tests/acceptance-guardian.test.js; .gitignore; design/KG/SystemArchitecture.json"
         }
       ],
       "description": "图谱写入互斥锁（Graph Write Lock，框架级，L0 缺陷修复）：canonical 图是一次『整文件读-改-写』（loadContext 全量读 → 内存变更 → 临时文件+rename）。每个 Agent/会话各自一个 argo-mcp-server 进程，两个进程可各自读到 v1 再分别写 v2/v2′，后写者整体覆盖先写者，先写者的变更被静默丢失（lost update，非合并）。不变量：同一 canonical 图的读-改-写窗口在跨进程范围内串行。机制：①锁原语 argo/scripts/file-lock.js（wx 原子创建 + 崩溃遗留锁按 staleMs 窃取）；②argo/scripts/graph-write-lock.js 以 <graph>.lock 为锁路径，与 EA Web 服务现有锁约定一致，故 Agent 写与人类 Web 端写互斥；③接入唯一写漏斗：systemarchitecture-mcp-server.js runMutationCall 在 loadContext 之前取锁（读必须在锁内），覆盖 applySystemArchitectureMutation + 全部单对象写工具；preview 与 dryRun 不取锁（全文件 rename 保证读不到撕裂文档）；④锁内一并完成墓碑追加/Neo4j 同步/.qea 投影，保证派生投影与 canonical 的写入顺序一致；⑤超时返回 status failed + error.category=GRAPH_WRITE_LOCK_TIMEOUT + guidance（重新读取后重试），绝不回退为直接改文件。局限（后续 L1/L2）：锁只防『丢更新』，不合并内容冲突（同元素并发更新的后写者仍胜出）、不防语义矛盾；锁等待上限默认 120s（ARGO_GRAPH_WRITE_LOCK_WAIT_MS），stale 默认 600s（ARGO_GRAPH_WRITE_LOCK_STALE_MS）。",
@@ -13368,6 +13373,35 @@
         }
       ],
       "type": "Application Component"
+    },
+    {
+      "attributes": [
+        {
+          "name": "decision",
+          "value": "graph-write-lock-L0-mutex-not-merge"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "COMPLETED"
+        }
+      ],
+      "description": "里程碑（2026-10-23，项目总管）：背景——多 Agent 团队在同一项目/同一工作区并行运行时，每个 Agent/会话各有一个 argo-mcp-server 进程，而 canonical 图写入是『整文件读-改-写』（loadContext 全量读 → 内存变更 → 临时文件 + rename，systemarchitecture-mcp-server.js），且无锁、无版本/CAS 校验。两个进程可各读 v1 再分别写 v2/v2′，后写者整体覆盖先写者 → 先写者变更静默丢失（lost update）。同进程内不会交错（argo-mcp-server.js 主循环 for await + await handleRequest 串行），因此这是纯跨进程缺陷；并发还放大 ID 分配基于陈旧快照（allocateUniqueId）与并发绕过去重门禁的风险。决策（人类伙伴裁决『先做 L0，这是 bug』）：L0 = 跨进程互斥，不做内容合并。实现：①argo/scripts/file-lock.js 通用锁原语（wx 原子创建 + staleMs 窃取，抽取自 semanticAlignmentLock）；②argo/scripts/graph-write-lock.js 以 <graph>.lock 为锁路径，复用 EA Web 服务既有锁约定，Agent 写与人类 Web 端写互斥；③唯一写漏斗 runMutationCall 在 loadContext 之前取锁，覆盖 applySystemArchitectureMutation + 9 个单对象写工具，preview/dryRun 不取锁（rename 保证读不到撕裂文档）；④锁内完成墓碑追加 / Neo4j 同步 / .qea 投影，写入顺序与派生投影一致；⑤超时返回 status failed + error.category=GRAPH_WRITE_LOCK_TIMEOUT + guidance，不静默降级。验证：AT-graph-write-lock-01..05（含两个真实 MCP 进程并发各写 6 个元素、全部存活），npm test 797/797、0 skip；validateSystemArchitecture passed。被否/暂缓：仅进程内 mutex（挡不住跨进程）；整文件 merge/重试（会把内容冲突半途混入，语义不可判定）；每 Agent 独立 worktree 只解决代码不解决 KG；L1 乐观并发（baseDigest 409）与 L2 单写者 committer（提议→串行应用）留作下一档，因为 L0 只防丢更新，不合并同元素并发内容冲突、不防语义矛盾。",
+      "id": "overseer-milestone-graph-write-lock-001",
+      "name": "里程碑：canonical 图跨进程写入互斥锁（L0 丢更新修复）",
+      "testcases": [
+        {
+          "Input": "tests/graph-write-lock.test.js",
+          "acceptanceCriteria": "tests/graph-write-lock.test.js",
+          "description": "GIVEN 两个真实 MCP 进程并发写同一张图；WHEN 各写 N 个不同元素；THEN 全部元素存活（无丢更新），且每个写入都报告 written:true。",
+          "name": "AT-graph-write-lock-03",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -17599,7 +17633,8 @@
         "overseer-milestone-lossless-write-001",
         "overseer-cross-project-dispatch-001",
         "overseer-argo-mcp-verification-001",
-        "overseer-principle-index-001"
+        "overseer-principle-index-001",
+        "overseer-milestone-graph-write-lock-001"
       ],
       "included_relationships": []
     },
