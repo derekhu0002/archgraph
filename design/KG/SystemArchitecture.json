@@ -13335,6 +13335,11 @@
           "name": "commit",
           "value": "d53551c",
           "description": "argo/scripts/file-lock.js; argo/scripts/graph-write-lock.js; argo/scripts/graph-rag/semanticAlignmentLock.js; argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; tests/graph-write-lock.test.js; tests/acceptance-guardian.test.js; .gitignore; design/KG/SystemArchitecture.json"
+        },
+        {
+          "name": "commit",
+          "value": "0634776",
+          "description": "scripts/ea-web-service.js（edit/undo/redo 不再跨 MCP 调用持有 <graph>.lock，避免同锁自锁死锁；快照直接写仍持锁）；argo/scripts/systemarchitecture-mcp-server.js（锁等待后固定已解析的 workspaceRoot，防 in-process 宿主换 ARGO_REPO_ROOT 时写错工作区）；argo/scripts/repair-subdiagram-views.js（fix-direct 在锁内重读再写，防丢更新）；tests/ea-web-service-impl.test.js（断言调用 MCP 时不持锁）；tests/argo-subdiagram-repair.test.js（并发写存活）"
         }
       ],
       "description": "图谱写入互斥锁（Graph Write Lock，框架级，L0 缺陷修复）：canonical 图是一次『整文件读-改-写』（loadContext 全量读 → 内存变更 → 临时文件+rename）。每个 Agent/会话各自一个 argo-mcp-server 进程，两个进程可各自读到 v1 再分别写 v2/v2′，后写者整体覆盖先写者，先写者的变更被静默丢失（lost update，非合并）。不变量：同一 canonical 图的读-改-写窗口在跨进程范围内串行。机制：①锁原语 argo/scripts/file-lock.js（wx 原子创建 + 崩溃遗留锁按 staleMs 窃取）；②argo/scripts/graph-write-lock.js 以 <graph>.lock 为锁路径，与 EA Web 服务现有锁约定一致，故 Agent 写与人类 Web 端写互斥；③接入唯一写漏斗：systemarchitecture-mcp-server.js runMutationCall 在 loadContext 之前取锁（读必须在锁内），覆盖 applySystemArchitectureMutation + 全部单对象写工具；preview 与 dryRun 不取锁（全文件 rename 保证读不到撕裂文档）；④锁内一并完成墓碑追加/Neo4j 同步/.qea 投影，保证派生投影与 canonical 的写入顺序一致；⑤超时返回 status failed + error.category=GRAPH_WRITE_LOCK_TIMEOUT + guidance（重新读取后重试），绝不回退为直接改文件。局限（后续 L1/L2）：锁只防『丢更新』，不合并内容冲突（同元素并发更新的后写者仍胜出）、不防语义矛盾；锁等待上限默认 120s（ARGO_GRAPH_WRITE_LOCK_WAIT_MS），stale 默认 600s（ARGO_GRAPH_WRITE_LOCK_STALE_MS）。",
