@@ -743,3 +743,24 @@ test('install-argo.ps1 numbers the deploy steps 1-22 including the OpenClaw conv
   assert.match(script, /\[21\/22\][^\n]*skills\\argo-init/, 'step 21 must deploy the OpenClaw argo-init skill');
   assert.match(script, /\[22\/22\][^\n]*mcp\.servers\.argo/, 'step 22 must register the OpenClaw argo MCP server');
 });
+
+test('install-argo.ps1 reports the ontology switch from the .env, not from the -EnableOntologyValidation flag', () => {
+  // GIVEN a .env that ALREADY enables the ontology validator
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-install-ontology-state-'));
+  const paths = hostPaths(tmp);
+  fs.mkdirSync(paths.argoRoot, { recursive: true });
+  const value = '[{"name":"ontology","timings":["write"],"onError":"error","command":["node","cli.js"]}]';
+  fs.writeFileSync(path.join(paths.argoRoot, '.env'), `ARGO_VALIDATION_EXTENSIONS=${value}\n`, 'utf8');
+  try {
+    // WHEN the installer runs WITHOUT -EnableOntologyValidation (-SkipEnv keeps it non-interactive)
+    const result = runInstall({ ...paths, skipEnv: true });
+    assert.equal(result.status, 0, `install script exited with ${result.status}: ${result.stderr}`);
+    // THEN it reports the EFFECTIVE state and the effective value
+    const out = `${result.stdout || ''}${result.stderr || ''}`;
+    assert.match(out, /Currently ENABLED/, 'an enabled .env must not be reported as disabled');
+    assert.doesNotMatch(out, /Currently DISABLED/, 'the report must reflect the .env, not the switch');
+    assert.ok(out.includes(value), 'the effective ARGO_VALIDATION_EXTENSIONS value must be shown');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});

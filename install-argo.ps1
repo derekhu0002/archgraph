@@ -1042,6 +1042,21 @@ function Set-EnvFileValue {
     [System.IO.File]::WriteAllLines($Path, $kept, (New-Object System.Text.UTF8Encoding $false))
 }
 
+function Get-EnvFileValue {
+    # Read the effective value of KEY from an env file (last occurrence wins,
+    # comments ignored). Used to REPORT the current state instead of assuming it
+    # from the presence of a command-line switch.
+    param([string]$Path, [string]$Key)
+    if (-not (Test-Path $Path)) { return '' }
+    $value = ''
+    foreach ($l in @(Get-Content $Path)) {
+        $trimmed = $l.TrimStart()
+        if ($trimmed.StartsWith('#') -or -not $trimmed.StartsWith("$Key=")) { continue }
+        $value = $trimmed.Substring($Key.Length + 1).Trim()
+    }
+    return $value
+}
+
 function Show-OntologyValidationSwitch {
     # Expose the OPTIONAL ontology-validation host switch during deploy, with its
     # meaning and how to verify its value. It is a host-level (user) environment
@@ -1070,10 +1085,21 @@ function Show-OntologyValidationSwitch {
         Write-Host '    Confirm the engine imports:'
         Write-Host "      $pyName -c `"import pyshacl, owlready2`""
     } else {
-        Write-Host '    Currently DISABLED. Enable by either:'
-        Write-Host '      - re-running:  argo-deploy -EnableOntologyValidation   (writes the key below to the .env), or'
-        Write-Host '      - editing the .env above and setting:'
-        Write-Host "        ARGO_VALIDATION_EXTENSIONS=$cmdJson"
+        # Report the EFFECTIVE state from the .env file, not from the absence of
+        # the switch: an already-enabled validator must never be announced as
+        # "Currently DISABLED" (that misleads the operator into re-enabling it).
+        $current = Get-EnvFileValue -Path $envPath -Key 'ARGO_VALIDATION_EXTENSIONS'
+        if ($current) {
+            Write-Host '    Currently ENABLED (from the .env file above). Effective value:'
+            Write-Host "      ARGO_VALIDATION_EXTENSIONS=$current"
+            Write-Host '    To change it: re-run argo-deploy -EnableOntologyValidation, or edit the .env above.'
+            Write-Host '    To disable it: set ARGO_VALIDATION_EXTENSIONS= (empty) in the .env above.'
+        } else {
+            Write-Host '    Currently DISABLED. Enable by either:'
+            Write-Host '      - re-running:  argo-deploy -EnableOntologyValidation   (writes the key below to the .env), or'
+            Write-Host '      - editing the .env above and setting:'
+            Write-Host "        ARGO_VALIDATION_EXTENSIONS=$cmdJson"
+        }
     }
 }
 
