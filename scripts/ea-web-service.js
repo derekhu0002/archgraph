@@ -1011,32 +1011,31 @@ function createService(options = {}) {
     }
     const args = buildEditArgs(op, payload);
     return withProjectWriteLock(projectId, async () => {
-      const release = acquireFileLock(project.graphPath);
-      try {
-        const beforeDoc = readGraphDocument(project.graphPath);
-        backupGraph(project);
-        const result = await mcpAdapter.callTool(toolName, args, project.root);
-        if (!result.ok) {
-          throw new HttpError(400, `编辑失败：${JSON.stringify(result.error || result.payload)}`);
-        }
-        let command;
-        if (op === 'applyMutation') {
-          const afterDoc = readGraphDocument(project.graphPath);
-          command = { op, kind: 'snapshot', before: beforeDoc, after: afterDoc };
-        } else {
-          command = {
-            op,
-            tool: toolName,
-            args,
-            inverse: deriveInverseCommand(op, args, beforeDoc),
-          };
-        }
-        pushUndo(projectId, command);
-        state.redoStacks.delete(projectId);
-        return { ok: true, op, tool: toolName, result: result.payload };
-      } finally {
-        release();
+      // Do NOT hold <graph>.lock across the MCP call: the MCP mutations take the
+      // SAME lock (single writer), so nesting it here self-deadlocks until the
+      // lock wait times out. The MCP serializes the write; the read/backup below
+      // only needs a consistent snapshot (writes are whole-file renames).
+      const beforeDoc = readGraphDocument(project.graphPath);
+      backupGraph(project);
+      const result = await mcpAdapter.callTool(toolName, args, project.root);
+      if (!result.ok) {
+        throw new HttpError(400, `编辑失败：${JSON.stringify(result.error || result.payload)}`);
       }
+      let command;
+      if (op === 'applyMutation') {
+        const afterDoc = readGraphDocument(project.graphPath);
+        command = { op, kind: 'snapshot', before: beforeDoc, after: afterDoc };
+      } else {
+        command = {
+          op,
+          tool: toolName,
+          args,
+          inverse: deriveInverseCommand(op, args, beforeDoc),
+        };
+      }
+      pushUndo(projectId, command);
+      state.redoStacks.delete(projectId);
+      return { ok: true, op, tool: toolName, result: result.payload };
     });
   }
 
@@ -1047,23 +1046,25 @@ function createService(options = {}) {
       throw new HttpError(400, '无可撤销的操作');
     }
     return withProjectWriteLock(projectId, async () => {
-      const release = acquireFileLock(project.graphPath);
-      try {
-        if (command.kind === 'snapshot') {
+      if (command.kind === 'snapshot') {
+        // A snapshot restore writes the file directly, so it owns the lock.
+        const release = acquireFileLock(project.graphPath);
+        try {
           atomicWriteFile(project.graphPath, JSON.stringify(command.before, null, 2));
           pushRedo(projectId, command);
           return { ok: true, undone: command.op };
+        } finally {
+          release();
         }
-        const result = await mcpAdapter.callTool(command.inverse.tool, command.inverse.args, project.root);
-        if (!result.ok) {
-          pushUndo(projectId, command);
-          throw new HttpError(400, `撤销失败：${JSON.stringify(result.error || result.payload)}`);
-        }
-        pushRedo(projectId, command);
-        return { ok: true, undone: command.op, result: result.payload };
-      } finally {
-        release();
       }
+      // The inverse is applied by the MCP, which takes <graph>.lock itself.
+      const result = await mcpAdapter.callTool(command.inverse.tool, command.inverse.args, project.root);
+      if (!result.ok) {
+        pushUndo(projectId, command);
+        throw new HttpError(400, `撤销失败：${JSON.stringify(result.error || result.payload)}`);
+      }
+      pushRedo(projectId, command);
+      return { ok: true, undone: command.op, result: result.payload };
     });
   }
 
@@ -1074,23 +1075,25 @@ function createService(options = {}) {
       throw new HttpError(400, '无可重做的操作');
     }
     return withProjectWriteLock(projectId, async () => {
-      const release = acquireFileLock(project.graphPath);
-      try {
-        if (command.kind === 'snapshot') {
+      if (command.kind === 'snapshot') {
+        // A snapshot redo writes the file directly, so it owns the lock.
+        const release = acquireFileLock(project.graphPath);
+        try {
           atomicWriteFile(project.graphPath, JSON.stringify(command.after, null, 2));
           pushUndo(projectId, command);
           return { ok: true, redone: command.op };
+        } finally {
+          release();
         }
-        const result = await mcpAdapter.callTool(command.tool, command.args, project.root);
-        if (!result.ok) {
-          pushRedo(projectId, command);
-          throw new HttpError(400, `重做失败：${JSON.stringify(result.error || result.payload)}`);
-        }
-        pushUndo(projectId, command);
-        return { ok: true, redone: command.op, result: result.payload };
-      } finally {
-        release();
       }
+      // The command is re-applied by the MCP, which takes <graph>.lock itself.
+      const result = await mcpAdapter.callTool(command.tool, command.args, project.root);
+      if (!result.ok) {
+        pushRedo(projectId, command);
+        throw new HttpError(400, `重做失败：${JSON.stringify(result.error || result.payload)}`);
+      }
+      pushUndo(projectId, command);
+      return { ok: true, redone: command.op, result: result.payload };
     });
   }
 

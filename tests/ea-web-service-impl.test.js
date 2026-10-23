@@ -545,3 +545,55 @@ test('真实 MCP 写图回滚：in-process addElement + removeElement', async (t
   assert.equal(after.elements.length, beforeCount, '元素数量应恢复');
   assert.ok(!after.elements.some((e) => e.id === '900001'), '元素应被移除');
 });
+
+test('编辑/撤销/重做：调用 MCP 时不持有 <graph>.lock（避免与 MCP 写锁自锁）', async () => {
+  // GIVEN a service whose MCP adapter takes the SAME <graph>.lock the MCP takes
+  const { tmp, graphPath } = makeFixture();
+  const observations = [];
+  const probe = (toolName) => {
+    const lockPath = `${graphPath}.lock`;
+    try {
+      const fd = fs.openSync(lockPath, 'wx');
+      fs.closeSync(fd);
+      fs.unlinkSync(lockPath);
+      observations.push([toolName, 'free']);
+    } catch (error) {
+      observations.push([toolName, error.code]);
+    }
+  };
+  const adapter = {
+    mode: 'probe',
+    available: true,
+    async callTool(toolName) {
+      probe(toolName);
+      return { ok: true, payload: { status: 'passed', written: true } };
+    },
+  };
+  const service = createService({
+    searchRoots: [tmp],
+    projectsConfigPath: path.join(tmp, 'projects.json'),
+    mcpAdapter: adapter,
+  });
+  try {
+    service.refreshProjects();
+    const project = [...service.state.projects.values()][0];
+
+    // WHEN the web service delegates an edit, an undo and a redo to the MCP
+    await service.editProject(project.id, 'addElement', {
+      element: { id: '3', name: 'C', type: 'Application Component' },
+      view_ids: ['100'],
+    });
+    await service.undoProject(project.id);
+    await service.redoProject(project.id);
+
+    // THEN the MCP call never runs while the web service holds <graph>.lock
+    // (nesting the same lock would deadlock until the wait timeout)
+    assert.deepEqual(observations.map(([, state]) => state), ['free', 'free', 'free'],
+      `the web service must not hold <graph>.lock across an MCP call: ${JSON.stringify(observations)}`);
+    assert.deepEqual(observations.map(([tool]) => tool),
+      ['addArchitectureElement', 'removeArchitectureElement', 'addArchitectureElement']);
+  } finally {
+    service.stop();
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});

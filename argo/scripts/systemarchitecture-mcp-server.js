@@ -3344,7 +3344,11 @@ async function runMutationCall(args, write, dependencies, buildMutations, lossAc
   const graphPath = resolveWorkspacePath(workspaceRoot, args.architecturePath || DEFAULT_GRAPH_PATH);
   try {
     return await withGraphWriteLock(graphPath.absolutePath, async () => {
-      const context = await loadContext(args);
+      // Pin the resolved workspace: the lock wait is an await, and an in-process
+      // host adapter (the EA web service) swaps ARGO_REPO_ROOT around each MCP
+      // call, so re-resolving from the environment here could target a DIFFERENT
+      // workspace than the one whose lock was taken.
+      const context = await loadContext({ ...args, workspaceRoot });
       const result = await buildMutationResult(context, buildMutations(), true, dependencies, lossAck);
       return mutationToolResult(attachContextWarnings(result, context), true);
     });

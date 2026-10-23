@@ -163,6 +163,42 @@ async function repairSubdiagramViews({
     workspaceRoot,
     graphPath: architecturePath,
   });
+
+  if (mode === 'fix-direct') {
+    // A direct write bypasses the MCP, so it must take the SAME canonical write
+    // lock and re-read INSIDE it: reading before the lock would write a stale
+    // document over a concurrent agent mutation (lost update).
+    const { withGraphWriteLock } = require('./graph-write-lock.js');
+    return withGraphWriteLock(absolutePath, async () => {
+      const document = readDocument(absolutePath, relativePath);
+      const desired = computeDesired(document);
+      const { mutations, reports } = computeMutations(document, desired);
+      if (reports.length === 0) {
+        return {
+          status: 'ok',
+          graphPath: relativePath,
+          driftCount: 0,
+          fixedCount: 0,
+          written: false,
+          reports: [],
+        };
+      }
+      const { document: fixedDocument } = applyMutations(document, mutations);
+      const backupPath = `${absolutePath}.bak`;
+      fs.copyFileSync(absolutePath, backupPath);
+      fs.writeFileSync(absolutePath, `${JSON.stringify(fixedDocument, null, 2)}\n`, 'utf8');
+      return {
+        status: 'ok',
+        graphPath: relativePath,
+        driftCount: reports.length,
+        fixedCount: reports.length,
+        written: true,
+        backupPath,
+        reports,
+      };
+    });
+  }
+
   const document = readDocument(absolutePath, relativePath);
   const desired = computeDesired(document);
   const { mutations, reports } = computeMutations(document, desired);
@@ -186,22 +222,6 @@ async function repairSubdiagramViews({
       fixedCount: 0,
       written: false,
       reports: [],
-    };
-  }
-
-  if (mode === 'fix-direct') {
-    const { document: fixedDocument } = applyMutations(document, mutations);
-    const backupPath = `${absolutePath}.bak`;
-    fs.copyFileSync(absolutePath, backupPath);
-    fs.writeFileSync(absolutePath, `${JSON.stringify(fixedDocument, null, 2)}\n`, 'utf8');
-    return {
-      status: 'ok',
-      graphPath: relativePath,
-      driftCount: reports.length,
-      fixedCount: reports.length,
-      written: true,
-      backupPath,
-      reports,
     };
   }
 
