@@ -81,6 +81,17 @@ function buildRunArgs(model, prompt) {
 // env values + ARGO_ENV_FILE), so the single measured variable stays "is the
 // argo MCP mounted".
 function buildArmEnv(arm, home, argoEnv, envFile) {
+  // Keep the two arms SINGLE-VARIABLE even when the caller (the architecture
+  // test runner, a fixed-workspace host, a dev shell) already exports graph
+  // configuration: strip every graph/env pointer inherited from the host and
+  // let only the 'on' arm re-add the sanctioned set.
+  const graphKeys = new Set([
+    'ARGO_REPO_ROOT',
+    'ARGO_ENV_FILE',
+    'ARGO_WORKSPACE_ROOTS',
+    'WORKSPACE_FOLDER',
+    ...Object.keys(argoEnv || {}),
+  ]);
   const env = {
     ...process.env,
     USERPROFILE: home,
@@ -89,6 +100,7 @@ function buildArmEnv(arm, home, argoEnv, envFile) {
     APPDATA: path.join(home, 'AppData'),
     LOCALAPPDATA: path.join(home, 'AppData', 'Local'),
   };
+  for (const key of graphKeys) delete env[key];
   if (arm === 'on') {
     env.ARGO_REPO_ROOT = ROOT;
     Object.assign(env, argoEnv);

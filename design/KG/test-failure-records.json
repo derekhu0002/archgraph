@@ -1,15 +1,1 @@
-[
-  {
-    "testcasename": "AT-memory-eval-run-03",
-    "testdescription": "GIVEN 两步回忆维度（TR-01~03，框架级验证三层记忆回忆机制）；WHEN 运行 harness；THEN memory_search 语义定位（宽松阈值）+getIntentElementContext 取全文命中、paraphrase 低分相关命中仍召回、无关查询不虚构；整体 31 题基线达标。",
-    "acceptanceCriteria": "tests/memory-eval-run.test.js",
-    "relatedIntentElementId": "memory-eval-run-wp-001",
-    "status": "failed",
-    "resolvedScriptPath": "tests/memory-eval-run.test.js",
-    "executionCommand": "\"C:\\Program Files\\nodejs\\node.exe\" tests/memory-eval-run.test.js",
-    "exitCode": 1,
-    "failureError": "Command failed: C:\\Program Files\\nodejs\\node.exe D:\\Projects\\archgraph\\tests\\memory-eval-run.test.js",
-    "stdout": "✖ memory-eval-run-baseline: harness evaluates all 31 questions and reports metrics (21449.9889ms)\n✔ memory-eval-run-fact: base fact question MQ-01 (项目总管) passes (2.2567ms)\n✔ memory-eval-run-baseline-floor: overall accuracy meets the recorded baseline floor (9962.3478ms)\n✔ memory-eval-run-multihop: multi-hop recall questions traverse topology links and pass (2.3607ms)\n✔ memory-eval-run-cost: cost stats report context compression and token cost (10208.8087ms)\nℹ tests 5\nℹ suites 0\nℹ pass 4\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 41631.644\n\n✖ failing tests:\n\ntest at tests\\memory-eval-run.test.js:23:1\n✖ memory-eval-run-baseline: harness evaluates all 31 questions and reports metrics (21449.9889ms)\n  AssertionError [ERR_ASSERTION]: no question should fail with a TOOL_ERROR\n  \n  1 !== 0\n  \n      at TestContext.<anonymous> (D:\\Projects\\archgraph\\tests\\memory-eval-run.test.js:30:10)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1201:25)\n      at Test.start (node:internal/test_runner/test:1096:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: 1,\n    expected: 0,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }",
-    "stderr": "Command failed: C:\\Program Files\\nodejs\\node.exe D:\\Projects\\archgraph\\tests\\memory-eval-run.test.js"
-  }
-]
+[]

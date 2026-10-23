@@ -82,3 +82,34 @@ test('AT-memory-retrieval-ab-06: headless runs auto-approve tools so the arms ar
   assert.ok(args.includes('--format') && args.includes('json'));
   assert.ok(args.join(' ').includes('ab/deepseek-flash'));
 });
+
+test('AT-memory-retrieval-ab-07: the off arm strips host-inherited graph config (single variable holds)', () => {
+  // GIVEN a host env that already exports graph config (the architecture test
+  // runner / a fixed-workspace host does this)
+  const saved = {
+    ARGO_REPO_ROOT: process.env.ARGO_REPO_ROOT,
+    ARGO_ENV_FILE: process.env.ARGO_ENV_FILE,
+    ARGO_NEO4J_DATABASE_URL: process.env.ARGO_NEO4J_DATABASE_URL,
+  };
+  process.env.ARGO_REPO_ROOT = 'D:/host/workspace';
+  process.env.ARGO_ENV_FILE = 'C:/host/.argo/.env';
+  process.env.ARGO_NEO4J_DATABASE_URL = 'bolt://host';
+  try {
+    // WHEN building the off arm's environment
+    const off = ab.buildArmEnv('off', path.join(os.tmpdir(), 'argo-ab', 'off'), { ARGO_NEO4J_DATABASE_URL: 'bolt://on' }, 'C:/Users/x/.argo/.env');
+    // THEN none of the host graph config leaks into it (single-variable fairness)
+    assert.equal(off.ARGO_REPO_ROOT, undefined);
+    assert.equal(off.ARGO_ENV_FILE, undefined);
+    assert.equal(off.ARGO_NEO4J_DATABASE_URL, undefined);
+    // AND the on arm still gets only the sanctioned config
+    const on = ab.buildArmEnv('on', path.join(os.tmpdir(), 'argo-ab', 'on'), { ARGO_NEO4J_DATABASE_URL: 'bolt://on' }, 'C:/Users/x/.argo/.env');
+    assert.equal(on.ARGO_REPO_ROOT, ROOT);
+    assert.equal(on.ARGO_ENV_FILE, 'C:/Users/x/.argo/.env');
+    assert.equal(on.ARGO_NEO4J_DATABASE_URL, 'bolt://on');
+  } finally {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});

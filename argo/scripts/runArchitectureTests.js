@@ -186,9 +186,11 @@ async function runArchitectureTests(workspaceRoot, architecturePath) {
 
     await writeFailureRecords(workspaceRoot, failureRecords);
 
-    const deliveryChanges = refreshDeliveryStatus(graph, results);
+    // Persist the computed delivery status under the canonical write lock, and
+    // re-read INSIDE it: the test run can take minutes, so writing the document
+    // read at the start would silently drop any agent write that landed meanwhile.
+    const deliveryChanges = await persistDeliveryStatus(graphPath, results);
     if (deliveryChanges.length > 0) {
-        await writeArchitectureGraph(graphPath, graph);
         console.log(`[DELIVERY] Refreshed delivery status: ${deliveryChanges.length} element(s) changed`);
         for (const change of deliveryChanges) {
             const direction = change.deliveryStatus === 'delivered' ? 'DELIVERED' : 'NOT_DELIVERED';
@@ -414,7 +416,24 @@ function printSummary(summary) {
 }
 
 async function writeArchitectureGraph(graphPath, graph) {
-    await fs.promises.writeFile(graphPath, JSON.stringify(graph, null, 2) + '\n', 'utf8');
+    const tempPath = `${graphPath}.${process.pid}.${Date.now()}.tmp`;
+    await fs.promises.writeFile(tempPath, JSON.stringify(graph, null, 2) + '\n', 'utf8');
+    await fs.promises.rename(tempPath, graphPath);
+}
+
+// Re-read the canonical graph under the cross-process write lock, refresh the
+// delivery status against the FRESH document, and write it atomically. Returns
+// only the changes computed on that fresh document.
+async function persistDeliveryStatus(graphPath, results) {
+    const { withGraphWriteLock } = require('./graph-write-lock.js');
+    return withGraphWriteLock(graphPath, async () => {
+        const freshGraph = await readArchitectureGraph(graphPath);
+        const changes = refreshDeliveryStatus(freshGraph, results);
+        if (changes.length > 0) {
+            await writeArchitectureGraph(graphPath, freshGraph);
+        }
+        return changes;
+    });
 }
 
 // --- Delivery Status Refresh (hard guardrail: computed by test runner, not by agents) ---
