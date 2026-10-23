@@ -12,6 +12,9 @@ const {
 const {
   buildSemanticRecordText,
 } = require('./graph-rag/semanticRecordText.js');
+const {
+  withGraphWriteLock,
+} = require('./graph-write-lock.js');
 
 const DEFAULT_GRAPH_PATH = 'design/KG/SystemArchitecture.json';
 const LEGAL_QUERY_PURPOSES = new Set([
@@ -3326,8 +3329,41 @@ function getSystemArchitectureResult(payload) {
   return toolResult(payload, buildGetSystemArchitectureStructuredContent(payload));
 }
 
-async function callTool(name, args = {}, dependencies = undefined) {
-  if (name === 'getSystemArchitecture') {
+// Single entry for every mutating MCP call. A write is a whole-file
+// read-modify-write, so the read (loadContext) must happen INSIDE the
+// cross-process lock: two agent processes each reading v1 and writing v2/v2'
+// would otherwise silently drop one mutation (lost update). Previews (write ===
+// false) stay lock-free -- a whole-file rename never exposes a torn document.
+async function runMutationCall(args, write, dependencies, buildMutations, lossAck) {
+  if (!write) {
+    const context = await loadContext(args);
+    const result = await buildMutationResult(context, buildMutations(), false, dependencies, lossAck);
+    return mutationToolResult(attachContextWarnings(result, context), false);
+  }
+  const workspaceRoot = resolveWorkspaceRoot(args);
+  const graphPath = resolveWorkspacePath(workspaceRoot, args.architecturePath || DEFAULT_GRAPH_PATH);
+  try {
+    return await withGraphWriteLock(graphPath.absolutePath, async () => {
+      const context = await loadContext(args);
+      const result = await buildMutationResult(context, buildMutations(), true, dependencies, lossAck);
+      return mutationToolResult(attachContextWarnings(result, context), true);
+    });
+  } catch (error) {
+    if (!error || error.category !== 'GRAPH_WRITE_LOCK_TIMEOUT') {
+      throw error;
+    }
+    return mutationToolResult({
+      status: 'failed',
+      written: false,
+      graphPath: graphPath.relativePath,
+      errors: [error.message],
+      guidance: [error.action],
+      error: { category: error.category, message: error.message, action: error.action },
+    }, true);
+  }
+}
+
+async function callTool(name, args = {}, dependencies = undefined) {  if (name === 'getSystemArchitecture') {
     if (Object.prototype.hasOwnProperty.call(args, 'query')) {
       const validation = validateExplicitQuery(args.query);
       if (validation.status === 'failed') {
@@ -3375,62 +3411,64 @@ async function callTool(name, args = {}, dependencies = undefined) {
   }
 
   if (name === 'applySystemArchitectureMutation') {
-    const context = await loadContext(args);
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, args.mutations, true, dependencies, { acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }), context), true);
+    return runMutationCall(args, true, dependencies, () => args.mutations, {
+      acknowledgeLoss: args.acknowledgeLoss,
+      lossJustification: args.lossJustification,
+    });
   }
 
   if (name === 'addArchitectureElement') {
-    const context = await loadContext(args);
-    const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addElement', element: args.element, view_ids: args.view_ids, onConflict: args.onConflict, justification: args.justification }], write, dependencies), context), write);
+    return runMutationCall(args, !args.dryRun, dependencies, () => ([{
+      type: 'addElement', element: args.element, view_ids: args.view_ids, onConflict: args.onConflict, justification: args.justification,
+    }]));
   }
 
   if (name === 'updateArchitectureElement') {
-    const context = await loadContext(args);
-    const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'updateElement', id: args.id, patch: args.patch, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
+    return runMutationCall(args, !args.dryRun, dependencies, () => ([{
+      type: 'updateElement', id: args.id, patch: args.patch, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification,
+    }]));
   }
 
   if (name === 'removeArchitectureElement') {
-    const context = await loadContext(args);
-    const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'removeElement', id: args.id, view_ids: args.view_ids, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
+    return runMutationCall(args, !args.dryRun, dependencies, () => ([{
+      type: 'removeElement', id: args.id, view_ids: args.view_ids, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification,
+    }]));
   }
 
   if (name === 'addArchitectureRelationship') {
-    const context = await loadContext(args);
-    const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addRelationship', relationship: args.relationship, view_ids: args.view_ids, onConflict: args.onConflict, justification: args.justification }], write), context), write);
+    return runMutationCall(args, !args.dryRun, dependencies, () => ([{
+      type: 'addRelationship', relationship: args.relationship, view_ids: args.view_ids, onConflict: args.onConflict, justification: args.justification,
+    }]));
   }
 
   if (name === 'updateArchitectureRelationship') {
-    const context = await loadContext(args);
-    const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'updateRelationship', id: args.id, patch: args.patch, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
+    return runMutationCall(args, !args.dryRun, dependencies, () => ([{
+      type: 'updateRelationship', id: args.id, patch: args.patch, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification,
+    }]));
   }
 
   if (name === 'removeArchitectureRelationship') {
-    const context = await loadContext(args);
-    const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'removeRelationship', id: args.id, view_ids: args.view_ids, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
+    return runMutationCall(args, !args.dryRun, dependencies, () => ([{
+      type: 'removeRelationship', id: args.id, view_ids: args.view_ids, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification,
+    }]));
   }
 
   if (name === 'addArchitectureView') {
-    const context = await loadContext(args);
-    const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'addView', view: args.view, onConflict: args.onConflict, justification: args.justification }], write), context), write);
+    return runMutationCall(args, !args.dryRun, dependencies, () => ([{
+      type: 'addView', view: args.view, onConflict: args.onConflict, justification: args.justification,
+    }]));
   }
 
   if (name === 'updateArchitectureView') {
-    const context = await loadContext(args);
-    const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'updateView', view_id: args.view_id, patch: args.patch, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
+    return runMutationCall(args, !args.dryRun, dependencies, () => ([{
+      type: 'updateView', view_id: args.view_id, patch: args.patch, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification,
+    }]));
   }
 
   if (name === 'removeArchitectureView') {
-    const context = await loadContext(args);
-    const write = !args.dryRun;
-    return mutationToolResult(attachContextWarnings(await buildMutationResult(context, [{ type: 'removeView', view_id: args.view_id, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification }], write), context), write);
+    return runMutationCall(args, !args.dryRun, dependencies, () => ([{
+      type: 'removeView', view_id: args.view_id, acknowledgeLoss: args.acknowledgeLoss, lossJustification: args.lossJustification,
+    }]));
   }
 
   if (name === 'queryNeo4jGraph') {

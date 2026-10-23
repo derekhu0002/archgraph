@@ -83,6 +83,7 @@ const DELIVERABLE_GUARDS = [
   ['FEATURE: Linux/WSL deployment (install-argo.sh POSIX deployer + argo-deploy dispatch)', 'tests/argo-deploy-linux.test.js'],
   ['FEATURE: order-independent mutation batches (topological apply + cycle report)', 'tests/mutation-batch-order.test.js'],
   ['FEATURE: bounded structural reads (context output budget: identity fallback + complete id manifest)', 'tests/agent-read-projection.test.js'],
+  ['FEATURE: canonical graph cross-process write lock (L0 lost-update guard; shared <graph>.lock)', 'tests/graph-write-lock.test.js'],
   ['FEATURE: Coding business deck v2 (editable nine-slide deliverable)', 'tests/coding-business-deck-v2.test.js'],
   ['FEATURE: Coding business deck v3 (framework-first nine-slide narrative)', 'tests/coding-business-deck-v3.test.js'],
   ['FEATURE: Coding business deck v4 (business/application layers with optional RAG modes)', 'tests/coding-business-deck-v4.test.js'],

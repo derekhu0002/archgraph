@@ -13319,6 +13319,55 @@
       "name": "里程碑：原则按 skill 式管理（原则索引常驻 + 正文按需）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ],
+      "description": "图谱写入互斥锁（Graph Write Lock，框架级，L0 缺陷修复）：canonical 图是一次『整文件读-改-写』（loadContext 全量读 → 内存变更 → 临时文件+rename）。每个 Agent/会话各自一个 argo-mcp-server 进程，两个进程可各自读到 v1 再分别写 v2/v2′，后写者整体覆盖先写者，先写者的变更被静默丢失（lost update，非合并）。不变量：同一 canonical 图的读-改-写窗口在跨进程范围内串行。机制：①锁原语 argo/scripts/file-lock.js（wx 原子创建 + 崩溃遗留锁按 staleMs 窃取）；②argo/scripts/graph-write-lock.js 以 <graph>.lock 为锁路径，与 EA Web 服务现有锁约定一致，故 Agent 写与人类 Web 端写互斥；③接入唯一写漏斗：systemarchitecture-mcp-server.js runMutationCall 在 loadContext 之前取锁（读必须在锁内），覆盖 applySystemArchitectureMutation + 全部单对象写工具；preview 与 dryRun 不取锁（全文件 rename 保证读不到撕裂文档）；④锁内一并完成墓碑追加/Neo4j 同步/.qea 投影，保证派生投影与 canonical 的写入顺序一致；⑤超时返回 status failed + error.category=GRAPH_WRITE_LOCK_TIMEOUT + guidance（重新读取后重试），绝不回退为直接改文件。局限（后续 L1/L2）：锁只防『丢更新』，不合并内容冲突（同元素并发更新的后写者仍胜出）、不防语义矛盾；锁等待上限默认 120s（ARGO_GRAPH_WRITE_LOCK_WAIT_MS），stale 默认 600s（ARGO_GRAPH_WRITE_LOCK_STALE_MS）。",
+      "id": "graph-write-lock-001",
+      "name": "图谱写入互斥锁（Graph Write Lock）",
+      "testcases": [
+        {
+          "Input": "tests/graph-write-lock.test.js",
+          "acceptanceCriteria": "tests/graph-write-lock.test.js",
+          "description": "GIVEN 另一个进程持有 canonical 写锁；WHEN 本进程尝试获取；THEN 等待其释放后才进入（跨进程串行，锁文件释放）。",
+          "name": "AT-graph-write-lock-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/graph-write-lock.test.js",
+          "acceptanceCriteria": "tests/graph-write-lock.test.js",
+          "description": "GIVEN 锁被他进程持有；WHEN preview / dryRun 执行；THEN 不等待锁即返回；WHEN apply 执行；THEN 等待锁并在获得后落盘。",
+          "name": "AT-graph-write-lock-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/graph-write-lock.test.js",
+          "acceptanceCriteria": "tests/graph-write-lock.test.js",
+          "description": "GIVEN 两个 MCP 进程同时写同一张图；WHEN 各写 N 个不同元素；THEN 全部 2N 个元素都存活（无丢更新）。",
+          "name": "AT-graph-write-lock-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/graph-write-lock.test.js",
+          "acceptanceCriteria": "tests/graph-write-lock.test.js",
+          "description": "GIVEN MCP 分发器源码；WHEN 检查各写工具处理块；THEN 每个写工具都经 runMutationCall 取锁，preview 保持无锁。",
+          "name": "AT-graph-write-lock-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "Input": "tests/graph-write-lock.test.js",
+          "acceptanceCriteria": "tests/graph-write-lock.test.js",
+          "description": "GIVEN 锁文件约定；THEN 锁路径为 <graph>.lock（与 EA Web 服务互操作）；AND 崩溃遗留的陈旧锁被窃取且动作后释放。",
+          "name": "AT-graph-write-lock-05",
+          "type": "Acceptance Test"
+        }
+      ],
+      "type": "Application Component"
     }
   ],
   "relationships": [
@@ -16553,6 +16602,16 @@
       "target_id": "acceptance-guardian-001",
       "target_name": "验收看护服务（Acceptance Guardianship）",
       "type": "Association"
+    },
+    {
+      "id": "harness-write-lock-to-dedup-001",
+      "name": "Triggering",
+      "source_id": "graph-write-lock-001",
+      "source_name": "图谱写入互斥锁（Graph Write Lock）",
+      "statement": "图谱写入互斥锁（Graph Write Lock） --(Triggering)--> 图谱写入去重门禁",
+      "target_id": "graph-write-dedup-gate",
+      "target_name": "图谱写入去重门禁",
+      "type": "Triggering"
     }
   ],
   "views": [
@@ -18229,7 +18288,8 @@
         "default-semantic-retrieval-001",
         "env-file-key-governance-001",
         "offline-embedding-deployment-001",
-        "ontology-validation-extension-001"
+        "ontology-validation-extension-001",
+        "graph-write-lock-001"
       ],
       "included_relationships": [
         "harness-read-semantic-to-hybrid-001",
@@ -18242,7 +18302,8 @@
         "harness-write-dedup-to-lossless-001",
         "harness-write-lossless-to-projection-001",
         "harness-config-envkey-to-embedding-001",
-        "harness-config-offline-deploy-realizes-embedding-001"
+        "harness-config-offline-deploy-realizes-embedding-001",
+        "harness-write-lock-to-dedup-001"
       ]
     },
     {
