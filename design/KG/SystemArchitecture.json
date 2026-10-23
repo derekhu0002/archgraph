@@ -13457,6 +13457,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "6dcbf1e",
+          "description": "package.json（release archgraph-argo@0.29.23：测试 runner deliveryStatus 锁内重读 + A/B off 臂剥离宿主图配置）"
         }
       ],
       "description": "里程碑（2026-10-23，项目总管）：背景——多 Agent 团队在同一项目/同一工作区并行运行时，每个 Agent/会话各有一个 argo-mcp-server 进程，而 canonical 图写入是『整文件读-改-写』（loadContext 全量读 → 内存变更 → 临时文件 + rename，systemarchitecture-mcp-server.js），且无锁、无版本/CAS 校验。两个进程可各读 v1 再分别写 v2/v2′，后写者整体覆盖先写者 → 先写者变更静默丢失（lost update）。同进程内不会交错（argo-mcp-server.js 主循环 for await + await handleRequest 串行），因此这是纯跨进程缺陷；并发还放大 ID 分配基于陈旧快照（allocateUniqueId）与并发绕过去重门禁的风险。决策（人类伙伴裁决『先做 L0，这是 bug』）：L0 = 跨进程互斥，不做内容合并。实现：①argo/scripts/file-lock.js 通用锁原语（wx 原子创建 + staleMs 窃取，抽取自 semanticAlignmentLock）；②argo/scripts/graph-write-lock.js 以 <graph>.lock 为锁路径，复用 EA Web 服务既有锁约定，Agent 写与人类 Web 端写互斥；③唯一写漏斗 runMutationCall 在 loadContext 之前取锁，覆盖 applySystemArchitectureMutation + 9 个单对象写工具，preview/dryRun 不取锁（rename 保证读不到撕裂文档）；④锁内完成墓碑追加 / Neo4j 同步 / .qea 投影，写入顺序与派生投影一致；⑤超时返回 status failed + error.category=GRAPH_WRITE_LOCK_TIMEOUT + guidance，不静默降级。验证：AT-graph-write-lock-01..05（含两个真实 MCP 进程并发各写 6 个元素、全部存活），npm test 797/797、0 skip；validateSystemArchitecture passed。被否/暂缓：仅进程内 mutex（挡不住跨进程）；整文件 merge/重试（会把内容冲突半途混入，语义不可判定）；每 Agent 独立 worktree 只解决代码不解决 KG；L1 乐观并发（baseDigest 409）与 L2 单写者 committer（提议→串行应用）留作下一档，因为 L0 只防丢更新，不合并同元素并发内容冲突、不防语义矛盾。",
