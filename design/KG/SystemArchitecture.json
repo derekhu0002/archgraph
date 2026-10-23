@@ -12779,6 +12779,11 @@
           "name": "commit",
           "value": "400956c",
           "description": "package.json（release archgraph-argo@0.29.15）"
+        },
+        {
+          "name": "commit",
+          "value": "7493868",
+          "description": "install-argo.ps1（deploy 报告改为读取 ~/.argo/.env 的实际值，不再仅凭 -EnableOntologyValidation 开关断言 DISABLED）；tests/argo-deploy.test.js（新增状态报告验收）"
         }
       ]
     },
