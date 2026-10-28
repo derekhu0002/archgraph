@@ -9565,6 +9565,13 @@
           "Input": "tests/first-hop-report.test.js",
           "name": "AT-first-hop-05",
           "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/first-hop-report.test.js",
+          "description": "GIVEN 一个 run 先在仓库读取、或先做语义检索（getSystemArchitecture/memory_search）、或只做结构查询；WHEN 求「首次语义检索是否早于首次仓库读取」；THEN 仅对实际触仓的 run 统计该信号，结构查询不算已查阅语义索引，且聚合分母只算触仓 run。",
+          "Input": "tests/first-hop-report.test.js",
+          "name": "AT-first-hop-06",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Application Component",
@@ -9617,6 +9624,11 @@
           "name": "commit",
           "value": "b111027",
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记首跳报告/AT 与 args 采集修复 562bf65）"
+        },
+        {
+          "name": "commit",
+          "value": "b3d9400",
+          "description": "scripts/first-hop-report.js; tests/first-hop-report.test.js（新增 semantic-before-repo 信号与最小样本量判定）"
         }
       ]
     },
