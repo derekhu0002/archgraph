@@ -4013,6 +4013,26 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "41b955f",
+          "description": "sandbox/Dockerfile; sandbox/entrypoint.sh; sandbox/navigation-agent-eval.js; tests/sandbox-framework.test.js; tests/navigation-agent-eval.test.js（真实用例 Docker 实测的 4 项修复）"
+        },
+        {
+          "name": "verification",
+          "value": "real-cases-docker-2026-10-28",
+          "description": "容器内 archgraph-argo@0.29.27（npm pack tarball）+ 真 Neo4j/embedding + opencode Agent：导航 SEED 28 题（r1 28/28；修复后 r2 27/28，CA-02 模型波动；avg 13.3s/tok 221k）+ 3 题 repo-rich 真实问答（全部先图后仓）；首跳 graph 31/31；成本日志已可按 run 分析。产物（gitignored）：results/nav-eval-20261028/、results/nav-eval-20261028-r2/、results/repo-probe-20261028/。"
+        },
+        {
+          "name": "defect-fix",
+          "value": "sandbox-real-case-4-defects",
+          "description": "① entrypoint 加 -SkipOntologyEngine：可选本体引擎要求 python3+JRE 前置，沙箱未装，否则 argo-deploy 直接 throw；② Dockerfile 补 COPY lib：smoke.js 与 navigation-agent-eval.js 都 require ./lib/argo-init-cli.js，之前镜像缺该目录必挂；③ navigation-agent-eval.js 的 loadEnvFile 改为沙箱白名单：宿主 .env 的 ARGO_VALIDATION_EXTENSIONS 带 C:/Users/... Windows 绝对路径，泄漏进容器后 init 校验必然失败；宿主专有键/密钥一律不注入；④ runAgent 环境固定 PWD=/workspace：opencode 按 PWD 解析项目目录，旧 PWD（部署 shell 的 /tmp/install）会把框架成本日志写到错误位置。均已加可执行 AT。"
+        },
+        {
+          "name": "known-limitation",
+          "value": "sandbox-schema-bundle-not-mounted",
+          "description": "残留：① 沙箱只挂了生产图、未挂仓库自己的 schema bundle，容器用默认 ArchiMate 3.2 校验工作区方言图 → argo-init 的 systemArchitecture 步骤仍 failed（但语义检索/导航不受影响）；② 该校验失败时 errors 数组为空（诊断缺口，应带具体违规）。下一步：把工作区 .argo/schema 作为 /opt/navigation-schema 挂载并在 initGraph 复制到 WORKSPACE/.argo/schema。"
         }
       ]
     },
@@ -9638,6 +9658,16 @@
           "name": "commit",
           "value": "c79c0d6",
           "description": "package.json（release archgraph-argo@0.29.27）"
+        },
+        {
+          "name": "measurement",
+          "value": "first-hop-real-docker",
+          "description": "真实用例（Docker，archgraph-argo@0.29.27，真 Neo4j+embedding）：导航 SEED 28 run 首跳 graph 28/28（schema 19 / semantic 1-2 / structural 7-8），未触仓；repo-rich 3 run 首跳 graph 3/3（schema 3），其中唯一触仓 run 的语义读早于首次仓库读=1/1。args 采集修复在容器内生效（schema 桶可识别）。日志：results/nav-eval-20261028[-r2]/agent-cost-log.ndjson、results/repo-probe-20261028/agent-cost-log.ndjson。"
+        },
+        {
+          "name": "measurement-note",
+          "value": "first-hop-sample-limit",
+          "description": "首跳口径已可用真实容器会话验证；repo-rich 仍样本不足（n=3<10）且沙箱工作区默认无仓库内容 → repo-first 指标需在带仓库的沙箱场景下才能充分测量。"
         }
       ]
     },
@@ -13768,8 +13798,8 @@
         },
         {
           "name": "verification",
-          "value": "args-capture-live",
-          "description": "2026-10-28T07:55Z pid=8452：args.keys 已采集；报告 schema 桶可识别（确凿）"
+          "value": "real-cases-docker-2026-10-28",
+          "description": "Docker 真实用例（tarball 0.29.27 + 真 Neo4j/embedding + opencode Agent）：导航 SEED 28 题 r2=27/28（r1=28/28，CA-02 为模型波动）；31 个真实 run 首跳全部 graph；2026-10-28 修复的 4 项沙箱缺陷（entrypoint -SkipOntologyEngine / Dockerfile COPY lib / 宿主 env 白名单 / PWD 固定）已验证，commit 41b955f。"
         }
       ],
       "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.27——修宿主工具参数采集。\n【缺陷】OpenCode 的 tool.execute.before(input, output) 把工具参数放在第二参 output.args；插件只传了 input，agentCostLog 的 args.keys/bytes 恒为空（{}）。后果：成本日志无法区分 queryNeo4jGraph 的 schema 读（STEP 0）与其它图查询，首跳 breakdown 的 schema 桶永远为 0。\n【修复】createHostCollectorHooks.before(input, toolOutput) 兼容两种宿主形态（第二参 output.args 优先，回落 input.args）；插件透传第二参；仍只记 keys/bytes，不落原值。AT-agent-cost-log-03 增加 OpenCode 第二参形态断言；AT-agent-cost-log-04 断言插件透传。\n【发布】npm publish archgraph-argo@0.29.27（registry 第 8 次轮询可见）→ npm i -g archgraph-argo@0.29.27 → argo-deploy -SkipEnv；核验 ~/.argo/scripts/graph-rag/agentCostLog.js 含 before(input, toolOutput)、~/.argo/plugins/argo-cost-collector.js 含 hooks.before(i, o)；opencode.json 已注册 argo-wakeup + argo-cost-collector。\n【生效条件】运行中的宿主进程持有旧代码，需重启 opencode 后才能记录 args。\n【重启后核验 2026-10-28T07:55Z】新进程 pid=8452：日志 args 已落（bash keys=[\"command\"] bytes=105，此前恒为 {}）；scripts/first-hop-report.js 对同一 run 正确判出 graph/schema（schema 桶从恒 0 变为可识别），端到端「采集 → 口径」链路打通。首跳样本仍为 n=1（本会话），报告按规则标 INSUFFICIENT SAMPLE。\n【验收】npm test 829/829（0 fail / 0 skip）；validateSystemArchitecture 通过。",
