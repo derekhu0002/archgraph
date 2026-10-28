@@ -69,6 +69,14 @@ function emit(errors, warnings) {
   process.stdout.write(JSON.stringify({ errors, warnings }));
 }
 
+// Bound tool output WITHOUT losing the diagnosis: a crash traceback puts the
+// actual cause at its TAIL, so keeping only the head hides it.
+function stderrTail(text, max = 800) {
+  const value = String(text || '').trim();
+  if (value.length <= max) return value;
+  return `...${value.slice(value.length - max)}`;
+}
+
 // The sidecar (this CLI + the Python engine) reads its bundle from a directory.
 // For an `extends` bundle the effective rules live in the CHAIN-MERGED bundle,
 // not the child dir: the base dir holds the endpoint matrix / type metadata, so
@@ -157,11 +165,21 @@ function main() {
     [path.join(__dirname, 'python', 'validate_ontology.py'), '--bundle', bundleDir, '--graph', effectiveFile, '--out', outFile],
     { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 120000 },
   );
-  if (proc.error || proc.status !== 0) {
+  // Distinguish "cannot launch the engine" (missing interpreter: the extension
+  // is unavailable) from "the engine ran and FAILED" (crash / non-zero exit: the
+  // engine ran but could not produce a verdict). Collapsing both into
+  // "unavailable" misdiagnoses a projection crash as a missing dependency.
+  if (proc.error) {
+    const detail = proc.error.message || String(proc.error);
+    const label = proc.error.code === 'ENOENT' ? 'unavailable' : 'failed';
+    errors.push(`ontology real engine ${label} (${python}): ${detail}`);
+    emit(errors, warnings);
+    return;
+  }
+  if (proc.status !== 0) {
+    const how = proc.signal ? `signal ${proc.signal}` : `exit ${proc.status}`;
     errors.push(
-      `ontology real engine unavailable (${python}): ${
-        (proc.error && proc.error.message) || String(proc.stderr || '').slice(0, 300)
-      }`,
+      `ontology real engine failed (${python}, ${how}): ${stderrTail(proc.stderr) || '<no stderr>'}`,
     );
     emit(errors, warnings);
     return;

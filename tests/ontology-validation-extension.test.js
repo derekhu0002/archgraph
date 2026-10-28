@@ -127,6 +127,25 @@ test('AT-ovx-3b onError:"warn" opts an entry back to advisory (non-blocking)', (
   assert.match(result.warnings[0], /unavailable/);
 });
 
+test('AT-ovx-19 real-engine failures are classified and the cause is not truncated', () => {
+  const ws = makeWorkspace('valid.json');
+
+  // Cannot launch the interpreter at all -> the extension itself is unavailable.
+  const missing = runCli(ws, 'write', { engine: 'real', env: { ARGO_ONTOLOGY_PYTHON: 'definitely-not-a-real-python-xyz' } });
+  assert.equal(missing.errors.length, 1, JSON.stringify(missing.errors));
+  assert.match(missing.errors[0], /unavailable/);
+
+  // The interpreter exists but the engine crashes (here node parses the Python
+  // source as JS). That is an engine FAILURE, not an unavailable dependency, and
+  // the tail of the traceback (the actual cause) must survive the size bound.
+  const crashed = runCli(ws, 'write', { engine: 'real', env: { ARGO_ONTOLOGY_PYTHON: process.execPath } });
+  assert.equal(crashed.errors.length, 1, JSON.stringify(crashed.errors));
+  assert.doesNotMatch(crashed.errors[0], /unavailable/);
+  assert.match(crashed.errors[0], /failed/);
+  assert.ok(crashed.errors[0].length > 600, 'the stderr tail was truncated away');
+  assert.match(crashed.errors[0], /Node\.js v/);
+});
+
 test('AT-ovx-4 ontology CLI (write) flags a violation and passes a valid graph', () => {
   const bad = makeWorkspace('endpoint-violation.json');
   const badResult = runCli(bad, 'write');
