@@ -4450,7 +4450,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话 · 2026-10-22 · 原则按 skill 式管理：框架基本能力）\n\n【会话目标】1) 回答“现有规则是否强制开工前加载全部原则”→没有：STEP 0 只载 T1，原则在 T2 靠 memory_search 召回。2) 在核心框架提供“原则像 skill 一样管理”，且作为基本能力。\n\n【最终设计（commit 2186c40）】\n- 框架内置 DEFAULT_PRINCIPLE_INDEX（ontology-neutral：indexElementId='principle-index-001'、principlesElementType=null、中性 tier token resident/on-demand、属性名约定）；无需任何声明即生效。\n- bundle 可逐字段覆盖，\"principleIndex\": null 显式关闭；非法覆盖 fail-closed。queryNeo4jGraph {schema:true} 与 argo-init 透出。\n- 规则：<PrincipleIndexGuideline> + CoreRule 13；STEP 0 按 indexElementId 读描述（零行=尚无索引，继续）；正文按需；确定性检查点；新增/修改原则必须登记索引（缺失则创建）。\n- 本仓无配置/图谱改动。\n\n【三次迭代与教训】dd1fff5 硬编码本仓定位（错）→ 22e5f77 改 bundle 声明式但顺带让本仓 opt-in（越界，a3216bb 已回退）→ 2186c40 改为基本能力。教训：交付能力 ≠ 本项目采纳；基本能力=有默认值、零声明生效、可覆盖、可关闭。\n\n【验收】npm test 792/792；validateSystemArchitecture 通过。\n\n【待续】重启 MCP 后 schema:true 才返回 principleIndex；发布 + argo-deploy 后全局生效。\n\n【坑】addArchitectureElement 客户端超时但服务端可能已写入——先查询确认。\n\n【复用】规则只描述行为，定位信息必须是数据；渐进披露的前提是索引常驻。",
+      "description": "项目总管工作记忆摘要（会话 · 2026-10-28 · 原则索引存在性可观测）\n\n【会话目标】解释并修复：为何 Agent 不主动先查图谱（全局规则已写 KG-first）；人类伙伴要求检索按「图语义检索→最小上下文包→据图扩到仓库→再外扩」。\n\n【诊断结论】规则写进 system prompt ≠ 有控制器。证据：① 唯一被插件插到提示最前的是 WAKEUP GATE（argo/plugins/argo-wakeup.js:12-18），只覆盖会话起步，不覆盖检索顺序；② 检索顺序埋在 CoreRule 7 / Exploration 0 / QueryPriorityGuideline（3.4k 词规则中段），中段决策无人唤起；③ 工具摩擦不对称（grep/read 零参数 vs getSystemArchitecture 需 purpose+intent）；④ 宿主提示词自带「省 token/少搜」反向激励；⑤ 无反馈无度量；⑥ 图自身不可靠——本次实证 schema 声明 principle-index-001 而元素零行。\n\n【已修缺陷（50a78b2）】原则索引「声明了却从不存在」+ 规则说「零行继续」= 静默空操作。修复：本仓创建 principle-index-001（Artifact，argo-workflow-rules-view），登记全部 5 条 Principle（2 resident / 3 on-demand）；schema 读新增 principleIndex.status = present / declared-missing（带指名 id 的 hint）/ unknown（图不可解析也不让读失败），null 关闭语义不变；STEP 0 与 <PrincipleIndexGuideline> 要求必须一句话上报并提议创建；新增 tests/principle-index-presence.test.js（三态 + 本仓索引无漂移）并挂 acceptance-guardian。npm test 812/812；validateSystemArchitecture 通过；docs(kg) 300513a 登记。\n\n【待办（按性价比）】1) 用 agent-search-diagnosis 出「首次检索落在哪个通道」基线；2) 触发式改写检索规则（即将 grep/read/webfetch 前先语义查图，用返回 id 作种子）；3) purpose 默认值 / 单参数 argo_search 降摩擦；4) 中段拦截 hook（有基线后再上，防仪式化）。\n【重启】运行中的 MCP 仍为旧代码，重启后 schema:true 才带 status。\n\n【教训】1)「零行=还没有」是静默失败：默认开启的能力必须有存在性诊断，不能靠 Agent 撞零行。2) 去重门禁拦下了「同一能力的第二个里程碑」——这次是对的，应复用原子元素而非造孪生。3) 覆盖写长 description 有丢内容风险，优先用结构化字段（commit/testcase）增量登记。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4472,8 +4472,8 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-22",
-          "description": "原则按 skill 式管理（索引常驻/正文按需）+ CoreRule 13 + 索引视图与元素"
+          "value": "2026-10-28",
+          "description": "原则索引存在性可观测：诊断 Agent 不主动查图的原因 + 创建 principle-index-001 + schema 读 status 三态 + STEP 0 必须上报"
         },
         {
           "name": "commit",
