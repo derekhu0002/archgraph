@@ -587,6 +587,25 @@ function resolvePrincipleIndex(config) {
   return resolved;
 }
 
+// The declaration is a promise about the GRAPH: `indexElementId` names an element
+// the agent is told to read at startup. Declarative validation cannot see the
+// graph, so a declared-but-absent catalog would otherwise pass silently and the
+// agent would read zero rows and continue as if it had loaded the catalog.
+// Callers that can see the graph attach the outcome here, making absence
+// observable instead of silent. `present` is true/false, or null/undefined when
+// the graph could not be inspected (never claim presence on uncertainty).
+function withPrincipleIndexPresence(principleIndex, present) {
+  if (!principleIndex) {
+    return principleIndex; // disabled (`"principleIndex": null`) stays null
+  }
+  const status = present === true ? 'present' : present === false ? 'declared-missing' : 'unknown';
+  const described = { ...principleIndex, status };
+  if (status === 'declared-missing') {
+    described.hint = `The declared principle index '${principleIndex.indexElementId}' does not exist in this graph. Report the gap to the human partner and offer to create the catalog; never invent entries or continue as if it were loaded.`;
+  }
+  return described;
+}
+
 function validatePrincipleIndex(language, elementTypeList, principleIndex) {
   const errors = [];
   if (principleIndex === null || principleIndex === undefined) {
@@ -1121,6 +1140,7 @@ module.exports = {
   resolveSchemaBundle,
   resolveTypeEnums,
   resolvePrincipleIndex,
+  withPrincipleIndexPresence,
   DEFAULT_PRINCIPLE_INDEX,
   buildOntology,
   resolveBundleAxioms,

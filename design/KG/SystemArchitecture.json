@@ -2881,6 +2881,20 @@
           "description": "GIVEN schema bundle 的 principleIndex 为可选声明；WHEN 未声明/合法声明/继承/非法声明；THEN 未声明为 null 且保持默认行为、合法声明按数据透出、非法声明 fail-closed。",
           "name": "AT-rules-08",
           "type": "Acceptance Test"
+        },
+        {
+          "name": "AT-rules-09",
+          "type": "Acceptance Test",
+          "description": "GIVEN schema 读返回 principleIndex 声明；WHEN 声明的索引元素存在/不存在/没法解析图/被 null 关闭；THEN status 分别为 present/declared-missing/unknown（附带指名 id 的 hint）/保持 null，且声明本身不变；图无文件时 schema 读仍成功。",
+          "Input": "tests/principle-index-presence.test.js",
+          "acceptanceCriteria": "tests/principle-index-presence.test.js"
+        },
+        {
+          "name": "AT-rules-10",
+          "type": "Acceptance Test",
+          "description": "GIVEN STEP 0 要加载原则索引；WHEN 索引缺失（零行或 status=declared-missing）；THEN 规则要求一句话说明并提示创建，禁止编造条目、禁止像已加载一样静默继续。",
+          "Input": "tests/argo-rules-principle-index.test.js",
+          "acceptanceCriteria": "tests/argo-rules-principle-index.test.js"
         }
       ],
       "attributes": [
@@ -13347,7 +13361,16 @@
       "id": "overseer-principle-index-001",
       "name": "里程碑：原则按 skill 式管理（原则索引常驻 + 正文按需）",
       "parent": "project-overseer-001",
-      "type": "Business Object"
+      "type": "Business Object",
+      "testcases": [
+        {
+          "name": "AT-ox-principle-index-001",
+          "type": "Acceptance Test",
+          "description": "GIVEN 本仓库 canonical 图与框架默认 indexElementId；WHEN 比对声明的索引元素与图中所有 Principle；THEN 索引元素必须存在，且每个 Principle 都必须登记在索引描述里（不漂移、无遗漏）。",
+          "Input": "tests/principle-index-presence.test.js",
+          "acceptanceCriteria": "tests/principle-index-presence.test.js"
+        }
+      ]
     },
     {
       "attributes": [
@@ -13477,6 +13500,12 @@
         }
       ],
       "type": "Business Object"
+    },
+    {
+      "description": "原则索引（Principle Index）：本项目原则的常驻目录，按 skill 式渐进披露管理——只常驻 id + tier + 一行摘要 + 触发词，正文按需用 getIntentElementContext 读取。\n被 schema 读的 principleIndex.indexElementId 指名（框架默认值 principle-index-001），Agent 在会话起步（WakeupGuideline STEP 0）先读本元素；未列入本目录的原则不得视为已加载。\nresident 层（红线）已写在常驻规则文件 argo/rules/archgraph.instructions.md 中，本目录只登记其 id 以便溯源，不重复正文。\n目录（id | tier | 一行摘要 | 触发词）：\n- overseer-retrieval-recall-first-001 | on-demand | 一切方案/措施不得牺牲检索的检出率与召回率，只能持平或提升 | 检索优化、阈值、截断、rerank、召回、precision/recall\n- framework-optimization-cross-scenario-001 | on-demand | 框架优化不得在一个场景或规模上劣化另一个场景或规模，须做场景×规模剖面验证 | 框架优化、跨场景、规模剖面、回归、性能\n- overseer-memory-tiers-001 | resident | ACTOR 记忆分 T1 工作记忆/T2 长期记忆/T3 档案三层，T1 只载紧凑摘要、正文两步回忆 | 记忆分层、T1/T2/T3、STEP 0、回忆、归档\n- archgraph-content-storage-policy-001 | resident | 文档内容 KG-first 存储，仓库只留必须文件并登记摘要与路径 | 内容存储、文档入库、KG-first、仓库留档\n- overseer-archimate-role-001 | on-demand | ArchiMate 是长期记忆的分类编目规则（手段非目标），变慢就应简化 | ArchiMate、分类编目、视图、Viewpoint、建模语言\n维护：新增或修改原则时必须同步登记本目录；principlesElementType 为 null 时本目录是唯一事实源，必须保持完整、不得漂移。",
+      "id": "principle-index-001",
+      "name": "原则索引（Principle Index）",
+      "type": "Artifact"
     }
   ],
   "relationships": [
@@ -17296,7 +17325,8 @@
         "ctg-decision-001",
         "cdg-decision-001",
         "archgraph-content-storage-policy-001",
-        "cs-policy-decision-001"
+        "cs-policy-decision-001",
+        "principle-index-001"
       ],
       "included_relationships": []
     },

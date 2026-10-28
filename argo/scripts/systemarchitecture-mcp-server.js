@@ -142,6 +142,7 @@ const {
   loadSchemaBundleAndOntology,
   resolveSchemaBundle,
   resolveTypeEnums,
+  withPrincipleIndexPresence,
 } = require('./schema-bundle.js');
 const {
   createProductionGraphRagRuntime,
@@ -172,6 +173,7 @@ const {
   assertReadOnlyCypher,
   buildGraphKey,
   buildNeo4jGraphSchema,
+  readArchitectureDocument,
   recoverNeo4jSyncIfNeeded,
   runNeo4jCypherQuery,
   syncArchitectureToNeo4j,
@@ -3787,6 +3789,18 @@ async function queryNeo4jGraphTool(args = {}) {
   }
 }
 
+// Best-effort probe: does the element the catalog declaration points at exist?
+// A declared-but-absent index is the silent failure this schema read must expose.
+function probeElementPresence(architecturePath, workspaceRoot, elementId) {
+  try {
+    const document = readArchitectureDocument(architecturePath, workspaceRoot);
+    const elements = document && Array.isArray(document.elements) ? document.elements : [];
+    return elements.some((element) => element && element.id === elementId);
+  } catch {
+    return null; // uninspectable graph: report 'unknown', never fail the schema read
+  }
+}
+
 function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
   const schema = buildNeo4jGraphSchema(architecturePath);
   let typeEnums = {};
@@ -3795,6 +3809,7 @@ function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
     const resolvedRoot = workspaceRoot || resolveWorkspaceRoot({ architecturePath });
     const { bundle, ontology } = loadSchemaBundleAndOntology(resolvedRoot);
     const enums = resolveTypeEnums(bundle);
+    const declaredPrincipleIndex = ontology.principleIndex || null;
     typeEnums = {
       archimateElementTypes: enums.elementTypes,
       archimateRelationshipTypes: enums.relationshipTypes,
@@ -3802,7 +3817,12 @@ function queryNeo4jGraphSchemaResult(architecturePath, workspaceRoot) {
       schemaKind: bundle.kind,
       schemaDialect: ontology.dialect,
       actorElementType: ontology.actorElementType,
-      principleIndex: ontology.principleIndex || null,
+      principleIndex: declaredPrincipleIndex
+        ? withPrincipleIndexPresence(
+          declaredPrincipleIndex,
+          probeElementPresence(architecturePath, resolvedRoot, declaredPrincipleIndex.indexElementId),
+        )
+        : null,
       bundleValidation: ontology.bundleValidation,
     };
     schemaBundleInfo = {

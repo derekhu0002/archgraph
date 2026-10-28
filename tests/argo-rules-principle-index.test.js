@@ -54,6 +54,9 @@ test('AT principle-index: the catalog is a base capability, not a per-project op
   assert.match(rules, /indexElementId/, 'must read the returned indexElementId');
   assert.match(rules, /principlesElementType/, 'must read the returned principlesElementType');
   assert.match(rules, /tiers/, 'must read the returned tiers');
+  // AND the read reports whether the declared catalog actually exists
+  assert.match(rules, /declared-missing/, 'must react to a declared-but-absent catalog');
+  assert.match(rules, /status/, 'must read the presence status');
 });
 
 test('AT principle-index: a bundle may override the defaults or disable the capability', () => {
@@ -66,7 +69,7 @@ test('AT principle-index: a bundle may override the defaults or disable the capa
   }
 });
 
-test('AT principle-index: STEP 0 loads the index and tolerates a not-yet-created catalog', () => {
+test('AT principle-index: STEP 0 loads the index and surfaces a not-yet-created catalog', () => {
   const rules = readRules();
   const gate = rules.match(/<WakeupGuideline>([\s\S]*?)<\/WakeupGuideline>/);
   assert.ok(gate, 'the rule must contain a <WakeupGuideline> block');
@@ -74,8 +77,11 @@ test('AT principle-index: STEP 0 loads the index and tolerates a not-yet-created
   assert.match(gate[1], /principles index/i, 'STEP 0 must load the principles index');
   assert.match(gate[1], /indexElementId/, 'STEP 0 must use the returned indexElementId');
   assert.match(gate[1], /never every principle body/i, 'STEP 0 must load the index only');
-  // AND a missing catalog is not an error
+  // AND a missing catalog is tolerated (not an error) but must be observable
   assert.match(gate[1], /Zero rows means no catalog yet/i, 'STEP 0 must tolerate an absent catalog');
+  assert.match(gate[1], /declared-missing/, 'STEP 0 must react to the declared-missing status');
+  assert.match(gate[1], /principleIndex/, 'STEP 0 must take the presence status from the schema read');
+  assert.match(gate[1], /never (invent|continue silently)/i, 'STEP 0 must forbid silent continuation');
 });
 
 test('AT principle-index: CoreRules makes the catalog load non-negotiable', () => {
