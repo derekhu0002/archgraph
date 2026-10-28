@@ -36,7 +36,14 @@ const GRAPH_WRITE_TOOLS = [
   'addArchitectureView', 'updateArchitectureView', 'removeArchitectureView',
 ];
 const VALIDATOR_TOOLS = ['validateSystemArchitecture', 'runArchitectureTests'];
-const REPO_TOOLS = ['read', 'grep', 'glob', 'list', 'bash', 'webfetch', 'edit', 'write'];
+// `kind` must answer ONE question: did this call READ content? A cost metric that
+// wants "the first retrieval of a run" cannot use a kind that lumps file writes,
+// shell runs and task-list edits in with reads. So the repo backend keeps three
+// distinct kinds (read / write / exec), and host utilities that touch neither the
+// graph nor the repository stay `other`.
+const REPO_READ_TOOLS = ['read', 'grep', 'glob', 'list', 'webfetch', 'fetch', 'search_files'];
+const REPO_WRITE_TOOLS = ['write', 'edit', 'multiedit', 'apply_patch', 'patch'];
+const SHELL_TOOLS = ['bash', 'shell', 'powershell', 'terminal', 'exec', 'exec_command', 'run_command'];
 
 function enabled() {
   return process.env.ARGO_COST_PROFILER !== '0';
@@ -55,15 +62,26 @@ function logFilePath(workspaceRoot) {
   return path.join(tempDir(workspaceRoot), LOG_FILE_NAME);
 }
 
-// Pure, total classification. Host tool names may be prefixed (e.g.
-// mcp__argo__getSystemArchitecture), so match by substring.
+// Pure, total classification. Host tool names vary (e.g. `read`,
+// `mcp__argo__getSystemArchitecture`, `functions.read`), so strip a transport
+// prefix (`mcp__<server>__`), a namespace (`functions.`), and the `argo_` alias
+// before matching an exact tool key. Unknown names stay `other` rather than
+// being force-fitted into a backend by substring.
+function toolKey(tool) {
+  const lower = String(tool || '').trim().toLowerCase();
+  const tail = lower.split('__').pop();
+  const segments = tail.split(/[.:]/);
+  return segments[segments.length - 1].replace(/^argo_/, '');
+}
+
 function classifyTool(tool) {
-  const name = String(tool || '');
-  const hit = (list) => list.some(t => name.includes(t));
-  if (hit(GRAPH_WRITE_TOOLS)) return { backend: 'graph', kind: 'write' };
-  if (hit(GRAPH_TOOLS)) return { backend: 'graph', kind: 'read' };
-  if (hit(VALIDATOR_TOOLS)) return { backend: 'framework', kind: 'framework' };
-  if (hit(REPO_TOOLS)) return { backend: 'repo', kind: 'read' };
+  const key = toolKey(tool);
+  if (GRAPH_WRITE_TOOLS.some(t => t.toLowerCase() === key)) return { backend: 'graph', kind: 'write' };
+  if (GRAPH_TOOLS.some(t => t.toLowerCase() === key)) return { backend: 'graph', kind: 'read' };
+  if (VALIDATOR_TOOLS.some(t => t.toLowerCase() === key)) return { backend: 'framework', kind: 'framework' };
+  if (REPO_READ_TOOLS.includes(key)) return { backend: 'repo', kind: 'read' };
+  if (REPO_WRITE_TOOLS.includes(key)) return { backend: 'repo', kind: 'write' };
+  if (SHELL_TOOLS.includes(key)) return { backend: 'repo', kind: 'exec' };
   return { backend: 'other', kind: 'other' };
 }
 

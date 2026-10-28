@@ -37,6 +37,32 @@ test('AT-agent-cost-log-01: one fixed path; tools classify across both backends'
   } finally { fs.rmSync(ws, { recursive: true, force: true }); }
 });
 
+test('AT-agent-cost-log-03: kind distinguishes content reads from writes, shell runs and host utilities', () => {
+  // GIVEN real host tool names across harnesses
+  const cases = [
+    // transport/namespace prefixes must not change the classification
+    ['mcp__argo__queryNeo4jGraph', { backend: 'graph', kind: 'read' }],
+    ['argo_getIntentElementContext', { backend: 'graph', kind: 'read' }],
+    ['functions.read', { backend: 'repo', kind: 'read' }],
+    ['argo_applySystemArchitectureMutation', { backend: 'graph', kind: 'write' }],
+    // writes are NOT reads
+    ['write', { backend: 'repo', kind: 'write' }],
+    ['edit', { backend: 'repo', kind: 'write' }],
+    ['apply_patch', { backend: 'repo', kind: 'write' }],
+    // shell runs are NOT content reads
+    ['bash', { backend: 'repo', kind: 'exec' }],
+    ['shell', { backend: 'repo', kind: 'exec' }],
+    // host utilities touch neither backend (and 'todowrite' must not match 'write')
+    ['todowrite', { backend: 'other', kind: 'other' }],
+    ['task', { backend: 'other', kind: 'other' }],
+  ];
+  // WHEN classified
+  for (const [tool, expected] of cases) {
+    // THEN each kind answers exactly one question: did this call read content?
+    assert.deepEqual(log.classifyTool(tool), expected, `${tool} must classify as ${JSON.stringify(expected)}`);
+  }
+});
+
 test('AT-agent-cost-log-02: appendRecord writes the single file, honors disable, rotates', () => {
   const ws = tmpWorkspace();
   const prevFlag = process.env.ARGO_COST_PROFILER;
