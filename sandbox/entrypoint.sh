@@ -28,8 +28,11 @@ npm init -y >/dev/null 2>&1
 npm install --no-audit --no-fund "$TARBALL"
 
 echo "[sandbox] 3/3 部署框架：npx argo-deploy（核心工具链；跳过 DSH/OpenClaw/交互式 .env）"
+# -SkipOntologyEngine: the ontology-validation engine is OPTIONAL and demands
+# python3 + a JRE as prerequisites (not installed in this sandbox); skipping it
+# keeps the sandbox testing the core toolchain a user actually needs.
 npx --no-install argo-deploy \
-  -SkipDsh -SkipOpenClaw -SkipEnv \
+  -SkipDsh -SkipOpenClaw -SkipEnv -SkipOntologyEngine \
   -ArgoRoot /root/.argo \
   -SkillsRoot /root/.copilot/skills \
   -PromptsRoot /root/prompts \

@@ -71,6 +71,8 @@ ENV USERPROFILE=/root \
 
 WORKDIR /opt/sandbox
 COPY entrypoint.sh smoke.js lightrag-mcp.py test-lightrag-mcp.py lmem-comparison.js lmem-ingest-lightrag.py probe-memory-search.js navigation-agent-eval.js probe-serve-api.js ./
+# Shared helpers: smoke.js and navigation-agent-eval.js require ./lib/argo-init-cli.js.
+COPY lib ./lib
 RUN chmod +x entrypoint.sh
 
 ENTRYPOINT ["/opt/sandbox/entrypoint.sh"]

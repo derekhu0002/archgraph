@@ -24,10 +24,12 @@ test('sandbox-framework-artifacts: sandbox env files exist (Dockerfile/entrypoin
   assert.match(df, /FROM \$\{BASE_IMAGE\}/, 'Dockerfile bases on the configurable BASE_IMAGE');
   assert.match(df, /BASE_IMAGE=node:/, 'Dockerfile default base is a node image');
   assert.match(df, /pwsh/, 'Dockerfile installs PowerShell Core (pwsh) for argo-deploy');
+  assert.match(df, /COPY\s+lib\s+\.\/lib/, 'Dockerfile must ship sandbox/lib (smoke.js and navigation-agent-eval.js require ./lib/argo-init-cli.js)');
   const ep = readFileSync(ENTRYPOINT, 'utf8');
   assert.match(ep, /npm install --no-audit --no-fund/, 'entrypoint installs the tarball like a user');
   assert.match(ep, /npx --no-install argo-deploy/, 'entrypoint deploys via npx argo-deploy');
   assert.match(ep, /USERPROFILE=.*\/root/, 'entrypoint pins USERPROFILE to the container HOME');
+  assert.match(ep, /-SkipOntologyEngine/, 'sandbox deploy must skip the OPTIONAL ontology engine (it would demand python + java prerequisites the sandbox does not install)');
   assert.doesNotMatch(ep, /\/fixture\/|cp \$FIXTURE/, 'entrypoint must not copy a production fixture graph');
 });
 

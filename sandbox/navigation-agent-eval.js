@@ -41,8 +41,23 @@ const ENV_FILE = process.env.ENV_FILE || '/env/argo.env';
 const NEO4J_DRIVER = path.join(HOME, '.argo/node_modules/neo4j-driver');
 
 // ── env ─────────────────────────────────────────────────────────────────────
-function loadEnvFile(file) {
-  if (!fs.existsSync(file)) return;
+// Only SANDBOX-SAFE keys may enter the container from the host env file. The
+// file is the host's own configuration, so host-ONLY settings (absolute host
+// paths, host validators) must never leak in: e.g. ARGO_VALIDATION_EXTENSIONS
+// pointing at C:/Users/<host>/... makes argo-init fail inside Linux.
+const ARGO_ENV_SUPPORTED_KEYS = [
+  'ARGO_EMBEDDING_BASE_URL', 'ARGO_EMBEDDING_MODEL', 'ARGO_EMBEDDING_PROVIDER',
+  'ARGO_EMBEDDING_MODEL_VERSION', 'ARGO_EMBEDDING_DIMENSIONS', 'ARGO_NEO4J_DATABASE_URL',
+  'ARGO_NEO4J_DATABASE_USERNAME', 'ARGO_NEO4J_DATABASE_PASSWORD', 'QWEN_KEY',
+  'ARGO_NEO4J_DATABASE', 'ARGO_LIVE_PROVIDER_E2E', 'ARGO_W31_LIVE_MUTATION_VECTOR_E2E',
+  'ARGO_SEMANTIC_MEMORY_THRESHOLD', 'ARGO_SEMANTIC_AUDIT_THRESHOLD', 'ARGO_SEMANTIC_TOP_K',
+];
+const AGENT_ENV_SUPPORTED_KEYS = ['DEEPSEEK_API_KEY', 'DEEPSEEK_BASE_URL', 'DEEPSEEK_MODEL', 'OPENAI_API_KEY', 'OPENAI_BASE_URL'];
+const SANDBOX_ENV_KEYS = new Set([...ARGO_ENV_SUPPORTED_KEYS, ...AGENT_ENV_SUPPORTED_KEYS]);
+
+function loadEnvFile(file, target = process.env) {
+  if (!fs.existsSync(file)) return [];
+  const applied = [];
   const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
   for (const line of lines) {
     const t = line.trim();
@@ -51,8 +66,11 @@ function loadEnvFile(file) {
     if (eq <= 0) continue;
     const k = t.slice(0, eq).trim();
     const v = t.slice(eq + 1).trim();
-    if (k) process.env[k] = v;
+    if (!k || !SANDBOX_ENV_KEYS.has(k)) continue;
+    target[k] = v;
+    applied.push(k);
   }
+  return applied;
 }
 loadEnvFile(ENV_FILE);
 if (!process.env.ARGO_NEO4J_DATABASE) process.env.ARGO_NEO4J_DATABASE = 'sandbox';
@@ -184,14 +202,6 @@ function dropDbs() {
   } catch (e) { return { ok: false, error: e.message }; }
 }
 
-const ARGO_ENV_SUPPORTED_KEYS = [
-  'ARGO_EMBEDDING_BASE_URL', 'ARGO_EMBEDDING_MODEL', 'ARGO_EMBEDDING_PROVIDER',
-  'ARGO_EMBEDDING_MODEL_VERSION', 'ARGO_EMBEDDING_DIMENSIONS', 'ARGO_NEO4J_DATABASE_URL',
-  'ARGO_NEO4J_DATABASE_USERNAME', 'ARGO_NEO4J_DATABASE_PASSWORD', 'QWEN_KEY',
-  'ARGO_NEO4J_DATABASE', 'ARGO_LIVE_PROVIDER_E2E', 'ARGO_W31_LIVE_MUTATION_VECTOR_E2E',
-  'ARGO_SEMANTIC_MEMORY_THRESHOLD', 'ARGO_SEMANTIC_AUDIT_THRESHOLD', 'ARGO_SEMANTIC_TOP_K',
-];
-
 function prepareEnvFileForPosix() {
   const dest = path.join(WORKSPACE, '.argo', 'env.argo.env');
   try {
@@ -221,6 +231,13 @@ function argoInit() {
 }
 
 // ── agent run + event parsing ──────────────────────────────────────────────
+// The OpenCode host resolves its project directory from PWD, so a stale PWD
+// inherited from the deploy shell would make the framework's host-side cost log
+// land in the wrong directory. Pin it to the workspace the agent actually uses.
+function agentEnv() {
+  return { ...process.env, PWD: WORKSPACE };
+}
+
 function runAgent(question) {
   // Framework content is NEVER modified: the deployed AGENTS.md (the real
   // ARCHGRAPH rule) stays intact, so the eval exercises the WHOLE framework.
@@ -231,7 +248,7 @@ function runAgent(question) {
   let out = ''; let rawSession = ''; let exit = -1;
   try {
     const r = spawnSync('opencode', ['run', '--format', 'json', prompt], {
-      env: process.env, cwd: WORKSPACE, encoding: 'utf8', timeout: 600000, maxBuffer: 40 * 1024 * 1024,
+      env: agentEnv(), cwd: WORKSPACE, encoding: 'utf8', timeout: 600000, maxBuffer: 40 * 1024 * 1024,
     });
     exit = r.status;
     rawSession = String(r.stdout || ''); // raw NDJSON agent-session record (audit trail)
@@ -358,4 +375,4 @@ if (require.main === module) {
   main().then(code => process.exit(code)).catch(e => { console.error(e); process.exit(1); });
 }
 
-module.exports = { QUESTIONS, judgeAnswer, parseEvents, saveRawSession, main };
+module.exports = { QUESTIONS, judgeAnswer, parseEvents, saveRawSession, loadEnvFile, agentEnv, SANDBOX_ENV_KEYS, main };

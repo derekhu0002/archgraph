@@ -56,6 +56,42 @@ test('AT navigation-agent-eval: raw agent session records are packaged per quest
   assert.ok(saved.bytes > 0, 'must record the byte size');
 });
 
+test('AT navigation-agent-eval: the host env file may only inject sandbox-safe keys', () => {
+  // GIVEN the host's own env file, which also carries host-ONLY settings
+  const mod = require(NAV_AGENT);
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nav-agent-env-'));
+  try {
+    const file = path.join(tmp, 'argo.env');
+    fs.writeFileSync(file, [
+      'ARGO_NEO4J_DATABASE_URL=neo4j://host.docker.internal:7687',
+      'ARGO_EMBEDDING_BASE_URL=https://dashscope.example/v1',
+      'QWEN_KEY=embedding-secret',
+      'DEEPSEEK_API_KEY=agent-secret',
+      'ARGO_VALIDATION_EXTENSIONS=[{"name":"ontology","command":["node","C:/Users/host/.argo/cli.js"]}]',
+      'ARGO_RERANK_API_KEY=host-only-secret',
+    ].join('\n'));
+    // WHEN the sandbox loads it
+    const target = {};
+    const applied = mod.loadEnvFile(file, target);
+    // THEN only the sandbox-safe keys are injected…
+    assert.deepEqual(applied.sort(), ['ARGO_EMBEDDING_BASE_URL', 'ARGO_NEO4J_DATABASE_URL', 'DEEPSEEK_API_KEY', 'QWEN_KEY'].sort());
+    // …and host-only config (absolute host paths, host secrets) never leaks in
+    assert.equal(target.ARGO_VALIDATION_EXTENSIONS, undefined, 'host validators must not leak into the container');
+    assert.equal(target.ARGO_RERANK_API_KEY, undefined, 'host-only secrets must not leak into the container');
+  } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
+});
+
+test('AT navigation-agent-eval: the agent env pins PWD to the workspace so the cost log lands there', () => {
+  const mod = require(NAV_AGENT);
+  // GIVEN the deploy shell leaves a stale PWD
+  const env = mod.agentEnv();
+  // THEN the agent process is told its workspace explicitly (host cost log path)
+  assert.equal(env.PWD, process.env.ARGO_REPO_ROOT || '/workspace');
+  // AND the rest of the environment is carried through unchanged
+  const homeKey = process.env.USERPROFILE ? 'USERPROFILE' : 'HOME';
+  assert.equal(env[homeKey], process.env[homeKey]);
+});
+
 test('AT navigation-agent-eval: result package report records raw session files', { skip: !fs.existsSync(path.join(ROOT, 'results', 'navigation-agent-report.json')) }, () => {
   // GIVEN a completed agent-eval run whose report exists in the result bundle
   const report = JSON.parse(fs.readFileSync(path.join(ROOT, 'results', 'navigation-agent-report.json'), 'utf8'));
