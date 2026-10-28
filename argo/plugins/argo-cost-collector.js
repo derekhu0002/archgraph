@@ -28,7 +28,10 @@ export default async function argoCostCollector(input) {
   const workspaceRoot = (input && (input.directory || input.worktree)) || process.cwd();
   const hooks = log.createHostCollectorHooks(workspaceRoot);
   return {
-    "tool.execute.before": async (i) => { try { hooks.before(i); } catch { /* best-effort */ } },
+    // OpenCode delivers tool arguments as the SECOND argument of
+    // tool.execute.before ({ args }); passing it through is what makes the
+    // logged args.keys usable (e.g. telling a schema read from a graph query).
+    "tool.execute.before": async (i, o) => { try { hooks.before(i, o); } catch { /* best-effort */ } },
     "tool.execute.after": async (i, o) => { try { hooks.after(i, o); } catch { /* best-effort */ } },
     event: async (payload) => { try { hooks.event(payload); } catch { /* best-effort */ } },
   };

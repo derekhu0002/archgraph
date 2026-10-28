@@ -103,14 +103,18 @@ test('AT-agent-cost-log-03: host hooks record EVERY action — MCP call, graph w
     hooks.after({ callID: 'c2', sessionID: 's', tool: 'argo_applySystemArchitectureMutation' }, { output: '{"status":"passed"}' });
     hooks.before({ callID: 'c3', sessionID: 's', tool: 'grep', args: { pattern: 'foo' } });
     hooks.after({ callID: 'c3', sessionID: 's', tool: 'grep' }, { output: 'a'.repeat(80) });
+    // OpenCode delivers the arguments as the SECOND hook argument, not on input
+    hooks.before({ callID: 'c4', sessionID: 's', tool: 'argo_queryNeo4jGraph' }, { args: { schema: true } });
+    hooks.after({ callID: 'c4', sessionID: 's', tool: 'argo_queryNeo4jGraph' }, { output: '{"status":"passed"}' });
     // assistant usage event
     hooks.event({ event: { properties: { info: { id: 'm1', role: 'assistant', sessionID: 's', tokens: { input: 100, output: 20, reasoning: 5 }, cost: 0.02 } } } });
 
     const { records } = log.readLog(ws);
     const tools = records.filter(r => r.type === 'tool');
-    assert.equal(tools.length, 3, 'every action is recorded (MCP call, graph write, repo call)');
-    assert.deepEqual(tools.map(r => `${r.backend}/${r.kind}`), ['graph/read', 'graph/write', 'repo/read']);
+    assert.equal(tools.length, 4, 'every action is recorded (MCP call, graph write, repo call)');
+    assert.deepEqual(tools.map(r => `${r.backend}/${r.kind}`), ['graph/read', 'graph/write', 'repo/read', 'graph/read']);
     assert.ok(tools[2].resultTokens > 0);
+    assert.deepEqual(tools[3].args.keys, ['schema'], 'OpenCode hook arguments must be recorded (keys only)');
     assert.ok(typeof tools[0].durationMs === 'number');
     const usage = records.filter(r => r.type === 'usage');
     assert.equal(usage.length, 1);
@@ -137,6 +141,7 @@ test('AT-agent-cost-log-04: the MCP server is NOT instrumented; the plugin ships
   const plugin = fs.readFileSync(pluginPath, 'utf8');
   assert.match(plugin, /createHostCollectorHooks/, 'plugin must use the shared host hooks');
   assert.match(plugin, /tool\.execute\.after/, 'plugin must record tool calls');
+  assert.match(plugin, /hooks\.before\(i,\s*o\)/, 'plugin must forward the host tool arguments (second hook argument)');
   assert.match(plugin, /\bevent\b/, 'plugin must record usage events');
 
   // and the installer registers it (a deploy activates the complete collector)

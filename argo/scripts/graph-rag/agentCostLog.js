@@ -145,9 +145,12 @@ function createHostCollectorHooks(workspaceRoot) {
   const starts = new Map();
   const seenUsage = new Set();
   return {
-    before(input) {
+    // Hosts differ in WHERE the arguments live: OpenCode passes them as the
+    // second argument of tool.execute.before ({ args }), while some harnesses
+    // put them on the input object. Accept both, never record raw values.
+    before(input, toolOutput) {
       if (!input || !input.callID) return;
-      const args = input.args || {};
+      const args = (toolOutput && toolOutput.args) || input.args || {};
       starts.set(input.callID, { t: Date.now(), keys: keysOf(args), bytes: byteLen(args) });
     },
     after(input, output) {
