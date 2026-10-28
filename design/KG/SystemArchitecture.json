@@ -10927,6 +10927,16 @@
           "name": "commit",
           "value": "58e641d",
           "description": "docs(agents): dev/stable split by package name; single latest tag, no --tag beta"
+        },
+        {
+          "name": "decision",
+          "value": "deploy-by-branch-line",
+          "description": "2026-10-28 人类伙伴决策：部署条款按分支线取包（main → archgraph-argo@latest，dev 分支 → archgraph-argo-beta@latest），安装前必须用 npm view <pkg>@latest version 对比 npm ls -g <pkg>，目标版本更旧则停止上报、不得覆盖；原因：dev 包 latest 停在 0.29.20-beta.1，字面照旧条款装 beta 会把稳定线 0.29.23/0.29.24 降级。作废：本元素下方【部署规矩】【Tag 策略】中『安装 archgraph-argo-beta（不写版本/tag）』已作废，以本条为准。已同步改 D:\\\\Projects\\\\archgraph\\\\AGENTS.md 部署条款（commit 5afc72e）。"
+        },
+        {
+          "name": "commit",
+          "value": "5afc72e",
+          "description": "AGENTS.md（部署条款：按当前分支线取最新 registry 包 + 禁跨线安装造成降级；修正写死 archgraph-argo-beta 的旧条款 5afc72e）"
         }
       ]
     },
