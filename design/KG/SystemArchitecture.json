@@ -3593,6 +3593,10 @@
         {
           "view_id": "overseer-ontology-001",
           "view_name": "项目总管记忆·本体与联邦资产"
+        },
+        {
+          "view_id": "overseer-release-archive-021-024",
+          "view_name": "项目总管发布记录·归档（0.21–0.24）"
         }
       ],
       "attributes": [
@@ -9598,8 +9602,8 @@
         },
         {
           "name": "release",
-          "value": "archgraph-argo@0.25.0",
-          "description": "npm publish shasum 5055189fad6de83f7eec818bda2e6fc5c17e9aca；全局安装 + argo-deploy 22/22；已注册 argo-cost-collector 插件（~/.config/opencode/opencode.json）与部署 agentCostLog.js/插件；~/.argo/scripts/argo-mcp-server.js 未含任何采集代码（0 引用）；待人类伙伴重启宿主加载插件开始采集"
+          "value": "archgraph-argo@0.29.27",
+          "description": "args 采集修复（OpenCode 第二参 output.args）已发布并部署；重启后生效"
         },
         {
           "name": "commit",
@@ -9629,6 +9633,11 @@
           "name": "commit",
           "value": "b3d9400",
           "description": "scripts/first-hop-report.js; tests/first-hop-report.test.js（新增 semantic-before-repo 信号与最小样本量判定）"
+        },
+        {
+          "name": "commit",
+          "value": "c79c0d6",
+          "description": "package.json（release archgraph-argo@0.29.27）"
         }
       ]
     },
@@ -13734,6 +13743,34 @@
       "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.26——修度量量具。\n【缺陷】agentCostLog.js 把所有 repo 工具（read/grep/glob/list/bash/webfetch/edit/write）一律标为 repo/read，导致「每个 run 的首个检索」无法用通用判据（kind=read + backend∈{graph,repo}）计算，只能回归到按宿主工具名硬排除，换宿主即失效。\n【修复】toolKey 归一化（mcp__<server>__ / functions. / argo_ 前缀）+ 严格集合匹配；kind 细分：内容读取=read（read/grep/glob/list/webfetch）、落盘=write（write/edit/multiedit/apply_patch/patch）、命令执行=exec（bash/shell/powershell/terminal/exec/exec_command/run_command）、与图仓无关=other（todowrite/task 等）。未知工具一律 other，不再靠子串硬套。AT-agent-cost-log-03。\n【意义】首跳口径变为零工具名假设、跨宿主/跨项目通用：每个 run 的第一条 kind=read 且 backend∈{graph,repo}。\n【发布】npm publish archgraph-argo@0.29.26（latest）→ 传播第 28 次轮询可见 → npm i -g archgraph-argo@0.29.26 → argo-deploy -SkipEnv；核验 ~/.argo/scripts/graph-rag/agentCostLog.js 已含 toolKey/REPO_WRITE_TOOLS/SHELL_TOOLS。\n【待办】重启宿主并**新开会话**（续接会话可能仍持有旧 instructions）；之后用新日志（kind 已细分）复测首跳，目标：仓库首跳占比由基线 29.8% 降到 <20%。\n【验收】npm test 823/823（0 fail / 0 skip）；validateSystemArchitecture 通过。\n【复测·2026-10-28 重启后新会话】部署版本核验：全局 archgraph-argo@0.29.26，新会话日志已按新量具落标（read→repo/read、write→repo/write、bash→repo/exec、todowrite→other）；0.29.25 一字段语义读实测可用（仅传 query.intent，purpose 默认 general）；principleIndex.status=present。首跳复测样本：重启后仅 1 个新 run（本会话），首跳为 graph（STEP 0 queryNeo4jGraph 的 schema 读），repo-first 0%，样本不足不能判定达标。历史可信用子集 31 run（图 87.1%/仓 12.9%）因旧量具会把含 bash/write 的 run 判为 legacy 而只剩「纯图 run」，存在选择偏差，不可与基线 29.8% 直接比较。**新发现量具缺口**：tool.execute.before 的工具参数在 OpenCode 位于第二参 output.args，旧插件只传 input，args.keys 恒为空 → schema 读与其它 queryNeo4jGraph 无法区分（报告中 structural 含未识别的 schema 读）。已在 562bf65 修复（含 AT），需随下一版本发布并重启后才对后续样本生效。首跳口径已固化为 scripts/first-hop-report.js（AT-first-hop-01..05），复测命令：node scripts/first-hop-report.js --since <重启时间>。",
       "id": "overseer-argo-0-29-26-release-001",
       "name": "里程碑：发布 archgraph-argo@0.29.26（成本日志 kind 细分，修首跳量具）",
+      "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "npm publish shasum 40a47b89ae8740093bd827a8cf157a842fd6edcf；全局安装 + argo-deploy",
+          "name": "release",
+          "value": "archgraph-argo@0.29.27"
+        },
+        {
+          "description": "argo/scripts/graph-rag/agentCostLog.js; argo/plugins/argo-cost-collector.js; tests/agent-cost-log.test.js（args 采集修复）",
+          "name": "commit",
+          "value": "562bf65"
+        },
+        {
+          "description": "package.json（release archgraph-argo@0.29.27）",
+          "name": "commit",
+          "value": "c79c0d6"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ],
+      "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.27——修宿主工具参数采集。\n【缺陷】OpenCode 的 tool.execute.before(input, output) 把工具参数放在第二参 output.args；插件只传了 input，agentCostLog 的 args.keys/bytes 恒为空（{}）。后果：成本日志无法区分 queryNeo4jGraph 的 schema 读（STEP 0）与其它图查询，首跳 breakdown 的 schema 桶永远为 0。\n【修复】createHostCollectorHooks.before(input, toolOutput) 兼容两种宿主形态（第二参 output.args 优先，回落 input.args）；插件透传第二参；仍只记 keys/bytes，不落原值。AT-agent-cost-log-03 增加 OpenCode 第二参形态断言；AT-agent-cost-log-04 断言插件透传。\n【发布】npm publish archgraph-argo@0.29.27（registry 第 8 次轮询可见）→ npm i -g archgraph-argo@0.29.27 → argo-deploy -SkipEnv；核验 ~/.argo/scripts/graph-rag/agentCostLog.js 含 before(input, toolOutput)、~/.argo/plugins/argo-cost-collector.js 含 hooks.before(i, o)；opencode.json 已注册 argo-wakeup + argo-cost-collector。\n【生效条件】运行中的宿主进程持有旧代码，需重启 opencode 后才能记录 args。\n【验收】npm test 829/829（0 fail / 0 skip）；validateSystemArchitecture 通过。",
+      "id": "overseer-argo-0-29-27-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.29.27（OpenCode 工具参数采集修复）",
+      "parent": "project-overseer-001",
       "type": "Business Object"
     }
   ],
@@ -17938,21 +17975,14 @@
       "view_id": "overseer-release-001",
       "view_name": "项目总管发布记录",
       "included_elements": [
-        "overseer-argo-0-21-0-release-001",
-        "overseer-argo-0-22-0-release-001",
-        "overseer-argo-0-22-1-release-001",
-        "overseer-argo-0-22-2-release-001",
-        "overseer-argo-0-23-0-release-001",
-        "overseer-argo-0-24-0-release-001",
-        "overseer-argo-0-24-1-release-001",
-        "overseer-argo-0-24-2-release-001",
         "overseer-milestone-schema-cross-project-001",
         "overseer-argo-0-28-0-release-001",
         "overseer-mem-issue12-functional-closedworld-001",
         "overseer-argo-0-29-18-release-001",
         "overseer-argo-0-29-24-release-001",
         "overseer-argo-0-29-25-release-001",
-        "overseer-argo-0-29-26-release-001"
+        "overseer-argo-0-29-26-release-001",
+        "overseer-argo-0-29-27-release-001"
       ],
       "included_relationships": []
     },
@@ -18761,6 +18791,22 @@
         "argo-init-cli-001"
       ],
       "included_relationships": []
+    },
+    {
+      "description": "项目总管发布记录的分层子视图：归档 0.21–0.24 版本里程碑，为主视图 overseer-release-001（上限 15）腾出位置。",
+      "included_elements": [
+        "overseer-argo-0-21-0-release-001",
+        "overseer-argo-0-22-0-release-001",
+        "overseer-argo-0-22-1-release-001",
+        "overseer-argo-0-22-2-release-001",
+        "overseer-argo-0-23-0-release-001",
+        "overseer-argo-0-24-0-release-001",
+        "overseer-argo-0-24-1-release-001",
+        "overseer-argo-0-24-2-release-001"
+      ],
+      "parent_element_id": "project-overseer-001",
+      "view_id": "overseer-release-archive-021-024",
+      "view_name": "项目总管发布记录·归档（0.21–0.24）"
     }
   ]
 }
