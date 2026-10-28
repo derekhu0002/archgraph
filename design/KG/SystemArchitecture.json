@@ -13765,9 +13765,14 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "verification",
+          "value": "args-capture-live",
+          "description": "2026-10-28T07:55Z pid=8452：args.keys 已采集；报告 schema 桶可识别（确凿）"
         }
       ],
-      "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.27——修宿主工具参数采集。\n【缺陷】OpenCode 的 tool.execute.before(input, output) 把工具参数放在第二参 output.args；插件只传了 input，agentCostLog 的 args.keys/bytes 恒为空（{}）。后果：成本日志无法区分 queryNeo4jGraph 的 schema 读（STEP 0）与其它图查询，首跳 breakdown 的 schema 桶永远为 0。\n【修复】createHostCollectorHooks.before(input, toolOutput) 兼容两种宿主形态（第二参 output.args 优先，回落 input.args）；插件透传第二参；仍只记 keys/bytes，不落原值。AT-agent-cost-log-03 增加 OpenCode 第二参形态断言；AT-agent-cost-log-04 断言插件透传。\n【发布】npm publish archgraph-argo@0.29.27（registry 第 8 次轮询可见）→ npm i -g archgraph-argo@0.29.27 → argo-deploy -SkipEnv；核验 ~/.argo/scripts/graph-rag/agentCostLog.js 含 before(input, toolOutput)、~/.argo/plugins/argo-cost-collector.js 含 hooks.before(i, o)；opencode.json 已注册 argo-wakeup + argo-cost-collector。\n【生效条件】运行中的宿主进程持有旧代码，需重启 opencode 后才能记录 args。\n【验收】npm test 829/829（0 fail / 0 skip）；validateSystemArchitecture 通过。",
+      "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.27——修宿主工具参数采集。\n【缺陷】OpenCode 的 tool.execute.before(input, output) 把工具参数放在第二参 output.args；插件只传了 input，agentCostLog 的 args.keys/bytes 恒为空（{}）。后果：成本日志无法区分 queryNeo4jGraph 的 schema 读（STEP 0）与其它图查询，首跳 breakdown 的 schema 桶永远为 0。\n【修复】createHostCollectorHooks.before(input, toolOutput) 兼容两种宿主形态（第二参 output.args 优先，回落 input.args）；插件透传第二参；仍只记 keys/bytes，不落原值。AT-agent-cost-log-03 增加 OpenCode 第二参形态断言；AT-agent-cost-log-04 断言插件透传。\n【发布】npm publish archgraph-argo@0.29.27（registry 第 8 次轮询可见）→ npm i -g archgraph-argo@0.29.27 → argo-deploy -SkipEnv；核验 ~/.argo/scripts/graph-rag/agentCostLog.js 含 before(input, toolOutput)、~/.argo/plugins/argo-cost-collector.js 含 hooks.before(i, o)；opencode.json 已注册 argo-wakeup + argo-cost-collector。\n【生效条件】运行中的宿主进程持有旧代码，需重启 opencode 后才能记录 args。\n【重启后核验 2026-10-28T07:55Z】新进程 pid=8452：日志 args 已落（bash keys=[\"command\"] bytes=105，此前恒为 {}）；scripts/first-hop-report.js 对同一 run 正确判出 graph/schema（schema 桶从恒 0 变为可识别），端到端「采集 → 口径」链路打通。首跳样本仍为 n=1（本会话），报告按规则标 INSUFFICIENT SAMPLE。\n【验收】npm test 829/829（0 fail / 0 skip）；validateSystemArchitecture 通过。",
       "id": "overseer-argo-0-29-27-release-001",
       "name": "里程碑：发布 archgraph-argo@0.29.27（OpenCode 工具参数采集修复）",
       "parent": "project-overseer-001",
