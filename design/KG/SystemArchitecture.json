@@ -13584,6 +13584,43 @@
       "id": "overseer-argo-0-29-24-release-001",
       "name": "里程碑：发布 archgraph-argo@0.29.24（原则索引存在性可观测）",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（release archgraph-argo@0.29.25）",
+          "name": "commit",
+          "value": "08b3fb9"
+        },
+        {
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/read-friction.test.js（一字段语义读）",
+          "name": "commit",
+          "value": "65289d8"
+        },
+        {
+          "description": "argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; tests/argo-rules-query.test.js（检索决策点触发语）",
+          "name": "commit",
+          "value": "5408e35"
+        },
+        {
+          "name": "commit",
+          "value": "cd6fc6a",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记 AT-rules-11）"
+        },
+        {
+          "description": "archgraph-argo@0.29.25",
+          "name": "release",
+          "value": "archgraph-argo@0.29.25"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ],
+      "description": "里程碑（2026-10-28 晚）：发布并部署 archgraph-argo@0.29.25，两项一起上线。\n① 一字段语义读（65289d8）：getSystemArchitecture 只需 query.intent（也接受裸 intent 字符串），purpose 默认 general，audit 仍为缺 subject 即 fail-closed 的显式严格模式；网关与域服务两份 inputSchema 同步，并新增漂移 AT；空白/缺失 intent 仍拒绝（省略 query 的全量读仍是最后手段）。\n② 检索顺序改为决策点触发语（5408e35）：STEP 0 新增 Retrieval contract（首个检索是图语义查询、已知文件路径不算检索问题、仓内/网络检索以返回 id 为种子）、QueryPriorityGuideline 第1条改为“即将搜索文件/代码/网络时先语义查图”的触发语、opencode 唤醒插件同文、dsh 产物重新生成。AT-rules-11。\n【基线（发布前实测，agent-cost-log.ndjson，141 个 run）】首跳落图 70.2%，落仓 29.8%；但 99 个“图首跳”里 85 个是 STEP 0 的 schema 读，真正首跳语义检索仅 9.9%。\n【验收标准】重启后按 backend 口径复测首跳：仓库首跳占比应从 29.8% 降到 <20%。\n【发布】npm publish archgraph-argo@0.29.25（latest）→ 传播轮询至可见 → npm i -g archgraph-argo@0.29.25 → argo-deploy -SkipEnv 完成。部署核验：~/.config/opencode/AGENTS.md 与 ~/.codex/AGENTS.md 含 Retrieval contract；~/.argo/plugins/argo-wakeup.js 含新行；~/.dsh/plugins/dsh-argo-wakeup/index.js 已重生成；~/.argo/scripts 含 normalizeExplicitQuery 与裸 intent 描述。\n【待办】重启宿主后生效，并复测首跳。\n【验收】npm test 822/822（0 fail / 0 skip）；validateSystemArchitecture 通过。",
+      "id": "overseer-argo-0-29-25-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.29.25（检索决策点触发语 + 一字段语义读）",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -17799,7 +17836,8 @@
         "overseer-argo-0-28-0-release-001",
         "overseer-mem-issue12-functional-closedworld-001",
         "overseer-argo-0-29-18-release-001",
-        "overseer-argo-0-29-24-release-001"
+        "overseer-argo-0-29-24-release-001",
+        "overseer-argo-0-29-25-release-001"
       ],
       "included_relationships": []
     },
