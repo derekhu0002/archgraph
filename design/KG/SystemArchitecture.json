@@ -13812,6 +13812,35 @@
       "name": "里程碑：发布 archgraph-argo@0.29.27（OpenCode 工具参数采集修复）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "npm publish → 全局安装 → argo-deploy -SkipEnv 完成（22/22）",
+          "name": "release",
+          "value": "archgraph-argo@0.29.28"
+        },
+        {
+          "description": "package.json（chore(release): archgraph-argo@0.29.28）",
+          "name": "commit",
+          "value": "b9ef2ce"
+        },
+        {
+          "description": "argo/scripts/ontology-projection/cli.js; tests/ontology-validation-extension.test.js（修复本体真引擎失败分类 + stderr 尾部保留 + AT-ovx-19）",
+          "name": "commit",
+          "value": "9b5b81d"
+        },
+        {
+          "description": "npm test 832/832；acceptance:ontology A/B/C PASS；validateSystemArchitecture passed；部署文件 sha256 与仓库一致",
+          "name": "verification",
+          "value": "2026-10-28"
+        }
+      ],
+      "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.28——本体校验扩展的真引擎失败诊断修复。\n【缺陷】ontology-projection/cli.js 把『引擎已启动但崩溃/非零退出』与『引擎无法启动』一律报成 engine unavailable，且 stderr 只取头 300 字符，Python traceback 末尾的真实原因被截掉（例：缺 type 元素 → KeyError: 'type' 被误标为 python 不可用，而本机 Python 正常）。\n【修复】ENOENT（及 spawn 失败）→ unavailable；非零退出/崩溃 → failed，并带 exit/signal 与 stderr 尾部 800 字符；新增 AT-ovx-19（缺解释器 vs 引擎崩溃分类 + 尾部原因保留）。commit 9b5b81d。\n【发布】npm publish archgraph-argo@0.29.28（shasum 962d712b07185a2f2ea8b1eb655341b4e4fe415e，registry 第 9 次轮询可见）→ npm i -g archgraph-argo@0.29.28 → argo-deploy -SkipEnv（22/22）；核验 ~/.argo/scripts/ontology-projection/cli.js 与仓库 sha256 一致（5BFBB3B9…）。\n【验收】npm test 832/832（0 fail/0 skip）；npm run acceptance:ontology（Docker 真引擎）A/B/C 全 PASS；validateSystemArchitecture 通过。npm run acceptance（schema-decoupling）5/10：失败均为既有环境/夹具问题——verify-all.js 复制清单漏 bin（/work/bin/argo-init.js 不存在，自 init 迁到 CLI 起即失效）与宿主 Neo4j 缺 schema-bundle-* 测试库；已用 stash 基线复跑确认与本次改动无关。\n【生效条件】运行中的 MCP 进程仍持有旧代码，需重启宿主。",
+      "id": "overseer-argo-0-29-28-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.29.28（本体真引擎失败诊断修复）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -18022,7 +18051,8 @@
         "overseer-argo-0-29-24-release-001",
         "overseer-argo-0-29-25-release-001",
         "overseer-argo-0-29-26-release-001",
-        "overseer-argo-0-29-27-release-001"
+        "overseer-argo-0-29-27-release-001",
+        "overseer-argo-0-29-28-release-001"
       ],
       "included_relationships": []
     },
