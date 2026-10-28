@@ -2604,7 +2604,7 @@
       ]
     },
     {
-      "description": "复用 ARGO MCP 检索方法：语义检索 getSystemArchitecture（query.purpose + query.intent）与上下文检索 getIntentElementContext / getArchitectureViewContext，返回命中元素/关系/视图供定位。",
+      "description": "复用 ARGO MCP 检索方法：语义检索 getSystemArchitecture（query.intent；purpose 默认 general，audit 为显式严格模式）与上下文检索 getIntentElementContext / getArchitectureViewContext，返回命中元素/关系/视图供定位。",
       "id": "2763",
       "name": "知识图谱搜索服务",
       "parent": "2760",
@@ -3866,6 +3866,13 @@
           "type": "Acceptance Test",
           "Input": "tests/argo-semantic-scope.test.js",
           "acceptanceCriteria": "tests/argo-semantic-scope.test.js"
+        },
+        {
+          "acceptanceCriteria": "tests/read-friction.test.js",
+          "description": "GIVEN getSystemArchitecture 的查询契约；WHEN 只给 query.intent（或裸 intent 字符串）；THEN 校验通过且生效 purpose=general；WHEN purpose:audit 缺 subject、purpose 非法、intent 空白/缺失；THEN 分别 fail-closed；两处 MCP gateway 的 inputSchema 不得漂移。",
+          "Input": "tests/read-friction.test.js",
+          "name": "AT-subgraph-semantic-02",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
@@ -3877,6 +3884,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "65289d8",
+          "description": "argo/scripts/systemarchitecture-mcp-server.js; argo/scripts/argo-mcp-server.js; argo/rules/archgraph.instructions.md; tests/read-friction.test.js; tests/argo-rules-query.test.js; tests/argo-semantic-scope.test.js; tests/acceptance-guardian.test.js（一字段语义读：query.intent 已足够，purpose 默认 general；两处 gateway schema 一致 65289d8）"
         }
       ]
     },
