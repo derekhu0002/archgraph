@@ -23,6 +23,11 @@
  *     mixed into the headline: if any record contradicts the current classifier
  *     (e.g. `bash` recorded as kind=read), that run's labels cannot be trusted.
  *
+ * The first hop alone cannot show whether a run that touches the repository
+ * first consulted the graph at all, so the report also measures, per run, the
+ * rule the framework actually states: a SEMANTIC graph read (getSystemArchitecture
+ * / memory_search) before the first repository read. That is the signal to watch.
+ *
  * Read-only. Usage:
  *   node scripts/first-hop-report.js [--log PATH] [--since ISO]
  *                                    [--gap-minutes N] [--json] [--details]
@@ -35,6 +40,8 @@ const ROOT = path.resolve(__dirname, '..');
 const DEFAULT_GAP_MINUTES = 30;
 const HOP_BACKENDS = ['graph', 'repo'];
 const REPO_FIRST_TARGET_PCT = 20;
+// A verdict from a handful of runs is noise; say so instead of claiming success.
+const MIN_RUNS_FOR_VERDICT = 10;
 
 // Host tool names vary (`read`, `mcp__argo__getSystemArchitecture`, `argo_x`,
 // `functions.read`). This mirrors agentCostLog.toolKey so the report can name a
@@ -127,6 +134,26 @@ function graphHopType(record) {
   return SEMANTIC_TOOLS.has(key) ? 'semantic' : 'structural';
 }
 
+// The first-hop metric alone cannot show whether a run that DOES touch the
+// repository first consulted the graph's semantic index (the actual rule:
+// semantic graph retrieval -> minimal context -> widen to the repository).
+// This is that second, more decisive signal.
+function semanticBeforeRepo(run) {
+  let firstSemantic = -1;
+  let firstRepo = -1;
+  (run.records || []).forEach((record, index) => {
+    if (record.kind !== 'read') return;
+    if (firstRepo === -1 && record.backend === 'repo') firstRepo = index;
+    if (firstSemantic === -1 && record.backend === 'graph' && graphHopType(record) === 'semantic') firstSemantic = index;
+  });
+  return {
+    firstSemantic,
+    firstRepo,
+    touchesRepo: firstRepo !== -1,
+    semanticFirst: firstSemantic !== -1 && (firstRepo === -1 || firstSemantic < firstRepo),
+  };
+}
+
 function pct(part, whole) {
   return whole > 0 ? Math.round((part / whole) * 1000) / 10 : null;
 }
@@ -152,8 +179,14 @@ function buildFirstHopReport(records, options = {}) {
   const graphBreakdown = { schema: 0, semantic: 0, structural: 0 };
   const graphHopTools = {};
   const argsRecorded = rows.some(record => record.args && Array.isArray(record.args.keys) && record.args.keys.length > 0);
+  const repoTasks = { runs: 0, semanticFirst: 0 };
   const details = [];
   for (const run of measured) {
+    const signal = semanticBeforeRepo(run);
+    if (signal.touchesRepo) {
+      repoTasks.runs += 1;
+      if (signal.semanticFirst) repoTasks.semanticFirst += 1;
+    }
     const first = firstHopOf(run);
     if (!first) {
       hop.none += 1;
@@ -189,6 +222,11 @@ function buildFirstHopReport(records, options = {}) {
     firstHop: hop,
     graphFirstBreakdown: graphBreakdown,
     graphHopTools,
+    repoTasks: {
+      runs: repoTasks.runs,
+      semanticFirst: repoTasks.semanticFirst,
+      semanticFirstPct: pct(repoTasks.semanticFirst, repoTasks.runs),
+    },
     instrument: { argsRecorded },
     percentages: {
       repoFirst: repoFirstPct,
@@ -196,7 +234,12 @@ function buildFirstHopReport(records, options = {}) {
       graphSemanticFirst: pct(graphBreakdown.semantic, hops),
       graphSchemaFirst: pct(graphBreakdown.schema, hops),
     },
-    target: { repoFirstPctBelow: REPO_FIRST_TARGET_PCT, met: repoFirstPct !== null && repoFirstPct < REPO_FIRST_TARGET_PCT },
+    target: {
+      repoFirstPctBelow: REPO_FIRST_TARGET_PCT,
+      minRuns: MIN_RUNS_FOR_VERDICT,
+      sampleSufficient: measured.length >= MIN_RUNS_FOR_VERDICT,
+      met: measured.length >= MIN_RUNS_FOR_VERDICT && repoFirstPct !== null && repoFirstPct < REPO_FIRST_TARGET_PCT,
+    },
     details,
   };
 }
@@ -213,11 +256,12 @@ function formatReport(report, options = {}) {
   lines.push(`first hop: graph ${h.graph} (${fmt(report.percentages.graphFirst)}%) | repo ${h.repo} (${fmt(report.percentages.repoFirst)}%) | none ${h.none}`);
   const g = report.graphFirstBreakdown;
   lines.push(`graph hops: schema ${g.schema} | semantic ${g.semantic} | structural ${g.structural}`);
+  lines.push(`runs touching the repo: ${report.repoTasks.runs} | semantic graph read before the first repo read: ${report.repoTasks.semanticFirst} (${fmt(report.repoTasks.semanticFirstPct)}%)`);
   if (!report.instrument.argsRecorded) {
     lines.push('note: tool arguments were NOT recorded, so STEP-0 schema reads cannot be separated');
     lines.push('      from other graph queries (queryNeo4jGraph counted as structural).');
   }
-  lines.push(`target: repo-first < ${report.target.repoFirstPctBelow}% -> ${report.target.met ? 'MET' : 'NOT MET'}`);
+  lines.push(`target: repo-first < ${report.target.repoFirstPctBelow}% -> ${report.target.sampleSufficient ? (report.target.met ? 'MET' : 'NOT MET') : `INSUFFICIENT SAMPLE (n=${report.runs.measured} < ${report.target.minRuns})`}`);
   if (options.details) {
     lines.push('');
     lines.push('details:');
@@ -281,6 +325,7 @@ module.exports = {
   runHasTrustworthyKinds,
   firstHopOf,
   graphHopType,
+  semanticBeforeRepo,
   buildFirstHopReport,
   formatReport,
   parseArgs,

@@ -96,14 +96,57 @@ test('AT-first-hop-04: graph hops split into schema / semantic / structural and 
   assert.equal(result.firstHop.repo, 1);
   assert.equal(result.percentages.repoFirst, 20);
   assert.equal(result.percentages.graphSemanticFirst, 40);
-  // AND the target is strict: exactly 20% is not below 20%
-  assert.equal(result.target.met, false, 'repo-first must be strictly below the target');
-  // WHEN one more graph-first run is added
+  // AND a verdict is withheld while the sample is too small
+  assert.equal(result.target.sampleSufficient, false);
+  assert.equal(result.target.met, false);
+  // WHEN one more graph-first run is added (still below the minimum sample)
   records.push(tool(at(5), { pid: 6, tool: 'getSystemArchitecture', backend: 'graph', kind: 'read' }));
   const better = report.buildFirstHopReport(records);
-  // THEN 1/6 repo-first clears the target
   assert.equal(better.percentages.repoFirst, 16.7);
-  assert.equal(better.target.met, true);
+  assert.equal(better.target.sampleSufficient, false, 'six runs are still too few for a verdict');
+  // WHEN the sample reaches the minimum (10 runs, 1 repo-first)
+  for (let i = 0; i < 4; i += 1) {
+    records.push(tool(at(10 + i), { pid: 7 + i, tool: 'getSystemArchitecture', backend: 'graph', kind: 'read' }));
+  }
+  const verdict = report.buildFirstHopReport(records);
+  // THEN the strict target is judged
+  assert.equal(verdict.target.sampleSufficient, true);
+  assert.equal(verdict.percentages.repoFirst, 10);
+  assert.equal(verdict.target.met, true);
+});
+
+test('AT-first-hop-06: a semantic graph read before the first repo read is the decisive signal', () => {
+  // GIVEN runs that differ only in retrieval ORDER (helper keeps fixtures readable)
+  const trajectory = (pid, calls) => ({
+    records: calls.map(([tool, backend], index) => ({
+      at: `2026-10-28T00:00:0${index}Z`, pid, source: 'host', type: 'tool', tool, backend, kind: 'read', args: { keys: [] },
+    })),
+  });
+
+  // WHEN the repo is read before any semantic graph read
+  const repoThenGraph = trajectory(1, [['grep', 'repo'], ['getSystemArchitecture', 'graph']]);
+  const a = report.semanticBeforeRepo(repoThenGraph);
+  // THEN the run touches the repo but did NOT consult the semantic index first
+  assert.equal(a.touchesRepo, true);
+  assert.equal(a.semanticFirst, false);
+
+  // WHEN a semantic read comes first (memory_search or getSystemArchitecture)
+  const semanticThenRepo = trajectory(2, [['memory_search', 'graph'], ['queryNeo4jGraph', 'graph'], ['read', 'repo']]);
+  const b = report.semanticBeforeRepo(semanticThenRepo);
+  // THEN the signal is true
+  assert.equal(b.touchesRepo, true);
+  assert.equal(b.semanticFirst, true);
+
+  // WHEN only a non-semantic graph read precedes the repo
+  const structuralThenRepo = trajectory(3, [['queryNeo4jGraph', 'graph'], ['grep', 'repo']]);
+  // THEN a structural query alone does not count as consulting the semantic index
+  assert.equal(report.semanticBeforeRepo(structuralThenRepo).semanticFirst, false);
+
+  // AND the aggregate only divides by runs that actually touched the repo
+  const result = report.buildFirstHopReport([...repoThenGraph.records, ...semanticThenRepo.records, ...structuralThenRepo.records]);
+  assert.equal(result.repoTasks.runs, 3);
+  assert.equal(result.repoTasks.semanticFirst, 1);
+  assert.equal(result.repoTasks.semanticFirstPct, 33.3);
 });
 
 test('AT-first-hop-05: reads the real log file, applies --since, and survives a missing log', () => {
