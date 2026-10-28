@@ -13523,6 +13523,33 @@
           "description": "design/KG/SystemArchitecture.json; argo/rules/archgraph.instructions.md（原则索引落地：5 条原则登记 + 存在性探针 50a78b2）"
         }
       ]
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（release archgraph-argo@0.29.24：原则索引存在性可观测）",
+          "name": "release",
+          "value": "archgraph-argo@0.29.24"
+        },
+        {
+          "description": "package.json（chore(release) archgraph-argo@0.29.24）",
+          "name": "commit",
+          "value": "e55e902"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json; argo/scripts/schema-bundle.js; argo/scripts/systemarchitecture-mcp-server.js; argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; tests/principle-index-presence.test.js（修复主体）",
+          "name": "commit",
+          "value": "50a78b2"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ],
+      "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.24（稳定线 main）。\n内容：原则目录「声明了却从不存在」的静默缺陷修复——① 本仓创建 principle-index-001（Artifact，argo-workflow-rules-view）并登记全部 5 条 Principle；② queryNeo4jGraph {schema:true} 的 principleIndex 新增 status = present / declared-missing（附指名 id 的 hint）/ unknown（图不可解析也不让读失败），\"principleIndex\": null 关闭语义不变；③ STEP 0 与 <PrincipleIndexGuideline> 要求 declared-missing 或零行必须一句话上报并提议创建；④ 新增 tests/principle-index-presence.test.js（三态 + 本仓索引无漂移）+ acceptance-guardian 条目。\n发布：npm publish archgraph-argo@0.29.24（latest）→ 传播第 18 次轮询可见 → npm i -g archgraph-argo@0.29.24 → argo-deploy -SkipEnv（opencode/Codex 规则与插件、Codex skills、MCP 注册均已更新）。\n部署核验：~/.config/opencode/AGENTS.md 与 ~/.codex/AGENTS.md 含 declared-missing；~/.argo/scripts/schema-bundle.js 含 withPrincipleIndexPresence；~/.argo/scripts/systemarchitecture-mcp-server.js 含 probeElementPresence；~/.argo/plugins/argo-wakeup.js 已更新。\n【待办】重启宿主（opencode / VS Code / Cursor / OpenClaw / Doubao / Codex）以加载新常驻 MCP 进程；重启后 schema:true 才返回 status。\n【验收】npm test 812/812（0 fail / 0 skip）；validateSystemArchitecture 通过。",
+      "id": "overseer-argo-0-29-24-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.29.24（原则索引存在性可观测）",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -17737,7 +17764,8 @@
         "overseer-milestone-schema-cross-project-001",
         "overseer-argo-0-28-0-release-001",
         "overseer-mem-issue12-functional-closedworld-001",
-        "overseer-argo-0-29-18-release-001"
+        "overseer-argo-0-29-18-release-001",
+        "overseer-argo-0-29-24-release-001"
       ],
       "included_relationships": []
     },
