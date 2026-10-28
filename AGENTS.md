@@ -30,20 +30,22 @@ matrix.
 
 ## Deployment (this repo)
 
-1. **Deploy only via the official method.** Host deployment MUST install the
-   published package from the registry, then run the deployer:
-   `npm i -g archgraph-argo-beta` followed by `argo-deploy -SkipEnv`. Never
-   install from a local tarball, folder, `npm pack`, or any other path — the
-   registry artifact is the only sanctioned source.
-2. **Tag policy: one `latest` per package; separate dev/stable by PACKAGE NAME.**
-   Stable = `archgraph-argo` (its own `latest`); dev = `archgraph-argo-beta` (its
-   own `latest`, tracking the newest dev build). Do NOT use `--tag beta` (or any
-   extra dev tag): publish dev releases with the default tag so the dev package
-   keeps a single `latest`. Install dev with `npm i -g archgraph-argo-beta`
-   (no version, no tag).
+1. **Deploy the package that matches the current branch line.** Host deployment
+   MUST install the published package from the registry, then run the deployer:
+   `npm i -g <package>@latest` followed by `argo-deploy -SkipEnv`. `main` ships
+   the stable package `archgraph-argo`; a dev branch ships `archgraph-argo-beta`.
+   Never install from a local tarball, folder, `npm pack`, or any other path —
+   the registry artifact is the only sanctioned source.
+2. **Never cross lines: the other line's package may be a downgrade.** Before
+   installing, compare `npm view <package>@latest version` with what is already
+   installed (`npm ls -g <package>`). A dev `latest` legitimately trails stable,
+   so installing it onto a stable host replaces newer code with older code — if
+   the target is older, stop and report instead of installing. Tag policy: one
+   `latest` per package, dev/stable separated by package name; do NOT use
+   `--tag beta` or any extra dev tag.
 3. **Wait out registry propagation, don't bypass it.** After `npm publish`,
-   confirm `npm view archgraph-argo-beta@<version> version` succeeds before
-   installing. If it lags, retry — do not fall back to a local install.
+   confirm `npm view <package>@<version> version` succeeds before installing. If
+   it lags, retry — do not fall back to a local install.
 4. **The deployer copies, it does not mirror.** `argo-deploy` copy-overlays
    `argo/schema` into `~/.argo/schema` without deleting renamed/removed files.
    After a rename, manually delete stale files under `~/.argo` (e.g. old
