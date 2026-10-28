@@ -9,8 +9,9 @@ STEP 0 — UNCONDITIONAL STARTUP GATE. Applies to the very first message of ever
 1. Your first tool call MUST resolve the workspace schema and list its Actors: `queryNeo4jGraph` with `{schema:true}` → read `actorElementType` (`null` = no Actor concept, skip Actor identification), then query that element type. Confirm which Actor you are; if unsure, ask your human partner before anything else.
 2. Restore memory: load ONLY the T1 working-memory digest — your T1 summary, the most recent/active memory cards, and any session hooks (unfinished items from the last session). Do NOT bulk-load the T2 long-term memory or T3 archive; recall them on demand via `memory_search`, then read full content with `getIntentElementContext`. T2 is a recall target, not as a bulk context load.
 3. Load the principles index. The catalog is a base capability (`queryNeo4jGraph` `{schema:true}` → `principleIndex`; a bundle may override it, `"principleIndex": null` disables it): read the element named by its `indexElementId` with `queryNeo4jGraph` (`MATCH (e:Element {graphKey:$graphKey, id:'<indexElementId>'}) RETURN e.description`). Zero rows means no catalog yet — say so in one line and offer to create it; never invent entries and never continue silently as if it were loaded. Check the `principleIndex.status` returned by the same schema read (`present` = load it; `declared-missing` or `unknown` = report the gap). Load the index only, never every principle body. See `<PrincipleIndexGuideline>`.
-4. If the Actor's `agent` attribute differs from your type, switch to it or delegate per `<CoperationGuideline>` item 2.
-5. If the ARGO MCP is unavailable or errors, say so before doing anything else.
+4. Retrieval contract: when a request needs information you do not already hold, your FIRST retrieval is a semantic graph query (`getSystemArchitecture` with a single `intent`); file, repository and web retrieval come AFTER, seeded by the returned ids. A known file path is not a retrieval question. Searching the repository without a preceding graph read is a violation.
+5. If the Actor's `agent` attribute differs from your type, switch to it or delegate per `<CoperationGuideline>` item 2.
+6. If the ARGO MCP is unavailable or errors, say so before doing anything else.
 </WakeupGuideline>
 
 <CoreRules>
@@ -67,7 +68,7 @@ Be a critical peer, not a compliant assistant: your duty is to the evidence, not
 </ExplorationGuideline>
 
 <QueryPriorityGuideline>
-1. KG-first retrieval: the intent graph (design/KG/SystemArchitecture.json via ARGO MCP) is the FIRST hop for any retrieval task. Do NOT search files, code, or web first.
+1. KG-first retrieval (decision-point trigger): when a request needs information you do not already hold and you are about to search files, code or the web, stop and run one semantic graph query first (`getSystemArchitecture` with a single `intent`). Do NOT search files, code, or web first. A known file path is not a retrieval question. Treat the returned ids as the seeds for whatever comes next; a repository search with no preceding graph read is a violation.
 2. Semantic-first KG retrieval: use `getSystemArchitecture` with `query.intent` (`query.purpose` defaults to `general`; `audit` + `subject` only for strict proof closure), and `getIntentElementContext` / `getArchitectureViewContext` for focused context. An omitted-query full read, or reading the graph JSON file, is a last resort.
 3. `queryNeo4jGraph` (read-only Cypher) is the SECONDARY path for structural/type lookups semantic retrieval does not cover. See `<GraphQueryGuideline>`.
 4. Exhaustive enumeration only: read view membership with `getArchitectureViewContext`. Never fabricate or guess retrieval results; if the graph cannot answer, say so and escalate to your human partner.

@@ -50,6 +50,32 @@ test('archgraph-rules-document-query-semantic-first', () => {
   assert.match(tools[1], /query\.purpose`? defaults to `?general`?/i);
 });
 
+test('archgraph-rules-document-query-decision-point-trigger', () => {
+  // GIVEN the startup gate, the one place every session is guaranteed to read
+  const rules = readRules();
+  const gate = rules.match(/<WakeupGuideline>([\s\S]*?)<\/WakeupGuideline>/);
+  assert.ok(gate, 'the rule must contain a <WakeupGuideline> block');
+  // THEN it carries the retrieval order as a checkpoint, not a buried principle
+  assert.match(gate[1], /Retrieval contract/);
+  assert.match(gate[1], /FIRST retrieval is a semantic graph query/);
+  assert.match(gate[1], /getSystemArchitecture/);
+  assert.match(gate[1], /A known file path is not a retrieval question/);
+  assert.match(gate[1], /seeded by the returned ids/);
+  // AND the hand-written host gate (highest salience) says the same thing
+  const plugin = fs.readFileSync(
+    path.join(__dirname, '..', 'argo', 'plugins', 'argo-wakeup.js'),
+    'utf8',
+  );
+  assert.match(plugin, /Retrieval contract/);
+  assert.match(plugin, /A known file path is not a retrieval question/);
+  assert.match(plugin, /seeded by the returned ids/);
+  // AND the query-priority guideline states the same trigger with its carve-out
+  const section = rules.match(/<QueryPriorityGuideline>([\s\S]*?)<\/QueryPriorityGuideline>/);
+  assert.match(section[1], /decision-point trigger/);
+  assert.match(section[1], /A known file path is not a retrieval question/);
+  assert.match(section[1], /seeds/);
+});
+
 test('archgraph-rules-document-query-scope', () => {
   // GIVEN the global ARGO workflow rules file
   const rules = readRules();
