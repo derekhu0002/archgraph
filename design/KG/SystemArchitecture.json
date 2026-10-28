@@ -9498,7 +9498,7 @@
       ]
     },
     {
-      "description": "ARGO 框架内建的 Agent 成本汇总日志（2026-09-23，项目总管；承接业界洞察 insight-lead-milestone-two-backend-roundtrip-001 的 R7）。设计：把「Agent 成本」度量汇成一份日志、一个固定路径，人类伙伴一次取全；不提供取数接口（无 MCP 工具、无 CLI）。**唯一采集器 = OpenCode 宿主插件** argo/plugins/argo-cost-collector.js（install-argo.ps1 注册）：经 tool.execute.before/after 记录**每一个工具调用**（MCP 接口调用 / 写图调用 / 仓侧 read·grep·glob 全都记）+ event 记录 assistant tokens/cost。**明确不在 MCP 服务端做采集**：MCP 只看得到图侧、看不到仓侧工具与 token 用量，单边记录不完整。固定路径 <workspace>/.argo/temp/agent-cost-log.ndjson（追加式、默认 5MB 轮转为 .1、ARGO_COST_PROFILER=0 关）。记录 schema：公共 at/pid/source(host)/type；type=tool{tool,backend(graph|repo|framework|other),kind(read|write|framework|other),durationMs,ok,args{keys,bytes},resultBytes,resultTokens,sessionID?,callID?}；type=usage{messageID,tokens{input,output,reasoning,cache},cost}；args 绝不记原始取值。只观测已产出结果，不改检索/缩候选/改内容。边界：tool hook 只对经宿主会话发起的调用触发；不经宿主的后台 MCP 进程不在内。交付：argo/scripts/graph-rag/agentCostLog.js（单一日志+宿主钩子 createHostCollectorHooks）+ argo/plugins/argo-cost-collector.js（唯一采集器）+ install-argo.ps1（注册插件）+ docs/agent-cost-profiler.md + tests/agent-cost-log.test.js（AT-agent-cost-log-01..04）+ tests/argo-deploy.test.js（断言部署与注册）。",
+      "description": "ARGO 框架内建的 Agent 成本汇总日志（2026-09-23，项目总管；承接业界洞察 insight-lead-milestone-two-backend-roundtrip-001 的 R7）。设计：把「Agent 成本」度量汇成一份日志、一个固定路径，人类伙伴一次取全；不提供取数接口（无 MCP 工具、无 CLI）。**唯一采集器 = OpenCode 宿主插件** argo/plugins/argo-cost-collector.js（install-argo.ps1 注册）：经 tool.execute.before/after 记录**每一个工具调用**（MCP 接口调用 / 写图调用 / 仓侧 read·grep·glob 全都记）+ event 记录 assistant tokens/cost。**明确不在 MCP 服务端做采集**：MCP 只看得到图侧、看不到仓侧工具与 token 用量，单边记录不完整。固定路径 <workspace>/.argo/temp/agent-cost-log.ndjson（追加式、默认 5MB 轮转为 .1、ARGO_COST_PROFILER=0 关）。记录 schema：公共 at/pid/source(host)/type；type=tool{tool,backend(graph|repo|framework|other),kind(read|write|framework|other),durationMs,ok,args{keys,bytes},resultBytes,resultTokens,sessionID?,callID?}；type=usage{messageID,tokens{input,output,reasoning,cache},cost}；args 绝不记原始取值。只观测已产出结果，不改检索/缩候选/改内容。边界：tool hook 只对经宿主会话发起的调用触发；不经宿主的后台 MCP 进程不在内。交付：argo/scripts/graph-rag/agentCostLog.js（单一日志+宿主钩子 createHostCollectorHooks）+ argo/plugins/argo-cost-collector.js（唯一采集器）+ install-argo.ps1（注册插件）+ docs/agent-cost-profiler.md + tests/agent-cost-log.test.js（AT-agent-cost-log-01..04）+ tests/argo-deploy.test.js（断言部署与注册）。\n\n【2026-10-28 首跳口径固化 + args 采集修复】新增 scripts/first-hop-report.js（只读报告）：按 pid 分组、空闲 >30min 切分 run；每 run 取首个 kind=read 且 backend∈{graph,repo} 作为首跳；graph 首跳再分 schema（queryNeo4jGraph 带 schema 参数）/semantic（getSystemArchitecture、memory_search）/structural；与当前分类器标号矛盾的旧量具 run 整条排除并单列（legacyExcluded），绝不混入主口径；输出图/仓首跳占比与目标判定（repo-first <20%）。验收 tests/first-hop-report.test.js（AT-first-hop-01..05）。同时修正宿主插件 args 采集缺陷：OpenCode 的 tool.execute.before(input, output) 把工具参数放在第二参 output.args，原实现只传 input，导致 args.keys 恒为空、schema 读无法与其它图查询区分；现 before(input, toolOutput) 兼容两种宿主形态，插件透传第二参，仍只记 keys/bytes 不落原值。commit 562bf65。",
       "id": "agent-cost-profiler-001",
       "name": "Agent 成本 Profiler（框架内建后台度量）",
       "parent": "1961",
@@ -9530,6 +9530,41 @@
           "type": "Acceptance Test",
           "Input": "tests/agent-cost-log.test.js",
           "acceptanceCriteria": "tests/agent-cost-log.test.js"
+        },
+        {
+          "acceptanceCriteria": "tests/first-hop-report.test.js",
+          "description": "GIVEN 宿主成本日志中的工具记录；WHEN 切分 run；THEN 同一 pid 内空闲超过阈值（默认 30min）才新起 run，不同 pid 必然分开，且 run 的 start/end 与记录一致。",
+          "Input": "tests/first-hop-report.test.js",
+          "name": "AT-first-hop-01",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/first-hop-report.test.js",
+          "description": "GIVEN 一个 run 内含写图、命令执行、宿主工具与校验器；WHEN 求首跳；THEN 只有第一条 kind=read 且 backend∈{graph,repo} 的内容读取算首跳，写入/执行/校验/宿主工具一律不计。",
+          "Input": "tests/first-hop-report.test.js",
+          "name": "AT-first-hop-02",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/first-hop-report.test.js",
+          "description": "GIVEN 一条由旧量具产生的 run（标号与当前分类器矛盾，如 bash 记为 read）；WHEN 生成报告；THEN 该 run 计入 legacyExcluded 并从 headline 统计中排除，不污染图/仓首跳占比。",
+          "Input": "tests/first-hop-report.test.js",
+          "name": "AT-first-hop-03",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/first-hop-report.test.js",
+          "description": "GIVEN 图首跳来自 schema 读、语义检索、结构查询三种工具；WHEN 生成报告；THEN schema/semantic/structural 分别计数，图/仓占比按有效首跳计算，且目标判定严格（repo-first 恰为 20% 时不达标）。",
+          "Input": "tests/first-hop-report.test.js",
+          "name": "AT-first-hop-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/first-hop-report.test.js",
+          "description": "GIVEN 真实成本日志文件；WHEN 指定 --since 截止时间或日志缺失；THEN 仅统计截止时间之后的 run，缺失日志也返回结构完整、可序列化的空报告而不抛错。",
+          "Input": "tests/first-hop-report.test.js",
+          "name": "AT-first-hop-05",
+          "type": "Acceptance Test"
         }
       ],
       "type": "Application Component",
@@ -9572,6 +9607,11 @@
           "name": "commit",
           "value": "582a785",
           "description": "argo/scripts/graph-rag/agentCostLog.js（toolKey 归一化 + kind 细分 read/write/exec/other）; tests/agent-cost-log.test.js（AT-agent-cost-log-03 582a785）"
+        },
+        {
+          "name": "commit",
+          "value": "562bf65",
+          "description": "scripts/first-hop-report.js; tests/first-hop-report.test.js; argo/scripts/graph-rag/agentCostLog.js; argo/plugins/argo-cost-collector.js; tests/agent-cost-log.test.js（首跳口径固化 + OpenCode args 采集修复）"
         }
       ]
     },
@@ -13662,9 +13702,14 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "562bf65",
+          "description": "scripts/first-hop-report.js; tests/first-hop-report.test.js; argo/scripts/graph-rag/agentCostLog.js; argo/plugins/argo-cost-collector.js; tests/agent-cost-log.test.js; design/KG/SystemArchitecture.json（重启后复测结论 + 首跳口径固化 + args 采集修复）"
         }
       ],
-      "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.26——修度量量具。\n【缺陷】agentCostLog.js 把所有 repo 工具（read/grep/glob/list/bash/webfetch/edit/write）一律标为 repo/read，导致「每个 run 的首个检索」无法用通用判据（kind=read + backend∈{graph,repo}）计算，只能回归到按宿主工具名硬排除，换宿主即失效。\n【修复】toolKey 归一化（mcp__<server>__ / functions. / argo_ 前缀）+ 严格集合匹配；kind 细分：内容读取=read（read/grep/glob/list/webfetch）、落盘=write（write/edit/multiedit/apply_patch/patch）、命令执行=exec（bash/shell/powershell/terminal/exec/exec_command/run_command）、与图仓无关=other（todowrite/task 等）。未知工具一律 other，不再靠子串硬套。AT-agent-cost-log-03。\n【意义】首跳口径变为零工具名假设、跨宿主/跨项目通用：每个 run 的第一条 kind=read 且 backend∈{graph,repo}。\n【发布】npm publish archgraph-argo@0.29.26（latest）→ 传播第 28 次轮询可见 → npm i -g archgraph-argo@0.29.26 → argo-deploy -SkipEnv；核验 ~/.argo/scripts/graph-rag/agentCostLog.js 已含 toolKey/REPO_WRITE_TOOLS/SHELL_TOOLS。\n【待办】重启宿主并**新开会话**（续接会话可能仍持有旧 instructions）；之后用新日志（kind 已细分）复测首跳，目标：仓库首跳占比由基线 29.8% 降到 <20%。\n【验收】npm test 823/823（0 fail / 0 skip）；validateSystemArchitecture 通过。",
+      "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.26——修度量量具。\n【缺陷】agentCostLog.js 把所有 repo 工具（read/grep/glob/list/bash/webfetch/edit/write）一律标为 repo/read，导致「每个 run 的首个检索」无法用通用判据（kind=read + backend∈{graph,repo}）计算，只能回归到按宿主工具名硬排除，换宿主即失效。\n【修复】toolKey 归一化（mcp__<server>__ / functions. / argo_ 前缀）+ 严格集合匹配；kind 细分：内容读取=read（read/grep/glob/list/webfetch）、落盘=write（write/edit/multiedit/apply_patch/patch）、命令执行=exec（bash/shell/powershell/terminal/exec/exec_command/run_command）、与图仓无关=other（todowrite/task 等）。未知工具一律 other，不再靠子串硬套。AT-agent-cost-log-03。\n【意义】首跳口径变为零工具名假设、跨宿主/跨项目通用：每个 run 的第一条 kind=read 且 backend∈{graph,repo}。\n【发布】npm publish archgraph-argo@0.29.26（latest）→ 传播第 28 次轮询可见 → npm i -g archgraph-argo@0.29.26 → argo-deploy -SkipEnv；核验 ~/.argo/scripts/graph-rag/agentCostLog.js 已含 toolKey/REPO_WRITE_TOOLS/SHELL_TOOLS。\n【待办】重启宿主并**新开会话**（续接会话可能仍持有旧 instructions）；之后用新日志（kind 已细分）复测首跳，目标：仓库首跳占比由基线 29.8% 降到 <20%。\n【验收】npm test 823/823（0 fail / 0 skip）；validateSystemArchitecture 通过。\n【复测·2026-10-28 重启后新会话】部署版本核验：全局 archgraph-argo@0.29.26，新会话日志已按新量具落标（read→repo/read、write→repo/write、bash→repo/exec、todowrite→other）；0.29.25 一字段语义读实测可用（仅传 query.intent，purpose 默认 general）；principleIndex.status=present。首跳复测样本：重启后仅 1 个新 run（本会话），首跳为 graph（STEP 0 queryNeo4jGraph 的 schema 读），repo-first 0%，样本不足不能判定达标。历史可信用子集 31 run（图 87.1%/仓 12.9%）因旧量具会把含 bash/write 的 run 判为 legacy 而只剩「纯图 run」，存在选择偏差，不可与基线 29.8% 直接比较。**新发现量具缺口**：tool.execute.before 的工具参数在 OpenCode 位于第二参 output.args，旧插件只传 input，args.keys 恒为空 → schema 读与其它 queryNeo4jGraph 无法区分（报告中 structural 含未识别的 schema 读）。已在 562bf65 修复（含 AT），需随下一版本发布并重启后才对后续样本生效。首跳口径已固化为 scripts/first-hop-report.js（AT-first-hop-01..05），复测命令：node scripts/first-hop-report.js --since <重启时间>。",
       "id": "overseer-argo-0-29-26-release-001",
       "name": "里程碑：发布 archgraph-argo@0.29.26（成本日志 kind 细分，修首跳量具）",
       "type": "Business Object"
