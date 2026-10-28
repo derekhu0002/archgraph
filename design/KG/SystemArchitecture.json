@@ -12964,6 +12964,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "9b5b81d",
+          "description": "fix(ontology): real-engine diagnostics — 区分“无法启动引擎”(ENOENT→unavailable)与“引擎运行后失败”(崩溃/非零退出→failed, 含 exit/signal)；stderr 由只取头 300 字符改为保留尾部 800 字符，保证 traceback 末尾的真实原因（如 KeyError: 'type'）不被截掉；新增 AT-ovx-19。argo/scripts/ontology-projection/cli.js; tests/ontology-validation-extension.test.js"
         }
       ]
     },
