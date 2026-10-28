@@ -2895,6 +2895,13 @@
           "description": "GIVEN STEP 0 要加载原则索引；WHEN 索引缺失（零行或 status=declared-missing）；THEN 规则要求一句话说明并提示创建，禁止编造条目、禁止像已加载一样静默继续。",
           "Input": "tests/argo-rules-principle-index.test.js",
           "acceptanceCriteria": "tests/argo-rules-principle-index.test.js"
+        },
+        {
+          "acceptanceCriteria": "tests/argo-rules-query.test.js",
+          "description": "GIVEN 会话起步门禁与检索顺序规则；WHEN 检查规则文本；THEN STEP 0 内声明检索契约（首个检索是图语义查询、已知文件路径不算检索问题、仓内/网络检索以返回 id 为种子）、opencode 唤醒插件同文、QueryPriorityGuideline 第1条为决策点触发语。",
+          "Input": "tests/argo-rules-query.test.js",
+          "name": "AT-rules-11",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [
@@ -3076,6 +3083,11 @@
           "name": "commit",
           "value": "50a78b2",
           "description": "argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; argo/scripts/schema-bundle.js; argo/scripts/systemarchitecture-mcp-server.js; tests/argo-rules-principle-index.test.js; tests/principle-index-presence.test.js（declared-missing 必须上报）"
+        },
+        {
+          "name": "commit",
+          "value": "5408e35",
+          "description": "argo/rules/archgraph.instructions.md（STEP 0 新增 Retrieval contract + QueryPriorityGuideline 第1条改为决策点触发语）; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js（重新生成）; tests/argo-rules-query.test.js（5408e35）"
         }
       ],
       "subdiagram_views": []
