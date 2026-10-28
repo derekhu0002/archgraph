@@ -4498,7 +4498,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话 · 2026-10-28 · 重启后复测首跳 + 发布 0.29.27）\n\n【会话目标】人类伙伴重启宿主并新开会话后，继续验证 0.29.24/25/26 的检索行为改造，复测「首跳」，并（经人类批准）发布 args 采集修复。\n\n【已验证（重启后生效）】① 量具 0.29.26：日志 kind 已细分（read→repo/read、write→repo/write、bash→repo/exec、todowrite→other）；② 0.29.25 一字段语义读可用（仅 query.intent，purpose=general）；③ principleIndex.status=present。\n\n【首跳复测结论】重启后仅 1 个新 run：首跳=graph，repo-first 0%，触仓 run 中语义检索早于首次仓库读取=1/1；报告按最小样本 10 标 INSUFFICIENT SAMPLE，不下结论。历史可信用子集 31 run（图 87.1%/仓 12.9%；触仓 11、语义先于仓 45.5%）有选择偏差（旧量具把含 bash/write 的 run 判 legacy，只剩纯图 run），不可与基线（141 run：图 70.2%/仓 29.8%，其中 85/99 图首跳为 STEP 0 schema 读）直接比较。\n\n【已发布 archgraph-argo@0.29.27】修复宿主工具参数未采集：OpenCode 的 tool.execute.before 把 args 放在第二参 output.args，旧插件只传 input → args.keys 恒空、schema 读无法区分。现 before(input, toolOutput) 兼容两形态 + 插件透传 + AT；已 npm publish（第 8 次轮询可见）→ 全局安装 → argo-deploy -SkipEnv，核验 ~/.argo 两份文件均含修复。**需重启 opencode 才生效**。另：发布记录视图达 15 上限，已新建分层子视图 overseer-release-archive-021-024（0.21–0.24）并在主视图登记 0.29.27。\n\n【工具与验收】scripts/first-hop-report.js（pid+30min 切 run；首个 kind=read 且 backend∈{graph,repo} 为首跳；graph 首跳分 schema/semantic/structural；旧量具 run 整条排除单列；第二信号「首次语义检索是否早于首次仓库读取」；n<10 不判达标；--since/--json/--details）+ AT-first-hop-01..06。npm test 829/829（0 fail / 0 skip；首轮一次 memory-eval-run 偶发 0xC0000409，重跑全绿，本机已知偶发）；validate 通过。commit：562bf65、b3d9400、b111027/96fafe7、c79c0d6、8b6e201。\n\n【下一步】① 人类重启 opencode（新会话）→ 新日志才会带 args.keys；② 真实会话积累 ≥10 run 后用 `node scripts/first-hop-report.js --since <重启时间>` 判定 repo-first<20% 与语义先于仓比例；③ 未达标再调位置/措辞（中段 hook 需先有基线，勿先上仪式化拦截）；④ backlog：bundle 声明式 artifactLocators、commit 属性校验缺口。",
+      "description": "项目总管工作记忆摘要（会话 · 2026-10-28 · Docker 真实用例实测）\n\n【会话目标】重启后继续验证检索行为改造；并在本机 Docker 容器里用真实用例实测（不只跑单测）。\n\n【已确认（宿主）】args 采集重启后生效（bash keys=[\"command\"]，此前恒 {}）；报告可识别 schema 读。\n\n【Docker 真实用例实测（archgraph-argo@0.29.27 tarball + 真 Neo4j/embedding + opencode Agent）】\n■ 导航 SEED 28 题（真实 Agent、完整 argo MCP）：r1（修复前）=28/28，avg 16.2s；r2（修复后）=27/28（CA-02 为模型波动，选错 AT 元素），avg 13.3s、tok 221k。\n■ repo-rich 3 题（工作区含真实仓库内容）：全部先图后仓；Q2 唯一触仓 run 的语义读早于首次 grep/read=1/1；Q1/Q3 直接用图内 commit/路径信息作答。\n■ 首跳统计（成本日志，真实容器会话）：nav 28/28、repo probe 3/3，合计 31/31 首跳=graph（schema 19 / semantic 1-2 / structural 7-8）；args 采集在容器内也生效（schema 桶可识别）。\n\n【发现并修复 4 个沙箱缺陷（commit 41b955f，均加可执行 AT）】① entrypoint 未传 -SkipOntologyEngine：可选本体引擎要求 python3+JRE，沙箱未装 → argo-deploy 直接 throw；② Dockerfile 未 COPY lib：smoke/nav-eval require ./lib/argo-init-cli.js → 镜像内必挂；③ nav-eval 的 loadEnvFile 全量注入宿主 .env：ARGO_VALIDATION_EXTENSIONS 带 C:/Users/... Windows 路径 → 容器 init 校验失败；现改为沙箱白名单（宿主专有键/密钥不注入）；④ runAgent 不固定 PWD：opencode 按 PWD 解析项目目录，日志落到 /tmp/install；现固定 PWD=/workspace。\n\n【残留/backlog】① 沙箱只挂了生产图、未挂仓库自己的 .argo/schema → 容器用默认 ArchiMate 3.2 校验工作区方言图，argo-init 的 systemArchitecture 仍 failed（但语义检索/导航不受影响），且失败时 errors=[] （诊断缺口）；② repo-first 指标需要带仓库内容的沙箱场景，且 repo-rich 样本 n=3<10，暂不能下结论；③ CA-02 模型波动（同题 r1 对 r2 错）。\n\n【构建/环境坑】Docker 镜像构建时容器内 GitHub 下载 pwsh 不稳定（other side closed）→ 宿主预下载后 COPY；本机 docker 镜像源对 node:20 返回 401 → 用本地 node:24-bookworm-slim 作 BASE_IMAGE；argo/.env 被 ACL 拒绝（宿主与 Docker 都 403）→ 用 ~/.argo/.env（ARGO_*/QWEN）+ ~/.local/share/opencode/auth.json（DeepSeek）传凭据。\n\n【验收】npm test 831/831（0 fail / 0 skip）；validateSystemArchitecture 通过。commit：562bf65、b3d9400、b111027/96fafe7、c79c0d6、41b955f、60b7bed。产物（gitignored）：results/nav-eval-20261028/、results/nav-eval-20261028-r2/、results/repo-probe-20261028/。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4521,7 +4521,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-10-28",
-          "description": "重启后复测 + 发布 0.29.27（args 采集修复）；待重启后积累 ≥10 run 判定"
+          "description": "Docker 真实用例已完成（导航 28 题 + repo-rich 3 题）；下一步：挂工作区 schema bundle 并在带仓库沙箱积累 ≥10 run"
         },
         {
           "name": "commit",
@@ -4899,13 +4899,13 @@
         },
         {
           "name": "nextAction",
-          "value": "restart-then-accumulate-first-hop-samples",
-          "description": "重启 opencode 后，用 scripts/first-hop-report.js --since <重启时间> 积累 ≥10 run 再判定"
+          "value": "mount-workspace-schema-and-accumulate-repo-runs",
+          "description": "挂 .argo/schema 到沙箱 → 消除 init 的 systemArchitecture failed；带仓库沙箱积累 ≥10 run 后判定 repo-first<20%"
         },
         {
           "name": "sessionHook",
-          "value": "await-restart-for-args-capture",
-          "description": "0.29.27 已部署但需重启；重启后的日志才带 args.keys（schema 读可识别）"
+          "value": "sandbox-fixes-landed-41b955f",
+          "description": "沙箱入口需 -SkipOntologyEngine；Dockerfile 需 COPY lib；宿主 .env 需白名单；agent 子进程需固定 PWD"
         }
       ],
       "testcases": [
