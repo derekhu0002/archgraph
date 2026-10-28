@@ -9508,11 +9508,11 @@
           "acceptanceCriteria": "tests/agent-cost-log.test.js"
         },
         {
-          "name": "AT-agent-cost-log-03",
-          "description": "GIVEN 宿主采集钩子；WHEN 依次发生 MCP 读调用、写图调用、仓侧调用与一个 assistant usage 事件；THEN 四者均写入同一份日志，工具记录的 backend/kind 依次为 graph/read、graph/write、repo/read，并含时长/返回 token/usage 的 tokens·cost。",
-          "type": "Acceptance Test",
+          "acceptanceCriteria": "tests/agent-cost-log.test.js",
+          "description": "GIVEN 各宿主工具名（read/grep/glob、write/edit/apply_patch、bash/shell、todowrite/task、mcp__argo__ / argo_ / functions. 前缀）；WHEN classifyTool；THEN kind 只回答“是否读取内容”：读=read、落盘=write、命令执行=exec、与图仓无关=other；前缀与命名空间不影响分类。",
           "Input": "tests/agent-cost-log.test.js",
-          "acceptanceCriteria": "tests/agent-cost-log.test.js"
+          "name": "AT-agent-cost-log-03",
+          "type": "Acceptance Test"
         },
         {
           "name": "AT-agent-cost-log-04",
@@ -9557,6 +9557,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "582a785",
+          "description": "argo/scripts/graph-rag/agentCostLog.js（toolKey 归一化 + kind 细分 read/write/exec/other）; tests/agent-cost-log.test.js（AT-agent-cost-log-03 582a785）"
         }
       ]
     },
