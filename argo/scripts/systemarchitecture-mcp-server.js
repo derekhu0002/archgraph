@@ -198,35 +198,45 @@ const HANDLED_MUTATION_TYPES = new Set([
 const TOOLS = [
   {
     name: 'getSystemArchitecture',
-    description: 'Read-only intent architecture access via explicit semantic query. Always provide query.purpose and query.intent to get a compact business/architecture result, then use returned element ids with getIntentElementContext for focused dependency context. Full-graph snapshot access is not exposed; query is required.',
+    description: 'Read-only intent architecture access via semantic query. One field is enough: query.intent (a natural-language intent); purpose defaults to "general". Pass purpose:"audit" + subject only for strict proof-closure reads. Then use the returned element ids with getIntentElementContext for focused dependency context. Full-graph snapshot access is not exposed.',
     inputSchema: {
       type: 'object',
       required: ['query'],
       properties: {
         architecturePath: { type: 'string', description: `Default: ${DEFAULT_GRAPH_PATH}` },
         query: {
-          type: 'object',
-          description: 'Required semantic query. Provide query.purpose + query.intent; combine the returned element ids with getIntentElementContext when deeper local context is needed.',
-          properties: {
-            purpose: {
+          description: 'Required semantic query: a natural-language intent string, or an object with intent (purpose optional, defaults to general).',
+          anyOf: [
+            {
               type: 'string',
-              enum: Array.from(LEGAL_QUERY_PURPOSES),
-              description: 'Declared reading purpose: general for generic semantic/memory retrieval, or audit for strict proof-closure reads (subject required).',
+              description: 'Bare natural-language intent; shorthand for { purpose: "general", intent: <string> }.',
             },
-            intent: { type: 'string', description: 'Natural-language intent for semantic retrieval, for example "summarize business features for high-risk audit".' },
-            subject: { type: 'string', description: 'Required for audit; optional anchor/focus id for other semantic purposes.' },
-            scope: {
+            {
               type: 'object',
-              description: 'Optional subgraph scope to bound semantic retrieval and limit the returned content to a local region. Provide view_id to search within one view membership, or element_id (+ depth) to search within an element subtree.',
+              description: 'Semantic query. Only query.intent is required; query.purpose defaults to "general".',
+              required: ['intent'],
               properties: {
-                view_id: { type: 'string', description: 'Restrict retrieval to the members of this view.' },
-                element_id: { type: 'string', description: 'Restrict retrieval to this element and its mounted sub-view subtree.' },
-                depth: { type: 'number', description: 'Default: 2. Subtree depth for element scope.' },
+                purpose: {
+                  type: 'string',
+                  enum: Array.from(LEGAL_QUERY_PURPOSES),
+                  description: 'Optional. Defaults to general for generic semantic/memory retrieval. Use audit for strict proof-closure reads (subject required).',
+                },
+                intent: { type: 'string', description: 'Natural-language intent for semantic retrieval, for example "summarize business features for high-risk audit".' },
+                subject: { type: 'string', description: 'Required for audit; optional anchor/focus id for other semantic purposes.' },
+                scope: {
+                  type: 'object',
+                  description: 'Optional subgraph scope to bound semantic retrieval and limit the returned content to a local region. Provide view_id to search within one view membership, or element_id (+ depth) to search within an element subtree.',
+                  properties: {
+                    view_id: { type: 'string', description: 'Restrict retrieval to the members of this view.' },
+                    element_id: { type: 'string', description: 'Restrict retrieval to this element and its mounted sub-view subtree.' },
+                    depth: { type: 'number', description: 'Default: 2. Subtree depth for element scope.' },
+                  },
+                  additionalProperties: false,
+                },
               },
-              additionalProperties: false,
+              additionalProperties: true,
             },
-          },
-          additionalProperties: true,
+          ],
         },
       },
       additionalProperties: false,
@@ -3104,19 +3114,38 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+// One-field read path. The intent is the only thing the agent must supply;
+// `purpose` is a strictness opt-in (`audit`), not a required ceremony, and it
+// defaults to `general`. A bare intent string is accepted as shorthand for
+// `{ purpose: 'general', intent }`, so the cheapest way to ask is also the
+// correct way to ask (see QueryPriorityGuideline / ToolsGuideline).
+function normalizeExplicitQuery(query) {
+  if (typeof query === 'string') {
+    return { purpose: 'general', intent: query };
+  }
+  if (!query || typeof query !== 'object' || Array.isArray(query)) {
+    return null;
+  }
+  return { ...query, purpose: query.purpose === undefined ? 'general' : query.purpose };
+}
+
 function validateExplicitQuery(query) {
-  if (!query || typeof query !== 'object' || Array.isArray(query) || !query.purpose) {
-    return queryError('QUERY_PURPOSE_REQUIRED', 'Explicit queries require a purpose');
+  const normalized = normalizeExplicitQuery(query);
+  if (!normalized) {
+    return queryError(
+      'QUERY_INTENT_REQUIRED',
+      'Explicit queries require a non-blank intent (pass query.intent or a bare intent string)',
+    );
   }
-  if (!LEGAL_QUERY_PURPOSES.has(query.purpose)) {
-    return queryError('QUERY_PURPOSE_INVALID', `Unsupported query purpose: ${query.purpose}`);
+  if (!LEGAL_QUERY_PURPOSES.has(normalized.purpose)) {
+    return queryError('QUERY_PURPOSE_INVALID', `Unsupported query purpose: ${normalized.purpose}`);
   }
-  if (typeof query.intent !== 'string' || query.intent.trim().length === 0) {
+  if (typeof normalized.intent !== 'string' || normalized.intent.trim().length === 0) {
     return queryError('QUERY_INTENT_REQUIRED', 'Explicit queries require a non-blank intent');
   }
   if (
-    query.purpose === 'audit'
-    && (typeof query.subject !== 'string' || query.subject.trim().length === 0)
+    normalized.purpose === 'audit'
+    && (typeof normalized.subject !== 'string' || normalized.subject.trim().length === 0)
   ) {
     return queryError('AUDIT_SUBJECT_REQUIRED', 'Audit queries require a non-blank subject');
   }
@@ -3124,9 +3153,9 @@ function validateExplicitQuery(query) {
   return {
     status: 'passed',
     query: {
-      ...query,
-      intent: query.intent.trim(),
-      ...(query.subject === undefined ? {} : { subject: query.subject.trim() }),
+      ...normalized,
+      intent: normalized.intent.trim(),
+      ...(normalized.subject === undefined ? {} : { subject: normalized.subject.trim() }),
     },
   };
 }
@@ -5188,4 +5217,5 @@ module.exports = {
   memoryHitCard,
   resolveSemanticScope,
   validateDocument,
+  validateExplicitQuery,
 };

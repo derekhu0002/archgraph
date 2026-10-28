@@ -68,7 +68,7 @@ Be a critical peer, not a compliant assistant: your duty is to the evidence, not
 
 <QueryPriorityGuideline>
 1. KG-first retrieval: the intent graph (design/KG/SystemArchitecture.json via ARGO MCP) is the FIRST hop for any retrieval task. Do NOT search files, code, or web first.
-2. Semantic-first KG retrieval: use `getSystemArchitecture` with query.purpose + query.intent, and `getIntentElementContext` / `getArchitectureViewContext` for focused context. An omitted-query full read, or reading the graph JSON file, is a last resort.
+2. Semantic-first KG retrieval: use `getSystemArchitecture` with `query.intent` (`query.purpose` defaults to `general`; `audit` + `subject` only for strict proof closure), and `getIntentElementContext` / `getArchitectureViewContext` for focused context. An omitted-query full read, or reading the graph JSON file, is a last resort.
 3. `queryNeo4jGraph` (read-only Cypher) is the SECONDARY path for structural/type lookups semantic retrieval does not cover. See `<GraphQueryGuideline>`.
 4. Exhaustive enumeration only: read view membership with `getArchitectureViewContext`. Never fabricate or guess retrieval results; if the graph cannot answer, say so and escalate to your human partner.
 5. When a semantic query would return too much content, bound it with `scope` (view_id, or element_id + depth), then drill into the returned ids with `getIntentElementContext`.
@@ -175,7 +175,7 @@ Operate the three-tier memory directly from this rule (no skill load):
 
 <ToolsGuideline>
 Read/write the intent graph ONLY through ARGO MCP. Never edit design/KG/SystemArchitecture.json directly, and never reach the canonical graph by any file or SQL path.
-1. `getSystemArchitecture` MUST supply query.purpose + query.intent; an omitted-query full read is a last resort.
+1. `getSystemArchitecture` needs only `query.intent`; `query.purpose` defaults to `general` (`purpose:"audit"` + `subject` is an explicit strictness opt-in). An omitted-query full read is a last resort.
 2. Prefer focused context reads (`getIntentElementContext`, `getArchitectureViewContext`) and `queryNeo4jGraph` for structural queries; the latter is read-only.
 3. Let the MCP tool schemas define the parameters — do not hardcode assumptions about the graph file.
 </ToolsGuideline>

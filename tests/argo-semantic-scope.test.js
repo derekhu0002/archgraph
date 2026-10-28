@@ -68,7 +68,10 @@ test('getSystemArchitecture tool schema documents the scope parameter', () => {
   const tool = TOOLS.find(entry => entry.name === 'getSystemArchitecture');
   assert.ok(tool, 'getSystemArchitecture tool must be registered');
   // THEN the query schema documents scope (view_id / element_id / depth)
-  const queryProps = tool.inputSchema.properties.query.properties;
+  const query = tool.inputSchema.properties.query;
+  const objectBranch = (query.anyOf || [query]).find(branch => branch.type === 'object');
+  assert.ok(objectBranch, 'query must accept an object form');
+  const queryProps = objectBranch.properties;
   assert.ok(queryProps.scope, 'query.scope must be documented');
   assert.ok(queryProps.scope.properties.view_id, 'scope must accept view_id');
   assert.ok(queryProps.scope.properties.element_id, 'scope must accept element_id');

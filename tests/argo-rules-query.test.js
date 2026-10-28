@@ -46,7 +46,8 @@ test('archgraph-rules-document-query-semantic-first', () => {
   // AND the ToolsGuideline mandates the semantic query (not merely recommends it)
   const tools = rules.match(/<ToolsGuideline>([\s\S]*?)<\/ToolsGuideline>/);
   assert.ok(tools, 'ToolsGuideline section must exist');
-  assert.match(tools[1], /MUST supply query\.purpose \+ query\.intent/);
+  assert.match(tools[1], /query\.intent/);
+  assert.match(tools[1], /query\.purpose`? defaults to `?general`?/i);
 });
 
 test('archgraph-rules-document-query-scope', () => {

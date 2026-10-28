@@ -62,6 +62,7 @@ const DELIVERABLE_GUARDS = [
   ['RULE: skill-style principle index (bundle-declared, opt-in)', 'tests/argo-rules-principle-index.test.js'],
   ['FEATURE: schema bundle principle catalog declaration (opt-in, validated)', 'tests/schema-bundle-principle-index.test.js'],
   ['FEATURE: principle catalog presence probe (declared-missing is observable)', 'tests/principle-index-presence.test.js'],
+  ['FEATURE: one-field semantic read (query.intent; purpose defaults to general)', 'tests/read-friction.test.js'],
   ['SKILL: argo-init drives the argo-init CLI (init removed from MCP; functionally identical)', 'tests/argo-init-interface.test.js'],
   ['Schema / ArchiMate 3.2 constraint', 'tests/aml-standard.test.js'],
   ['Neo4j structural projection & sync', 'tests/neo4j-sync-staleness.test.js'],

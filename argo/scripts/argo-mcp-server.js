@@ -93,35 +93,45 @@ const TOOLS = [
   },
   {
     name: 'getSystemArchitecture',
-    description: 'Start here, but prefer an explicit semantic query instead of an omitted-query full graph read. Provide query.purpose and query.intent to get a compact business/architecture result, then use returned element ids with getIntentElementContext for focused dependency context. Omit query only when an exact full canonical snapshot is explicitly required.',
+    description: 'Start here. One field is enough: query.intent (a natural-language intent); purpose defaults to "general". Pass purpose:"audit" + subject only for strict proof-closure reads. Then use the returned element ids with getIntentElementContext for focused dependency context. Omit query only when an exact full canonical snapshot is explicitly required.',
     inputSchema: {
       type: 'object',
       required: ['query'],
       properties: {
         architecturePath: { type: 'string', description: 'Default: design/KG/SystemArchitecture.json' },
         query: {
-          type: 'object',
-          description: 'Required semantic query. Provide query.purpose + query.intent; combine the returned element ids with getIntentElementContext when deeper local context is needed.',
-          properties: {
-            purpose: {
+          description: 'Required semantic query: a natural-language intent string, or an object with intent (purpose optional, defaults to general).',
+          anyOf: [
+            {
               type: 'string',
-              enum: ['general', 'audit'],
-              description: 'Declared reading purpose: general for generic semantic/memory retrieval, or audit for strict proof-closure reads (subject required).',
+              description: 'Bare natural-language intent; shorthand for { purpose: "general", intent: <string> }.',
             },
-            intent: { type: 'string', description: 'Natural-language intent for semantic retrieval, for example "summarize business features for high-risk audit".' },
-            subject: { type: 'string', description: 'Required for audit; optional anchor/focus id for other semantic purposes.' },
-            scope: {
+            {
               type: 'object',
-              description: 'Optional subgraph scope to bound semantic retrieval and limit the returned content to a local region. Provide view_id to search within one view membership, or element_id (+ depth) to search within an element subtree.',
+              description: 'Semantic query. Only query.intent is required; query.purpose defaults to "general".',
+              required: ['intent'],
               properties: {
-                view_id: { type: 'string', description: 'Restrict retrieval to the members of this view.' },
-                element_id: { type: 'string', description: 'Restrict retrieval to this element and its mounted sub-view subtree.' },
-                depth: { type: 'number', description: 'Default: 2. Subtree depth for element scope.' },
+                purpose: {
+                  type: 'string',
+                  enum: ['general', 'audit'],
+                  description: 'Optional. Defaults to general for generic semantic/memory retrieval. Use audit for strict proof-closure reads (subject required).',
+                },
+                intent: { type: 'string', description: 'Natural-language intent for semantic retrieval, for example "summarize business features for high-risk audit".' },
+                subject: { type: 'string', description: 'Required for audit; optional anchor/focus id for other semantic purposes.' },
+                scope: {
+                  type: 'object',
+                  description: 'Optional subgraph scope to bound semantic retrieval and limit the returned content to a local region. Provide view_id to search within one view membership, or element_id (+ depth) to search within an element subtree.',
+                  properties: {
+                    view_id: { type: 'string', description: 'Restrict retrieval to the members of this view.' },
+                    element_id: { type: 'string', description: 'Restrict retrieval to this element and its mounted sub-view subtree.' },
+                    depth: { type: 'number', description: 'Default: 2. Subtree depth for element scope.' },
+                  },
+                  additionalProperties: false,
+                },
               },
-              additionalProperties: false,
+              additionalProperties: true,
             },
-          },
-          additionalProperties: true,
+          ],
         },
       },
       additionalProperties: false,
@@ -988,6 +998,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  TOOLS,
   callTool,
   handleRequest,
   initializeWorkspace,
