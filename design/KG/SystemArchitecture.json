@@ -4474,7 +4474,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话 · 2026-10-28 · 重启后复测首跳）\n\n【会话目标】人类伙伴重启宿主并新开会话后，继续验证 0.29.24/25/26 的检索行为改造，并复测「首跳」口径。\n\n【已验证（重启后生效）】① 量具 0.29.26 生效：本会话日志 kind 已细分（read→repo/read、write→repo/write、bash→repo/exec、todowrite→other）；② 0.29.25 一字段语义读生效（仅传 query.intent，purpose=general，semanticRetrieval=invoked）；③ principleIndex.status=present（原则索引可读）。\n\n【复测首跳结果（诚实口径）】重启后仅 1 个新 run（本会话），首跳=graph（STEP 0 queryNeo4jGraph），repo-first 0%；样本不足，不能判定达标。全日志可信用子集 31 run（图 87.1% / 仓 12.9%）存在选择偏差——旧量具把含 bash/write 的 run 判为 legacy，只剩「纯图 run」，不可与基线 29.8% 直接比较。基线：141 run 图 70.2% / 仓 29.8%，其中 85/99 图首跳是 STEP 0 schema 读（真正语义首跳 9.9%）。\n\n【新发现并已修（待发布）】OpenCode 的 tool.execute.before(input, output) 把工具参数放在第二参 output.args，旧插件只传 input → args.keys 恒为空，schema 读无法与其它 queryNeo4jGraph 区分（报告 structural 中混有未识别 schema 读）。已在 562bf65 修复（before(input, toolOutput) 兼容两种形态 + 插件透传第二参 + AT），需下一版本发布 + 重启才对后续样本生效。\n\n【已交付工具】scripts/first-hop-report.js（pid+30min 空闲切 run；每 run 首个 kind=read 且 backend∈{graph,repo} 为首跳；graph 首跳再分 schema/semantic/structural；旧量具 run 整条排除单列；repo-first<20% 目标判定；--since/--json/--details）+ tests/first-hop-report.test.js（AT-first-hop-01..05）。回归 npm test 828/828（首轮一次 memory-eval-run 偶发 0xC0000409 崩溃，重跑全绿，属本机已知偶发）。commit：562bf65（代码/AT）、b111027、cb21e5f（图登记）。\n\n【下一步】① 人类裁决是否发布 0.29.27（含 args 采集修复）；② 以 --since <重启时间> 在真实会话积累样本后判定 repo-first<20%；③ 未达标再调位置/措辞（中段 hook 需先有基线，勿先上仪式化拦截）；④ 可选 backlog 不变：bundle 声明式 artifactLocators、commit 属性校验缺口。",
+      "description": "项目总管工作记忆摘要（会话 · 2026-10-28 · 重启后复测首跳）\n\n【会话目标】人类伙伴重启宿主并新开会话后，继续验证 0.29.24/25/26 的检索行为改造，并复测「首跳」。\n\n【已验证（重启后生效）】① 量具 0.29.26 生效：本会话日志 kind 已细分（read→repo/read、write→repo/write、bash→repo/exec、todowrite→other）；② 0.29.25 一字段语义读生效（仅传 query.intent，purpose=general，semanticRetrieval=invoked）；③ principleIndex.status=present。\n\n【首跳复测结论（诚实口径）】重启后仅 1 个新 run（本会话）：首跳=graph，repo-first 0%，触仓 run 中「语义检索早于首次仓库读取」=1/1；n=1 远低于最小判定样本 10，报告直接标 INSUFFICIENT SAMPLE，不下结论。历史可信用子集 31 run（图 87.1% / 仓 12.9%；触仓 11，语义先于仓 45.5%）因旧量具会把含 bash/write 的 run 判 legacy、只剩纯图 run，存在选择偏差，不可与基线 29.8% 直接比较。基线：141 run 图 70.2% / 仓 29.8%，其中 85/99 图首跳为 STEP 0 schema 读（真正语义首跳 9.9%）。\n\n【新增量具能力（scripts/first-hop-report.js，AT-first-hop-01..06）】pid+30min 空闲切 run；首个 kind=read 且 backend∈{graph,repo} 为首跳；graph 首跳分 schema/semantic/structural；旧量具 run 整条排除单列；另有更决定性的第二信号：每条触仓 run 是否「首次语义检索（getSystemArchitecture/memory_search）早于首次仓库读取」；样本<10 不判达标；支持 --since/--json/--details。\n\n【新发现并已修（待发布）】OpenCode 的 tool.execute.before(input, output) 把工具参数放在第二参 output.args，旧插件只传 input → args.keys 恒空，schema 读无法与其它 queryNeo4jGraph 区分。已在 562bf65 修复（before(input, toolOutput) 兼容两形态 + 插件透传 + AT），需下一版本发布 + 重启才对后续样本生效。\n\n【验收】npm test 829/829（0 fail / 0 skip；首轮一次 memory-eval-run 偶发 0xC0000409，重跑全绿，属本机已知偶发）；validateSystemArchitecture 通过。commit：562bf65（代码/AT）、b3d9400（semantic-before-repo + 最小样本）、b111027/96fafe7（图登记）、b78c421/cb21e5f（T1/登记）。\n\n【下一步】① 人类裁决是否发布 0.29.27（args 采集修复）；② 真实会话积累 ≥10 个 run 后用 node scripts/first-hop-report.js --since <重启时间> 判定 repo-first<20% 与语义先于仓比例；③ 未达标再调位置/措辞（中段 hook 需先有基线）；④ backlog：bundle 声明式 artifactLocators、commit 属性校验缺口。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4497,7 +4497,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-10-28",
-          "description": "重启后复测：量具/一字段读/原则索引均生效；首跳样本不足；新修 args 采集（待发布）"
+          "description": "重启后复测：环境生效；首跳样本不足（n=1）；新增 semantic-before-repo 信号；args 修复待发布"
         },
         {
           "name": "commit",
@@ -4876,7 +4876,7 @@
         {
           "name": "nextAction",
           "value": "publish-0.29.27-or-await-samples",
-          "description": "人类裁决发布 args 修复；真实会话积累样本后用 scripts/first-hop-report.js --since 判定"
+          "description": "人类裁决发布 args 修复；积累 ≥10 run 后用 scripts/first-hop-report.js --since 判定"
         },
         {
           "name": "sessionHook",
