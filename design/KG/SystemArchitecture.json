@@ -4474,7 +4474,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话 · 2026-10-28 · 原则索引存在性可观测）\n\n【会话目标】解释并修复：为何 Agent 不主动先查图谱（全局规则已写 KG-first）；人类伙伴要求检索按「图语义检索→最小上下文包→据图扩到仓库→再外扩」。\n\n【诊断结论】规则写进 system prompt ≠ 有控制器。证据：① 唯一被插件插到提示最前的是 WAKEUP GATE（argo/plugins/argo-wakeup.js:12-18），只覆盖会话起步，不覆盖检索顺序；② 检索顺序埋在 CoreRule 7 / Exploration 0 / QueryPriorityGuideline（3.4k 词规则中段），中段决策无人唤起；③ 工具摩擦不对称（grep/read 零参数 vs getSystemArchitecture 需 purpose+intent）；④ 宿主提示词自带「省 token/少搜」反向激励；⑤ 无反馈无度量；⑥ 图自身不可靠——本次实证 schema 声明 principle-index-001 而元素零行。\n\n【已修缺陷（50a78b2）】原则索引「声明了却从不存在」+ 规则说「零行继续」= 静默空操作。修复：本仓创建 principle-index-001（Artifact，argo-workflow-rules-view），登记全部 5 条 Principle（2 resident / 3 on-demand）；schema 读新增 principleIndex.status = present / declared-missing（带指名 id 的 hint）/ unknown（图不可解析也不让读失败），null 关闭语义不变；STEP 0 与 <PrincipleIndexGuideline> 要求必须一句话上报并提议创建；新增 tests/principle-index-presence.test.js（三态 + 本仓索引无漂移）并挂 acceptance-guardian。npm test 812/812；validateSystemArchitecture 通过；docs(kg) 300513a 登记。\n\n【待办（按性价比）】1) 用 agent-search-diagnosis 出「首次检索落在哪个通道」基线；2) 触发式改写检索规则（即将 grep/read/webfetch 前先语义查图，用返回 id 作种子）；3) purpose 默认值 / 单参数 argo_search 降摩擦；4) 中段拦截 hook（有基线后再上，防仪式化）。\n【重启】运行中的 MCP 仍为旧代码，重启后 schema:true 才带 status。\n\n【教训】1)「零行=还没有」是静默失败：默认开启的能力必须有存在性诊断，不能靠 Agent 撞零行。2) 去重门禁拦下了「同一能力的第二个里程碑」——这次是对的，应复用原子元素而非造孪生。3) 覆盖写长 description 有丢内容风险，优先用结构化字段（commit/testcase）增量登记。",
+      "description": "项目总管工作记忆摘要（会话 · 2026-10-28 · 检索行为改造：诊断→修缺→发布→待复测）\n\n【会话目标】回答“为什么 Agent 不主动先查图谱（全局规则已写 KG-first）”，并按「图语义检索→最小上下文包→据图扩到仓库→再外扩」的要求改造；人类伙伴要求所有方案必须站在通用框架视角，不能只满足部分项目类型。\n\n【已交付（3 个发布，均已 deploy，待重启生效）】\n■ 0.29.24（50a78b2）：原则索引「声明了却从不存在」的静默缺陷。本仓创建 principle-index-001（Artifact，argo-workflow-rules-view，登记全部 5 条 Principle）；schema 读新增 principleIndex.status=present/declared-missing(带 hint)/unknown，null 关闭语义不变；STEP 0 要求缺失必须上报并提议创建；tests/principle-index-presence.test.js。\n■ 0.29.25（65289d8 + 5408e35）：① 一字段语义读：getSystemArchitecture 只需 query.intent（或裸字符串），purpose 默认 general，audit 缺 subject 仍 fail-closed；网关(argo-mcp-server.js)与域服务两份 inputSchema 已同步并加漂移 AT。② 检索顺序改为决策点触发语：STEP 0 新增 Retrieval contract、QueryPriorityGuideline 第1条改为“即将搜文件/代码/网络时先语义查图”、opencode 唤醒插件同文、dsh 产物重生成。\n■ 0.29.26（582a785）：修量具——agentCostLog.js 原先把所有 repo 工具都标 repo/read（bash/write/edit/todowrite 也是 read）。现改为 toolKey 归一化 + kind 细分：read（read/grep/glob/list/webfetch）、write（write/edit/multiedit/apply_patch）、exec（bash/shell/…）、other（todowrite/task）。\n【附带修正】项目级 AGENTS.md 部署条款（5afc72e）：从“装 archgraph-argo-beta”改为“按当前分支线取最新 registry 包 + 禁跨线降级”；决策记录在 overseer-lesson-npm-proxy-deploy-001 的 decision 属性。\n\n【基线（发布前，发布前日志）】141 个 run：图首跳 70.2%、仓库首跳 29.8%；且 99 个图首跳中 85 个是 STEP 0 的 schema 读，真正首跳语义检索仅 9.9%。2026-10-28T05:37Z 部署后暂无有效样本（仅本次会话自己的核验调用）。\n\n【下次开工第一步：复测首跳】只用重启后的新记录（旧记录 kind 是旧标签，混不了）。口径：按 pid + 30 分钟间隔切 run；每个 run 的第一条 kind=read 且 backend∈{graph,repo} 算首跳。目标：仓库首跳 <20%。已核对：只传 {query:{intent}} 已能成功（purpose=general），0.29.25 代码已生效。\n\n【后续 backlog（按性价比）】1) 复测并判定；2) 把首跳口径沉淀为 scripts/first-hop-report.js + 1 条 AT（约 1h，避免每次手写）；3) 若未达标：调位置/措辞（更靠前、更短），仍无改善再上中段 hook（首个 grep/read 前未测图则拦截一次）——但 hook 有仪式化风险，必须先有基线对照；4) 可选通用能力：bundle 声明式 artifactLocators（默认 commit）把“图→仓”机械衔接；5) 契约缺口：commit 属性有强制要求但无任何校验（同原则索引一类缺陷）。\n\n【约束/坑】① 运行中 MCP 与采集器都是启动时加载，改后必须重启；② 续接会话可能仍用旧 instructions，需新开会话；③ 部署只走 registry 包 + argo-deploy，禁止本地 tarball；跨线安装会降级。\n\n【教训】1)“零行/零命中=还没有”是静默失败，默认开启的能力必须有存在性诊断。2) 规则写进 system prompt ≠ 有控制器；真正起作用的是高显著度位置（门禁/schema 读）+ 低摩擦工具接口。3) 度量先于优化，且量具本身要通用可验证（这次就差点被 kind 误标带偏）。4) 去重门禁拦下“同一能力的第二个里程碑”时，应复用原子元素而不是造孪生。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4497,7 +4497,7 @@
         {
           "name": "lastSummaryAt",
           "value": "2026-10-28",
-          "description": "原则索引存在性可观测：诊断 Agent 不主动查图的原因 + 创建 principle-index-001 + schema 读 status 三态 + STEP 0 必须上报"
+          "description": "检索行为改造（0.29.24/25/26 三版发布）+ 首跳基线与复测口径 + 后续 backlog"
         },
         {
           "name": "commit",
@@ -4872,6 +4872,16 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "nextAction",
+          "value": "measure-first-hop-after-restart",
+          "description": "重启后复测首跳（用重启后的新记录，kind=read + backend∈{graph,repo}）；仓库首跳 <20% 为达标"
+        },
+        {
+          "name": "sessionHook",
+          "value": "await-human-restart-then-measure",
+          "description": "人类伙伴已重启宿主；请新开会话后再干活，否则 instructions 可能仍是旧版；回来后直接说“复测首跳”即可接着做"
         }
       ],
       "testcases": [
