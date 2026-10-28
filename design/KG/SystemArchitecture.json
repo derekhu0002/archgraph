@@ -13626,6 +13626,38 @@
       "id": "overseer-argo-0-29-25-release-001",
       "name": "里程碑：发布 archgraph-argo@0.29.25（检索决策点触发语 + 一字段语义读）",
       "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（release archgraph-argo@0.29.26）",
+          "name": "commit",
+          "value": "42ac5f9"
+        },
+        {
+          "description": "argo/scripts/graph-rag/agentCostLog.js; tests/agent-cost-log.test.js（分类器 kind 细分）",
+          "name": "commit",
+          "value": "582a785"
+        },
+        {
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记 AT-agent-cost-log-03）",
+          "name": "commit",
+          "value": "440b554"
+        },
+        {
+          "description": "archgraph-argo@0.29.26",
+          "name": "release",
+          "value": "archgraph-argo@0.29.26"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ],
+      "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.26——修度量量具。\n【缺陷】agentCostLog.js 把所有 repo 工具（read/grep/glob/list/bash/webfetch/edit/write）一律标为 repo/read，导致「每个 run 的首个检索」无法用通用判据（kind=read + backend∈{graph,repo}）计算，只能回归到按宿主工具名硬排除，换宿主即失效。\n【修复】toolKey 归一化（mcp__<server>__ / functions. / argo_ 前缀）+ 严格集合匹配；kind 细分：内容读取=read（read/grep/glob/list/webfetch）、落盘=write（write/edit/multiedit/apply_patch/patch）、命令执行=exec（bash/shell/powershell/terminal/exec/exec_command/run_command）、与图仓无关=other（todowrite/task 等）。未知工具一律 other，不再靠子串硬套。AT-agent-cost-log-03。\n【意义】首跳口径变为零工具名假设、跨宿主/跨项目通用：每个 run 的第一条 kind=read 且 backend∈{graph,repo}。\n【发布】npm publish archgraph-argo@0.29.26（latest）→ 传播第 28 次轮询可见 → npm i -g archgraph-argo@0.29.26 → argo-deploy -SkipEnv；核验 ~/.argo/scripts/graph-rag/agentCostLog.js 已含 toolKey/REPO_WRITE_TOOLS/SHELL_TOOLS。\n【待办】重启宿主并**新开会话**（续接会话可能仍持有旧 instructions）；之后用新日志（kind 已细分）复测首跳，目标：仓库首跳占比由基线 29.8% 降到 <20%。\n【验收】npm test 823/823（0 fail / 0 skip）；validateSystemArchitecture 通过。",
+      "id": "overseer-argo-0-29-26-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.29.26（成本日志 kind 细分，修首跳量具）",
+      "type": "Business Object"
     }
   ],
   "relationships": [
@@ -17842,7 +17874,8 @@
         "overseer-mem-issue12-functional-closedworld-001",
         "overseer-argo-0-29-18-release-001",
         "overseer-argo-0-29-24-release-001",
-        "overseer-argo-0-29-25-release-001"
+        "overseer-argo-0-29-25-release-001",
+        "overseer-argo-0-29-26-release-001"
       ],
       "included_relationships": []
     },
