@@ -116,6 +116,10 @@ const HOST_ONLY_ENV_KEYS = Object.freeze([
   'ARGO_COST_PROFILER',
   'ARGO_COST_TRACE_MAX_BYTES',
   'ARGO_CONTEXT_MAX_BYTES',
+  // CLI entry resolution (argo/scripts/resolveArgoCli.js): the control plane tells
+  // the toolchain where it installed/found the CLI; not a .env setting.
+  'ARGO_INSTALL_ROOT',
+  'ARGO_CLI_PATH',
   // Internal to the extension runner (set by the write hook when spawning an
   // external validator); never user-configured in .env.
   'ARGO_VALIDATION_TOUCHED_ELEMENTS',

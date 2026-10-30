@@ -13169,7 +13169,7 @@
       "name": "argo-init CLI（工作区确定性初始化）",
       "id": "argo-init-cli-001",
       "parent": "1961",
-      "description": "argo-init CLI（bin/argo-init.js）：工作区确定性初始化的命令行入口，运行与已移除 MCP 工具相同的 initializeWorkspaceReport（同一实现）——bootstrap + Neo4j 结构同步 + .qea 全量投影 + 语义生命周期 + canonical 校验 + 本体定义/校验 + subdiagram_views 一致性。输出契约（2026-10-15 优化）：默认输出简明摘要（约十行：整体状态 + schema + 各阶段状态 + 本体/本体校验 + Neo4j 库名与 .qea 目标的一致性核验 + 报告路径），修复前默认把 ~384KB 完整报告（其中端点矩阵 ~180KB）pretty-JSON 全量刷屏、污染终端与 Agent 上下文；--json（--verbose 别名）输出完整报告 JSON（与旧行为逐字段一致）；完整报告始终写入 .argo/temp/argo-harness-init-report.json。摘要渲染为纯函数 argo/scripts/argoInitSummary.js（防御式：不抛错、容忍部分报告）。程序化调用方 sandbox/lib/argo-init-cli.js 显式传 --json 取全量。",
+      "description": "argo-init CLI（bin/argo-init.js）：工作区确定性初始化的命令行入口，运行与已移除 MCP 工具相同的 initializeWorkspaceReport（同一实现）——bootstrap + Neo4j 结构同步 + .qea 全量投影 + 语义生命周期 + canonical 校验 + 本体定义/校验 + subdiagram_views 一致性。输出契约（2026-10-15 优化）：默认输出简明摘要（约十行：整体状态 + schema + 各阶段状态 + 本体/本体校验 + Neo4j 库名与 .qea 目标的一致性核验 + 报告路径），修复前默认把 ~384KB 完整报告（其中端点矩阵 ~180KB）pretty-JSON 全量刷屏、污染终端与 Agent 上下文；--json（--verbose 别名）输出完整报告 JSON（与旧行为逐字段一致）；完整报告始终写入 .argo/temp/argo-harness-init-report.json。摘要渲染为纯函数 argo/scripts/argoInitSummary.js（防御式：不抛错、容忍部分报告）。程序化调用方 sandbox/lib/argo-init-cli.js 显式传 --json 取全量。\n\n入口解析（2026-10-30，GitHub issue #17 非交互/远端执行）：CLI 入口解析收敛到单一模块 argo/scripts/resolveArgoCli.js（bin/argo-init.js 与 sandbox/lib/argo-init-cli.js 共用，按 ARGO_CLI_PATH → ARGO_INSTALL_ROOT → ~/.argo → 由 process.execPath 推导的 npm 全局前缀 → 本包根 → PATH 顺序解析；package.json 的 bin 映射优先，故布局/扩展名变更无需改代码），并**不依赖调用方 PATH**；失败时抛出 ArgoCliResolutionError，列出全部已尝试的绝对路径与修复建议（npm i -g archgraph-argo / argo-deploy -SkipEnv / ARGO_INSTALL_ROOT / ARGO_CLI_PATH）。argo-deploy 在部署 scripts 的同一步加法式写入 <ArgoRoot>/bin/argo-init.js 与（非 Windows）<ArgoRoot>/bin/argo-init POSIX 包装：幂等、不覆盖非本安装器写入的文件、不进 PATH、可用 -SkipCliShim 或 ARGO_DEPLOY_CLI_SHIM=0 关闭；Windows 与独立交互式终端的既有行为与产物不变。",
       "testcases": [
         {
           "name": "AT-argo-init-01",
@@ -13191,6 +13191,20 @@
           "description": "GIVEN argo-init CLI；WHEN 无参 vs --json；THEN 默认打印简明摘要、--json 打印完整报告且共用同一渲染模块；sandbox 程序化调用方显式传 --json 保持全量对象。",
           "Input": "tests/argo-init-interface.test.js",
           "acceptanceCriteria": "tests/argo-init-interface.test.js"
+        },
+        {
+          "acceptanceCriteria": "tests/argo-cli-resolution.test.js",
+          "description": "GIVEN 非交互/远端执行环境（Paperclip/WSL/CI：PATH 不含全局 npm bin，HOME 为 per-agent home，消费方仓库无 bin/argo-init.js）；WHEN sandbox runner 或 <ArgoRoot>/bin/argo-init 解析入口并运行；THEN 无需 PATH 即解析到绝对入口并执行（ARGO_CLI_PATH 优先级最高、package.json bin 映射优先于约定路径、既有 checkout/仓库内 bin 探针行为不变），无候选时错误包含全部已尝试绝对路径与修复建议。",
+          "Input": "tests/argo-cli-resolution.test.js",
+          "name": "AT-argo-init-04",
+          "type": "Acceptance Test"
+        },
+        {
+          "acceptanceCriteria": "tests/argo-deploy.test.js",
+          "description": "GIVEN 一次 argo-deploy 部署（含重复部署与 -SkipCliShim）；WHEN 检查 <ArgoRoot>/bin；THEN 正常部署写入 argo-init.js（非 Windows 另有 POSIX 包装）且与 scripts/resolveArgoCli.js 同批就位，重复部署幂等、不覆盖非本安装器写入的文件，-SkipCliShim 时不创建任何 bin 包装；Windows 部署不生成 POSIX 包装、既有产物与行为不变。",
+          "Input": "tests/argo-deploy.test.js",
+          "name": "AT-argo-init-05",
+          "type": "Acceptance Test"
         }
       ],
       "attributes": [

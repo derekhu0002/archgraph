@@ -52,6 +52,7 @@ function buildInstallArgs(opts) {
     '-SkipDeps',
     ...(opts.openCodeSystemConfigPath ? ['-OpenCodeSystemConfigPath', opts.openCodeSystemConfigPath] : []),
     ...(opts.skipEnv ? ['-SkipEnv'] : []),
+    ...(opts.extraArgs || []),
   ];
 }
 
@@ -762,5 +763,64 @@ test('install-argo.ps1 reports the ontology switch from the .env, not from the -
     assert.ok(out.includes(value), 'the effective ARGO_VALIDATION_EXTENSIONS value must be shown');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('install-argo.ps1 deploys additive PATH-free CLI entry shims (idempotent, foreign-safe, opt-out)', () => {
+  // GIVEN a non-interactive control plane (WSL/CI/SSH) whose PATH lacks the npm
+  //       global bin directory, so a bare `argo-init` is not discoverable there
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-cli-shim-'));
+  const paths = hostPaths(tmp);
+  const cliShim = path.join(paths.argoRoot, 'bin', 'argo-init.js');
+  const posixShim = path.join(paths.argoRoot, 'bin', 'argo-init');
+  try {
+    // WHEN the deployer runs
+    const first = runInstall({ ...paths, skipEnv: true });
+    // THEN it publishes a PATH-free entry next to the deployed scripts
+    assert.equal(first.status, 0, `install exited with ${first.status}: ${first.stderr}`);
+    assert.ok(fs.existsSync(cliShim), 'the PATH-free CLI entry must be deployed under <ArgoRoot>/bin');
+    assert.match(
+      fs.readFileSync(cliShim, 'utf8'),
+      /deterministic workspace initialization/,
+      'the deployed entry must be the real argo-init CLI',
+    );
+    assert.ok(
+      fs.existsSync(path.join(paths.argoRoot, 'scripts', 'resolveArgoCli.js')),
+      'the shared resolver must ship with the toolchain',
+    );
+    if (process.platform === 'win32') {
+      assert.ok(!fs.existsSync(posixShim), 'the POSIX wrapper is Linux/WSL-only');
+    } else {
+      assert.ok(fs.existsSync(posixShim), 'the POSIX wrapper must be deployed');
+      assert.match(fs.readFileSync(posixShim, 'utf8'), /^#!\//, 'the POSIX wrapper must start with a shebang');
+    }
+
+    // AND a re-deploy never clobbers a file it did not write
+    fs.writeFileSync(cliShim, '// user-owned custom wrapper\n', 'utf8');
+    const second = runInstall({ ...paths, skipEnv: true });
+    assert.equal(second.status, 0, `second install exited with ${second.status}: ${second.stderr}`);
+    assert.equal(
+      fs.readFileSync(cliShim, 'utf8'),
+      '// user-owned custom wrapper\n',
+      'a foreign file at the shim path must be preserved',
+    );
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+
+  // GIVEN an operator who does not want the extra entry
+  // WHEN the deployer runs with -SkipCliShim
+  // THEN no bin/ shim is created (opt-out is additive, not destructive)
+  const tmp2 = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-cli-shim-off-'));
+  const paths2 = hostPaths(tmp2);
+  try {
+    const result = runInstall({ ...paths2, skipEnv: true, extraArgs: ['-SkipCliShim'] });
+    assert.equal(result.status, 0, `opt-out install exited with ${result.status}: ${result.stderr}`);
+    assert.ok(
+      !fs.existsSync(path.join(paths2.argoRoot, 'bin', 'argo-init.js')),
+      '-SkipCliShim must skip the CLI entry shim',
+    );
+  } finally {
+    fs.rmSync(tmp2, { recursive: true, force: true });
   }
 });

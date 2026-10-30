@@ -6,20 +6,22 @@
 // callers need the FULL report, which --json still emits verbatim.
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 
+const { resolveArgoCli } = require('../../argo/scripts/resolveArgoCli.js');
+
 function resolveArgoInit() {
-  const home = process.env.HOME || process.env.USERPROFILE || os.homedir();
+  // A checkout (or the Docker sandbox at /work) carries the CLI at <repo>/bin.
+  // Keep that probe first so existing sandbox runs resolve exactly as before.
   const repo = process.env.ARGO_REPO_ROOT || process.env.SANDBOX_REPO || '/work';
-  const candidates = [
-    path.join(repo, 'bin', 'argo-init.js'),
-    path.join(home, '.argo', 'bin', 'argo-init.js'),
-  ];
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) return { cmd: process.execPath, args: [candidate] };
-  }
-  return { cmd: 'argo-init', args: [] }; // global on PATH
+  const repoCli = path.join(repo, 'bin', 'argo-init.js');
+  if (fs.existsSync(repoCli)) return { cmd: process.execPath, args: [repoCli] };
+
+  // Otherwise use the shared resolver: deployed ~/.argo/bin, npm global prefix,
+  // this package's own root, and PATH last. Never assume PATH on a
+  // non-interactive control plane (Paperclip/SSH/WSL/CI).
+  const resolved = resolveArgoCli('argo-init');
+  return { cmd: resolved.cmd, args: resolved.args };
 }
 
 function runArgoInitCli(workspaceRoot, extraEnv = {}) {

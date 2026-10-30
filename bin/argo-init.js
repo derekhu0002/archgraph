@@ -32,10 +32,35 @@ function wantsFullJson() {
   return process.argv.includes('--json') || process.argv.includes('--verbose');
 }
 
+// The shared resolver ships next to the deployed scripts (and inside this
+// package). A deployed copy of this file lives at <root>/bin/argo-init.js, so the
+// same relative path is tried in both layouts; older mixed installs keep working
+// through the legacy probe below.
+function loadResolver() {
+  const candidates = [
+    path.join(__dirname, '..', 'scripts', 'resolveArgoCli.js'),
+    path.join(__dirname, '..', 'argo', 'scripts', 'resolveArgoCli.js'),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return require(candidate); // eslint-disable-line global-require
+  }
+  return null;
+}
+
 function resolveArgoMcp() {
+  const resolver = loadResolver();
+  if (resolver) {
+    const server = resolver.resolveArgoServer();
+    if (server) return server;
+  }
   const deployed = path.join(os.homedir(), '.argo', 'scripts', 'argo-mcp-server.js');
   if (fs.existsSync(deployed)) return deployed;
-  return path.join(__dirname, '..', 'argo', 'scripts', 'argo-mcp-server.js');
+  const local = path.join(__dirname, '..', 'argo', 'scripts', 'argo-mcp-server.js');
+  if (fs.existsSync(local)) return local;
+  throw new Error(
+    'argo-init cannot locate the deployed ARGO toolchain (argo-mcp-server.js). '
+    + 'Run `argo-deploy -SkipEnv` to deploy it, or set ARGO_INSTALL_ROOT to the installed package root.',
+  );
 }
 
 async function main() {

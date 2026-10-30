@@ -64,6 +64,7 @@ const DELIVERABLE_GUARDS = [
   ['FEATURE: principle catalog presence probe (declared-missing is observable)', 'tests/principle-index-presence.test.js'],
   ['FEATURE: one-field semantic read (query.intent; purpose defaults to general)', 'tests/read-friction.test.js'],
   ['SKILL: argo-init drives the argo-init CLI (init removed from MCP; functionally identical)', 'tests/argo-init-interface.test.js'],
+  ['FEATURE: PATH-free argo-init entry resolution (non-interactive/remote: WSL/CI/SSH)', 'tests/argo-cli-resolution.test.js'],
   ['Schema / ArchiMate 3.2 constraint', 'tests/aml-standard.test.js'],
   ['Neo4j structural projection & sync', 'tests/neo4j-sync-staleness.test.js'],
   ['Secret .env preflight (never-committed; ACL not enforced)', 'tests/semantic-env-guard.test.js'],

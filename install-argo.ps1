@@ -20,6 +20,7 @@ param(
     [switch]$SkipOntologyEngine,
     [switch]$EnableOntologyValidation,
     [switch]$SkipMcp,
+    [switch]$SkipCliShim,
     [switch]$SkipDsh,
     [string]$DshHome = "$env:USERPROFILE\.dsh",
     [string]$DshCwd = '',
@@ -57,6 +58,60 @@ function Copy-Tree {
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
     Copy-Item -Recurse -Force -Path (Join-Path $Source '*') -Destination $Destination
 }
+
+# CLI entry shims (non-interactive / remote execution).
+# A control plane (Paperclip over SSH, WSL, CI) spawns agents with a PATH that
+# does not contain the global npm bin directory, so a bare `argo-init` is not
+# discoverable there. Deploy an additive, PATH-free entry instead:
+#   <ArgoRoot>/bin/argo-init.js  -> runs the deployed scripts/argo-mcp-server.js
+#   <ArgoRoot>/bin/argo-init     -> POSIX wrapper (non-Windows only)
+# Additive and idempotent: it never touches PATH, never clobbers a file this
+# installer did not write, and can be disabled with -SkipCliShim or
+# ARGO_DEPLOY_CLI_SHIM=0.
+function Write-CliShims {
+    param([string]$ArgoRoot, [string]$RepoRoot)
+    if ($SkipCliShim -or $env:ARGO_DEPLOY_CLI_SHIM -eq '0') {
+        Write-Host '  argo\bin\argo-init (CLI entry shim) skipped'
+        return
+    }
+    $cliSrc = Join-Path (Join-Path $RepoRoot 'bin') 'argo-init.js'
+    if (-not (Test-Path -LiteralPath $cliSrc)) { return }
+    $binDest = Join-Path $ArgoRoot 'bin'
+    New-Item -ItemType Directory -Force -Path $binDest | Out-Null
+
+    $cliDest = Join-Path $binDest 'argo-init.js'
+    $refresh = $true
+    if (Test-Path -LiteralPath $cliDest) {
+        # Refresh only what this installer wrote; leave any other file untouched.
+        $existing = Get-Content -LiteralPath $cliDest -Raw -ErrorAction SilentlyContinue
+        $refresh = ($null -ne $existing) -and ($existing -match 'deterministic workspace initialization')
+    }
+    if ($refresh) { Copy-Item -Force -Path $cliSrc -Destination $cliDest }
+    Write-Host "  argo\bin\argo-init.js -> $cliDest (PATH-free CLI entry)"
+
+    if (-not $isWindowsHost) {
+        $shimPath = Join-Path $binDest 'argo-init'
+        if (-not (Test-Path -LiteralPath $shimPath)) {
+            $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+            $nodeExe = if ($nodeCmd) { [string]$nodeCmd.Source } else { 'node' }
+            $nodeExe = $nodeExe -replace '\\', '/'
+            $shim = @(
+                '#!/usr/bin/env sh',
+                '# argo-deploy CLI shim (generated; safe to delete; never added to PATH).',
+                '# Resolves the deployed toolchain without relying on the caller PATH.',
+                ("NODE_BIN='" + $nodeExe + "'"),
+                '[ -x "$NODE_BIN" ] || NODE_BIN=node',
+                'exec "$NODE_BIN" "$(dirname "$0")/argo-init.js" "$@"',
+                ''
+            ) -join "`n"
+            # BOM-less on purpose: a BOM would break the `#!` line.
+            [System.IO.File]::WriteAllText($shimPath, $shim, (New-Object System.Text.UTF8Encoding($false)))
+            try { & chmod 755 $shimPath 2>$null } catch { }
+            Write-Host "  argo\bin\argo-init -> $shimPath (POSIX wrapper)"
+        }
+    }
+}
+
 
 function Copy-Agents {
     param(
@@ -1114,6 +1169,7 @@ $scriptsSrc = Join-Path $argoDir 'scripts'
 $scriptsDest = Join-Path $ArgoRoot 'scripts'
 Write-Host "[2/22] argo\scripts -> $scriptsDest"
 Copy-Tree -Source $scriptsSrc -Destination $scriptsDest
+Write-CliShims -ArgoRoot $ArgoRoot -RepoRoot $repoRoot
 
 $defaultsSrc = Join-Path $argoDir 'defaults'
 $defaultsDest = Join-Path $ArgoRoot 'defaults'
