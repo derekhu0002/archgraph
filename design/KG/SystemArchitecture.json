@@ -13914,6 +13914,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "verification",
+          "value": "restart-2026-10-30-live",
+          "description": "真重启后实测（2026-10-30）：宿主机上 10 个 argo-mcp-server 子进程创建时间 20:25:40–20:25:58，均晚于部署产物 20:18:59 → 运行中 MCP 已加载 0.29.29。实测：schema(workspace/Acme+UML2/actor=Business Actor/principleIndex=present)、结构 429 元素/299 关系/94 视图、getSystemArchitecture、getIntentElementContext(testcases=5)、getArchitectureViewContext、memory_search(3 命中)、validateSystemArchitecture(passed) 全部正常。部署 CLI 端到端：ARGO INIT OK（429/299/94，semanticLifecycle Aligned，subdiagramViews drift 0）。非交互复现：PATH 仅含 node 目录（无 npm 全局 bin）→ CLI 仍被解析并执行（issue #17 已修）；剩余失败为扩展引擎依赖 PATH 的 python（host 配置项）。PATH 空 + per-agent HOME(junction) → CLI 仍被解析并执行；剩余失败为扩展命令裸 node 的 ENOENT 与 env 文件 reparse-point 守卫（≈WSL 下 ~/.argo 符号链接，issue 原文已说明由 host 侧 ARGO_ENV_FILE 绕过）。结论：既有场景无回归。"
         }
       ],
       "description": "发布里程碑（2026-10-30）：archgraph-argo@0.29.29（GitHub issue #17 修复：PATH-free argo-init CLI 入口解析）。\n【发布】npm publish（105 files，shasum d3b2496c51d2d5a3208f106d0843f47a2dffbf31）→ registry 传播第 12 次轮询可见（~55s）→ npm i -g archgraph-argo@0.29.29（旧 0.29.28，非降级）→ argo-deploy -SkipEnv 完成（Win 22/22 + Codex 3/3）。\n【产物核验】~/.argo/bin/argo-init.js 已创建（Windows 不生成 POSIX 包装，符合预期）；~/.argo/scripts/resolveArgoCli.js、argo-mcp-server.js、argoInitSummary.js 与仓库源码 SHA256 完全一致；npm 全局 argo-init shim（%APPDATA%\\npm\\argo-init.ps1）保持原状（既有调用方式未变）。OpenCode opencode.json 的 mcp.argo（node + 绝对 server 路径）与 plugins 均未变。\n【本机验证（等价重启：全新 MCP 实例加载已部署代码）】initialize OK，tools/list 18 个；queryNeo4jGraph 结构 428 元素/94 视图；schema 为 workspace / Acme + UML 2 State Machine / actor=Business Actor / principleIndex=present；getSystemArchitecture 语义检索 OK；getIntentElementContext focus=argo-init-cli-001 testcases=5；getArchitectureViewContext OK；memory_search 命中 issue #17 里程碑；validateSystemArchitecture passed。\n【非交互场景本地实测】HOME=<per-agent home>（.argo 为 junction）+ PATH=空目录：resolveArgoCli 无需 PATH 即解析到 <HOME>/.argo/bin/argo-init.js（source=install-root），node --check 通过。\n【回归】npm test 839/839（0 fail 0 skip，含新增守卫）；runArchitectureTests 全通过。\n【遗留】issue #17 保持开启，由提出方在 WSL 非交互/Paperclip 环境实测确认后再关；本机未发现既有场景受损。",
