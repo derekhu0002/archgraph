@@ -4498,7 +4498,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话 · 2026-10-28 · Docker 真实用例实测）\n\n【会话目标】重启后继续验证检索行为改造；并在本机 Docker 容器里用真实用例实测（不只跑单测）。\n\n【已确认（宿主）】args 采集重启后生效（bash keys=[\"command\"]，此前恒 {}）；报告可识别 schema 读。\n\n【Docker 真实用例实测（archgraph-argo@0.29.27 tarball + 真 Neo4j/embedding + opencode Agent）】\n■ 导航 SEED 28 题（真实 Agent、完整 argo MCP）：r1（修复前）=28/28，avg 16.2s；r2（修复后）=27/28（CA-02 为模型波动，选错 AT 元素），avg 13.3s、tok 221k。\n■ repo-rich 3 题（工作区含真实仓库内容）：全部先图后仓；Q2 唯一触仓 run 的语义读早于首次 grep/read=1/1；Q1/Q3 直接用图内 commit/路径信息作答。\n■ 首跳统计（成本日志，真实容器会话）：nav 28/28、repo probe 3/3，合计 31/31 首跳=graph（schema 19 / semantic 1-2 / structural 7-8）；args 采集在容器内也生效（schema 桶可识别）。\n\n【发现并修复 4 个沙箱缺陷（commit 41b955f，均加可执行 AT）】① entrypoint 未传 -SkipOntologyEngine：可选本体引擎要求 python3+JRE，沙箱未装 → argo-deploy 直接 throw；② Dockerfile 未 COPY lib：smoke/nav-eval require ./lib/argo-init-cli.js → 镜像内必挂；③ nav-eval 的 loadEnvFile 全量注入宿主 .env：ARGO_VALIDATION_EXTENSIONS 带 C:/Users/... Windows 路径 → 容器 init 校验失败；现改为沙箱白名单（宿主专有键/密钥不注入）；④ runAgent 不固定 PWD：opencode 按 PWD 解析项目目录，日志落到 /tmp/install；现固定 PWD=/workspace。\n\n【残留/backlog】① 沙箱只挂了生产图、未挂仓库自己的 .argo/schema → 容器用默认 ArchiMate 3.2 校验工作区方言图，argo-init 的 systemArchitecture 仍 failed（但语义检索/导航不受影响），且失败时 errors=[] （诊断缺口）；② repo-first 指标需要带仓库内容的沙箱场景，且 repo-rich 样本 n=3<10，暂不能下结论；③ CA-02 模型波动（同题 r1 对 r2 错）。\n\n【构建/环境坑】Docker 镜像构建时容器内 GitHub 下载 pwsh 不稳定（other side closed）→ 宿主预下载后 COPY；本机 docker 镜像源对 node:20 返回 401 → 用本地 node:24-bookworm-slim 作 BASE_IMAGE；argo/.env 被 ACL 拒绝（宿主与 Docker 都 403）→ 用 ~/.argo/.env（ARGO_*/QWEN）+ ~/.local/share/opencode/auth.json（DeepSeek）传凭据。\n\n【验收】npm test 831/831（0 fail / 0 skip）；validateSystemArchitecture 通过。commit：562bf65、b3d9400、b111027/96fafe7、c79c0d6、41b955f、60b7bed。产物（gitignored）：results/nav-eval-20261028/、results/nav-eval-20261028-r2/、results/repo-probe-20261028/。",
+      "description": "项目总管工作记忆摘要（会话 · 2026-10-30 · GitHub issue #17 + argo MCP 掉线诊断）\n\n【会话目标】查看新 GitHub issue、分析并实施；期间排查一次 argo MCP 掉线。\n\n【已定位 issue】#17 [argo-init] 非交互/远端执行（Paperclip + WSL）下 CLI 入口不可发现。核对证据全部成立：sandbox/lib/argo-init-cli.js 只探 <repo>/bin、~/.argo/bin、PATH；本机 ~/.argo 无 bin/（部署器从不创建）；bin/argo-init.js:36,38,49 硬编码 .js；MCP 配置已用绝对 server 路径。\n\n【交付（commit 1287eca，Tier 3）】argo/scripts/resolveArgoCli.js 单一解析器（ARGO_CLI_PATH→ARGO_INSTALL_ROOT→~/.argo→npm 全局前缀(process.execPath)→本包根→PATH；manifest bin 映射权威）；bin/argo-init.js 与 sandbox runner 共用（checkout 探针保持第一，沙箱行为不变）；失败列出全部绝对候选+修复建议；install-argo.ps1 在 [2/22] 加法式写 <ArgoRoot>/bin/argo-init.js（非 Windows 加 POSIX 包装），幂等/不覆盖外部文件/不进 PATH/-SkipCliShim 或 ARGO_DEPLOY_CLI_SHIM=0 可关；Windows 与交互式产物零变化。已否决 issue 的 dist/TS 推测兜底（本仓无 TS 构建，YAGNI）。env 覆盖测试新增 ARGO_INSTALL_ROOT/ARGO_CLI_PATH 为 host-only 键。\n\n【验收】新增 tests/argo-cli-resolution.test.js 6 条 AT + deploy 包装 AT；guardian 已登记；npm test 839/839（0 fail 0 skip）；runArchitectureTests 全通过（AT-argo-init-04/05）；validateSystemArchitecture 通过。\n\n【argo MCP 掉线诊断（非代码缺陷）】11:22:40 opencode WARN “MCP connection closed” server=argo；mcp-phase.json 显示 pid 7004 最后相位 tool:queryNeo4jGraph，mcp-crash.log 无 exit/uncaughtException → 硬终止（宿主终止或 native abort）；无 WER、内存充裕、同 cypher 新实例实测成功 → 服务器健康；opencode 1.19.1 会话内不重连，需重启 MCP/客户端。观察项：当前并存 9 个 argo-mcp-server 进程（每会话一个，疑似泄漏），且共写同一 mcp-phase.json 使归因不可靠。\n\n【坑】PS5.1 的 Get-Content/Set-Content 按 ANSI 处理 UTF-8 测试文件 → 中文与破折号损坏；已回滚并用 edit 工具重写。改文本/代码禁用 PowerShell 管道回写。\n\n【待办】①发布 archgraph-argo@latest + argo-deploy，WSL 非交互实测 shim；②回复/关闭 issue #17；③（沿用）沙箱挂 .argo/schema + repo-rich ≥10 run；④可选：MCP 进程多实例/阶段文件共用问题单独立项。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4520,7 +4520,7 @@
         },
         {
           "name": "lastSummaryAt",
-          "value": "2026-10-28",
+          "value": "2026-10-30",
           "description": "Docker 真实用例已完成（导航 28 题 + repo-rich 3 题）；下一步：挂工作区 schema bundle 并在带仓库沙箱积累 ≥10 run"
         },
         {
@@ -4899,13 +4899,13 @@
         },
         {
           "name": "nextAction",
-          "value": "mount-workspace-schema-and-accumulate-repo-runs",
+          "value": "release-and-verify-wsl-noninteractive",
           "description": "挂 .argo/schema 到沙箱 → 消除 init 的 systemArchitecture failed；带仓库沙箱积累 ≥10 run 后判定 repo-first<20%"
         },
         {
           "name": "sessionHook",
-          "value": "sandbox-fixes-landed-41b955f",
-          "description": "沙箱入口需 -SkipOntologyEngine；Dockerfile 需 COPY lib；宿主 .env 需白名单；agent 子进程需固定 PWD"
+          "value": "issue17-fix-landed-needs-release",
+          "description": "commit 1287eca 已交付但未发布：需 npm publish + argo-deploy 后在 WSL 非交互验证 ~/.argo/bin/argo-init 生效，再回复/关闭 issue #17"
         }
       ],
       "testcases": [
@@ -11384,7 +11384,14 @@
       "name": "经验：argo MCP「连接被关/反复崩溃」诊断法 + 本次结论（宿主终止 vs 服务端崩溃）",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "经验（2026-10-04，项目总管）：诊断 opencode 日志反复出现的 WARN \"MCP connection closed\" server=argo 与 aBot 常驻 MCP 进程硬死。\n【现象】9-11..10-04 多次；每次关闭都发生在某次 argo 工具调用后 0.05–3.6s（多为 apply/addArchitectureElement，也有 queryNeo4jGraph/memory_search，甚至 git status 后）。\n【可复用诊断法】①读每工作区 <ws>/.argo/temp/mcp-crash.log + mcp-phase.json：kind=previous-run-phase 表示上一进程最后相位（硬死、无 exit）；kind=exit 正常退出；kind=uncaughtException JS 异常；把相位与 opencode 关闭时间对齐。②查 Windows WER/Application+System 事件与 Crashpad dumps，判断是否有 OS 级 node 崩溃。③受控复现：ARGO_REPO_ROOT=一次性工作区 + 部署版 argo-mcp-server.js 直连 stdio，加 --report-on-fatalerror/--report-directory 并捕获 stderr/exit。\n【本次结论】aBot pid 37932 最后相位 mutation:embeddingLifecycle @2026-10-04T09:17:31.833Z，markPhase('mutation:done') 从未写入 → 死于 await attachMutationEmbeddingLifecycle 未返回时；该进程无 exit、无 uncaughtException，Windows 无 node WER/AppHang/System 事件 → 硬杀（TerminateProcess 类）。受控复现（单次 + 同进程连续 40 次 live 写入）：embeddingLifecycle=Aligned、RSS ~74MB 平稳、句柄 221→218、到 Neo4j 7687 连接每次回落 0、干净退出 code=0、无 report → argo 写入+语义生命周期代码非本次死因；排除 OOM（aBot 113/archgraph 501 条语义记录）、driver/socket 泄漏、外部 embed 挂死（端点 HTTP200 ~125ms 1536 维）、JS 异常。判定：宿主 opencode 关闭/终止 MCP 子连接（opencode INFO 无原因、且不自动重连，故上会话需手工 stdio 兜底）。\n【坑】不能只凭最后相位断定服务端 bug；必须用‘一次成功复现’证伪确定性缺陷，再区分 native abort（有 node report/WER）与外部 kill（服务端无任何痕迹）。\n【代码观察（非本次死因，勿据此改动，保稳定）】attachMutationEmbeddingLifecycle→persistentReconcile 每次新建 neo4j.driver（mutationEmbeddingVectorLifecycle.js:136-144），projectionStore.close（L241）在该路径为死代码；另有 2 处 properties() 全量物化（mutationEmbeddingVectorLifecycle.js:276 topK100；productionSemanticNeo4jAdapter.js:79 readRecords 全量带 vector），系 2026-09-22 OOM 热修显式 defer 的站点，仅大图需处理。\n【未定/下一步（人类决定，未实施）】给 argo MCP 启动包薄 wrapper 记录 exit code/signal/stderr + --report-on-fatalerror，或临时调 opencode debug 日志，复现一次即可定案终止者。"
+      "description": "经验（2026-10-04，项目总管）：诊断 opencode 日志反复出现的 WARN \"MCP connection closed\" server=argo 与 aBot 常驻 MCP 进程硬死。\n【现象】9-11..10-04 多次；每次关闭都发生在某次 argo 工具调用后 0.05–3.6s（多为 apply/addArchitectureElement，也有 queryNeo4jGraph/memory_search，甚至 git status 后）。\n【可复用诊断法】①读每工作区 <ws>/.argo/temp/mcp-crash.log + mcp-phase.json：kind=previous-run-phase 表示上一进程最后相位（硬死、无 exit）；kind=exit 正常退出；kind=uncaughtException JS 异常；把相位与 opencode 关闭时间对齐。②查 Windows WER/Application+System 事件与 Crashpad dumps，判断是否有 OS 级 node 崩溃。③受控复现：ARGO_REPO_ROOT=一次性工作区 + 部署版 argo-mcp-server.js 直连 stdio，加 --report-on-fatalerror/--report-directory 并捕获 stderr/exit。\n【本次结论】aBot pid 37932 最后相位 mutation:embeddingLifecycle @2026-10-04T09:17:31.833Z，markPhase('mutation:done') 从未写入 → 死于 await attachMutationEmbeddingLifecycle 未返回时；该进程无 exit、无 uncaughtException，Windows 无 node WER/AppHang/System 事件 → 硬杀（TerminateProcess 类）。受控复现（单次 + 同进程连续 40 次 live 写入）：embeddingLifecycle=Aligned、RSS ~74MB 平稳、句柄 221→218、到 Neo4j 7687 连接每次回落 0、干净退出 code=0、无 report → argo 写入+语义生命周期代码非本次死因；排除 OOM（aBot 113/archgraph 501 条语义记录）、driver/socket 泄漏、外部 embed 挂死（端点 HTTP200 ~125ms 1536 维）、JS 异常。判定：宿主 opencode 关闭/终止 MCP 子连接（opencode INFO 无原因、且不自动重连，故上会话需手工 stdio 兜底）。\n【坑】不能只凭最后相位断定服务端 bug；必须用‘一次成功复现’证伪确定性缺陷，再区分 native abort（有 node report/WER）与外部 kill（服务端无任何痕迹）。\n【代码观察（非本次死因，勿据此改动，保稳定）】attachMutationEmbeddingLifecycle→persistentReconcile 每次新建 neo4j.driver（mutationEmbeddingVectorLifecycle.js:136-144），projectionStore.close（L241）在该路径为死代码；另有 2 处 properties() 全量物化（mutationEmbeddingVectorLifecycle.js:276 topK100；productionSemanticNeo4jAdapter.js:79 readRecords 全量带 vector），系 2026-09-22 OOM 热修显式 defer 的站点，仅大图需处理。\n【未定/下一步（人类决定，未实施）】给 argo MCP 启动包薄 wrapper 记录 exit code/signal/stderr + --report-on-fatalerror，或临时调 opencode debug 日志，复现一次即可定案终止者。\n\n【2026-10-30 追加（再次复现 + 新发现）】①现象：11:22:40 WARN \"MCP connection closed\" server=argo，本会话 argo_* 工具整体消失；**仅重启 MCP（不重启 opencode）即恢复**（实测 queryNeo4jGraph 正常）——opencode 1.19.1 按会话固定工具表、不自动重连。②定性：mcp-phase.json 显示 pid 7004（uptime 48.7h）最后相位 tool:queryNeo4jGraph（11:22:40.136Z），mcp-crash.log 无该 pid 的 exit/uncaughtException → 硬终止；OS 无 WER/Application Error，内存充裕（33GB free）；同一条 cypher 在全新实例上成功 → 排除语句/代码缺陷。与 2026-10-04 结论一致：宿主终止，非服务端 bug。③**诊断缺口（新）**：同一宿主上并存 9 个 argo-mcp-server 进程（同一父进程、启动时间集中在一分钟），疑似每会话/每实例一个常驻进程；且它们共写同一个 mcp-crash.log / mcp-phase.json，面包屑相互覆盖（大量 previous-run-phase 交错），使崩溃相位归属不可靠。建议（未实施）：phase/crash 文件按 pid（或 workspace+pid）分文件；排查宿主为何为每会话常驻 MCP 子进程。",
+      "attributes": [
+        {
+          "name": "commit",
+          "value": "1287eca",
+          "description": "2026-10-30 追加：再次硬终止复现（pid 7004，tool:queryNeo4jGraph，无 exit 记录）+ 9 实例并存与共享 phase/crash 文件的诊断缺口；仅重启 MCP 即恢复。"
+        }
+      ]
     },
     {
       "description": "UML 2 状态机视角（扩展自 Acme 基础 schema：ArchiMate 3.2 + UML 2 state-machine profile）。承载「Coding 业务状态机」的 UML 2 视图：状态以 State 建模、流转以 Transition 建模，指标以 Acme/ArchiMate 的 Assessment 建模并关联到状态。",
@@ -13236,6 +13243,11 @@
         {
           "name": "deliveryStatus",
           "value": "delivered"
+        },
+        {
+          "name": "commit",
+          "value": "1287eca",
+          "description": "fix(argo-init): PATH-free CLI entry resolution（issue #17）— argo/scripts/resolveArgoCli.js; bin/argo-init.js; sandbox/lib/argo-init-cli.js; install-argo.ps1 (-SkipCliShim + <ArgoRoot>/bin shims); argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; tests/argo-cli-resolution.test.js; tests/argo-deploy.test.js; tests/acceptance-guardian.test.js; design/KG/SystemArchitecture.json; archgraph.qea"
         }
       ]
     },
@@ -13853,6 +13865,28 @@
       "description": "里程碑（2026-10-28）：发布并部署 archgraph-argo@0.29.28——本体校验扩展的真引擎失败诊断修复。\n【缺陷】ontology-projection/cli.js 把『引擎已启动但崩溃/非零退出』与『引擎无法启动』一律报成 engine unavailable，且 stderr 只取头 300 字符，Python traceback 末尾的真实原因被截掉（例：缺 type 元素 → KeyError: 'type' 被误标为 python 不可用，而本机 Python 正常）。\n【修复】ENOENT（及 spawn 失败）→ unavailable；非零退出/崩溃 → failed，并带 exit/signal 与 stderr 尾部 800 字符；新增 AT-ovx-19（缺解释器 vs 引擎崩溃分类 + 尾部原因保留）。commit 9b5b81d。\n【发布】npm publish archgraph-argo@0.29.28（shasum 962d712b07185a2f2ea8b1eb655341b4e4fe415e，registry 第 9 次轮询可见）→ npm i -g archgraph-argo@0.29.28 → argo-deploy -SkipEnv（22/22）；核验 ~/.argo/scripts/ontology-projection/cli.js 与仓库 sha256 一致（5BFBB3B9…）。\n【验收】npm test 832/832（0 fail/0 skip）；npm run acceptance:ontology（Docker 真引擎）A/B/C 全 PASS；validateSystemArchitecture 通过。npm run acceptance（schema-decoupling）5/10：失败均为既有环境/夹具问题——verify-all.js 复制清单漏 bin（/work/bin/argo-init.js 不存在，自 init 迁到 CLI 起即失效）与宿主 Neo4j 缺 schema-bundle-* 测试库；已用 stash 基线复跑确认与本次改动无关。\n【生效条件】运行中的 MCP 进程仍持有旧代码，需重启宿主。",
       "id": "overseer-argo-0-29-28-release-001",
       "name": "里程碑：发布 archgraph-argo@0.29.28（本体真引擎失败诊断修复）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "fix(argo-init): PATH-free CLI entry resolution（issue #17）— argo/scripts/resolveArgoCli.js; bin/argo-init.js; sandbox/lib/argo-init-cli.js; install-argo.ps1; argo/scripts/graph-rag/liveEmbeddingProviderConfig.js; tests/argo-cli-resolution.test.js; tests/argo-deploy.test.js; tests/acceptance-guardian.test.js; design/KG/SystemArchitecture.json; archgraph.qea",
+          "name": "commit",
+          "value": "1287eca"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ],
+      "description": "里程碑（2026-10-30，项目总管）：处理 GitHub issue #17（Paperclip 控制面 + WSL 非交互执行下 `argo-init` 不可发现）。\n【根因】①sandbox/lib/argo-init-cli.js 只探 <repo>/bin/argo-init.js、~/.argo/bin/argo-init.js、PATH 三者，WSL 非交互 PATH 不含 /opt/node24/bin、消费方仓库无 bin/、部署器从不建 ~/.argo/bin → 必然 ENOENT 且报错不含候选与修复建议；②三处硬编码 .js 路径，布局变更会静默失效。\n【方案（人类伙伴批准，最小且零影响既有场景）】新增 argo/scripts/resolveArgoCli.js 单一解析器（ARGO_CLI_PATH → ARGO_INSTALL_ROOT → ~/.argo → 由 process.execPath 推导的 npm 全局前缀 → 本包根 → PATH；package.json bin 映射优先，故布局/扩展名变更无需改代码）；bin/argo-init.js 与 sandbox runner 共用它（checkout/Docker 的 <repo>/bin 探针保持第一，行为不变）；失败抛 ArgoCliResolutionError 列出全部已尝试绝对路径 + 修复建议（npm i -g / argo-deploy -SkipEnv / ARGO_INSTALL_ROOT / ARGO_CLI_PATH）；install-argo.ps1 在 [2/22] 同一步加法式写 <ArgoRoot>/bin/argo-init.js（非 Windows 另加 POSIX 包装，绝对 node + PATH 回退）：幂等、不覆盖非本安装器写入的文件、不进 PATH、-SkipCliShim / ARGO_DEPLOY_CLI_SHIM=0 可关；Windows 与独立交互式终端产物/行为不变。\n【否决】issue 建议的 .js→dist/*.js→.ts 推测式兜底（本仓无 TS 构建，属 YAGNI）：改由 manifest bin 映射权威解析覆盖该风险。\n【验收】新增 tests/argo-cli-resolution.test.js 6 条 AT（非 PATH 解析 / bin 映射权威 / ARGO_CLI_PATH 优先 / 失败报候选+建议 / runner 端到端 / checkout 行为不变）+ tests/argo-deploy.test.js 包装 AT（幂等、外部文件不被覆盖、-SkipCliShim）；acceptance-guardian 登记。npm test 839/839（0 fail 0 skip）；runArchitectureTests 全通过（含 AT-argo-init-04/05）；validateSystemArchitecture 通过。\n【坑】Set-Content/Get-Content 在 PS5.1 下会按 ANSI 读写 UTF-8 源文件，导致测试文件中文/破折号损坏 → 回滚后用 edit 工具按 UTF-8 重写；批量文本改动禁用 PowerShell 管道回写。\n【待办】发布 archgraph-argo@latest + argo-deploy 验证 shim 生效（WSL 非交互实测）→ 回复/关闭 issue #17。commit 1287eca。",
+      "id": "overseer-mem-issue17-argo-init-entry-001",
+      "name": "里程碑：GitHub issue #17 — argo-init 非交互/远端执行的 CLI 入口发现（PATH-free 解析）",
       "parent": "project-overseer-001",
       "type": "Business Object"
     }
@@ -18085,7 +18119,8 @@
         "overseer-cross-project-dispatch-001",
         "overseer-argo-mcp-verification-001",
         "overseer-principle-index-001",
-        "overseer-milestone-graph-write-lock-001"
+        "overseer-milestone-graph-write-lock-001",
+        "overseer-mem-issue17-argo-init-entry-001"
       ],
       "included_relationships": []
     },
