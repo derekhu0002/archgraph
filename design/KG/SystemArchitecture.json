@@ -4498,7 +4498,7 @@
       "name": "项目总管工作记忆摘要",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "项目总管工作记忆摘要（会话 · 2026-10-30 · GitHub issue #17 + argo MCP 掉线诊断）\n\n【会话目标】查看新 GitHub issue、分析并实施；期间排查一次 argo MCP 掉线。\n\n【已定位 issue】#17 [argo-init] 非交互/远端执行（Paperclip + WSL）下 CLI 入口不可发现。核对证据全部成立：sandbox/lib/argo-init-cli.js 只探 <repo>/bin、~/.argo/bin、PATH；本机 ~/.argo 无 bin/（部署器从不创建）；bin/argo-init.js:36,38,49 硬编码 .js；MCP 配置已用绝对 server 路径。\n\n【交付（commit 1287eca，Tier 3）】argo/scripts/resolveArgoCli.js 单一解析器（ARGO_CLI_PATH→ARGO_INSTALL_ROOT→~/.argo→npm 全局前缀(process.execPath)→本包根→PATH；manifest bin 映射权威）；bin/argo-init.js 与 sandbox runner 共用（checkout 探针保持第一，沙箱行为不变）；失败列出全部绝对候选+修复建议；install-argo.ps1 在 [2/22] 加法式写 <ArgoRoot>/bin/argo-init.js（非 Windows 加 POSIX 包装），幂等/不覆盖外部文件/不进 PATH/-SkipCliShim 或 ARGO_DEPLOY_CLI_SHIM=0 可关；Windows 与交互式产物零变化。已否决 issue 的 dist/TS 推测兜底（本仓无 TS 构建，YAGNI）。env 覆盖测试新增 ARGO_INSTALL_ROOT/ARGO_CLI_PATH 为 host-only 键。\n\n【验收】新增 tests/argo-cli-resolution.test.js 6 条 AT + deploy 包装 AT；guardian 已登记；npm test 839/839（0 fail 0 skip）；runArchitectureTests 全通过（AT-argo-init-04/05）；validateSystemArchitecture 通过。\n\n【argo MCP 掉线诊断（非代码缺陷）】11:22:40 opencode WARN “MCP connection closed” server=argo；mcp-phase.json 显示 pid 7004 最后相位 tool:queryNeo4jGraph，mcp-crash.log 无 exit/uncaughtException → 硬终止（宿主终止或 native abort）；无 WER、内存充裕、同 cypher 新实例实测成功 → 服务器健康；opencode 1.19.1 会话内不重连，需重启 MCP/客户端。观察项：当前并存 9 个 argo-mcp-server 进程（每会话一个，疑似泄漏），且共写同一 mcp-phase.json 使归因不可靠。\n\n【坑】PS5.1 的 Get-Content/Set-Content 按 ANSI 处理 UTF-8 测试文件 → 中文与破折号损坏；已回滚并用 edit 工具重写。改文本/代码禁用 PowerShell 管道回写。\n\n【待办】①发布 archgraph-argo@latest + argo-deploy，WSL 非交互实测 shim；②回复/关闭 issue #17；③（沿用）沙箱挂 .argo/schema + repo-rich ≥10 run；④可选：MCP 进程多实例/阶段文件共用问题单独立项。",
+      "description": "项目总管工作记忆摘要（会话 · 2026-10-30 · GitHub issue #17 修复发布 + argo MCP 掉线诊断）\n\n【会话目标】处理 GitHub issue #17（非交互/远端执行下 argo-init 入口不可发现），发布部署并验证已有场景无影响；期间排查一次 argo MCP 掉线。\n\n【交付】commit 1287eca（Tier 3）：argo/scripts/resolveArgoCli.js 单一解析器（ARGO_CLI_PATH→ARGO_INSTALL_ROOT→~/.argo→npm 全局前缀(process.execPath)→本包根→PATH；manifest bin 映射权威）；bin/argo-init.js 与 sandbox runner 共用（checkout 探针仍第一，Docker 行为不变）；失败列全部绝对候选+修复建议；install-argo.ps1 在 [2/22] 加法式写 <ArgoRoot>/bin/argo-init.js（非 Windows 加 POSIX 包装），幂等/不覆盖外部文件/不进 PATH/-SkipCliShim 可关。已否决 issue 的 dist/TS 推测兜底（无 TS 构建，YAGNI）。\n\n【发布部署】0.29.29 发布（shasum d3b2496c，传播第12次可见）→ npm i -g（旧 0.29.28，非降级）→ argo-deploy -SkipEnv 22/22 + Codex 3/3。产物：~/.argo/bin/argo-init.js 已建（Windows 无 POSIX 包装，符合预期）；三个部署脚本与仓库源 SHA256 一致；npm 全局 shim 与 opencode.json 均未变。\n\n【本机验证（等价重启：全新实例加载部署代码）】18 个工具；结构 428 元素/94 视图；schema workspace/Acme+UML2/actor=Business Actor/principleIndex=present；语义检索、元素上下文（testcases=5）、视图上下文、memory_search、validate 全部 OK。非交互实测：HOME=per-agent home + PATH 空目录 → 解析到 <HOME>/.argo/bin/argo-init.js（无需 PATH）。\n\n【回归】npm test 839/839（0 fail 0 skip）；runArchitectureTests 全通过。新增元素后 overseer-ltm-layering 精确成员守卫已同步（0f1ec29）。\n\n【argo MCP 掉线（非代码缺陷）】mcp-phase.json 显示 pid 7004 最后相位 tool:queryNeo4jGraph，crash 日志无 exit 记录 → 硬终止；同 cypher 新实例成功、无 WER、内存充足 → 服务器健康；仅重启 MCP 即恢复（opencode 1.19.1 不自动重连）。观察：9 个 MCP 进程并存且共写同一 phase/crash 文件（归因干扰），已记入经验库。\n\n【坑】PS5.1 的 Get-Content/Set-Content 按 ANSI 处理 UTF-8 文件会破坏中文；改代码/测试禁用 PowerShell 管道回写。\n\n【待办】①等提出方在 WSL/Paperclip 实测确认后关闭 issue #17（本会话不关）；②（沿用）沙箱挂 .argo/schema + repo-rich ≥10 run；③可选：MCP 多实例/共享 phase 文件问题单独立项。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -4899,13 +4899,13 @@
         },
         {
           "name": "nextAction",
-          "value": "release-and-verify-wsl-noninteractive",
+          "value": "await-external-wsl-verify-then-close-issue17",
           "description": "挂 .argo/schema 到沙箱 → 消除 init 的 systemArchitecture failed；带仓库沙箱积累 ≥10 run 后判定 repo-first<20%"
         },
         {
           "name": "sessionHook",
-          "value": "issue17-fix-landed-needs-release",
-          "description": "commit 1287eca 已交付但未发布：需 npm publish + argo-deploy 后在 WSL 非交互验证 ~/.argo/bin/argo-init 生效，再回复/关闭 issue #17"
+          "value": "issue17-released-awaiting-external-verify",
+          "description": "0.29.29 已发布+部署+本机验证；issue #17 保持开启，等 Paperclip/WSL 侧对方实测确认，收到人类指令后再关闭。"
         }
       ],
       "testcases": [
@@ -13882,11 +13882,43 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.29.29",
+          "description": "已发布 archgraph-argo@0.29.29 并部署验证（见 overseer-argo-0-29-29-release-001）；issue #17 保持开启待提出方实测。"
         }
       ],
       "description": "里程碑（2026-10-30，项目总管）：处理 GitHub issue #17（Paperclip 控制面 + WSL 非交互执行下 `argo-init` 不可发现）。\n【根因】①sandbox/lib/argo-init-cli.js 只探 <repo>/bin/argo-init.js、~/.argo/bin/argo-init.js、PATH 三者，WSL 非交互 PATH 不含 /opt/node24/bin、消费方仓库无 bin/、部署器从不建 ~/.argo/bin → 必然 ENOENT 且报错不含候选与修复建议；②三处硬编码 .js 路径，布局变更会静默失效。\n【方案（人类伙伴批准，最小且零影响既有场景）】新增 argo/scripts/resolveArgoCli.js 单一解析器（ARGO_CLI_PATH → ARGO_INSTALL_ROOT → ~/.argo → 由 process.execPath 推导的 npm 全局前缀 → 本包根 → PATH；package.json bin 映射优先，故布局/扩展名变更无需改代码）；bin/argo-init.js 与 sandbox runner 共用它（checkout/Docker 的 <repo>/bin 探针保持第一，行为不变）；失败抛 ArgoCliResolutionError 列出全部已尝试绝对路径 + 修复建议（npm i -g / argo-deploy -SkipEnv / ARGO_INSTALL_ROOT / ARGO_CLI_PATH）；install-argo.ps1 在 [2/22] 同一步加法式写 <ArgoRoot>/bin/argo-init.js（非 Windows 另加 POSIX 包装，绝对 node + PATH 回退）：幂等、不覆盖非本安装器写入的文件、不进 PATH、-SkipCliShim / ARGO_DEPLOY_CLI_SHIM=0 可关；Windows 与独立交互式终端产物/行为不变。\n【否决】issue 建议的 .js→dist/*.js→.ts 推测式兜底（本仓无 TS 构建，属 YAGNI）：改由 manifest bin 映射权威解析覆盖该风险。\n【验收】新增 tests/argo-cli-resolution.test.js 6 条 AT（非 PATH 解析 / bin 映射权威 / ARGO_CLI_PATH 优先 / 失败报候选+建议 / runner 端到端 / checkout 行为不变）+ tests/argo-deploy.test.js 包装 AT（幂等、外部文件不被覆盖、-SkipCliShim）；acceptance-guardian 登记。npm test 839/839（0 fail 0 skip）；runArchitectureTests 全通过（含 AT-argo-init-04/05）；validateSystemArchitecture 通过。\n【坑】Set-Content/Get-Content 在 PS5.1 下会按 ANSI 读写 UTF-8 源文件，导致测试文件中文/破折号损坏 → 回滚后用 edit 工具按 UTF-8 重写；批量文本改动禁用 PowerShell 管道回写。\n【待办】发布 archgraph-argo@latest + argo-deploy 验证 shim 生效（WSL 非交互实测）→ 回复/关闭 issue #17。commit 1287eca。",
       "id": "overseer-mem-issue17-argo-init-entry-001",
       "name": "里程碑：GitHub issue #17 — argo-init 非交互/远端执行的 CLI 入口发现（PATH-free 解析）",
+      "parent": "project-overseer-001",
+      "type": "Business Object"
+    },
+    {
+      "attributes": [
+        {
+          "description": "package.json（0.29.28→0.29.29）",
+          "name": "commit",
+          "value": "ce5dd7c"
+        },
+        {
+          "description": "tests/overseer-ltm-layering.test.js（新元素纳入 overseer-rules-001 精确成员守卫）",
+          "name": "commit",
+          "value": "0f1ec29"
+        },
+        {
+          "name": "release",
+          "value": "archgraph-argo@0.29.29"
+        },
+        {
+          "name": "deliveryStatus",
+          "value": "delivered"
+        }
+      ],
+      "description": "发布里程碑（2026-10-30）：archgraph-argo@0.29.29（GitHub issue #17 修复：PATH-free argo-init CLI 入口解析）。\n【发布】npm publish（105 files，shasum d3b2496c51d2d5a3208f106d0843f47a2dffbf31）→ registry 传播第 12 次轮询可见（~55s）→ npm i -g archgraph-argo@0.29.29（旧 0.29.28，非降级）→ argo-deploy -SkipEnv 完成（Win 22/22 + Codex 3/3）。\n【产物核验】~/.argo/bin/argo-init.js 已创建（Windows 不生成 POSIX 包装，符合预期）；~/.argo/scripts/resolveArgoCli.js、argo-mcp-server.js、argoInitSummary.js 与仓库源码 SHA256 完全一致；npm 全局 argo-init shim（%APPDATA%\\npm\\argo-init.ps1）保持原状（既有调用方式未变）。OpenCode opencode.json 的 mcp.argo（node + 绝对 server 路径）与 plugins 均未变。\n【本机验证（等价重启：全新 MCP 实例加载已部署代码）】initialize OK，tools/list 18 个；queryNeo4jGraph 结构 428 元素/94 视图；schema 为 workspace / Acme + UML 2 State Machine / actor=Business Actor / principleIndex=present；getSystemArchitecture 语义检索 OK；getIntentElementContext focus=argo-init-cli-001 testcases=5；getArchitectureViewContext OK；memory_search 命中 issue #17 里程碑；validateSystemArchitecture passed。\n【非交互场景本地实测】HOME=<per-agent home>（.argo 为 junction）+ PATH=空目录：resolveArgoCli 无需 PATH 即解析到 <HOME>/.argo/bin/argo-init.js（source=install-root），node --check 通过。\n【回归】npm test 839/839（0 fail 0 skip，含新增守卫）；runArchitectureTests 全通过。\n【遗留】issue #17 保持开启，由提出方在 WSL 非交互/Paperclip 环境实测确认后再关；本机未发现既有场景受损。",
+      "id": "overseer-argo-0-29-29-release-001",
+      "name": "里程碑：发布 archgraph-argo@0.29.29（issue #17 PATH-free argo-init 入口）",
       "parent": "project-overseer-001",
       "type": "Business Object"
     }
@@ -18100,7 +18132,8 @@
         "overseer-argo-0-29-25-release-001",
         "overseer-argo-0-29-26-release-001",
         "overseer-argo-0-29-27-release-001",
-        "overseer-argo-0-29-28-release-001"
+        "overseer-argo-0-29-28-release-001",
+        "overseer-argo-0-29-29-release-001"
       ],
       "included_relationships": []
     },
