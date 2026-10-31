@@ -3095,6 +3095,11 @@
           "name": "commit",
           "value": "5408e35",
           "description": "argo/rules/archgraph.instructions.md（STEP 0 新增 Retrieval contract + QueryPriorityGuideline 第1条改为决策点触发语）; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js（重新生成）; tests/argo-rules-query.test.js（5408e35）"
+        },
+        {
+          "name": "commit",
+          "value": "3b111a4",
+          "description": "argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; argo/scripts/systemarchitecture-mcp-server.js; tests/argo-rules-query.test.js; tests/first-hop-report.test.js; tests/acceptance-guardian.test.js; scripts/first-hop-report.js; design/KG/SystemArchitecture.json（Recall-before-acting + AT-rules-12）"
         }
       ],
       "subdiagram_views": []
@@ -13966,6 +13971,11 @@
         {
           "name": "status",
           "value": "ACTIVE"
+        },
+        {
+          "name": "commit",
+          "value": "3b111a4",
+          "description": "argo/rules/archgraph.instructions.md; argo/plugins/argo-wakeup.js; dsh-argo-wakeup/index.js; argo/scripts/systemarchitecture-mcp-server.js; tests/argo-rules-query.test.js; tests/first-hop-report.test.js; tests/acceptance-guardian.test.js; scripts/first-hop-report.js; design/KG/SystemArchitecture.json"
         }
       ]
     }
