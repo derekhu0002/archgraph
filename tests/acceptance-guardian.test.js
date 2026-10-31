@@ -56,6 +56,7 @@ const MCP_INTERFACE_GUARDS = [
 // [deliverableLabel, testFile] — core framework deliverable guards.
 const DELIVERABLE_GUARDS = [
   ['RULE: KG-first / semantic-first retrieval', 'tests/argo-rules-query.test.js'],
+  ['RULE: recall before acting (a task is a recall trigger, not only a question)', 'tests/argo-rules-query.test.js'],
   ['RULE: change-tier gate', 'tests/argo-rules-change-tier.test.js'],
   ['RULE: capability delegation', 'tests/argo-rules-capability-delegation.test.js'],
   ['RULE: content storage (docs into KG)', 'tests/argo-rules-content-storage.test.js'],

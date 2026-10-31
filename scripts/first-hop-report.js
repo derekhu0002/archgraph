@@ -154,6 +154,26 @@ function semanticBeforeRepo(run) {
   };
 }
 
+// The framework also requires one retrieval before the FIRST side-effecting
+// action (write or command execution), so a task/goal is a recall trigger, not
+// only a question. This is the task-side counterpart of semanticBeforeRepo.
+const ACTION_KINDS = new Set(['write', 'exec']);
+
+function recallBeforeFirstAction(run) {
+  let firstSemantic = -1;
+  let firstAction = -1;
+  (run.records || []).forEach((record, index) => {
+    if (firstAction === -1 && ACTION_KINDS.has(record.kind)) firstAction = index;
+    if (firstSemantic === -1 && record.kind === 'read' && record.backend === 'graph' && graphHopType(record) === 'semantic') firstSemantic = index;
+  });
+  return {
+    firstAction,
+    firstSemantic,
+    hasAction: firstAction !== -1,
+    recallFirst: firstSemantic !== -1 && firstAction !== -1 && firstSemantic < firstAction,
+  };
+}
+
 function pct(part, whole) {
   return whole > 0 ? Math.round((part / whole) * 1000) / 10 : null;
 }
@@ -180,12 +200,18 @@ function buildFirstHopReport(records, options = {}) {
   const graphHopTools = {};
   const argsRecorded = rows.some(record => record.args && Array.isArray(record.args.keys) && record.args.keys.length > 0);
   const repoTasks = { runs: 0, semanticFirst: 0 };
+  const actionTasks = { runs: 0, recallFirst: 0 };
   const details = [];
   for (const run of measured) {
     const signal = semanticBeforeRepo(run);
     if (signal.touchesRepo) {
       repoTasks.runs += 1;
       if (signal.semanticFirst) repoTasks.semanticFirst += 1;
+    }
+    const action = recallBeforeFirstAction(run);
+    if (action.hasAction) {
+      actionTasks.runs += 1;
+      if (action.recallFirst) actionTasks.recallFirst += 1;
     }
     const first = firstHopOf(run);
     if (!first) {
@@ -227,6 +253,11 @@ function buildFirstHopReport(records, options = {}) {
       semanticFirst: repoTasks.semanticFirst,
       semanticFirstPct: pct(repoTasks.semanticFirst, repoTasks.runs),
     },
+    actionTasks: {
+      runs: actionTasks.runs,
+      recallFirst: actionTasks.recallFirst,
+      recallFirstPct: pct(actionTasks.recallFirst, actionTasks.runs),
+    },
     instrument: { argsRecorded },
     percentages: {
       repoFirst: repoFirstPct,
@@ -257,6 +288,7 @@ function formatReport(report, options = {}) {
   const g = report.graphFirstBreakdown;
   lines.push(`graph hops: schema ${g.schema} | semantic ${g.semantic} | structural ${g.structural}`);
   lines.push(`runs touching the repo: ${report.repoTasks.runs} | semantic graph read before the first repo read: ${report.repoTasks.semanticFirst} (${fmt(report.repoTasks.semanticFirstPct)}%)`);
+  lines.push(`runs with a side-effecting action: ${report.actionTasks.runs} | semantic graph read before the first action: ${report.actionTasks.recallFirst} (${fmt(report.actionTasks.recallFirstPct)}%)`);
   if (!report.instrument.argsRecorded) {
     lines.push('note: tool arguments were NOT recorded, so STEP-0 schema reads cannot be separated');
     lines.push('      from other graph queries (queryNeo4jGraph counted as structural).');
@@ -326,6 +358,7 @@ module.exports = {
   firstHopOf,
   graphHopType,
   semanticBeforeRepo,
+  recallBeforeFirstAction,
   buildFirstHopReport,
   formatReport,
   parseArgs,

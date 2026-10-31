@@ -2824,7 +2824,7 @@
       "name": "ArchGraph ARGO Workflow Rules",
       "parent": "1249",
       "type": "Rule",
-      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）。2026-09-11 全量改写为 Agent 视角：规则文件是给 Agent 的提示，只写「Agent 该做什么/怎么判定」的行为契约，不写工具内部实现（算法/阈值/环境变量/字段名）与解释性论证；每个会话随上下文加载，越短越准越好。运行规则：起步闸门（WakeupGuideline STEP 0）仅载 T1 工作记忆摘要；改动前先定位元素、只经 ARGO MCP 读写图谱、验收测试先行（可执行 GIVEN-WHEN-THEN）、提交后登记 commit id+文件路径；KG-first 且语义优先检索；KG-first 内容存储；写入去重（GraphDeduplication）；三层记忆；分级改动（Tier 1/2/3）。2026-09-15 新增 <CriticalReasoningGuideline> + CoreRule 10（证据驱动的批判性思维，AT-rules-04）。2026-09-15 新增 <LosslessWrite> + CoreRule 11：写图不静默丢内容——结构化字段 merge（省略≠删除）、标量文本 acknowledgeLoss（重大加 lossJustification）、破坏性删除 tombstone 快照、每次响应含 lossless 报告（AT-rules-05；能力组件 lossless-write-gate）。安装器 install-argo.ps1 从 <WakeupGuideline> 块生成各宿主唤醒插件，部署测试断言该锚点与 UNCONDITIONAL STARTUP GATE 文本。 2026-09-22 新增 <FederationGuideline> + CoreRule 12：联邦行为契约——注册/注销无需外部审批、发现成员、先授权后读取、默认拒绝、读返回引用而非副本、单一中心经 graph MCP；中心落在 graph-wiki（云端），各项目自注册/自注销（AT-rules-06；WP wp-federation-framework-side-001）。",
+      "description": "ArchGraph/ARGO 全局工作流规则文件（argo/rules/archgraph.instructions.md，全英文）。2026-09-11 全量改写为 Agent 视角：规则文件是给 Agent 的提示，只写「Agent 该做什么/怎么判定」的行为契约，不写工具内部实现（算法/阈值/环境变量/字段名）与解释性论证；每个会话随上下文加载，越短越准越好。运行规则：起步闸门（WakeupGuideline STEP 0）仅载 T1 工作记忆摘要；改动前先定位元素、只经 ARGO MCP 读写图谱、验收测试先行（可执行 GIVEN-WHEN-THEN）、提交后登记 commit id+文件路径；KG-first 且语义优先检索；KG-first 内容存储；写入去重（GraphDeduplication）；三层记忆；分级改动（Tier 1/2/3）。2026-09-15 新增 <CriticalReasoningGuideline> + CoreRule 10（证据驱动的批判性思维，AT-rules-04）。2026-09-15 新增 <LosslessWrite> + CoreRule 11：写图不静默丢内容——结构化字段 merge（省略≠删除）、标量文本 acknowledgeLoss（重大加 lossJustification）、破坏性删除 tombstone 快照、每次响应含 lossless 报告（AT-rules-05；能力组件 lossless-write-gate）。安装器 install-argo.ps1 从 <WakeupGuideline> 块生成各宿主唤醒插件，部署测试断言该锚点与 UNCONDITIONAL STARTUP GATE 文本。 2026-09-22 新增 <FederationGuideline> + CoreRule 12：联邦行为契约——注册/注销无需外部审批、发现成员、先授权后读取、默认拒绝、读返回引用而非副本、单一中心经 graph MCP；中心落在 graph-wiki（云端），各项目自注册/自注销（AT-rules-06；WP wp-federation-framework-side-001）。 2026-10-31 新增 Recall-before-acting：任务/目标与提问一样是回忆触发点——会话内首个副作用动作（写/改文件、执行命令、改图、委派）之前，若尚未按任务意图检索，先做一次 memory_search（或 getSystemArchitecture），单次查询、零相关命中即放行；落点 WakeupGuideline 第5条、QueryPriorityGuideline 第1条、MemoryRecallGuideline 第5条、CoreRule 14、opencode 唤醒插件与 dsh 生成物；first-hop 报告新增 actionTasks（首个副作用动作前语义读）度量（AT-rules-12、AT-first-hop-07）。",
       "testcases": [
         {
           "Input": "tests/argo-rules-query.test.js",
@@ -2902,6 +2902,13 @@
           "Input": "tests/argo-rules-query.test.js",
           "name": "AT-rules-11",
           "type": "Acceptance Test"
+        },
+        {
+          "name": "AT-rules-12",
+          "type": "Acceptance Test",
+          "description": "GIVEN 一个任务/目标（而非提问）作为首条消息；WHEN Agent 在首个副作用动作（写/改文件、执行命令、改图、委派）前检查规则；THEN WakeupGuideline/QueryPriorityGuideline/MemoryRecallGuideline/CoreRules/opencode 唤醒插件/dsh 生成物均要求先按任务意图做一次语义检索（memory_search 或 getSystemArchitecture），单次、不批量、零相关命中即放行，禁止先动手后回忆。",
+          "Input": "tests/argo-rules-query.test.js",
+          "acceptanceCriteria": "tests/argo-rules-query.test.js"
         }
       ],
       "attributes": [
@@ -13944,6 +13951,23 @@
       "name": "里程碑：发布 archgraph-argo@0.29.29（issue #17 PATH-free argo-init 入口）",
       "parent": "project-overseer-001",
       "type": "Business Object"
+    },
+    {
+      "id": "overseer-recall-before-acting-001",
+      "name": "里程碑：Recall-before-acting（任务/目标也先回忆）",
+      "type": "Business Object",
+      "parent": "project-overseer-001",
+      "description": "里程碑（2026-10-31，项目总管）：把检索触发从『提问』扩展到『动手』。人类伙伴反馈：问 Agent 一个问题时它会检索记忆，但给它一个任务/目标时往往只做 STEP 0 的 schema 读、不回忆经验。证据（scripts/first-hop-report.js，37 个可测 run）：首跳 graph 86.5%，但真语义首跳仅 18.9%（schema 5 / semantic 7 / structural 20，后者多为 STEP 0 的 Actor 枚举）；新增 actionTasks 口径实测 7 个含副作用动作的 run 中仅 3 个在首个动作前做过语义读（42.9%）。改动：WakeupGuideline 新增第 5 条 Recall-before-acting（首个副作用动作前按任务意图做一次 memory_search / getSystemArchitecture，单次、不批量、零命中即放行）；QueryPriorityGuideline 第1条触发点加入『即将动手』；MemoryRecallGuideline 第5条声明任务是回忆触发点；CoreRule 14；opencode 唤醒插件同步；dsh 插件由规则重新生成；memory_search 工具描述加入『开始任务前』。度量：scripts/first-hop-report.js 新增 actionTasks + AT-first-hop-07。验收：tests/argo-rules-query.test.js 新增 AT-rules-12；npm test 841/841（0 fail / 0 skip）；dsh 单源 --check 通过。待办：发布 archgraph-argo 并 argo-deploy 后重启宿主，按 actionTasks 复测。",
+      "attributes": [
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -18194,7 +18218,8 @@
         "overseer-mem-agent-cost-harness-001",
         "overseer-milestone-read-projection-001",
         "overseer-harness-view-relations-001",
-        "overseer-rerank-native-qwen-transport-001"
+        "overseer-rerank-native-qwen-transport-001",
+        "overseer-recall-before-acting-001"
       ],
       "included_relationships": []
     },

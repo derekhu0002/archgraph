@@ -423,7 +423,7 @@ const TOOLS = [
   },
   {
     name: 'memory_search',
-    description: 'Semantic memory search: retrieve the user\'s memory by natural-language query. Runs embedding-based semantic retrieval (memory-retrieval purpose) over the intent graph and returns the top-k relevant memory items (id, name, type, similarity score, and a description excerpt with its full length). Each hit is a lightweight card: to keep the tool result compact, description is truncated to max_desc_len characters (default 800) and the full text length is reported as description_length. To read the full text of a hit, call getIntentElementContext with its id. Agents SHOULD call this tool to look up the user\'s memory before answering a question about the user.',
+    description: 'Semantic memory search: retrieve the user\'s memory by natural-language query. Runs embedding-based semantic retrieval (memory-retrieval purpose) over the intent graph and returns the top-k relevant memory items (id, name, type, similarity score, and a description excerpt with its full length). Each hit is a lightweight card: to keep the tool result compact, description is truncated to max_desc_len characters (default 800) and the full text length is reported as description_length. To read the full text of a hit, call getIntentElementContext with its id. Agents SHOULD call this tool to look up the user\'s memory before answering a question about the user AND before starting a task that may depend on prior decisions or lessons.',
     inputSchema: {
       type: 'object',
       properties: {

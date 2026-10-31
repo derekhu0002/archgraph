@@ -76,6 +76,44 @@ test('archgraph-rules-document-query-decision-point-trigger', () => {
   assert.match(section[1], /seeds/);
 });
 
+test('archgraph-rules-document-recall-before-acting', () => {
+  // GIVEN a task or goal (not only a question) as the first message
+  const rules = readRules();
+  const gate = rules.match(/<WakeupGuideline>([\s\S]*?)<\/WakeupGuideline>/);
+  assert.ok(gate, 'the rule must contain a <WakeupGuideline> block');
+  // THEN the startup gate requires a recall before the first side-effecting action
+  assert.match(gate[1], /Recall before acting/);
+  assert.match(gate[1], /memory_search/);
+  assert.match(gate[1], /side-effecting action/);
+  // AND a miss must never block the work (zero relevant hits means proceed)
+  assert.match(gate[1], /zero relevant hits means proceed/i);
+  // AND the hand-written host gate (highest salience) carries the same rule
+  const plugin = fs.readFileSync(
+    path.join(__dirname, '..', 'argo', 'plugins', 'argo-wakeup.js'),
+    'utf8',
+  );
+  assert.match(plugin, /Recall before acting/);
+  assert.match(plugin, /side-effecting action/);
+  assert.match(plugin, /zero relevant hits means proceed/i);
+  // AND the generated DSH artifact (single source of truth) carries it too
+  const dsh = fs.readFileSync(
+    path.join(__dirname, '..', 'dsh-argo-wakeup', 'index.js'),
+    'utf8',
+  );
+  assert.match(dsh, /Recall before acting/);
+  // AND the query-priority trigger covers acting, not only searching
+  const query = rules.match(/<QueryPriorityGuideline>([\s\S]*?)<\/QueryPriorityGuideline>/);
+  assert.match(query[1], /side-effecting action/);
+  assert.match(query[1], /do NOT act first/i);
+  // AND the recall guideline states that a task is a recall trigger
+  const recall = rules.match(/<MemoryRecallGuideline>([\s\S]*?)<\/MemoryRecallGuideline>/);
+  assert.match(recall[1], /Recall before acting/);
+  assert.match(recall[1], /task or goal is a recall trigger/i);
+  // AND the core rules list it as a red line
+  const coreRules = rules.match(/<CoreRules>([\s\S]*?)<\/CoreRules>/);
+  assert.match(coreRules[1], /Recall before acting/);
+});
+
 test('archgraph-rules-document-query-scope', () => {
   // GIVEN the global ARGO workflow rules file
   const rules = readRules();

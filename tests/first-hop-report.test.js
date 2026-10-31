@@ -149,6 +149,38 @@ test('AT-first-hop-06: a semantic graph read before the first repo read is the d
   assert.equal(result.repoTasks.semanticFirstPct, 33.3);
 });
 
+test('AT-first-hop-07: a semantic read before the first side-effecting action is the task-side signal', () => {
+  // GIVEN runs that differ only in whether recall precedes the first write/exec
+  const trajectory = (pid, calls) => ({
+    records: calls.map(([tool, backend, kind], index) => ({
+      at: `2026-10-28T00:00:0${index}Z`, pid, source: 'host', type: 'tool', tool, backend, kind, args: { keys: [] },
+    })),
+  });
+
+  // WHEN the run acts first and only then recalls
+  const actThenRecall = trajectory(1, [['grep', 'repo', 'read'], ['bash', 'repo', 'exec'], ['memory_search', 'graph', 'read']]);
+  const a = report.recallBeforeFirstAction(actThenRecall);
+  // THEN the task-side gate is not satisfied
+  assert.equal(a.hasAction, true);
+  assert.equal(a.recallFirst, false);
+
+  // WHEN the retrieval comes before the action (a memory recall for a task)
+  const recallThenAct = trajectory(2, [['queryNeo4jGraph', 'graph', 'read'], ['memory_search', 'graph', 'read'], ['edit', 'repo', 'write']]);
+  // THEN the signal is true
+  assert.equal(report.recallBeforeFirstAction(recallThenAct).recallFirst, true);
+
+  // WHEN only a structural graph read precedes the action
+  const structuralThenAct = trajectory(3, [['queryNeo4jGraph', 'graph', 'read'], ['bash', 'repo', 'exec']]);
+  // THEN a structural query alone does not count as recall
+  assert.equal(report.recallBeforeFirstAction(structuralThenAct).recallFirst, false);
+
+  // AND the aggregate only divides by runs that actually acted
+  const result = report.buildFirstHopReport([...actThenRecall.records, ...recallThenAct.records, ...structuralThenAct.records]);
+  assert.equal(result.actionTasks.runs, 3);
+  assert.equal(result.actionTasks.recallFirst, 1);
+  assert.equal(result.actionTasks.recallFirstPct, 33.3);
+});
+
 test('AT-first-hop-05: reads the real log file, applies --since, and survives a missing log', () => {
   const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'argo-first-hop-'));
   const prev = process.env.ARGO_COST_PROFILER;
