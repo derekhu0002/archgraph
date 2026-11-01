@@ -13962,7 +13962,7 @@
       "name": "里程碑：Recall-before-acting（任务/目标也先回忆）",
       "type": "Business Object",
       "parent": "project-overseer-001",
-      "description": "里程碑（2026-10-31，项目总管）：把检索触发从『提问』扩展到『动手』。人类伙伴反馈：问 Agent 一个问题时它会检索记忆，但给它一个任务/目标时往往只做 STEP 0 的 schema 读、不回忆经验。证据（scripts/first-hop-report.js，37 个可测 run）：首跳 graph 86.5%，但真语义首跳仅 18.9%（schema 5 / semantic 7 / structural 20，后者多为 STEP 0 的 Actor 枚举）；新增 actionTasks 口径实测 7 个含副作用动作的 run 中仅 3 个在首个动作前做过语义读（42.9%）。改动：WakeupGuideline 新增第 5 条 Recall-before-acting（首个副作用动作前按任务意图做一次 memory_search / getSystemArchitecture，单次、不批量、零命中即放行）；QueryPriorityGuideline 第1条触发点加入『即将动手』；MemoryRecallGuideline 第5条声明任务是回忆触发点；CoreRule 14；opencode 唤醒插件同步；dsh 插件由规则重新生成；memory_search 工具描述加入『开始任务前』。度量：scripts/first-hop-report.js 新增 actionTasks + AT-first-hop-07。验收：tests/argo-rules-query.test.js 新增 AT-rules-12；npm test 841/841（0 fail / 0 skip）；dsh 单源 --check 通过。待办：发布 archgraph-argo 并 argo-deploy 后重启宿主，按 actionTasks 复测。",
+      "description": "里程碑（2026-10-31，项目总管）：把检索触发从『提问』扩展到『动手』。人类伙伴反馈：问 Agent 一个问题时它会检索记忆，但给它一个任务/目标时往往只做 STEP 0 的 schema 读、不回忆经验。证据（scripts/first-hop-report.js，37 个可测 run）：首跳 graph 86.5%，但真语义首跳仅 18.9%（schema 5 / semantic 7 / structural 20，后者多为 STEP 0 的 Actor 枚举）；新增 actionTasks 口径实测 7 个含副作用动作的 run 中仅 3 个在首个动作前做过语义读（42.9%）。改动：WakeupGuideline 新增第 5 条 Recall-before-acting（首个副作用动作前按任务意图做一次 memory_search / getSystemArchitecture，单次、不批量、零命中即放行）；QueryPriorityGuideline 第1条触发点加入『即将动手』；MemoryRecallGuideline 第5条声明任务是回忆触发点；CoreRule 14；opencode 唤醒插件同步；dsh 插件由规则重新生成；memory_search 工具描述加入『开始任务前』。度量：scripts/first-hop-report.js 新增 actionTasks + AT-first-hop-07。验收：tests/argo-rules-query.test.js 新增 AT-rules-12；npm test 841/841（0 fail / 0 skip）；dsh 单源 --check 通过。待办：发布 archgraph-argo 并 argo-deploy 后重启宿主，按 actionTasks 复测。\n\n【2026-11-01 部署与验证补充】①Windows 宿主重启后核验：全局 archgraph-argo@0.29.30、registry latest 一致；Recall-before-acting 已就位于 ~/.config/opencode/AGENTS.md（3 处）、~/.argo/plugins/argo-wakeup.js（第 5 条）、~/.codex/AGENTS.md（3 处）、~/.cursor/rules/archgraph.mdc（3 处）。②WSL 发行版 ocpc（Ubuntu 24.04，root）由 0.29.29 升级到 0.29.30；argo-deploy -SkipEnv + OPENCODE_SYSTEM_CONFIG_PATH=/etc/opencode/opencode.json 完整执行 22/22，/etc/opencode 管理层被覆盖（AGENTS.md 含新规则 3 处、skills、mcp、plugin）；opencode-web.service（systemd --user）重启成功，argo MCP 子进程重生。③功能验证：MCP initialize + tools/list 返回 18 个工具；validateSystemArchitecture 在 /mnt/d/Projects/archgraph 返回 passed；语义 getSystemArchitecture / memory_search 正常命中本里程碑（score 0.99）；唤醒插件自检确认门禁注入为 system 第一条且含 Recall-before-acting。④复测：38 个可测 run，含副作用动作的 8 个中 4 个在首个动作前做语义读（50%，基线 42.9%），样本仍不足以判定显著提升。",
       "attributes": [
         {
           "name": "memoryTier",
@@ -13984,6 +13984,14 @@
         {
           "name": "deployment",
           "value": "deployed 2026-10-31 via argo-deploy -SkipEnv; awaiting host restart verification"
+        },
+        {
+          "name": "deployment-wsl",
+          "value": "0.29.30 installed 2026-11-01 in WSL distro ocpc (Ubuntu 24.04, root); argo-deploy -SkipEnv with OPENCODE_SYSTEM_CONFIG_PATH=/etc/opencode/opencode.json (22/22; /etc/opencode managed layer covered); opencode-web.service restarted, argo-mcp-server respawned"
+        },
+        {
+          "name": "verification",
+          "value": "2026-11-01: Windows host rules present on 4 surfaces; WSL 0.29.30; MCP smoke 18 tools + validateSystemArchitecture passed on /mnt/d/Projects/archgraph; semantic getSystemArchitecture/memory_search hit this milestone (0.99); wakeup plugin injects gate first with Recall-before-acting; actionTasks 4/8 (50% vs baseline 42.9%)"
         }
       ]
     }
