@@ -13992,6 +13992,11 @@
         {
           "name": "verification",
           "value": "2026-11-01: Windows host rules present on 4 surfaces; WSL 0.29.30; MCP smoke 18 tools + validateSystemArchitecture passed on /mnt/d/Projects/archgraph; semantic getSystemArchitecture/memory_search hit this milestone (0.99); wakeup plugin injects gate first with Recall-before-acting; actionTasks 4/8 (50% vs baseline 42.9%)"
+        },
+        {
+          "name": "commit",
+          "value": "4e728a3",
+          "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记 0.29.30 在 Windows 宿主与 WSL(ocpc) 的升级+验证结论）"
         }
       ]
     }
