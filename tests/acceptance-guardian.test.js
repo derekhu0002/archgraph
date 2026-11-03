@@ -61,6 +61,7 @@ const DELIVERABLE_GUARDS = [
   ['RULE: capability delegation', 'tests/argo-rules-capability-delegation.test.js'],
   ['RULE: content storage (docs into KG)', 'tests/argo-rules-content-storage.test.js'],
   ['RULE: skill-style principle index (bundle-declared, opt-in)', 'tests/argo-rules-principle-index.test.js'],
+  ['RULE: task-end memory capture (one summary per task + capture marker; control-plane gate)', 'tests/argo-rules-task-memory-capture.test.js'],
   ['FEATURE: schema bundle principle catalog declaration (opt-in, validated)', 'tests/schema-bundle-principle-index.test.js'],
   ['FEATURE: principle catalog presence probe (declared-missing is observable)', 'tests/principle-index-presence.test.js'],
   ['FEATURE: one-field semantic read (query.intent; purpose defaults to general)', 'tests/read-friction.test.js'],

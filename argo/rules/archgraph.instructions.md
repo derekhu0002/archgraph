@@ -31,6 +31,7 @@ Non-negotiable red lines (MUST). Never skip, simplify, or silently violate them;
 12. Federate by reference, never by copy: register/discover/authorize/read through the federation center (graph MCP surface); a read returns a reference, not a copy; cross-member access is denied by default. See `<FederationGuideline>`.
 13. Manage principles like skills: load the principles index at session start (a base capability surfaced by the schema read), keep the resident tier in the always-loaded rule, and load an on-demand principle body only when its trigger matches a checkpoint. See `<PrincipleIndexGuideline>`.
 14. Recall before acting: a task or goal is a recall trigger, not only a question — run one retrieval on the task intent before the first side-effecting action. See `<QueryPriorityGuideline>` item 1 and `<MemoryRecallGuideline>` item 5.
+15. At task end, write ONE task summary and end it with a `memory-capture` marker (`none: <reason>` when deliberately skipped); the control plane, not this framework, enforces it. See `<TaskMemoryCapture>`.
 </CoreRules>
 
 <Ontology>
@@ -150,6 +151,7 @@ Memory capture: milestone immediate writes are the reliable backbone; the sessio
 2. Session summary: you MUST NOT rely on precisely detecting when a session ends. Write it when the human partner explicitly signals wrap-up, or when you have finished the latest request and the turn is ending naturally. Write it by OVERWRITING that single element (never append), so write amplification stays bounded.
 3. Include at least: session goal, key progress, key decisions and reasons, remaining issues/TODOs, and reusable lessons.
 4. Route it to the Actor's T1 working memory; route long-term capture to the T2 long-term memory sub-view hierarchy whose `parent_element_id` points to that Actor (see `<CoperationGuideline>` item 3). Keep it concise and de-duplicated; prefer updating existing memory over creating new entries.
+5. For a control-plane task, the single task summary in `<TaskMemoryCapture>` is the end-of-task record; do not also write a per-turn or per-session summary.
 </SessionMemorySummarization>
 
 <MemoryTriggerTiming>
@@ -159,6 +161,18 @@ Write long-term memory IMMEDIATELY at these moments — this is the backbone; ne
 3. Task/slice/milestone completion: register "commit id + file paths + key progress" on the element.
 immediate writes are primarily triggered IMMEDIATELY and follow the concise, de-duplicated style of `<SessionMemorySummarization>`; the session-end summary is a separate, opportunistic write, not the primary path.
 </MemoryTriggerTiming>
+
+<TaskMemoryCapture>
+Task-end memory capture: ONE summary per task, never per turn or per session — per-turn summarization burns tokens for little value.
+1. When you finish a task, before reporting it complete, write ONE task summary into the Actor's T2 memory (the `<actor>-ltm-*` hierarchy); reuse an existing element when appropriate. A control plane, not this framework, determines when the task ends.
+2. The summary must contain: (a) result and evidence — what changed, commit id, files, verification; (b) key decisions with rationale and rejected alternatives; (c) pitfalls and fixes — symptom, cause, fix; (d) the target T2 element id.
+3. End the summary with exactly ONE capture marker line:
+   - memory written: `memory-capture: argo:<graphKey>#<elementId>`
+   - deliberately skipped: `memory-capture: none: <reason>`
+   The `memory-capture:` prefix is case-sensitive; `<graphKey>` is verbatim (for example `design/KG/SystemArchitecture.json`); `<elementId>` is the T2 memory element id.
+4. Enforcement belongs to the control plane: before completing the task it checks the final summary for the marker. If missing, it blocks and returns the exact template as actionable feedback, up to two times, then releases and continues the normal flow without escalating to a human. A declared `none: <reason>` is a conscious waiver and passes immediately.
+5. This framework never hard-blocks a task or session end, and exposes no CLI or MCP checker; a missed capture is recorded best-effort for later observation. Never emit a marker without actually writing the memory.
+</TaskMemoryCapture>
 
 <MemoryRecallGuideline>
 Recall in TWO steps — a compact card is a LOCATOR, never the full memory:

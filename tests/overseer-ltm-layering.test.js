@@ -31,12 +31,12 @@ const MEMBERS_BY_VIEW = {
     'overseer-graph-mcp-deploy-001', 'overseer-harness-workspaceroot-fix-001', 'overseer-mcp-tool-surface-001',
     'overseer-milestone-critical-reasoning-001', 'overseer-milestone-graph-write-lock-001',
     'overseer-mem-issue17-argo-init-entry-001', 'overseer-milestone-lossless-write-001',
-    'overseer-principle-index-001',
+    'overseer-mem-capture-session-scope-001', 'overseer-principle-index-001',
   ],
   'overseer-retrieval-001': [
     'overseer-community-probe-001', 'overseer-harness-view-relations-001', 'overseer-mem-agent-cost-harness-001',
     'overseer-mem-semantic-threshold-calibration-001', 'overseer-milestone-read-projection-001',
-    'overseer-rerank-latency-fix-001', 'overseer-rerank-native-qwen-transport-001',
+    'overseer-recall-before-acting-001', 'overseer-rerank-latency-fix-001', 'overseer-rerank-native-qwen-transport-001',
     'overseer-semantic-projection-oom-001', 'overseer-semantic-seed-prefix-fix-001',
   ],
   'overseer-product-001': [

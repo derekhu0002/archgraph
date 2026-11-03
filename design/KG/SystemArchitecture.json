@@ -2909,6 +2909,13 @@
           "description": "GIVEN 一个任务/目标（而非提问）作为首条消息；WHEN Agent 在首个副作用动作（写/改文件、执行命令、改图、委派）前检查规则；THEN WakeupGuideline/QueryPriorityGuideline/MemoryRecallGuideline/CoreRules/opencode 唤醒插件/dsh 生成物均要求先按任务意图做一次语义检索（memory_search 或 getSystemArchitecture），单次、不批量、零相关命中即放行，禁止先动手后回忆。",
           "Input": "tests/argo-rules-query.test.js",
           "acceptanceCriteria": "tests/argo-rules-query.test.js"
+        },
+        {
+          "name": "AT-rules-13",
+          "type": "Acceptance Test",
+          "description": "GIVEN 常驻规则新增任务结束记忆捕获协议；WHEN 检查规则文本与标记语法；THEN 声明每任务一次（非每轮）、四段总结内容、两种标记（written / none: 原因）、控制面最多阻断两次后直接放行且不升级人工，且框架不做 CLI/MCP 校验器。",
+          "Input": "tests/argo-rules-task-memory-capture.test.js",
+          "acceptanceCriteria": "tests/argo-rules-task-memory-capture.test.js"
         }
       ],
       "attributes": [
@@ -13999,6 +14006,38 @@
           "description": "design/KG/SystemArchitecture.json; archgraph.qea（登记 0.29.30 在 Windows 宿主与 WSL(ocpc) 的升级+验证结论）"
         }
       ]
+    },
+    {
+      "id": "overseer-mem-capture-session-scope-001",
+      "type": "Business Object",
+      "name": "协议：任务结束记忆捕获（框架定协议，Paperclip 门禁）",
+      "description": "任务结束记忆捕获协议 v2（2026-11-03 人类伙伴裁决；对齐 GitHub issue #18 与 Paperclip 控制面）。\n【原则】框架定协议，控制面做门禁；框架不感知任务结束、不硬拦、不做 CLI/MCP 校验器。\n【时机】每个任务结束写一次总结（不是每轮/每会话），避免逐轮总结的 token 成本；任务结束由 Paperclip 控制面确定，框架无需感知。\n【总结内容（对照清单）】①结果与证据（做了什么/commit/文件/验证）；②关键决策与被否方案；③坑与修复（现象→根因→修法）；④T2 元素 id 与写入位置。\n【标记】总结中必须包含且仅包含一行：\n- 已写：`memory-capture: argo:<graphKey>#<elementId>`\n- 主动豁免（无图能力/明确不写）：`memory-capture: none: <原因>`\n前缀 `memory-capture:` 区分大小写；`<graphKey>` 原样使用（如 design/KG/SystemArchitecture.json），`<elementId>` 为 T2 记忆元素 id。\n【忘记写怎么办】检查不依赖 Agent 自检：Paperclip 在 done 前无条件检查最终总结/评论。没有 marker = 忘记/未写（与『写了但忘了加标记』同等处理）→ 阻断并反馈，反馈要直接给出模板（提醒补写总结并附 marker）；已声明 `none: <原因>` = 主动豁免 → 直接放行并记录原因，不阻断。\n【检查（Paperclip 侧）】任务置 done 前检查最终总结/评论中的标记；缺失则不转移状态并返回可操作反馈，提醒 Agent 补写。\n【阻断与放行】至少阻断两次，给两次补救机会（同一 run 内可重试）；两次之后仍缺失则直接放行，按原流程继续，不升级人工。放行时记录『memory-capture missed』供事后观察；框架侧无法在放行后补写（不感知任务结束、跨设备无会话），故这是最佳努力 + 可观测兜底。Paperclip 不做图谱真实性校验（跨设备无图访问），只校验标记。\n【框架侧】常驻规则写入协议；不新增 CLI/MCP；不逐轮提醒。\n【被否】①每轮结束总结/提醒（token 成本高）；②框架硬拦；③框架提供 CLI/MCP 校验器；④框架感知任务状态；⑤两次后升级人工（人类伙伴明确不要）；⑥两次后无限阻断（会卡死任务链）。\n【验收（待实现）】常驻规则含协议与标记语法；本地测试可解析标记（已写 / none / 无标记三种状态）；负向验收确认无新增 CLI/MCP。\n\n【历史 v1（2026-11-03 早先裁决，已被上方 v2 修订）】曾定为只感知会话结束、只提醒不硬拦、不做校验器（假设控制面不参与）；当日改为任务结束写总结、由 Paperclip 按标记门禁。",
+      "attributes": [
+        {
+          "name": "status",
+          "value": "ACTIVE"
+        },
+        {
+          "name": "memoryTier",
+          "value": "T2"
+        },
+        {
+          "name": "issue",
+          "value": "18"
+        },
+        {
+          "name": "protocolVersion",
+          "value": "v2"
+        },
+        {
+          "name": "afterTwoBlocks",
+          "value": "release-no-escalation"
+        },
+        {
+          "name": "forgotHandling",
+          "value": "block-twice-with-template-then-release-and-record-missed"
+        }
+      ]
     }
   ],
   "relationships": [
@@ -18231,7 +18270,8 @@
         "overseer-argo-mcp-verification-001",
         "overseer-principle-index-001",
         "overseer-milestone-graph-write-lock-001",
-        "overseer-mem-issue17-argo-init-entry-001"
+        "overseer-mem-issue17-argo-init-entry-001",
+        "overseer-mem-capture-session-scope-001"
       ],
       "included_relationships": []
     },
